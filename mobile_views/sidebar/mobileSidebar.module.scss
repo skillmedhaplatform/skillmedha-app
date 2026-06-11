@@ -1,0 +1,140 @@
+.mobileHeader {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background-color: #ffffff;
+  border-bottom: 1.5px solid #f1f5f9;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 1001; // Keep toggle button clickable above drawer and overlay
+  height: 64px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+
+  .hamburger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: #0f172a;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    position: relative;
+    z-index: 1002;
+
+    &:hover, &:active {
+      background-color: #f1f5f9;
+    }
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+
+    img {
+      height: 28px;
+      width: auto;
+    }
+
+    .logoText {
+      font-size: 15px;
+      font-weight: 800;
+      color: #08334c;
+      letter-spacing: 1px;
+      white-space: nowrap;
+
+      span {
+        color: #1e69da;
+      }
+    }
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  &.open {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 80%;
+  max-width: 300px;
+  height: 100vh;
+  background-color: #ffffff;
+  z-index: 1000;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 10px 0 25px -5px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+
+  &.open {
+    transform: translateX(0);
+  }
+
+  .drawerContent {
+    flex: 1;
+    overflow: hidden; // Let the inner SideBar handle scrollbars
+    display: flex;
+    flex-direction: column;
+
+    // Override desktop SideBar absolute sizing when inside drawer
+    :global(.sideBarContainer) {
+      width: 100% !important;
+      min-width: 100% !important;
+      border-right: none !important;
+
+      // Hide the duplicate logo container in the mobile drawer
+      :global(.logoContainer) {
+        display: none !important;
+      }
+
+      // Force expanded layout even if collapsedSidebar class is active on mobile
+      &.collapsedSidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+
+        :global(.logoText) {
+          width: auto !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          display: block !important;
+        }
+
+        :global(.titleLabel) {
+          width: auto !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      }
+    }
+  }
+}

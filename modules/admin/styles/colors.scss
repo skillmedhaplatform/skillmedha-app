@@ -1,0 +1,118 @@
+// ==================== PRIMARY COLORS ====================
+$primaryColor: #24A058;
+$secondaryColor: #24A058;
+$borderColor: rgba(122, 122, 122, 0.59);
+$backgroundColorLowOpacity: rgba(12, 88, 182, 0.1);
+$backgroundColor1: rgba(12, 88, 182, 0.3);
+$textPrimary: #333333;
+
+// ==================== BASE COLORS ====================
+$white: #ffffff;
+$black: #000000;
+
+// ==================== GRAY SCALE ====================
+$gray100: #f7f7f7;
+$gray200: #e5e5e5;
+$gray300: #d4d4d4;
+$gray400: #a3a3a3;
+$gray500: #737373;
+$gray600: #525252;
+$gray700: #404040;
+$gray800: #262626;
+$gray900: #171717;
+
+// ==================== STATUS COLORS ====================
+$success: #10b981;
+$successLight: #d1fae5;
+$successDark: #047857;
+
+$warning: #f59e0b;
+$warningLight: #fef3c7;
+$warningDark: #d97706;
+
+$error: #ef4444;
+$errorLight: #fee2e2;
+$errorDark: #dc2626;
+
+$info: #3b82f6;
+$infoLight: #dbeafe;
+$infoDark: #2563eb;
+
+// ==================== BORDER RADIUS ====================
+$borderRadius: 8px;
+$borderRadiusLarge: 12px;
+$borderRadiusMedium: 8px;
+$borderRadiusSmall: 4px;
+$borderRadiusXSmall: 2px;
+$borderRadiusFull: 9999px;
+
+// ==================== SPACING ====================
+$spacing1: 4px;
+$spacing2: 8px;
+$spacing3: 12px;
+$spacing4: 16px;
+$spacing5: 20px;
+$spacing6: 24px;
+$spacing7: 28px;
+$spacing8: 32px;
+$spacing10: 40px;
+$spacing12: 48px;
+$spacing16: 64px;
+$spacing20: 80px;
+
+// ==================== SHADOWS ====================
+$shadowSm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadowMd: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadowLg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadowXl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+$shadow2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+$shadowInner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+// ==================== TYPOGRAPHY ====================
+$fontSizeXs: 12px;
+$fontSizeSm: 14px;
+$fontSizeBase: 16px;
+$fontSizeLg: 18px;
+$fontSizeXl: 20px;
+$fontSize2xl: 24px;
+$fontSize3xl: 28px;
+$fontSize4xl: 32px;
+$fontSize5xl: 40px;
+
+$fontWeightNormal: 400;
+$fontWeightMedium: 500;
+$fontWeightSemibold: 600;
+$fontWeightBold: 700;
+$fontWeightExtrabold: 800;
+
+$lineHeightTight: 1.25;
+$lineHeightNormal: 1.5;
+$lineHeightRelaxed: 1.75;
+
+// ==================== TRANSITIONS ====================
+$transitionFast: 150ms;
+$transitionBase: 200ms;
+$transitionSlow: 300ms;
+$transitionSlower: 500ms;
+
+// ==================== Z-INDEX ====================
+$zIndexDropdown: 1000;
+$zIndexSticky: 1020;
+$zIndexFixed: 1030;
+$zIndexModalBackdrop: 1040;
+$zIndexModal: 1050;
+$zIndexPopover: 1060;
+$zIndexTooltip: 1070;
+
+// ==================== BREAKPOINTS ====================
+$breakpointXs: 480px;
+$breakpointSm: 640px;
+$breakpointMd: 768px;
+$breakpointLg: 1024px;
+$breakpointXl: 1280px;
+$breakpoint2xl: 1536px;
+
+// ==================== CONTAINER ====================
+$containerMaxWidth: 1920px;
+$containerPadding: $spacing6;
+$containerPaddingMobile: $spacing4;

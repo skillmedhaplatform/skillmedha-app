@@ -1,0 +1,13 @@
+.container {
+  height: 100%;
+
+  .body {
+    margin-top: 1rem;
+    height: 90%;
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}

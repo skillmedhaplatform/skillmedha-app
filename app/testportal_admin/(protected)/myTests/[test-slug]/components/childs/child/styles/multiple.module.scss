@@ -1,0 +1,51 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+.container{
+    height: calc(100% - 10px);
+}
+
+.flexComp{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: 1rem 0rem;
+    font-weight: normal;
+    .span{
+        font-weight: 700;
+        width: 10%;
+        display: flex;
+        justify-content: space-between;
+        align-items:center ;
+        input{
+            margin-left: 0.3rem;
+            }
+    }
+    .removeButton{
+        border: none;
+        outline: none;
+        background-color: transparent;
+        margin: 0rem .5rem;
+        cursor: pointer;
+        width: 5%;
+    }
+    .editorComp{
+        width:85%;
+        overflow: hidden;
+        border: 1px solid ; 
+        border-radius: 0.5rem;
+    }
+}
+
+.AddNew{
+    border: none;
+        outline: none;
+        background-color: $iconBackgroundLowOpacity;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+        cursor: pointer;
+}
+
+.scoreSet{
+    margin-top: 1.5rem;
+}

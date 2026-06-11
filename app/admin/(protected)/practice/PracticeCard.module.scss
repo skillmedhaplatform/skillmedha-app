@@ -1,0 +1,275 @@
+// Color Palette based on primary #24A058 (teal)
+$primary-color: #24A058; // Main teal
+$primary-light: #4db6b9; // Lighter teal
+$primary-dark: #1a7b7e; // Darker teal
+$primary-lighter: #7dd3d6; // Very light teal
+
+// Secondary colors (complementary and analogous)
+$secondary-coral: #a65225; // Complementary coral/orange
+$secondary-mint: #25a667; // Analogous mint green
+$secondary-blue: #2567a6; // Analogous blue
+
+// Accent colors
+$accent-success: #10b981;
+$accent-warning: #f59e0b;
+$accent-error: #ef4444;
+
+// Neutral colors
+$white: #ffffff;
+$light-gray: #f8fafc;
+$gray-100: #f1f5f9;
+$gray-200: #e2e8f0;
+$gray-300: #cbd5e1;
+$gray-500: #64748b;
+$gray-700: #334155;
+$gray-900: #0f172a;
+
+// Shadows and effects
+$shadow-sm: rgba(37, 163, 166, 0.1);
+$shadow-md: rgba(37, 163, 166, 0.15);
+$shadow-lg: rgba(37, 163, 166, 0.2);
+
+// Card container
+.cardContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+// Individual card styles
+.card {
+  background: $white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px $shadow-sm, 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+
+  // Subtle background pattern
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, $primary-color, $primary-light);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 25px -5px $shadow-md, 0 10px 10px -5px $shadow-sm;
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &.active {
+    border-color: $primary-color;
+
+    &:hover {
+      border-color: $primary-dark;
+    }
+  }
+
+  &.inactive {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none;
+      box-shadow: 0 4px 6px -1px $shadow-sm, 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+
+      &::before {
+        opacity: 0;
+      }
+    }
+  }
+}
+
+// Icon container with gradient backgrounds
+.iconContainer {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  position: relative;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+
+  &.nonTechnical {
+    background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+  }
+
+  &.coding {
+    background: linear-gradient(135deg, $secondary-blue 0%, #4f9cf9 100%);
+  }
+
+  &.technical {
+    background: linear-gradient(135deg, $secondary-mint 0%, #4ade80 100%);
+  }
+
+  &.inactive {
+    background: linear-gradient(135deg, $gray-500 0%, $gray-300 100%);
+  }
+
+  // Subtle animation on hover
+  .card:hover & {
+    transform: scale(1.05);
+  }
+}
+
+// Icon styles
+.icon {
+  font-size: 2rem;
+  color: $white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+// Card content
+.cardContent {
+  text-align: center;
+}
+
+.cardTitle {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  color: $gray-900;
+  line-height: 1.4;
+
+  .inactive & {
+    color: $gray-500;
+  }
+}
+
+// Enhanced status badge
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+
+  &.available {
+    background: linear-gradient(
+      135deg,
+      rgba(37, 163, 166, 0.1) 0%,
+      rgba(37, 163, 166, 0.15) 100%
+    );
+    color: $primary-dark;
+    border: 1px solid rgba(37, 163, 166, 0.2);
+  }
+
+  &.comingSoon {
+    background: linear-gradient(
+      135deg,
+      rgba(245, 158, 11, 0.1) 0%,
+      rgba(245, 158, 11, 0.15) 100%
+    );
+    color: #92400e;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+
+  &.available {
+    background: $primary-color;
+  }
+
+  &.comingSoon {
+    background: $accent-warning;
+  }
+}
+
+// Pulse animation for status dot
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+// Title styles
+.pageTitle {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: $gray-900;
+  margin-bottom: 0.5rem;
+
+  // Add subtle gradient text effect
+  background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pageSubtitle {
+  text-align: center;
+  font-size: 1.125rem;
+  color: $gray-500;
+  margin-bottom: 3rem;
+  font-weight: 400;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .cardContainer {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .card {
+    padding: 1.75rem;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .iconContainer {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+  }
+
+  .icon {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardTitle {
+    font-size: 1.25rem;
+  }
+
+  .pageTitle {
+    font-size: 1.75rem;
+  }
+}

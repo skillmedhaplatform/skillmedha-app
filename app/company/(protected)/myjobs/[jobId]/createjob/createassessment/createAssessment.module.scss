@@ -1,0 +1,631 @@
+@import "@/utils/universalUtils/colors.module.scss";
+
+.mainCont {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  background: #fff;
+  // min-height: 100vh;
+  border: 1px solid $primaryColor;
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+  height: 70vh;
+  overflow-y: scroll;
+  > p:first-child {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  &::-webkit-scrollbar{
+    display: none;
+  }
+}
+
+.formSection {
+  margin-bottom: 24px;
+
+  .sectionLabel {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    display: block;
+
+    &.required::after {
+      content: "*";
+      color: #ff4d4f;
+      margin-left: 4px;
+    }
+  }
+}
+
+// Skills select styling
+.skillsSelect {
+  width: 100%;
+  max-width: 400px;
+
+  :global(.ant-select-selector) {
+    min-height: 40px !important;
+    border-radius: 6px !important;
+  }
+
+  :global(.ant-select-selection-item) {
+    background: #f0f2f5 !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 4px !important;
+    margin: 2px !important;
+    padding: 2px 8px !important;
+  }
+}
+
+// Duration picker styling
+// .durationPicker {
+//   width: 280px;
+//   height: 40px;
+
+//   :global(.ant-picker) {
+//     width: 100% !important;
+//     height: 40px !important;
+//     border-radius: 6px !important;
+//   }
+// }
+
+// Skills list display
+.skillsList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+
+  p {
+    background: linear-gradient(135deg, $primaryColor 0%, $primaryColor 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Table styling
+.skillsTable {
+  margin-top: 16px;
+
+  :global(.ant-table) {
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+
+    .ant-table-thead > tr > th {
+      background: #fafafa;
+      font-weight: 600;
+      color: #262626;
+      border-bottom: 1px solid #f0f0f0;
+      padding: 16px 12px;
+      font-size: 14px;
+    }
+
+    .ant-table-tbody > tr > td {
+      padding: 12px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background: #fafafa;
+    }
+  }
+
+  .questionSelect,
+  .difficultySelect {
+    width: 100%;
+
+    :global(.ant-select-selector) {
+      border-radius: 4px !important;
+      border: 1px solid #d9d9d9 !important;
+    }
+  }
+}
+
+// Description section
+.descriptionSection {
+  .descriptionTextarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primaryColor;
+      box-shadow: 0 0 0 2px $primary10;
+    }
+
+    &::placeholder {
+      color: #bfbfbf;
+    }
+  }
+
+  .infoBox {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: 8px;
+    padding: 12px 16px;
+    background: #f6f8ff;
+    border-radius: 6px;
+    border-left: 4px solid $primaryColor;
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: #595959;
+      line-height: 1.5;
+    }
+
+    :global(.anticon) {
+      color: $primaryColor;
+      margin-top: 2px;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+  }
+
+  .charCounter {
+    font-weight: 600;
+    color: $primaryColor;
+  }
+}
+
+// Configuration sections base styling
+.configSection {
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+
+  .configHeader {
+    margin-bottom: 20px;
+
+    .configTitle {
+      font-size: 18px;
+      font-weight: 600;
+      color: #262626;
+      margin-bottom: 16px;
+    }
+
+    :global(.ant-radio-group) {
+      display: flex;
+      gap: 0;
+
+      .ant-radio-button-wrapper {
+        height: 36px;
+        line-height: 34px;
+        padding: 0 16px;
+        font-weight: 500;
+        font-size: 14px;
+        border-color: #d9d9d9;
+        transition: all 0.3s ease;
+
+        &.ant-radio-button-wrapper-checked {
+          background: $primaryColor;
+          border-color: $primaryColor;
+          color: #fff;
+          z-index: 1;
+
+          &:hover {
+            background: $primaryColor;
+            border-color: $primaryColor;
+          }
+        }
+
+        &:not(.ant-radio-button-wrapper-checked) {
+          background: #fff;
+          color: #595959;
+
+          &:hover {
+            color: $primaryColor;
+            border-color: $primaryColor;
+          }
+        }
+
+        &:first-child {
+          border-top-left-radius: 6px;
+          border-bottom-left-radius: 6px;
+        }
+
+        &:last-child {
+          border-top-right-radius: 6px;
+          border-bottom-right-radius: 6px;
+        }
+      }
+    }
+  }
+
+  .configContent {
+    .contentDescription {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #595959;
+      margin-bottom: 20px;
+    }
+
+    .infoSection {
+      background: #fff;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 16px;
+
+      .infoHeader {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+
+        :global(.anticon) {
+          color: $primaryColor;
+          font-size: 16px;
+        }
+
+        p {
+          font-weight: 600;
+          color: #262626;
+          margin: 0;
+          font-size: 14px;
+        }
+      }
+
+      .infoContent {
+        p {
+          font-size: 14px;
+          line-height: 1.6;
+          color: #595959;
+          margin-bottom: 12px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          strong {
+            color: #262626;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+
+    .maxLeavesSection {
+      margin-top: 20px;
+
+      .maxLeavesHeader {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+
+        p {
+          font-size: 14px;
+          color: #262626;
+          margin: 0;
+
+          &:first-child {
+            font-weight: 600;
+          }
+
+          &:last-child {
+            color: #8c8c8c;
+            font-size: 13px;
+            font-style: italic;
+          }
+        }
+
+        :global(.anticon) {
+          color: #faad14;
+          font-size: 14px;
+        }
+      }
+
+      .maxLeavesSelect {
+        width: 120px;
+
+        :global(.ant-select-selector) {
+          border-radius: 4px !important;
+        }
+      }
+    }
+  }
+}
+
+// Specific section styling
+.hrtSection {
+  @extend .configSection;
+}
+
+.snapshotSection {
+  @extend .configSection;
+}
+
+.proctoringSection {
+  @extend .configSection;
+}
+
+// Save button
+.saveButton {
+  min-width: 200px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 32px;
+  border-radius: 6px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+
+  &:global(.ant-btn-primary) {
+    background: linear-gradient(135deg, $primaryColor 0%, $primaryColor 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+
+    &:hover {
+      background: linear-gradient(135deg, $primaryColor 0%, $primaryColor 100%);
+
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    &:focus,
+    &:active {
+      background: linear-gradient(135deg, $primaryColor 0%, $primaryColor 100%);
+
+      transform: translateY(0);
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .mainCont {
+    padding: 16px;
+
+    > p:first-child {
+      font-size: 24px;
+      margin-bottom: 24px;
+    }
+  }
+
+  .formSection {
+    margin-bottom: 20px;
+  }
+
+  .skillsSelect,
+  .durationPicker {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .skillsTable {
+    :global(.ant-table-wrapper) {
+      overflow-x: auto;
+    }
+
+    .questionSelect,
+    .difficultySelect {
+      min-width: 140px;
+    }
+  }
+
+  .configSection {
+    padding: 16px;
+    margin-bottom: 20px;
+
+    .configHeader {
+      :global(.ant-radio-group) {
+        flex-wrap: wrap;
+        gap: 8px;
+
+        .ant-radio-button-wrapper {
+          height: 32px;
+          line-height: 30px;
+          padding: 0 12px;
+          font-size: 13px;
+          border-radius: 4px !important;
+          margin-bottom: 4px;
+        }
+      }
+    }
+  }
+
+  .saveButton {
+    width: 100%;
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainCont {
+    padding: 12px;
+  }
+
+  .skillsList {
+    gap: 6px;
+
+    p {
+      font-size: 12px;
+      padding: 3px 8px;
+    }
+  }
+
+  .configHeader {
+    :global(.ant-radio-group) {
+      .ant-radio-button-wrapper {
+        flex: 1;
+        text-align: center;
+        min-width: 0;
+        padding: 0 8px;
+      }
+    }
+  }
+
+  .maxLeavesSection {
+    .maxLeavesHeader {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+  }
+}
+
+// Animations
+.formSection,
+.configSection {
+  animation: fadeInUp 0.4s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Custom scrollbar
+.descriptionTextarea {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}
+
+// Add these styles to your existing SCSS file
+
+// Duration container styling
+.durationContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
+}
+
+.durationSelector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .hoursSelect,
+  .minutesSelect {
+    width: 120px;
+
+    :global(.ant-select-selector) {
+      height: 40px !important;
+      border-radius: 6px !important;
+      border: 1px solid #d9d9d9 !important;
+    }
+
+    :global(.ant-select-selection-item) {
+      line-height: 38px !important;
+    }
+  }
+
+  .durationSeparator {
+    font-size: 18px;
+    font-weight: 600;
+    color: #595959;
+    margin: 0 4px;
+  }
+}
+
+.durationDisplay {
+  .durationText {
+    display: inline-block;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, $primaryColor 0%, $primaryColor 100%);
+
+    color: white;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// // Remove the old durationPicker styles and replace with:
+// .durationPicker {
+//   // This class is no longer needed, but keep it empty to avoid breaking existing references
+// }
+
+// Update responsive design for duration selector
+@media (max-width: 768px) {
+  .durationContainer {
+    max-width: none;
+  }
+
+  .durationSelector {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+
+    .hoursSelect,
+    .minutesSelect {
+      width: 140px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .durationSelector {
+    .hoursSelect,
+    .minutesSelect {
+      width: 100px;
+    }
+
+    .durationSeparator {
+      font-size: 16px;
+    }
+  }
+
+  .durationDisplay {
+    .durationText {
+      font-size: 13px;
+      padding: 6px 10px;
+    }
+  }
+}
+
+// Fix for Ant Design global styles
+// :global {
+.ant-select-dropdown {
+  border-radius: 6px !important;
+}
+
+.ant-table-pagination.ant-pagination {
+  margin: 16px 0 0 0;
+}
+// }

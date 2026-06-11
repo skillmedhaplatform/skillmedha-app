@@ -1,0 +1,680 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+@import "@/modules/testportal_admin/components/styles/mixins.scss";
+
+.container {
+  padding: 1rem;
+  height: 90vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin-top: 2rem;
+
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $whitecolor;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $iconBackground;
+    border-radius: 20px;
+    border: 3px solid #f5f5f5;
+    cursor: grabbing;
+  }
+}
+
+.headerContainer {
+  width: 100%;
+  @include flexBox(column, center, center);
+
+  .title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-align: center;
+
+    span {
+      color: $navbarColor;
+    }
+  }
+
+  .bonScore {
+    color: $statusDefault;
+  }
+
+  .scoreContainer {
+    display: flex;
+    // border: 1px solid;
+    gap: 0.5rem;
+  }
+
+  .dataContainer {
+    margin-top: 1rem;
+    @include flexBox(column, center, center);
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+    border-radius: 1rem;
+
+    // background-color: rgba(255, 0, 0, 0.1);
+    // background-color: rgba(4, 255, 0, 0.1);
+    .datachart_cont {
+      gap: 1.5rem;
+      @include flexBox(row, center, center);
+
+      .dataLeftContiner {
+        // @include flexBox(column, center, space-between);
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        gap: 1rem;
+
+        .rankingContainer {
+          background: $categoryColor;
+          box-shadow: 4px 4px 5px 0px #00000024;
+          border-radius: 0.6rem;
+          padding: 0.8rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.8rem;
+
+          .headerImg {
+            max-width: 3rem;
+          }
+        }
+
+        .statsContainer {
+          background: $categoryColor;
+          box-shadow: 4px 4px 5px 0px #00000024;
+          border-radius: 0.6rem;
+          padding: 0.8rem;
+          gap: 0.8rem;
+          @include flexBox(row, space-between, center);
+        }
+
+        .dataVal {
+          gap: 0.8rem;
+          @include flexBox(column, space-between, center);
+
+          p {
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding-top: 0.3rem;
+          }
+
+          .dataValTitle {
+            font-weight: 400;
+            font-size: 0.8rem;
+          }
+
+          img {
+            width: 39px;
+          }
+        }
+      }
+
+      .chartContainer {
+        background: $categoryColor;
+        box-shadow: 4px 4px 5px 0px #00000024;
+        border-radius: 0.6rem;
+        padding: 0.8rem;
+        max-width: 100%;
+        @include flexBox(row, center, center);
+
+        .donutParent {
+          height: 100%;
+        }
+
+        .responseStats {
+          @include flexBox(column, center, space-between);
+          gap: 0.8rem;
+
+          .chartInfoContainer {
+            @include flexBox(row, center, flex-start);
+            width: 15rem;
+            max-width: 15rem;
+            gap: 0.8rem;
+            margin: 0;
+
+            .chartInfoContainer_span {
+              background-color: $selfPaced;
+            }
+
+            .chartInfoContainer_not_Answered {
+              background-color: $notanswered;
+            }
+
+            .chartInfoContainer_Unattempted {
+              background-color: $liveTraning;
+            }
+
+            span {
+              width: 1.2rem;
+              height: 1.2rem;
+              border-radius: 0.2rem;
+            }
+
+            p {
+              font-size: 1rem;
+              font-weight: 600;
+            }
+
+            .chartInfoContainerVal {
+              font-weight: 400;
+              font-size: 0.8rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.questionContainer {
+  padding: 1rem;
+  // background-color: $iconBackgroundLowOpacity;
+  background-color: $sidebargray;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    rgb(209, 213, 219) 0px 0px 0px 1px inset;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+
+  img {
+    width: 10%;
+  }
+
+  width: 100%;
+
+  .questionHeader {
+    @include flexBox(row, center, space-between);
+    margin-bottom: 0.5rem;
+    width: 100%;
+
+    .typeContainer {
+      @include flexBox(row, center, flex-start);
+      gap: 0.8rem;
+
+      .type {
+        font-weight: 700;
+        font-size: 0.8rem;
+      }
+
+      .categoryBadge {
+        background-color: $navbarColor;
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .sno {
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .queScore,
+    .bonusScore,
+    .negScore,
+    .partialScore {
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .queScore {
+      color: $selfPaced;
+    }
+
+    .partialScore {
+      color: $partialScore;
+    }
+
+    .bonusScore {
+      color: $statusDefault;
+    }
+
+    .negScore {
+      color: $negScore;
+    }
+  }
+
+  .optionsContainer {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+
+    .optionLable {
+      display: flex;
+      margin-bottom: 0.5rem;
+      border: 0.5px solid rgba(49, 49, 49, 0.286);
+      padding: 0.5rem;
+      border-radius: 5px;
+      background-color: white;
+      align-items: center;
+
+      .points_span {
+        width: 10%;
+      }
+
+      .options_div {
+        width: 100%;
+        display: flex;
+      }
+
+      .optionsOrderChar {
+        p {
+          color: inherit;
+        }
+
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0.5rem;
+      }
+    }
+
+    .optionValue {
+      p {
+        display: inline;
+      }
+    }
+
+    .correct {
+      color: $selfPaced;
+    }
+
+    .correct_selected {
+      background-color: $selfPaced;
+    }
+
+    .shortParaAns {
+      font-size: 0.8rem;
+      border: 0.5px solid rgba(49, 49, 49, 0.286);
+      padding: 0.5rem;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    .incorrect {
+      background-color: $statuscolor;
+      color: white;
+    }
+
+    .scoreContainer {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-top: 0.5rem;
+      // .queScore,
+      // .bonusScore,
+      // .negScore,
+      // .partialScore {
+      //   font-size: 0.6rem;
+      //   font-weight: 600;
+      // }
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: flex-start;
+
+      .queScore {
+        color: $selfPaced;
+      }
+
+      .partialScore {
+        color: $partialScore;
+      }
+
+      .bonusScore {
+        color: $statusDefault;
+      }
+
+      .negScore {
+        color: $negScore;
+      }
+    }
+  }
+
+  .paraanswers_div {
+    h3 {
+      font-size: 1rem;
+      margin-bottom: 0.2rem;
+    }
+
+    span {
+      background-color: transparent !important;
+      padding: 0 1rem;
+
+      >* {
+        padding: 0 1.3rem;
+      }
+
+      ol,
+      ul {
+        background-color: transparent !important;
+
+        li {
+          background-color: transparent !important;
+        }
+      }
+    }
+
+    .student_ans {
+      background-color: transparent;
+      padding: 0 1rem;
+      width: calc(80% - 2rem);
+      word-wrap: break-word;
+
+      // > * {
+      //   padding: 0 1.3rem;
+      // }
+      // ol,
+      // ul {
+      //   background-color: transparent !important;
+      //   li {
+      //     background-color: transparent !important;
+      //   }
+      // }
+    }
+  }
+}
+
+.anwers_div {
+  .answers_scroll_cont {
+
+    // overflow-y: scroll;
+    // height: 70vh;
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: $whitecolor;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: $iconBackground;
+      border-radius: 20px;
+      border: 3px solid #f5f5f5;
+      cursor: auto;
+    }
+  }
+
+  .empty_div {
+    height: 10rem;
+  }
+
+  .flagged_div {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 1rem;
+
+    div {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+
+      // width: 70%;
+      p {
+        border: 1px solid;
+        padding: 0.2rem;
+        border-radius: 5px;
+        background-color: $iconBackgroundLowOpacity;
+        padding: 0.2rem 0.8rem;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.flaggedIcon {
+  margin-left: 0.5rem;
+  color: $textRed !important;
+}
+
+.incorrect_span {
+  background-color: $studentTestBlock;
+}
+
+.Test_blocked_h3 {
+  color: $studentTestBlock;
+}
+
+.backgroundNeutral {
+  background-color: #f7f9fc !important;
+}
+
+.backgroundPass {
+  background-color: $backgroundPass !important;
+}
+
+.textRed {
+  color: $textRed;
+}
+
+.textGreen {
+  color: $textGreen;
+}
+
+.boldText {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+// Coding Question Styles
+.codingQuestionContainer {
+  margin: 1rem 0;
+}
+
+.testCasesSection {
+  margin-bottom: 2rem;
+
+  .testCasesTitle {
+    color: #333;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+}
+
+.testCaseItem {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+
+  .testCaseHeader {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .testCaseContent {
+    padding: 1rem;
+
+    .inputSection,
+    .outputSection,
+    .explanationSection {
+      margin-bottom: 1rem;
+
+      strong {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-size: 0.9rem;
+      }
+    }
+
+    .explanationText {
+      padding: 0.5rem;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+}
+
+.studentCodeSection {
+  margin-top: 2rem;
+
+  .studentCodeTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #333;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+
+    .languageBadge {
+      background-color: #007bff;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+  }
+}
+
+.codeSubmissionContainer {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.codeBlock,
+.studentCodeBlock {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.4;
+
+  code {
+    background: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    color: #333;
+  }
+}
+
+.studentCodeBlock {
+  background-color: #1e1e1e;
+  border: none;
+  margin: 0;
+  border-radius: 0;
+
+  code {
+    color: #d4d4d4;
+  }
+}
+
+.testResultsSection {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-top: 1px solid #e0e0e0;
+
+  .testResultsTitle {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #495057;
+  }
+}
+
+.testResultsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.testResult {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+
+  .testCaseNumber {
+    font-weight: 500;
+  }
+
+  .testStatus {
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+
+    &.pass {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    &.fail {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  }
+
+  &.pass {
+    background-color: #f0f9f0;
+    border-left: 4px solid #28a745;
+  }
+
+  &.fail {
+    background-color: #fdf2f2;
+    border-left: 4px solid #dc3545;
+  }
+}
+
+.noCodeSubmitted {
+  padding: 2rem;
+  text-align: center;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px dashed #dee2e6;
+
+  p {
+    margin: 0;
+    font-style: italic;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .testCaseContent {
+    padding: 0.75rem;
+  }
+
+  .codeBlock,
+  .studentCodeBlock {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .testResult {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}

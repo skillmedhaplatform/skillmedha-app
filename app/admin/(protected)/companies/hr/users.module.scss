@@ -1,0 +1,357 @@
+@import "@/modules/admin/styles/mixins.scss";
+
+.pageContainer {
+  width: 100%;
+}
+
+.headerSection {
+  .pageTitle {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+
+    @media (min-width: 768px) {
+      font-size: 1.75rem;
+      margin-bottom: 10px;
+    }
+
+    @media (min-width: 1024px) {
+      font-size: 22px;
+    }
+  }
+
+  .headerContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  .usersCount {
+    border: 1px solid lightgray;
+    height: fit-content;
+    display: flex;
+    align-items: center;
+    padding: 0.3rem 1rem;
+    border-radius: 6px;
+    margin: 0;
+    font-size: 0.875rem;
+
+    @media (min-width: 768px) {
+      font-size: 1rem;
+    }
+  }
+}
+
+.filterSection {
+  @include flexBox(column, stretch, flex-start, 0.75rem);
+
+  .searchBar {
+    width: 100%;
+
+    :global(.ant-input-search) {
+      max-width: 100%;
+    }
+  }
+
+  .filterControls {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .filterSelect {
+      flex: 1;
+      min-width: 120px;
+
+      @media (min-width: 480px) {
+        flex: 0 0 auto;
+        min-width: 140px;
+      }
+
+      @media (min-width: 768px) {
+        min-width: 150px;
+      }
+
+      @media (min-width: 1024px) {
+        min-width: 180px;
+      }
+    }
+  }
+
+  @media (min-width: 768px) {
+    @include flexBox(row, center, space-between, 1rem);
+
+    .searchBar {
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .filterControls {
+      width: auto;
+      flex-wrap: nowrap;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .searchBar {
+      max-width: 500px;
+    }
+  }
+}
+
+.loadingContainer {
+  @include flexBox(column, center, center, 0);
+  min-height: 200px;
+
+  @media (min-width: 768px) {
+    min-height: 300px;
+  }
+}
+
+.usersGrid {
+  @include auto-grid(20rem, 1.5rem);
+  margin-top: 0.8rem;
+  max-height: 65vh;
+  min-height: 50vh;
+  overflow-y: auto;
+  @include custom-scrollbar();
+  align-content: flex-start;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    min-height: 40vh;
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+.userCard {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+  @include flexBox(column, stretch, flex-start, 0.75rem);
+  cursor: pointer;
+
+  @media (min-width: 768px) {
+    padding: 1.25rem;
+    border-radius: 10px;
+    gap: 0.875rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 1.5rem;
+    border-radius: 12px;
+    gap: 1rem;
+  }
+
+  //   &:hover {
+  //     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  //     border: 1px solid #24A058;
+  //     transform: translateY(-2px);
+
+  //     @media (min-width: 768px) {
+  //       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  //       transform: translateY(-4px);
+  //     }
+  //   }
+
+  .cardHeader {
+    @include flexBox(row, center, flex-start, 1rem);
+
+    @media (min-width: 768px) {
+      gap: 1.25rem;
+    }
+  }
+
+  .avatar {
+    flex-shrink: 0;
+  }
+
+  .userInfo {
+    flex: 1;
+    min-width: 0;
+    @include flexBox(column, flex-start, flex-start, 0.5rem);
+
+    @media (min-width: 768px) {
+      gap: 0.625rem;
+    }
+  }
+
+  .userName {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+
+    @media (min-width: 768px) {
+      font-size: 1.125rem;
+    }
+
+    @media (min-width: 1024px) {
+      font-size: 1.25rem;
+    }
+  }
+
+  .userDetails {
+    @include flexBox(column, stretch, flex-start);
+
+    .detailItem {
+      @include flexBox(row, center, flex-start);
+      font-size: 0.8125rem;
+      color: #666;
+
+      @media (min-width: 768px) {
+        gap: 0.625rem;
+        font-size: 0.875rem;
+      }
+
+      span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      svg {
+        color: #24A058;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+
+        @media (min-width: 768px) {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+
+  .roleInfo {
+    font-size: 0.8125rem;
+    color: #666;
+    padding: 0.4rem 0.5rem;
+    background: #f5f5f5;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    @media (min-width: 768px) {
+      font-size: 0.875rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+    }
+
+    strong {
+      color: #333;
+      font-weight: 600;
+    }
+  }
+
+  .cardFooter {
+    @include flexBox(row, center, flex-end, 0.5rem);
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f0f0f0;
+
+    @media (min-width: 768px) {
+      padding-top: 1rem;
+    }
+  }
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+
+  @media (min-width: 768px) {
+    padding: 1.5rem 0;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .userCard {
+    .cardHeader {
+      flex-wrap: wrap;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .userInfo {
+      width: 100%;
+      align-items: center;
+    }
+
+    .userName {
+      text-align: center;
+    }
+
+    .userDetails {
+      width: 100%;
+
+      .detailItem {
+        justify-content: center;
+      }
+    }
+  }
+}
+
+@media (max-width: 375px) {
+  .headerSection {
+    .pageTitle {
+      font-size: 1.125rem;
+    }
+
+    .usersCount {
+      font-size: 0.8125rem;
+      padding: 0.25rem 0.75rem;
+    }
+  }
+
+  .userCard {
+    padding: 0.875rem;
+
+    .userName {
+      font-size: 0.9375rem;
+    }
+
+    .userDetails {
+      .detailItem {
+        font-size: 0.75rem;
+
+        svg {
+          font-size: 0.8125rem;
+        }
+      }
+    }
+
+    .roleInfo {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.5rem;
+    }
+
+    .cardFooter {
+      font-size: 0.75rem;
+    }
+  }
+}

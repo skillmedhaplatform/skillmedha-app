@@ -1,0 +1,50 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+.draggableQuestion {
+
+    // background-color: #f5f5f5;
+    border-radius: 5px;
+    cursor: grab;
+    border-radius: 0.5rem;
+    // box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.092);
+    margin: 1rem 0rem;
+    display: flex;
+    align-items: flex-start;
+    &.dragging {
+      background-color: #e0e0e0;
+      cursor: grabbing;
+      }
+      .questionHandle {
+        font-size: 2rem;
+        padding:  0 0.5rem;
+        opacity: 0.6;
+      }
+    .con{
+      .flex{
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem ;
+        span{
+          margin-left: 1rem;
+        }
+      }
+
+      .ques{
+        padding: 0.5rem 2rem;
+
+      }
+    }
+  }
+  .No_Questions_container{
+    width: 100%;
+    text-align: center;
+    height: 50vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background-color: $NoQuestionscontainer;
+    margin-top: 2rem;
+  }
+
+  

@@ -1,0 +1,27 @@
+@mixin flexBox($direction, $jc, $ai) {
+  display: flex;
+  justify-content: $jc;
+  align-items: $ai;
+  flex-direction: $direction;
+}
+@mixin button(
+  $border: none,
+  $display: flex,
+  $justify-self: center,
+  $padding: 0.7rem 2rem,
+  $background-color: $btnsColorBlue,
+  $color: #ffffff,
+  $font-weight: 600,
+  $border-radius: 5px,
+  $cursor: pointer
+) {
+  border: $border;
+  display: $display;
+  justify-self: $justify-self;
+  padding: $padding;
+  background-color: $background-color;
+  color: $color;
+  font-weight: $font-weight;
+  border-radius: $border-radius;
+  cursor: $cursor;
+}

@@ -1,0 +1,336 @@
+@import "@/modules/admin/styles/colors.scss";
+@import "@/modules/admin/styles/mixins.scss";
+
+.container {
+  height: 100%;
+  min-height: 60vh;
+  width: 100%;
+  padding: 0 2rem;
+  overflow-y: auto;
+  @include custom-scrollbar();
+  position: relative;
+
+  .titleContainer {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 9;
+    .title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: $primaryColor;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+  }
+
+  .body {
+    height: 90%;
+    margin-top: 1rem;
+    width: 100%;
+    align-items: flex-start;
+
+    .sectionHeader {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: $primaryColor;
+      margin: 2rem 0 1.5rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid $primaryColor;
+      user-select: none;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    .internTtle {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 2rem;
+
+      span {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: $textPrimary;
+        min-width: 180px;
+      }
+
+      input {
+        flex: 1;
+        padding: 0.5rem 0.8rem;
+        outline: none;
+        border-radius: 0.4rem;
+        border: 1px solid rgba(0, 0, 0, 0.25);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+
+        &:focus {
+          border-color: $primaryColor;
+          box-shadow: 0 0 5px rgba($primaryColor, 0.5);
+        }
+
+        &::placeholder {
+          color: rgba(0, 0, 0, 0.4);
+        }
+      }
+
+      small {
+        min-width: 120px;
+        text-align: right;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 0.85rem;
+      }
+    }
+
+    .formRow {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 1rem 0;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .formField {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      label {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: $textPrimary;
+      }
+
+      input,
+      textarea,
+      select {
+        padding: 0.5rem 0.8rem;
+        outline: none;
+        border-radius: 0.4rem;
+        border: 1px solid rgba(0, 0, 0, 0.25);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+
+        &:focus {
+          border-color: $primaryColor;
+          box-shadow: 0 0 5px rgba($primaryColor, 0.5);
+        }
+
+        &::placeholder {
+          color: rgba(0, 0, 0, 0.4);
+        }
+      }
+    }
+
+    .desc {
+      margin: 1rem 0;
+
+      .sd {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: $textPrimary;
+      }
+
+      .genAi {
+        margin-top: 0.5rem;
+        float: right;
+        background-color: $primaryColor;
+        color: #fff;
+        padding: 0.5rem 2rem;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        user-select: none;
+        transition: background-color 0.3s ease;
+
+        &:hover,
+        &:focus {
+          background-color: darken($primaryColor, 10%);
+        }
+      }
+    }
+
+    .preQ {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+
+      p {
+        align-self: flex-start;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: $textPrimary;
+        min-width: 220px;
+        padding-top: 0.3rem;
+      }
+
+      > div:last-child {
+        flex: 1;
+      }
+    }
+
+    .difficulty {
+      display: flex;
+      align-items: center;
+      margin-top: 1.2rem;
+      gap: 2rem;
+
+      span {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: $textPrimary;
+        min-width: 180px;
+      }
+    }
+
+    .price {
+      display: flex;
+      align-items: center;
+      margin-top: 1.2rem;
+
+      span {
+        width: 20%;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: $textPrimary;
+      }
+
+      .priceIn {
+        display: flex;
+        align-items: center;
+        border: 1px solid rgba(0, 0, 0, 0.3);
+        padding: 0.4rem 0.6rem;
+        border-radius: 0.4rem;
+        width: 100%;
+        max-width: 200px;
+        transition: border-color 0.3s ease;
+
+        &:focus-within {
+          border-color: $primaryColor;
+          box-shadow: 0 0 5px rgba($primaryColor, 0.5);
+        }
+
+        span {
+          margin: 0;
+          padding: 0 0.5rem;
+          font-weight: 600;
+          color: $textPrimary;
+          width: auto;
+        }
+
+        input {
+          border: none;
+          font-size: 1rem;
+          outline: none;
+          width: 100%;
+          color: $textPrimary;
+
+          &::placeholder {
+            color: lighten($textPrimary, 30%);
+          }
+        }
+      }
+    }
+
+    .checkboxGroup {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1rem 0;
+
+      .checkboxLabel {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        cursor: pointer;
+        user-select: none;
+
+        input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+          accent-color: $primaryColor;
+        }
+
+        span {
+          font-size: 1rem;
+          font-weight: 500;
+          color: $textPrimary;
+        }
+
+        &:hover {
+          span {
+            color: $primaryColor;
+          }
+        }
+      }
+    }
+
+    .priceSummary {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: rgba($primaryColor, 0.05);
+      border-radius: 0.4rem;
+      border-left: 4px solid $primaryColor;
+
+      .ant-tag {
+        font-size: 1.1rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+  }
+
+  .buttonsContainer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    // margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    gap: 1rem;
+    position: sticky;
+    bottom: 0;
+    background-color: #fff;
+
+    // button {
+    //   min-width: 140px;
+    //   font-size: 1rem;
+    //   font-weight: 600;
+    //   border-radius: 0.4rem;
+    //   padding: 0.6rem 1.5rem;
+    //   height: auto;
+
+    //   &:focus-visible {
+    //     outline: 2px solid $primaryColor;
+    //     outline-offset: 2px;
+    //   }
+    // }
+  }
+}
+
+.coverImage_container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 3rem;
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+
+  .sd {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: $textPrimary;
+    min-width: 180px;
+    padding-top: 0.5rem;
+  }
+}

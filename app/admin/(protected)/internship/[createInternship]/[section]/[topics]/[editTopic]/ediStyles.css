@@ -1,0 +1,18 @@
+.anticon svg {
+  color: #24A058;
+}
+
+.time-picker-popup .ant-picker-time-panel-column::before {
+  content: attr(aria-label);
+  display: block;
+  text-align: center;
+  font-weight: bold;
+  padding: 4px 0;
+  color: #999;
+}
+
+.quill {
+  width: 50vw !important;
+  overflow-y: scroll;
+  /* height: 10rem !important; */
+}

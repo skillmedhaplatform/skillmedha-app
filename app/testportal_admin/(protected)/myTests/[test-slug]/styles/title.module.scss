@@ -1,0 +1,46 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+
+
+.titlesContainer {
+  width: 100%;
+  padding: 0rem 0rem;
+  margin-top: 1rem;
+
+  .navTabs {
+    width: 100%;
+
+    :global(.ant-tabs-nav) {
+      margin-bottom: 0;
+
+      &::before {
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.439);
+      }
+    }
+
+    :global(.ant-tabs-tab) {
+      padding: 12px 16px;
+
+      .ant-tabs-tab-btn {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #666;
+      }
+
+      &:hover .ant-tabs-tab-btn {
+        color: $navbarColor;
+      }
+    }
+
+    :global(.ant-tabs-tab-active) {
+      .ant-tabs-tab-btn {
+        color: $navbarColor !important;
+      }
+    }
+
+    :global(.ant-tabs-ink-bar) {
+      height: 4px !important;
+      background: $navbarColor !important;
+      border-radius: 2px 2px 0 0;
+    }
+  }
+}

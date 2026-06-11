@@ -1,0 +1,207 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+
+.container {
+  width: 100%;
+  height: 90vh; // Give it a max viewport height
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Header Section ──
+.headerSection {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+// ── Left Side (Title + Info + Filters) ──
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.titleLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  h2 {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: $iconBackground;
+    font-weight: 700;
+    margin: 0;
+  }
+}
+
+// ── Info Bar (Inline) ──
+.infoBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.35rem 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+
+  strong {
+    color: #222;
+    font-size: 13px;
+  }
+}
+
+// ── Filter Tags (Inline) ──
+.filterTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+// ── Right Side (Action Buttons) ──
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+// ── Table Body ──
+.progressBody {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 2rem; // Extra padding for pagination
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+  }
+}
+
+// ── Misc (keep existing) ──
+.head1 {
+  display: flex;
+  padding: 0.2rem 1rem;
+  justify-content: space-between;
+
+  .searchContainer {
+    display: flex;
+    border: 1.5px solid rgba(0, 0, 0, 0.178);
+    border-radius: 0.3rem;
+    font-size: 1rem;
+    width: 20%;
+    padding: 0rem 0.5rem 0rem 0rem;
+    align-items: center;
+
+    span {
+      height: 100%;
+      display: flex;
+      padding: 0rem 0.3rem;
+      background-color: $iconBackgroundLowOpacity;
+      cursor: pointer;
+
+      .searchIcon {
+        background-color: transparent;
+      }
+    }
+
+    input {
+      padding-left: 0.5rem;
+      border: none;
+      outline: none;
+    }
+  }
+
+  button {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0.5rem 2rem;
+    background-color: $iconBackground;
+    border-radius: 0.5rem;
+  }
+}
+
+.viewButton {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  background-color: $iconBackground;
+  border-radius: 0.5rem;
+}
+
+.image {
+  border: 1px solid;
+  width: 6rem;
+  height: 4rem;
+  background-color: rgba(102, 102, 102, 0.233);
+  border-radius: 0.4rem;
+}
+
+.info {
+  cursor: pointer;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+.studentActivity_btn {
+  color: black !important;
+  font-size: 0.7rem !important;
+  padding: 0.1rem 0.5rem !important;
+  height: fit-content !important;
+}
+
+.studentActivity_btn:hover {
+  background-color: white !important;
+}
+
+.student_test_block {
+  color: $studentTestBlock;
+}
+
+.icon {
+  transition: transform 0.3s;
+  font-size: 1rem;
+}
+
+.iconActive {
+  transform: rotate(120deg);
+}
+
+.iconInactive {
+  transform: rotate(30deg);
+}
+
+.capture-root {
+  transform: none !important;
+  position: static !important;
+}

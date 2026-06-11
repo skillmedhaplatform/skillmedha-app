@@ -1,0 +1,334 @@
+// "use client";
+// import Home from "@/app/page";
+// import React, { useEffect, useRef, useState } from "react";
+
+// import styles from "./talkToAi.module.scss";
+// import { Button, Input } from "antd";
+// import { ClockCircleOutlined } from "@ant-design/icons";
+// import { useUserMedia } from "@/helpers/useUserMedia";
+// import { formatTime } from "@/helpers/formatVideoTime";
+// import axios from "axios";
+
+// const Dictaphone = () => {
+//   const [transcript, setTranscript] = useState("");
+//   const [listening, setListening] = useState(false);
+//   const recognitionRef = useRef(null);
+
+//   const { stream, error, isLoading } = useUserMedia({
+//     video: true,
+//     audio: true,
+//   });
+//   const videoRef = useRef(null);
+//   const [currentTime, setCurrentTime] = useState(0);
+
+//   const questions = [
+//     "Tell me about yourself.",
+//     "Why do you want to work at our company?",
+//     "What are your greatest strengths?",
+//     "What is your biggest weakness?",
+//     "Describe a time you faced a conflict at work and how you handled it.",
+//     "Where do you see yourself in five years?",
+//     "Why are you leaving your current job?",
+//     "How do you handle stress and pressure?",
+//     "What motivates you to perform well?",
+//     "Do you prefer working independently or in a team?",
+//   ];
+//   const [quesNo, setQuesNo] = useState(
+//     Math.floor(Math.random() * questions.length)
+//   );
+//   const [addQuesFlag, setAddQuesFlag] = useState(false);
+//   const [addQues, setAddQues] = useState(null);
+//   const [activeTab, setActiveTab] = useState(0);
+
+//   useEffect(() => {
+//     if (videoRef.current && stream) {
+//       videoRef.current.srcObject = stream;
+//     }
+//   }, [stream]);
+//   const handleStartRec = () => {
+//     if (videoRef.current) {
+//       setTranscript("");
+//       setActiveTab(0);
+//       setCurrentTime(0);
+//       videoRef.current.currentTime = 0;
+//       videoRef.current.play();
+//       startRecognition();
+//     }
+//   };
+//   const handleStopRec = () => {
+//     if (videoRef.current) {
+//       videoRef.current.pause();
+//       videoRef.current.currentTime = 0;
+//       setCurrentTime(0); // reset UI time immediately
+//       stopRecognition();
+//     }
+//   };
+//   const handleReplayRec = () => {};
+
+//   const handleTimeUpdate = () => {
+//     if (videoRef.current) {
+//       if (videoRef.current.currentTime > 60) {
+//         handleStopRec();
+//         handleSubmitRec();
+//       }
+//       setCurrentTime(videoRef.current.currentTime);
+//     }
+//   };
+
+//   const startRecognition = () => {
+//     if (recognitionRef.current) {
+//       recognitionRef.current.start();
+//       setListening(true);
+//     }
+//   };
+
+//   const stopRecognition = () => {
+//     if (recognitionRef.current) {
+//       recognitionRef.current.stop();
+//       setListening(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     // Initialize Speech Recognition
+//     const SpeechRecognition =
+//       window.SpeechRecognition || window.webkitSpeechRecognition;
+//     if (!SpeechRecognition) {
+//       console.error("Speech Recognition API not supported in this browser.");
+//       return;
+//     }
+
+//     const recognition = new SpeechRecognition();
+//     recognition.continuous = true;
+//     recognition.interimResults = true;
+//     recognition.lang = "en-US";
+
+//     recognition.onresult = (event) => {
+//       let interimTranscript = "";
+//       for (let i = event.resultIndex; i < event.results.length; i++) {
+//         const result = event.results[i];
+//         if (result.isFinal) {
+//           setTranscript((prev) => prev + result[0].transcript + " ");
+//         } else {
+//           interimTranscript += result[0].transcript;
+//         }
+//       }
+
+//       console.log(interimTranscript);
+
+//       // You could display interim results if desired
+//       // e.g., setInterim(interimTranscript)
+//     };
+
+//     recognition.onerror = (event) => {
+//       console.error("Speech recognition error:", event.error);
+//       setListening(false);
+//     };
+
+//     recognitionRef.current = recognition;
+
+//     return () => {
+//       recognition.stop();
+//     };
+//   }, []);
+//   const [aiSuggestions, setAiSuggestions] = useState({
+//     grammarAndSpellingCheck: null,
+//     clarityAndStyleSuggestions: null,
+//     positiveFeedback: null,
+//     reviewedText: null,
+//     report: null,
+//     relevance: null,
+//   });
+
+//   const [waitSubmit, setWaitSubmit] = useState(false);
+//   const baseurl = "https://ai.skillmedha.com";
+//   // const baseurl = "http://localhost:7172";
+
+//   const handleSubmitRec = async () => {
+//     try {
+//       setWaitSubmit(true);
+//       const { data } = await axios.post(baseurl + "/checkEnglishText", {
+//         text: transcript,
+//         question: addQues ? addQues : questions[quesNo],
+//       });
+//       setAiSuggestions(data);
+//       setWaitSubmit(false);
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   };
+//   return (
+//     <Home>
+//       <div className={styles.container}>
+//         <p className={styles.title}>Talk to AI</p>
+//         <div className={styles.funcConatiner}>
+//           <div className={styles.leftContainer}>
+//             <div className={styles.mediaContainer}>
+//               {isLoading ? (
+//                 <div>Loading Media...</div>
+//               ) : (
+//                 <video
+//                   ref={videoRef}
+//                   controls={false}
+//                   width={"100%"}
+//                   onTimeUpdate={handleTimeUpdate}
+//                   muted
+//                 />
+//               )}
+//             </div>
+//             <div className={styles.controlsContainer}>
+//               <div>
+//                 <button
+//                   className={styles.btn}
+//                   onClick={handleStartRec}
+//                   disabled={listening}
+//                 >
+//                   Start
+//                 </button>
+//                 <button
+//                   className={styles.btn}
+//                   onClick={handleStopRec}
+//                   disabled={!listening || waitSubmit}
+//                 >
+//                   Stop
+//                 </button>
+//                 <button
+//                   className={styles.btn}
+//                   onClick={handleReplayRec}
+//                   disabled={!listening && !transcript}
+//                 >
+//                   Replay
+//                 </button>
+//                 <Button
+//                   loading={waitSubmit}
+//                   className={styles.btn}
+//                   onClick={handleSubmitRec}
+//                   disabled={!listening && !transcript}
+//                 >
+//                   Submit
+//                 </Button>
+//               </div>
+//               <div>
+//                 <ClockCircleOutlined />
+//                 <p>Time: {formatTime(currentTime)}</p>
+//               </div>
+//             </div>
+//           </div>
+//           <div className={styles.rightContainer}>
+//             <div className={styles.quesContainer}>
+//               <div className={styles.quesTitle}>Question :</div>
+//               <div className={styles.quesContent}>
+//                 {addQues ? addQues : questions[quesNo]}
+//               </div>
+//               <div className={styles.questionControls}>
+//                 {addQuesFlag ? (
+//                   <div className={styles.addQuestion}>
+//                     <Input onChange={(e) => setAddQues(e.target.value)} />
+//                     <button
+//                       className={styles.btn}
+//                       onClick={() => {
+//                         setAddQuesFlag(false);
+//                       }}
+//                     >
+//                       Save
+//                     </button>
+//                   </div>
+//                 ) : (
+//                   <div className={styles.quesBtnGroup}>
+//                     <button
+//                       className={styles.btn}
+//                       onClick={() => {
+//                         setAddQues("");
+//                         setQuesNo(Math.floor(Math.random() * questions.length));
+//                       }}
+//                     >
+//                       Change Question
+//                     </button>
+//                     <button
+//                       className={styles.btn}
+//                       onClick={() => {
+//                         setAddQuesFlag(true);
+//                       }}
+//                     >
+//                       Add Custom Question
+//                     </button>
+//                   </div>
+//                 )}
+//               </div>
+//             </div>
+//             <div className={styles.aiContainer}>
+//               <div className={styles.tabContainer}>
+//                 <div
+//                   className={activeTab == 0 && styles.activeTab}
+//                   onClick={() => {
+//                     setActiveTab(0);
+//                   }}
+//                 >
+//                   Your Answer
+//                 </div>
+//                 <div
+//                   className={activeTab == 1 && styles.activeTab}
+//                   onClick={() => {
+//                     if (!aiSuggestions.report) return;
+//                     setActiveTab(1);
+//                   }}
+//                 >
+//                   Review Report
+//                 </div>
+//                 <div
+//                   className={activeTab == 2 && styles.activeTab}
+//                   onClick={() => {
+//                     if (!aiSuggestions.report) return;
+//                     setActiveTab(2);
+//                   }}
+//                 >
+//                   AI Suggestion
+//                 </div>
+//               </div>
+//               {activeTab == 0 && (
+//                 <div className={styles.aiOutputContainer}>{transcript}</div>
+//               )}
+//               {activeTab == 1 && (
+//                 <div
+//                   className={styles.aiOutputContainer}
+//                   dangerouslySetInnerHTML={{
+//                     __html: aiSuggestions.report || "",
+//                   }}
+//                 ></div>
+//               )}
+//               {activeTab == 2 && (
+//                 <div className={styles.aiOutputContainer}>
+//                   <strong>Relevence : </strong>
+//                   <div
+//                     dangerouslySetInnerHTML={{
+//                       __html: aiSuggestions.relevance || "",
+//                     }}
+//                   ></div>
+//                   <strong>Grammar And Spelling Check : </strong>
+//                   <div
+//                     dangerouslySetInnerHTML={{
+//                       __html: aiSuggestions.grammarAndSpellingCheck || "",
+//                     }}
+//                   ></div>
+//                   <strong>Clarity And Style Suggestions : </strong>
+//                   <div
+//                     dangerouslySetInnerHTML={{
+//                       __html: aiSuggestions.clarityAndStyleSuggestions || "",
+//                     }}
+//                   ></div>
+//                   <strong>Positive Feedback : </strong>
+//                   <div
+//                     dangerouslySetInnerHTML={{
+//                       __html: aiSuggestions.positiveFeedback || "",
+//                     }}
+//                   ></div>
+//                 </div>
+//               )}
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </Home>
+//   );
+// };
+// export default Dictaphone;

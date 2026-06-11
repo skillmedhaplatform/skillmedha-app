@@ -1,0 +1,78 @@
+@import "@/utils/universalUtils/colors.module.scss";
+
+.headerContainer {
+  display: flex;
+  padding: 0.5rem 1rem;
+  justify-content: space-between;
+  // height: 2rem;
+  align-items: center;
+  border: 1px solid $borderColor;
+
+  .icon {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 1.3rem;
+    color: "#08334C";
+    font-weight: 800;
+    cursor: pointer;
+
+    .logoText {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+    span {
+      color: #25a3a6;
+    }
+    img {
+      cursor: pointer;
+      display: flex;
+      align-self: center;
+      width: 2.5rem;
+    }
+  }
+
+  .credsCon {
+    display: flex;
+    justify-content: flex-end;
+    width: 40%;
+    align-items: center;
+    height: 100%;
+    gap: 1rem;
+    .upgradeButton {
+      font-size: clamp(0.5rem, 1vw, 1rem);
+      padding: 0.3rem 2rem;
+      background-color: transparent;
+      color: $primaryColor;
+      border: 1px solid $primaryColor;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .notificationIcon {
+      cursor: pointer;
+      width: 5%;
+    }
+    .avatar {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      border: 2px solid $primaryColor;
+      display: flex;
+      align-items: center;
+      color: $primaryColor;
+      justify-content: center;
+      padding: 0.1rem;
+      cursor: pointer;
+    }
+  }
+}
+
+.profileImage {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f0f0f0;
+}

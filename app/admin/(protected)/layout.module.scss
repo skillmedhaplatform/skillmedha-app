@@ -1,0 +1,34 @@
+@use "@/modules/admin/styles/mixins" as *;
+@use "@/modules/admin/styles/colors" as *;
+
+.mainCont {
+  height: 100vh;
+  width: 100%;
+  @include flexBox(column, center, flex-start);
+
+  .header {
+    height: 7%;
+    width: 100%;
+  }
+
+  .bottom {
+    flex: 1;
+    max-height: 93%;
+    width: 100%;
+    @include flexBox(row, flex-start, flex-start);
+
+    .sidebar {
+      padding-top: 0.5rem;
+      height: 100%;
+      width: 15%;
+      border-right: 1px solid $borderColor;
+      min-width: 12rem;
+    }
+
+    .content {
+      padding: 0.5rem;
+      height: 100%;
+      flex: 1;
+    }
+  }
+}

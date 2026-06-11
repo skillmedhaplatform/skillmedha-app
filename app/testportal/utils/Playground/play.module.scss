@@ -1,0 +1,37 @@
+@import "./styles/colors.scss";
+
+.container {
+  width: 100%;
+  .editorContainer {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    .headerCon {
+      color: $primaryColor;
+      z-index: 10;
+      background-color: #25a3a61a;
+      padding: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1rem;
+      font-weight: 700;
+      .headerConRight {
+        display: flex;
+        justify-content: space-evenly;
+        width: 60%;
+        .select {
+          border: 0;
+          width: 15rem;
+        }
+        button {
+          padding: 0rem 1rem;
+          border-radius: 0.5rem;
+          border: none;
+          background-color: #25a3a6;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}

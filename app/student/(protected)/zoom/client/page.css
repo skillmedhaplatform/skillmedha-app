@@ -1,0 +1,106 @@
+.ant-breadcrumb .ant-breadcrumb-separator {
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  text-indent: -9999px;
+
+  display: inline-block;
+  height: 1.2rem;
+  width: 1.2rem;
+  display: flex;
+  align-self: center;
+
+  background: url("https://res.cloudinary.com/dug3awue8/image/upload/v1746083643/icon_sgq3vj.svg")
+    no-repeat center center;
+  background-size: contain;
+}
+
+.ant-collapse-item {
+  padding: .5rem 0rem !important;
+}
+
+.ant-collapse-header {
+  border: none !important;
+}
+
+
+.ant-collapse-header-text{
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+}
+
+.ant-collapse-item-active ,.ant-collapse-content-box{
+  background-color: #25a5a733;
+}
+
+/* .wr-main-content ,.page-footer,.preview-agreement , #foot-bar{
+  display: none !important;
+}
+ */
+ .meeting-header ,.zoom-meetingsdk-meeting-header , .join-dialog{
+  display: none !important;
+ }
+
+ #wc-container-right{
+  position: absolute !important;
+  width: 50% !important;
+  height: 100% !important;
+  z-index: 1000 !important;
+ }
+/* make your container a positioning context */
+.single-main-container__video-frame {
+  /* position: relative; */
+  width: 100%;
+  height: 100%;
+  /* overflow: hidden; */
+}
+
+/* target the <video-player> wrapper and its inner div */
+.single-main-container__video-frame video-player,
+.single-main-container__video-frame video-player > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
+
+/* if your avatar-footer needs to stay at the bottom,
+   you can override its vertical position instead of stretching:
+*/
+.single-main-container__video-frame .video-avatar__avatar-footer {
+  top: auto;
+  bottom: 0;
+}
+
+
+#zmmtg-root {
+  position: absolute !important;
+  top: 0; left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1;            /* sit above your background */
+}
+
+/* Stretch any video elements inside Zoom’s container */
+#zmmtg-root video,
+#zmmtg-root .video-container,
+#zmmtg-root .meeting-video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;     /* or “contain” if you prefer letterboxing */
+}
+
+/* (optional) hide Zoom’s chrome/UI bars if you don’t want them */
+/* #zmmtg-root .meeting-header,
+#zmmtg-root #wc-footer,
+.mobile-suspension-window-wrapper,
+.VideoShareLayout,
+.ReactModal__Content--after-open {
+  display: none !important;
+} */
+
+
+#video-share-layout{
+  height: 100% !important;
+  position: static !important;
+}

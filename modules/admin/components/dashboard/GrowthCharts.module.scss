@@ -1,0 +1,188 @@
+@use '@/modules/admin/styles/colors' as *;
+
+.chartsSection {
+  margin-top: $spacing6;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing6;
+  flex-wrap: wrap;
+  gap: $spacing4;
+
+  .titleSection {
+    display: flex;
+    align-items: center;
+    gap: $spacing3;
+
+    .icon {
+      color: $primaryColor;
+    }
+
+    h2 {
+      font-size: $fontSizeXl;
+      font-weight: $fontWeightBold;
+      color: $textPrimary;
+      margin: 0 0 $spacing1 0;
+    }
+
+    p {
+      font-size: $fontSizeSm;
+      color: $gray600;
+      margin: 0;
+    }
+  }
+
+  .controls {
+    display: flex;
+    gap: $spacing3;
+    flex-wrap: wrap;
+  }
+}
+
+.periodSelector {
+  display: flex;
+  align-items: center;
+  gap: $spacing2;
+  padding: $spacing2 $spacing3;
+  background: $white;
+  border: 1px solid $borderColor;
+  border-radius: $borderRadius;
+
+  svg {
+    color: $gray600;
+  }
+
+  select {
+    border: none;
+    background: transparent;
+    font-size: $fontSizeSm;
+    font-weight: $fontWeightMedium;
+    color: $textPrimary;
+    cursor: pointer;
+    outline: none;
+    padding: 0;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.chartTypeSelector {
+  display: flex;
+  gap: $spacing2;
+  background: $gray100;
+  padding: $spacing1;
+  border-radius: $borderRadius;
+
+  .typeButton {
+    display: flex;
+    align-items: center;
+    gap: $spacing2;
+    padding: $spacing2 $spacing3;
+    background: transparent;
+    border: none;
+    border-radius: $borderRadiusSmall;
+    font-size: $fontSizeSm;
+    font-weight: $fontWeightMedium;
+    color: $gray700;
+    cursor: pointer;
+    transition: all $transitionBase;
+
+    svg {
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: rgba($primaryColor, 0.1);
+      color: $primaryColor;
+    }
+
+    &.active {
+      background: $white;
+      color: $primaryColor;
+      box-shadow: $shadowSm;
+    }
+  }
+}
+
+.chartsGrid {
+  display: grid;
+  gap: $spacing6;
+}
+
+.chartCard {
+  background: $white;
+  border: 1px solid $borderColor;
+  border-radius: $borderRadius;
+  padding: $spacing6;
+  box-shadow: $shadowSm;
+
+  h3 {
+    font-size: $fontSizeLg;
+    font-weight: $fontWeightSemibold;
+    color: $textPrimary;
+    margin: 0 0 $spacing5 0;
+  }
+}
+
+.chartContainer {
+  min-height: 400px;
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing10;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid $gray200;
+    border-top-color: $primaryColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: $spacing4;
+  }
+
+  p {
+    color: $gray600;
+    font-size: $fontSizeSm;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: $breakpointMd) {
+  .chartHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .controls {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .periodSelector,
+  .chartTypeSelector {
+    width: 100%;
+  }
+
+  .chartTypeSelector {
+    overflow-x: auto;
+
+    .typeButton {
+      white-space: nowrap;
+    }
+  }
+}

@@ -1,0 +1,89 @@
+$max-width1372:1372px;
+$min-width1025:1024px;
+
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+@import "@/modules/testportal_admin/components/styles/mixins.scss";
+.container{
+    width: 100%;
+    .price_container {
+        display: flex;
+        flex-direction: column;
+        input[type="radio"] {
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid #2d2d2db5;
+            border-radius: 50%;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            margin-left: 0.3rem;
+            
+        &:checked {
+           background-color: $iconBackground !important;
+            border-color: $iconBackground;
+          }
+      
+          &:focus {
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+          }
+          }
+        .respTitle {
+            margin: 1rem 0rem;
+            color: $navbarColor;
+            font-weight: 700;
+            font-size: 1.4rem;
+          }
+          .radioContainer {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+          }
+          
+          .radioInput {
+            margin-right: 5px;
+          }
+
+          
+          .radioLabel {
+            margin-left: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+          }
+          
+          .inputContainer {
+            margin-top: 1rem;
+          }
+          .flexCon {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 1rem;
+            input[type="number"] {
+              width: 100%;
+              outline: 0;
+              border-radius: 0.5rem;
+              padding: 0.5rem 1rem;
+              border: $border;
+            }
+          }
+          .inputLabel {
+            margin: 1rem 0rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+          }
+      }
+      .save_btn{
+        width: 11rem;
+        background-color: $LeavingtestpageButton;
+        font-weight: 650;
+        font-size: 1rem;
+        border: none;
+        padding: 0.5rem;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+    }
+}

@@ -1,0 +1,124 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+
+.container{
+    height: 100%;
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items:flex-start;
+    justify-content:flex-start;
+    row-gap: 1.6rem;
+
+    .aboutText{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        column-gap: 0.3rem;
+        font-size: 0.8rem;
+        color: $iconBackground;
+        font-weight: 550;
+    }
+    .copyComp{
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        column-gap: 1rem;
+
+        div{
+            width: 85%;
+            background-color:$btnbackground ;
+            padding: 0.5rem;
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+        button{
+        border-radius: 0.5rem;
+          width: 15%;
+          padding: 0.5rem 2rem;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border: 1px solid $topicbackcolor;
+          column-gap: 0.5rem;
+          background-color: rgba(140, 140, 140, 0.097);
+
+          img{
+            width: 20%;
+          }
+        }
+    }
+    .SwitchComp{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.8rem;
+        column-gap: 0.4rem;
+        font-weight: 550;
+        .SwitchComp_btn{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+    .respondents_cont{
+        width: 100%;
+        display: flex;
+        justify-content:flex-start;
+        align-items:flex-start;
+        flex-direction: column;
+        row-gap: 0.3rem;
+
+        h2{
+            font-size: 1.1rem;
+            font-weight: 650;
+         }
+         input{
+            width: 72%;
+            background-color:$btnbackground ;
+            padding: 0.5rem;
+            overflow: hidden;
+            outline: none;
+            border: 1px solid $topicbackcolor;
+            border-radius: 0.5rem;
+         }
+         .attempts_respondents_cont{
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            column-gap: 0.8rem;
+            select{
+                border: 1px solid var(--Green-with-transp, $LeavingtestpageButton);
+                border-radius: 0.4rem;
+                padding: 0.4rem;
+            }
+         }
+         div{
+            width: 100%;
+            display: flex;
+            justify-content:flex-start;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 550;
+            img{
+                width: 2%;
+            }
+         }
+    }
+    .save_btn{
+        width: 18%;
+        background-color: $LeavingtestpageButton;
+        font-weight: 650;
+        font-size: 1rem;
+        border: none;
+        padding: 0.5rem;
+        cursor: pointer;
+        border-radius: 0.5rem;
+    }
+   
+}

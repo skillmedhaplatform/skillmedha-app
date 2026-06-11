@@ -1,0 +1,379 @@
+@use "sass:color";
+@use '@/modules/admin/styles/colors' as *;
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $zIndexModal;
+  padding: $spacing4;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modalContent {
+  background: $white;
+  border-radius: $borderRadiusLarge;
+  box-shadow: $shadow2xl;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing5;
+  border-bottom: 1px solid $borderColor;
+
+  .headerLeft {
+    display: flex;
+    align-items: center;
+    gap: $spacing3;
+
+    .headerIcon {
+      color: $primaryColor;
+    }
+
+    h2 {
+      font-size: $fontSize2xl;
+      font-weight: $fontWeightBold;
+      color: $textPrimary;
+      margin: 0 0 $spacing1 0;
+    }
+
+    p {
+      font-size: $fontSizeSm;
+      color: $gray600;
+      margin: 0;
+    }
+  }
+
+  .closeButton {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: $gray600;
+    padding: $spacing2;
+    border-radius: $borderRadius;
+    transition: all $transitionBase;
+
+    &:hover {
+      background: $gray100;
+      color: $textPrimary;
+    }
+  }
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid $borderColor;
+  padding: 0 $spacing5;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: $spacing2;
+    padding: $spacing3 $spacing4;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: $gray600;
+    font-size: $fontSizeSm;
+    font-weight: $fontWeightMedium;
+    cursor: pointer;
+    transition: all $transitionBase;
+
+    &:hover:not(:disabled) {
+      color: $textPrimary;
+    }
+
+    &.active {
+      color: $primaryColor;
+      border-bottom-color: $primaryColor;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.modalBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing5;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $gray100;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gray400;
+    border-radius: $borderRadiusSmall;
+
+    &:hover {
+      background: $gray500;
+    }
+  }
+}
+
+.departmentsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing3;
+}
+
+.departmentCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing4;
+  border: 1px solid $borderColor;
+  border-radius: $borderRadius;
+  cursor: pointer;
+  transition: all $transitionBase;
+
+  &:hover {
+    background: $gray100;
+    border-color: $primaryColor;
+  }
+
+  .deptInfo {
+    display: flex;
+    align-items: center;
+    gap: $spacing3;
+
+    svg {
+      color: $primaryColor;
+    }
+
+    h4 {
+      font-size: $fontSizeBase;
+      font-weight: $fontWeightSemibold;
+      color: $textPrimary;
+      margin: 0 0 $spacing1 0;
+    }
+
+    p {
+      font-size: $fontSizeSm;
+      color: $gray600;
+      margin: 0;
+    }
+  }
+
+  .deptStats {
+    display: flex;
+    align-items: center;
+    gap: $spacing3;
+    color: $gray600;
+    font-size: $fontSizeSm;
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: $spacing2;
+    }
+  }
+}
+
+.studentsList {
+  .studentsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing4;
+    margin-bottom: $spacing4;
+    flex-wrap: wrap;
+
+    .backButton {
+      padding: $spacing2 $spacing4;
+      background: $gray100;
+      border: none;
+      border-radius: $borderRadius;
+      color: $textPrimary;
+      font-size: $fontSizeSm;
+      font-weight: $fontWeightMedium;
+      cursor: pointer;
+      transition: all $transitionBase;
+
+      &:hover {
+        background: $gray200;
+      }
+    }
+
+    .searchForm {
+      display: flex;
+      gap: $spacing2;
+      flex: 1;
+      max-width: 400px;
+
+      input {
+        flex: 1;
+        padding: $spacing2 $spacing3;
+        border: 1px solid $borderColor;
+        border-radius: $borderRadius;
+        font-size: $fontSizeSm;
+
+        &:focus {
+          outline: none;
+          border-color: $primaryColor;
+        }
+      }
+
+      button {
+        padding: $spacing2 $spacing4;
+        background: $primaryColor;
+        color: $white;
+        border: none;
+        border-radius: $borderRadius;
+        font-size: $fontSizeSm;
+        font-weight: $fontWeightMedium;
+        cursor: pointer;
+        transition: all $transitionBase;
+
+        &:hover {
+          background: color.adjust($primaryColor, $lightness: -10%);
+        }
+      }
+    }
+  }
+
+  .studentsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: $spacing3;
+  }
+
+  .studentCard {
+    display: flex;
+    align-items: center;
+    gap: $spacing3;
+    padding: $spacing4;
+    border: 1px solid $borderColor;
+    border-radius: $borderRadius;
+    transition: all $transitionBase;
+
+    &:hover {
+      background: $gray100;
+      border-color: $primaryColor;
+    }
+
+    .studentAvatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: $backgroundColorLowOpacity;
+      color: $primaryColor;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: $fontSizeLg;
+      font-weight: $fontWeightBold;
+      flex-shrink: 0;
+    }
+
+    .studentInfo {
+      flex: 1;
+      min-width: 0;
+
+      h5 {
+        font-size: $fontSizeSm;
+        font-weight: $fontWeightSemibold;
+        color: $textPrimary;
+        margin: 0 0 $spacing1 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      p {
+        font-size: $fontSizeXs;
+        color: $gray600;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .pagination {
+    text-align: center;
+    padding: $spacing4 0;
+    color: $gray600;
+    font-size: $fontSizeSm;
+  }
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: $spacing10;
+  color: $gray600;
+  font-size: $fontSizeSm;
+}
+
+@media (max-width: $breakpointMd) {
+  .modalContent {
+    max-height: 95vh;
+  }
+
+  .modalHeader {
+    .headerLeft {
+      h2 {
+        font-size: $fontSizeLg;
+      }
+    }
+  }
+
+  .studentsList {
+    .studentsHeader {
+      flex-direction: column;
+
+      .searchForm {
+        max-width: 100%;
+      }
+    }
+
+    .studentsGrid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

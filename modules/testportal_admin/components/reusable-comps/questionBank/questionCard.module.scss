@@ -1,0 +1,300 @@
+@import "../../styles/colors.scss";
+@import "../../styles/mixins.scss";
+$max-width1400:1380px;
+$min-width1024:1024px;
+
+
+.questionCard {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  height: 85vh;
+  .header_div {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 4.7rem;
+    .heading {
+      font-size: 1.2rem;
+      padding: 1rem 0;
+    }
+    p {
+      font-size: 1.1rem;
+      font-weight: 500;
+      border: 1px solid;
+      padding: 0.2rem 0.5rem;
+      border-radius: 5px;
+    }
+  }
+  .questions_cont {
+    overflow-y: scroll;
+    height: 85%;
+    padding: 0.2rem;
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      cursor: pointer;
+      background-color: $iconBackground;
+      border-radius: 20px;
+      border: 3px solid #f5f5f5;
+      cursor: auto;
+    }
+    .No_Questions_container{
+      width: 100%;
+      text-align: center;
+      height: 50vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      background-color: $NoQuestionscontainer;
+      margin-top: 2rem;
+    }
+  }
+}
+
+.ansCard {
+  @include flexBox(row, flex-start, flex-start);
+  margin: 0.5rem;
+  .optionContent {
+    @include fontMixin();
+    p {
+      margin: 0;
+      margin-left: 0.5rem;
+    }
+  }
+}
+
+.header {
+  @include flexBox(row, center, space-between);
+  margin-bottom: 1rem;
+  & > :nth-child(1) {
+    @include flexBox(row, center, center, 1rem);
+    span {
+      @include fontMixin(_, 700);
+    }
+  }
+  .accordianArrow {
+    transform: rotate(0deg);
+    transition: all 150ms linear;
+  }
+  .activeAccordianArrow {
+    transform: rotate(90deg);
+  }
+}
+
+.checkbox {
+  margin-right: 0.5rem;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.question {
+  cursor: pointer;
+  font-weight: 600;
+  & > :nth-child(1) {
+    margin-bottom: 0.8rem;
+    @include fontMixin();
+  }
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  & > :nth-last-child(1) {
+    font-size: 1.3rem;
+    cursor: pointer;
+  }
+  & > :nth-last-child(2) {
+    background-color: $qmbtncolorpink;
+  }
+  button {
+    width: fit-content;
+    display: inline;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background-color: $graybackground;
+
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    padding: 0.5rem 2rem;
+    cursor: pointer;
+  }
+}
+@media (min-width:$min-width1024) and (max-width:$max-width1400) {
+  .ant-select-selector {
+    width: 70% !important;
+    height: 100%;
+    padding: 0 11px;
+}
+.ant-select{
+  width: 130px !important;
+}
+}
+.optsCon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  & > :nth-last-child(1) {
+    background-color: $iconBackground;
+    border-radius: 5px;
+  }
+  & > :nth-child(2) {
+    padding: 0.4rem 0.8rem;
+    background-color: rgba(152, 151, 151, 0.209);
+    .inactive {
+      filter: grayscale(2);
+    }
+    border-radius: 5px;
+  }
+  & > :nth-child(3) {
+    padding: 0.25rem 0.8rem;
+    background-color: rgba(152, 151, 151, 0.209);
+    .inactive {
+      filter: grayscale(2);
+    }
+    border-radius: 5px;
+  }
+  @media (min-width:$min-width1024) and (max-width:$max-width1400) {
+    & > :nth-child(2) {
+      padding: 0.3rem 0.8rem;
+      background-color: rgba(152, 151, 151, 0.209);
+      .inactive {
+        filter: grayscale(2);
+      }
+      border-radius: 5px;
+    }
+    & > :nth-child(3) {
+      padding: 0.15rem 0.8rem;
+      background-color: rgba(152, 151, 151, 0.209);
+      font-size: 0.5rem;
+      .inactive {
+        filter: grayscale(2);
+      }
+      border-radius: 5px;
+    }
+    .selectAllCon {
+      span {
+        font-size: 0.5rem !important;
+      }
+    }
+  }
+  .selectAllCon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    span {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      cursor: pointer;
+    }
+  }
+
+  .searchCon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+    background-color: $graybackground;
+    padding: 0.3rem 0.5rem;
+    input {
+      width: 100%;
+      margin-left: 0.5rem;
+      border: none;
+      outline: none;
+      background-color: transparent;
+    }
+  }
+  .filterings{
+    .Select_tag{
+      width: 200px !important;
+      text-align: center;
+    }
+  }
+  @media (min-width:$min-width1024) and (max-width:$max-width1400) {
+    .filterings{
+      .Select_tag{
+        width: 110px !important;
+        text-align: center;
+        font-size: 0.6rem !important;
+        .ant-select-selection-placeholder {
+          font-size: 0.6rem !important;
+        }
+      }
+    }
+    .searchCon {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 5px;
+      background-color: $graybackground;
+      padding: 0.2rem 0.2rem;
+    }
+  }
+
+  button {
+    border: none;
+    outline: none;
+    background-color: $graybackground;
+    padding: 0.5rem 1.5rem;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  @media (min-width:$min-width1024) and (max-width:$max-width1400) {
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 0.5em;
+    }
+  }
+}
+
+.addQueCon {
+  height: 100%;
+
+  .categoryCon {
+    display: flex;
+    margin: 1.5rem 0rem;
+    justify-content: flex-start;
+    align-items: center;
+
+    .Title {
+      font-weight: 700;
+      width: 10%;
+    }
+    .categoryConRig {
+      width: 100%;
+      max-width: 20rem;
+      select {
+        background-color: transparent;
+        outline: none;
+        padding: 0.5rem;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        width: 95%;
+        max-width: 20rem;
+      }
+      button {
+        background-color: $iconBackground;
+        margin-left: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        border: none;
+        outline: none;
+        cursor: pointer;
+      }
+    }
+  }
+}

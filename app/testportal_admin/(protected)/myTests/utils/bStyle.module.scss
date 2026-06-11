@@ -1,0 +1,14 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+
+.container{
+    width: fit-content;
+    display: inline;
+    font-size: 1rem ;
+    font-weight: 600;
+    background-color:  $iconBackground;
+    border: none;
+    outline: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 2rem;
+    cursor: pointer;
+}

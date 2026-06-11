@@ -1,0 +1,438 @@
+.container {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.header {
+  background: #fff;
+  padding: 0 24px;
+}
+
+.breadcrumb {
+  font-size: 16px;
+
+  :global(.ant-breadcrumb) {
+    display: flex !important;
+    align-items: center !important;
+    overflow: hidden !important; // Add this to handle overflow
+
+    ol {
+      display: flex !important;
+      align-items: center !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important; // Add this
+      max-width: 100% !important; // Add this
+
+      li {
+        display: flex !important;
+        align-items: center !important;
+        min-width: 0 !important; // Add this for proper text truncation
+        max-width: 200px !important; // Add max-width for each breadcrumb item
+
+        &:not(:last-child) {
+          margin-right: 0 !important;
+        }
+
+        // Add styles for breadcrumb text truncation
+        span {
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
+          display: block !important;
+          max-width: 100% !important;
+        }
+      }
+    }
+  }
+
+  :global(.ant-breadcrumb-separator) {
+    margin: 0 8px !important;
+    color: #8c8c8c !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 20px !important;
+    flex-shrink: 0 !important; // Prevent separator from shrinking
+
+    svg {
+      vertical-align: middle;
+    }
+  }
+
+  :global(.ant-breadcrumb-link) {
+    color: #24A058 !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: hidden !important; // Add this
+    text-overflow: ellipsis !important; // Add this
+    white-space: nowrap !important; // Add this
+  }
+
+  :global(.ant-breadcrumb-link:hover) {
+    color: #1e8287 !important;
+  }
+}
+
+.breadcrumbLink {
+  color: #24A058 !important;
+  cursor: pointer;
+  transition: color 0.3s;
+  font-size: 20px;
+  font-weight: 500;
+  display: block !important; // Changed from flex to block
+  line-height: 20px;
+  height: 20px;
+  overflow: hidden !important; // Add this
+  text-overflow: ellipsis !important; // Add this
+  white-space: nowrap !important; // Add this
+  max-width: 100% !important; // Add this
+
+  &:hover {
+    color: #1e8287 !important;
+    text-decoration: underline;
+  }
+}
+
+.content {
+  padding: 0 24px;
+}
+
+// Add navigation tabs styling
+.navigationTabs {
+  margin-top: 16px;
+
+  :global(.ant-tabs-nav) {
+    margin-bottom: 0;
+  }
+
+  :global(.ant-tabs-tab) {
+    padding: 8px 16px;
+
+    &:hover {
+      color: #24A058;
+    }
+  }
+
+  :global(.ant-tabs-tab-active) {
+    color: #24A058 !important;
+  }
+
+  :global(.ant-tabs-ink-bar) {
+    background-color: #24A058 !important;
+  }
+
+  :global(.ant-tabs-tab-disabled) {
+    color: #d9d9d9;
+    cursor: not-allowed;
+  }
+}
+
+.overviewContainer {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+}
+
+.overviewFormRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.overviewLabel {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
+  display: block;
+
+  &:after {
+    content: ":";
+    margin-left: 2px;
+  }
+}
+
+.overviewScheduleInputs {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  :global(.ant-picker) {
+    min-width: 200px;
+    height: 40px;
+    border-radius: 6px;
+
+    &:hover,
+    &:focus {
+      border-color: #24A058;
+      box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
+    }
+  }
+
+  :global(.ant-picker-focused) {
+    border-color: #24A058;
+    box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
+  }
+}
+
+.overviewTextEditor {
+  width: 90%;
+  min-height: 200px;
+  border-radius: 6px;
+  padding: 12px;
+
+  &:hover {
+    border-color: #24A058;
+  }
+
+  &:focus-within {
+    border-color: #24A058;
+    box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
+  }
+}
+
+.overviewUpload {
+  width: 100%;
+
+  :global(.ant-upload) {
+    width: 100%;
+  }
+
+  :global(.ant-upload-btn) {
+    height: 120px;
+    border: 2px dashed #d9d9d9;
+    border-radius: 6px;
+    background: #fafafa;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #24A058;
+      background: rgba(37, 163, 166, 0.02);
+    }
+  }
+
+  :global(.ant-upload-list) {
+    margin-top: 16px;
+  }
+
+  :global(.ant-upload-list-item) {
+    padding: 8px 12px;
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+    margin-bottom: 8px;
+
+    &:hover {
+      background: #f9f9f9;
+    }
+  }
+
+  :global(.ant-upload-list-item-name) {
+    color: #333;
+    font-weight: 500;
+  }
+
+  :global(.ant-upload-list-item-actions) {
+    .anticon {
+      color: #666;
+
+      &:hover {
+        color: #24A058;
+      }
+    }
+  }
+}
+
+.overviewUploadButton {
+  height: 40px;
+  border-radius: 6px;
+  border: 1px solid #24A058;
+  background: #fff;
+  color: #24A058;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #24A058;
+    color: #fff;
+    border-color: #24A058;
+  }
+
+  &:focus {
+    background: #24A058;
+    color: #fff;
+    border-color: #24A058;
+    box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
+  }
+
+  .anticon {
+    margin-right: 8px;
+  }
+}
+
+.overviewButtonRow {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.overviewSaveButton {
+  height: 44px;
+  padding: 0 32px;
+  background: #24A058;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(37, 163, 166, 0.2);
+
+  &:hover {
+    background: #1e8287;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(37, 163, 166, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(37, 163, 166, 0.2);
+  }
+
+  &:focus {
+    background: #1e8287;
+    box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
+  }
+
+  &:disabled {
+    background: #d9d9d9;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+
+    &:hover {
+      background: #d9d9d9;
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+.overviewLoadingState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+
+  .ant-spin {
+    color: #24A058;
+  }
+}
+
+.overviewErrorMessage {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+  padding: 12px 16px;
+  color: #ff4d4f;
+  margin-bottom: 16px;
+
+  .anticon {
+    margin-right: 8px;
+  }
+}
+
+.overviewSuccessMessage {
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 6px;
+  padding: 12px 16px;
+  color: #52c41a;
+  margin-bottom: 16px;
+
+  .anticon {
+    margin-right: 8px;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .overviewContainer {
+    padding: 16px;
+    margin: 0 -16px;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .overviewScheduleInputs {
+    flex-direction: column;
+    align-items: stretch;
+
+    :global(.ant-picker) {
+      min-width: auto;
+      width: 100%;
+    }
+  }
+
+  .overviewButtonRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .overviewSaveButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .overviewLabel {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .overviewFormRow {
+    margin-bottom: 20px;
+  }
+
+  .overviewUpload {
+    :global(.ant-upload-btn) {
+      height: 80px;
+    }
+  }
+
+  .overviewSaveButton {
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+// Focus states for accessibility
+.overviewContainer {
+  *:focus {
+    outline: 2px solid #24A058;
+    outline-offset: 2px;
+  }
+}
+
+// Animation for smooth transitions
+.overviewFormRow {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}

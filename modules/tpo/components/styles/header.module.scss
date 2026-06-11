@@ -1,0 +1,39 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  background-color: #0a1c30;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  height: 4rem;
+  padding-right: 1.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+  z-index: 3;
+}
+.second {
+  display: flex;
+  align-items: center;
+  column-gap: 30px;
+}
+.notify {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  padding: 1rem;
+}
+.name {
+  font-size: 16px;
+  font-weight: bold;
+}
+.slicedName {
+  border: 1px solid black;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}

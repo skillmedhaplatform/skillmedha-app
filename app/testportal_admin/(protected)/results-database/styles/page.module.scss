@@ -1,0 +1,19 @@
+@import "../../../../../modules/testportal_admin/components/styles/colors.scss";
+
+.container {
+  width: 100%;
+  height: calc(100% - 1.5rem);
+  padding: 1.5rem 2rem;
+  .titlecont {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    color: $iconBackground;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .progressParent {
+    height: 100%;
+    margin-top: 1rem;
+  }
+}

@@ -1,0 +1,292 @@
+"use client";
+import React, { useEffect, useState } from "react";
+import internStyles from "./page.module.scss";
+
+import TextEditor from "@/utils/editor";
+import ChipInput from "@/utils/chipInput/chip";
+import { Button, Radio, Upload, Modal, message } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import ImgCrop from "antd-img-crop";
+import { useParams, useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createInternship,
+  getOneInternship,
+  updateInternship,
+} from "@/redux/slices/cms/internship";
+
+import { uploadFileToS3 } from "@/utils/uploadtos3";
+import { restUrl } from "@/config/urls";
+
+const page = () => {
+  const nav = useRouter();
+  const params = useParams();
+  const dispatch = useDispatch();
+
+  const [mounted, setMounted] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [preRequisites, setPreRequisites] = useState([]);
+  const [difficulty, setDifficulty] = useState("Beginner");
+  const [price, setPrice] = useState("");
+
+  // NEW: image state
+  const [coverImage, setCoverImage] = useState("");
+  const [fileList, setFileList] = useState([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+
+  const userCreds = useSelector((state) => state.user.singleUser);
+
+  useEffect(() => {
+    if (params.createInternship?.split("/")?.join("") !== "newInternship") {
+      dispatch(
+        getOneInternship({
+          id: params.createInternship,
+          orgId: userCreds?.orgId,
+        })
+      )?.then((resp) => {
+        if (resp?.payload) {
+          setTitle(resp?.payload?.title);
+          setDescription(resp?.payload?.description);
+          setPreRequisites(resp?.payload?.preRequisites || []);
+          setDifficulty(resp?.payload?.difficulty || "Beginner");
+          setPrice(resp?.payload?.price || "");
+          if (resp?.payload?.coverImage) {
+            setCoverImage(resp.payload.coverImage);
+            setFileList([
+              {
+                uid: "-1",
+                name: "cover-image",
+                status: "done",
+                url: resp.payload.coverImage,
+              },
+            ]);
+          }
+        }
+      });
+    }
+  }, [params.createInternship, dispatch, userCreds?.orgId]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  // Validate before crop modal opens
+  const validateBeforeCrop = (file) => {
+    const isAllowed =
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "image/webp";
+    if (!isAllowed) {
+      message.error("Only JPG/PNG/WebP images are allowed");
+      return false;
+    }
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    // if (!isLt2M) {
+    //   message.error("Image must be smaller than 2MB");
+    //   return false;
+    // }
+    return true;
+  };
+
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+  };
+
+  // Custom uploader -> send to S3 via provided helper
+  const handleCustomUpload = async (options) => {
+    const { file, onSuccess, onError } = options;
+    try {
+      const url = await uploadFileToS3({
+        file,
+        restUrl,
+        onUploaded: (s3Url) => {
+          setCoverImage(s3Url);
+        },
+      });
+      setFileList([
+        {
+          uid: file.uid || String(Date.now()),
+          name: file.name,
+          status: "done",
+          url,
+        },
+      ]);
+      onSuccess && onSuccess({ url }, file);
+    } catch (err) {
+      onError && onError(err);
+    }
+  };
+
+  const handleSave = async () => {
+    if (params.createInternship?.split("/")?.join("") !== "newInternship") {
+      dispatch(
+        updateInternship({
+          id: params.createInternship,
+          dispatch,
+          data: {
+            title,
+            description,
+            preRequisites,
+            difficulty,
+            price,
+            coverImage, // include uploaded image URL
+          },
+        })
+      );
+    } else {
+      dispatch(
+        createInternship({
+          title,
+          description,
+          preRequisites,
+          difficulty,
+          price,
+          coverImage, // include uploaded image URL
+        })
+      )?.then((resp) => {
+        const id = resp.payload.data.insertedId;
+        nav.replace("/internship/" + id);
+      });
+    }
+  };
+
+  return (
+    <div className={internStyles.container}>
+      <div className={internStyles.titleContainer}>
+        <div className={internStyles.title}>Internship Details</div>
+      </div>
+
+      <div className={internStyles.body}>
+        <div className={internStyles.internTtle}>
+          <span>Internship Title *</span>
+          <input
+            placeholder="Internship Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        <div className={internStyles.desc}>
+          <div className={internStyles.sd}>Short Description *</div>
+          <TextEditor
+            name="description"
+            initialContent={{ description }}
+            editorFun={(val) => setDescription(val)}
+          />
+          <span className={internStyles.genAi}>Generate using AI</span>
+        </div>
+
+        {/* NEW: Cover Image */}
+        <div className={internStyles.coverImage_container}>
+          <div className={internStyles.sd}>Cover Image :</div>
+          <ImgCrop
+            aspect={16 / 9}
+            rotate
+            zoom
+            quality={0.8}
+            beforeCrop={validateBeforeCrop}
+            cropperProps={{ restrictPosition: false }}
+          >
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              maxCount={1}
+              customRequest={handleCustomUpload}
+              onChange={({ fileList: fl }) => setFileList(fl)}
+              onPreview={handlePreview}
+              onRemove={() => {
+                setCoverImage("");
+                setFileList([]);
+              }}
+              accept="image/jpeg,image/png,image/webp"
+            >
+              {fileList.length >= 1 ? null : (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+          </ImgCrop>
+
+          <Modal
+            open={previewOpen}
+            title="Preview"
+            footer={null}
+            onCancel={() => setPreviewOpen(false)}
+          >
+            <img alt="cover" style={{ width: "100%" }} src={previewImage} />
+          </Modal>
+        </div>
+
+        <div className={internStyles.preQ}>
+          <span>Pre Requisites *</span>
+          <ChipInput
+            initialValue={preRequisites}
+            onChipsChange={setPreRequisites}
+          />
+        </div>
+
+        <div className={internStyles.difficulty}>
+          <span>Difficulty</span>
+          <div>
+            <Radio.Group
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+            >
+              <Radio.Button value="Beginner">Beginner</Radio.Button>
+              <Radio.Button value="Intermediate">Intermediate</Radio.Button>
+              <Radio.Button value="Advanced">Advanced</Radio.Button>
+            </Radio.Group>
+          </div>
+        </div>
+
+        <div className={internStyles.price}>
+          <span>Price</span>
+          <div className={internStyles.priceIn}>
+            <span>₹</span>
+            <input
+              placeholder="0.00"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className={internStyles.buttonsContainer}>
+          <Button type="primary" onClick={handleSave}>
+            {params.createInternship?.split("/")?.join("") !== "newInternship"
+              ? "Update"
+              : "Save"}
+          </Button>
+          <Button
+            type="primary"
+            onClick={() =>
+              nav.replace(`/internship/${params.createInternship}/new`)
+            }
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default page;

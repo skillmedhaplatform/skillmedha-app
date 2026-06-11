@@ -1,0 +1,191 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+@import "@/modules/testportal_admin/components/styles/mixins.scss";
+$min-width1024: 1024px;
+$max-width1140: 1140px;
+
+.editorComp {
+  width: fit-content;
+  // border-radius: 0.5rem;
+  overflow: hidden;
+  // border: $border;
+  display: flex;
+  width: 80%;
+  // border: $border;
+  // border-radius: 10px;
+  width: 100%;
+  // border-radius: 0.4rem;
+  height: 100%;
+
+  & > :nth-child(1) {
+    width: 100%;
+    border: 0;
+    border-radius: 0.4rem;
+  }
+  & > :nth-child(2) {
+    border: 0;
+    border-radius: 0.4rem;
+  }
+}
+.container {
+  @include flexBox(column, flex-start, center, 2rem);
+  margin-top: 1rem;
+  margin-bottom: 3rem;
+
+  .flexComp {
+    width: 100%;
+    display: flex;
+    .spans {
+      font-weight: 700;
+      width: 20%;
+      font-size: 1.1rem;
+      color: $navbarColor;
+    }
+    .editorComp {
+      width: fit-content;
+      // border-radius: 0.5rem;
+      overflow: hidden;
+      // border: $border;
+      display: flex;
+      width: 80%;
+      // border: $border;
+      // border-radius: 10px;
+      // border-radius: 0.4rem;
+      height: 100%;
+
+      & > :nth-child(1) {
+        width: 100%;
+        border: 0;
+        border-radius: 0.4rem;
+      }
+      & > :nth-child(2) {
+        border: 0;
+        border-radius: 0.4rem;
+      }
+    }
+  }
+
+  .flexComp2 {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    .spans {
+      font-weight: 700;
+      width: 20%;
+      color: $navbarColor;
+      font-size: 1.1rem;
+    }
+    .inpsCon {
+      @include flexBox(row, center, flex-start, 2rem);
+      width: 80%;
+      label {
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+      input[type="number"] {
+        padding: 0.5rem 1rem;
+        outline: 0;
+        border: $border;
+        width: 15%;
+        font-size: 1.1rem;
+        border-radius: 0.5rem;
+        // font-weight: 600;
+      }
+
+      button {
+        background-color: $iconBackgroundLowOpacity;
+        border: $border;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        outline: 0;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .flexComp3 {
+    @include flexBox(row, flex-start, center);
+    width: 100%;
+    .spans {
+      font-weight: 700;
+      width: 20%;
+      color: $navbarColor;
+      font-size: 1.1rem;
+    }
+    .flexcomp_main {
+      width: 80%;
+      @include flexBox(column, flex-start, center, 2rem);
+
+      .Add_more_intervals_btn {
+        background-color: $categoryColor;
+        border: $border;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        outline: 0;
+        font-weight: 700;
+      }
+      .flexCon {
+        width: 100%;
+        @include flexBox(column, flex-start, center, 2rem);
+
+        .inpsCon {
+          @include flexBox(row, center, flex-start, 1rem);
+          h2 {
+            font-size: 1rem;
+          }
+          .deleteButton {
+            width: 2%;
+            cursor: pointer;
+          }
+          input[type="number"] {
+            margin: 0rem 0.5rem;
+            padding: 0.5rem 1rem;
+            outline: 0;
+            border: $border;
+            font-size: 1.1rem;
+            border-radius: 0.5rem;
+            // font-weight: 600;
+            width: 20%;
+          }
+          input[type="text"] {
+            margin: 0rem 0.5rem;
+            padding: 0.5rem 1rem;
+            outline: 0;
+            border: $border;
+            width: 20%;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+          }
+          button {
+            background-color: $iconBackgroundLowOpacity;
+            border: $border;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            outline: 0;
+            font-weight: 700;
+          }
+        }
+
+        .save {
+          margin-top: 2rem;
+          margin-bottom: 3rem;
+        }
+      }
+    }
+
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+  }
+}
+.selected {
+  background-color: $selected;
+}
+
+.notSelected {
+  background-color: $notSelected;
+}
+
+

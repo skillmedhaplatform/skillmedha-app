@@ -1,0 +1,252 @@
+.container {
+  min-height: 100%;
+  padding: 16px;
+  background-color: #f8fafc !important;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  box-sizing: border-box;
+
+  @media (min-width: 768px) {
+    padding: 24px;
+  }
+
+  // Card Wrapper Adjustments
+  :global(.ant-card) {
+    border-radius: 16px !important;
+    box-shadow: 0 4px 12px rgba(12, 30, 64, 0.05) !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+
+  @media (min-width: 768px) {
+    margin-bottom: 32px;
+  }
+
+  .title {
+    font-size: clamp(1.8rem, 5vw, 2.5rem) !important;
+    font-weight: 800;
+    background: linear-gradient(135deg, #24a058 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 0 8px 0 !important;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .subtitle {
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem) !important;
+    color: #64748b;
+    margin: 0 !important;
+    font-weight: 500;
+  }
+}
+
+.layoutGrid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  // Mobile Order Stack:
+  // 1. Question Card
+  // 2. Video Card
+  // 3. Results Card
+  .questionCardContainer {
+    order: 1 !important;
+    width: 100%;
+  }
+
+  .videoCardContainer {
+    order: 2 !important;
+    width: 100%;
+  }
+
+  .resultsCardContainer {
+    order: 3 !important;
+    width: 100%;
+  }
+
+  // Tablet & Medium devices (768px - 1023px)
+  // This component only renders below 1024px, so min-width: 768px covers 768-1023
+  @media (min-width: 768px) {
+    display: grid !important;
+    grid-template-columns: 55fr 45fr !important;
+    gap: 20px !important;
+
+    .videoCardContainer {
+      grid-column: 1 !important;
+      grid-row: 1 / span 2 !important;
+      order: unset !important;
+    }
+
+    .questionCardContainer {
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+      order: unset !important;
+    }
+
+    .resultsCardContainer {
+      grid-column: 2 !important;
+      grid-row: 2 !important;
+      order: unset !important;
+    }
+  }
+}
+
+
+
+// Video Camera Viewport
+.videoViewport {
+  position: relative;
+  width: 100%;
+  background-color: #1e293b;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9 !important;
+  height: auto !important;
+
+  @media (max-width: 767px) {
+    max-height: 280px !important;
+  }
+
+  @media (min-width: 768px) {
+    max-height: 380px !important;
+  }
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-cover: cover;
+  }
+}
+
+// Recording Controls Grid
+.controlsGrid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr !important;
+  }
+
+  :global(.ant-btn) {
+    height: 48px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+
+    &:active {
+      transform: scale(0.98) !important;
+    }
+  }
+
+  .submitBtn {
+    grid-column: 1 / span 2 !important;
+    height: 56px !important;
+    font-size: 1.1rem !important;
+
+    @media (max-width: 480px) {
+      grid-column: 1 !important;
+    }
+  }
+}
+
+// Tab headers custom styling
+.tabsHeader {
+  display: flex !important;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #ffffff;
+  position: sticky;
+  top: -1px; // Align to border
+  z-index: 10;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.tabItem {
+  flex: 1;
+  padding: 14px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #64748b;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    padding: 12px 4px;
+    gap: 4px;
+  }
+
+  &:hover {
+    color: #24a058;
+    background-color: #f8fafc;
+  }
+
+  &.activeTab {
+    color: #24a058 !important;
+    border-bottom-color: #24a058 !important;
+    background-color: #ffffff !important;
+  }
+
+  &.disabledTab {
+    opacity: 0.5;
+    cursor: not-allowed;
+    
+    &:hover {
+      color: #64748b;
+      background-color: transparent;
+    }
+  }
+}
+
+.tabContentPanel {
+  padding: 16px;
+  min-height: 250px;
+  max-height: 450px;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  @media (min-width: 768px) {
+    padding: 24px;
+    min-height: 300px;
+  }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}

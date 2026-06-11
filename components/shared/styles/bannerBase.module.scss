@@ -1,0 +1,10 @@
+.bannerBase {
+  background:      var(--banner-bg);
+  min-height:      var(--banner-height);
+  padding:         var(--banner-padding-y) var(--banner-padding-x);
+  color:           var(--banner-text-color);
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  width:           100%;
+}

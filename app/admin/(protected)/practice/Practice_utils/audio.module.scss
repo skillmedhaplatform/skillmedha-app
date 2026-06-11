@@ -1,0 +1,21 @@
+.container {
+  width: 50vw !important;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-radius: 4px;
+    .player_cont{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    column-gap: 1rem;
+      .player{
+        height: 2rem;
+      }
+      .delete_btn{
+        max-width: 1.5rem;
+       max-height: 1.5rem;
+       cursor: pointer;
+      }
+    }
+  }

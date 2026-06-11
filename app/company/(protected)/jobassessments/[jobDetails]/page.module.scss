@@ -1,0 +1,15 @@
+@import "@/utils/universalUtils/colors.module.scss";
+
+.container {
+  height: 85vh;
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.content {
+  margin-top: 1rem;
+  border-radius: 8px;
+}

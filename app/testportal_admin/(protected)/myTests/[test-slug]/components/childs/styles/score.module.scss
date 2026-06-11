@@ -1,0 +1,235 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+
+
+
+.container{
+    width: 100%;
+
+    .scoreTitle{
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-top: 1rem;
+        color: $navbarColor;
+    }
+
+    .scoreContent{
+        margin-top: 1rem;
+
+        label {
+
+            position: relative;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            // align-items: center;
+
+            .inputs_heading{
+              width: 20%;
+            }
+            .leftP{
+                width:15%;
+                padding-left: 2rem;
+            }
+            .rightP{
+                width: 80%;
+                .rightPIn{
+                    width: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                    position: relative;
+                    input{
+                        width: 80% !important;
+                        margin-left: 3rem;
+                    }
+                    input[type="checkbox"]{
+                        position: absolute;
+                        opacity: 0;
+                        cursor: pointer;
+                        height: 0;
+                        width: 0;
+
+                    
+                        &:checked + span {
+                        background-color: $iconBackground;
+                    
+                        &:after {
+                            transform: scale(1);
+                        }
+                        }
+                    }
+                    
+                    span {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        bottom: 0;
+                        margin: auto;
+                        margin-left: 1rem;
+                        height: 20px;
+                        width: 20px;
+                        background-color: $sliderBefore;
+                        border-radius: 50%;
+                        border: $border;
+                        transition: background-color 0.3s;
+                    
+                        &:after {
+                        content: "";
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%) scale(0);
+                        height: 10px;
+                        width: 10px;
+                        border-radius: 50%;
+                        transition: transform 0.3s;
+                        }
+                    }
+                    margin-top: 1rem;
+                    display: flex;
+                    align-items: center;
+                }
+                input{
+                    width: 70% !important;
+                    padding: 0.5rem 1rem;
+                    margin-left: 1rem;
+                    // font-size: 1rem;
+                    border-radius: 0.5rem;
+                }
+                .noteDivs{
+                    opacity:60%;
+                    font-size:0.8rem;
+                    margin-Left:1rem;
+                    margin-top: 0.1rem;
+                    margin-bottom: 1rem;
+                }
+                .noteDivs1{
+                  opacity:60%;
+                  font-size:0.8rem;
+                  margin-Left:3rem;
+                  margin-top: 0.1rem;
+                  margin-bottom: 1rem;
+              }
+
+            }
+            input{
+                width: 30%;
+                padding: 0.5rem 1rem;
+                margin-left: 1rem;
+                // font-size: 1rem;
+                border-radius: 0.5rem;
+                border: $border;
+
+                // border: 0.5px solid rgba(0, 0, 0, 0.266) ;
+                outline: none;
+                
+            }
+          }
+        
+          input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+            border-radius: 50%;
+        
+            &:checked + span {
+              background-color: $iconBackground;
+        
+              &:after {
+                transform: scale(1);
+              }
+            }
+          }
+        
+          span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            // bottom: 0;
+            // margin: auto;
+            height: 20px;
+            width: 20px;
+            background-color: $sliderBefore;
+            border-radius: 50%;
+            // border: 1px solid #ccc;
+            border: $border;
+            transition: background-color 0.3s;
+        
+            &:after {
+              content: "";
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) scale(0);
+              height: 10px;
+              width: 10px;
+              border-radius: 50%;
+              transition: transform 0.3s;
+            }
+          }
+    }
+
+}
+
+
+.radioButtons {
+    label {
+      width: 100%;
+      display: block;
+      position: relative;
+      // padding-left: 30px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      user-select: none;
+      padding-left: 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+  
+    input[type="checkbox"]{
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+      border-radius: 50%;
+  
+      &:checked + span {
+        background-color: $iconBackground;
+  
+        &:after {
+          transform: scale(1);
+        }
+      }
+    }
+  
+    span {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 20px;
+      width: 20px;
+      background-color: $sliderBefore;
+      border-radius: 50%;
+      // border: 1px solid #ccc;
+      border: $border;
+      transition: background-color 0.3s;
+  
+      &:after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        transition: transform 0.3s;
+      }
+    }
+  }
+

@@ -1,0 +1,221 @@
+@import "../../styles/colors.scss";
+
+.icon {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 1.3rem;
+  color: "#08334C";
+  font-weight: 800;
+  cursor: pointer;
+  // letter-spacing: 5px;
+
+  .logoText {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+  span {
+    color: #27ae60;
+  }
+  img {
+    cursor: pointer;
+    display: flex;
+    align-self: center;
+    width: 2.5rem;
+  }
+}
+.container {
+  display: flex;
+  padding: 0.7rem 1rem;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.285);
+  // background-color: $navbarColor;
+
+  .credsCon {
+    display: flex;
+    justify-content: flex-end;
+    width: 40%;
+    align-items: center;
+    height: 100%;
+
+    .searchCon {
+      background-color: $iconBackground;
+      display: flex;
+      align-items: center;
+      padding: 0.3rem 1rem;
+      width: 40%;
+      border-radius: 0.5rem;
+      gap: 0.5rem;
+      img {
+        width: 1.2rem;
+      }
+      input {
+        height: 100%;
+        padding: 0.2rem;
+        outline: none;
+        border: none;
+        background-color: transparent;
+        width: 100%;
+      }
+    }
+
+    .proflie {
+      position: relative;
+      display: flex;
+      width: 40%;
+      border-radius: 0.5rem;
+      align-items: center;
+      padding: 0.1rem 0.5rem;
+      background-color: $iconBackground;
+
+      .proflieName {
+        padding-left: 0.5rem;
+        width: 100%;
+        border-radius: 0.5rem;
+        font-size: 0.8rem;
+        opacity: 70%;
+        font-weight: 700;
+        span {
+          font-weight: 500;
+          opacity: 90%;
+        }
+      }
+      img {
+        width: 1.2rem;
+      }
+    }
+  }
+}
+.profileCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  margin-right: 1rem;
+  background: #27ae60;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: white;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.profileImage {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f0f0f0;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.orgName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.userName {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+// .credsCon{
+//     display: flex;
+//     justify-content: space-between;
+//     width: 40%;
+//    align-items: center;
+//    height: 100%;
+
+//    .searchInput{
+//     position: relative;
+//     display: flex;
+//     width: 45%;
+//     border-radius: 0.5rem;
+//     align-items: center;
+//     padding: 0.1rem 0.5rem;
+
+//     input{
+//         opacity: 70%;
+//         width: 100%;
+//         padding: 0.5rem 0.5rem;
+//         font-size: 1rem;
+//         outline: none;
+//         background-color: $iconBackground;
+//         border: none;
+//         padding-left: 1.5rem;
+//         border-radius: 0.5rem;
+//     }
+//     .searchIcon{
+//         opacity: 100% !important;
+//         cursor: pointer;
+//         position: absolute;
+//         left: 0;
+//         display: flex;
+//         justify-content: center;
+//         align-items: center;
+//         padding: 0.5rem;
+//         width: 14%;
+//         border-radius: 50%;
+//         background-color: $iconBackground;
+//         margin-left: -1rem;
+//         img{
+//             width: 100%;
+
+//         }
+//     }
+// }
+// .proflie{
+// position: relative;
+// display: flex;
+// width: 40%;
+// border-radius: 0.5rem;
+// align-items: center;
+// padding: 0.1rem 0.5rem;
+//     .profileImgParent{
+//         cursor: pointer;
+//         position: absolute;
+//         left: 0;
+//         display: flex;
+//         justify-content: center;
+//         align-items: center;
+//         padding: 0.5rem;
+//         width: 15%;
+//         border-radius: 50%;
+//         background-color: $iconBackground;
+//         margin-left: -1rem;
+//         z-index: 1;
+//         img{
+
+//             width: 100%;
+//         }
+//     }
+// .proflieName{
+//     padding: 0.3rem 0rem;
+//     padding-left: 1.5rem;
+//     width: 100%;
+//     background-color: $iconBackground;
+//     border-radius: 0.5rem;
+//     font-size: 0.8rem;
+//     opacity: 70%;
+//     span{
+//         font-size: 0.5rem;
+//         opacity: 90%;
+//     }
+// }
+// }
+// }

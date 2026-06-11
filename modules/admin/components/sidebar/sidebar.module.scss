@@ -1,0 +1,211 @@
+@use "@/modules/admin/styles/mixins" as *;
+@use "@/modules/admin/styles/colors" as *;
+
+.sidebarContainer {
+  font-size: 0.8rem;
+  font-weight: 600;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // Prevent container from scrolling
+}
+
+// Fixed Header Section
+.header {
+  width: 100%;
+  padding: 1rem 0;
+  flex-shrink: 0; // Prevent shrinking
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid lightgray;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  width: 90%;
+}
+
+.userInfoBlock {
+  display: flex;
+  flex-direction: column;
+  width: 8rem;
+  align-items: flex-start;
+}
+
+.role {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  color: #222;
+}
+
+.fullname {
+  font-size: 0.9rem;
+  margin: 0;
+  color: #555;
+  font-weight: 500;
+}
+
+// Scrollable Middle Section
+.topLinksCont {
+  flex: 1; // Takes remaining space
+  width: 90%;
+  margin: 0 auto;
+  overflow-y: auto; // Enable vertical scrolling
+  overflow-x: hidden;
+  @include flexBox(column, center, flex-start, 1rem);
+  padding: 0.5rem 0.3rem;
+
+  // Custom scrollbar styling (optional)
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+
+    &:hover {
+      background: #999;
+    }
+  }
+}
+
+.name {
+  background-color: #f5f5f5;
+  font-size: 16px;
+  border-radius: 5px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  height: 2.8rem;
+  box-shadow: 0px 1px 4px 0px #00000040;
+  color: black;
+  display: flex;
+  align-items: center;
+  padding-left: 1rem;
+  transition: background-color 0.3s, color 0.3s;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0; // Prevent items from shrinking
+
+  &:hover {
+    background-color: #24A058;
+    color: white;
+  }
+}
+
+.active {
+  background-color: #24A058;
+  color: white;
+}
+
+// Ant Design Menu styles
+.menuContainer {
+  width: 100%;
+  flex-shrink: 0; // Prevent menu from shrinking
+}
+
+.topLinksCont :global(.ant-menu) {
+  border: none;
+  background: transparent;
+  width: 100%;
+}
+
+.topLinksCont :global(.ant-menu-submenu-title) {
+  border-radius: 5px;
+  margin: 0;
+  padding: 12px 16px !important;
+  height: 2.8rem;
+  line-height: 1.5;
+  background-color: #f5f5f5;
+  box-shadow: 0px 1px 4px 0px #00000040;
+  font-weight: 700;
+  font-size: 16px;
+  color: black;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s, color 0.3s;
+
+  &:hover {
+    background-color: #24A058 !important;
+    color: white !important;
+  }
+}
+
+.topLinksCont :global(.ant-menu-submenu-open) :global(.ant-menu-submenu-title),
+.topLinksCont :global(.ant-menu-submenu-active) :global(.ant-menu-submenu-title) {
+  background-color: #24A058 !important;
+  color: white !important;
+}
+
+.topLinksCont :global(.ant-menu-sub) {
+  background: transparent !important;
+}
+
+// Fixed Footer Section
+.footer {
+  width: 100%;
+  padding: 1rem 0;
+  flex-shrink: 0; // Prevent shrinking
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logoutBtn {
+  // background-color: #f5f5f5;
+  // font-size: 16px;
+  // border-radius: 5px;
+  // font-weight: 700;
+  // cursor: pointer;
+  // width: 90%;
+  // box-shadow: 0px 1px 4px 0px #00000040;
+  // color: black;
+  // display: flex;
+  // align-items: center;
+  // justify-content: flex-start;
+  // height: 3rem;
+  // transition: background-color 0.3s, color 0.3s;
+  width: 90%;
+
+  &:hover {
+    background-color: #ff4d4f;
+    color: white;
+  }
+}
+
+.sidebarButton {
+  background: #fff;
+  /* Default background */
+  color: #444;
+  /* Default text color */
+  border: 1px solid #d9d9d9;
+  padding: 20px 16px;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
+  &:hover {
+    background-color: #24A058 !important;
+    color: white !important;
+    border: none;
+    /* Remove border on hover */
+  }
+}

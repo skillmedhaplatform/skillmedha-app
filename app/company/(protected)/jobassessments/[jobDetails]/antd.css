@@ -1,0 +1,16 @@
+  .ant-radio-button-wrapper {
+    border-color: #25A3A6; 
+    color: #25A3A6; 
+  }
+
+  .ant-radio-button-wrapper-checked {
+    background-color: #25A3A6 !important;
+    border-color: #25A3A6 !important;
+    color: white !important;
+    box-shadow: none !important;
+  }
+
+  .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-checked):hover {
+    color: #25A3A6;
+    border-color: #25A3A6;
+  }

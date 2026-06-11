@@ -1,0 +1,80 @@
+@import "@/modules/admin/styles/mixins.scss";
+@import "@/modules/admin/styles/colors.scss";
+
+.bulkUploadPreview {
+  margin-top: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
+.uploadArea {
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  background-color: #fafafa;
+  transition: all 0.3s;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $primaryColor;
+    background-color: #f0f7ff;
+  }
+}
+
+.templateSection {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.errorText {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.successText {
+  color: #52c41a;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.previewTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+
+  th {
+    background-color: #fafafa;
+    padding: 8px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.summaryCard {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+
+  &.hasErrors {
+    background-color: #fff1f0;
+    border-color: #ffa39e;
+  }
+}

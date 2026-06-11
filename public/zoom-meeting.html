@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoom Meeting</title>
+    <link type="text/css" rel="stylesheet" href="https://source.zoom.us/3.9.0/css/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="https://source.zoom.us/3.9.0/css/react-select.css" />
+</head>
+<body>
+    <div id="zmmtg-root"></div>
+    <div id="aria-notify-area"></div>
+
+    <!-- Import React and ReactDOM (Version 18 for compatibility) -->
+    <script src="https://source.zoom.us/3.9.0/lib/vendor/react.min.js"></script>
+    <script src="https://source.zoom.us/3.9.0/lib/vendor/react-dom.min.js"></script>
+    <script src="https://source.zoom.us/3.9.0/lib/vendor/redux.min.js"></script>
+    <script src="https://source.zoom.us/3.9.0/lib/vendor/redux-thunk.min.js"></script>
+    <script src="https://source.zoom.us/3.9.0/lib/vendor/lodash.min.js"></script>
+
+    <!-- Import Zoom SDK -->
+    <script src="https://source.zoom.us/zoom-meeting-3.9.0.min.js"></script>
+
+    <script>
+        ZoomMtg.setZoomJSLib('https://source.zoom.us/3.9.0/lib', '/av');
+        ZoomMtg.preLoadWasm();
+        ZoomMtg.prepareWebSDK();
+        ZoomMtg.i18n.load('en-US');
+        ZoomMtg.i18n.reload('en-US');
+
+        function getParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                signature: urlParams.get('signature'),
+                sdkKey: urlParams.get('sdkKey'),
+                meetingNumber: urlParams.get('meetingNumber'),
+                passWord: urlParams.get('passWord'),
+                userName: urlParams.get('userName'),
+                userEmail: urlParams.get('userEmail'),
+                leaveUrl: urlParams.get('leaveUrl') || '/liveLect'
+            };
+        }
+
+        const params = getParams();
+
+        if (params.signature && params.meetingNumber) {
+            ZoomMtg.init({
+                leaveUrl: params.leaveUrl,
+                isSupportAV: true,
+                success: (success) => {
+                    console.log('Zoom init success', success);
+
+                    ZoomMtg.join({
+                        signature: params.signature,
+                        meetingNumber: params.meetingNumber,
+                        userName: params.userName,
+                        sdkKey: params.sdkKey,
+                        userEmail: params.userEmail,
+                        passWord: params.passWord,
+                        success: (success) => {
+                            console.log('Zoom join success', success);
+                        },
+                        error: (error) => {
+                            console.error('Zoom join error', error);
+                            alert('Error joining meeting: ' + (error.message || error));
+                        }
+                    });
+                },
+                error: (error) => {
+                    console.error('Zoom init error', error);
+                    alert('Error initializing Zoom: ' + (error.message || error));
+                }
+            });
+        } else {
+             document.body.innerHTML = "<h1>Missing meeting parameters</h1>";
+        }
+    </script>
+</body>
+</html>

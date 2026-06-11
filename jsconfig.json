@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/universalUtils/*": ["./utils/universalUtils/*"],
+      "@/helpers/*": ["./utils/helpers/*"],
+      "@/graphql_quries/*": ["./utils/graphql_quries/*"],
+      "@/transcribe/*": ["./utils/transcribe/*"],
+      "@/assets/*": ["./assets/*"],
+      "@/modules/*": ["./modules/*"],
+      "@/adminComponents/*": ["./modules/admin/components/*"],
+      "@/adminUtils/*": ["./modules/admin/utils/*"],
+      "@/adminStyles/*": ["./modules/admin/styles/*"],
+      "@/components/*": ["./components/*"],
+      "@/styles/*": ["./styles/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/services/*": ["./services/*"],
+      "@/utils/*": ["./utils/*"],
+      "@/config/*": ["./config/*"],
+      "@/constants/*": ["./constants/*"],
+      "@/shared/*": ["./shared/*"],
+      "@/redux/*": ["./redux/*"]
+    }
+  },
+  "exclude": ["node_modules", ".next"]
+}

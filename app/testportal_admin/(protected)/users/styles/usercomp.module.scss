@@ -1,0 +1,41 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+
+.mainContainer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+
+  .headerSection {
+    flex-shrink: 0;
+  }
+
+  .tableContainer {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .faceData {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #52c41a;
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    padding: 10px;
+
+    .tableContainer {
+      :global(.ant-table) {
+        font-size: 12px;
+      }
+    }
+  }
+
+  @media (max-width: 576px) {
+    padding: 8px;
+  }
+}

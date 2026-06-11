@@ -1,0 +1,65 @@
+@import "@/utils/universalUtils/colors.module.scss";
+
+.sidebarContainer {
+  font-size: 0.8rem;
+  font-weight: 600;
+  width: 18%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100%;
+}
+.bottom {
+  height: 10%;
+  width: 90%;
+}
+.topLinksCont {
+  width: 90%;
+  flex: 1;
+}
+
+.name {
+  background-color: #f5f5f5;
+  font-size: 16px;
+  border-radius: 5px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  flex: 1;
+  height: 3rem;
+  box-shadow: 0px 1px 4px 0px #00000040;
+  color: black;
+  display: flex;
+  align-items: center;
+  padding-left: 1rem;
+  transition: background-color 0.3s, color 0.3s;
+  align-self: center;
+
+  &:hover {
+    background-color: #25a3a6;
+    color: white;
+  }
+}
+
+.active {
+  background-color: #25a3a6;
+  color: white;
+}
+
+.logoutBtn {
+  background-color: #f5f5f5;
+  font-size: 16px;
+  border-radius: 5px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  width: 90%;
+  height: 3rem;
+  box-shadow: 0px 1px 4px 0px #00000040;
+  color: black;
+  display: flex;
+  align-items: center;
+  padding-left: 1rem;
+  transition: background-color 0.3s, color 0.3s;
+}

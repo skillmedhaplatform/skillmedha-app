@@ -1,0 +1,55 @@
+.breadcrumb-wrapper {
+  /* border: 1px solid rgba(128, 128, 128, 0.209); */
+  border-radius: 5px;
+  padding: 0.4rem 0.5rem;
+  display: flex;
+  align-items: center;
+  /* box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px; */
+}
+
+.breadcrumb-wrapper .ant-breadcrumb {
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-wrapper .ant-breadcrumb ol {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb-wrapper .ant-breadcrumb li {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.breadcrumb-wrapper .ant-breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  font-weight: bold;
+  /* background-color: rgba(0, 0, 0, 0.05) !important;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem; */
+}
+
+/* Remove background from last breadcrumb item */
+.breadcrumb-wrapper .ant-breadcrumb li:last-child .ant-breadcrumb-link {
+  background-color: transparent !important;
+}
+
+/* Customize hover effect */
+.breadcrumb-wrapper .ant-breadcrumb-link a {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  height: fit-content;
+}
+
+/* Remove hover background from last item */
+.breadcrumb-wrapper .ant-breadcrumb li:last-child .ant-breadcrumb-link:hover {
+  background-color: transparent !important;
+}

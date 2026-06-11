@@ -1,0 +1,89 @@
+@import "@/modules/admin/styles/colors.scss";
+@import "@/modules/admin/styles/mixins.scss";
+.container {
+  height: 95%;
+  overflow: scroll;
+}
+
+.header {
+  font-size: 1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #333;
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+  position: sticky;
+  left: 0;
+  top: 0;
+  background-color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.286);
+  border-radius: 0.5rem;
+  box-shadow: 1px 1px 5px 1px rgba(0, 0, 0, 0.08);
+  span {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.section {
+  padding: 0rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: auto;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.sectionLabel {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.input {
+  border: 1px solid #0000005e;
+  padding: 10px;
+  width: 70%;
+  border-radius: 6px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button {
+  background-color: #11999e;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.deleteButton {
+  background-color: #e74c3c;
+  color: white;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.saveButton {
+  background-color: $primaryColor;
+  color: white;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

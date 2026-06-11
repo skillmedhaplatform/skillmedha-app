@@ -1,0 +1,569 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px;
+  background-color: #f8fafc !important;
+  width: 100%;
+  min-height: 100%;
+  overflow: visible;
+}
+
+// 1. Welcome Card (Dark Blue Background)
+.welcomeCard {
+  background-color: #0c1e40;
+  border-radius: 12px;
+  padding: 16px 18px 18px;
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(12, 30, 64, 0.15), 0 2px 4px -1px rgba(12, 30, 64, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .welcomeHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .date {
+      font-size: 9px;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.85);
+      letter-spacing: 0.5px;
+    }
+  }
+
+  p {
+    margin: 2px 0 0 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+}
+
+// 2. Enrolled Stats Grid (Horizontal flex stack)
+.statsGrid {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.statCard {
+  flex: 1 !important;
+  min-width: 0 !important;
+  border-radius: 12px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid transparent;
+  min-height: 110px;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  .iconWrapper {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .tileLabel {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-align: center;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .tileValue {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  &.coursesCard {
+    background-color: #f0fdf4;
+    border-color: #dcfce7;
+
+    .iconWrapper {
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+  }
+
+  &.internshipsCard {
+    background-color: #eff6ff;
+    border-color: #dbeafe;
+
+    .iconWrapper {
+      background-color: #dbeafe;
+      color: #1e69da;
+    }
+  }
+
+  &.practiceCard {
+    background-color: #fff7ed;
+    border-color: #ffedd5;
+
+    .iconWrapper {
+      background-color: #ffedd5;
+      color: #ea580c;
+    }
+  }
+}
+
+// 3. Summary Grid (Horizontal flex stack)
+.summaryGrid {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.summaryCard {
+  flex: 1 !important;
+  min-width: 0 !important;
+  border-radius: 12px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid transparent;
+  min-height: 110px;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  .iconWrapper {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .tileLabel {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-align: center;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .tileValue {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  &.perfCard {
+    background-color: #eff6ff;
+    border-color: #dbeafe;
+
+    .iconWrapper {
+      background-color: #dbeafe;
+      color: #1e69da;
+    }
+  }
+
+  &.noticeCard {
+    background-color: #fffbeb;
+    border-color: #fef3c7;
+
+    .iconWrapper {
+      background-color: #fef3c7;
+      color: #ea580c;
+    }
+  }
+
+  &.achCard {
+    background-color: #f0fdf4;
+    border-color: #dcfce7;
+
+    .iconWrapper {
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+  }
+}
+
+// 4. Section Headers
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+  }
+}
+
+// 5. Continue Learning Card
+.learningList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.learningCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+
+  &:active {
+    border-color: #cbd5e1;
+  }
+
+  .learningContent {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+
+    .courseIconWrapper {
+      width: 64px;
+      height: 48px;
+      border-radius: 8px;
+      background-color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .learningInfo {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0; // Allows wrapping
+
+      h4 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 800;
+        color: #0c1e40;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .learningMeta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 4px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #64748b;
+
+        .learningTypeTag {
+          font-size: 9px;
+          font-weight: 700;
+          padding: 1px 6px;
+          border-radius: 4px;
+        }
+
+        .tagCourse {
+          background-color: #f0fdf4;
+          color: #15803d;
+        }
+
+        .tagInternship {
+          background-color: #eff6ff;
+          color: #1e69da;
+        }
+
+        .dot {
+          color: #cbd5e1;
+        }
+      }
+
+      .progressContainer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+        width: 100%;
+
+        .progressBar {
+          margin: 0;
+          flex: 1;
+        }
+
+        .progressText {
+          font-size: 11px;
+          font-weight: 700;
+          color: #475569;
+          min-width: 28px;
+          text-align: right;
+        }
+      }
+    }
+
+    .chevron {
+      font-size: 16px;
+      color: #94a3b8;
+      flex-shrink: 0;
+      margin-left: 2px;
+    }
+  }
+}
+
+// Empty State inside section
+.emptyStateCard {
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  button {
+    height: 34px;
+    font-weight: 700;
+    border-radius: 8px;
+    font-size: 12px;
+    background-color: #1e69da;
+    border: none;
+  }
+}
+
+// 6. Recommended Horizontal Scroll Sections
+.recommendationsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.recommendationsScroll {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  overflow-x: auto;
+  width: 100%;
+  padding: 8px 16px;
+  margin: 0 -16px; // Stretch container to screen edges
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  
+  // Hide scrollbar but keep functionality
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.recScrollCard {
+  flex: 0 0 240px; // Makes cards bigger
+  scroll-snap-align: start;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .recImageContainer {
+    position: relative;
+    width: 100%;
+    height: 135px; // Aspect ratio ~16:9
+    background-color: #f1f5f9;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .difficultyTag {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #0f1115;
+      background: linear-gradient(90deg, #ffd66b, #ffb347);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .recCardBody {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+
+    .recCardMetaRow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .recTypeTag {
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1px 6px;
+        border-radius: 4px;
+      }
+
+      .tagCourse {
+        background-color: #f0fdf4;
+        color: #15803d;
+      }
+
+      .tagInternship {
+        background-color: #eff6ff;
+        color: #1e69da;
+      }
+
+      .recDifficulty {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+      }
+    }
+
+    h4 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      height: 36px; // Align height consistently
+    }
+
+    .recRatingRow {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+
+      .ratingValue {
+        color: #0f172a;
+      }
+
+      .star {
+        color: #eab308;
+        font-size: 12px;
+      }
+
+      .ratingCount {
+        color: #94a3b8;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Responsive Modal Custom Styles for Mobile
+.responsiveModal {
+  :global(.ant-modal-content) {
+    border-radius: 20px !important;
+    padding: 20px 16px !important;
+  }
+  :global(.ant-modal-header) {
+    margin-bottom: 16px !important;
+  }
+  :global(.ant-modal-title) {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+  }
+}

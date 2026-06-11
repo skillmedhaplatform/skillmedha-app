@@ -1,0 +1,1364 @@
+"use client";
+import React, { useEffect, useState } from "react";
+import internStyles from "./page.module.scss";
+import TextEditor from "@/utils/editor";
+import ChipInput from "@/utils/chipInput/chip";
+import { Button, Radio, Upload, Modal, message } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import dynamic from "next/dynamic";
+import { useParams, useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createCourse,
+  getOneInternship,
+  updateInternship,
+} from "@/redux/slices/cms/internship";
+import { uploadFileToS3 } from "@/utils/uploadtos3";
+import { restUrl } from "@/config/urls";
+
+// IMPORTANT: client-only import so the crop modal can mount properly in Next.js
+const ImgCrop = dynamic(() => import("antd-img-crop"), { ssr: false });
+
+const Page = () => {
+  const nav = useRouter();
+  const params = useParams();
+  const dispatch = useDispatch();
+
+  const [mounted, setMounted] = useState(false);
+
+  // existing fields
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [preRequisites, setPreRequisites] = useState([]);
+  const [difficulty, setDifficulty] = useState("Beginner");
+  const [price, setPrice] = useState("");
+
+  // image state
+  const [coverImage, setCoverImage] = useState("");
+  const [fileList, setFileList] = useState([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+
+  const userCreds = useSelector((state) => state.user.singleUser);
+
+  useEffect(() => {
+    if (params.createInternship?.split("/")?.join("") !== "newCourse") {
+      dispatch(
+        getOneInternship({
+          id: params.createInternship,
+          orgId: userCreds?.orgId,
+        })
+      )?.then((resp) => {
+        if (resp?.payload) {
+          setTitle(resp?.payload?.title || "");
+          setDescription(resp?.payload?.description || "");
+          setPreRequisites(resp?.payload?.preRequisites || []);
+          setDifficulty(resp?.payload?.difficulty || "Beginner");
+          setPrice(resp?.payload?.price || "");
+          if (resp?.payload?.coverImage) {
+            setCoverImage(resp.payload.coverImage);
+            setFileList([
+              {
+                uid: "-1",
+                name: "cover-image",
+                status: "done",
+                url: resp.payload.coverImage,
+              },
+            ]);
+          }
+        }
+      });
+    }
+  }, [params.createInternship, dispatch, userCreds?.orgId]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const validateBeforeCrop = (file) => {
+    const isAllowed =
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "image/webp";
+    if (!isAllowed) {
+      message.error("Only JPG/PNG/WebP images are allowed");
+      return false;
+    }
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    // if (!isLt2M) {
+    //   message.error("Image must be smaller than 2MB");
+    //   return false;
+    // }
+    return true;
+  };
+
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+  };
+
+  // Confirm cropper opens first with this in place,
+  // then keep customRequest to upload the CROPPED blob to S3.
+  const handleCustomUpload = async (options) => {
+    const { file, onSuccess, onError } = options;
+    try {
+      const url = await uploadFileToS3({
+        file, // this is the cropped file from ImgCrop
+        restUrl,
+        onUploaded: (s3Url) => {
+          setCoverImage(s3Url);
+        },
+      });
+      setFileList([
+        {
+          uid: file.uid || String(Date.now()),
+          name: file.name,
+          status: "done",
+          url,
+        },
+      ]);
+      onSuccess && onSuccess({ url }, file);
+    } catch (err) {
+      onError && onError(err);
+    }
+  };
+
+  const handleSave = async () => {
+    if (params.createInternship?.split("/")?.join("") !== "newCourse") {
+      dispatch(
+        updateInternship({
+          id: params.createInternship,
+          dispatch,
+          data: {
+            title,
+            description,
+            preRequisites,
+            difficulty,
+            price,
+            coverImage,
+          },
+        })
+      );
+    } else {
+      dispatch(
+        createCourse({
+          title,
+          description,
+          preRequisites,
+          difficulty,
+          price,
+          coverImage,
+        })
+      )?.then((resp) => {
+        const id = resp.payload.data.insertedId;
+        nav.replace("/course/" + id);
+      });
+    }
+  };
+
+  return (
+    <div className={internStyles.container}>
+      <div className={internStyles.titleContainer}>
+        <div className={internStyles.title}>Course Details</div>
+      </div>
+
+      <div className={internStyles.body}>
+        <div className={internStyles.internTtle}>
+          <span>Course Title *</span>
+          <input
+            placeholder="Course Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        <div className={internStyles.desc}>
+          <div className={internStyles.sd}>Short Description *</div>
+          <TextEditor
+            name="description"
+            initialContent={{ description }}
+            editorFun={(val) => setDescription(val)}
+          />
+          <Button
+            type="primary"
+            style={{ marginTop: "1rem", alignSelf: "flex-end" }}
+          >
+            Generate using AI
+          </Button>
+        </div>
+
+        {/* Cover Image with client-only ImgCrop */}
+        <div className={internStyles.coverImage_container}>
+          <div className={internStyles.sd}>Cover Image :</div>
+
+          <ImgCrop
+            aspect={16 / 9}
+            rotate
+            zoom
+            quality={0.8}
+            beforeCrop={validateBeforeCrop}
+            cropperProps={{ restrictPosition: false }}
+            modalTitle="Edit image"
+          >
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              maxCount={1}
+              customRequest={handleCustomUpload}
+              onChange={({ fileList: fl }) => setFileList(fl)}
+              onPreview={handlePreview}
+              onRemove={() => {
+                setCoverImage("");
+                setFileList([]);
+              }}
+              // broaden if needed: "image/*"
+              accept="image/jpeg,image/png,image/webp"
+            >
+              {fileList.length >= 1 ? null : (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+          </ImgCrop>
+
+          <Modal
+            open={previewOpen}
+            title="Preview"
+            footer={null}
+            onCancel={() => setPreviewOpen(false)}
+          >
+            <img alt="cover" style={{ width: "100%" }} src={previewImage} />
+          </Modal>
+        </div>
+
+        <div className={internStyles.preQ}>
+          <span>Pre Requisites *</span>
+          <ChipInput
+            initialValue={preRequisites}
+            onChipsChange={setPreRequisites}
+          />
+        </div>
+
+        <div className={internStyles.difficulty}>
+          <span>Difficulty</span>
+          <div>
+            <Radio.Group
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+            >
+              <Radio.Button value="Beginner">Beginner</Radio.Button>
+              <Radio.Button value="Intermediate">Intermediate</Radio.Button>
+              <Radio.Button value="Advanced">Advanced</Radio.Button>
+            </Radio.Group>
+          </div>
+        </div>
+
+        <div className={internStyles.price}>
+          <span>Price</span>
+          <div className={internStyles.priceIn}>
+            <span>₹</span>
+            <input
+              placeholder="0.00"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className={internStyles.buttonsContainer}>
+          <Button type="primary" onClick={handleSave}>
+            {params.createInternship?.split("/")?.join("") !== "newCourse"
+              ? "Update"
+              : "Save"}
+          </Button>
+          <Button
+            type="primary"
+            onClick={() =>
+              nav.replace(`/course/${params.createInternship}/new`)
+            }
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Page;
+
+
+
+
+
+
+
+
+
+
+
+
+=================================================+++++++++++++++++++++++=====================================================
+
+
+
+"use client";
+import React, { useEffect, useState } from "react";
+import internStyles from "./page.module.scss";
+import TextEditor from "@/utils/editor";
+import {
+  Button,
+  Radio,
+  Upload,
+  Modal,
+  message,
+  Select,
+  Input,
+  InputNumber,
+  Tag,
+} from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import dynamic from "next/dynamic";
+import { useParams, useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createCourse,
+  getOneInternship,
+  updateInternship,
+} from "@/redux/slices/cms/internship";
+import { uploadFileToS3 } from "@/utils/uploadtos3";
+import { restUrl } from "@/config/urls";
+
+const ImgCrop = dynamic(() => import("antd-img-crop"), { ssr: false });
+const { TextArea } = Input;
+const { Option } = Select;
+
+const Page = () => {
+  const nav = useRouter();
+  const params = useParams();
+  const dispatch = useDispatch();
+
+  const [mounted, setMounted] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Basic course info
+  const [courseBasic, setCourseBasic] = useState({
+    title: "",
+    subtitle: "",
+    description: "",
+    category: "",
+    language: "English",
+    difficulty: "Beginner",
+    duration: "",
+    projects: "",
+  });
+
+  // Store initial description separately to pass to TextEditor
+  const [editorInitialContent, setEditorInitialContent] = useState({
+    description: "",
+  });
+
+  // Arrays
+  const [courseArrays, setCourseArrays] = useState({
+    subcategories: [],
+    tags: [],
+    preRequisites: [],
+    learningPoints: [],
+    skills: [],
+    tools: [],
+    targetAudience: [],
+    keywords: [],
+  });
+
+  // Course includes
+  const [courseIncludes, setCourseIncludes] = useState({
+    videoDuration: "",
+    articles: 0,
+    downloadableResources: 0,
+    codingExercises: 0,
+    quizzes: 0,
+    lifetimeAccess: true,
+    certificateOfCompletion: true,
+    jobAssistance: false,
+  });
+
+  // Pricing
+  const [pricing, setPricing] = useState({
+    currentPrice: "",
+    originalPrice: "",
+    couponCode: "",
+    couponDiscount: 0,
+  });
+
+  // SEO
+  const [seo, setSeo] = useState({
+    metaTitle: "",
+    metaDescription: "",
+  });
+
+  // Status & visibility
+  const [visibility, setVisibility] = useState({
+    status: "active",
+    featured: false,
+    trending: false,
+  });
+
+  // Images
+  const [images, setImages] = useState({
+    coverImage: "",
+    thumbnailImage: "",
+    bannerImage: "",
+  });
+
+  const [fileList, setFileList] = useState([]);
+  const [thumbnailFileList, setThumbnailFileList] = useState([]);
+  const [bannerFileList, setBannerFileList] = useState([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+
+  const userCreds = useSelector((state) => state.user.singleUser);
+
+  const categoryOptions = [
+    "Data Science & AI",
+    "Web Development",
+    "Mobile Development",
+    "Cloud Computing",
+    "Cybersecurity",
+    "DevOps",
+    "UI/UX Design",
+    "Business & Marketing",
+  ];
+
+  const languageOptions = [
+    "English",
+    "Hindi",
+    "Telugu",
+    "Tamil",
+    "Spanish",
+    "French",
+  ];
+
+  useEffect(() => {
+    if (
+      params.createInternship?.split("/")?.join("") !== "newCourse" &&
+      !dataLoaded
+    ) {
+      dispatch(
+        getOneInternship({
+          id: params.createInternship,
+          orgId: userCreds?.orgId,
+        })
+      )?.then((resp) => {
+        if (resp?.payload) {
+          const data = resp.payload;
+
+          // Basic info
+          setCourseBasic({
+            title: data?.title || "",
+            subtitle: data?.subtitle || "",
+            description: data?.description || "",
+            category: data?.category || "",
+            language: data?.language || "English",
+            difficulty: data?.difficulty || "Beginner",
+            duration: data?.duration || "",
+            projects: data?.projects || "",
+          });
+
+          // Set editor initial content
+          setEditorInitialContent({
+            description: data?.description || "",
+          });
+
+          // Arrays
+          setCourseArrays({
+            subcategories: data?.subcategories || [],
+            tags: data?.tags || [],
+            preRequisites: data?.preRequisites || [],
+            learningPoints: data?.learningPoints || [],
+            skills: data?.skills || [],
+            tools: data?.tools || [],
+            targetAudience: data?.targetAudience || [],
+            keywords: data?.seoMetadata?.keywords || [],
+          });
+
+          // Course includes
+          setCourseIncludes({
+            videoDuration: data?.courseIncludes?.videoDuration || "",
+            articles: data?.courseIncludes?.articles || 0,
+            downloadableResources:
+              data?.courseIncludes?.downloadableResources || 0,
+            codingExercises: data?.courseIncludes?.codingExercises || 0,
+            quizzes: data?.courseIncludes?.quizzes || 0,
+            lifetimeAccess: data?.courseIncludes?.lifetimeAccess ?? true,
+            certificateOfCompletion:
+              data?.courseIncludes?.certificateOfCompletion ?? true,
+            jobAssistance: data?.courseIncludes?.jobAssistance || false,
+          });
+
+          // Pricing
+          setPricing({
+            currentPrice: data?.pricing?.currentPrice || data?.price || "",
+            originalPrice: data?.pricing?.originalPrice || "",
+            couponCode: data?.pricing?.couponCode || "",
+            couponDiscount: data?.pricing?.couponDiscount || 0,
+          });
+
+          // SEO
+          setSeo({
+            metaTitle: data?.seoMetadata?.metaTitle || "",
+            metaDescription: data?.seoMetadata?.metaDescription || "",
+          });
+
+          // Visibility
+          setVisibility({
+            status: data?.status || "active",
+            featured: data?.featured || false,
+            trending: data?.trending || false,
+          });
+
+          // Images
+          const coverUrl = data?.media?.coverImage || data?.coverImage;
+          if (coverUrl) {
+            setImages((prev) => ({ ...prev, coverImage: coverUrl }));
+            setFileList([
+              { uid: "-1", name: "cover-image", status: "done", url: coverUrl },
+            ]);
+          }
+          if (data?.media?.thumbnailImage) {
+            setImages((prev) => ({
+              ...prev,
+              thumbnailImage: data.media.thumbnailImage,
+            }));
+            setThumbnailFileList([
+              {
+                uid: "-2",
+                name: "thumbnail",
+                status: "done",
+                url: data.media.thumbnailImage,
+              },
+            ]);
+          }
+          if (data?.media?.bannerImage) {
+            setImages((prev) => ({
+              ...prev,
+              bannerImage: data.media.bannerImage,
+            }));
+            setBannerFileList([
+              {
+                uid: "-3",
+                name: "banner",
+                status: "done",
+                url: data.media.bannerImage,
+              },
+            ]);
+          }
+
+          setDataLoaded(true);
+        }
+      });
+    }
+  }, [params.createInternship, userCreds?.orgId, dataLoaded, dispatch]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const validateBeforeCrop = (file) => {
+    const isAllowed =
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "image/webp";
+    if (!isAllowed) {
+      message.error("Only JPG/PNG/WebP images are allowed");
+      return false;
+    }
+    return true;
+  };
+
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+  };
+
+  const handleCustomUpload = async (options, type = "cover") => {
+    const { file, onSuccess, onError } = options;
+    try {
+      const url = await uploadFileToS3({
+        file,
+        restUrl,
+        onUploaded: (s3Url) => {
+          setImages((prev) => ({ ...prev, [type + "Image"]: s3Url }));
+        },
+      });
+
+      const fileObj = {
+        uid: file.uid || String(Date.now()),
+        name: file.name,
+        status: "done",
+        url,
+      };
+
+      if (type === "cover") setFileList([fileObj]);
+      else if (type === "thumbnail") setThumbnailFileList([fileObj]);
+      else if (type === "banner") setBannerFileList([fileObj]);
+
+      onSuccess && onSuccess({ url }, file);
+    } catch (err) {
+      onError && onError(err);
+    }
+  };
+
+  const handleSave = async () => {
+    const courseData = {
+      ...courseBasic,
+      ...courseArrays,
+      courseIncludes,
+      pricing: {
+        ...pricing,
+        finalPrice:
+          parseFloat(pricing.currentPrice || 0) -
+          parseFloat(pricing.couponDiscount || 0),
+      },
+      media: images,
+      seoMetadata: {
+        ...seo,
+        keywords: courseArrays.keywords,
+      },
+      ...visibility,
+    };
+    console.log(courseData);
+
+    if (params.createInternship?.split("/")?.join("") !== "newCourse") {
+      dispatch(
+        updateInternship({
+          id: params.createInternship,
+          dispatch,
+          data: courseData,
+        })
+      );
+    } else {
+      dispatch(createCourse(courseData))?.then((resp) => {
+        const id = resp.payload.data.insertedId;
+        nav.replace("/course/" + id);
+      });
+    }
+  };
+
+  return (
+    <div className={internStyles.container}>
+      <div className={internStyles.titleContainer}>
+        <div className={internStyles.title}>Course Details</div>
+      </div>
+
+      <div className={internStyles.body}>
+        {/* Basic Information Section */}
+        <div className={internStyles.sectionHeader}>Basic Information</div>
+
+        <div className={internStyles.internTtle}>
+          <span>Course Title *</span>
+          <input
+            placeholder="e.g., Complete Python Bootcamp"
+            value={courseBasic.title}
+            onChange={(e) =>
+              setCourseBasic((prev) => ({ ...prev, title: e.target.value }))
+            }
+          />
+        </div>
+
+        <div className={internStyles.internTtle}>
+          <span>Subtitle</span>
+          <input
+            placeholder="e.g., Go from zero to hero in Python"
+            value={courseBasic.subtitle}
+            onChange={(e) =>
+              setCourseBasic((prev) => ({ ...prev, subtitle: e.target.value }))
+            }
+          />
+        </div>
+
+        <div className={internStyles.desc}>
+          <div className={internStyles.sd}>Course Description *</div>
+          <TextEditor
+            name="description"
+            initialContent={editorInitialContent}
+            editorFun={(val) =>
+              setCourseBasic((prev) => ({ ...prev, description: val }))
+            }
+          />
+          <Button
+            type="primary"
+            style={{ marginTop: "1rem", alignSelf: "flex-end" }}
+          >
+            Generate using AI
+          </Button>
+        </div>
+
+        {/* Category & Classification */}
+        <div className={internStyles.sectionHeader}>
+          Category & Classification
+        </div>
+
+        <div className={internStyles.formRow}>
+          <div className={internStyles.formField}>
+            <label>Category *</label>
+            <Select
+              placeholder="Select category"
+              value={courseBasic.category}
+              onChange={(val) =>
+                setCourseBasic((prev) => ({ ...prev, category: val }))
+              }
+              style={{ width: "100%" }}
+              showSearch
+            >
+              {categoryOptions.map((cat) => (
+                <Option key={cat} value={cat}>
+                  {cat}
+                </Option>
+              ))}
+            </Select>
+          </div>
+
+          <div className={internStyles.formField}>
+            <label>Language</label>
+            <Select
+              placeholder="Select language"
+              value={courseBasic.language}
+              onChange={(val) =>
+                setCourseBasic((prev) => ({ ...prev, language: val }))
+              }
+              style={{ width: "100%" }}
+            >
+              {languageOptions.map((lang) => (
+                <Option key={lang} value={lang}>
+                  {lang}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        </div>
+
+        <div className={internStyles.formRow}>
+          <div className={internStyles.formField}>
+            <label>Subcategories</label>
+            <Select
+              mode="tags"
+              placeholder="Add subcategories"
+              value={courseArrays.subcategories}
+              onChange={(val) =>
+                setCourseArrays((prev) => ({ ...prev, subcategories: val }))
+              }
+              style={{ width: "100%" }}
+              tokenSeparators={[","]}
+            />
+          </div>
+
+          <div className={internStyles.formField}>
+            <label>Tags</label>
+            <Select
+              mode="tags"
+              placeholder="Add tags for SEO"
+              value={courseArrays.tags}
+              onChange={(val) =>
+                setCourseArrays((prev) => ({ ...prev, tags: val }))
+              }
+              style={{ width: "100%" }}
+              tokenSeparators={[","]}
+            />
+          </div>
+        </div>
+
+        {/* Course Details */}
+        <div className={internStyles.sectionHeader}>Course Details</div>
+
+        <div className={internStyles.formRow}>
+          <div className={internStyles.formField}>
+            <label>Duration</label>
+            <input
+              placeholder="e.g., 4 Months, 12 Weeks"
+              value={courseBasic.duration}
+              onChange={(e) =>
+                setCourseBasic((prev) => ({
+                  ...prev,
+                  duration: e.target.value,
+                }))
+              }
+            />
+          </div>
+
+          <div className={internStyles.formField}>
+            <label>Total Video Duration</label>
+            <input
+              placeholder="e.g., 35 hours"
+              value={courseIncludes.videoDuration}
+              onChange={(e) =>
+                setCourseIncludes((prev) => ({
+                  ...prev,
+                  videoDuration: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+
+        <div className={internStyles.internTtle}>
+          <span>Projects Description</span>
+          <input
+            placeholder="e.g., 8+ Capstone Projects (Classification, NLP, Time Series)"
+            value={courseBasic.projects}
+            onChange={(e) =>
+              setCourseBasic((prev) => ({ ...prev, projects: e.target.value }))
+            }
+          />
+        </div>
+
+        <div className={internStyles.difficulty}>
+          <span>Difficulty Level</span>
+          <div>
+            <Radio.Group
+              value={courseBasic.difficulty}
+              onChange={(e) =>
+                setCourseBasic((prev) => ({
+                  ...prev,
+                  difficulty: e.target.value,
+                }))
+              }
+              buttonStyle="solid"
+            >
+              <Radio.Button value="Beginner">Beginner</Radio.Button>
+              <Radio.Button value="Intermediate">Intermediate</Radio.Button>
+              <Radio.Button value="Advanced">Advanced</Radio.Button>
+            </Radio.Group>
+          </div>
+        </div>
+
+        {/* Learning Outcomes */}
+        <div className={internStyles.sectionHeader}>
+          Learning Outcomes & Audience
+        </div>
+
+        <div className={internStyles.preQ}>
+          <p>Prerequisites</p>
+          <div style={{ flex: 1 }}>
+            <Select
+              mode="tags"
+              placeholder="Add prerequisites (press enter to add)"
+              value={courseArrays.preRequisites}
+              onChange={(val) =>
+                setCourseArrays((prev) => ({ ...prev, preRequisites: val }))
+              }
+              style={{ width: "100%" }}
+              tokenSeparators={[","]}
+            />
+          </div>
+        </div>
+
+        <div className={internStyles.preQ}>
+          <p>Learning Points (What students will learn)</p>
+          <div style={{ flex: 1 }}>
+            <Select
+              mode="tags"
+              placeholder="Add learning outcomes"
+              value={courseArrays.learningPoints}
+              onChange={(val) =>
+                setCourseArrays((prev) => ({ ...prev, learningPoints: val }))
+              }
+              style={{ width: "100%" }}
+              tokenSeparators={[","]}
+            />
+          </div>
+        </div>
+
+        <div className={internStyles.preQ}>
+          <p>Skills Covered</p>
+          <div style={{ flex: 1 }}>
+            <Select
+              mode="tags"
+              placeholder="Add skills"
+              value={courseArrays.skills}
+              onChange={(val) =>
+                setCourseArrays((prev) => ({ ...prev, skills: val }))
+              }
+              style={{ width: "100%" }}
+              tokenSeparators={[","]}
+            />
+          </div>
+        </div>
+
+        <div className={internStyles.preQ}>
+          <p>Tools & Technologies</p>
+          <div style={{ flex: 1 }}>
+            <Select
+              mode="tags"
+              placeholder="Add tools"
+              value={courseArrays.tools}
+              onChange={(val) =>
+                setCourseArrays((prev) => ({ ...prev, tools: val }))
+              }
+              style={{ width: "100%" }}
+              tokenSeparators={[","]}
+            />
+          </div>
+        </div>
+
+        <div className={internStyles.preQ}>
+          <p>Target Audience</p>
+          <div style={{ flex: 1 }}>
+            <Select
+              mode="tags"
+              placeholder="e.g., Aspiring Data Scientists, Software Developers"
+              value={courseArrays.targetAudience}
+              onChange={(val) =>
+                setCourseArrays((prev) => ({ ...prev, targetAudience: val }))
+              }
+              style={{ width: "100%" }}
+              tokenSeparators={[","]}
+            />
+          </div>
+        </div>
+
+        {/* Course Includes */}
+        <div className={internStyles.sectionHeader}>Course Includes</div>
+
+        <div className={internStyles.formRow}>
+          <div className={internStyles.formField}>
+            <label>Articles</label>
+            <InputNumber
+              min={0}
+              value={courseIncludes.articles}
+              onChange={(val) =>
+                setCourseIncludes((prev) => ({ ...prev, articles: val }))
+              }
+              style={{ width: "100%" }}
+            />
+          </div>
+
+          <div className={internStyles.formField}>
+            <label>Downloadable Resources</label>
+            <InputNumber
+              min={0}
+              value={courseIncludes.downloadableResources}
+              onChange={(val) =>
+                setCourseIncludes((prev) => ({
+                  ...prev,
+                  downloadableResources: val,
+                }))
+              }
+              style={{ width: "100%" }}
+            />
+          </div>
+        </div>
+
+        <div className={internStyles.formRow}>
+          <div className={internStyles.formField}>
+            <label>Coding Exercises</label>
+            <InputNumber
+              min={0}
+              value={courseIncludes.codingExercises}
+              onChange={(val) =>
+                setCourseIncludes((prev) => ({ ...prev, codingExercises: val }))
+              }
+              style={{ width: "100%" }}
+            />
+          </div>
+
+          <div className={internStyles.formField}>
+            <label>Quizzes</label>
+            <InputNumber
+              min={0}
+              value={courseIncludes.quizzes}
+              onChange={(val) =>
+                setCourseIncludes((prev) => ({ ...prev, quizzes: val }))
+              }
+              style={{ width: "100%" }}
+            />
+          </div>
+        </div>
+
+        <div className={internStyles.checkboxGroup}>
+          <label className={internStyles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={courseIncludes.lifetimeAccess}
+              onChange={(e) =>
+                setCourseIncludes((prev) => ({
+                  ...prev,
+                  lifetimeAccess: e.target.checked,
+                }))
+              }
+            />
+            <span>Lifetime Access</span>
+          </label>
+
+          <label className={internStyles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={courseIncludes.certificateOfCompletion}
+              onChange={(e) =>
+                setCourseIncludes((prev) => ({
+                  ...prev,
+                  certificateOfCompletion: e.target.checked,
+                }))
+              }
+            />
+            <span>Certificate of Completion</span>
+          </label>
+
+          <label className={internStyles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={courseIncludes.jobAssistance}
+              onChange={(e) =>
+                setCourseIncludes((prev) => ({
+                  ...prev,
+                  jobAssistance: e.target.checked,
+                }))
+              }
+            />
+            <span>Job Assistance</span>
+          </label>
+        </div>
+
+        {/* Pricing Section */}
+        <div className={internStyles.sectionHeader}>Pricing</div>
+
+        <div className={internStyles.formRow}>
+          <div className={internStyles.formField}>
+            <label>Current Price *</label>
+            <div className={internStyles.priceIn}>
+              <span>₹</span>
+              <input
+                placeholder="699"
+                value={pricing.currentPrice}
+                onChange={(e) =>
+                  setPricing((prev) => ({
+                    ...prev,
+                    currentPrice: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className={internStyles.formField}>
+            <label>Original Price</label>
+            <div className={internStyles.priceIn}>
+              <span>₹</span>
+              <input
+                placeholder="5999"
+                value={pricing.originalPrice}
+                onChange={(e) =>
+                  setPricing((prev) => ({
+                    ...prev,
+                    originalPrice: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className={internStyles.formRow}>
+          <div className={internStyles.formField}>
+            <label>Coupon Code</label>
+            <input
+              placeholder="e.g., DATA_PRO200"
+              value={pricing.couponCode}
+              onChange={(e) =>
+                setPricing((prev) => ({ ...prev, couponCode: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className={internStyles.formField}>
+            <label>Coupon Discount (₹)</label>
+            <InputNumber
+              min={0}
+              value={pricing.couponDiscount}
+              onChange={(val) =>
+                setPricing((prev) => ({ ...prev, couponDiscount: val }))
+              }
+              style={{ width: "100%" }}
+              placeholder="200"
+            />
+          </div>
+        </div>
+
+        {pricing.currentPrice && pricing.couponDiscount > 0 && (
+          <div className={internStyles.priceSummary}>
+            <Tag color="green">
+              Final Price: ₹
+              {parseFloat(pricing.currentPrice || 0) -
+                parseFloat(pricing.couponDiscount || 0)}
+            </Tag>
+          </div>
+        )}
+
+        {/* Media Section */}
+        <div className={internStyles.sectionHeader}>Media Assets</div>
+
+        <div className={internStyles.coverImage_container}>
+          <div className={internStyles.sd}>Cover Image (16:9):</div>
+          <ImgCrop
+            aspect={16 / 9}
+            rotate
+            zoom
+            quality={0.8}
+            beforeCrop={validateBeforeCrop}
+            cropperProps={{ restrictPosition: false }}
+            modalTitle="Edit Cover Image"
+          >
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              maxCount={1}
+              customRequest={(options) => handleCustomUpload(options, "cover")}
+              onChange={({ fileList: fl }) => setFileList(fl)}
+              onPreview={handlePreview}
+              onRemove={() => {
+                setImages((prev) => ({ ...prev, coverImage: "" }));
+                setFileList([]);
+              }}
+              accept="image/jpeg,image/png,image/webp"
+            >
+              {fileList.length >= 1 ? null : (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+          </ImgCrop>
+        </div>
+
+        <div className={internStyles.coverImage_container}>
+          <div className={internStyles.sd}>Thumbnail (1:1):</div>
+          <ImgCrop
+            aspect={1}
+            rotate
+            zoom
+            quality={0.8}
+            beforeCrop={validateBeforeCrop}
+            cropperProps={{ restrictPosition: false }}
+            modalTitle="Edit Thumbnail"
+          >
+            <Upload
+              listType="picture-card"
+              fileList={thumbnailFileList}
+              maxCount={1}
+              customRequest={(options) =>
+                handleCustomUpload(options, "thumbnail")
+              }
+              onChange={({ fileList: fl }) => setThumbnailFileList(fl)}
+              onPreview={handlePreview}
+              onRemove={() => {
+                setImages((prev) => ({ ...prev, thumbnailImage: "" }));
+                setThumbnailFileList([]);
+              }}
+              accept="image/jpeg,image/png,image/webp"
+            >
+              {thumbnailFileList.length >= 1 ? null : (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+          </ImgCrop>
+        </div>
+
+        <div className={internStyles.coverImage_container}>
+          <div className={internStyles.sd}>Banner Image (21:9):</div>
+          <ImgCrop
+            aspect={21 / 9}
+            rotate
+            zoom
+            quality={0.8}
+            beforeCrop={validateBeforeCrop}
+            cropperProps={{ restrictPosition: false }}
+            modalTitle="Edit Banner"
+          >
+            <Upload
+              listType="picture-card"
+              fileList={bannerFileList}
+              maxCount={1}
+              customRequest={(options) => handleCustomUpload(options, "banner")}
+              onChange={({ fileList: fl }) => setBannerFileList(fl)}
+              onPreview={handlePreview}
+              onRemove={() => {
+                setImages((prev) => ({ ...prev, bannerImage: "" }));
+                setBannerFileList([]);
+              }}
+              accept="image/jpeg,image/png,image/webp"
+            >
+              {bannerFileList.length >= 1 ? null : (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+          </ImgCrop>
+        </div>
+
+        <Modal
+          open={previewOpen}
+          title="Preview"
+          footer={null}
+          onCancel={() => setPreviewOpen(false)}
+        >
+          <img alt="preview" style={{ width: "100%" }} src={previewImage} />
+        </Modal>
+
+        {/* SEO Section */}
+        <div className={internStyles.sectionHeader}>SEO & Metadata</div>
+
+        <div className={internStyles.internTtle}>
+          <span>Meta Title</span>
+          <input
+            placeholder="SEO optimized title"
+            value={seo.metaTitle}
+            onChange={(e) =>
+              setSeo((prev) => ({ ...prev, metaTitle: e.target.value }))
+            }
+            maxLength={60}
+          />
+          <small>{seo.metaTitle.length}/60 characters</small>
+        </div>
+
+        <div className={internStyles.formField}>
+          <label>Meta Description</label>
+          <TextArea
+            placeholder="SEO meta description"
+            value={seo.metaDescription}
+            onChange={(e) =>
+              setSeo((prev) => ({ ...prev, metaDescription: e.target.value }))
+            }
+            maxLength={160}
+            rows={3}
+            showCount
+          />
+        </div>
+
+        <div className={internStyles.preQ}>
+          <span>SEO Keywords</span>
+          <div style={{ flex: 1 }}>
+            <Select
+              mode="tags"
+              placeholder="Add SEO keywords"
+              value={courseArrays.keywords}
+              onChange={(val) =>
+                setCourseArrays((prev) => ({ ...prev, keywords: val }))
+              }
+              style={{ width: "100%" }}
+              tokenSeparators={[","]}
+              maxTagCount="responsive"
+              maxTagTextLength={25}
+            />
+          </div>
+        </div>
+
+        {/* Status & Visibility */}
+        <div className={internStyles.sectionHeader}>Status & Visibility</div>
+
+        <div className={internStyles.formRow}>
+          <div className={internStyles.formField}>
+            <label>Course Status</label>
+            <Select
+              value={visibility.status}
+              onChange={(val) =>
+                setVisibility((prev) => ({ ...prev, status: val }))
+              }
+              style={{ width: "100%" }}
+            >
+              <Option value="active">Active</Option>
+              <Option value="draft">Draft</Option>
+              <Option value="archived">Archived</Option>
+            </Select>
+          </div>
+
+          <div className={internStyles.formField}>
+            <div className={internStyles.checkboxGroup}>
+              <label className={internStyles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={visibility.featured}
+                  onChange={(e) =>
+                    setVisibility((prev) => ({
+                      ...prev,
+                      featured: e.target.checked,
+                    }))
+                  }
+                />
+                <span>Featured Course</span>
+              </label>
+
+              <label className={internStyles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={visibility.trending}
+                  onChange={(e) =>
+                    setVisibility((prev) => ({
+                      ...prev,
+                      trending: e.target.checked,
+                    }))
+                  }
+                />
+                <span>Trending Course</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className={internStyles.buttonsContainer}>
+          <Button type="default" onClick={() => nav.back()}>
+            Cancel
+          </Button>
+          <Button type="primary" onClick={handleSave}>
+            {params.createInternship?.split("/")?.join("") !== "newCourse"
+              ? "Update Course"
+              : "Save & Continue"}
+          </Button>
+          <Button
+            type="primary"
+            onClick={() =>
+              nav.replace(`/course/${params.createInternship}/new`)
+            }
+          >
+            Next: Add Curriculum
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Page;

@@ -1,0 +1,354 @@
+@import "../../styles/colors.scss";
+@import "../../styles/mixins.scss";
+
+.container {
+  padding: 1rem;
+  height: 90vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  &::-webkit-scrollbar {
+    width: 10px;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $white;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $iconBackground;
+    border-radius: 20px;
+    border: 3px solid #f5f5f5;
+    cursor: grabbing;
+  }
+}
+.headerContainer {
+  width: 100%;
+  @include flexBox(column, center, center);
+  .title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-align: center;
+    span {
+      color: $headerColor;
+    }
+  }
+  .blocked_msg {
+    color: $incorrectAns;
+    margin: 0.5rem 0;
+  }
+
+  .bonScore {
+    color: $bluebackground;
+  }
+
+  .scoreContainer {
+    display: flex;
+    border: 1px solid;
+    gap: 0.5rem;
+  }
+  .dataContainer {
+    margin-top: 1rem;
+    @include flexBox(column, center, center);
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+    border-radius: 1rem;
+    width: 100%;
+
+    .datachart_cont {
+      gap: 1.5rem;
+      @include flexBox(row, space-between, center);
+      .dataLeftContiner {
+        @include flexBox(column, space-between, center);
+        gap: 1rem;
+        .rankingContainer {
+          width: 100%;
+          background: $resultChartBackground;
+          box-shadow: 4px 4px 5px 0px #00000024;
+          border-radius: 0.6rem;
+          padding: 0.8rem;
+          @include flexBox(row, space-evenly, center);
+          gap: 0.8rem;
+          .headerImg {
+            max-width: 3rem;
+          }
+        }
+        .statsContainer {
+          background: $resultChartBackground;
+          box-shadow: 4px 4px 5px 0px #00000024;
+          border-radius: 0.6rem;
+          padding: 0.8rem;
+          gap: 0.8rem;
+          @include flexBox(row, space-between, center);
+        }
+        .dataVal {
+          gap: 0.8rem;
+          @include flexBox(column, space-between, center);
+          p {
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding-top: 0.3rem;
+          }
+          .dataValTitle {
+            font-weight: 400;
+            font-size: 0.8rem;
+          }
+
+          img {
+            width: 39px;
+          }
+        }
+      }
+      .chartContainer {
+        background: $resultChartBackground;
+        box-shadow: 4px 4px 5px 0px #00000024;
+        border-radius: 0.6rem;
+        padding: 0.8rem;
+        max-width: 100%;
+        @include flexBox(row, center, center);
+        .donutParent {
+          height: 100%;
+        }
+        .responseStats {
+          @include flexBox(column, space-between, center);
+          gap: 0.8rem;
+          .chartInfoContainer {
+            @include flexBox(row, flex-start, center);
+            width: 15rem;
+            max-width: 15rem;
+            gap: 0.8rem;
+            margin: 0;
+
+            span {
+              width: 1.2rem;
+              height: 1.2rem;
+              border-radius: 0.2rem;
+            }
+            p {
+              font-size: 1rem;
+              font-weight: 600;
+            }
+            .chartInfoContainerVal {
+              font-weight: 400;
+              font-size: 0.8rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.questionContainer {
+  padding: 1rem;
+  background-color: #fafafa;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    rgb(209, 213, 219) 0px 0px 0px 1px inset;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  img {
+    width: 10%;
+  }
+  .questionHeader {
+    @include flexBox(row, space-between, center);
+    margin-bottom: 0.5rem;
+    width: 100%;
+    .type,
+    .sno {
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .queScore,
+    .bonusScore,
+    .negScore,
+    .partialScore {
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .queScore {
+      color: #87cc85;
+    }
+    .partialScore {
+      color: #ff8540;
+    }
+    .bonusScore {
+      color: #6e87f5;
+    }
+    .negScore {
+      color: #ff3939;
+    }
+  }
+  .optionsContainer {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    .optionLable {
+      display: flex;
+      margin-bottom: 0.5rem;
+      border: 0.5px solid rgba(49, 49, 49, 0.286);
+      padding: 0.5rem;
+      border-radius: 5px;
+      background-color: white;
+      align-items: center;
+      .points_span {
+        width: 10%;
+      }
+      .options_div {
+        width: 100%;
+        display: flex;
+      }
+
+      .optionsOrderChar {
+        p {
+          color: inherit;
+        }
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0.5rem;
+      }
+    }
+    .optionValue {
+      p {
+        display: inline;
+      }
+    }
+    .correct {
+      color: $correctAns;
+    }
+    .correct_selected {
+      background-color: $correctAns;
+    }
+    .shortParaAns {
+      font-size: 0.8rem;
+      border: 0.5px solid rgba(49, 49, 49, 0.286);
+      padding: 0.5rem;
+      border-radius: 5px;
+      width: 100%;
+    }
+    .incorrect {
+      background-color: $incorrectAns;
+      color: white;
+    }
+
+    .scoreContainer {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: flex-start;
+      .queScore {
+        color: #87cc85;
+      }
+      .partialScore {
+        color: #ff8540;
+      }
+      .bonusScore {
+        color: #6e87f5;
+      }
+      .negScore {
+        color: #ff3939;
+      }
+    }
+  }
+  .paraanswers_div {
+    h3 {
+      font-size: 1rem;
+      margin-bottom: 0.2rem;
+    }
+    span {
+      background-color: transparent !important;
+      padding: 0 1rem;
+      > * {
+        padding: 0 1.3rem;
+      }
+      ol,
+      ul {
+        background-color: transparent !important;
+        li {
+          background-color: transparent !important;
+        }
+      }
+    }
+    .student_ans {
+      background-color: transparent;
+      padding: 0 1rem;
+      width: calc(80% - 2rem);
+      word-wrap: break-word;
+    }
+  }
+}
+
+.anwers_div {
+  .answers_scroll_cont {
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: white;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: $iconBackground;
+      border-radius: 20px;
+      border: 3px solid #f5f5f5;
+      cursor: auto;
+    }
+    .collapse_div {
+      margin-top: 1rem;
+    }
+  }
+  .empty_div {
+    height: 10rem;
+  }
+  .flagged_div {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 1rem;
+    div {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      width: 70%;
+      p {
+        border: 1px solid;
+        border-radius: 5px;
+        background-color: $iconBackgroundLowOpacity;
+        padding: 0.2rem 0.8rem;
+        cursor: pointer;
+      }
+    }
+  }
+}
+.main_header_div {
+  font-weight: 600;
+  .header {
+    display: flex;
+    width: 60%;
+    justify-content: space-between;
+    div {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      span {
+        font-weight: 700;
+      }
+    }
+  }
+}
+.flaggedIcon {
+  margin-left: 0.5rem;
+  color: red !important;
+  cursor: pointer;
+}

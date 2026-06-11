@@ -1,0 +1,208 @@
+@import "@/utils/universalUtils/colors.module.scss";
+@import "@/utils/universalUtils/mixins.scss";
+
+// Question Editor Container
+.QuestionContainer {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+    width: 3px; // reduced width
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #25a3a6;
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #1b8184;
+  }
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #25a3a6 transparent;
+
+  .QuestionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    div {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: $primaryColor;
+    }
+  }
+
+  .QuestionBody {
+    margin-top: 1rem;
+    overflow-y: auto;
+    height: 60vh;
+    // border: 1px solid;
+
+    .QuestionBodyFlexHead,
+    .QuestionBodyFlex {
+      display: flex;
+      margin: 1rem 0rem;
+
+      .title {
+        width: 20%;
+        font-size: 1rem;
+        font-weight: 700;
+
+        input[type="checkbox"] {
+          margin-right: 5px;
+          height: 20px;
+          width: 20px;
+        }
+      }
+
+      .titleAlign {
+        display: flex;
+        align-items: center;
+      }
+      .typeContent {
+        width: 80%;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 1rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .rightBody {
+        width: 80%;
+
+        .correctAns {
+          width: 40%;
+          padding: 0.5rem;
+          border-radius: 0.5rem;
+          outline: none;
+          border: 2px solid $borderColor;
+        }
+      }
+
+      .rightBodyButtons {
+        display: flex;
+        padding: 0.5rem;
+        justify-content: space-around;
+        align-items: center;
+
+        button {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          background-color: transparent;
+          cursor: pointer;
+
+          img {
+            filter: grayscale(100%);
+          }
+
+          div {
+            padding: 0.3rem;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+    .QuestionBodyFlexHead {
+      display: flex;
+      position: sticky;
+      top: 0;
+      background-color: #f5f5f5;
+      z-index: 5;
+      margin: 0;
+    }
+  }
+}
+
+// Option-related styles
+.rightBody1 {
+  display: flex;
+  align-items: center;
+}
+
+.OptionText {
+  // Add this if you want to style the option text specifically
+  margin-left: 0.5rem;
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: red;
+  font-size: 1em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.addBtn {
+  display: block;
+  padding: 0.6rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+  background-color: $primaryColor;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+// File upload styles (for Document question type)
+.fileUploadWrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.fileInput {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.fileLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+.uploadIcon {
+  margin-right: 8px;
+}

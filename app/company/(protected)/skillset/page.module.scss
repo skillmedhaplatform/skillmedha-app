@@ -1,0 +1,260 @@
+@import '@/utils/universalUtils/colors.module.scss';
+
+
+
+.container{
+    height: calc(100% - 20px);
+    padding: 1rem;
+
+    .mainTitle{
+        color: $primaryColor;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+
+    .filterContainer{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+        div{
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            // width: 20%;
+        }
+        button{
+            margin: 0rem 1rem;
+            text-wrap: wrap;
+            width: 15%;
+            gap: .5rem;
+            font-size: .8rem;
+        }
+        select{
+            width: 15%;
+            padding: .3rem;
+            border-radius: .5rem;
+            cursor: pointer;
+            margin-right: .5rem;
+            // font-size: 1rem;
+            background-color: #0C58B61A;
+            border: none;
+        }
+    }
+
+
+    .questionsContainer{
+        margin-top: 1rem;
+        height: calc(100% - 1px);
+        overflow-y: scroll;
+        scrollbar-width: thin; 
+        scrollbar-color: $primaryColor rgba(12, 88, 182, 0.3);
+        margin-bottom: 2rem;
+        width: 100%;
+        margin-top: 1rem !important;
+
+        &::-webkit-scrollbar{
+            display: none;
+        }
+
+        .textCenter{
+            display: flex;
+           justify-content: center;
+           align-items: center;
+           height: 100%;
+           font-size: 2rem;
+           font-weight: 600;
+        }
+    }
+
+    .eachTranslationCard{
+        border-bottom: .5px solid rgba(0, 0, 0, 0.133);
+        margin: 2rem 0rem;
+        padding-bottom: 1rem;
+    
+        .optionContainer{
+            display: flex;
+            gap: 1rem;
+            font-weight: 500;
+            font-size: 1rem;
+            align-items: center;
+            margin-left: 1rem;
+            padding: .5rem 0rem;
+        }
+    
+        .eachQuestion {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-left: 1rem;
+            margin-top: 1rem;
+        }
+    }
+    
+    
+    
+    .eachQuestionHeader {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        max-width: 100%;
+    
+        div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 150px;
+            flex: 1 1 150px; 
+    
+            select {
+                width: 100%;
+                padding: 5px;
+                border-radius: 4px;
+                background-color: white;
+            }
+        }
+    
+        .options-btn {
+            flex: 0 0 auto;
+            padding: 5px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+    
+            &:hover {
+                background-color: #0056b3;
+            }
+        }
+    }
+    
+    
+    .loadMore{
+        margin: 0 auto;
+        display: flex;
+        padding: .5rem 2rem;
+        border-radius: .5rem;
+        background-color: #007bff;
+        cursor: pointer;
+        border: none;
+        color: #fff;
+        font-weight: 600;
+    }
+    
+    .moveQuestionsModal{
+        width: 100%;
+        div{
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1rem;
+            label {
+                width: 20%;
+                font-size: 1rem;
+                font-weight: 600;
+    
+            }
+            select{
+                width:80%;
+                height: 3rem;
+                font-size: 1rem;
+            }
+        }
+    
+        button {
+            display: flex;
+            margin: 0 auto;
+            margin-top: 2rem;
+            background-color: #1677ff;
+            border: none;
+            padding: .5rem 2rem;
+            cursor: pointer;
+            border-radius: .5rem;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+    }
+    
+    .moveQuestionsButton{
+             background-color: #1677ff;
+            border: none;
+            padding: .5rem 1rem;
+            cursor: pointer;
+            border-radius: .5rem;
+            // font-size: 1rem;
+            // font-weight: 600; 
+    }
+    
+    .select{
+        width: 15%;
+        padding: .5rem ;
+        cursor: pointer;
+        border-radius: .5rem;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    .qbank{
+        width: 100%;
+    }
+}
+
+
+.moveQuestionsModal{
+    width: 100%;
+    div{
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 1rem;
+        label {
+            width: 20%;
+            font-size: 1rem;
+            font-weight: 600;
+
+        }
+        select{
+            width:80%;
+            height: 3rem;
+            font-size: 1rem;
+        }
+    }
+
+    button {
+        display: flex;
+        margin: 0 auto;
+        margin-top: 2rem;
+        background-color: #1677ff;
+        border: none;
+        padding: .5rem 2rem;
+        cursor: pointer;
+        border-radius: .5rem;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+}
+
+.moveQuestionsButton{
+    background-color: #1677ff;
+        border: none;
+        padding: .5rem 2rem;
+        cursor: pointer;
+        border-radius: .5rem;
+        font-size: 1rem;
+        font-weight: 600; 
+}
+
+.select{
+    width: 15%;
+    padding: .5rem ;
+    cursor: pointer;
+    border-radius: .5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}

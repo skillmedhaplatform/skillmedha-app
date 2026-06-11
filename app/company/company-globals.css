@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+
+html,
+body {
+  font-family: "Nunito", serif;
+  font-optical-sizing: auto;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+.container,
+.container-lg,
+.container-md,
+.container-sm,
+.container-xl {
+  max-width: 100vw !important;
+}
+
+.container {
+  padding: 0;
+  margin: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  position: fixed;
+  overflow: hidden;
+}
+.flexBody {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.children {
+  padding: 1rem;
+  width: 100%;
+}
+
+.ant-select-selection-placeholder {
+  color: black !important;
+}
+
+.ql-editor {
+  height: 10.5rem !important;
+  overflow-y: scroll !important;
+  border-radius: 0.4rem;
+}
+
+.ant-table-cell {
+  border: 1px solid #f0f0f0;
+}
+
+.ant-collapse-expand-icon {
+  display: none !important;
+}
+
+.ant-collapse {
+  margin-top: 1rem !important;
+}
+
+
+@media (min-width: 1200px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 100vw !important;
+  }
+}
+@media (min-width: 992px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 100vw !important;
+  }
+}
+@media (min-width: 768px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 100vw !important;
+  }
+}
+@media (min-width: 576px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 100vw !important;
+  }
+}
+
+

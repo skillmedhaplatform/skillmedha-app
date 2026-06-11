@@ -1,0 +1,92 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+@import "@/modules/testportal_admin/components/styles/mixins.scss";
+
+.container {
+  width: 100%;
+  height: auto;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  position: relative;
+  @include flexBox(column, flex-start, center);
+  gap: 1rem;
+  .respTitle {
+    @include flexBox(column, flex-start, center);
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0;
+    color: $navbarColor;
+    font-weight: 700;
+    font-size: 1.2rem;
+    p {
+      font-weight: 500;
+    }
+  }
+  .editor_div {
+    width: 80%;
+    height: 14rem;
+    border: $border;
+    .textEditor_inst {
+      width: 80%;
+      height: 100%;
+      border-radius: 10px;
+
+      & > :nth-child(1) {
+        border: 0;
+        border: $border;
+      }
+      & > :nth-child(2) {
+        border: 0;
+      }
+    }
+  }
+
+  .formComp {
+    width: 100%;
+  }
+
+  .ConsetComp {
+    @include flexBox(column, flex-start, flex-start);
+    width: 100%;
+    // height: 13rem;
+    gap: 0.5rem;
+    p {
+      // font-weight: 600;
+      // font-size: 1.2rem;
+      // width: 18%;
+    }
+    // span {
+    //   width: 15%;
+    // }
+    .consentForm{
+      width: 15%;
+    }
+    .editorComp {
+      width: 85%;
+      height: 100%;
+      // border: $border;
+      // border-radius: 0.4rem;
+      // https://res.cloudinary.com/cliqtick/image/upload/v1722508839/x0ylugotn13b1otirqv9.png  
+      overflow: hidden;
+      // border: $border;
+      // .textEditor_conset {
+      //   border: $border;
+      //   border-radius: 10px;
+      //   width: 100%;
+      //   border-radius: 0.4rem;
+      //   height: 100%;
+      //   & > :nth-child(1) {
+      //     border: 0;
+      //     border-radius: 0.4rem;
+      //   }
+      //   & > :nth-child(2) {
+      //     border: 0;
+      //     border-radius: 0.4rem;
+      //   }
+      // }
+    }
+  }
+  .save {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+}

@@ -1,0 +1,85 @@
+@use '@/modules/admin/styles/colors' as *;
+
+.header {
+  background: $white;
+  border-bottom: 1px solid $borderColor;
+  position: sticky;
+  top: 0;
+  z-index: $zIndexSticky;
+  box-shadow: $shadowSm;
+}
+
+.container {
+  max-width: $containerMaxWidth;
+  margin: 0 auto;
+  padding: $spacing4 $spacing6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  h1 {
+    font-size: 20px;
+    font-weight: $fontWeightBold;
+    color: $primaryColor;
+    margin: 0;
+  }
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: $spacing4;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing2;
+  padding: $spacing2 $spacing3;
+  background: $gray100;
+  border-radius: $borderRadius;
+  color: $textPrimary;
+  font-size: $fontSizeSm;
+  font-weight: $fontWeightMedium;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing2;
+  padding: $spacing2 $spacing4;
+  background: transparent;
+  border: 1px solid $borderColor;
+  border-radius: $borderRadius;
+  color: $gray700;
+  font-size: $fontSizeSm;
+  font-weight: $fontWeightMedium;
+  cursor: pointer;
+  transition: all $transitionBase;
+
+  &:hover {
+    background: $errorLight;
+    border-color: $error;
+    color: $error;
+  }
+}
+
+@media (max-width: $breakpointMd) {
+  .container {
+    padding: $spacing3 $spacing4;
+  }
+
+  .logo h1 {
+    font-size: 18px;
+  }
+
+  .userInfo span {
+    display: none;
+  }
+
+  .logoutButton span {
+    display: none;
+  }
+}

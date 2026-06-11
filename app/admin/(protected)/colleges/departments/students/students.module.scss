@@ -1,0 +1,223 @@
+@import "@/modules/admin/styles/mixins.scss";
+
+.studentsContainer {
+  width: 100%;
+  min-height: 60vh;
+  height: 100%;
+  overflow-y: auto;
+  @include custom-scrollbar();
+  position: relative;
+}
+
+.header {
+  @include flexBox(row, center, space-between);
+  border-radius: 8px;
+  padding-top: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  background-color: white;
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .subtitle {
+    margin-top: 8px;
+    color: #666;
+    font-size: 14px;
+
+    strong {
+      color: #1890ff;
+      font-size: 16px;
+    }
+  }
+}
+
+.loadingContainer {
+  @include flexBox(column, center, center);
+  min-height: 400px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.errorContainer {
+  @include flexBox(column, center, center);
+  padding: 60px 40px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  p {
+    color: #ff4d4f;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+}
+
+.tableWrapper {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  @include custom-scrollbar(#1890ff, #f0f0f0, 10px);
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 768px) {
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.studentsTable {
+  width: 100%;
+
+  // Use :global() function syntax instead of block syntax
+  :global(.ant-table) {
+    font-size: 14px;
+
+    @media (max-width: 768px) {
+      font-size: 12px;
+    }
+  }
+
+  :global(.ant-table-thead) > :global(tr) > :global(th) {
+    white-space: nowrap;
+    font-weight: 600;
+    background: #fafafa;
+
+    @media (max-width: 768px) {
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
+
+  :global(.ant-table-tbody) > :global(tr) > :global(td) {
+    white-space: nowrap;
+
+    @media (max-width: 768px) {
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
+
+  :global(.ant-pagination) {
+    margin: 16px 0;
+
+    @media (max-width: 768px) {
+      text-align: center;
+    }
+  }
+
+  :global(.ant-pagination-options) {
+    @media (max-width: 768px) {
+      display: block;
+      margin: 8px 0;
+    }
+  }
+
+  :global(.ant-pagination-item),
+  :global(.ant-pagination-prev),
+  :global(.ant-pagination-next),
+  :global(.ant-pagination-jump-prev),
+  :global(.ant-pagination-jump-next) {
+    @media (max-width: 768px) {
+      margin: 0 2px;
+      min-width: 28px;
+    }
+  }
+
+  :global(.ant-pagination-options-size-changer) {
+    @media (max-width: 480px) {
+      width: 100%;
+      margin: 8px 0;
+    }
+  }
+
+  :global(.ant-select-selector) {
+    @media (max-width: 480px) {
+      width: 100% !important;
+    }
+  }
+
+  :global(.ant-table-container) {
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    &::-webkit-scrollbar {
+      height: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f0f0f0;
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #1890ff;
+      border-radius: 10px;
+
+      &:hover {
+        background: #096dd9;
+      }
+    }
+  }
+
+  :global(.ant-table-cell-fix-left),
+  :global(.ant-table-cell-fix-right) {
+    @media (max-width: 768px) {
+      position: sticky !important;
+      z-index: 2;
+    }
+  }
+}
+
+.evenRow {
+  background: #ffffff;
+
+  &:hover {
+    background: #f5f5f5 !important;
+  }
+}
+
+.oddRow {
+  background: #fafafa;
+
+  &:hover {
+    background: #f0f0f0 !important;
+  }
+}
+.activeFilters {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+  padding: 24px 0;
+}
+
+.aiUsageSummary {
+  margin-top: 8px;
+  padding: 8px 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  
+  > div:first-child {
+    flex: 1;
+  }
+}

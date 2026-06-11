@@ -1,0 +1,202 @@
+@import "@/modules/admin/styles/colors.scss";
+@import "@/modules/admin/styles/mixins.scss";
+.mainContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.cardsList {
+  overflow-y: auto;
+  min-height: 70vh;
+  height: 85%;
+  padding: 1rem 0 5rem 0;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #24A058;
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #1b8184;
+  }
+
+  scrollbar-width: thin;
+  scrollbar-color: #24A058 transparent;
+}
+
+.cards {
+  margin-top: 1rem;
+  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+
+  /* Extra small devices (phones, 320px and up) */
+  @media (max-width: 575.98px) {
+    margin-top: 0.5rem;
+    gap: 0.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  /* Small devices (landscape phones, 576px and up) */
+  @media (min-width: 576px) and (max-width: 767.98px) {
+    margin-top: 0.75rem;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  }
+
+  /* Medium devices (tablets, 768px and up) */
+  @media (min-width: 768px) and (max-width: 991.98px) {
+    margin-top: 1rem;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  }
+
+  /* Large devices (desktops, 992px and up) */
+  @media (min-width: 992px) and (max-width: 1199.98px) {
+    margin-top: 1rem;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  }
+
+  /* Extra large devices (large desktops, 1200px and up) */
+  @media (min-width: 1200px) and (max-width: 1399.98px) {
+    margin-top: 1rem;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  }
+
+  /* XXL devices (larger desktops, 1400px and up) */
+  @media (min-width: 1400px) {
+    margin-top: 1.25rem;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  }
+
+  /* Ultra-wide screens (1920px and up) */
+  @media (min-width: 1920px) {
+    margin-top: 1.5rem;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+  }
+}
+
+.card {
+  border: 1px solid rgba(128, 128, 128, 0.29);
+  padding: 1rem;
+  border-radius: 10px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  gap: 1rem;
+}
+
+.createButton {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  div {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+}
+
+.skillsStyles {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  .skillTab {
+    padding: 0.2rem 1rem;
+    border-radius: 1rem;
+    background-color: $backgroundColor1;
+  }
+}
+
+.infoBody {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.cardBody {
+  .imageContainer {
+    border: 0.01px solid rgba(128, 128, 128, 0.29);
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+    }
+  }
+}
+
+.paddingContainer {
+  height: 10vh;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.emptyStateIcon {
+  margin-bottom: 24px;
+  opacity: 0.6;
+}
+
+.emptyStateContent h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 12px;
+}
+
+.emptyStateContent p {
+  font-size: 16px;
+  color: #8c8c8c;
+  margin-bottom: 32px;
+  max-width: 400px;
+  line-height: 1.5;
+}
+.desc {
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  min-height: 3rem;
+  max-height: 10rem;
+  text-align: justify;
+
+  /* For ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}

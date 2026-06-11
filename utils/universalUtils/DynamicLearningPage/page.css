@@ -1,0 +1,76 @@
+.ant-breadcrumb .ant-breadcrumb-separator {
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  text-indent: -9999px;
+
+  display: inline-block;
+  height: 1.2rem;
+  width: 1.2rem;
+  display: flex;
+  align-self: center;
+
+  background: url("https://res.cloudinary.com/dug3awue8/image/upload/v1746083643/icon_sgq3vj.svg")
+    no-repeat center center;
+  background-size: contain;
+}
+
+.ant-collapse-item {
+  padding: .5rem 0rem !important;
+}
+
+.ant-collapse-header {
+  border: none !important;
+}
+
+
+.ant-collapse-header-text{
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+}
+
+.ant-collapse-item-active ,.ant-collapse-content-box{
+  background-color: #25a5a733;
+}
+
+
+.wr-main-content ,.page-footer,.preview-agreement{
+  display: none !important;
+}
+
+/* In page.module.scss */
+.modalContent {
+  height: 100%;
+  overflow-y: auto;
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+.modalContent::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, Opera */
+}
+
+/* 
+.waiting-room-preview {
+  width: 90% !important;
+  height: 60% !important;
+
+}
+.waiting-room-preview{
+  position: static !important;
+} */
+
+/* .mobile-waiting-room{
+  flex-direction: column !important;
+  justify-content: end;
+}
+
+.preview-canvas{
+  width: 100% !important;
+  height: 100% !important;
+} */
+
+
+#zmmtg-root video[muted] {
+  display: none !important;
+}
+

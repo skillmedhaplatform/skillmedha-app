@@ -1,0 +1,76 @@
+.cardCont {
+  border: 1px solid rgba(128, 128, 128, 0.29);
+  padding: 0.6rem;
+  border-radius: 10px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  &:hover {
+    border-color: #24A058;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    // transform: translateY(-4px);
+  }
+  &:hover .branchImage {
+    transform: scale(1.1);
+    transition: all 0.3s ease-in-out;
+  }
+}
+
+.imgCont {
+  border: 0.01px solid rgba(128, 128, 128, 0.29);
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.branchImage {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  transition: all 0.3s ease-in-out;
+}
+.titleCont {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 12px;
+  .moreIconCont {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 3px;
+    padding: 0 1px;
+    .moreIcon {
+      font-size: 22px;
+    }
+    &:hover {
+      border: 0.01px solid rgba(128, 128, 128, 0.29);
+      background-color: rgba(224, 224, 224, 0.451);
+    }
+  }
+  .title {
+    font-size: 18px;
+    font-weight: 800;
+  }
+}
+
+// .infoSection {
+//   //   margin-top: 12px;
+// }
+
+.detailsSection p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #444;
+}
+
+.brochureBtn {
+  margin-top: 12px;
+  width: 100%;
+}

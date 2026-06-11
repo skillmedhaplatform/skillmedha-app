@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --banner-bg:          #1565C0;
+  --banner-height:      64px;
+  --banner-padding-x:  24px;
+  --banner-padding-y:  0px;
+  --banner-text-color: #FFFFFF;
+  --banner-font-size:  14px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-inter);
+  --color-brand-50: #fdf8f5;
+  --color-brand-100: #f5f3ff;
+  --color-brand-200: #e0e7ff;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #1e1b4b;
+  --color-brand-dark: #0f172a;
+}
+
+/* 
+  Removed dark mode media query and body overrides to prevent 
+  Tailwind base colors from polluting legacy Ant Design / custom CSS text colors.
+  Legacy CSS assumes light mode and browser defaults.
+*/

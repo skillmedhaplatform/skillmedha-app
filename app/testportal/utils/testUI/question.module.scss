@@ -1,0 +1,462 @@
+@import "../../styles/colors.scss";
+@import "../../styles/mixins.scss";
+
+.container {
+  width: 100%;
+  height: calc(95% - 10px);
+
+  position: relative;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $white;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $iconBackground;
+    border-radius: 20px;
+    border: 3px solid $scrollBorder;
+    cursor: auto;
+  }
+
+  .header {
+    @include flexBox(row, space-between, center);
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    position: sticky;
+    background-color: $buttonBackground;
+    top: 0;
+
+    .categoryBreadcrumb {
+      width: 100%;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: $iconBackground;
+      padding: 0.4rem 0.6rem;
+      margin-bottom: 0.4rem;
+      background: linear-gradient(135deg, rgba(29, 164, 105, 0.08), rgba(29, 164, 105, 0.03));
+      border-left: 3px solid $iconBackground;
+      border-radius: 0.3rem;
+    }
+
+    .type,
+    .sno {
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .type {
+      color: $iconBackground;
+
+      strong {
+        color: $orange;
+      }
+    }
+
+    .queScore,
+    .bonusScore,
+    .negScore,
+    .partialScore {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .queScore {
+      color: $queScore;
+    }
+
+    .partialScore {
+      color: $partialScore;
+    }
+
+    .bonusScore {
+      color: $bonusScore;
+    }
+
+    .negScore {
+      color: $negScore;
+    }
+  }
+
+  .optionsContaiuer {
+    margin-top: 1rem;
+
+    .optionLable {
+      @include flexBox(row, flex-start, center);
+      gap: 0.2rem;
+      cursor: pointer;
+
+      img {
+        max-width: 10rem;
+      }
+
+      .optionsInput {
+        display: inline-block;
+        width: 0.8rem;
+        height: 0.8rem;
+        border: 0.09rem solid;
+        border-radius: 0.2rem;
+      }
+
+      span {
+        .optionsOrderChar {
+          font-weight: 600;
+          margin: 0 0.5rem;
+        }
+      }
+    }
+
+    .optionValue {
+      p {
+        display: inline;
+      }
+    }
+  }
+}
+
+.bodyCon {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem;
+  height: calc(95% - 10px);
+
+  .quesContainer_main_cont {
+    width: 60%;
+  }
+
+  .quesContainerMain {
+    width: 100%;
+    overflow-y: scroll;
+    height: calc(100% - 1rem);
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      box-shadow: inset 0 0 5px rgba(183, 182, 182, 0.721);
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $iconBackground;
+      border-radius: 10px;
+      height: 50%;
+    }
+
+    .videoElement {
+      width: 100%;
+      max-height: 22rem;
+      margin-top: 20px;
+    }
+
+    .player {
+      width: 100%;
+      margin-top: 2rem;
+    }
+
+    .player::-webkit-progress-bar {
+      color: $iconBackground;
+    }
+
+    .player::-webkit-media-controls-panel {
+      background-color: #f1f1f100;
+    }
+
+    .player::-webkit-media-controls-enclosure {
+      background-color: transparent;
+    }
+
+    .player::-webkit-media-controls-mute-button {
+      display: none !important;
+    }
+
+    .player::-webkit-media-controls-volume-slider {
+      display: none !important;
+    }
+  }
+
+  .quesContainer {
+    width: 100%;
+    display: flex;
+    align-items: start;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    position: relative;
+    flex-direction: column;
+    gap: 1rem;
+
+    .comprehension_div {
+      padding: 1rem;
+      border-radius: 5px;
+      height: 22rem;
+      overflow: hidden;
+      overflow-y: auto;
+      font-size: 1rem;
+      background-color: $inputBackground;
+      width: 98%;
+      object-fit: contain;
+
+      .video_cont {
+        width: 100%;
+        max-height: 98%;
+      }
+
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      &::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 5px #b7b6b6b8;
+        border-radius: 10px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: $iconBackground;
+        border-radius: 10px;
+        height: 50%;
+      }
+    }
+
+    .question_div {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    .flagImg {
+      position: absolute;
+      top: 0;
+      margin-top: -1rem;
+      height: fit-content;
+    }
+
+    .questionText {
+      height: calc(100% - 1rem);
+      width: 100%;
+      padding-right: 0.9rem;
+      text-align: justify;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      p {
+        width: 100%;
+        object-fit: contain;
+
+        img {
+          margin-left: 2rem;
+          width: 50%;
+        }
+      }
+
+      img {
+        max-width: 15rem;
+      }
+    }
+
+    .index_span {
+      border: 1px solid $iconBackground;
+      height: 1.7rem;
+      width: 1.7rem;
+      margin-right: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      font-size: 1rem;
+    }
+
+    @media (min-width: 1024px) and (max-width: 1250px) {
+      .questionText {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .optionsContaiuer {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 1rem);
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding: 0.5rem;
+    row-gap: 1rem;
+    width: 40%;
+
+    .optionLable {
+      height: auto;
+      width: 100%;
+      padding: 1rem 1rem;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      cursor: pointer;
+      border-radius: 0.5rem;
+      border: 1px solid $iconBackground;
+
+      &:hover {
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+          rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+      }
+
+      .checked {
+        background-color: $iconBackground;
+        position: relative;
+        display: flex;
+        align-self: flex-start;
+        justify-content: flex-start;
+
+        &::after {
+          color: $white;
+          border: 1px solid;
+          border-radius: 50%;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: auto;
+        }
+      }
+
+      .optionsInput {
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: 50%;
+      }
+
+      .borderRadius {
+        border-radius: 2px;
+      }
+
+      .paraoptionsInput {
+        border: 1px solid $black;
+        width: 100%;
+        height: 100%;
+      }
+
+      .optionsOrderChar {
+        color: $headerColor;
+      }
+
+      .optionValue {
+        width: 90%;
+        text-align: justify;
+      }
+    }
+  }
+
+  .para_optionsInput {
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+
+    .legend {
+      width: 100%;
+      height: auto;
+      border: 1px solid $headerColor;
+      padding: 1rem;
+      border-radius: 1rem;
+      position: relative;
+
+      p {
+        color: $iconBackground;
+        font-weight: 700;
+        font-size: 1.1rem;
+        position: absolute;
+        top: -5%;
+        left: 5%;
+        z-index: 2;
+        background: $white;
+        padding: 0 0.5rem;
+      }
+    }
+  }
+
+  .optionsContaiuer::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  .optionsContaiuer::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+  }
+
+  .optionsContaiuer::-webkit-scrollbar-thumb {
+    background: $iconBackground;
+    border-radius: 10px;
+    height: 50%;
+  }
+}
+
+.codingQuestionContainer {
+  margin-top: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+
+.codingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.languageSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  label {
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+.languageSelect {
+  padding: 0.5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+  min-width: 120px;
+
+  &:focus {
+    outline: none;
+    border-color: #1890ff;
+  }
+}
+
+.submitBtn {
+  padding: 0.5rem 1rem;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+
+  &:hover {
+    background-color: #40a9ff;
+  }
+
+  &:disabled {
+    background-color: #d9d9d9;
+    cursor: not-allowed;
+  }
+}
+
+.editorContainer {
+  position: relative;
+  border: none;
+}

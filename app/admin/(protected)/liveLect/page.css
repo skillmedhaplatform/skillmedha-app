@@ -1,0 +1,72 @@
+.parentComp{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+
+
+
+
+
+/* make your container a positioning context */
+.single-main-container__video-frame {
+    /* position: relative; */
+    width: 100%;
+    height: 100%;
+    /* overflow: hidden; */
+  }
+  
+  /* target the <video-player> wrapper and its inner div */
+  .single-main-container__video-frame video-player,
+  .single-main-container__video-frame video-player > div {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  
+  
+  /* if your avatar-footer needs to stay at the bottom,
+     you can override its vertical position instead of stretching:
+  */
+  .single-main-container__video-frame .video-avatar__avatar-footer {
+    top: auto;
+    bottom: 0;
+  }
+  
+  
+#zmmtg-root {
+    position: absolute !important;
+    top: 0; left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 1;        
+  }
+
+  #zmmtg-root video,
+#zmmtg-root .video-container,
+#zmmtg-root .meeting-video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;   
+}
+
+/* 
+#zmmtg-root .meeting-header,
+#zmmtg-root #wc-footer,
+.mobile-suspension-window-wrapper,
+.VideoShareLayout,
+.ReactModal__Content--after-open {
+  display: none !important;
+} */
+
+
+#video-share-layout{
+  height: 100% !important;
+  position: static !important;
+}
+
+
+.ant-radio-button-checked{
+  background-color: #25A3A6;
+}

@@ -1,0 +1,970 @@
+@import "@/modules/admin/styles/mixins.scss";
+
+// ==================== GRID MIXINS ====================
+
+// Responsive Grid Mixin
+@mixin responsive-grid($min-width: 250px, $max-columns: null, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, #{$min-width}), 1fr)
+  );
+  gap: $gap;
+  background-color: transparent;
+  border: none;
+
+  @if $max-columns {
+    @media (min-width: 1200px) {
+      grid-template-columns: repeat($max-columns, 1fr);
+    }
+  }
+}
+
+// Grid with Max Width (for cards like TPO that shouldn't stretch)
+@mixin responsive-grid-max($min-width: 300px, $max-width: 450px, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(#{$min-width}, #{$max-width}));
+  gap: $gap;
+  background-color: transparent;
+  border: none;
+  justify-content: start;
+
+  @media (max-width: 575px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Two Column Grid (responsive)
+@mixin two-column-grid($min-width: 280px, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, #{$min-width}), 1fr)
+  );
+  gap: $gap;
+  background-color: transparent;
+  border: none;
+
+  @media (min-width: 992px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// Three Column Grid (responsive)
+@mixin three-column-grid($min-width: 250px, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, #{$min-width}), 1fr)
+  );
+  gap: $gap;
+  background-color: transparent;
+  border: none;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1400px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// Four Column Grid (responsive)
+@mixin four-column-grid($min-width: 280px, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, #{$min-width}), 1fr)
+  );
+  gap: $gap;
+  background-color: transparent;
+  border: none;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// Charts Grid (wider min-width)
+@mixin charts-grid($min-width: 500px, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, #{$min-width}), 1fr)
+  );
+  gap: $gap;
+  background-color: transparent;
+  border: none;
+
+  &.fullWidth {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboardContainer {
+  min-height: 70vh;
+  height: 85vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.5rem;
+  padding-top: 0;
+  @include custom-scrollbar();
+
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  // Header Section
+  .header {
+    @include flexBox(row, center, space-between, 1rem);
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 9;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    .headerLeft {
+      @include flexBox(column, flex-start, flex-start, 0.25rem);
+      max-width: 100%;
+      overflow: hidden;
+
+      h2 {
+        margin: 0;
+        font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+        font-weight: 600;
+        color: #262626;
+        line-height: 1.2;
+      }
+
+      .subtitle {
+        font-size: clamp(0.813rem, 1.5vw, 0.938rem);
+        color: #8c8c8c;
+      }
+    }
+
+    .headerRight {
+      @include flexBox(row, center, flex-end, 0.75rem);
+    }
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background-color: #f0f0f0;
+    margin: 1rem 0;
+  }
+
+  // Section Title
+  .sectionTitle {
+    @include flexBox(row, center, flex-start, 0.75rem);
+    margin: 1.5rem 0 1rem 0;
+    padding-left: 0.5rem;
+
+    h3 {
+      margin: 0;
+      font-size: clamp(1.125rem, 2vw, 1.375rem);
+      font-weight: 600;
+      color: #262626;
+      @include flexBox(row, center, flex-start, 0.5rem);
+
+      svg {
+        color: #1890ff;
+        font-size: clamp(1.125rem, 2vw, 1.5rem);
+      }
+    }
+  }
+
+  // ==================== GRID LAYOUTS ====================
+
+  // Stats Cards Grid (4 columns)
+  .statsGrid {
+    @include four-column-grid(280px, 1rem);
+    margin-bottom: 1.5rem;
+
+    .statsCard {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border-left: 4px solid;
+      min-height: 140px;
+      @include flexBox(column, flex-start, space-between, 1rem);
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+      }
+
+      .cardHeader {
+        @include flexBox(row, center, space-between, 0.5rem);
+        width: 100%;
+        flex-wrap: wrap;
+
+        .avatar {
+          width: clamp(40px, 5vw, 48px);
+          height: clamp(40px, 5vw, 48px);
+          border-radius: 50%;
+          @include flexBox(row, center, center, 0);
+          color: white;
+          font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+          flex-shrink: 0;
+        }
+
+        .trend {
+          padding: 0.25rem 0.75rem;
+          border-radius: 6px;
+          font-size: clamp(0.688rem, 1.2vw, 0.813rem);
+          font-weight: 500;
+          @include flexBox(row, center, center, 0.25rem);
+          white-space: nowrap;
+        }
+      }
+
+      .cardBody {
+        @include flexBox(column, flex-start, flex-start, 0.25rem);
+        width: 100%;
+
+        .cardTitle {
+          font-size: clamp(0.813rem, 1.3vw, 0.938rem);
+          color: #8c8c8c;
+          font-weight: 400;
+        }
+
+        .cardValue {
+          font-size: clamp(1.5rem, 3vw, 2rem);
+          font-weight: 600;
+          line-height: 1.1;
+        }
+      }
+    }
+  }
+
+  // Organization Details Grid (3 columns)
+  .detailsGrid {
+    @include two-column-grid(250px, 1rem);
+    margin-bottom: 1.5rem;
+    gap: 1.5rem;
+    .detailCard {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+      min-height: 280px;
+      border: 1px solid rgba(190, 190, 190, 0.3);
+
+      &:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      }
+
+      .cardTitle {
+        @include flexBox(row, center, space-between, 0.75rem);
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+
+        h3 {
+          @include flexBox(row, center, flex-start, 0.5rem);
+          margin: 0;
+          font-size: clamp(1rem, 1.8vw, 1.125rem);
+          font-weight: 600;
+          color: #262626;
+
+          .icon {
+            font-size: clamp(1.125rem, 2vw, 1.375rem);
+            color: #1890ff;
+          }
+        }
+      }
+
+      .cardContent {
+        @include flexBox(column, flex-start, flex-start, 1rem);
+
+        .infoRow {
+          @include flexBox(row, flex-start, flex-start, 0.5rem);
+          width: 100%;
+          flex-wrap: wrap;
+
+          .label {
+            font-weight: 600;
+            color: #262626;
+            min-width: clamp(100px, 25%, 130px);
+            font-size: clamp(0.813rem, 1.3vw, 0.938rem);
+          }
+
+          .value {
+            color: #595959;
+            flex: 1;
+            font-size: clamp(0.813rem, 1.3vw, 0.938rem);
+            word-break: break-word;
+          }
+
+          .tag {
+            padding: 0.25rem 0.625rem;
+            border-radius: 6px;
+            font-size: clamp(0.688rem, 1.2vw, 0.813rem);
+            font-weight: 500;
+          }
+
+          .badge {
+            @include flexBox(row, center, flex-start, 0.5rem);
+            font-size: clamp(0.813rem, 1.3vw, 0.938rem);
+
+            &::before {
+              content: "";
+              width: 8px;
+              height: 8px;
+              border-radius: 50%;
+              background-color: #52c41a;
+              flex-shrink: 0;
+            }
+          }
+        }
+
+        .progressSection {
+          width: 100%;
+          @include flexBox(column, flex-start, flex-start, 0.5rem);
+
+          .progressLabel {
+            font-weight: 600;
+            color: #262626;
+            font-size: clamp(0.813rem, 1.3vw, 0.938rem);
+          }
+
+          .progressBar {
+            width: 100%;
+            height: 10px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            overflow: hidden;
+
+            .progressFill {
+              height: 100%;
+              border-radius: 6px;
+              transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+          }
+
+          .progressPercent {
+            font-size: clamp(0.688rem, 1.2vw, 0.813rem);
+            color: #8c8c8c;
+            font-weight: 500;
+          }
+        }
+
+        .statistic {
+          @include flexBox(column, flex-start, flex-start, 0.25rem);
+
+          .statisticLabel {
+            font-size: clamp(0.813rem, 1.3vw, 0.938rem);
+            color: #8c8c8c;
+          }
+
+          .statisticValue {
+            @include flexBox(row, center, flex-start, 0.5rem);
+            font-size: clamp(1.375rem, 3vw, 1.75rem);
+            font-weight: 600;
+            color: #262626;
+
+            .suffix {
+              font-size: clamp(0.813rem, 1.3vw, 0.938rem);
+              color: #8c8c8c;
+            }
+          }
+        }
+
+        // ==================== FEATURE MANAGEMENT STYLES ====================
+        .featuresList {
+          @include flexBox(column, flex-start, flex-start, 0.875rem);
+          width: 100%;
+        }
+
+        .featureItem {
+          @include flexBox(row, center, space-between, 0.75rem);
+          padding: 0.75rem 0.875rem;
+          background: #fafafa;
+          border-radius: 8px;
+          transition: all 0.3s ease;
+          border: 1px solid rgba(0, 0, 0, 0.04);
+          width: 100%;
+
+          &:hover {
+            background: #f0f0f0;
+            transform: translateX(4px);
+            border-color: rgba(0, 0, 0, 0.08);
+          }
+        }
+
+        .featureInfo {
+          @include flexBox(row, center, flex-start, 0.625rem);
+          flex: 1;
+          min-width: 0;
+        }
+
+        .featureIcon {
+          width: clamp(32px, 3.5vw, 36px);
+          height: clamp(32px, 3.5vw, 36px);
+          border-radius: 8px;
+          @include flexBox(row, center, center, 0);
+          font-size: clamp(0.938rem, 1.6vw, 1.063rem);
+          flex-shrink: 0;
+        }
+
+        .featureText {
+          @include flexBox(column, flex-start, flex-start, 0.125rem);
+          flex: 1;
+          min-width: 0;
+        }
+
+        .featureLabel {
+          font-size: clamp(0.75rem, 1.2vw, 0.875rem);
+          font-weight: 600;
+          color: #262626;
+          line-height: 1.3;
+        }
+
+        .featureDescription {
+          font-size: clamp(0.625rem, 1.1vw, 0.75rem);
+          color: #8c8c8c;
+          line-height: 1.3;
+        }
+      }
+    }
+  }
+
+  // ==================== JOBS GRID (FOR COMPANY DASHBOARD) ====================
+  .jobsGrid {
+    @include responsive-grid(320px, null, 1rem);
+    margin-bottom: 1.5rem;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    @media (min-width: 1200px) {
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+  }
+
+  .jobCard {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 1px solid rgba(190, 190, 190, 0.3);
+    min-height: 200px;
+    @include flexBox(column, flex-start, space-between, 1rem);
+
+    &:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-4px);
+      border-color: #1890ff;
+    }
+
+    .jobCardHeader {
+      @include flexBox(row, flex-start, space-between, 0.75rem);
+      width: 100%;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #f0f0f0;
+
+      .jobTitle {
+        font-size: clamp(1rem, 1.8vw, 1.125rem);
+        font-weight: 600;
+        color: #262626;
+        margin: 0;
+        flex: 1;
+        line-height: 1.3;
+        word-break: break-word;
+      }
+    }
+
+    .jobCardContent {
+      @include flexBox(column, flex-start, flex-start, 0.75rem);
+      width: 100%;
+      flex: 1;
+
+      .jobInfo {
+        @include flexBox(row, flex-start, space-between, 0.5rem);
+        width: 100%;
+        flex-wrap: wrap;
+
+        .jobLabel {
+          font-size: clamp(0.75rem, 1.2vw, 0.813rem);
+          color: #8c8c8c;
+          font-weight: 500;
+          min-width: 90px;
+        }
+
+        .jobValue {
+          font-size: clamp(0.75rem, 1.2vw, 0.875rem);
+          color: #262626;
+          font-weight: 600;
+          text-align: right;
+          flex: 1;
+          word-break: break-word;
+        }
+      }
+    }
+  }
+
+  // TPO Profile Grid (SMALLER & OPTIMIZED)
+  .tpoProfileGrid {
+    @include responsive-grid-max(280px, 360px, 1rem);
+    margin-bottom: 1.5rem;
+
+    .tpoProfileCard {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(190, 190, 190, 0.3);
+      width: 100%;
+      cursor: pointer;
+
+      &:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        transform: translateY(-4px);
+      }
+
+      .tpoCover {
+        height: clamp(70px, 10vw, 90px);
+        position: relative;
+        overflow: hidden;
+
+        .coverGradient {
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      .tpoContent {
+        padding: 0 1rem 1rem;
+        position: relative;
+
+        .tpoAvatarSection {
+          @include flexBox(column, center, center, 0.5rem);
+          margin-top: -32px;
+          margin-bottom: 0.875rem;
+          text-align: center;
+
+          .tpoAvatar {
+            width: clamp(60px, 8vw, 70px);
+            height: clamp(60px, 8vw, 70px);
+            border-radius: 50%;
+            background: white;
+            border: 3px solid white;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+            @include flexBox(row, center, center, 0);
+            flex-shrink: 0;
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
+            svg {
+              font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+              color: #8c8c8c;
+            }
+          }
+
+          .tpoBasicInfo {
+            @include flexBox(column, center, center, 0.25rem);
+
+            .tpoName {
+              margin: 0;
+              font-size: clamp(0.875rem, 1.6vw, 1rem);
+              font-weight: 700;
+              color: #262626;
+              line-height: 1.2;
+              text-align: center;
+              word-break: break-word;
+              width: 100%;
+            }
+
+            .tpoDesignation {
+              margin: 0;
+              font-size: clamp(0.688rem, 1.2vw, 0.813rem);
+              color: #8c8c8c;
+              font-weight: 500;
+              line-height: 1.3;
+            }
+
+            .tpoQualification {
+              @include flexBox(row, center, center, 0.25rem);
+              padding: 0.188rem 0.5rem;
+              background: #f0f5ff;
+              color: #1890ff;
+              border-radius: 8px;
+              font-size: clamp(0.625rem, 1vw, 0.688rem);
+              font-weight: 500;
+              margin-top: 0.25rem;
+
+              svg {
+                font-size: 0.625rem;
+              }
+            }
+          }
+        }
+
+        .tpoDetailsGrid {
+          @include flexBox(column, flex-start, flex-start, 0.5rem);
+          margin-bottom: 0.75rem;
+
+          .tpoDetailItem {
+            @include flexBox(row, center, flex-start, 0.625rem);
+            padding: 0.625rem 0.75rem;
+            background: #fafafa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            width: 100%;
+
+            &:hover {
+              background: #f0f0f0;
+              transform: translateX(3px);
+              border-color: rgba(0, 0, 0, 0.08);
+            }
+
+            .detailIcon {
+              width: clamp(28px, 3vw, 32px);
+              height: clamp(28px, 3vw, 32px);
+              border-radius: 50%;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              @include flexBox(row, center, center, 0);
+              color: white;
+              font-size: clamp(0.75rem, 1.2vw, 0.875rem);
+              flex-shrink: 0;
+            }
+
+            .detailContent {
+              @include flexBox(column, flex-start, flex-start, 0.125rem);
+              flex: 1;
+              min-width: 0;
+              overflow: hidden;
+
+              .detailLabel {
+                font-size: clamp(0.563rem, 0.9vw, 0.625rem);
+                color: #8c8c8c;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+                line-height: 1.2;
+              }
+
+              .detailValue {
+                font-size: clamp(0.688rem, 1.1vw, 0.75rem);
+                color: #262626;
+                font-weight: 600;
+                word-break: break-word;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: 1.3;
+                max-width: 100%;
+                display: block;
+                white-space: normal;
+              }
+            }
+          }
+        }
+
+        .tpoAwards {
+          padding: 0.75rem;
+          background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+          border-radius: 8px;
+          margin-top: 0.5rem;
+          border: 1px solid rgba(253, 203, 110, 0.5);
+
+          h4 {
+            @include flexBox(row, center, flex-start, 0.375rem);
+            margin: 0 0 0.375rem 0;
+            font-size: clamp(0.688rem, 1.2vw, 0.813rem);
+            font-weight: 700;
+            color: #d63031;
+            line-height: 1.3;
+
+            svg {
+              font-size: clamp(0.75rem, 1.3vw, 0.938rem);
+            }
+          }
+
+          p {
+            margin: 0;
+            font-size: clamp(0.625rem, 1.1vw, 0.75rem);
+            color: #2d3436;
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+  }
+
+  // Charts Section
+  .chartsSection {
+    margin-top: 1.5rem;
+
+    .chartsGrid {
+      @include charts-grid(500px, 1rem);
+
+      .chartCard {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(190, 190, 190, 0.2);
+
+        &:hover {
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .chartTitle {
+          font-size: clamp(0.938rem, 1.6vw, 1.125rem);
+          font-weight: 600;
+          color: #262626;
+          margin-bottom: 0.5rem;
+          @include flexBox(column, flex-start, flex-start, 0.25rem);
+
+          .chartSubtitle {
+            font-size: clamp(0.688rem, 1.1vw, 0.75rem);
+            color: #8c8c8c;
+            font-weight: 400;
+          }
+        }
+
+        .chartWrapper {
+          width: 100%;
+          overflow: hidden;
+          margin-top: 0.75rem;
+        }
+      }
+    }
+  }
+
+  // Global overrides for ApexCharts
+  :global(.apexcharts-canvas) {
+    max-width: 100% !important;
+
+    svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+  }
+
+  // Full width chart container
+  .fullWidth {
+    grid-column: 1 / -1;
+  }
+}
+
+// ==================== RESPONSIVE BREAKPOINTS ====================
+
+// Extra Small Devices (Portrait Phones, < 576px)
+@media (max-width: 575px) {
+  .dashboardContainer {
+    height: auto;
+    min-height: 100vh;
+    padding: 0.5rem;
+
+    .statsGrid,
+    .detailsGrid,
+    .jobsGrid {
+      gap: 0.875rem;
+
+      .statsCard,
+      .detailCard,
+      .jobCard {
+        padding: 1rem;
+      }
+    }
+
+    .statsCard {
+      min-height: 120px;
+    }
+
+    .jobCard {
+      min-height: 180px;
+    }
+
+    .tpoProfileGrid {
+      .tpoProfileCard {
+        .tpoContent {
+          .tpoDetailsGrid {
+            .tpoDetailItem {
+              .detailContent {
+                .detailValue {
+                  font-size: 0.688rem;
+                  word-break: break-all;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Small Devices (Landscape Phones, 576px - 767px)
+@media (min-width: 576px) and (max-width: 767px) {
+  .dashboardContainer {
+    .tpoProfileGrid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 340px));
+    }
+
+    .jobsGrid {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+  }
+}
+
+// Medium Devices (Tablets, 768px - 991px)
+@media (min-width: 768px) and (max-width: 991px) {
+  .dashboardContainer {
+    padding: 1rem;
+
+    .tpoProfileGrid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 360px));
+    }
+
+    .jobsGrid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+  }
+}
+
+// Large Devices (Desktops, 992px - 1199px)
+@media (min-width: 992px) and (max-width: 1199px) {
+  .dashboardContainer {
+    .tpoProfileGrid {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+    }
+
+    .jobsGrid {
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    }
+  }
+}
+
+// Extra Large Devices (Large Desktops, >= 1400px)
+@media (min-width: 1400px) {
+  .dashboardContainer {
+    max-width: 1600px;
+    margin: 0 auto;
+
+    .statsCard:hover,
+    .tpoProfileCard:hover,
+    .jobCard:hover {
+      transform: translateY(-6px);
+    }
+
+    .tpoProfileGrid {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+    }
+
+    .jobsGrid {
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+  }
+}
+
+// Landscape Orientation Specific
+@media (orientation: landscape) and (max-height: 600px) {
+  .dashboardContainer {
+    height: auto;
+    min-height: auto;
+
+    .header {
+      position: relative;
+    }
+
+    .statsCard {
+      min-height: 100px;
+      padding: 0.875rem;
+    }
+
+    .jobCard {
+      min-height: 160px;
+      padding: 0.875rem;
+    }
+  }
+}
+
+// Print Styles
+@media print {
+  .dashboardContainer {
+    overflow: visible;
+    height: auto;
+    padding: 0;
+
+    .header {
+      position: static;
+      box-shadow: none;
+    }
+
+    .statsCard,
+    .detailCard,
+    .chartCard,
+    .tpoProfileCard,
+    .jobCard {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      box-shadow: none;
+      border: 1px solid #e0e0e0;
+    }
+
+    .statsCard:hover,
+    .tpoProfileCard:hover,
+    .detailCard:hover,
+    .chartCard:hover,
+    .jobCard:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+
+.tokenLimitSection {
+  margin-top: 16px;
+  
+  .inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.quickActions {
+  .buttonGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+.warningText {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}

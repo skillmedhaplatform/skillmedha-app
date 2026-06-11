@@ -1,0 +1,56 @@
+.card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+  background: white;
+  color: black;
+  border: .8px solid rgba(150, 150, 150, 0.851);
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 0.5rem;
+}
+
+.thumbWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: white;
+  overflow: hidden;
+  border-radius: 12px;
+  display: flex;
+}
+
+.skeletonImage {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+
+  :global(.ant-skeleton-image) {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 12px;
+  }
+}
+
+.content {
+  display: grid;
+  grid-auto-rows: max-content;
+  gap: 8px;
+  padding: 5px;
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  height: 65px;
+  overflow: hidden;
+  gap: 6px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}

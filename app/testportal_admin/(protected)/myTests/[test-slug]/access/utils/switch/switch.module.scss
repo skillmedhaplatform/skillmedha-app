@@ -1,0 +1,63 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 39px;
+    height: 16px;
+    border-radius: 17px;
+    overflow: hidden; 
+    cursor: pointer;
+  }
+  
+  .switch.on {
+    background-color: $switchon ;
+  }
+  
+  .switch.off {
+    background-color: $switchoff;
+  }
+  
+  .knob {
+    position: absolute;
+   top: 0;
+   bottom: 0;
+   left: 2px;
+   margin: auto;
+    width: 11px;
+    height: 11px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: .3s;
+
+  }
+  
+  .switch.on .knob {
+    left: calc(100% - 2px);
+    transform: translateX(-100%);
+  }
+  
+  .label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content; 
+    font-size: 0.5rem;
+    font-weight: bold;
+    pointer-events: none; 
+    transition: .3s;
+  }
+  
+  .switch.on .label {
+ 
+     transform: translateX(15%);
+  }
+  .switch.off .label {
+    right: 0;
+     transform: translateX(35%);
+  }
+  

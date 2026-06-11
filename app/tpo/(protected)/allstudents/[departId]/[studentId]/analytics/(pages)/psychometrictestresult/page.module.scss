@@ -1,0 +1,49 @@
+.container {
+  padding: 2rem;
+}
+
+.card {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.question {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.option {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.selected {
+  background-color: rgba(5, 163, 5, 0.91);
+  border-color: green;
+  color: white;
+}
+
+.summaryCard {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  p {
+    margin: 4px 0;
+    font-size: 18px;
+  }
+}

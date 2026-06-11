@@ -1,0 +1,6 @@
+Question Type,Question Text,Explanation,Score Points,Correct Answer
+True/False,"The Earth is flat.","False. The Earth is an oblate spheroid (roughly spherical shape)",1,"false"
+True/False,"Water boils at 100 degrees Celsius at sea level.","True. At standard atmospheric pressure (sea level), water boils at 100°C or 212°F",1,"true"
+True/False,"Humans have four chambers in their heart.","True. The human heart has four chambers: left atrium, right atrium, left ventricle, and right ventricle",1,"true"
+True/False,"The sun revolves around the Earth.","False. The Earth and other planets revolve around the sun (heliocentric model)",1,"false"
+True/False,"Python is a compiled programming language.","False. Python is an interpreted language, not a compiled language like C or C++",1,"false"

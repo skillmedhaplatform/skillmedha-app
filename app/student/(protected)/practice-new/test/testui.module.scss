@@ -1,0 +1,289 @@
+@import "../../../../../utils/universalUtils/colors.module.scss";
+@import "../../../../../utils/universalUtils/mixins.scss";
+
+.mainCont {
+  width: 98%;
+  height: 95%;
+  overflow: hidden;
+  @include flexBox(column, flex-start, space-evenly);
+  padding: 0.5rem;
+
+  .headerCont {
+    width: 100%;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: $primaryColor;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .contentCont {
+    width: 100%;
+    height: 90%;
+    @include flexBox(row, flex-start, flex-start, 1rem);
+
+    .testCont {
+      width: 50%;
+      height: 100%;
+    }
+
+    .SuggestionsCont {
+      width: 50%;
+      height: 100%;
+      @include flexBox(column, flex-start, flex-start, 1rem);
+
+      .aiSuggCont {
+        width: 100%;
+        height: 50%;
+      }
+
+      .explCont {
+        width: 100%;
+        height: 50%;
+      }
+    }
+  }
+}
+
+.questionCard {
+  width: 100%;
+  height: 100%;
+  background-color: #24A0581a;
+  border-radius: 10px;
+  @include flexBox(column, center, space-between);
+  border: 0.1px solid #25a4a666;
+
+  .headerContbtn {
+    width: 100%;
+    height: 10%;
+    border-bottom: 0.5px solid $primaryColor;
+    @include flexBox(row, center, space-between);
+    padding: 1rem 0.5rem;
+
+    .quesText {
+      font-size: 17px;
+      font-weight: 700;
+      color: $primaryColor;
+    }
+  }
+
+  .questionCont {
+    width: 100%;
+    height: 100%;
+    padding: 0.5rem 1rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    @include custom-scrollbar($scrollbarWidth: 6px);
+
+    .questionText {
+      font-weight: 700;
+    }
+
+    .optionLable {
+      border: 0.5px solid $primaryColor;
+      border-radius: 5px;
+      padding: 0.5rem 1rem;
+      margin: 1rem 0;
+      @include flexBox(row, center, flex-start, 1rem);
+      cursor: pointer;
+      background-color: #f5f5f5b2;
+
+      .optionsOrderChar {
+        font-weight: 800;
+      }
+    }
+
+    .selectedOption {
+      background-color: $primaryColor;
+      color: white;
+    }
+
+    .correctAns {
+      background-color: green;
+      color: white;
+    }
+
+    .wrongAns {
+      background-color: #f8d7da; // reddish
+      border: 1px solid #dc3545;
+    }
+  }
+}
+
+.suggestionContainer {
+  width: 100%;
+  height: 100%;
+  background-color: #24A0581a;
+  border-radius: 10px;
+  @include flexBox(column, center, space-between);
+  border: 0.1px solid #25a4a666;
+
+  .PageHeader {
+    height: 15%;
+    width: 100%;
+    border-bottom: 0.1px solid $primaryColor;
+    @include flexBox(row, center, space-between);
+
+    p {
+      color: $primaryColor;
+      font-size: 18px;
+      font-weight: 700;
+      padding-left: 1rem;
+    }
+
+    img {
+      transform: scale(0.8);
+      margin-right: 1rem;
+    }
+  }
+
+  .PageContent {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 1rem;
+    @include flexBox(row, flex-start, flex-start);
+  }
+
+  .Suggestionheader {
+    width: 100%;
+    height: 10%;
+    border-bottom: 0.5px solid $primaryColor;
+    padding: 0.5rem 0;
+    @include flexBox(row, center, center);
+    gap: 65%;
+
+    .contentCont {
+      width: 100%;
+      height: 80%;
+      border-bottom: 1px solid;
+    }
+  }
+}
+
+.questionTypeBadge {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+
+  .questionTypeLabel {
+    padding: 0.3rem 1rem;
+    border: 1px solid;
+    margin-top: 1rem;
+    border-radius: 5px;
+    display: flex;
+    align-self: flex-end;
+  }
+}
+
+// True/False styles
+.trueFalseContainer {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.trueFalseButton {
+  padding: 15px 30px;
+  border: 2px solid #d9d9d9;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+
+  &:hover {
+    border-color: #1890ff;
+    color: #1890ff;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.trueFalseLabel {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+// Media container styles
+.mediaContainer {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.videoPlayer {
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.audioPlayer {
+  width: 100%;
+  max-width: 500px;
+  margin: 10px 0;
+}
+
+// Text answer styles
+.textAnswerContainer {
+  margin: 20px 0;
+}
+
+.textAnswerArea {
+  margin-bottom: 15px;
+
+  &:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
+}
+
+.submitTextButton {
+  display: block;
+  margin: 0 auto;
+}
+
+.submittedAnswer {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 6px;
+
+  strong {
+    color: #52c41a;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin: 0;
+    color: #333;
+    white-space: pre-wrap;
+  }
+}
+
+// Update existing styles for True/False selected states
+.trueFalseButton.selectedOption {
+  background-color: #1890ff;
+  color: white;
+  border-color: #1890ff;
+}
+
+.trueFalseButton.correctAns {
+  background-color: #52c41a;
+  color: white;
+  border-color: #52c41a;
+}
+
+.trueFalseButton.wrongAns {
+  background-color: #ff4d4f;
+  color: white;
+  border-color: #ff4d4f;
+}

@@ -1,0 +1,76 @@
+@import "../../styles/mixins.scss";
+@import "../../styles/colors.scss";
+
+.timeCon {
+  padding: 0rem 1rem;
+  height: 2rem;
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  position: relative;
+
+  .timeFlex {
+    position: absolute;
+    width: 50%;
+
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+    align-items: center;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.212);
+    overflow: hidden;
+
+    .TimeParent {
+      height: 10rem;
+      overflow-y: scroll;
+      z-index: 10;
+      width: 100%;
+      background-color: rgb(255, 255, 255);
+
+      div {
+        border-radius: 0.2rem;
+        padding: 0.2rem 0.5rem;
+        &:hover {
+          background-color: $iconBackgroundLowOpacity;
+          color: white;
+        }
+      }
+      .tp {
+        position: sticky;
+        top: 0;
+        left: 0;
+        background-color: $iconBackground;
+      }
+      &::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: white;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: $iconBackground;
+        border-radius: 20px;
+        border: 3px solid #f5f5f5;
+        cursor: auto;
+      }
+    }
+  }
+
+  .TimeDiv {
+    width: 100%;
+  }
+  .activeTime {
+    background-color: $iconBackgroundLowOpacity !important;
+    color: white;
+  }
+}
+.activeMinute {
+  background-color: $iconBackgroundLowOpacity !important;
+  color: white;
+}

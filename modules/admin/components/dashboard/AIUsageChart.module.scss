@@ -1,0 +1,194 @@
+// src/components/dashboard/AIUsageChart.module.scss
+.chartContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.loadingState,
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #64748b;
+  gap: 16px;
+
+  .spinIcon {
+    animation: spin 2s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .icon {
+    color: #8b5cf6;
+  }
+
+  .title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 4px 0 0 0;
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.chartTypeSelector {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+
+  button {
+    padding: 6px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #64748b;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #e2e8f0;
+    }
+
+    &.active {
+      background: white;
+      color: #8b5cf6;
+      font-weight: 500;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+.periodSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  color: #64748b;
+
+  select {
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    cursor: pointer;
+    color: #1e293b;
+    font-weight: 500;
+    outline: none;
+  }
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border-left: 4px solid #e2e8f0;
+
+  &.positive {
+    background: #f0fdf4;
+    border-left-color: #24A058;
+
+    .statIcon {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+  }
+
+  &.negative {
+    background: #fef2f2;
+    border-left-color: #ef4444;
+
+    .statIcon {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+  }
+
+  .statIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #e2e8f0;
+    color: #64748b;
+  }
+
+  .statLabel {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 4px 0;
+  }
+
+  .statValue {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .statChange {
+    font-size: 12px;
+    font-weight: 400;
+    color: #64748b;
+  }
+}
+
+.chartWrapper {
+  margin-top: 20px;
+}

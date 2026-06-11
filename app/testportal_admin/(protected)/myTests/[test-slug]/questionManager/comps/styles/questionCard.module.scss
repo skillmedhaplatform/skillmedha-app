@@ -1,0 +1,94 @@
+@import "@/modules/testportal_admin/components/styles/colors.scss";
+@import "@/modules/testportal_admin/components/styles/mixins.scss";
+$min-width1024: 1024px;
+$max-width1140: 1140px;
+
+.questionCardComp {
+  background-color: none !important;
+  width: 100%;
+}
+
+.questionCard {
+  padding: 1rem;
+  background-color: $sidebargray;
+  border-radius: 0.5rem;
+  box-shadow: rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px;
+  width: 100%;
+}
+
+.ansCard {
+  @include flexBox(row, flex-start, flex-start);
+  margin: 0.5rem;
+  .optionContent {
+    @include fontMixin();
+    p {
+      margin: 0;
+      margin-left: 0.5rem;
+    }
+  }
+}
+
+.header {
+  @include flexBox(row, center, space-between);
+  margin-bottom: 1rem;
+  & > :nth-child(1) {
+    @include flexBox(row, center, center, 1rem);
+    span {
+      @include fontMixin(_, 700);
+    }
+  }
+}
+
+.checkbox {
+  margin-right: 0.5rem;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.question {
+  cursor: pointer;
+  font-weight: 600;
+  & > :nth-child(1) {
+    margin-bottom: 0.8rem;
+    @include fontMixin();
+  }
+  .video_div {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  & > :nth-last-child(1) {
+    font-size: 1.3rem;
+    cursor: pointer;
+  }
+  & > :nth-last-child(2) {
+    background-color: $qmbtncolorpink;
+  }
+  button {
+    width: fit-content;
+    display: inline;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background-color: $graybackground;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    padding: 0.5rem 2rem;
+    cursor: pointer;
+  }
+}
+.comprehension_text {
+  p {
+    font-weight: 500;
+  }
+}
+.Comprehension_delete_btn{
+  color: $ComprehensionDeleteBtn;
+}

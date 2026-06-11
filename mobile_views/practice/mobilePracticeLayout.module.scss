@@ -1,0 +1,176 @@
+@import "../../utils/universalUtils/colors.module.scss";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  box-sizing: border-box;
+}
+
+/* 1. Main Category Navigation Tabs */
+.categoryTabs {
+  display: flex;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 16px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tabBtn {
+  flex: 1;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+
+  &:hover {
+    background: #e2e8f0;
+  }
+}
+
+.activeTab {
+  background: #24a058 !important;
+  border-color: #24a058 !important;
+  color: #ffffff !important;
+}
+
+/* 2. Subject and Topic Selector Accordion */
+.accordionContainer {
+  padding: 12px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.collapseWrapper {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+  overflow: hidden !important;
+
+  :global(.ant-collapse-item) {
+    border-bottom: 1px solid #f1f5f9 !important;
+    &:last-child {
+      border-bottom: none !important;
+    }
+  }
+
+  :global(.ant-collapse-header) {
+    padding: 14px 16px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    font-size: 0.95rem !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  :global(.ant-collapse-content-box) {
+    padding: 12px !important;
+    background: #f8fafc !important;
+  }
+}
+
+.subjectHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topicsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.topicChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+}
+
+.activeTopicChip {
+  background: #e1f5fe !important;
+  border-color: #0288d1 !important;
+  color: #0288d1 !important;
+}
+
+.loadingSpinner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.emptyTopics {
+  margin: 0;
+  padding: 8px 12px;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
+/* 3. Section Content Display Area & Question Cards Mobile Sizing */
+.contentArea {
+  flex: 1;
+  padding: 12px;
+  box-sizing: border-box;
+  width: 100%;
+
+  /* Fix grid column minimum width to prevent card compression or horizontal scroll */
+  :global(.grid) {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+    padding-bottom: 24px !important;
+  }
+
+  /* Make question subtopic cards occupy 100% viewport width and look polished */
+  :global(.grid) > :global(div) {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 20px !important;
+    gap: 16px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* START Button overrides to make them larger and touch-friendly */
+  :global(.ant-btn) {
+    width: 100% !important;
+    height: 40px !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+  }
+}

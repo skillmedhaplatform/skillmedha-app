@@ -1,0 +1,416 @@
+/* page.module.scss */
+/* SCSS Variables - Light mode baseline */
+$bg: #ffffff;
+$text: #0f172a;
+$muted: #64748b;
+$border: #e5e7eb;
+$ring: #25a3a6;
+$primary: #25a3a6;
+$primary-600: #1e8f91;
+$error: #d92d20;
+$card-shadow: 0 8px 30px rgba(2, 24, 43, 0.08);
+
+.page {
+  min-height: 100dvh;
+  background: $bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.brandBar {
+  display: flex;
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+  border-bottom: 1px solid $border;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.icon {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: 22px;
+  font-weight: 900;
+  color: $text;
+
+  span {
+    color: $primary;
+  }
+}
+
+.shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  width: 100%;
+}
+
+.card {
+  width: 35%;
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 3rem 28px;
+  box-shadow: $card-shadow;
+}
+
+.header {
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.title {
+  margin: 0 0 6px 0;
+  font-size: 28px;
+  line-height: 1.2;
+  color: $text;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: $muted;
+}
+
+.error {
+  background: #fff5f5;
+  color: $error;
+  border: 1px solid #ffd4d4;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin: 8px 0 12px;
+}
+
+.group {
+  margin-top: 14px;
+}
+
+.label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: $text;
+  margin-bottom: 8px;
+}
+
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 95%;
+  height: 44px;
+  padding: 10px 12px;
+  border: 1.5px solid $border;
+  border-radius: 12px;
+  background: #fff;
+  color: $text;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease,
+    background 160ms ease;
+
+  &::placeholder {
+    color: #94a3b8;
+  }
+
+  &:hover {
+    border-color: #d1d5db;
+  }
+
+  &:focus {
+    border-color: $ring;
+    box-shadow: 0 0 0 4px rgba(37, 163, 166, 0.15);
+  }
+}
+
+.passwordWrapper .input {
+  padding-right: 44px;
+}
+
+.toggleButton {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: $muted;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 120ms ease, color 120ms ease;
+
+  &:hover {
+    background: #f1f5f9;
+    color: $text;
+  }
+
+  &:active {
+    background: #e2e8f0;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ring;
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.button {
+  width: 100%;
+  margin-top: 18px;
+  height: 46px;
+  border: none;
+  border-radius: 12px;
+  background: $primary;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 80ms ease,
+    box-shadow 160ms ease;
+  box-shadow: 0 6px 18px rgba(37, 163, 166, 0.25);
+
+  &:hover {
+    background: $primary-600;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(37, 163, 166, 0.2);
+  }
+}
+
+.helperRow {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.link {
+  color: $primary;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 120ms ease;
+
+  &:hover {
+    color: $primary-600;
+    text-decoration: underline;
+  }
+}
+
+/* ========================================
+   RESPONSIVE MEDIA QUERIES
+   ======================================== */
+
+/* Extra Small Mobile Devices (320px - 480px) */
+@media (max-width: 480px) {
+  .brandBar {
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logoText {
+    font-size: 16px;
+  }
+
+  .shell {
+    padding: 20px 12px;
+  }
+
+  .card {
+    width: 100%;
+    padding: 24px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(2, 24, 43, 0.06);
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .label {
+    font-size: 14px;
+  }
+
+  .input {
+    height: 42px;
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .button {
+    height: 44px;
+    font-size: 15px;
+  }
+
+  .error {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .link {
+    font-size: 12px;
+  }
+}
+
+/* Small Mobile Landscape (481px - 600px) */
+@media (min-width: 481px) and (max-width: 600px) {
+  .card {
+    width: 90%;
+    padding: 28px 20px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .shell {
+    padding: 24px 14px;
+  }
+}
+
+/* Small Tablets Portrait (601px - 768px) */
+@media (min-width: 601px) and (max-width: 768px) {
+  .card {
+    width: 70%;
+    padding: 2.5rem 24px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .shell {
+    padding: 28px 16px;
+  }
+
+  .brandBar {
+    padding: 0 20px;
+  }
+}
+
+/* Large Tablets & Small Laptops (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .card {
+    width: 55%;
+    padding: 2.75rem 26px;
+  }
+
+  .title {
+    font-size: 27px;
+  }
+}
+
+/* Medium Desktops (1025px - 1280px) */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .card {
+    width: 45%;
+  }
+}
+
+/* Large Desktops (1281px - 1440px) */
+@media (min-width: 1281px) and (max-width: 1440px) {
+  .card {
+    width: 38%;
+    padding: 3.25rem 30px;
+  }
+
+  .title {
+    font-size: 30px;
+  }
+}
+
+/* Extra Large Screens (1441px and above) */
+@media (min-width: 1441px) {
+  .card {
+    width: 32%;
+    max-width: 550px;
+    padding: 3.5rem 32px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .input {
+    height: 48px;
+    font-size: 16px;
+  }
+
+  .button {
+    height: 50px;
+    font-size: 17px;
+  }
+}
+
+/* Landscape Orientation for Mobile/Tablets */
+@media (max-height: 500px) and (orientation: landscape) {
+  .shell {
+    padding: 16px 12px;
+  }
+
+  .card {
+    padding: 20px 24px;
+    width: 60%;
+  }
+
+  .title {
+    font-size: 20px;
+    margin: 0 0 4px 0;
+  }
+
+  .header {
+    margin-bottom: 12px;
+  }
+
+  .group {
+    margin-top: 10px;
+  }
+
+  .button {
+    margin-top: 12px;
+    height: 40px;
+  }
+
+  .brandBar {
+    height: 52px;
+  }
+}

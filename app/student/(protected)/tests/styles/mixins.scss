@@ -1,0 +1,23 @@
+@mixin flexBox($direction,$jc,$ai) {
+    display: flex;
+    justify-content: $jc;
+    align-items: $ai;
+    flex-direction: $direction;
+}
+
+@mixin scrollBar {
+    &::-webkit-scrollbar {
+        width: 10px;
+      }
+     
+      &::-webkit-scrollbar-track {
+        background: white;
+      }
+     
+      &::-webkit-scrollbar-thumb {
+        background-color: $iconBackground;
+        border-radius: 20px;
+        border: 3px solid #f5f5f5;
+        cursor: auto;
+      }
+}
