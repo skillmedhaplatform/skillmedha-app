@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Pagination, Tooltip, Button, Select, Input, Modal, Tag, Row, Col } from "antd";
 import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase } from "react-icons/bs";
+import { HiOutlineBuildingOffice2, HiOutlineBookOpen } from "react-icons/hi2";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useAppRouter } from "@/helpers/useAppRouter";
 import CourseCardSkeleton from "@/universalUtils/CourseCardSkeleton/CourseCardSkeleton";
@@ -13,6 +15,16 @@ import MobileLibraryPage from "@/mobile_views/library/MobileLibraryPage";
 // --- Helpers ---
 const stripHtml = (html) =>
   typeof html === "string" ? html.replace(/<[^>]*>/g, "") : "";
+
+const getCardTheme = (category, index) => {
+  const themes = [
+    { bg: "linear-gradient(135deg, #0e1e3e, #1a3673)", icon: <BsCodeSlash size={32} color="white" /> }, // blue
+    { bg: "linear-gradient(135deg, #2a0a4a, #4a158a)", icon: <BsBarChartFill size={32} color="white" /> }, // purple
+    { bg: "linear-gradient(135deg, #0a3a2a, #156a4a)", icon: <BsCpuFill size={32} color="white" /> }, // green
+    { bg: "linear-gradient(135deg, #4a2a0a, #8a4a15)", icon: <BsBook size={32} color="white" /> }, // brown
+  ];
+  return themes[index % themes.length];
+};
 
 const formatUpdatedDate = (dateInput) => {
   if (!dateInput) return "";
@@ -167,6 +179,11 @@ const InfoContent = ({ item }) => {
  *  - idPrefix       {string}   Used for unique element IDs ("course" | "internship")
  *  - renderMetaChips {fn}      Optional: (item) => extra <span> chips beyond category
  */
+
+const MobileLibraryPageWrapper = ({ title, items, ...props }) => {
+  return <MobileLibraryPage title={title} items={items} {...props} />;
+};
+
 const LibraryPage = ({
   title,
   fetchAction,
@@ -186,7 +203,6 @@ const LibraryPage = ({
   const items = useSelector(dataSelector);
   const paginationData = useSelector(paginationSelector);
 
-  // --- URL-driven filter state ---
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("limit") || "20", 10);
   const urlSearch = searchParams.get("search") || "";
@@ -196,14 +212,12 @@ const LibraryPage = ({
   const [searchInput, setSearchInput] = useState(urlSearch);
   const debounceRef = useRef(null);
   const [loading, setLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState(null);
 
   // Sync local input if URL changes (back/forward navigation)
   useEffect(() => {
     setSearchInput(urlSearch);
   }, [urlSearch]);
 
-  // Fetch whenever any filter param changes
   useEffect(() => {
     setLoading(true);
     dispatch(
@@ -217,7 +231,6 @@ const LibraryPage = ({
     ).finally(() => setLoading(false));
   }, [dispatch, fetchAction, currentPage, pageSize, urlSearch, urlCategory, urlDifficulty]);
 
-  // --- URL mutation helper ---
   const pushParams = useCallback(
     (updates) => {
       const params = new URLSearchParams(searchParams);
@@ -225,7 +238,6 @@ const LibraryPage = ({
         if (v) params.set(k, v);
         else params.delete(k);
       });
-      // Reset page when a filter changes (not when changing page itself)
       if (Object.keys(updates).some((k) => k !== "page" && k !== "limit")) {
         params.set("page", "1");
       }
@@ -234,36 +246,51 @@ const LibraryPage = ({
     [searchParams, pathname, nav]
   );
 
-  // --- Handlers ---
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchInput(val);
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => pushParams({ search: val }), 500);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      pushParams({ search: val });
+    }, 400);
   };
 
-  const handleCategoryChange = (val) => pushParams({ category: val || "" });
-  const handleDifficultyChange = (val) => pushParams({ difficulty: val || "" });
+  const handleDifficultyChange = (val) => {
+    pushParams({ difficulty: val });
+  };
+
   const handleClearAll = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("search");
+    params.delete("category");
+    params.delete("difficulty");
+    params.set("page", "1");
     setSearchInput("");
-    pushParams({ search: "", category: "", difficulty: "", page: "1" });
+    nav.push(`${pathname}?${params.toString()}`);
   };
-  const removeFilter = (key) => {
-    if (key === "search") setSearchInput("");
-    pushParams({ [key]: "" });
-  };
-  const handlePageChange = (page, size) =>
-    pushParams({ page: page.toString(), limit: size.toString() });
 
-  // --- Derived ---
+  const safeItems = Array.isArray(items) ? items : [];
+
+  const categories = useMemo(() => {
+    if (!safeItems.length) return [];
+    const catMap = new Map();
+    safeItems.forEach((item) => {
+      if (item.category) {
+        catMap.set(item.category, (catMap.get(item.category) || 0) + 1);
+      }
+    });
+    return Array.from(catMap.entries()).map(([value, count]) => ({ value, count }));
+  }, [items]);
+
   const categoryOptions = [
-    ...new Set((items || []).map((item) => item.category).filter(Boolean)),
+    ...new Set(safeItems.map((item) => item.category).filter(Boolean)),
   ].map((cat) => ({ label: cat, value: cat }));
 
-  const difficultyOptions = DIFFICULTY_OPTIONS.map((d) => ({
-    label: d,
-    value: d,
-  }));
+  const difficultyOptions = [
+    { label: "Beginner", value: "Beginner" },
+    { label: "Intermediate", value: "Intermediate" },
+    { label: "Advanced", value: "Advanced" },
+  ];
 
   const activeFilters = [
     urlSearch && { key: "search", label: `Search: "${urlSearch}"` },
@@ -273,18 +300,57 @@ const LibraryPage = ({
 
   const hasActiveFilters = activeFilters.length > 0;
 
-  const isMobile = useResponsive(); // < 1024px → mobile layout
+  const handleCategoryChange = (val) => pushParams({ category: val || "" });
+
+  const removeFilter = (key) => {
+    if (key === "search") setSearchInput("");
+    pushParams({ [key]: "" });
+  };
+
+  const handlePageChange = (page, size) => {
+    pushParams({ page: page.toString(), limit: size.toString() });
+  };
+
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const [activeTab, setActiveTab] = useState("all"); 
+
+  const filteredTabItems = safeItems.filter((item) => {
+    if (activeTab === "my") {
+      return item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled;
+    }
+    if (activeTab === "recent") {
+      if (!item.createdAt) return false;
+      const createdAtDate = new Date(item.createdAt);
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      return createdAtDate >= sixMonthsAgo;
+    }
+    return true; 
+  });
+
+  const totalAvailable = paginationData?.totalLength || safeItems.length || 0;
+  const enrolledItems = safeItems.filter(item => item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled);
+  const totalEnrolled = enrolledItems.length;
+  const avgProgress = totalEnrolled > 0 
+    ? Math.round(enrolledItems.reduce((acc, curr) => acc + (curr.progress || 0), 0) / totalEnrolled) 
+    : 0;
+
+  const isCourse = title ? title.toLowerCase().includes("course") : false;
+  const moduleName = isCourse ? "courses" : "internships";
+
+  const isMobile = useResponsive(); 
 
   if (isMobile) {
     return (
-      <MobileLibraryPage
+      <MobileLibraryPageWrapper
         title={title}
         viewLabel={viewLabel}
         searchPlaceholder={searchPlaceholder}
         idPrefix={idPrefix}
         renderMetaChips={renderMetaChips}
         getItemUrl={getItemUrl}
-        items={items}
+        items={filteredTabItems} // pass filtered items to mobile as well
         loading={loading}
         paginationData={paginationData}
         searchInput={searchInput}
@@ -311,13 +377,106 @@ const LibraryPage = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 relative">
-      {/* Sticky Header Row: Title left | Filters right */}
-      <div className="flex items-center justify-between flex-wrap gap-2.5 sticky top-0 left-0 w-full bg-white z-10 py-2">
-        <div className="text-[clamp(1.3rem,2vw,1.5rem)] font-bold text-[#24A058] whitespace-nowrap shrink-0">{title}</div>
+    <div className="flex flex-col gap-0 relative bg-white min-h-screen">
+      {/* Banner Section - Matching TPO Portal & Dashboard */}
+      <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-between p-4 lg:px-8 pt-6 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+        
+        {/* Decorative Icons */}
+        <div className="absolute inset-0 pointer-events-none z-[1]">
+          <div className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]">✕</div>
+          <div className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]">+</div>
+          <div className="absolute top-[40%] right-[50%] text-[#1E69DA] opacity-50 text-[1.1rem]">★</div>
+          <div className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]">✕</div>
+        </div>
 
-        {/* Filter Controls */}
-        <div className="flex flex-wrap items-center gap-2 flex-1 justify-end">
+        {/* Top half: Title & Stats */}
+        <div className="flex items-center justify-between w-full relative z-[2]">
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
+              {moduleName.toLowerCase().includes('internship') ? <HiOutlineBuildingOffice2 className="text-white text-2xl" /> : <HiOutlineBookOpen className="text-white text-2xl" />}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <h1 
+                className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0"
+                style={{ border: 'none' }}
+              >
+                {title}
+              </h1>
+              <p className="text-white text-[15px] lg:text-[16px] m-0">
+                Explore all available {moduleName.toLowerCase()}s and {moduleName.toLowerCase().includes('internship') ? 'kickstart your career' : 'start learning'} today.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6 lg:gap-10">
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">{totalEnrolled}</span>
+              <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Enrolled</span>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">{totalAvailable}</span>
+              <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Available</span>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-[24px] lg:text-[28px] font-bold leading-none bg-gradient-to-br from-[#1E69DA] to-[#5694F0] bg-clip-text text-transparent">{avgProgress}%</span>
+              <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Avg. Done</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs Row (Attached directly below banner) */}
+      <div className="w-full bg-[#f1f5f9] border-b border-[#e2e8f0] px-4 lg:px-8 flex items-center gap-8 shadow-sm">
+        {[
+          { id: "all", label: `All ${moduleName.toLowerCase().includes('internship') ? 'internships' : 'courses'}` },
+          { id: "my", label: `My ${moduleName.toLowerCase().includes('internship') ? 'internships' : 'courses'}` },
+          { id: "recent", label: "Recently added" }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer
+              ${activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"}`}
+          >
+            {tab.label}
+            {activeTab === tab.id && (
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1E69DA] rounded-t-md"></div>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Categories Pill Bar */}
+      <div className="w-full px-4 lg:px-8 py-3 bg-white border-b border-[#e2e8f0] flex items-center gap-3 overflow-x-auto no-scrollbar">
+        <button
+          onClick={() => pushParams({ category: "" })}
+          className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer
+            ${!urlCategory 
+              ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]" 
+              : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"}`}
+        >
+          <span className={!urlCategory ? "text-white" : "text-[#3b82f6]"}>☷</span> All categories
+        </button>
+        {categoryOptions.map(cat => {
+          const isActive = urlCategory === cat.value;
+          return (
+            <button
+              key={cat.value}
+              onClick={() => pushParams({ category: cat.value })}
+              className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer
+                ${isActive 
+                  ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]" 
+                  : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"}`}
+            >
+              {cat.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Filter Bar */}
+      <div className="flex items-center justify-between flex-wrap gap-2.5 w-full bg-transparent px-4 lg:px-8 py-2 mt-2">
+        <div className="flex flex-wrap items-center gap-4 flex-1">
           <Input
             id={`${idPrefix}-search`}
             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
@@ -326,18 +485,7 @@ const LibraryPage = ({
             onChange={handleSearchChange}
             allowClear
             onClear={() => pushParams({ search: "" })}
-            style={{ maxWidth: 240, borderRadius: 8 }}
-          />
-
-          <Select
-            id={`${idPrefix}-category`}
-            placeholder="All Categories"
-            value={urlCategory || undefined}
-            onChange={handleCategoryChange}
-            allowClear
-            options={categoryOptions}
-            style={{ minWidth: 150 }}
-            popupMatchSelectWidth={false}
+            className="w-[280px] rounded-[20px] shadow-sm border-[#e2e8f0]"
           />
 
           <Select
@@ -347,46 +495,28 @@ const LibraryPage = ({
             onChange={handleDifficultyChange}
             allowClear
             options={difficultyOptions}
-            style={{ minWidth: 130 }}
+            className="min-w-[130px] shadow-sm rounded-lg"
             popupMatchSelectWidth={false}
           />
 
           {hasActiveFilters && (
-            <Button danger size="middle" onClick={handleClearAll} style={{ borderRadius: 8 }}>
+            <Button type="text" danger size="middle" onClick={handleClearAll} className="font-medium hover:bg-red-50 rounded-lg">
               Clear Filters
             </Button>
           )}
         </div>
       </div>
 
-      {/* Active Filter Chips */}
-      {hasActiveFilters && (
-        <div className="flex flex-wrap gap-2 pb-1">
-          {activeFilters.map(({ key, label }) => (
-            <span key={key} className="inline-flex items-center gap-[6px] bg-[#e8f0fe] text-[#1a56db] border border-[#a4c2f4] rounded-full py-[3px] pr-[10px] pl-[12px] text-[12px] font-medium">
-              {label}
-              <button
-                className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#a4c2f4] border-none cursor-pointer text-[10px] text-[#1a56db] leading-none p-0 hover:bg-[#1a56db] hover:text-white"
-                onClick={() => removeFilter(key)}
-                aria-label={`Remove ${key} filter`}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-
       {/* Cards */}
       <div className="w-full overflow-hidden">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] self-start gap-4 p-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] self-start gap-4 p-2 px-4 lg:px-8">
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
-          ) : !items?.length ? (
+          ) : !filteredTabItems?.length ? (
             <div className="col-span-full flex flex-col items-center justify-center gap-2 py-20 px-4 text-[#8ea2b5] text-base text-center w-full">
               <span style={{ fontSize: "2.5rem" }}>🔍</span>
               <span>
-                No {title.toLowerCase()} found
+                No {title ? title.toLowerCase() : ""} found
                 {hasActiveFilters ? " matching your filters" : ""}.
               </span>
               {hasActiveFilters && (
@@ -407,79 +537,128 @@ const LibraryPage = ({
               )}
             </div>
           ) : (
-            items.map((item) => (
-              <div
-                key={item?._id}
-                className="group grid grid-rows-[auto_1fr] gap-2.5 bg-white text-black border-[0.2px] border-[rgba(207,207,207,0.851)] rounded-[14px] overflow-hidden cursor-pointer transition-all duration-180 hover:-translate-y-1 hover:shadow-[rgba(60,64,67,0.3)_0px_2px_4px_0px,rgba(60,64,67,0.15)_0px_2px_6px_2px] p-2 shadow-[rgba(60,64,67,0.3)_0px_1px_2px_0px,rgba(60,64,67,0.15)_0px_1px_3px_1px]"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="relative w-full aspect-video bg-[#f5f5f5] overflow-hidden rounded-xl">
-                  <img
-                    className="w-full h-full object-cover block scale-[1.001] transition-transform duration-220 group-hover:scale-[1.03]"
-                    src={item?.coverImage || item?.media?.coverImage || ""}
-                    alt={item?.title || title}
-                    loading="lazy"
-                  />
-                </div>
+            filteredTabItems.map((item, index) => {
+              const isEnrolled = item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled;
+              const progressVal = item.progress || 0;
+              const duration = item?.duration || item?.courseIncludes?.videoDuration;
+              const modulesCount = item?.sections?.length || 0;
+              const createdAtDate = item?.createdAt ? formatUpdatedDate(item.createdAt) : '';
 
-                <div className="grid auto-rows-max gap-2 p-1.5">
-                  <div style={{ display: "flex", alignItems: "center", width: "100%", overflow: "hidden", gap: 6 }}>
-                    <Tooltip title={item?.title} placement="topLeft" mouseEnterDelay={0.5}>
-                      <div className="text-base font-bold leading-[1.2] w-[90%] whitespace-nowrap overflow-hidden text-ellipsis underline">{item?.title}</div>
-                    </Tooltip>
-                    <InfoCircleOutlined
-                      onClick={(e) => { e.stopPropagation(); setSelectedItem(item); }}
-                      style={{
-                        fontSize: 15,
-                        color: "#8ea2b5",
-                        flexShrink: 0,
-                        cursor: "pointer",
-                        transition: "color 160ms",
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = "#1677ff")}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = "#8ea2b5")}
+              let statusText = "Not enrolled";
+              let buttonText = "Enroll";
+              let statusColor = "text-[#94a3b8]";
+              
+              if (isEnrolled) {
+                if (progressVal === 0) {
+                  statusText = "Not started";
+                  buttonText = "Start";
+                  statusColor = "text-[#94a3b8]";
+                } else {
+                  statusText = `${progressVal}% complete`;
+                  buttonText = "Continue";
+                  statusColor = "text-[#10b981]"; // Green for in-progress
+                }
+              }
+
+              return (
+                <div
+                  key={item?._id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nav.push(getItemUrl(item));
+                  }}
+                  className="group flex flex-col bg-white text-black border-[1px] border-[#e2e8f0] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-sm"
+                  role="button"
+                  tabIndex={0}
+                >
+                  {/* Top Image Section */}
+                  <div className="relative w-full h-[160px] bg-[#f8fafc] flex items-center justify-center overflow-hidden">
+                    <img
+                      className="w-full h-full object-cover block scale-[1.001] transition-transform duration-300 group-hover:scale-[1.05]"
+                      src={item?.coverImage || item?.media?.coverImage || ""}
+                      alt={item?.title || title}
+                      loading="lazy"
                     />
-                  </div>
-
-                  <div className="flex flex-wrap content-start h-[65px] overflow-hidden gap-[6px]">
-                    {item?.category && (
-                      <span className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] py-1 px-2 rounded-full">{item.category}</span>
+                    
+                    {/* Absolute Overlays */}
+                    {isEnrolled && (
+                      <div className="absolute top-3 left-3 bg-[#00000080] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-white/20">
+                        <BsCheckCircleFill className="text-[#22c55e] text-[10px]" />
+                        <span className="text-white text-[11px] font-medium tracking-wide">Enrolled</span>
+                      </div>
                     )}
-                    {/* Extra chips from parent (e.g. duration for courses, difficulty for internships) */}
-                    {renderMetaChips?.(item)}
-                    {item?.sections?.length ? (
-                      <span className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] py-1 px-2 rounded-full">{item.sections.length} Modules</span>
-                    ) : null}
+                    <div className="absolute top-3 right-3 bg-[#00000080] backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/20">
+                      <BsBookmark className="text-white text-[14px]" />
+                    </div>
+
+                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 opacity-100 bg-[#00000080] px-2 py-0.5 rounded backdrop-blur-sm">
+                      <BsCodeSlash className="text-white text-[12px]" />
+                      <span className="text-white text-[11px] font-medium">{item.category || "General"}</span>
+                    </div>
+
+                    {item.difficulty && (
+                      <div className="absolute bottom-3 right-3 bg-[#f59e0b] px-2 py-0.5 rounded text-white text-[10px] font-bold tracking-wider uppercase shadow-sm">
+                        {item.difficulty}
+                      </div>
+                    )}
                   </div>
 
-                  <p
-                    className="text-[#b9c7d6] text-[13px] leading-[1.45] my-0.5 mb-1.5 line-clamp-3 overflow-hidden h-[60px]"
-                    title={stripHtml(item?.description) || ""}
-                  >
-                    {(() => {
-                      const text = stripHtml(item?.description) || "";
-                      return text.slice(0, 120) + (text.length > 120 ? "…" : "");
-                    })()}
-                  </p>
+                  {/* Bottom Content Section */}
+                  <div className="flex flex-col p-4 flex-1">
+                    <Tooltip title={item?.title} placement="topLeft" mouseEnterDelay={0.5}>
+                      <h3 className="text-[15px] font-bold text-[#1e293b] leading-tight mb-2 line-clamp-2 min-h-[36px]">
+                        {item?.title}
+                      </h3>
+                    </Tooltip>
+                    
+                    <p className="text-[#64748b] text-[12px] leading-snug mb-4 line-clamp-2 min-h-[34px]">
+                      {stripHtml(item?.description)}
+                    </p>
 
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="text-[#8ea2b5] text-xs">
-                      {item?.updatedAt && `Updated ${formatUpdatedDate(item.updatedAt)}`}
+                    {/* Progress Bar */}
+                    <div className="w-full flex items-center gap-3 mb-4">
+                      <div className="flex-1 h-[6px] bg-[#f1f5f9] rounded-full overflow-hidden">
+                        {isEnrolled && (
+                          <div 
+                            className="h-full bg-gradient-to-br from-[#1E69DA] to-[#5694F0] rounded-full transition-all duration-500" 
+                            style={{ width: `${progressVal}%` }}
+                          />
+                        )}
+                      </div>
+                      <span className="text-[13px] font-bold text-[#64748b] min-w-[32px] text-right">
+                        {isEnrolled ? `${progressVal}%` : '0%'}
+                      </span>
                     </div>
-                    <Button
-                      type="primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        nav.push(getItemUrl(item));
-                      }}
-                    >
-                      {viewLabel}
-                    </Button>
+
+                    {/* Meta Info Row */}
+                    <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] font-medium mb-4">
+                      {duration && <span className="flex items-center gap-1"><BsClock /> {duration}</span>}
+                      {duration && modulesCount > 0 && <span>•</span>}
+                      {modulesCount > 0 && <span className="flex items-center gap-1"><BsJournalBookmark /> {modulesCount} modules</span>}
+                      {createdAtDate && (duration || modulesCount > 0) && <span>•</span>}
+                      {createdAtDate && <span>{createdAtDate}</span>}
+                    </div>
+
+                    {/* Footer Row */}
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f1f5f9]">
+                      <span className={`text-[12px] font-bold flex items-center gap-1 ${statusColor}`}>
+                        {statusText}
+                      </span>
+                      
+                      <button
+                        className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] text-white text-[13px] font-bold py-1.5 px-5 rounded-full border-none cursor-pointer shadow-sm hover:shadow-md transition-shadow flex items-center gap-1.5"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          nav.push(getItemUrl(item));
+                        }}
+                      >
+                        {buttonText}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

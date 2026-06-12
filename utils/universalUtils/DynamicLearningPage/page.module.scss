@@ -1,5 +1,4 @@
-@import "../colors.module.scss";
-
+@use "../colors.module.scss" as *;
 .container {
   height: 100vh;
   display: flex;
