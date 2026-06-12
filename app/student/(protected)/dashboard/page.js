@@ -16,6 +16,7 @@ import {
   message,
   Table,
   Modal,
+  Skeleton,
 } from "antd";
 import { FaArrowRight } from "react-icons/fa";
 import { HiOutlineArrowsExpand, HiOutlineBookOpen, HiOutlineBriefcase, HiOutlineClipboardList } from "react-icons/hi";
@@ -26,7 +27,6 @@ import { ReadOutlined, LaptopOutlined } from "@ant-design/icons";
 import CardsList from "@/modules/student/components/cardsList";
 import MobileDashboard from "@/mobile_views/dashboard/MobileDashboard";
 import useResponsive from "@/hooks/useResponsive";
-import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 
 const DashboardStats = ({ stats, router }) => (
   <div className="flex flex-row w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
@@ -159,7 +159,7 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick }) => {
 };
 
 
-const ProfileSection = ({ profileValues, router, studentCreds }) => (
+const ProfileSection = ({ profileValues, router, studentCreds, mounted }) => (
   <div className="w-full flex flex-col items-center">
     <div className="w-full flex justify-between items-start mb-1">
       <div className="flex flex-col">
@@ -171,7 +171,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
     <div className="relative flex justify-center mb-1 mt-6">
       <Progress
         type="dashboard"
-        percent={profileValues?.percentage || 12}
+        percent={mounted ? (profileValues?.percentage || 12) : 12}
         size={130}
         strokeWidth={10}
         strokeColor="#1E69DA"
@@ -313,7 +313,7 @@ export default function DashboardPage() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(4); // Items per page
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [recCourseIndex, setRecCourseIndex] = useState(0);
@@ -348,7 +348,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchAllData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchAllData]);
 
   // Memoized profile values
   const profileValues = useMemo(() => {
@@ -442,16 +442,26 @@ export default function DashboardPage() {
   return (
     <section className="w-full h-full flex flex-col lg:flex-row items-stretch py-4 gap-4 lg:gap-2">
       <div className="w-full lg:flex-1 h-full flex flex-col items-center lg:items-start gap-2 overflow-y-auto [&::-webkit-scrollbar]:hidden px-2 lg:px-0 lg:mr-[272px] xl:mr-[312px]">
-        <StudentPageHeader
-          section="Dashboard"
-          title={mounted && studentCreds?.userName ? `Hi ${studentCreds.userName.charAt(0).toUpperCase() + studentCreds.userName.slice(1)}, ${greeting}` : greeting}
-          rightSlot={new Date().toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        />
+        {/* Welcome Section */}
+        <div className="w-full h-auto flex flex-col items-start gap-1 p-3 lg:p-4 pb-3 lg:pb-3 border-[0.2px] border-[#9a9a9ad1] rounded-2xl bg-[#0C1E40] text-white">
+          <div className="w-full flex items-center justify-between">
+            <p className="text-[16px] lg:text-[22px] font-bold text-white m-0">
+              {mounted && studentCreds?.userName
+                ? `Hi ${studentCreds.userName.charAt(0).toUpperCase() + studentCreds.userName.slice(1)},`
+                : "Hi,"}
+            </p>
+            <div className="text-[10px] lg:text-[12px] font-bold tracking-[0.5px] uppercase">
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </div>
+          </div>
+
+          <p className="text-[16px] lg:text-[30px] font-bold text-white m-0 mt-1">{greeting}</p>
+        </div>
 
         {/* Dashboard Statistics Card */}
         <div className="w-full flex justify-start">
@@ -483,8 +493,28 @@ export default function DashboardPage() {
           </div>
 
           {loading ? (
-            <div className="text-center p-8">
-              <Spin size="large" />
+            <div className="flex flex-col gap-4 mt-4 w-full">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex flex-col md:flex-row items-center justify-between p-4 bg-white border border-[#e2e8f0] rounded-[16px]">
+                  <div className="flex items-center gap-4 w-full md:w-auto animate-pulse">
+                    <div className="w-[50px] h-[50px] rounded-xl bg-gray-200 shrink-0"></div>
+                    <div className="flex flex-col gap-2">
+                      <div className="h-[18px] bg-gray-200 rounded w-[200px]"></div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-[16px] bg-gray-200 rounded w-[60px]"></div>
+                        <div className="h-[14px] bg-gray-200 rounded w-[120px]"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 w-full md:w-auto mt-4 md:mt-0 animate-pulse">
+                    <div className="flex items-center gap-2 w-[180px] justify-end">
+                      <div className="h-[6px] bg-gray-200 rounded-full w-[120px]"></div>
+                      <div className="h-[14px] bg-gray-200 rounded w-[24px]"></div>
+                    </div>
+                    <div className="h-[32px] bg-gray-200 rounded-[8px] w-[120px]"></div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <>
@@ -569,7 +599,56 @@ export default function DashboardPage() {
           )}
         </div>
         {/* Grouped Recommended Section */}
-        {(allCourses?.data?.length > 0 || allInternships?.data?.length > 0) && (
+        {loading ? (
+          <div className="w-full rounded-2xl bg-white p-4 lg:p-6 mt-4 flex flex-col items-center">
+            <div className="w-full flex flex-col md:flex-row gap-6 items-stretch">
+              <div className="flex-1 flex flex-col items-center border-b md:border-b-0 pb-6 md:pb-0 md:pr-6">
+                <div className="w-full text-left mb-3">
+                  <div className="h-[22px] bg-gray-200 rounded w-[200px] animate-pulse"></div>
+                </div>
+                <div className="w-full h-[460px] bg-white border border-[#e2e8f0] rounded-[14px] p-2 animate-pulse flex flex-col">
+                  <div className="w-full h-[220px] bg-gray-200 rounded-xl shrink-0"></div>
+                  <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
+                    <div className="h-[24px] bg-gray-200 rounded w-3/4 mb-1"></div>
+                    <div className="flex gap-2">
+                      <div className="h-[26px] bg-gray-200 rounded-full w-20"></div>
+                      <div className="h-[26px] bg-gray-200 rounded-full w-24"></div>
+                    </div>
+                    <div className="h-[16px] bg-gray-200 rounded w-full mt-2"></div>
+                    <div className="h-[16px] bg-gray-200 rounded w-5/6"></div>
+                    <div className="h-[16px] bg-gray-200 rounded w-4/6"></div>
+                    <div className="h-[14px] bg-gray-200 rounded w-24 mt-auto"></div>
+                    <div className="flex justify-center items-center gap-2 mt-2">
+                      {[1,2,3].map(i => <div key={i} className="w-[8px] h-[8px] bg-gray-200 rounded-full"></div>)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 flex flex-col items-center pt-6 md:pt-0 md:pl-6">
+                <div className="w-full text-left mb-3">
+                  <div className="h-[22px] bg-gray-200 rounded w-[200px] animate-pulse"></div>
+                </div>
+                <div className="w-full h-[460px] bg-white border border-[#e2e8f0] rounded-[14px] p-2 animate-pulse flex flex-col">
+                  <div className="w-full h-[220px] bg-gray-200 rounded-xl shrink-0"></div>
+                  <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
+                    <div className="h-[24px] bg-gray-200 rounded w-3/4 mb-1"></div>
+                    <div className="flex gap-2">
+                      <div className="h-[26px] bg-gray-200 rounded-full w-20"></div>
+                      <div className="h-[26px] bg-gray-200 rounded-full w-24"></div>
+                    </div>
+                    <div className="h-[16px] bg-gray-200 rounded w-full mt-2"></div>
+                    <div className="h-[16px] bg-gray-200 rounded w-5/6"></div>
+                    <div className="h-[16px] bg-gray-200 rounded w-4/6"></div>
+                    <div className="h-[14px] bg-gray-200 rounded w-24 mt-auto"></div>
+                    <div className="flex justify-center items-center gap-2 mt-2">
+                      {[1,2,3].map(i => <div key={i} className="w-[8px] h-[8px] bg-gray-200 rounded-full"></div>)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (allCourses?.data?.length > 0 || allInternships?.data?.length > 0) ? (
           <div className="w-full rounded-2xl bg-white p-4 lg:p-6 mt-4 flex flex-col items-center">
             <div className="w-full flex flex-col md:flex-row gap-6 items-stretch">
               {allCourses?.data?.length > 0 && (
@@ -618,7 +697,7 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Sidebar */}
@@ -630,6 +709,7 @@ export default function DashboardPage() {
               profileValues={profileValues}
               router={router}
               studentCreds={studentCreds}
+              mounted={mounted}
             />
           </div>
           
