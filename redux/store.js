@@ -109,4 +109,10 @@ export const store = configureStore({
     practice: practiceSlice,
     studentDashboardStats: studentDashboardStatsReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        warnAfter: 128,
+      },
+    }),
 });

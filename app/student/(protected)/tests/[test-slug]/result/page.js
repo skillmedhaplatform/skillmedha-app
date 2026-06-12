@@ -5,6 +5,7 @@ import _ from "lodash";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { TbTriangleInvertedFilled } from "react-icons/tb";
+import resultStyles from "./results.module.scss";
 
 import { Collapse, Input, Select, Tag, message, Skeleton, Card, Row, Col, Statistic } from "antd";
 import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, ThunderboltOutlined, PercentageOutlined, TrophyOutlined, CaretRightOutlined } from "@ant-design/icons";

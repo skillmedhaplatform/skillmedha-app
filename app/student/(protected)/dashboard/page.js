@@ -175,7 +175,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
         size={130}
         strokeWidth={10}
         strokeColor="#1E69DA"
-        trailColor="#f1f5f9"
+        railColor="#f1f5f9"
         format={(percent) => (
           <div className="flex flex-col items-center justify-center -mt-2">
             <span className="text-[28px] font-black text-[#0f172a] tracking-tighter leading-none">{percent}%</span>
@@ -541,7 +541,7 @@ export default function DashboardPage() {
                             size="small" 
                             showInfo={false} 
                             strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'} 
-        trailColor="#f1f5f9"
+        railColor="#f1f5f9"
                             className="m-0 w-[120px]"
                           />
                           <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{item?.progress || 0}%</span>
