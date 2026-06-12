@@ -18,6 +18,7 @@ import {
   Modal,
 } from "antd";
 import { FaArrowRight } from "react-icons/fa";
+import { BsX, BsPlus, BsStar } from "react-icons/bs";
 import { HiOutlineArrowsExpand, HiOutlineBookOpen, HiOutlineBriefcase, HiOutlineClipboardList } from "react-icons/hi";
 import { calculateProfileCompletion } from "@/universalUtils/getprofilecompleteion";
 import { useAppRouter } from "@/helpers/useAppRouter";
@@ -26,7 +27,6 @@ import { ReadOutlined, LaptopOutlined } from "@ant-design/icons";
 import CardsList from "@/modules/student/components/cardsList";
 import MobileDashboard from "@/mobile_views/dashboard/MobileDashboard";
 import useResponsive from "@/hooks/useResponsive";
-import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 
 const DashboardStats = ({ stats, router }) => (
   <div className="flex flex-row w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
@@ -161,26 +161,20 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick }) => {
 
 const ProfileSection = ({ profileValues, router, studentCreds }) => (
   <div className="w-full flex flex-col items-center">
-    <div className="w-full flex justify-between items-start mb-1">
+    <div className="w-full flex justify-between items-center mb-1">
       <div className="flex flex-col">
         <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px]">Overall performance</h3>
-        <span className="text-[12px] text-[#64748b] font-bold">Profile completion rate</span>
+        <span className="text-[12px] text-[#64748b] font-bold mt-1">Profile completion rate</span>
       </div>
-    </div>
-    
-    <div className="relative flex justify-center mb-1 mt-6">
       <Progress
-        type="dashboard"
+        type="circle"
         percent={profileValues?.percentage || 12}
-        size={130}
+        size={48}
         strokeWidth={10}
         strokeColor="#1E69DA"
         trailColor="#f1f5f9"
         format={(percent) => (
-          <div className="flex flex-col items-center justify-center -mt-2">
-            <span className="text-[28px] font-black text-[#0f172a] tracking-tighter leading-none">{percent}%</span>
-            <span className="text-[10px] font-bold text-[#1E69DA] tracking-wider mt-1">INCOMPLETE</span>
-          </div>
+          <span className="text-[12px] font-black text-[#0f172a] leading-none">{percent}%</span>
         )}
       />
     </div>
@@ -348,7 +342,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchAllData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchAllData]);
 
   // Memoized profile values
   const profileValues = useMemo(() => {
@@ -440,230 +434,248 @@ export default function DashboardPage() {
   }
 
   return (
-    <section className="w-full h-full flex flex-col lg:flex-row items-stretch py-4 gap-4 lg:gap-2">
-      <div className="w-full lg:flex-1 h-full flex flex-col items-center lg:items-start gap-2 overflow-y-auto [&::-webkit-scrollbar]:hidden px-2 lg:px-0 lg:mr-[272px] xl:mr-[312px]">
-        <StudentPageHeader
-          section="Dashboard"
-          title={mounted && studentCreds?.userName ? `Hi ${studentCreds.userName.charAt(0).toUpperCase() + studentCreds.userName.slice(1)}, ${greeting}` : greeting}
-          rightSlot={new Date().toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        />
-
-        {/* Dashboard Statistics Card */}
-        <div className="w-full flex justify-start">
-          <DashboardStats stats={dashboardStats} router={router} />
+    <section className="w-full h-full flex flex-col items-stretch lg:pt-0">
+      {/* Welcome Section - Top Full Width */}
+      <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+        {/* Decorative Icons matching TPO Portal */}
+        <div className="absolute inset-0 pointer-events-none z-[1]">
+          <BsX className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]" />
+          <BsPlus className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]" />
+          <BsStar className="absolute top-[40%] right-[50%] text-[#1E69DA] opacity-50 text-[1.1rem]" />
+          <BsX className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]" />
         </div>
 
-        {/* Continue Learning Section with Pagination */}
-        <div className="w-full rounded-2xl bg-white py-4 px-4 lg:px-8">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-[18px] lg:text-[22px] font-extrabold">
-              <span>Continue Learning</span>
-              {combinedLearningData.length > pageSize && (
-                <span className="text-[14px] text-[#666] ml-4 font-normal">
-                  ({combinedLearningData.length} total items)
-                </span>
-              )}
-            </div>
-            {combinedLearningData.length > pageSize && (
-              <Pagination
-                current={currentPage}
-                total={combinedLearningData.length}
-                pageSize={pageSize}
-                onChange={handlePageChange}
-                showSizeChanger={false}
-                showQuickJumper={false}
-                size="small"
-              />
-            )}
+        <div className="w-full flex items-center justify-between relative z-[2]">
+          <p className="text-[18px] lg:text-[24px] font-bold text-white m-0">
+            {mounted && studentCreds?.userName
+              ? `Hi ${studentCreds.userName.charAt(0).toUpperCase() + studentCreds.userName.slice(1)},`
+              : "Hi,"}
+          </p>
+          <div className="text-[11px] lg:text-[13px] font-bold tracking-[0.5px] uppercase text-[#cbd5e1]">
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </div>
-
-          {loading ? (
-            <div className="text-center p-8">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <>
-              <div className="flex flex-col gap-4 mt-4 w-full min-h-[380px]">
-                {paginatedLearningData.map((item) => {
-                  const hasLastAccessed = item?.lastAccessedSection !== undefined && item?.lastAccessedSection !== null;
-                  const handleNavigate = () => {
-                    const basePath = item?.type === "internship" ? "/student/learning-internship" : "/student/learning-course";
-                    let url = `${basePath}?title=${item?.title?.split(" ")?.join("")}&id=${item?._id}&orgId=${item?.sourceOrgId}`;
-                    if (hasLastAccessed) {
-                      url += `&section=${item.lastAccessedSection}`;
-                      if (item.lastAccessedTopic !== undefined && item.lastAccessedTopic !== null) url += `&topic=${item.lastAccessedTopic}`;
-                    }
-                    router.push(url);
-                  };
-
-                  let lastAccessedInfo = "Not started";
-                  if (hasLastAccessed) {
-                    lastAccessedInfo = "In progress";
-                  }
-
-                  const isInternship = item?.type === "internship";
-                  const coverImage = item?.coverImage || item?.media?.coverImage || "https://skillmedha-profiles.s3.ap-south-1.amazonaws.com/1757941527624-profile.jpg";
-
-                  return (
-                    <div key={item._id} className="flex flex-col md:flex-row items-center justify-between p-4 bg-white border border-[#e2e8f0] rounded-[16px] hover:shadow-md transition-shadow">
-                      {/* Left Side: Icon & Info */}
-                      <div className="flex items-center gap-4 w-full md:w-auto">
-                        <div className={`w-[50px] h-[50px] rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${isInternship ? 'bg-[#e1f5fe]' : 'bg-[#e8f5e9]'}`}>
-                          {isInternship ? (
-                            <LaptopOutlined style={{ fontSize: '24px', color: '#0284c7' }} />
-                          ) : (
-                            <ReadOutlined style={{ fontSize: '24px', color: '#24A058' }} />
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-[#1e293b] text-[15px]">{item?.title}</span>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className={`text-[11px] font-semibold px-2 py-[2px] rounded-md ${isInternship ? 'bg-[#e1f5fe] text-[#0284c7]' : 'bg-[#e8f5e9] text-[#24A058]'}`}>
-                              {isInternship ? 'Internship' : 'Course'}
-                            </span>
-                            <span className="text-[12px] text-[#64748b]">
-                              {lastAccessedInfo} · Added {new Date(item?.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right Side: Progress & Button */}
-                      <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-4 md:mt-0">
-                        <div className="flex items-center gap-2 w-[180px] justify-end">
-                          <Progress 
-                            percent={item?.progress || 0} 
-                            size="small" 
-                            showInfo={false} 
-                            strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'} 
-        trailColor="#f1f5f9"
-                            className="m-0 w-[120px]"
-                          />
-                          <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{item?.progress || 0}%</span>
-                        </div>
-                        <Button
-                          onClick={handleNavigate}
-                          className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white"
-                          style={{
-                            fontWeight: '600',
-                            borderRadius: '8px',
-                            padding: '4px 16px',
-                            height: '32px'
-                          }}
-                        >
-                          {hasLastAccessed ? "Continue" : "Start Learning"}
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Pagination Removed */}
-            </>
-          )}
         </div>
-        {/* Grouped Recommended Section */}
-        {(allCourses?.data?.length > 0 || allInternships?.data?.length > 0) && (
-          <div className="w-full rounded-2xl bg-white p-4 lg:p-6 mt-4 flex flex-col items-center">
-            <div className="w-full flex flex-col md:flex-row gap-6 items-stretch">
-              {allCourses?.data?.length > 0 && (
-                <div className="flex-1 flex flex-col items-center border-b md:border-b-0 pb-6 md:pb-0 md:pr-6">
-                  <div className="w-full text-left mb-3">
-                    <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Course</span>
-                  </div>
-                  <div className="w-full h-full flex flex-col justify-between">
-                    <RecommendedCard 
-                      item={allCourses.data[recCourseIndex % allCourses.data.length]} 
-                      total={allCourses.data.length}
-                      currentIndex={recCourseIndex}
-                      onDotClick={setRecCourseIndex}
-                    />
-                    <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
-                      <div 
-                        key={`course-${recCourseIndex}`}
-                        className="absolute top-0 right-0 h-full bg-[#1E69DA]" 
-                        style={{ animation: 'fillRightToLeft 10s linear forwards' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-              {allInternships?.data?.length > 0 && (
-                <div className="flex-1 flex flex-col items-center pt-6 md:pt-0 md:pl-6">
-                  <div className="w-full text-left mb-3">
-                    <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Internship</span>
-                  </div>
-                  <div className="w-full h-full flex flex-col justify-between">
-                    <RecommendedCard 
-                      item={allInternships.data[recInternshipIndex % allInternships.data.length]} 
-                      total={allInternships.data.length}
-                      currentIndex={recInternshipIndex}
-                      onDotClick={setRecInternshipIndex}
-                    />
-                    <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
-                      <div 
-                        key={`internship-${recInternshipIndex}`}
-                        className="absolute top-0 left-0 h-full bg-[#1E69DA]" 
-                        style={{ animation: 'fillLeftToRight 10s linear forwards' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        <p className="text-[18px] lg:text-[32px] font-bold text-white m-0 tracking-tight relative z-[2]">{greeting}</p>
       </div>
 
-      {/* Sidebar */}
-      <div className="hidden lg:flex fixed top-0 right-0 w-[280px] xl:w-[320px] h-screen flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] p-4 pb-2 z-[100]">
-        <div className="w-full flex flex-col overflow-hidden flex-1 h-full">
-          {/* Section 1: Overall Performance */}
-          <div className="shrink-0 w-full">
-            <ProfileSection
-              profileValues={profileValues}
-              router={router}
-              studentCreds={studentCreds}
-            />
+      <div className="w-full flex-1 flex flex-col lg:flex-row items-stretch overflow-hidden relative">
+        <div className="w-full lg:flex-1 h-full flex flex-col items-center lg:items-start gap-6 overflow-y-auto [&::-webkit-scrollbar]:hidden px-2 lg:px-8 py-4 lg:py-6">
+
+          {/* Dashboard Statistics Card */}
+          <div className="w-full flex justify-start">
+            <DashboardStats stats={dashboardStats} router={router} />
+          </div>
+
+          {/* Continue Learning Section with Pagination */}
+          <div className="w-full rounded-2xl bg-white py-6 px-4 lg:px-8 shadow-sm border border-[#e2e8f0]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-[18px] lg:text-[22px] font-extrabold">
+                <span>Continue Learning</span>
+                {combinedLearningData.length > pageSize && (
+                  <span className="text-[14px] text-[#666] ml-4 font-normal">
+                    ({combinedLearningData.length} total items)
+                  </span>
+                )}
+              </div>
+              {combinedLearningData.length > pageSize && (
+                <Pagination
+                  current={currentPage}
+                  total={combinedLearningData.length}
+                  pageSize={pageSize}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                  showQuickJumper={false}
+                  size="small"
+                />
+              )}
+            </div>
+
+            {loading ? (
+              <div className="text-center p-8">
+                <Spin size="large" />
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-4 w-full min-h-[380px]">
+                  {paginatedLearningData.map((item) => {
+                    const hasLastAccessed = item?.lastAccessedSection !== undefined && item?.lastAccessedSection !== null;
+                    const handleNavigate = () => {
+                      const basePath = item?.type === "internship" ? "/student/learning-internship" : "/student/learning-course";
+                      let url = `${basePath}?title=${item?.title?.split(" ")?.join("")}&id=${item?._id}&orgId=${item?.sourceOrgId}`;
+                      if (hasLastAccessed) {
+                        url += `&section=${item.lastAccessedSection}`;
+                        if (item.lastAccessedTopic !== undefined && item.lastAccessedTopic !== null) url += `&topic=${item.lastAccessedTopic}`;
+                      }
+                      router.push(url);
+                    };
+
+                    let lastAccessedInfo = "Not started";
+                    if (hasLastAccessed) {
+                      lastAccessedInfo = "In progress";
+                    }
+
+                    const isInternship = item?.type === "internship";
+
+                    return (
+                      <div key={item._id} className="flex flex-col md:flex-row items-center justify-between p-4 bg-white border border-[#e2e8f0] rounded-[16px] hover:shadow-md transition-shadow">
+                        {/* Left Side: Icon & Info */}
+                        <div className="flex items-center gap-4 w-full md:w-auto">
+                          <div className={`w-[50px] h-[50px] rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${isInternship ? 'bg-[#e1f5fe]' : 'bg-[#e8f5e9]'}`}>
+                            {isInternship ? (
+                              <LaptopOutlined style={{ fontSize: '24px', color: '#0284c7' }} />
+                            ) : (
+                              <ReadOutlined style={{ fontSize: '24px', color: '#24A058' }} />
+                            )}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-[#1e293b] text-[15px]">{item?.title}</span>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`text-[11px] font-semibold px-2 py-[2px] rounded-md ${isInternship ? 'bg-[#e1f5fe] text-[#0284c7]' : 'bg-[#e8f5e9] text-[#24A058]'}`}>
+                                {isInternship ? 'Internship' : 'Course'}
+                              </span>
+                              <span className="text-[12px] text-[#64748b]">
+                                {lastAccessedInfo} · Added {new Date(item?.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right Side: Progress & Button */}
+                        <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-4 md:mt-0">
+                          <div className="flex items-center gap-2 w-[180px] justify-end">
+                            <Progress 
+                              percent={item?.progress || 0} 
+                              size="small" 
+                              showInfo={false} 
+                              strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'} 
+                              trailColor="#f1f5f9"
+                              className="m-0 w-[120px]"
+                            />
+                            <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{item?.progress || 0}%</span>
+                          </div>
+                          <Button
+                            onClick={handleNavigate}
+                            className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                            style={{
+                              fontWeight: '600',
+                              borderRadius: '8px',
+                              padding: '4px 16px',
+                              height: '32px'
+                            }}
+                          >
+                            {hasLastAccessed ? "Continue" : "Start Learning"}
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
           
-          {/* Section 2: Notice Board */}
-          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden w-full mt-4 flex flex-col relative border-t border-[#f1f5f9] pt-4">
-            <div className="w-full flex items-center justify-between mb-4 sticky top-0 bg-white z-10">
-              <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px]">Notice Board</h3>
-              <HiOutlineArrowsExpand
-                className="text-[1.2rem] cursor-pointer text-[#24A058] transition-transform duration-200 hover:scale-125"
-                onClick={() => setIsNoticeModalOpen(true)}
-              />
+          {/* Grouped Recommended Section */}
+          {(allCourses?.data?.length > 0 || allInternships?.data?.length > 0) && (
+            <div className="w-full rounded-2xl bg-white p-4 lg:p-6 shadow-sm border border-[#e2e8f0] flex flex-col items-center">
+              <div className="w-full flex flex-col md:flex-row gap-6 items-stretch">
+                {allCourses?.data?.length > 0 && (
+                  <div className="flex-1 flex flex-col items-center border-b md:border-b-0 pb-6 md:pb-0 md:pr-6 md:border-r border-[#e2e8f0]">
+                    <div className="w-full text-left mb-3">
+                      <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Course</span>
+                    </div>
+                    <div className="w-full h-full flex flex-col justify-between">
+                      <RecommendedCard 
+                        item={allCourses.data[recCourseIndex % allCourses.data.length]} 
+                        total={allCourses.data.length}
+                        currentIndex={recCourseIndex}
+                        onDotClick={setRecCourseIndex}
+                      />
+                      <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
+                        <div 
+                          key={`course-${recCourseIndex}`}
+                          className="absolute top-0 right-0 h-full bg-[#1E69DA]" 
+                          style={{ animation: 'fillRightToLeft 10s linear forwards' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {allInternships?.data?.length > 0 && (
+                  <div className="flex-1 flex flex-col items-center pt-6 md:pt-0 md:pl-6">
+                    <div className="w-full text-left mb-3">
+                      <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Internship</span>
+                    </div>
+                    <div className="w-full h-full flex flex-col justify-between">
+                      <RecommendedCard 
+                        item={allInternships.data[recInternshipIndex % allInternships.data.length]} 
+                        total={allInternships.data.length}
+                        currentIndex={recInternshipIndex}
+                        onDotClick={setRecInternshipIndex}
+                      />
+                      <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
+                        <div 
+                          key={`internship-${recInternshipIndex}`}
+                          className="absolute top-0 left-0 h-full bg-[#1E69DA]" 
+                          style={{ animation: 'fillLeftToRight 10s linear forwards' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="w-full flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-              <CardsList type="notifications" />
-            </div>
-          </div>
-          
-          {/* Section 3: Achievements */}
-          <div className="shrink-0 w-full mt-4 relative border-t border-[#f1f5f9] pt-4">
-            <Achievements />
-          </div>
+          )}
         </div>
 
-        <Modal
-          title="Notice Board"
-          open={isNoticeModalOpen}
-          onCancel={() => setIsNoticeModalOpen(false)}
-          footer={null}
-          width={1000}
-        >
-          <div style={{ height: "70vh", overflowY: "auto" }}>
-            <CardsList type="notifications" />
+        {/* Sidebar */}
+        <div className="hidden lg:flex w-[280px] xl:w-[320px] h-full flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] p-4 pb-2 shrink-0 z-10 shadow-sm relative">
+          <div className="w-full flex flex-col overflow-hidden flex-1 h-full">
+            {/* Section 1: Overall Performance */}
+            <div className="shrink-0 w-full">
+              <ProfileSection
+                profileValues={profileValues}
+                router={router}
+                studentCreds={studentCreds}
+              />
+            </div>
+            
+            {/* Section 2: Notice Board */}
+            <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden w-full mt-4 flex flex-col relative border-t border-[#f1f5f9] pt-4">
+              <div className="w-full flex items-center justify-between mb-4 sticky top-0 bg-white z-10">
+                <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px]">Notice Board</h3>
+                <HiOutlineArrowsExpand
+                  className="text-[1.2rem] cursor-pointer text-[#24A058] transition-transform duration-200 hover:scale-125"
+                  onClick={() => setIsNoticeModalOpen(true)}
+                />
+              </div>
+              <div className="w-full flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                <CardsList type="notifications" />
+              </div>
+            </div>
+            
+            {/* Section 3: Achievements */}
+            <div className="shrink-0 w-full mt-4 relative border-t border-[#f1f5f9] pt-4">
+              <Achievements />
+            </div>
           </div>
-        </Modal>
+
+          <Modal
+            title="Notice Board"
+            open={isNoticeModalOpen}
+            onCancel={() => setIsNoticeModalOpen(false)}
+            footer={null}
+            width={1000}
+          >
+            <div style={{ height: "70vh", overflowY: "auto" }}>
+              <CardsList type="notifications" />
+            </div>
+          </Modal>
+        </div>
       </div>
     </section>
   );
