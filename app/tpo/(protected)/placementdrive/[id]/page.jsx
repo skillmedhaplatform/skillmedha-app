@@ -20,6 +20,15 @@ const PlacementDetails = () => {
   const router = useRouter();
   const path = usePathname();
   const dispatch = useDispatch();
+  const pathSegments = path?.split("/").filter((e) => e) || [];
+
+  const resolveName = (segment, index) => {
+    if (segment === "placementdrive") return "Placement Drives";
+    if (index > 0 && pathSegments[index - 1] === "placementdrive") {
+      return getName(id) || "Company Details";
+    }
+    return segment.charAt(0).toUpperCase() + segment.slice(1);
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,14 +37,19 @@ const PlacementDetails = () => {
   const [selectedProfile, setSelectedProfile] = useState("All");
 
   const { value: ALLJOBS } = useSelector((state) => state.placement.AllJobs);
-  const { value: ALLPLACEMENTS } = useSelector(
+  const { value: ALLPLACEMENTS, status: placementsStatus } = useSelector(
     (state) => state.placement.AllPlacements
   );
 
   useEffect(() => {
     dispatch(GetAllJobs({ limit: 10, profileId: id }));
-    dispatch(GetAllPlacements());
-  }, []);
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (placementsStatus !== "succeeded" && placementsStatus !== "loading") {
+      dispatch(GetAllPlacements());
+    }
+  }, [dispatch, placementsStatus]);
 
   const handleAction = async (jobId) => {
     setIsLoading(true);
@@ -181,6 +195,38 @@ const PlacementDetails = () => {
         }
       />
       <div className={allStudents.container}>
+        {/* Breadcrumbs Trail */}
+        <div className={allStudents.headerCont} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            {pathSegments.map((segment, index) => {
+              const displayName = resolveName(segment, index);
+              const isLast = index === pathSegments.length - 1;
+              let pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
+              if (pathToHere === "/tpo") {
+                pathToHere = "/tpo/dashboard";
+              }
+              return (
+                <span
+                  key={index}
+                  className={isLast ? allStudents.activeCrumb : allStudents.crumb}
+                  onClick={() => {
+                    if (!isLast) router.push(pathToHere);
+                  }}
+                  style={{ display: "inline-flex", alignItems: "center" }}
+                >
+                  {displayName}&nbsp;
+                  {index < pathSegments.length - 1 && (
+                    <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />
+                  )}
+                </span>
+              );
+            })}
+          </div>
+          <Button type="primary" onClick={() => router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`)}>
+            + Add New Job
+          </Button>
+        </div>
+
         <div
           style={{
             display: "flex",
@@ -204,18 +250,80 @@ const PlacementDetails = () => {
           />
         </div>
 
-        <Table
-          scroll={{ y: 600 }}
-          columns={columns}
-          dataSource={filteredJobs}
-          // dataSource={ALLJOBS?.data}
-          pagination={false}
-          className={allStudents.custom_table}
-          onRow={(record) => ({
-            onClick: () => handleClick(record),
-            style: { cursor: "pointer" },
-          })}
-        />
+        <div className={allStudents.cardsList}>
+          {filteredJobs && filteredJobs.length > 0 ? (
+            filteredJobs.map((record) => {
+              const dateStart = new Date(record.startDate);
+              const dateEnd = new Date(record.endDate);
+
+              return (
+                <div
+                  key={record._id}
+                  className={allStudents.companyCard}
+                  onClick={() => handleClick(record)}
+                >
+                  <div className={allStudents.companyInfo} style={{ minWidth: '220px' }}>
+                    <span className={allStudents.companyName} style={{ fontSize: '1rem' }}>
+                      {record.jobTitle || "Unnamed Role"}
+                    </span>
+                    <span className={allStudents.companyContact}>
+                      {Array.isArray(record.interviewRounds) && record.interviewRounds.length > 0
+                        ? `${record.interviewRounds.length} Round${record.interviewRounds.length > 1 ? "s" : ""}`
+                        : "0 Rounds"}
+                    </span>
+                  </div>
+
+                  <div className={allStudents.cardMeta}>
+                    <div className={allStudents.metaItem}>
+                      <span className={allStudents.metaLabel}>Applicants</span>
+                      <span className={allStudents.metaValue}>
+                        {Array.isArray(record.applicants) && record.applicants.length > 0
+                          ? `${record.applicants.length} Applicant${record.applicants.length > 1 ? "s" : ""}`
+                          : "0 Applicants"}
+                      </span>
+                    </div>
+                    <div className={allStudents.metaItem}>
+                      <span className={allStudents.metaLabel}>Application Start</span>
+                      <span className={allStudents.metaValue}>
+                        {isNaN(dateStart) ? record.startDate : dateStart.toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className={allStudents.metaItem}>
+                      <span className={allStudents.metaLabel}>Application Deadline</span>
+                      <span className={allStudents.metaValue}>
+                        {isNaN(dateEnd) ? record.endDate : dateEnd.toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div
+                    className={allStudents.cardActions}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Button
+                      loading={isLoading && selectedJobId === record._id}
+                      type="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAction(record._id);
+                      }}
+                    >
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className={allStudents.emptyState}>
+              <div className={allStudents.emptyIcon}>📋</div>
+              <span className={allStudents.emptyText}>No jobs found</span>
+              <span className={allStudents.emptySub}>
+                Try adjusting your search filters or add a new job
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       <JobDetailsModal

@@ -1,10 +1,13 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "./myprofile.module.scss";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { profileSidebarItems } from "./(components)/sidebarData";
 import { usePathname } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
+import { getAllDepartments } from "@/redux/slices/tpo/departmentSlice";
+import { getAllStudents } from "@/redux/slices/tpo/dashboardSlice";
+import { GetAllPlacements } from "@/redux/slices/tpo/placementsSlice";
 import {
   FaUser,
   FaBuilding,
@@ -13,21 +16,54 @@ import {
   FaFileContract,
   FaCheckCircle,
 } from "react-icons/fa";
+import { BsPlus, BsX, BsStar } from "react-icons/bs";
 
 export default function ProfileLayout({ children, activeView, setView }) {
+  const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
 
   // Dynamic statistics
-  const { stats } = useSelector((state) => state.dashboardStats);
-  const departmentsCount = stats.departmentsCount;
-  const studentsCount = stats.studentsCount;
-  const drivesCount = stats.totalPlacements;
+  const { value: departMent, status: departmentStatus } = useSelector(
+    (state) => state.department.getAllDepartments
+  );
+  const departmentsCount = departMent?.data?.length || 0;
+
+  const { value: StudentsLength, status: studentsStatus } = useSelector(
+    (state) => state.dashboard.AllStudents
+  );
+  const studentsCount = Array.isArray(StudentsLength?.data)
+    ? StudentsLength.data.length
+    : Array.isArray(StudentsLength)
+    ? StudentsLength.length
+    : 0;
+
+  const { value: ALLPLACEMENTS, status: placementsStatus } = useSelector(
+    (state) => state.placement.AllPlacements
+  );
+  const placementsList = Array.isArray(ALLPLACEMENTS?.data)
+    ? ALLPLACEMENTS.data
+    : Array.isArray(ALLPLACEMENTS)
+    ? ALLPLACEMENTS
+    : [];
+  const drivesCount = placementsList.length;
 
   // Coordinator info
   const USER_DETAILS = useSelector(
     (state) => state.user.UserDetails?.value?.data
   );
+
+  useEffect(() => {
+    if (departmentStatus !== "sucess" && departmentStatus !== "loading") {
+      dispatch(getAllDepartments());
+    }
+    if (studentsStatus !== "succeeded" && studentsStatus !== "loading") {
+      dispatch(getAllStudents({}));
+    }
+    if (placementsStatus !== "succeeded" && placementsStatus !== "loading") {
+      dispatch(GetAllPlacements());
+    }
+  }, [dispatch, departmentStatus, studentsStatus, placementsStatus]);
 
   const name = USER_DETAILS?.userName || "Sure Yalla";
   const email = USER_DETAILS?.email || "cstpo1@gmail.com";
@@ -102,6 +138,14 @@ export default function ProfileLayout({ children, activeView, setView }) {
     <div className={styles.mainWrapper}>
       {/* Dark Blue Profile Hero Header */}
       <div className={styles.heroSection}>
+        {/* Background Icons */}
+        <div className={styles.bgIcons}>
+          <BsX className={styles.icon1} />
+          <BsPlus className={styles.icon2} />
+          <BsStar className={styles.icon3} />
+          <BsX className={styles.icon4} />
+        </div>
+        
         <div className={styles.heroTop}>
           {/* Coordinator Identity Area */}
           <div className={styles.identityArea}>
@@ -123,7 +167,10 @@ export default function ProfileLayout({ children, activeView, setView }) {
             <div className={styles.identityDetails}>
               <div className={styles.nameRow}>
                 <h1 className={styles.coordName}>{name}</h1>
-                <span className={styles.designationBadge}>{designation}</span>
+                <span className={styles.designationBadge}>
+                  <FaCheckCircle style={{ marginRight: '4px', fontSize: '0.85em' }} />
+                  {designation}
+                </span>
               </div>
               <div className={styles.metaRow}>
                 <span>Employee ID: {employeeId}</span>
@@ -166,7 +213,10 @@ export default function ProfileLayout({ children, activeView, setView }) {
           </div>
         </div>
 
-        {/* Profile Navigation Tabs */}
+      </div>
+
+      {/* Profile Navigation Tabs (Outside Hero Section to have white background) */}
+      <div className={styles.tabsWrapper}>
         <div className={styles.tabsRow}>
           {profileSidebarItems.map((item) => {
             const currentPathEnd = (activeView || pathname).split("/").pop();
@@ -178,9 +228,8 @@ export default function ProfileLayout({ children, activeView, setView }) {
                 className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
                 onClick={() => handleTabClick(item.path)}
               >
-                {getTabIcon(item.name)}
                 <span>{item.name}</span>
-                {isActive && <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#24a058] rounded-t-md" />}
+                {isActive && <span className={styles.activeIndicator} />}
               </div>
             );
           })}

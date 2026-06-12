@@ -3,7 +3,6 @@ import { formSchemas } from "../(components)/formschema";
 import DynamicForm from "../(components)/dynamicform";
 import styles from "../form.module.scss";
 import { profileSidebarItems } from "../(components)/sidebarData";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 export async function generateStaticParams() {
   return profileSidebarItems?.map((item) => {
@@ -19,7 +18,6 @@ export default function FormsPage({ params }) {
 
   return (
     <div className={styles.formContainer}>
-      <PageHeader title="My Profile" />
       <DynamicForm schema={currentForm} />
     </div>
   );

@@ -10,7 +10,6 @@ import { PlusOneOutlined } from "@mui/icons-material";
 import educationDegreeOptions from "@/utils/universalUtils/educationData";
 import { useRouter } from "@bprogress/next/app";
 import { useParams } from "next/navigation";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 export default function BasicDetailsPage() {
   const { id, jobid } = useParams();
@@ -335,7 +334,6 @@ export default function BasicDetailsPage() {
 
   return (
     <div className={styles.mainCont}>
-      <PageHeader title="Basic Details" />
       <div className={styles.fieldCont}>
         <label>Job Title</label>
         <input

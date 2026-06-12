@@ -6,7 +6,6 @@ import axios from "axios";
 import { Button } from "antd";
 import { useSearchParams } from "next/navigation";
 import { restUrl } from "@/utils/universalUtils/urls";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 export default function PsychometricTestResultPage({ id, isDownload }) {
   // const params = useSearchParams();
@@ -69,7 +68,6 @@ export default function PsychometricTestResultPage({ id, isDownload }) {
 
   return (
     <div className={styles.container}>
-      <PageHeader title="Psychometric Test Result" />
       <Button
         type="primary"
         onClick={downloadPDF}

@@ -1,16 +1,48 @@
-@import "@/utils/universalUtils/colors.module.scss";
+@use "@/utils/universalUtils/colors.module.scss" as *;
 
 .container {
-  height: 90vh;
-  margin: 1rem;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background-color: transparent;
+  min-height: calc(100vh - 140px);
+}
+.headerCont {
+  width: 100%;
+  padding: 0.25rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  background-color: transparent;
+  margin-bottom: 0.75rem;
+
+  .crumb {
+    font-size: 16px;
+    font-weight: 500;
+    color: #6BA8ED;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .activeCrumb {
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 600;
+  }
 }
 .head {
-  color: $bgcolor;
+  color: #6BA8ED;
   font-size: 20px;
   font-weight: 700;
 }
 .custom_table :global(.ant-table-thead > tr > th) {
-  background-color: #24A0581a; // or any other color you prefer
+  background-color: rgba(30, 105, 218, 0.1); // or any other color you prefer
   font-weight: bold;
 }
 
@@ -103,4 +135,157 @@
   text-align: center;
   font-style: italic;
   width: 100%;
+}
+
+.cardsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.companyCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    border-color: #cbd5e0;
+    transform: translateY(-1px);
+  }
+}
+
+.companyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 180px;
+  max-width: 220px;
+}
+
+.companyName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a202c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.companyContact {
+  font-size: 0.75rem;
+  color: #718096;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* ===== Card Meta Columns ===== */
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 85px;
+}
+
+.metaLabel {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.metaValue {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2d3748;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  text-align: center;
+}
+
+/* ===== Card Actions ===== */
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.actionBtn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #4a5568;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #f7fafc;
+    border-color: #cbd5e0;
+  }
+}
+
+.actionBtnPrimary {
+  background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%) !important;
+  border: none !important;
+  color: white !important;
+
+  &:hover {
+    opacity: 0.9 !important;
+  }
+}
+
+/* ===== Empty State ===== */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: #a0aec0;
+  gap: 0.75rem;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #718096;
+}
+
+.emptySub {
+  font-size: 0.8rem;
+  color: #a0aec0;
 }

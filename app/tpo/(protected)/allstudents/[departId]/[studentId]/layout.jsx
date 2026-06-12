@@ -9,6 +9,8 @@ import { Spin } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllDetails } from "@/redux/slices/tpo/getAllDetailsSlice";
 import { FaCaretRight } from "react-icons/fa";
+import PageHeader from "@/modules/tpo/components/PageHeader";
+import { getSstorage } from "@/utils/universalUtils/windowMW";
 import { useParams, usePathname } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
 
@@ -35,30 +37,39 @@ const StudentLayout = ({ children }) => {
         if (pathname === baseUrl && subsidenavLinks.length > 0) {
             router.replace(`${baseUrl}${subsidenavLinks[0].path}`);
         }
-    }, []);
+    }, [pathname, baseUrl, router]);
 
-    const symbol = <FaCaretRight style={{ fontSize: "24px" }} />;
+    const symbol = <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />;
+    const studentName = selectedStudent?.data
+        ? `${selectedStudent.data.firstName || ""} ${selectedStudent.data.lastName || selectedStudent.data.userName || ""}`.trim()
+        : "Student Profile";
+
+    const lastSegment = pathname?.split("/").pop() || "";
+    const displayTabName = lastSegment.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
     return (
         <>
+            <PageHeader
+                breadcrumb="All departments"
+                title={studentName}
+                subtitle={`Class of ${selectedStudent?.data?.yearOfPassing || "N/A"} - ${selectedStudent?.data?.email || ""}`}
+            />
             <div className={detail.container}>
                 <div className={detail.first}>
-                    <p
-                        onClick={() => router.push("/tpo/allstudents")}
-                        style={{ cursor: "pointer" }}
-                    >
-                        All Students
+                    <p onClick={() => router.push("/tpo/allstudents")}>
+                        All Departments
                     </p>
                     <span>{symbol}</span>
-                    <p
-                        onClick={() => router.push(`/tpo/allstudents/${params.departId}/`)}
-                        style={{ cursor: "pointer" }}
-                    >
-                        Students of Dept
+                    <p onClick={() => router.push(`/tpo/allstudents/${params.departId}/`)}>
+                        {getSstorage("departmentTitle") || "Department"}
                     </p>
-                    {symbol}
-                    <p style={{ fontWeight: "bold" }}>
-                        {selectedStudent?.data?.userName} - {pathname?.split("/").pop()}
+                    <span>{symbol}</span>
+                    <p style={{ color: "#0f172a", fontWeight: "600", cursor: "default" }}>
+                        {selectedStudent?.data?.userName || "Profile"}
+                    </p>
+                    <span>{symbol}</span>
+                    <p style={{ color: "#0f172a", fontWeight: "600", cursor: "default" }}>
+                        {displayTabName}
                     </p>
                 </div>
                 <div className={detail.mainContainer}>

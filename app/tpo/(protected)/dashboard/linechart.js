@@ -13,11 +13,11 @@ const PlacementActivityChart = ({ data = [], offersThisMonth = 0, averageTimeToO
     stroke: {
       curve: "smooth",
       width: 3,
-      colors: ["#1fbb9c"],
+      colors: ["#6BA8ED"],
     },
     markers: {
       size: 4,
-      colors: ["#1fbb9c"],
+      colors: ["#6BA8ED"],
       strokeColors: "#fff",
       strokeWidth: 2,
     },
@@ -53,7 +53,7 @@ const PlacementActivityChart = ({ data = [], offersThisMonth = 0, averageTimeToO
         lines: { show: false }
       }
     },
-    colors: ["#1fbb9c"],
+    colors: ["#6BA8ED"],
   };
 
   const series = [
@@ -71,7 +71,7 @@ const PlacementActivityChart = ({ data = [], offersThisMonth = 0, averageTimeToO
       <div style={{ display: "flex", gap: "1.5rem", marginBottom: "1rem" }}>
         <div>
           <div style={{ fontSize: "0.8rem", color: "#666", fontWeight: 500 }}>Offers This Month</div>
-          <div style={{ fontSize: "1.4rem", fontWeight: 700, color: "#1fbb9c" }}>{offersThisMonth}</div>
+          <div style={{ fontSize: "1.4rem", fontWeight: 700, color: "#6BA8ED" }}>{offersThisMonth}</div>
         </div>
         <div style={{ width: "1px", backgroundColor: "#eef2f5" }}></div>
         <div>

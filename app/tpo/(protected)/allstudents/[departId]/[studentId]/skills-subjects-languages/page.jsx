@@ -16,7 +16,6 @@ import {
 import { Button } from "antd";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { IoMdCloseCircleOutline } from "react-icons/io";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const Skills = () => {
   const dispatch = useDispatch();
@@ -135,7 +134,7 @@ const Skills = () => {
                 style={{
                   color:
                     selectedStudent?.data?.[verifKeyMap[title]] === "approved"
-                      ? "green"
+                      ? "#6BA8ED"
                       : selectedStudent?.data?.[verifKeyMap[title]] ===
                         "resubmission"
                         ? "orange"
@@ -157,7 +156,7 @@ const Skills = () => {
             <div className={education.mark}>
               <Button
                 type="text"
-                style={{ color: "#24A058" }}
+                style={{ color: "#6BA8ED" }}
                 onClick={() => handleApprove(title)}
                 icon={<FaRegCheckCircle />}
               >
@@ -199,7 +198,6 @@ const Skills = () => {
   // 7️⃣ Final render
   return (
     <>
-      <PageHeader title="Skills & Languages" />
 
       <div className={education.container}>
         {(technical.length > 0 ||

@@ -13,6 +13,7 @@ export default function NoticePreviewCard({ data, onEdit }) {
           <Button
             onClick={onEdit}
             type="primary"
+            className="!bg-gradient-to-br !from-[#6BA8ED] !to-[#A3CCFA] !border-none !text-white"
             style={{ alignSelf: "flex-end" }}
           >
             Edit
@@ -43,7 +44,7 @@ export default function NoticePreviewCard({ data, onEdit }) {
       {priority && (
         <p>
           <strong>Priority :</strong>{" "}
-          <strong style={{ color: priority === "High" ? "red" : "#24A058" }}>
+          <strong style={{ color: priority === "High" ? "red" : "#6BA8ED" }}>
             {priority}
           </strong>
         </p>

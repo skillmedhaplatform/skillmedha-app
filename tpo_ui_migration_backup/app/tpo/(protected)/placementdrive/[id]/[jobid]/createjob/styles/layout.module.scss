@@ -1,0 +1,76 @@
+@import "@/utils/universalUtils/colors.module.scss";
+
+.mainContainer {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  .headerCont {
+    height: 8%;
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    .crumb {
+      font-size: 18px;
+      font-weight: 500;
+      color: $bgcolor;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .activeCrumb {
+      color: $bgcolor;
+      font-size: 20px;
+      font-weight: 700;
+    }
+  }
+  .bottomCont {
+    width: 100%;
+    height: 92%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .sidebarCont {
+      width: 15%;
+      height: 100%;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      .routeNames {
+        font-size: 16px;
+        font-weight: 600;
+        border: 0;
+        background-color: transparent;
+        text-align: left;
+        cursor: pointer;
+        &:hover {
+          color: $bgcolor;
+        }
+      }
+      .disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+      .active {
+        color: $bgcolor;
+        text-decoration: underline;
+      }
+    }
+    .contentCont {
+      width: 85%;
+      height: 100%;
+      padding: 1rem;
+    }
+  }
+}
