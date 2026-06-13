@@ -204,7 +204,7 @@ const LibraryPage = ({
   const paginationData = useSelector(paginationSelector);
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
-  const pageSize = parseInt(searchParams.get("limit") || "20", 10);
+  const pageSize = parseInt(searchParams.get("limit") || "6", 10);
   const urlSearch = searchParams.get("search") || "";
   const urlCategory = searchParams.get("category") || "";
   const urlDifficulty = searchParams.get("difficulty") || "";
@@ -313,7 +313,7 @@ const LibraryPage = ({
 
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const [activeTab, setActiveTab] = useState("all"); 
+  const [activeTab, setActiveTab] = useState("all");
 
   const filteredTabItems = safeItems.filter((item) => {
     if (activeTab === "my") {
@@ -326,20 +326,20 @@ const LibraryPage = ({
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       return createdAtDate >= sixMonthsAgo;
     }
-    return true; 
+    return true;
   });
 
   const totalAvailable = paginationData?.totalLength || safeItems.length || 0;
   const enrolledItems = safeItems.filter(item => item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled);
   const totalEnrolled = enrolledItems.length;
-  const avgProgress = totalEnrolled > 0 
-    ? Math.round(enrolledItems.reduce((acc, curr) => acc + (curr.progress || 0), 0) / totalEnrolled) 
+  const avgProgress = totalEnrolled > 0
+    ? Math.round(enrolledItems.reduce((acc, curr) => acc + (curr.progress || 0), 0) / totalEnrolled)
     : 0;
 
   const isCourse = title ? title.toLowerCase().includes("course") : false;
   const moduleName = isCourse ? "courses" : "internships";
 
-  const isMobile = useResponsive(); 
+  const isMobile = useResponsive();
 
   if (isMobile) {
     return (
@@ -380,7 +380,7 @@ const LibraryPage = ({
     <div className="flex flex-col gap-0 relative bg-white min-h-screen">
       {/* Banner Section - Matching TPO Portal & Dashboard */}
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-between p-4 lg:px-8 pt-6 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
-        
+
         {/* Decorative Icons */}
         <div className="absolute inset-0 pointer-events-none z-[1]">
           <div className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]">✕</div>
@@ -392,18 +392,18 @@ const LibraryPage = ({
         {/* Top half: Title & Stats */}
         <div className="flex items-center justify-between w-full relative z-[2]">
           <div className="flex items-center gap-4 relative z-10">
-            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
-              {moduleName.toLowerCase().includes('internship') ? <HiOutlineBuildingOffice2 className="text-white text-2xl" /> : <HiOutlineBookOpen className="text-white text-2xl" />}
+            <div className="w-[56px] h-[56px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
+              {moduleName.toLowerCase().includes('internship') ? <HiOutlineBuildingOffice2 className="text-white text-3xl" /> : <HiOutlineBookOpen className="text-white text-3xl" />}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <h1 
+            <div className="flex flex-col justify-center gap-1">
+              <h1
                 className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0"
-                style={{ border: 'none' }}
+                style={{ border: 'none', marginBottom: 0 }}
               >
                 {title}
               </h1>
-              <p className="text-white text-[15px] lg:text-[16px] m-0">
-                Explore all available {moduleName.toLowerCase()}s and {moduleName.toLowerCase().includes('internship') ? 'kickstart your career' : 'start learning'} today.
+              <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
+                Explore all available {moduleName.toLowerCase()} and {moduleName.toLowerCase().includes('internship') ? 'kickstart your career' : 'start learning'} today.
               </p>
             </div>
           </div>
@@ -426,24 +426,58 @@ const LibraryPage = ({
       </div>
 
       {/* Tabs Row (Attached directly below banner) */}
-      <div className="w-full bg-[#f1f5f9] border-b border-[#e2e8f0] px-4 lg:px-8 flex items-center gap-8 shadow-sm">
-        {[
-          { id: "all", label: `All ${moduleName.toLowerCase().includes('internship') ? 'internships' : 'courses'}` },
-          { id: "my", label: `My ${moduleName.toLowerCase().includes('internship') ? 'internships' : 'courses'}` },
-          { id: "recent", label: "Recently added" }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer
-              ${activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"}`}
-          >
-            {tab.label}
-            {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1E69DA] rounded-t-md"></div>
-            )}
-          </button>
-        ))}
+      <div className="w-full bg-[#f1f5f9] border-b border-[#e2e8f0] px-4 lg:px-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-sm gap-2 md:gap-0">
+        <div className="flex items-center gap-8">
+          {[
+            { id: "all", label: `All ${moduleName.toLowerCase().includes('internship') ? 'internships' : 'courses'}` },
+            { id: "my", label: `My ${moduleName.toLowerCase().includes('internship') ? 'internships' : 'courses'}` },
+            { id: "recent", label: "Recently added" }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer
+                ${activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"}`}
+            >
+              {tab.label}
+              {activeTab === tab.id && (
+                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1E69DA] rounded-t-md"></div>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Search & Difficulty Filter Moved Here */}
+        <div className="flex items-center gap-4 py-2 md:py-0">
+          <Input
+            id={`${idPrefix}-search`}
+            prefix={<SearchOutlined style={{ color: "#1E69DA" }} />}
+            placeholder={searchPlaceholder}
+            value={searchInput}
+            onChange={handleSearchChange}
+            allowClear
+            onClear={() => pushParams({ search: "" })}
+            className="w-[160px] rounded-[20px] shadow-sm border-[#e2e8f0] [&>input]:text-[#64748b] [&>input]:font-medium [&>input::placeholder]:text-[#94a3b8]"
+            style={{ color: "#64748b" }}
+          />
+
+          <Select
+            id={`${idPrefix}-difficulty`}
+            placeholder="All Levels"
+            value={urlDifficulty || undefined}
+            onChange={handleDifficultyChange}
+            allowClear
+            options={difficultyOptions}
+            className="w-[130px] shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
+            popupMatchSelectWidth={false}
+          />
+
+          {hasActiveFilters && (
+            <Button type="text" danger size="middle" onClick={handleClearAll} className="font-medium hover:bg-red-50 rounded-lg px-2">
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Categories Pill Bar */}
@@ -451,8 +485,8 @@ const LibraryPage = ({
         <button
           onClick={() => pushParams({ category: "" })}
           className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer
-            ${!urlCategory 
-              ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]" 
+            ${!urlCategory
+              ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
               : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"}`}
         >
           <span className={!urlCategory ? "text-white" : "text-[#3b82f6]"}>☷</span> All categories
@@ -464,8 +498,8 @@ const LibraryPage = ({
               key={cat.value}
               onClick={() => pushParams({ category: cat.value })}
               className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer
-                ${isActive 
-                  ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]" 
+                ${isActive
+                  ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
                   : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"}`}
             >
               {cat.label}
@@ -474,42 +508,9 @@ const LibraryPage = ({
         })}
       </div>
 
-      {/* Filter Bar */}
-      <div className="flex items-center justify-between flex-wrap gap-2.5 w-full bg-transparent px-4 lg:px-8 py-2 mt-2">
-        <div className="flex flex-wrap items-center gap-4 flex-1">
-          <Input
-            id={`${idPrefix}-search`}
-            prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
-            placeholder={searchPlaceholder}
-            value={searchInput}
-            onChange={handleSearchChange}
-            allowClear
-            onClear={() => pushParams({ search: "" })}
-            className="w-[280px] rounded-[20px] shadow-sm border-[#e2e8f0]"
-          />
-
-          <Select
-            id={`${idPrefix}-difficulty`}
-            placeholder="All Levels"
-            value={urlDifficulty || undefined}
-            onChange={handleDifficultyChange}
-            allowClear
-            options={difficultyOptions}
-            className="min-w-[130px] shadow-sm rounded-lg"
-            popupMatchSelectWidth={false}
-          />
-
-          {hasActiveFilters && (
-            <Button type="text" danger size="middle" onClick={handleClearAll} className="font-medium hover:bg-red-50 rounded-lg">
-              Clear Filters
-            </Button>
-          )}
-        </div>
-      </div>
-
       {/* Cards */}
-      <div className="w-full overflow-hidden">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] self-start gap-4 p-2 px-4 lg:px-8">
+      <div className="w-full flex-1 mb-8 pb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 lg:gap-x-16 gap-y-8 p-2 px-4 lg:px-6 max-w-[1500px] mx-auto w-full">
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
           ) : !filteredTabItems?.length ? (
@@ -544,10 +545,10 @@ const LibraryPage = ({
               const modulesCount = item?.sections?.length || 0;
               const createdAtDate = item?.createdAt ? formatUpdatedDate(item.createdAt) : '';
 
-              let statusText = "Not enrolled";
-              let buttonText = "Enroll";
+              let statusText = "Not started";
+              let buttonText = "Start";
               let statusColor = "text-[#94a3b8]";
-              
+
               if (isEnrolled) {
                 if (progressVal === 0) {
                   statusText = "Not started";
@@ -560,7 +561,11 @@ const LibraryPage = ({
                 }
               }
 
-              return (
+                  const theme = getCardTheme(item.category || "General", index);
+
+                  const imageUrl = item?.media?.thumbnailImage || item?.media?.coverImage || item?.thumbnail || item?.image || item?.bannerImage || item?.coverImage || item?.companyLogo || "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80";
+
+                  return (
                 <div
                   key={item?._id}
                   onClick={(e) => {
@@ -572,55 +577,54 @@ const LibraryPage = ({
                   tabIndex={0}
                 >
                   {/* Top Image Section */}
-                  <div className="relative w-full h-[160px] bg-[#f8fafc] flex items-center justify-center overflow-hidden">
-                    <img
-                      className="w-full h-full object-cover block scale-[1.001] transition-transform duration-300 group-hover:scale-[1.05]"
-                      src={item?.coverImage || item?.media?.coverImage || ""}
-                      alt={item?.title || title}
-                      loading="lazy"
-                    />
-                    
+                  <div className="relative w-full h-[170px] flex flex-col items-center justify-center overflow-hidden bg-[#071631]">
+                    <img src={imageUrl} alt={item.title || "Thumbnail"} className="w-full h-full object-cover" />
+
                     {/* Absolute Overlays */}
                     {isEnrolled && (
-                      <div className="absolute top-3 left-3 bg-[#00000080] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-white/20">
-                        <BsCheckCircleFill className="text-[#22c55e] text-[10px]" />
-                        <span className="text-white text-[11px] font-medium tracking-wide">Enrolled</span>
+                      <div className="absolute top-3 left-3 bg-[#022c22] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-[#047857]">
+                        <BsCheckCircleFill className="text-[#10b981] text-[10px]" />
+                        <span className="text-[#10b981] text-[11px] font-medium tracking-wide">Enrolled</span>
                       </div>
                     )}
-                    <div className="absolute top-3 right-3 bg-[#00000080] backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/20">
+                    <div className="absolute top-3 right-3 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10">
                       <BsBookmark className="text-white text-[14px]" />
                     </div>
 
-                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 opacity-100 bg-[#00000080] px-2 py-0.5 rounded backdrop-blur-sm">
-                      <BsCodeSlash className="text-white text-[12px]" />
-                      <span className="text-white text-[11px] font-medium">{item.category || "General"}</span>
+                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-0.5">
+                      <BsCodeSlash className="text-white/80 text-[12px]" />
+                      <span className="text-white/90 text-[11px] font-medium">{item.category || "General"}</span>
                     </div>
 
                     {item.difficulty && (
-                      <div className="absolute bottom-3 right-3 bg-[#f59e0b] px-2 py-0.5 rounded text-white text-[10px] font-bold tracking-wider uppercase shadow-sm">
+                      <div className={`absolute bottom-3 right-3 px-2.5 py-0.5 rounded-sm text-[10px] font-bold tracking-wider uppercase ${
+                        item.difficulty?.toLowerCase() === 'beginner' ? 'bg-[#047857] text-white' :
+                        item.difficulty?.toLowerCase() === 'intermediate' ? 'bg-[#d97706] text-white' :
+                        'bg-[#dc2626] text-white'
+                      }`}>
                         {item.difficulty}
                       </div>
                     )}
                   </div>
 
                   {/* Bottom Content Section */}
-                  <div className="flex flex-col p-4 flex-1">
+                  <div className="flex flex-col p-3 flex-1">
                     <Tooltip title={item?.title} placement="topLeft" mouseEnterDelay={0.5}>
                       <h3 className="text-[15px] font-bold text-[#1e293b] leading-tight mb-2 line-clamp-2 min-h-[36px]">
                         {item?.title}
                       </h3>
                     </Tooltip>
-                    
-                    <p className="text-[#64748b] text-[12px] leading-snug mb-4 line-clamp-2 min-h-[34px]">
+
+                    <p className="text-[#64748b] text-[12px] font-medium leading-snug mb-3 line-clamp-2 min-h-[34px]">
                       {stripHtml(item?.description)}
                     </p>
 
                     {/* Progress Bar */}
                     <div className="w-full flex items-center gap-3 mb-4">
-                      <div className="flex-1 h-[6px] bg-[#f1f5f9] rounded-full overflow-hidden">
+                      <div className="flex-1 h-[8px] bg-[#f1f5f9] rounded-full overflow-hidden">
                         {isEnrolled && (
-                          <div 
-                            className="h-full bg-gradient-to-br from-[#1E69DA] to-[#5694F0] rounded-full transition-all duration-500" 
+                          <div
+                            className="h-full bg-gradient-to-br from-[#1E69DA] to-[#5694F0] rounded-full transition-all duration-500"
                             style={{ width: `${progressVal}%` }}
                           />
                         )}
@@ -631,7 +635,7 @@ const LibraryPage = ({
                     </div>
 
                     {/* Meta Info Row */}
-                    <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] font-medium mb-4">
+                    <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] font-bold mb-4">
                       {duration && <span className="flex items-center gap-1"><BsClock /> {duration}</span>}
                       {duration && modulesCount > 0 && <span>•</span>}
                       {modulesCount > 0 && <span className="flex items-center gap-1"><BsJournalBookmark /> {modulesCount} modules</span>}
@@ -644,15 +648,15 @@ const LibraryPage = ({
                       <span className={`text-[12px] font-bold flex items-center gap-1 ${statusColor}`}>
                         {statusText}
                       </span>
-                      
+
                       <button
-                        className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] text-white text-[13px] font-bold py-1.5 px-5 rounded-full border-none cursor-pointer shadow-sm hover:shadow-md transition-shadow flex items-center gap-1.5"
+                        className="bg-[#1a56db] hover:bg-[#1e40af] text-white text-[13px] font-medium py-1.5 px-5 rounded-[20px] border-none cursor-pointer transition-colors flex items-center gap-1.5 shadow-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           nav.push(getItemUrl(item));
                         }}
                       >
-                        {buttonText}
+                        {buttonText === "Start" ? "+ Start" : `▷ ${buttonText}`}
                       </button>
                     </div>
                   </div>
@@ -693,8 +697,8 @@ const LibraryPage = ({
         centered={true}
         styles={{ body: { padding: 0 } }}
       >
-        <div 
-          className="[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#d0d0d0] hover:[&::-webkit-scrollbar-thumb]:bg-[#aaa] [&::-webkit-scrollbar-thumb]:rounded-full" 
+        <div
+          className="[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#d0d0d0] hover:[&::-webkit-scrollbar-thumb]:bg-[#aaa] [&::-webkit-scrollbar-thumb]:rounded-full"
           style={{ maxHeight: "75vh", overflowY: "auto", overflowX: "hidden", padding: "24px" }}
         >
           {selectedItem && <InfoContent item={selectedItem} />}
@@ -703,14 +707,14 @@ const LibraryPage = ({
 
       {/* Pagination */}
       {paginationData && paginationData.totalLength > 0 && !loading && (
-        <div className="sticky bottom-0 left-0 w-full bg-white z-10 py-2 flex justify-end">
+        <div className="mt-auto w-full bg-white z-10 py-4 px-4 lg:px-8 flex justify-center border-t border-[#f1f5f9]">
           <Pagination
             current={currentPage}
             pageSize={pageSize}
             total={paginationData.totalLength}
             onChange={handlePageChange}
-            showSizeChanger
-            pageSizeOptions={["10", "20", "50", "100"]}
+            showSizeChanger={false}
+            pageSizeOptions={["6"]}
           />
         </div>
       )}
