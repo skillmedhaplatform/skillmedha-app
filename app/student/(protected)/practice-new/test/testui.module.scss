@@ -1,37 +1,93 @@
-@import "../../../../../utils/universalUtils/colors.module.scss";
-@import "../../../../../utils/universalUtils/mixins.scss";
+@use "../../../../../utils/universalUtils/colors.module.scss" as *;
+@use "../../../../../utils/universalUtils/mixins.scss" as *;
 
+// ─── Design Tokens ────────────────────────────────────────────
+$navy-900: #071631;
+$navy-800: #0c1e3f;
+$navy-700: #10254c;
+$blue-600: #1e69da;
+$blue-500: #3b82f6;
+$blue-400: #60a5fa;
+$blue-50: #eff6ff;
+$green-600: #16a34a;
+$green-500: #22c55e;
+$green-50: #f0fdf4;
+$red-500: #ef4444;
+$red-50: #fef2f2;
+$slate-50: #f8fafc;
+$slate-100: #f1f5f9;
+$slate-200: #e2e8f0;
+$slate-300: #cbd5e1;
+$slate-400: #94a3b8;
+$slate-500: #64748b;
+$slate-600: #475569;
+$slate-700: #334155;
+$slate-800: #1e293b;
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+$radius-xl: 18px;
+$shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+$shadow-soft: 0 2px 8px rgba(30, 105, 218, 0.08);
+$transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// ─── Main Container ───────────────────────────────────────────
 .mainCont {
-  width: 98%;
-  height: 95%;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  @include flexBox(column, flex-start, space-evenly);
-  padding: 0.5rem;
+  @include flexBox(column, flex-start, flex-start);
+  background-color: $slate-50;
 
   .headerCont {
     width: 100%;
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     font-weight: 700;
-    color: $primaryColor;
+    color: $navy-800;
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border-bottom: 1px solid $slate-200;
+    letter-spacing: -0.01em;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(180deg, $blue-600, $blue-400);
+      border-radius: 2px;
+      margin-right: 12px;
+    }
+  }
+
+  :global(.ant-divider) {
+    display: none !important;
   }
 
   .contentCont {
     width: 100%;
-    height: 90%;
-    @include flexBox(row, flex-start, flex-start, 1rem);
+    height: calc(100% - 55px);
+    @include flexBox(row, flex-start, flex-start);
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+    overflow: hidden;
 
     .testCont {
-      width: 50%;
+      width: 58%;
       height: 100%;
+      min-width: 0;
     }
 
     .SuggestionsCont {
-      width: 50%;
+      width: 42%;
       height: 100%;
-      @include flexBox(column, flex-start, flex-start, 1rem);
+      @include flexBox(column, flex-start, flex-start, 0.75rem);
+      min-width: 0;
 
       .aiSuggCont {
         width: 100%;
@@ -46,95 +102,247 @@
   }
 }
 
+// ─── Question Card ────────────────────────────────────────────
 .questionCard {
   width: 100%;
   height: 100%;
-  background-color: #24A0581a;
-  border-radius: 10px;
-  @include flexBox(column, center, space-between);
-  border: 0.1px solid #25a4a666;
+  background-color: $blue-50;
+  border-radius: $radius-lg;
+  @include flexBox(column, center, flex-start);
+  border: 1px solid $slate-200;
+  box-shadow: $shadow-card;
+  overflow: hidden;
 
   .headerContbtn {
     width: 100%;
-    height: 10%;
-    border-bottom: 0.5px solid $primaryColor;
+    flex-shrink: 0;
+    background: #0F2449;
     @include flexBox(row, center, space-between);
-    padding: 1rem 0.5rem;
+    padding: 0.85rem 1.25rem;
+
+    // Style the Ant Design buttons inside the header
+    :global(.ant-btn) {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      color: white !important;
+      font-weight: 600;
+      font-size: 13px;
+      border-radius: $radius-sm;
+      padding: 4px 16px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all $transition-fast;
+      backdrop-filter: blur(4px);
+
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.35) !important;
+        transform: translateY(-1px);
+      }
+
+      &:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      svg {
+        font-size: 12px;
+      }
+    }
 
     .quesText {
-      font-size: 17px;
-      font-weight: 700;
-      color: $primaryColor;
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
   }
 
   .questionCont {
     width: 100%;
     height: 100%;
-    padding: 0.5rem 1rem;
+    padding: 1.25rem 1.5rem;
     overflow-y: auto;
     overflow-x: hidden;
-    @include custom-scrollbar($scrollbarWidth: 6px);
+    @include custom-scrollbar($thumbColor: $blue-500, $scrollbarWidth: 5px, $trackColor: $slate-100);
 
     .questionText {
-      font-weight: 700;
+      font-weight: 600;
+      font-size: 15px;
+      line-height: 1.7;
+      color: $slate-800;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px dashed $slate-200;
+
+      p {
+        margin: 0;
+      }
     }
 
     .optionLable {
-      border: 0.5px solid $primaryColor;
-      border-radius: 5px;
-      padding: 0.5rem 1rem;
-      margin: 1rem 0;
-      @include flexBox(row, center, flex-start, 1rem);
+      border: 1.5px solid $slate-200;
+      border-radius: $radius-md;
+      padding: 0.85rem 1.15rem;
+      margin: 0.6rem 0;
+      @include flexBox(row, center, flex-start, 0.85rem);
       cursor: pointer;
-      background-color: #f5f5f5b2;
+      background-color: white;
+      transition: all $transition-fast;
+      position: relative;
+
+      &:hover {
+        border-color: $blue-400;
+        background-color: $blue-50;
+        box-shadow: $shadow-soft;
+        transform: translateX(3px);
+      }
 
       .optionsOrderChar {
-        font-weight: 800;
+        font-weight: 700;
+        font-size: 14px;
+        color: $blue-600;
+        background: $blue-50;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border: 1.5px solid rgba($blue-600, 0.2);
+        transition: all $transition-fast;
+      }
+
+      .optionValue {
+        font-size: 14px;
+        color: $slate-700;
+        line-height: 1.5;
+
+        p {
+          margin: 0;
+        }
       }
     }
 
     .selectedOption {
-      background-color: $primaryColor;
-      color: white;
+      background-color: rgba($blue-600, 0.08);
+      border-color: $blue-600;
+      box-shadow: 0 0 0 3px rgba($blue-600, 0.1);
+
+      .optionsOrderChar {
+        background: $blue-600;
+        color: white;
+        border-color: $blue-600;
+      }
     }
 
     .correctAns {
-      background-color: green;
-      color: white;
+      background-color: $green-50;
+      border-color: $green-500;
+      box-shadow: 0 0 0 3px rgba($green-500, 0.1);
+
+      .optionsOrderChar {
+        background: $green-500;
+        color: white;
+        border-color: $green-500;
+      }
+
+      .optionValue {
+        color: darken($green-600, 5%);
+      }
     }
 
     .wrongAns {
-      background-color: #f8d7da; // reddish
-      border: 1px solid #dc3545;
+      background-color: $red-50;
+      border-color: $red-500;
+      box-shadow: 0 0 0 3px rgba($red-500, 0.1);
+
+      .optionsOrderChar {
+        background: $red-500;
+        color: white;
+        border-color: $red-500;
+      }
+
+      .optionValue {
+        color: darken($red-500, 10%);
+      }
     }
   }
 }
 
+// ─── Submit Button ────────────────────────────────────────────
+.submitButtonContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed $slate-200;
+
+  :global(.ant-btn-primary) {
+    background: linear-gradient(135deg, $blue-600, $blue-500) !important;
+    border: none !important;
+    border-radius: $radius-sm;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 32px;
+    height: 42px;
+    box-shadow: 0 4px 14px rgba($blue-600, 0.35);
+    transition: all $transition-smooth;
+    letter-spacing: 0.02em;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba($blue-600, 0.45);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+}
+
+// ─── Suggestion / Explanation Cards ───────────────────────────
 .suggestionContainer {
   width: 100%;
   height: 100%;
-  background-color: #24A0581a;
-  border-radius: 10px;
-  @include flexBox(column, center, space-between);
-  border: 0.1px solid #25a4a666;
+  background-color: $blue-50;
+  border-radius: $radius-lg;
+  @include flexBox(column, center, flex-start);
+  border: 1px solid $slate-200;
+  box-shadow: $shadow-card;
+  overflow: hidden;
 
   .PageHeader {
-    height: 15%;
+    flex-shrink: 0;
     width: 100%;
-    border-bottom: 0.1px solid $primaryColor;
+    background: #0F2449;
     @include flexBox(row, center, space-between);
+    padding: 0.75rem 1.25rem;
 
     p {
-      color: $primaryColor;
-      font-size: 18px;
-      font-weight: 700;
-      padding-left: 1rem;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 0.02em;
     }
 
     img {
-      transform: scale(0.8);
-      margin-right: 1rem;
+      width: 26px;
+      height: 26px;
+      filter: brightness(0) invert(1) opacity(0.85);
     }
   }
 
@@ -142,104 +350,157 @@
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    padding: 1rem;
-    @include flexBox(row, flex-start, flex-start);
+    padding: 1rem 1.25rem;
+    @include flexBox(column, flex-start, flex-start);
+    @include custom-scrollbar($thumbColor: $blue-500, $scrollbarWidth: 5px, $trackColor: $slate-100);
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: $slate-600;
+
+    p {
+      margin: 0;
+      color: $slate-500;
+      font-style: italic;
+    }
   }
 
   .Suggestionheader {
     width: 100%;
-    height: 10%;
-    border-bottom: 0.5px solid $primaryColor;
-    padding: 0.5rem 0;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid $slate-200;
     @include flexBox(row, center, center);
     gap: 65%;
 
     .contentCont {
       width: 100%;
       height: 80%;
-      border-bottom: 1px solid;
     }
   }
 }
 
+// ─── Question Type Badge ──────────────────────────────────────
 .questionTypeBadge {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 1rem;
+  padding: 0.75rem 1.5rem 0;
+  flex-shrink: 0;
 
   .questionTypeLabel {
-    padding: 0.3rem 1rem;
-    border: 1px solid;
-    margin-top: 1rem;
-    border-radius: 5px;
-    display: flex;
-    align-self: flex-end;
+    padding: 0.3rem 0.9rem;
+    border: 1.5px solid $blue-400;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: $blue-600;
+    background: $blue-50;
+    letter-spacing: 0.03em;
+    text-transform: capitalize;
   }
 }
 
-// True/False styles
+// ─── True/False Styles ────────────────────────────────────────
 .trueFalseContainer {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   justify-content: center;
-  margin: 20px 0;
+  margin: 24px 0;
 }
 
 .trueFalseButton {
-  padding: 15px 30px;
-  border: 2px solid #d9d9d9;
-  border-radius: 8px;
+  padding: 14px 36px;
+  border: 2px solid $slate-200;
+  border-radius: $radius-md;
   background: white;
   cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 120px;
+  transition: all $transition-smooth;
+  min-width: 130px;
+  font-family: inherit;
 
-  &:hover {
-    border-color: #1890ff;
-    color: #1890ff;
+  &:hover:not(:disabled) {
+    border-color: $blue-500;
+    color: $blue-600;
+    background: $blue-50;
+    transform: translateY(-2px);
+    box-shadow: $shadow-soft;
   }
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.5;
   }
 }
 
 .trueFalseLabel {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-// Media container styles
+// True/False selected states
+.trueFalseButton.selectedOption {
+  background: linear-gradient(135deg, $blue-600, $blue-500);
+  color: white;
+  border-color: $blue-600;
+  box-shadow: 0 4px 14px rgba($blue-600, 0.3);
+}
+
+.trueFalseButton.correctAns {
+  background: linear-gradient(135deg, $green-600, $green-500);
+  color: white;
+  border-color: $green-500;
+  box-shadow: 0 4px 14px rgba($green-500, 0.3);
+}
+
+.trueFalseButton.wrongAns {
+  background: linear-gradient(135deg, $red-500, lighten($red-500, 8%));
+  color: white;
+  border-color: $red-500;
+  box-shadow: 0 4px 14px rgba($red-500, 0.3);
+}
+
+// ─── Media Container Styles ──────────────────────────────────
 .mediaContainer {
   margin: 20px 0;
   text-align: center;
+  padding: 16px;
+  background: $slate-50;
+  border-radius: $radius-md;
+  border: 1px solid $slate-200;
 }
 
 .videoPlayer {
   width: 100%;
   max-width: 800px;
   height: auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: $radius-md;
+  box-shadow: $shadow-elevated;
 }
 
 .audioPlayer {
   width: 100%;
   max-width: 500px;
-  margin: 10px 0;
+  margin: 10px auto;
 }
 
-// Text answer styles
+// ─── Text Answer Styles ──────────────────────────────────────
 .textAnswerContainer {
   margin: 20px 0;
 }
 
 .textAnswerArea {
   margin-bottom: 15px;
+  border-radius: $radius-sm;
+  border: 1.5px solid $slate-200;
+  transition: border-color $transition-fast;
+
+  &:focus,
+  &:hover {
+    border-color: $blue-500;
+  }
 
   &:disabled {
-    background-color: #f5f5f5;
+    background-color: $slate-50;
     cursor: not-allowed;
   }
 }
@@ -247,43 +508,61 @@
 .submitTextButton {
   display: block;
   margin: 0 auto;
+  background: linear-gradient(135deg, $blue-600, $blue-500) !important;
+  border: none !important;
+  border-radius: $radius-sm;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba($blue-600, 0.35);
 }
 
 .submittedAnswer {
   margin-top: 15px;
-  padding: 15px;
-  background-color: #f6ffed;
-  border: 1px solid #b7eb8f;
-  border-radius: 6px;
+  padding: 16px;
+  background-color: $green-50;
+  border: 1.5px solid lighten($green-500, 20%);
+  border-radius: $radius-md;
 
   strong {
-    color: #52c41a;
+    color: $green-600;
     display: block;
     margin-bottom: 8px;
+    font-size: 13px;
   }
 
   p {
     margin: 0;
-    color: #333;
+    color: $slate-700;
     white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.6;
   }
 }
 
-// Update existing styles for True/False selected states
-.trueFalseButton.selectedOption {
-  background-color: #1890ff;
-  color: white;
-  border-color: #1890ff;
-}
+// ─── Explanation Content ──────────────────────────────────────
+.explanation {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: $slate-700;
 
-.trueFalseButton.correctAns {
-  background-color: #52c41a;
-  color: white;
-  border-color: #52c41a;
-}
+  p {
+    margin: 0 0 0.75rem 0;
+    font-style: normal !important;
+    color: $slate-700 !important;
+  }
 
-.trueFalseButton.wrongAns {
-  background-color: #ff4d4f;
-  color: white;
-  border-color: #ff4d4f;
+  ul, ol {
+    padding-left: 1.25rem;
+    margin: 0.5rem 0;
+  }
+
+  li {
+    margin: 0.25rem 0;
+  }
+
+  code {
+    background: $slate-100;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
 }
