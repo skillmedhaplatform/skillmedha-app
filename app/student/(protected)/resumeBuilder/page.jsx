@@ -714,7 +714,7 @@ function Form() {
   };
 
   const sectionRefs = useRef({});
-  const [activeSection, setActiveSection] = useState("Basic Details");
+  const [activeSection, setActiveSection] = useState(null);
 
   const availableSections = isEditing 
     ? [
@@ -867,7 +867,7 @@ function Form() {
           </div>
 
           {/* Navigation Menu */}
-          <div className="flex flex-col gap-2">
+          <div className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] p-2 flex flex-col gap-1">
               {availableSections.map((item) => (
                <div 
                  key={item} 

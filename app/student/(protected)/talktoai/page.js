@@ -23,6 +23,7 @@ import axios from "axios";
 import { getLstorage } from "@/universalUtils/windowMW";
 import { aiUrl, restUrl } from "@/config/urls";
 import { BsX, BsPlus, BsStar } from "react-icons/bs";
+import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import MobileTalkToAi from "@/mobile_views/talktoai/MobileTalkToAi";
 import useResponsive from "@/hooks/useResponsive";
 
@@ -368,7 +369,7 @@ const Dictaphone = () => {
   return (
     <section className="w-full h-full flex flex-col items-stretch lg:pt-0">
       {/* Banner Section - Top Full Width */}
-      <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+      <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         {/* Decorative Icons matching TPO Portal */}
         <div className="absolute inset-0 pointer-events-none z-[1]">
           <BsX className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]" />
@@ -377,12 +378,21 @@ const Dictaphone = () => {
           <BsX className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]" />
         </div>
 
-        <div className="w-full flex items-center justify-between relative z-[2]">
-          <p className="text-[18px] lg:text-[24px] font-bold text-white m-0">
-            Talk to AI
-          </p>
+        <div className="flex items-center justify-between w-full relative z-[2]">
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-[56px] h-[56px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
+              <HiOutlineChatBubbleLeftRight className="text-white text-3xl" />
+            </div>
+            <div className="flex flex-col justify-center gap-1">
+              <h1 className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0" style={{ border: 'none', marginBottom: 0 }}>
+                Talk to AI
+              </h1>
+              <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
+                Your personal AI Interview Assistant to help you prepare and succeed.
+              </p>
+            </div>
+          </div>
         </div>
-        <p className="text-[18px] lg:text-[32px] font-bold text-white m-0 tracking-tight relative z-[2]">AI Interview Assistant</p>
       </div>
 
       <div className="w-full flex-1 flex flex-col items-stretch overflow-hidden relative">
@@ -561,9 +571,9 @@ const Dictaphone = () => {
             className="bg-white rounded-2xl shadow-md border border-[#e2e8f0] flex-1 flex flex-col min-h-0 [&_.ant-card-body]:p-0 [&_.ant-card-body]:flex-1 [&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:min-h-0"
           variant="borderless"
           >
-            <div className="flex border-b border-[#f0f0f0]">
+            <div className="flex border-b border-[#f0f0f0] overflow-x-auto [&::-webkit-scrollbar]:hidden">
               <div
-                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
+                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent whitespace-nowrap flex-nowrap shrink-0 min-w-fit [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
                   activeTab === 0 ? "!bg-white !text-[#1E69DA] !border-[#1E69DA]" : ""
                 }`}
                 onClick={() => setActiveTab(0)}
@@ -572,7 +582,7 @@ const Dictaphone = () => {
                 <span>Your Answer</span>
               </div>
               <div
-                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
+                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent whitespace-nowrap flex-nowrap shrink-0 min-w-fit [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
                   activeTab === 1 ? "!bg-white !text-[#1E69DA] !border-[#1E69DA]" : ""
                 } ${!aiSuggestions.report ? "opacity-50 cursor-not-allowed hover:!bg-[#f8fafc] hover:!text-[#64748b]" : ""}`}
                 onClick={() => aiSuggestions.report && setActiveTab(1)}
@@ -581,7 +591,7 @@ const Dictaphone = () => {
                 <span>AI Report</span>
               </div>
               <div
-                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
+                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent whitespace-nowrap flex-nowrap shrink-0 min-w-fit [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
                   activeTab === 2 ? "!bg-white !text-[#1E69DA] !border-[#1E69DA]" : ""
                 } ${!aiSuggestions.report ? "opacity-50 cursor-not-allowed hover:!bg-[#f8fafc] hover:!text-[#64748b]" : ""}`}
                 onClick={() => aiSuggestions.report && setActiveTab(2)}
