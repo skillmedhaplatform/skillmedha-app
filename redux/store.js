@@ -48,9 +48,13 @@ import testSlice from "./slices/assessmentsSlice/testSlice";
 import UserFormSlice from "./slices/assessmentsSlice/userForm";
 import jobassessmentsSlice from "./slices/jobassessmentsSlice";
 import studentDashboardStatsReducer from "@/redux/slices/studentDashboardStatsSlice";
+import cartReducer from "./slices/cartSlice";
+import wishlistReducer from "./slices/wishlistSlice";
+
 
 export const store = configureStore({
   reducer: {
+     wishlist: wishlistReducer,
     student: studentSlice,
     sideBar: SideBarSlice,
     steps: StepFormSlice,
@@ -108,5 +112,7 @@ export const store = configureStore({
     jobassessments: jobassessmentsSlice,
     practice: practiceSlice,
     studentDashboardStats: studentDashboardStatsReducer,
+      cart: cartReducer,
+
   },
 });
