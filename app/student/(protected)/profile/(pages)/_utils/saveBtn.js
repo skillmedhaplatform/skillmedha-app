@@ -65,7 +65,7 @@ export default function SaveBtn({ children, type,sameAsCurrent }) {
   return (
     <div className="flex justify-end mt-4">
       <Button
-        className="bg-[#1E69DA] text-white hover:bg-[#219653] border-none"
+        className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
         onClick={handleSave}
       >
         {children}

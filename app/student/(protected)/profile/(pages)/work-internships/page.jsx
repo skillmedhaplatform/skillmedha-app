@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import axios from "axios";
+import formStyles from "../../form.module.scss";
 import {
   Upload,
   Button,
@@ -329,177 +330,167 @@ export default function WorkAndInternshipPage() {
   };
 
   return (
-    <div className="max-w-full mx-auto">
-      <StudentPageHeader section="Profile" title="Work & Internships" />
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      {/* Header Card matching TPO */}
+      <div className={formStyles.formContainer} style={{ padding: "1.5rem 2rem", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <div className={formStyles.headerLeft}>
+          <h1 className={formStyles.formTitle}>Work & Internships</h1>
+          <p className={formStyles.formSubtitle}>Update your work experience and internship history below</p>
+        </div>
+      </div>
+
       {experiences?.map((exp, idx) => (
-        <div key={idx} className="border border-solid border-[#24A058] rounded-lg p-6 mb-6 relative bg-white">
+        <div key={idx} className={formStyles.formContainer} style={{ marginBottom: "1.5rem" }}>
           {/* Header */}
-          <div className="flex justify-between items-center text-[#24A058]">
-            <div className="flex gap-2 justify-start items-center">
-              {exp.status === "success" ? (
-                <CheckCircleOutlined />
-              ) : (
-                <ExclamationCircleOutlined />
-              )}
-              <div className="text-[1.2rem] font-bold flex gap-2 items-center">
-                {exp?.role}
-                <span> - </span>
-                {exp?.type}
-                <span>-</span>
+          <div className={formStyles.headertitleCont} style={{ borderBottom: "none", marginBottom: "1rem" }}>
+            <div className={formStyles.headerLeft}>
+              <h3 className={formStyles.formTitle} style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                <span>{exp?.role || "New Experience"}</span>
+                {exp?.type && <span className="text-sm font-normal text-slate-400">({exp.type})</span>}
                 {exp?.verificationType == "approved" ? (
-                  <div className="text-base text-green-500">Verified</div>
+                  <span className="text-sm font-semibold text-green-500">Verified</span>
                 ) : exp?.verificationType == "resubmission" ? (
-                  <div className="text-base text-red-500">Re-Submit</div>
+                  <span className="text-sm font-semibold text-red-500">Re-Submit</span>
                 ) : (
-                  <div className="text-base text-[#ffc400]">Not Verified.</div>
+                  <span className="text-sm font-semibold text-[#ffc400]">Not Verified</span>
                 )}
-              </div>
+              </h3>
             </div>
-            <div className="flex gap-2">
+            <div className={formStyles.editButtonContainer} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               {idx !== editingIndex && (
                 <Button
-                  type="text"
-                  icon={<EditOutlined />}
                   onClick={() => startEditing(idx)}
-                />
+                  className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                  style={{ fontWeight: "600", borderRadius: "8px" }}
+                >
+                  Edit
+                </Button>
               )}
-              {experiences.length > 1 && (
-                <Button
-                  type="text"
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => deleteExperience(idx)}
-                />
-              )}
+              <Button
+                danger
+                onClick={() => deleteExperience(idx)}
+                style={{ borderRadius: "8px", fontWeight: "600" }}
+              >
+                Delete
+              </Button>
             </div>
           </div>
 
           {/* Form View */}
           {idx === editingIndex ? (
-            <div className="mt-4">
-              <Row gutter={[16, 16]}>
-                {/* Employer */}
-                <Col span={24}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">Employer*</label>
-                    <Input
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      value={exp?.company}
-                      placeholder="Company / organisation name"
-                      onChange={(e) =>
-                        updateField(idx, "company", e.target.value)
-                      }
-                    />
-                  </div>
-                </Col>
+            <div className={formStyles.dynamicFormContainer} style={{ paddingTop: 0 }}>
+              {/* Employer */}
+              <div className={formStyles.formField}>
+                <label>Employer*</label>
+                <input
+                  type="text"
+                  className={formStyles.inputField}
+                  value={exp?.company || ""}
+                  placeholder="Company / organisation name"
+                  onChange={(e) =>
+                    updateField(idx, "company", e.target.value)
+                  }
+                />
+              </div>
 
-                {/* Role */}
-                <Col span={12}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">Role*</label>
-                    <Input
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      value={exp.role}
-                      placeholder="Role"
-                      onChange={(e) => updateField(idx, "role", e.target.value)}
-                    />
-                  </div>
-                </Col>
+              {/* Role */}
+              <div className={formStyles.formField}>
+                <label>Role*</label>
+                <input
+                  type="text"
+                  className={formStyles.inputField}
+                  value={exp.role || ""}
+                  placeholder="Role"
+                  onChange={(e) => updateField(idx, "role", e.target.value)}
+                />
+              </div>
 
-                {/* Type */}
-                <Col span={12}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">Type*</label>
-                    <Select
-                      className="flex-auto [&>.ant-select-selector]:bg-[#eafaf1] [&>.ant-select-selector]:border-none [&>.ant-select-selector]:outline-none"
-                      value={exp.type || undefined}
-                      placeholder="--Work Type--"
-                      onChange={(value) => updateField(idx, "type", value)}
-                    >
-                      <Option value="Internship">Internship</Option>
-                      <Option value="Work">Work</Option>
-                    </Select>
-                  </div>
-                </Col>
+              {/* Type */}
+              <div className={formStyles.formField}>
+                <label>Type*</label>
+                <Select
+                  className={formStyles.selectField}
+                  value={exp.type || undefined}
+                  placeholder="--Work Type--"
+                  onChange={(value) => updateField(idx, "type", value)}
+                >
+                  <Option value="Internship">Internship</Option>
+                  <Option value="Work">Work</Option>
+                </Select>
+              </div>
 
-                {/* Dates (dayjs, month format, disable future months) */}
-                <Col span={12}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">Start Date*</label>
-                    <DatePicker
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      picker="month"
-                      format={monthFormat}
-                      value={exp?.start ? dayjs(exp.start, monthFormat) : null}
-                      onChange={(date) =>
-                        updateField(
-                          idx,
-                          "start",
-                          date ? date.format(monthFormat) : null
-                        )
-                      }
-                      disabledDate={disabledFutureMonth}
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                </Col>
-                <Col span={12}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">End Date*</label>
-                    <DatePicker
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      picker="month"
-                      format={monthFormat}
-                      value={exp?.end ? dayjs(exp.end, monthFormat) : null}
-                      onChange={(date) =>
-                        updateField(
-                          idx,
-                          "end",
-                          date ? date.format(monthFormat) : null
-                        )
-                      }
-                      disabledDate={disabledFutureMonth}
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                </Col>
+              {/* City */}
+              <div className={formStyles.formField}>
+                <label>City*</label>
+                <input
+                  type="text"
+                  className={formStyles.inputField}
+                  value={exp?.city || ""}
+                  placeholder="City"
+                  onChange={(e) => updateField(idx, "city", e.target.value)}
+                />
+              </div>
 
-                {/* City */}
-                <Col span={24}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">City*</label>
-                    <Input
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      value={exp?.city}
-                      placeholder="City"
-                      onChange={(e) => updateField(idx, "city", e.target.value)}
-                    />
-                  </div>
-                </Col>
+              {/* Dates */}
+              <div className={formStyles.formField}>
+                <label>Start Date*</label>
+                <DatePicker
+                  className={formStyles.selectField}
+                  picker="month"
+                  format={monthFormat}
+                  value={exp?.start ? dayjs(exp.start, monthFormat) : null}
+                  onChange={(date) =>
+                    updateField(
+                      idx,
+                      "start",
+                      date ? date.format(monthFormat) : null
+                    )
+                  }
+                  disabledDate={disabledFutureMonth}
+                />
+              </div>
 
-                {/* Description */}
-                <Col span={24}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">Description</label>
-                    <textarea
-                      className="max-w-full w-full overflow-y-auto resize-none min-h-[8rem] h-auto rounded-[5px] p-4 text-[16px] bg-[#eafaf1] border-none outline-none"
-                      value={exp.description}
-                      placeholder={`* Relevant Coursework: [Course 1], [Course 2]\n* GPA: [Your GPA]`}
-                      onChange={(e) =>
-                        updateField(idx, "description", e.target.value)
-                      }
-                    />
-                  </div>
-                </Col>
+              <div className={formStyles.formField}>
+                <label>End Date*</label>
+                <DatePicker
+                  className={formStyles.selectField}
+                  picker="month"
+                  format={monthFormat}
+                  value={exp?.end ? dayjs(exp.end, monthFormat) : null}
+                  onChange={(date) =>
+                    updateField(
+                      idx,
+                      "end",
+                      date ? date.format(monthFormat) : null
+                    )
+                  }
+                  disabledDate={disabledFutureMonth}
+                />
+              </div>
 
-                {/* Work: Joining + Relieving */}
-                {exp.type === "Work" && (
-                  <>
-                    <Col span={24}>
-                      <div className="flex items-center mb-4">
-                        <label className="flex-none w-[200px] m-0 text-[#555] font-medium">
-                          Upload Joining Letter*
-                        </label>
+              {/* Description */}
+              <div className={formStyles.fullWidthField}>
+                <div className={formStyles.formField}>
+                  <label>Description</label>
+                  <textarea
+                    className={formStyles.inputField}
+                    style={{ minHeight: "100px", resize: "vertical" }}
+                    value={exp.description || ""}
+                    placeholder={`* Relevant Coursework: [Course 1], [Course 2]\n* GPA: [Your GPA]`}
+                    onChange={(e) =>
+                      updateField(idx, "description", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Work: Joining + Relieving */}
+              {exp.type === "Work" && (
+                <>
+                  <div className={formStyles.fullWidthField}>
+                    <div className={formStyles.formField}>
+                      <label>Upload Joining Letter*</label>
+                      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "4px" }}>
                         <Upload
                           multiple
                           fileList={exp.joiningFiles}
@@ -514,29 +505,32 @@ export default function WorkAndInternshipPage() {
                             icon={<UploadOutlined />}
                             loading={loading}
                             disabled={exp.joiningFiles.length >= 1}
+                            className={formStyles.addNewBtn}
+                            style={{ borderRadius: "8px", fontWeight: "600" }}
                           >
                             Select File
                           </Button>
                         </Upload>
-                        <div className="my-4">
+                        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                           {exp.joiningFiles.map((f) => (
                             <Tag
                               key={f.uid}
                               closable
                               onClose={() => removeFile(idx, "joining", f)}
+                              style={{ background: "#eef5fb", border: "none", padding: "4px 8px", borderRadius: "4px" }}
                             >
                               {f.name}
                             </Tag>
                           ))}
                         </div>
                       </div>
-                    </Col>
+                    </div>
+                  </div>
 
-                    <Col span={24}>
-                      <div className="flex items-center mb-4">
-                        <label className="flex-none w-[200px] m-0 text-[#555] font-medium">
-                          Upload Relieving Letter*
-                        </label>
+                  <div className={formStyles.fullWidthField}>
+                    <div className={formStyles.formField}>
+                      <label>Upload Relieving Letter*</label>
+                      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "4px" }}>
                         <Upload
                           multiple
                           fileList={exp.relievingFiles}
@@ -553,33 +547,36 @@ export default function WorkAndInternshipPage() {
                             icon={<UploadOutlined />}
                             loading={loading}
                             disabled={exp.relievingFiles.length >= 1}
+                            className={formStyles.addNewBtn}
+                            style={{ borderRadius: "8px", fontWeight: "600" }}
                           >
                             Select File
                           </Button>
                         </Upload>
-                        <div className="my-4">
+                        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                           {exp.relievingFiles.map((f) => (
                             <Tag
                               key={f.uid}
                               closable
                               onClose={() => removeFile(idx, "relieving", f)}
+                              style={{ background: "#eef5fb", border: "none", padding: "4px 8px", borderRadius: "4px" }}
                             >
                               {f.name}
                             </Tag>
                           ))}
                         </div>
                       </div>
-                    </Col>
-                  </>
-                )}
+                    </div>
+                  </div>
+                </>
+              )}
 
-                {/* Internship: Certificate */}
-                {exp.type === "Internship" && (
-                  <Col span={24}>
-                    <div className="flex items-center mb-4">
-                      <label className="flex-none w-[200px] m-0 text-[#555] font-medium">
-                        Upload Certificate*
-                      </label>
+              {/* Internship: Certificate */}
+              {exp.type === "Internship" && (
+                <div className={formStyles.fullWidthField}>
+                  <div className={formStyles.formField}>
+                    <label>Upload Certificate*</label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "4px" }}>
                       <Upload
                         multiple
                         fileList={exp.certificate}
@@ -596,38 +593,43 @@ export default function WorkAndInternshipPage() {
                           icon={<UploadOutlined />}
                           loading={loading}
                           disabled={exp?.certificate?.length >= 1}
+                          className={formStyles.addNewBtn}
+                          style={{ borderRadius: "8px", fontWeight: "600" }}
                         >
                           Select File
                         </Button>
                       </Upload>
-                      <div className="my-4">
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                         {exp.certificate.map((f) => (
                           <Tag
                             key={f.uid}
                             closable
                             onClose={() => removeFile(idx, "certificate", f)}
+                            style={{ background: "#eef5fb", border: "none", padding: "4px 8px", borderRadius: "4px" }}
                           >
                             {f.name}
                           </Tag>
                         ))}
                       </div>
                     </div>
-                  </Col>
-                )}
+                  </div>
+                </div>
+              )}
 
-                {/* Custom Documents */}
-                {exp?.customDocs?.map((doc, didx) => (
-                  <Col span={24} key={didx}>
-                    <div className="flex items-center mb-4">
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <label className="flex-none w-[200px] m-0 text-[#555] font-medium">{doc?.title}</label>
-                        <Button
-                          type="text"
-                          icon={<DeleteOutlined />}
-                          onClick={() => removeCustomDoc(idx, didx)}
-                          danger
-                        />
-                      </div>
+              {/* Custom Documents */}
+              {exp?.customDocs?.map((doc, didx) => (
+                <div className={formStyles.fullWidthField} key={didx}>
+                  <div className={formStyles.formField}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <label style={{ marginBottom: 0 }}>{doc?.title}</label>
+                      <Button
+                        type="text"
+                        icon={<DeleteOutlined />}
+                        onClick={() => removeCustomDoc(idx, didx)}
+                        danger
+                      />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "4px" }}>
                       <Upload
                         multiple
                         fileList={doc?.files}
@@ -644,74 +646,157 @@ export default function WorkAndInternshipPage() {
                           icon={<UploadOutlined />}
                           loading={loading}
                           disabled={doc.files.length >= 1}
+                          className={formStyles.addNewBtn}
+                          style={{ borderRadius: "8px", fontWeight: "600" }}
                         >
                           Select File
                         </Button>
                       </Upload>
-                      <div className="my-4">
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                         {doc.files.map((f) => (
                           <Tag
                             key={f.uid}
                             closable
                             onClose={() => removeFile(idx, "custom", f, didx)}
+                            style={{ background: "#eef5fb", border: "none", padding: "4px 8px", borderRadius: "4px" }}
                           >
                             {f.name}
                           </Tag>
                         ))}
                       </div>
                     </div>
-                  </Col>
-                ))}
-              </Row>
+                  </div>
+                </div>
+              ))}
 
-              <div className="flex justify-between mt-6">
+              <div className={formStyles.fullWidthField} style={{ display: "flex", justifyContent: "space-between", marginTop: "1.5rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem" }}>
                 <Button
                   onClick={() => addCustomDoc(idx)}
-                  icon={<PlusOutlined />}
-                  style={{ marginRight: 8 }}
+                  className={formStyles.addNewBtn}
+                  style={{ borderRadius: "8px", fontWeight: "600", padding: "6px 16px" }}
                 >
-                  Add Document
+                  + Add Document
                 </Button>
                 <Button
                   type="primary"
                   onClick={() => saveExperience(idx)}
                   disabled={!isExperienceValid(exp)}
+                  className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                  style={{ fontWeight: "600", borderRadius: "8px", padding: "6px 20px" }}
                 >
-                  Save
+                  Save Experience
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="w-full">
-              <div className="w-full flex items-center justify-start gap-2">
-                <span>{exp?.company}</span>
-                <span>
-                  {" "}
-                  | {exp?.start} to {exp?.end}
-                </span>
-                <span> | {exp?.city}</span>
+            <div className={formStyles.dynamicFormContainer} style={{ padding: 0 }}>
+              <div className={formStyles.formField}>
+                <label>Employer</label>
+                <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                  {exp?.company || "—"}
+                </div>
               </div>
-              <hr />
-              <div
-                className="w-full"
-                dangerouslySetInnerHTML={{
-                  __html: getSafeDescription(exp?.description),
-                }}
-              />
+              <div className={formStyles.formField}>
+                <label>Role</label>
+                <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                  {exp?.role || "—"}
+                </div>
+              </div>
+              <div className={formStyles.formField}>
+                <label>Type</label>
+                <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                  {exp?.type || "—"}
+                </div>
+              </div>
+              <div className={formStyles.formField}>
+                <label>Duration</label>
+                <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                  {exp?.start || "—"} to {exp?.end || "—"}
+                </div>
+              </div>
+              <div className={formStyles.formField}>
+                <label>City</label>
+                <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                  {exp?.city || "—"}
+                </div>
+              </div>
+
+              {exp?.description && (
+                <div className={formStyles.fullWidthField}>
+                  <div className={formStyles.formField}>
+                    <label>Description</label>
+                    <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8, height: "auto", padding: "10px 12px" }}>
+                      <div dangerouslySetInnerHTML={{ __html: getSafeDescription(exp.description) }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Document Lists in Read-only */}
+              {((exp.joiningFiles && exp.joiningFiles.length > 0) || 
+                (exp.relievingFiles && exp.relievingFiles.length > 0) || 
+                (exp.certificate && exp.certificate.length > 0) || 
+                (exp.customDocs && exp.customDocs.length > 0)) && (
+                <div className={formStyles.fullWidthField}>
+                  <div className={formStyles.formField}>
+                    <label>Attached Documents</label>
+                    <div
+                      style={{
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "12px",
+                        padding: "15px",
+                        width: "100%",
+                        backgroundColor: "#f8fafc",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px"
+                      }}
+                    >
+                      {exp.joiningFiles?.map((f, i) => (
+                        <div key={`j-${i}`} style={{ display: "flex", gap: "10px", alignItems: "center", backgroundColor: "white", padding: "8px 12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                          <strong style={{ color: "#475569" }}>Joining Letter:</strong>
+                          <a href={f.url} target="_blank" rel="noreferrer" style={{ color: "#6BA8ED", fontWeight: "600" }}>{f.name}</a>
+                        </div>
+                      ))}
+                      {exp.relievingFiles?.map((f, i) => (
+                        <div key={`r-${i}`} style={{ display: "flex", gap: "10px", alignItems: "center", backgroundColor: "white", padding: "8px 12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                          <strong style={{ color: "#475569" }}>Relieving Letter:</strong>
+                          <a href={f.url} target="_blank" rel="noreferrer" style={{ color: "#6BA8ED", fontWeight: "600" }}>{f.name}</a>
+                        </div>
+                      ))}
+                      {exp.certificate?.map((f, i) => (
+                        <div key={`c-${i}`} style={{ display: "flex", gap: "10px", alignItems: "center", backgroundColor: "white", padding: "8px 12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                          <strong style={{ color: "#475569" }}>Certificate:</strong>
+                          <a href={f.url} target="_blank" rel="noreferrer" style={{ color: "#6BA8ED", fontWeight: "600" }}>{f.name}</a>
+                        </div>
+                      ))}
+                      {exp.customDocs?.map((doc, i) => (
+                        doc.files?.map((f, fi) => (
+                          <div key={`cust-${i}-${fi}`} style={{ display: "flex", gap: "10px", alignItems: "center", backgroundColor: "white", padding: "8px 12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                            <strong style={{ color: "#475569" }}>{doc.title}:</strong>
+                            <a href={f.url} target="_blank" rel="noreferrer" style={{ color: "#6BA8ED", fontWeight: "600" }}>{f.name}</a>
+                          </div>
+                        ))
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
       ))}
 
-      <Button
-        type="dashed"
-        icon={<PlusOutlined />}
-        onClick={addExperience}
-        className="w-full text-center"
-        disabled={editingIndex !== null}
-      >
-        Add More Experience
-      </Button>
+      <div style={{ width: "100%" }}>
+        <Button
+          onClick={addExperience}
+          className={formStyles.addNewBtn}
+          style={{ fontWeight: "600", borderRadius: "8px", padding: "10px 24px", height: "auto", width: "100%", marginBottom: "2rem" }}
+          disabled={editingIndex !== null}
+        >
+          + Add Experience
+        </Button>
+      </div>
     </div>
   );
 }

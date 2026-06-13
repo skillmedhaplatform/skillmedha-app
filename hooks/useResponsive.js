@@ -10,17 +10,17 @@ import { useState, useEffect } from "react";
  * on client to prevent layout flash.
  */
 export default function useResponsive(breakpoint = 1024) {
-  const [isResponsive, setIsResponsive] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.innerWidth < breakpoint;
-  });
+  const [isResponsive, setIsResponsive] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const check = () =>
       setIsResponsive(window.innerWidth < breakpoint);
+    check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, [breakpoint]);
 
-  return isResponsive;
+  return mounted ? isResponsive : false;
 }

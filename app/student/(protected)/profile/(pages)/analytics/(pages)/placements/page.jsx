@@ -3,6 +3,7 @@ import React from "react";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { useSelector } from "react-redux";
 import { Table, Tag, Empty, Typography } from "antd";
+import formStyles from "../../../../form.module.scss";
 
 const { Text } = Typography;
 
@@ -84,24 +85,6 @@ const Page = () => {
       },
       width: 100,
     },
-    // {
-    //   title: "Interviewer",
-    //   key: "interviewer",
-    //   render: (_, record) => {
-    //     if (record?.interviewDetails?.interviewer) {
-    //       const interviewer = record.interviewDetails.interviewer;
-    //       return (
-    //         <div>
-    //           <Text strong>{interviewer.name}</Text>
-    //           <br />
-    //           <Text type="secondary">{interviewer.designation}</Text>
-    //         </div>
-    //       );
-    //     }
-    //     return <Text type="secondary">N/A</Text>;
-    //   },
-    //   width: 120,
-    // },
   ];
 
   // Clean data source - pass the original record structure
@@ -113,49 +96,43 @@ const Page = () => {
   // Loading state
   if (!studentDetails) {
     return (
-      
-        <div className="">
-          <Empty description="Loading student data..." />
-        </div>
-      
+      <div className={formStyles.formContainer} style={{ padding: "3rem", display: "flex", alignItems: "center", justifyItems: "center" }}>
+        <Empty description="Loading student data..." />
+      </div>
     );
   }
 
   // No applied jobs state
   if (appliedJobs.length === 0) {
     return (
-      
-        <div className="">
-          <Empty
-            description={
-              <span>
-                No job applications found
-                <br />
-                <Text type="secondary">
-                  This student hasn't applied to any jobs yet.
-                </Text>
-              </span>
-            }
-          />
-        </div>
-      
+      <div className={formStyles.formContainer} style={{ padding: "3rem", display: "flex", alignItems: "center", justifyItems: "center" }}>
+        <Empty
+          description={
+            <span>
+              No job applications found
+              <br />
+              <Text type="secondary">
+                {"This student hasn't applied to any jobs yet."}
+              </Text>
+            </span>
+          }
+        />
+      </div>
     );
   }
 
   return (
-    
-      <div className="">
-        <StudentPageHeader section="Profile · Analytics" title="Placements" />
-        <div style={{ marginBottom: "1rem" }}>
-          <Text strong style={{ fontSize: "18px" }}>
-            Job Applications ({appliedJobs.length})
-          </Text>
-          <br />
-          <Text type="secondary">
-            Complete overview of all job applications and their current status
-          </Text>
-        </div>
+    <div className={formStyles.formContainer}>
+      <div style={{ marginBottom: "1.5rem", borderBottom: "1px solid #eef5fb", width: "100%", paddingBottom: "1rem" }}>
+        <h3 className={formStyles.formTitle} style={{ fontSize: "1.125rem", fontWeight: "800", color: "#0f172a", margin: 0 }}>
+          Job Applications ({appliedJobs.length})
+        </h3>
+        <p className={formStyles.formSubtitle} style={{ fontSize: "0.8rem", color: "#64748b", margin: 0, marginTop: "0.25rem" }}>
+          Complete overview of all job applications and their current status
+        </p>
+      </div>
 
+      <div style={{ width: "100%" }}>
         <Table
           columns={columns}
           dataSource={dataSource}
@@ -166,14 +143,14 @@ const Page = () => {
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} of ${total} applications`,
           }}
-          // scroll={{ x: 1200 }} // Horizontal scroll for many columns
           size="middle"
           bordered
           rowKey="key"
         />
       </div>
-    
+    </div>
   );
 };
 
 export default Page;
+
