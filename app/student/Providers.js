@@ -41,7 +41,7 @@ export default function Providers({ children }) {
             <AppRouterCacheProvider options={{ enableCssLayer: true }}>
               <ProgressProvider
                 height="3px"
-                color="#24A058"
+                color="linear-gradient(to right, #1E69DA, #5694F0)"
                 options={{ showSpinner: false }}
                 shallowRouting
               >

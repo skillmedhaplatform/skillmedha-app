@@ -102,7 +102,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
       : filterQuotes(String(val));
   };
 
-const handleDownloadPdf = async () => {
+  const handleDownloadPdf = async () => {
     if (!resumeRef.current) return;
 
     try {

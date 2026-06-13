@@ -1,5 +1,5 @@
-@import "../../../../../utils/universalUtils/colors.module.scss";
-@import "../../../../../utils/universalUtils/mixins.scss";
+@use "../../../../../utils/universalUtils/colors.module.scss" as *;
+@use "../../../../../utils/universalUtils/mixins.scss" as *;
 
 .mainCont {
   width: 98%;

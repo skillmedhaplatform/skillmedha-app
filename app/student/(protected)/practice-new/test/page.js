@@ -51,14 +51,19 @@ export default function TestPage() {
   const isFirstQuestion = currentQuestionIndex === 0;
 
   useEffect(() => {
-    dispatch(
-      fetchPracQuestions({
-        refId: subTopicId,
-        type: "subTopicId",
-        userId: studentCreds?._id,
-      })
-    );
-  }, []);
+    const refId = subTopicId || subjectId;
+    const fetchType = subTopicId ? "subTopicId" : "subjectId";
+    
+    if (refId) {
+      dispatch(
+        fetchPracQuestions({
+          refId: refId,
+          type: fetchType,
+          userId: studentCreds?._id,
+        })
+      );
+    }
+  }, [subTopicId, subjectId, dispatch, studentCreds?._id]);
 
   // useEffect(() => {
   //   if (pracQuestions.length === 0) {

@@ -650,7 +650,7 @@ const LibraryPage = ({
                       </span>
 
                       <button
-                        className="bg-[#1a56db] hover:bg-[#1e40af] text-white text-[13px] font-medium py-1.5 px-5 rounded-[20px] border-none cursor-pointer transition-colors flex items-center gap-1.5 shadow-sm"
+                        className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white text-[13px] font-medium py-1.5 px-5 rounded-[20px] border-none cursor-pointer transition-opacity flex items-center gap-1.5 shadow-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           nav.push(getItemUrl(item));

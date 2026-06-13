@@ -716,23 +716,23 @@ function Form() {
   const sectionRefs = useRef({});
   const [activeSection, setActiveSection] = useState(null);
 
-  const availableSections = isEditing 
+  const availableSections = isEditing
     ? [
-        "Basic Details", "Links", "Experience", "Internships", "Education", 
-        "Projects", "Certifications", "Volunteering", "Skills", "Languages"
-      ]
+      "Basic Details", "Links", "Experience", "Internships", "Education",
+      "Projects", "Certifications", "Volunteering", "Skills", "Languages"
+    ]
     : [
-        "Basic Details", 
-        links?.length > 0 && "Links",
-        experienceDetails?.length > 0 && "Experience",
-        internships?.length > 0 && "Internships",
-        educationDetails?.length > 0 && "Education",
-        projectDetails?.length > 0 && "Projects",
-        certificates?.length > 0 && "Certifications",
-        volunteerings?.length > 0 && "Volunteering",
-        skills?.length > 0 && "Skills",
-        languages?.length > 0 && "Languages"
-      ].filter(Boolean);
+      "Basic Details",
+      links?.length > 0 && "Links",
+      experienceDetails?.length > 0 && "Experience",
+      internships?.length > 0 && "Internships",
+      educationDetails?.length > 0 && "Education",
+      projectDetails?.length > 0 && "Projects",
+      certificates?.length > 0 && "Certifications",
+      volunteerings?.length > 0 && "Volunteering",
+      skills?.length > 0 && "Skills",
+      languages?.length > 0 && "Languages"
+    ].filter(Boolean);
 
   const scrollToSection = (sectionName) => {
     setActiveSection(sectionName);
@@ -798,7 +798,7 @@ function Form() {
       />
     );
   }
-  
+
 
 
   return (
@@ -832,28 +832,28 @@ function Form() {
           </div>
 
           <div className="flex items-center gap-4">
-             <Button onClick={() => setIsEditing(!isEditing)} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
-               {isEditing ? "Disable Editing" : "Edit Details"}
-             </Button>
-             {isEditing && (
-               <Button onClick={handleSubmit} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
-                 Submit
-               </Button>
-             )}
-             <Button onClick={uploadResume} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
-               Download Resume
-             </Button>
+            <Button onClick={() => setIsEditing(!isEditing)} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
+              {isEditing ? "Disable Editing" : "Edit Details"}
+            </Button>
+            {isEditing && (
+              <Button onClick={handleSubmit} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
+                Submit
+              </Button>
+            )}
+            <Button onClick={uploadResume} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
+              Download Resume
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Content Area */}
       <div className="flex-1 w-full flex overflow-hidden">
-        
+
         {/* Left Sidebar */}
         <div className="w-[280px] shrink-0 bg-white border-r border-[#e2e8f0] p-6 flex flex-col gap-6 overflow-y-auto hidden lg:flex">
           <div className="text-[12px] font-bold text-[#94a3b8] tracking-wider uppercase mb-[-10px]">Sections</div>
-          
+
           {/* Profile Completion */}
           <div className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] p-4 flex flex-col gap-3">
             <div className="flex justify-between items-center">
@@ -868,16 +868,16 @@ function Form() {
 
           {/* Navigation Menu */}
           <div className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] p-2 flex flex-col gap-1">
-              {availableSections.map((item) => (
-               <div 
-                 key={item} 
-                 onClick={() => scrollToSection(item)}
-                 className={`group px-4 py-2.5 rounded-lg text-[13px] font-medium cursor-pointer border flex justify-between items-center transition-all ${activeSection === item ? '!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !text-white !border-transparent shadow-sm' : '!bg-transparent !border-transparent text-[#64748b] hover:!bg-white hover:!text-[#1E69DA] hover:!border-[#1E69DA] hover:shadow-sm'}`}
-               >
-                 {item}
-                 <div className={`w-1.5 h-1.5 rounded-full transition-colors ${activeSection === item ? 'bg-white' : 'bg-[#cbd5e1] group-hover:!bg-[#1E69DA]'}`}></div>
-               </div>
-             ))}
+            {availableSections.map((item) => (
+              <div
+                key={item}
+                onClick={() => scrollToSection(item)}
+                className={`group px-4 py-2.5 rounded-lg text-[13px] font-medium cursor-pointer border flex justify-between items-center transition-all ${activeSection === item ? '!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !text-white !border-transparent shadow-sm' : '!bg-transparent !border-transparent text-[#64748b] hover:!bg-white hover:!text-[#1E69DA] hover:!border-[#1E69DA] hover:shadow-sm'}`}
+              >
+                {item}
+                <div className={`w-1.5 h-1.5 rounded-full transition-colors ${activeSection === item ? 'bg-white' : 'bg-[#cbd5e1] group-hover:!bg-[#1E69DA]'}`}></div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -889,7 +889,7 @@ function Form() {
           }
         }}>
           <div className="max-w-[800px] mx-auto flex flex-col gap-6">
-            
+
             {/* If not editing, show Template. If editing, show forms. */}
             {!isEditing ? (
               <div className="bg-white shadow-md rounded-lg overflow-hidden border border-[#e2e8f0]">
@@ -903,53 +903,53 @@ function Form() {
             ) : (
               <>
                 <div ref={(el) => sectionRefs.current["Basic Details"] = el} data-section-name="Basic Details" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-[#1E69DA] text-white p-4 font-semibold">Basic Details</div>
-                   <BasicDetails data={basicDetails} updateField={updateBasicDetail} />
+                  <div className="bg-[#1E69DA] text-white p-4 font-semibold">Basic Details</div>
+                  <BasicDetails data={basicDetails} updateField={updateBasicDetail} />
                 </div>
-                
+
                 <div ref={(el) => sectionRefs.current["Links"] = el} data-section-name="Links" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Links <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
-                   <Links links={links} updateLink={updateLink} addLink={addLink} removeLink={removeLink} />
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Links <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <Links links={links} updateLink={updateLink} addLink={addLink} removeLink={removeLink} />
                 </div>
 
                 <div ref={(el) => sectionRefs.current["Experience"] = el} data-section-name="Experience" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Experience <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
-                   <ExperienceDetails experiences={experienceDetails} updateExperience={updateExperience} addExperience={addExperience} removeExperience={removeExperience} />
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Experience <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <ExperienceDetails experiences={experienceDetails} updateExperience={updateExperience} addExperience={addExperience} removeExperience={removeExperience} />
                 </div>
 
                 <div ref={(el) => sectionRefs.current["Internships"] = el} data-section-name="Internships" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Internships <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
-                   <InternshipsDetails experiences={internships} updateExperience={updateInternship} addExperience={addInternship} removeExperience={removeInternship} />
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Internships <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <InternshipsDetails experiences={internships} updateExperience={updateInternship} addExperience={addInternship} removeExperience={removeInternship} />
                 </div>
 
                 <div ref={(el) => sectionRefs.current["Education"] = el} data-section-name="Education" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Education <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
-                   <EducationDetails educationDetails={educationDetails} updateEducationDetail={updateEducationDetail} addEducation={addEducation} removeEducation={removeEducation} />
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Education <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <EducationDetails educationDetails={educationDetails} updateEducationDetail={updateEducationDetail} addEducation={addEducation} removeEducation={removeEducation} />
                 </div>
 
                 <div ref={(el) => sectionRefs.current["Projects"] = el} data-section-name="Projects" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Projects <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
-                   <ProjectDetails projects={projectDetails} updateProject={updateProject} addProject={addProject} removeProject={removeProject} />
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Projects <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <ProjectDetails projects={projectDetails} updateProject={updateProject} addProject={addProject} removeProject={removeProject} />
                 </div>
 
                 <div ref={(el) => sectionRefs.current["Certifications"] = el} data-section-name="Certifications" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Certifications <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
-                   <CertificateDetails certificates={certificates} updateCertificate={updateCertificate} addCertificate={addCertificate} removeCertificate={removeCertificate} />
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Certifications <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <CertificateDetails certificates={certificates} updateCertificate={updateCertificate} addCertificate={addCertificate} removeCertificate={removeCertificate} />
                 </div>
 
                 <div ref={(el) => sectionRefs.current["Volunteering"] = el} data-section-name="Volunteering" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Volunteering <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
-                   <VolunteeringDetails volunteerings={volunteerings} updateVolunteering={updateVolunteering} addVolunteering={addVolunteering} removeVolunteering={removeVolunteering} />
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Volunteering <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <VolunteeringDetails volunteerings={volunteerings} updateVolunteering={updateVolunteering} addVolunteering={addVolunteering} removeVolunteering={removeVolunteering} />
                 </div>
 
                 <div ref={(el) => sectionRefs.current["Skills"] = el} data-section-name="Skills" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Skills <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
-                   <SkillDetails skills={skills} updateSkill={updateSkill} addSkill={addSkill} removeSkill={removeSkill} />
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Skills <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <SkillDetails skills={skills} updateSkill={updateSkill} addSkill={addSkill} removeSkill={removeSkill} />
                 </div>
 
                 <div ref={(el) => sectionRefs.current["Languages"] = el} data-section-name="Languages" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
-                   <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Languages <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
-                   <Language languages={languages} updateLanguage={updateLanguage} addLanguage={addLanguage} removeLanguage={removeLanguage} />
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Languages <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <Language languages={languages} updateLanguage={updateLanguage} addLanguage={addLanguage} removeLanguage={removeLanguage} />
                 </div>
               </>
             )}
