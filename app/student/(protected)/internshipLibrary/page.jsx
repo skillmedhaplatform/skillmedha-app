@@ -35,6 +35,7 @@ const InternshipLibraryPage = () => (
     <StudentPageHeader section="Learning" title="Internship Library" />
     <LibraryPage
       title="Internship Library"
+      showBuyNow={false}
       fetchAction={getAllInternships}
       dataSelector={selectInternships}
       paginationSelector={selectPagination}

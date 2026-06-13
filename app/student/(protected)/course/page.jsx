@@ -37,6 +37,7 @@ const CourseLibraryPage = () => (
     <StudentPageHeader section="Learning" title="Course Library" />
     <LibraryPage
       title="Course Library"
+      showBuyNow={true} 
       fetchAction={getAllCourses}
       dataSelector={selectCourses}
       paginationSelector={selectPagination}
