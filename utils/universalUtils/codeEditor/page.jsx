@@ -29,19 +29,9 @@ const CodingPage = ({ questionData }) => {
   // State for collapsible question container
   const [isQuestionOpen, setIsQuestionOpen] = useState(true);
 
-  const language = codingQuestionsss.filter(
-    (item) => item.language === tags.toString()
-  );
-  const codingQuestions = language?.map((e) => {
-    return e?.question;
-  });
-
   const [questionIndex, setQuestionIndex] = useState(0);
 
   const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(setQuestion(codingQuestions[questionIndex]));
-  }, [questionIndex, codingQuestions[questionIndex]]);
 
   useEffect(() => {
     dispatch(resetOutput());
@@ -52,19 +42,50 @@ const CodingPage = ({ questionData }) => {
     setIsQuestionOpen(!isQuestionOpen);
   };
 
+  const getDifficultyColors = (difficulty) => {
+    const diff = difficulty?.toLowerCase() || "";
+    if (diff === "easy") {
+      return { bg: "#DEF7EC", text: "#03543F" };
+    } else if (diff === "hard") {
+      return { bg: "#FDE8E8", text: "#9B1C1C" };
+    }
+    return { bg: "#FEF08A", text: "#854D0E" }; // medium
+  };
+
+  const diffStyle = getDifficultyColors(questionData?.difficulty || "Medium");
+
   return (
     <div className={pageStyles.container}>
       <div className={pageStyles.boxContainer}>
         <div className={`${pageStyles.questionContainer}`}>
-          <div
-            className={pageStyles.toggleButton}
-            onClick={toggleQuestionContainer}
-          >
-            <span className={pageStyles.toggleText}>Question</span>
+          {/* Header section displaying Question */}
+          <div className={pageStyles.tabHeader} style={{ padding: "14px 16px" }}>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>Question</span>
           </div>
 
           <div className={pageStyles.questionContent}>
-            {/* Question Content */}
+            {/* Meta details */}
+            <div className={pageStyles.metaSection}>
+              <h1 className={pageStyles.questionTitle}>
+                {questionData?.title || questionData?.questionName || "Coding Question"}
+              </h1>
+              <div className={pageStyles.badgesRow}>
+                <span className={pageStyles.categoryBadge}>
+                  Coding - {questionData?.tags?.length ? questionData.tags.join(", ") : "Arrays"}
+                </span>
+                <span
+                  className={pageStyles.difficultyBadge}
+                  style={{
+                    backgroundColor: diffStyle.bg,
+                    color: diffStyle.text,
+                  }}
+                >
+                  {questionData?.difficulty || "Medium"}
+                </span>
+              </div>
+            </div>
+
+            {/* Question HTML Description */}
             <div
               className={pageStyles.question}
               dangerouslySetInnerHTML={{
@@ -72,63 +93,59 @@ const CodingPage = ({ questionData }) => {
               }}
             />
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                flexDirection: "column",
-                gap: "8px",
-                marginBottom: "8px",
-              }}
-            >
-              {questionData?.questionContent?.testCases &&
-                questionData?.questionContent?.testCases?.length > 0 && (
-                  <div className={pageStyles.testCasesSection}>
-                    <h3 className={pageStyles.testCasesTitle}>
-                      Test Cases:{" "}
-                      <Tag color="blue">
-                        {questionData?.questionContent?.testCases?.length || 0}
-                      </Tag>
-                    </h3>
-                    {questionData?.questionContent?.testCases?.map(
-                      (testCase, index) => (
-                        <div
-                          key={testCase._id || index}
-                          className={pageStyles.testCase}
-                        >
-                          <div className={pageStyles.testCaseHeader}>
-                            <strong>Test Case {index + 1}:</strong>
-                          </div>
-
-                          {testCase.input && (
-                            <div className={pageStyles.testCaseInput}>
-                              <span className={pageStyles.label}>Input: </span>
-                              <div
-                                className={pageStyles.codeBlock}
-                                dangerouslySetInnerHTML={{
-                                  __html: parseIfJson(testCase.input),
-                                }}
-                              />
-                            </div>
-                          )}
-
-                          {testCase.expectedOutput && (
-                            <div className={pageStyles.testCaseOutput}>
-                              <span className={pageStyles.label}>Output: </span>
-                              <div
-                                className={pageStyles.codeBlock}
-                                dangerouslySetInnerHTML={{
-                                  __html: parseIfJson(testCase.expectedOutput),
-                                }}
-                              />
-                            </div>
-                          )}
+            {/* Test Cases List */}
+            {questionData?.questionContent?.testCases &&
+              questionData?.questionContent?.testCases?.length > 0 && (
+                <div className={pageStyles.testCasesSection}>
+                  <h3 className={pageStyles.testCasesTitle}>
+                    Test Cases
+                    <span className={pageStyles.testCasesCountBadge}>
+                      {questionData?.questionContent?.testCases?.length || 0}
+                    </span>
+                  </h3>
+                  {questionData?.questionContent?.testCases?.map(
+                    (testCase, index) => (
+                      <div
+                        key={testCase._id || index}
+                        className={pageStyles.testCaseCard}
+                      >
+                        <div className={pageStyles.testCaseHeader}>
+                          <span className={pageStyles.testCaseName}>
+                            ⚡ Test Case {index + 1}
+                          </span>
+                          <span className={pageStyles.testCaseStatusBadge}>
+                            Pending
+                          </span>
                         </div>
-                      )
-                    )}
-                  </div>
-                )}
-            </div>
+
+                        {testCase.input && (
+                          <div className={pageStyles.testCaseDetail}>
+                            <span className={pageStyles.detailLabel}>Input</span>
+                            <div
+                              className={pageStyles.detailCodeBlock}
+                              dangerouslySetInnerHTML={{
+                                __html: parseIfJson(testCase.input),
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {testCase.expectedOutput && (
+                          <div className={pageStyles.testCaseDetail}>
+                            <span className={pageStyles.detailLabel}>Expected</span>
+                            <div
+                              className={pageStyles.detailCodeBlock}
+                              dangerouslySetInnerHTML={{
+                                __html: parseIfJson(testCase.expectedOutput),
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
           </div>
         </div>
 

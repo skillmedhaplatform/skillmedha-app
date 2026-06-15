@@ -26,7 +26,10 @@ export default function DynamicLearningPage({ moduleType }) {
   const [isExpandedView, setIsExpandedView] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   // 1. Data layer
@@ -216,6 +219,9 @@ export default function DynamicLearningPage({ moduleType }) {
           handleSaveNewNote={handleSaveNewNote}
           handleUpdateNote={handleUpdateNote}
           handleDeleteNote={handleDeleteNote}
+          completedTopics={completedTopics}
+          manualTopicChecks={manualTopicChecks}
+          toggleTopicCheck={toggleTopicCheck}
         />
 
         <ContentSidebar
@@ -233,6 +239,9 @@ export default function DynamicLearningPage({ moduleType }) {
           topicDurationOverrides={topicDurationOverrides}
           completedTopics={completedTopics}
           manualTopicChecks={manualTopicChecks}
+          displayProgress={displayProgress}
+          displayCompletedCount={displayCompletedCount}
+          displayTotalCount={displayTotalCount}
         />
       </div>
     </div>
