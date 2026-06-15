@@ -39,6 +39,14 @@ export const formSchemas = {
         disabled: true,
       },
       {
+        label: "Qualification",
+        name: "qualification",
+        type: "text",
+        placeholder:
+          "B.Tech / M.Tech / MBA / PhD (mention all degrees with branches & universities)",
+        required: true,
+      },
+      {
         label: "TPO Logo",
         name: "tpoLogo",
         type: "ImageUpload",
@@ -49,14 +57,6 @@ export const formSchemas = {
         type: "text",
         placeholder:
           "TPO / Assistant Professor & TPO / Dean – Training & Placements",
-        required: true,
-      },
-      {
-        label: "Qualification",
-        name: "qualification",
-        type: "text",
-        placeholder:
-          "B.Tech / M.Tech / MBA / PhD (mention all degrees with branches & universities)",
         required: true,
       },
       {

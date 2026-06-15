@@ -1,12 +1,11 @@
-@import "@/utils/universalUtils/colors.module.scss";
-
+@use "@/utils/universalUtils/colors.module.scss" as *;
 /* ===== Container ===== */
 .container {
   padding: 1.5rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  background-color: #f8fafc;
+  background-color: transparent;
   min-height: calc(100vh - 140px);
 }
 
@@ -33,11 +32,11 @@
   }
 
   &.companiesCard {
-    background: #e8f7ee;
+    background: #e8f8f0;
   }
 
   &.activeDrivesCard {
-    background: #e8f2ff;
+    background: #fff1f2;
   }
 
   &.studentsPlacedCard {
@@ -116,14 +115,14 @@
   white-space: nowrap;
 
   &:hover {
-    color: #24a058;
+    color: #6BA8ED;
   }
 }
 
 .tabActive {
-  color: #24a058;
+  color: #6BA8ED;
   font-weight: 600;
-  border-bottom-color: #24a058;
+  border-bottom-color: #6BA8ED;
 }
 
 .tabCount {
@@ -142,8 +141,8 @@
 }
 
 .tabActive .tabCount {
-  background-color: rgba(36, 160, 88, 0.12);
-  color: #24a058;
+  background-color: rgba(30, 105, 218, 0.12);
+  color: #6BA8ED;
 }
 
 /* ===== Toolbar: Search + Filters ===== */
@@ -199,7 +198,7 @@
 }
 
 .viewBtnActive {
-  background-color: #24a058;
+  background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%) !important;
   color: white;
 
   &:hover {
@@ -330,11 +329,11 @@
 }
 
 .statusActive {
-  background-color: #f0fdf4;
-  color: #16a34a;
+  background-color: #EFF6FF;
+  color: #6BA8ED;
 
   .statusDot {
-    background-color: #16a34a;
+    background-color: #6BA8ED;
   }
 }
 
@@ -384,13 +383,12 @@
 }
 
 .actionBtnPrimary {
-  background-color: #24a058;
-  border-color: #24a058;
-  color: white;
+  background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%) !important;
+  border: none !important;
+  color: white !important;
 
   &:hover {
-    background-color: #1e8749;
-    border-color: #1e8749;
+    opacity: 0.9 !important;
   }
 }
 
@@ -462,12 +460,12 @@
 }
 
 .pageBtnActive {
-  background-color: #24a058;
-  border-color: #24a058;
-  color: white;
+  background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%) !important;
+  border: none !important;
+  color: white !important;
 
   &:hover {
-    background-color: #1e8749;
+    opacity: 0.9 !important;
   }
 }
 
@@ -477,7 +475,7 @@
 
 /* ===== Table View (Alternative) ===== */
 .customTable :global(.ant-table-thead > tr > th) {
-  background-color: #24A0581a;
+  background-color: #6BA8ED1a;
   font-weight: bold;
 }
 
@@ -532,7 +530,7 @@
   border: 0;
   outline: 0;
   font-size: 16px;
-  background-color: $primary10;
+  background-color: rgba(30, 105, 218, 0.08);
   border-radius: 5px;
   border: 0.1px solid rgba(211, 211, 211, 0.35);
   &::placeholder {
@@ -549,7 +547,7 @@
 .saveBtn {
   border: 0;
   padding: 0.5rem 1.5rem;
-  background-color: $bgcolor;
+  background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%) !important;
   border-radius: 5px;
   border: 0.1px solid rgba(211, 211, 211, 0.35);
   font-weight: 600;
@@ -561,6 +559,11 @@
   color: white;
   width: fit-content;
   align-self: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 0.9;
+  }
 }
 .dateCont {
   display: flex;
@@ -587,7 +590,7 @@
       border: 0;
       outline: 0;
       font-size: 16px;
-      background-color: $primary10;
+      background-color: rgba(30, 105, 218, 0.08);
       border-radius: 5px;
       border: 0.1px solid rgba(211, 211, 211, 0.35);
       &::placeholder {
@@ -647,5 +650,34 @@
 
   .viewToggle {
     margin-left: 0;
+  }
+}
+
+.headerCont {
+  width: 100%;
+  padding: 0.25rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  background-color: transparent;
+  margin-bottom: 0.75rem;
+
+  .crumb {
+    font-size: 16px;
+    font-weight: 500;
+    color: #6BA8ED;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .activeCrumb {
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 600;
   }
 }

@@ -65,7 +65,7 @@ export default function JobDetailsModal({ open, loading, onClose }) {
   };
 
   const renderPdfContent = () => (
-    <div ref={contentRef} className={styles.container1}>
+    <div ref={contentRef} className={styles.container1} style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
       <article className={styles.article}>
         <header className={styles.header}>
           <h1>Placement Report</h1>

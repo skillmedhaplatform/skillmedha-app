@@ -1,8 +1,8 @@
-@import "@/utils/universalUtils/colors.module.scss";
+@use "@/utils/universalUtils/colors.module.scss" as *;
 
 .mainCont {
-  border: 1px solid $bgcolor;
-  // height: 100%;
+  background-color: white;
+  border: 1px solid #6BA8ED;
   max-height: 100%;
   overflow-y: auto;
   width: 100%;
@@ -21,17 +21,17 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #24A058;
+    background: linear-gradient(135deg, #6BA8ED, #A3CCFA);
     border-radius: 6px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #1b8184;
+    background-color: #1555b0;
   }
 
   /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: #24A058 transparent;
+  scrollbar-color: #6BA8ED transparent;
 
   .fieldCont {
     display: flex;
@@ -72,7 +72,7 @@
       border: 0;
       outline: 0;
       font-size: 16px;
-      background-color: $primary10;
+      background-color: #eef5fb;
       border-radius: 5px;
       border: 0.1px solid rgba(211, 211, 211, 0.35);
       &::placeholder {
@@ -87,7 +87,7 @@
     .button {
       border: 0;
       padding: 0.5rem 1rem;
-      background-color: $primary10;
+      background-color: #eef5fb;
       border-radius: 5px;
       border: 0.1px solid rgba(211, 211, 211, 0.35);
       font-weight: 600;
@@ -96,17 +96,22 @@
       justify-content: center;
       gap: 0.5rem;
       cursor: pointer;
-      color: $bgcolor;
+      color: #6BA8ED;
     }
     .selected {
-      background-color: $bgcolor;
+      background-color: #6BA8ED;
       color: white;
+    }
+    :global(.ant-select-selector) {
+      background-color: #eef5fb !important;
+      border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
+      border-radius: 5px !important;
     }
   }
   .saveBtn {
     border: 0;
     padding: 0.5rem 1.5rem;
-    background-color: $bgcolor;
+    background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%) !important;
     border-radius: 5px;
     border: 0.1px solid rgba(211, 211, 211, 0.35);
     font-weight: 600;
@@ -118,5 +123,10 @@
     color: white;
     width: fit-content;
     align-self: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      opacity: 0.9;
+    }
   }
 }

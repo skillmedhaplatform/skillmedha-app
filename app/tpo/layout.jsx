@@ -11,9 +11,9 @@ export default function RootLayout({ children }) {
         theme={{
           token: {
             fontSize: 16,
-            colorPrimary: "#24A058",
-            colorPrimaryHover: "#1e8749",
-            colorPrimaryActive: "#1b7b43",
+            colorPrimary: "#6BA8ED",
+            colorPrimaryHover: "#1555b0",
+            colorPrimaryActive: "#0f3e82",
             colorBorder: "#cbd5e0",
             controlHeight: 38,
             borderRadius: 8,
@@ -23,6 +23,10 @@ export default function RootLayout({ children }) {
               controlHeight: 38,
               borderRadius: 8,
               fontWeight: 600,
+            },
+            Tooltip: {
+              colorBgSpotlight: "#ffffff",
+              colorTextLightSolid: "#6BA8ED",
             }
           }
         }}

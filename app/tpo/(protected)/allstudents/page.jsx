@@ -39,12 +39,12 @@ export default function Page() {
     branchLogo: "",
   });
 
-  const { value: departMent } = useSelector(
+  const { value: departMent, status: departmentStatus } = useSelector(
     (state) => state.department.getAllDepartments
   );
 
-  const StudentsLength = useSelector(
-    (state) => state.dashboard.AllStudents.value
+  const { value: StudentsLength, status: studentsStatus } = useSelector(
+    (state) => state.dashboard.AllStudents
   );
 
   const studentsList = Array.isArray(StudentsLength?.data)
@@ -57,9 +57,13 @@ export default function Page() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getAllDepartments());
-    dispatch(fetchAllStudents({}));
-  }, [dispatch, departMent?.data?.length]);
+    if (departmentStatus !== "sucess" && departmentStatus !== "loading") {
+      dispatch(getAllDepartments());
+    }
+    if (studentsStatus !== "succeeded" && studentsStatus !== "loading") {
+      dispatch(fetchAllStudents({}));
+    }
+  }, [dispatch, departmentStatus, studentsStatus]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -239,44 +243,49 @@ export default function Page() {
         </div>
 
         {/* Search & Filter Chips Row */}
-        <div className={allStudents.searchFilterRow}>
-          <div className={allStudents.searchInput}>
-            <Search
-              placeholder="Search by name, HOD, email or SPOC..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onSearch={handleSearch}
-              allowClear
-              onClear={() => setSearchQuery("")}
-            />
+        <div className={allStudents.searchFilterRow} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div className={allStudents.searchInput}>
+              <Search
+                placeholder="Search by name, HOD, email or SPOC..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onSearch={handleSearch}
+                allowClear
+                onClear={() => setSearchQuery("")}
+              />
+            </div>
+            
+            <div className={allStudents.chipsContainer}>
+              <span
+                className={`${allStudents.chip} ${filterType === "All" ? allStudents.activeChip : ""}`}
+                onClick={() => setFilterType("All")}
+              >
+                All • {departmentsCount}
+              </span>
+              <span
+                className={`${allStudents.chip} ${filterType === "Active" ? allStudents.activeChip : ""}`}
+                onClick={() => setFilterType("Active")}
+              >
+                Active
+              </span>
+              <span
+                className={`${allStudents.chip} ${filterType === "SPOC" ? allStudents.activeChip : ""}`}
+                onClick={() => setFilterType("SPOC")}
+              >
+                SPOC
+              </span>
+              <span
+                className={`${allStudents.chip} ${filterType === "Incomplete" ? allStudents.activeChip : ""}`}
+                onClick={() => setFilterType("Incomplete")}
+              >
+                Incomplete data
+              </span>
+            </div>
           </div>
-          
-          <div className={allStudents.chipsContainer}>
-            <span
-              className={`${allStudents.chip} ${filterType === "All" ? allStudents.activeChip : ""}`}
-              onClick={() => setFilterType("All")}
-            >
-              All • {departmentsCount}
-            </span>
-            <span
-              className={`${allStudents.chip} ${filterType === "Active" ? allStudents.activeChip : ""}`}
-              onClick={() => setFilterType("Active")}
-            >
-              Active
-            </span>
-            <span
-              className={`${allStudents.chip} ${filterType === "SPOC" ? allStudents.activeChip : ""}`}
-              onClick={() => setFilterType("SPOC")}
-            >
-              SPOC
-            </span>
-            <span
-              className={`${allStudents.chip} ${filterType === "Incomplete" ? allStudents.activeChip : ""}`}
-              onClick={() => setFilterType("Incomplete")}
-            >
-              Incomplete data
-            </span>
-          </div>
+          <Button type="primary" onClick={showModal}>
+            + Add department
+          </Button>
         </div>
 
         {/* Department Cards Grid */}
@@ -423,7 +432,7 @@ export default function Page() {
             <Button
               type="primary"
               onClick={() => handleOk(isEditing ? "Update" : "Create")}
-              style={{ background: "#24a058", borderColor: "#24a058" }}
+              className="!bg-gradient-to-br !from-[#6BA8ED] !to-[#A3CCFA] !border-none !text-white"
             >
               Submit
             </Button>

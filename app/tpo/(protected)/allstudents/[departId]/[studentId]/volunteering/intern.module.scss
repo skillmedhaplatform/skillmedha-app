@@ -1,5 +1,9 @@
 .container {
-  padding: 2rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  margin: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .btn {
@@ -8,25 +12,33 @@
   cursor: pointer;
 
   &:hover {
-    box-sizing: 10px 10px 10px rgb(125, 115, 115);
+    box-shadow: 10px 10px 10px rgb(125, 115, 115);
   }
 }
 
 .about {
+  margin-top: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
 
   .head {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
   }
 
   .mark {
     display: flex;
     justify-content: space-between;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   .ticks {
@@ -36,10 +48,8 @@
 
 .aboutsidedata {
   display: flex;
+  gap: 1rem;
   width: 100%;
-  font-size: 14px;
-  margin-top: 0.5rem;
-  line-height: 25px;
 }
 
 .leftSection,
@@ -47,30 +57,31 @@
   display: flex;
   flex-direction: column;
   width: 50%;
-}
-
-.leftSection {
   gap: 1rem;
-  margin-top: 1rem;
-}
-
-.rightSection {
-  gap: 1.2rem;
-  margin-top: 1rem;
 }
 
 .detailRow {
   display: flex;
-  justify-content: start;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: #f4f8fb;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  width: 100%;
 }
 
 .label {
-  width: 10rem;
+  font-size: 11px;
+  color: #8fa0b0;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
 .value {
-  font-weight: bold;
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
 }
 
 .select {
@@ -83,18 +94,21 @@
 
 .collegeRow {
   display: flex;
-  justify-content: start;
-  align-items: start;
-  gap: 0.7rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: #f4f8fb;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  width: 100%;
   margin-top: 1rem;
 }
 
 .collegeLabel {
-  font-size: 14px;
-  width: 18rem;
-}
-.collegeLabelData {
-  font-size: 14px;
+  font-size: 11px;
+  color: #8fa0b0;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
 .longSelect {
@@ -103,34 +117,43 @@
 
 .regNumberRow {
   display: flex;
-  justify-content: start;
-  align-items: center;
-  margin-top: 2rem;
-  gap: 1.5rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: #f4f8fb;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .regLabel {
-  font-size: 14px;
+  font-size: 11px;
+  color: #8fa0b0;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
 .regValue {
-  font-weight: bold;
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
 }
 
 .summaryText {
   line-height: 24px;
   margin-top: 0.5rem;
+  background-color: #f4f8fb;
+  padding: 1rem;
+  border-radius: 8px;
 }
 
 .addressTitle {
-  font-weight: bold;
-  border-bottom: 1px solid grey;
-  width: 10rem;
-  margin-top: 1rem;
-
-  &:first-of-type {
-    width: 8rem;
-  }
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .sameAddressBtn {

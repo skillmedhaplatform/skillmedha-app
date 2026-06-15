@@ -18,7 +18,6 @@ import { Button } from "antd";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { parseIfJson } from "@/utils/universalUtils/windowMW";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const Projects = () => {
   const dispatch = useDispatch();
@@ -116,7 +115,6 @@ const Projects = () => {
 
   return (
     <>
-      <PageHeader title="Projects" />
 
       <div className={education.container}>
         {localProjects.length > 0 ? (
@@ -150,7 +148,7 @@ const Projects = () => {
                       style={{
                         color:
                           status === "approved"
-                            ? "green"
+                            ? "#6BA8ED"
                             : status === "resubmission"
                               ? "orange"
                               : "gray",
@@ -167,7 +165,7 @@ const Projects = () => {
                   <div className={education.mark}>
                     <Button
                       type="text"
-                      style={{ color: "#24A058" }}
+                      style={{ color: "#6BA8ED" }}
                       onClick={() => projectName && handleApprove(projectName)}
                       icon={<FaRegCheckCircle />}
                     >
