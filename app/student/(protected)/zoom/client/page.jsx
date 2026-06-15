@@ -9,28 +9,17 @@ import { currentMeeting, updateVideoProgress } from "@/redux/slices/internship";
 import _ from "lodash";
 import { getLstorage } from "@/universalUtils/windowMW";
 
-export default function ZoomClient({ meetingId, orgId }) {
+export default function ZoomClient({ meetingId, orgId, currentTopic }) {
+  const dispatch = useDispatch();
   const studentCreds = useSelector((state) => state.student.student?.data);
 
   const currentMeetingDetails = useSelector(
     (state) => state.internship.currentMeeting
   );
 
-  useEffect(() => {
-    dispatch(currentMeeting({ id: meetingId, orgId }))?.then(({ payload }) => {
-      setMeetingData({
-        ...meetingData,
-        meetingNumber: Number(payload?.meetingDetails?.id),
-        passWord: payload?.meetingDetails?.password,
-      });
-    });
-  }, [meetingId]);
-
   const [joined, setJoined] = useState(false);
   const [ready, setReady] = useState(true);
   const zoomMtgRef = useRef(null);
-
-  const dispatch = useDispatch();
 
   const [meetingData, setMeetingData] = useState({
     authEndpoint: `${restUrl}/signature`,
@@ -46,8 +35,22 @@ export default function ZoomClient({ meetingId, orgId }) {
 
   const videoRef = useRef(null);
 
-  const updateProgressDebounced = useRef(
-    _.debounce((currentTime) => {
+  useEffect(() => {
+    if (meetingId) {
+      dispatch(currentMeeting({ id: meetingId, orgId }))?.then(({ payload }) => {
+        setMeetingData((prev) => ({
+          ...prev,
+          meetingNumber: Number(payload?.meetingDetails?.id),
+          passWord: payload?.meetingDetails?.password,
+        }));
+      });
+    }
+  }, [meetingId, orgId, dispatch]);
+
+  const updateProgressDebouncedRef = useRef(null);
+
+  useEffect(() => {
+    updateProgressDebouncedRef.current = _.debounce((currentTime) => {
       if (meetingId && studentCreds?._id) {
         dispatch(
           updateVideoProgress({
@@ -59,8 +62,11 @@ export default function ZoomClient({ meetingId, orgId }) {
           })
         );
       }
-    }, 5000)
-  ).current;
+    }, 5000);
+    return () => {
+      updateProgressDebouncedRef.current?.cancel();
+    };
+  }, [meetingId, studentCreds?._id, orgId, dispatch]);
 
   useEffect(() => {
     if (
@@ -76,11 +82,11 @@ export default function ZoomClient({ meetingId, orgId }) {
     if (meetingId) {
       dispatch(currentMeeting({ id: meetingId, orgId }))?.then(
         ({ payload }) => {
-          setMeetingData({
-            ...meetingData,
+          setMeetingData((prev) => ({
+            ...prev,
             meetingNumber: Number(payload?.meetingDetails?.id),
             passWord: payload?.meetingDetails?.password,
-          });
+          }));
         }
       );
       import("@zoom/meetingsdk")
@@ -96,7 +102,7 @@ export default function ZoomClient({ meetingId, orgId }) {
           message.error("Could not load Zoom SDK");
         });
     }
-  }, [meetingId]);
+  }, [meetingId, orgId, dispatch]);
 
   const getSignature = async () => {
     if (!zoomMtgRef.current) {
@@ -155,12 +161,12 @@ export default function ZoomClient({ meetingId, orgId }) {
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full relative">
       {currentMeetingDetails?.recordedUrl ? (
         <div className="flex justify-center items-center h-full w-full z-[100] border-none outline-none">
           <video
             ref={videoRef}
-            onTimeUpdate={(e) => updateProgressDebounced(e.target.currentTime)}
+            onTimeUpdate={(e) => updateProgressDebouncedRef.current?.(e.target.currentTime)}
             className="w-full h-full"
             src={currentMeetingDetails?.recordedUrl}
             controls={true}
@@ -174,19 +180,40 @@ export default function ZoomClient({ meetingId, orgId }) {
             </div>
           )}
           {!joined && meetingId && (
-            <button
-              onClick={() => {
-                if (currentMeetingDetails?._id) {
-                  getSignature();
-                } else {
-                  message.warning("Please wait while fetching meeting details");
-                }
-              }}
-              disabled={!ready}
-              className="text-[1.2rem] font-bold relative z-[100] cursor-pointer bg-[#1e69da] text-white px-6 py-3 rounded-lg border-none outline-none hover:bg-blue-600 transition-colors"
-            >
-              {ready ? "Join Meeting" : "Loading Zoom…"}
-            </button>
+            <div className="flex flex-col items-center justify-center text-center gap-6 relative z-[100] px-4 w-full">
+              {/* Circular Avatar Placeholder */}
+              <div className="w-24 h-24 rounded-full border-2 border-slate-700 bg-slate-800/40 flex items-center justify-center text-slate-400 shadow-inner">
+                <svg className="w-12 h-12 text-slate-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
+              </div>
+
+              {/* Title & Info */}
+              <div className="flex flex-col gap-1.5">
+                <div className="text-white text-xl font-bold tracking-tight">
+                  {currentTopic?.title || "Live Lecture"}
+                </div>
+                <div className="text-slate-400 text-sm font-semibold tracking-wider uppercase flex items-center justify-center gap-2">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+                  Live Session
+                </div>
+              </div>
+
+              {/* Join Meeting Button */}
+              <button
+                onClick={() => {
+                  if (currentMeetingDetails?._id) {
+                    getSignature();
+                  } else {
+                    message.warning("Please wait while fetching meeting details");
+                  }
+                }}
+                disabled={!ready}
+                className="join-meeting-btn"
+              >
+                {ready ? "Join Meeting" : "Loading Zoom…"}
+              </button>
+            </div>
           )}
         </div>
       )}

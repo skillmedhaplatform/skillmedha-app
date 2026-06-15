@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Input, Card, Badge, Progress } from "antd";
-import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import {
   ClockCircleOutlined,
   VideoCameraOutlined,
@@ -23,6 +22,8 @@ import { formatTime } from "@/helpers/formatVideoTime";
 import axios from "axios";
 import { getLstorage } from "@/universalUtils/windowMW";
 import { aiUrl, restUrl } from "@/config/urls";
+import { BsX, BsPlus, BsStar } from "react-icons/bs";
+import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import MobileTalkToAi from "@/mobile_views/talktoai/MobileTalkToAi";
 import useResponsive from "@/hooks/useResponsive";
 
@@ -366,20 +367,40 @@ const Dictaphone = () => {
   }
 
   return (
-    <div className="h-[90%] min-h-[85vh] p-4">
-      <StudentPageHeader section="AI Tools" title="Talk to AI" />
-      <div className="text-center mb-4">
-        <p className="text-[2.5rem] font-extrabold bg-gradient-to-br from-[#1E69DA] to-[#5694F0] text-transparent bg-clip-text mb-2 drop-shadow-sm">
-          AI Interview Assistant
-        </p>
-        <p className="text-[1.1rem] text-[#64748b] m-0 font-medium">
-          Practice your interview skills with AI-powered feedback
-        </p>
+    <section className="w-full h-full flex flex-col items-stretch lg:pt-0">
+      {/* Banner Section - Top Full Width */}
+      <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+        {/* Decorative Icons matching TPO Portal */}
+        <div className="absolute inset-0 pointer-events-none z-[1]">
+          <BsX className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]" />
+          <BsPlus className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]" />
+          <BsStar className="absolute top-[40%] right-[50%] text-[#1E69DA] opacity-50 text-[1.1rem]" />
+          <BsX className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]" />
+        </div>
+
+        <div className="flex items-center justify-between w-full relative z-[2]">
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-[56px] h-[56px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
+              <HiOutlineChatBubbleLeftRight className="text-white text-3xl" />
+            </div>
+            <div className="flex flex-col justify-center gap-1">
+              <h1 className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0" style={{ border: 'none', marginBottom: 0 }}>
+                Talk to AI
+              </h1>
+              <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
+                Your personal AI Interview Assistant to help you prepare and succeed.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[1.5rem] lg:gap-8 max-w-[1400px] mx-auto">
-        {/* Left Panel - Video Recording */}
-        <Card
-          className="bg-white rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] overflow-hidden border-none [&_.ant-card-body]:p-6"
+
+      <div className="w-full flex-1 flex flex-col items-stretch overflow-hidden relative">
+        <div className="w-full h-full overflow-hidden p-4 lg:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-[1.5rem] lg:gap-6 max-w-[1400px] mx-auto h-full">
+            {/* Left Panel - Video Recording */}
+            <Card
+          className="bg-white rounded-2xl shadow-md border border-[#e2e8f0] overflow-hidden [&_.ant-card-body]:p-6 [&_.ant-card-body]:flex-1 [&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:min-h-0 flex flex-col h-full"
           variant="borderless"
         >
           <div className="flex justify-between items-center mb-4">
@@ -396,7 +417,7 @@ const Dictaphone = () => {
             </div>
           </div>
 
-          <div className="relative w-full h-[420px] bg-[#1e293b] rounded-xl overflow-hidden mb-4 flex items-center justify-center">
+          <div className="relative w-full flex-1 min-h-0 bg-[#1e293b] rounded-xl overflow-hidden mb-4 flex items-center justify-center">
             {isLoading ? (
               <div className="flex flex-col items-center gap-4 text-white">
                 <VideoCameraOutlined className="text-5xl opacity-70" />
@@ -412,7 +433,7 @@ const Dictaphone = () => {
               <video
                 ref={videoRef}
                 controls={false}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover scale-x-[-1]"
                 muted
               />
             )}
@@ -442,7 +463,7 @@ const Dictaphone = () => {
             className="mb-6 [&_.ant-progress-bg]:transition-all [&_.ant-progress-bg]:duration-300"
           />
 
-          <div className="grid grid-cols-2 gap-4 [&_.ant-btn]:h-[48px] [&_.ant-btn]:rounded-lg [&_.ant-btn]:font-semibold [&_.ant-btn]:flex [&_.ant-btn]:items-center [&_.ant-btn]:justify-center [&_.ant-btn]:gap-2 [&_.ant-btn]:shadow-sm hover:[&_.ant-btn]:-translate-y-[2px] hover:[&_.ant-btn]:shadow-md [&_.ant-btn]:transition-all">
+          <div className="grid grid-cols-3 gap-4 [&_.ant-btn]:h-[48px] [&_.ant-btn]:rounded-lg [&_.ant-btn]:font-semibold [&_.ant-btn]:flex [&_.ant-btn]:items-center [&_.ant-btn]:justify-center [&_.ant-btn]:gap-2 [&_.ant-btn]:shadow-sm hover:[&_.ant-btn]:-translate-y-[2px] hover:[&_.ant-btn]:shadow-md [&_.ant-btn]:transition-all">
             <Button
               type="primary"
               icon={<PlayCircleOutlined />}
@@ -480,7 +501,7 @@ const Dictaphone = () => {
               loading={waitSubmit}
               disabled={isSubmitDisabled()}
               size="large"
-              className="col-span-2 !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !h-[56px] !text-[1.1rem] !text-white"
+              className="col-span-3 !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !h-[56px] !text-[1.1rem] !text-white"
             >
               {isProcessingAudio ? "Processing..." : "Get AI Feedback"}
             </Button>
@@ -488,7 +509,7 @@ const Dictaphone = () => {
         </Card>
 
         {/* Right Panel - Question and Results */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 h-full min-h-0">
           {/* Question Card */}
           <Card
             title={
@@ -497,7 +518,7 @@ const Dictaphone = () => {
                 <span>Interview Question</span>
               </div>
             }
-            className="bg-white rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] border-none [&_.ant-card-head]:border-b [&_.ant-card-head]:border-[#f0f0f0] [&_.ant-card-head]:py-4 [&_.ant-card-head]:px-6"
+            className="bg-white rounded-2xl shadow-md border border-[#e2e8f0] [&_.ant-card-head]:border-b [&_.ant-card-head]:border-[#f0f0f0] [&_.ant-card-head]:py-4 [&_.ant-card-head]:px-6"
           variant="borderless"
           >
             <div className="text-[1.1rem] leading-[1.6] text-[#1e293b] mb-6 p-4 bg-[#f8fafc] rounded-lg border-l-4 border-[#1E69DA]">
@@ -547,12 +568,12 @@ const Dictaphone = () => {
 
           {/* Results Card */}
           <Card
-            className="bg-white rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] border-none flex-1 [&_.ant-card-body]:p-0"
+            className="bg-white rounded-2xl shadow-md border border-[#e2e8f0] flex-1 flex flex-col min-h-0 [&_.ant-card-body]:p-0 [&_.ant-card-body]:flex-1 [&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:min-h-0"
           variant="borderless"
           >
-            <div className="flex border-b border-[#f0f0f0]">
+            <div className="flex border-b border-[#f0f0f0] overflow-x-auto [&::-webkit-scrollbar]:hidden">
               <div
-                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
+                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent whitespace-nowrap flex-nowrap shrink-0 min-w-fit [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
                   activeTab === 0 ? "!bg-white !text-[#1E69DA] !border-[#1E69DA]" : ""
                 }`}
                 onClick={() => setActiveTab(0)}
@@ -561,7 +582,7 @@ const Dictaphone = () => {
                 <span>Your Answer</span>
               </div>
               <div
-                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
+                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent whitespace-nowrap flex-nowrap shrink-0 min-w-fit [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
                   activeTab === 1 ? "!bg-white !text-[#1E69DA] !border-[#1E69DA]" : ""
                 } ${!aiSuggestions.report ? "opacity-50 cursor-not-allowed hover:!bg-[#f8fafc] hover:!text-[#64748b]" : ""}`}
                 onClick={() => aiSuggestions.report && setActiveTab(1)}
@@ -570,7 +591,7 @@ const Dictaphone = () => {
                 <span>AI Report</span>
               </div>
               <div
-                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
+                className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent whitespace-nowrap flex-nowrap shrink-0 min-w-fit [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${
                   activeTab === 2 ? "!bg-white !text-[#1E69DA] !border-[#1E69DA]" : ""
                 } ${!aiSuggestions.report ? "opacity-50 cursor-not-allowed hover:!bg-[#f8fafc] hover:!text-[#64748b]" : ""}`}
                 onClick={() => aiSuggestions.report && setActiveTab(2)}
@@ -580,7 +601,7 @@ const Dictaphone = () => {
               </div>
             </div>
 
-            <div className="min-h-[300px] max-h-[500px] overflow-y-auto p-6 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#c1c1c1] [&::-webkit-scrollbar-thumb]:rounded-[3px] hover:[&::-webkit-scrollbar-thumb]:bg-[#a8a8a8]">
+            <div className="flex-1 min-h-0 overflow-y-auto p-6 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-[#f1f1f1] [&::-webkit-scrollbar-track]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#c1c1c1] [&::-webkit-scrollbar-thumb]:rounded-[3px] hover:[&::-webkit-scrollbar-thumb]:bg-[#a8a8a8]">
               {activeTab === 0 && (
                 <div className="[&_p]:text-[1rem] [&_p]:leading-[1.7] [&_p]:text-[#334155] [&_p]:m-0">
                   {isProcessingAudio ? (
@@ -667,8 +688,10 @@ const Dictaphone = () => {
             </div>
           </Card>
         </div>
+        </div>
       </div>
-    </div>
+      </div>
+    </section>
   );
 };
 

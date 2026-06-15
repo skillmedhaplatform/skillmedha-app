@@ -1,7 +1,6 @@
 "use client";
 
 import LibraryPage from "@/universalUtils/LibraryPage/LibraryPage";
-import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { getAllCourses } from "@/redux/slices/internship";
 
 // Stable module-level selectors (avoids new reference on every render)
@@ -33,20 +32,17 @@ const renderCourseMetaChips = (course) => {
 };
 
 const CourseLibraryPage = () => (
-  <>
-    <StudentPageHeader section="Learning" title="Course Library" />
-    <LibraryPage
-      title="Course Library"
-      fetchAction={getAllCourses}
-      dataSelector={selectCourses}
-      paginationSelector={selectPagination}
-      getItemUrl={getCourseUrl}
-      viewLabel="View Course"
-      searchPlaceholder="Search courses…"
-      idPrefix="course"
-      renderMetaChips={renderCourseMetaChips}
-    />
-  </>
+  <LibraryPage
+    title="Course Library"
+    fetchAction={getAllCourses}
+    dataSelector={selectCourses}
+    paginationSelector={selectPagination}
+    getItemUrl={getCourseUrl}
+    viewLabel="View Course"
+    searchPlaceholder="Search courses…"
+    idPrefix="course"
+    renderMetaChips={renderCourseMetaChips}
+  />
 );
 
 export default CourseLibraryPage;

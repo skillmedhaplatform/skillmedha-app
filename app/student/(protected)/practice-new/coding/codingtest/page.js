@@ -110,13 +110,13 @@ function CodingComponent({ questions, onRestart }) {
   }
 
   return (
-    <div className="flex-1 h-full flex flex-col">
-      <div className="flex-1">
+    <div className="flex-1 min-h-0 flex flex-col bg-[#F8FAFC]">
+      <div className="flex-1 min-h-0 overflow-hidden">
         <CodingPage questionData={questions?.[currentIndex]} />
       </div>
       <Divider className="!my-2" />
-      <div className="text-center w-full py-2 px-4 flex items-center justify-between gap-4">
-        <span className="text-[#666] text-[14px]">
+      <div className="text-center w-full py-3 px-6 flex items-center justify-between gap-4 bg-white border-t border-[#e2e8f0]">
+        <span className="text-[#64748B] text-[14px] font-medium">
           Question {currentIndex + 1} of {questions.length}
         </span>
 
@@ -126,6 +126,7 @@ function CodingComponent({ questions, onRestart }) {
             icon={<LeftOutlined />}
             onClick={handlePrev}
             disabled={currentIndex === 0}
+            className="!rounded-lg !border-[#1E69DA] !text-[#1E69DA] hover:!bg-[#1E69DA]/10 !h-10 !px-5 !font-semibold transition-all duration-200"
           >
             Previous Question
           </Button>
@@ -135,7 +136,7 @@ function CodingComponent({ questions, onRestart }) {
               type="primary"
               icon={<CheckCircleOutlined />}
               onClick={handleFinish}
-              className="!bg-[#52c41a] !border-[#52c41a]"
+              className="!rounded-lg !bg-gradient-to-r !from-[#24A058] !to-[#34d399] !border-none hover:!opacity-90 !h-10 !px-5 !font-semibold transition-all duration-200 shadow-md"
             >
               Finish Practice
             </Button>
@@ -144,6 +145,7 @@ function CodingComponent({ questions, onRestart }) {
               type="primary"
               icon={<RightOutlined />}
               onClick={handleNext}
+              className="!rounded-lg !bg-gradient-to-r !from-[#1E69DA] !to-[#5694F0] !border-none hover:!opacity-95 !h-10 !px-5 !font-semibold transition-all duration-200 shadow-md"
             >
               Next Question
             </Button>
@@ -204,16 +206,14 @@ export default function Page() {
   };
 
   return (
-    
-      <div className="w-full h-full flex items-center justify-center">
-        <StudentPageHeader section="Practice" title="Coding Test" />
-        {pracQuestions.length > 0 && (
-          <CodingComponent
-            questions={pracQuestions}
-            onRestart={handleRestart}
-          />
-        )}
-      </div>
-    
+    <div className="w-full h-full flex flex-col overflow-hidden">
+      <StudentPageHeader section="Practice" title="Coding Test" style={{ borderRadius: 0 }} />
+      {pracQuestions.length > 0 && (
+        <CodingComponent
+          questions={pracQuestions}
+          onRestart={handleRestart}
+        />
+      )}
+    </div>
   );
 }

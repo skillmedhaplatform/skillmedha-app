@@ -1,43 +1,96 @@
 .headerSection {
   width: 100%;
-  min-height: 80px;
-  background: #0C1E40;
-  border: 0.2px solid #9a9a9ad1;
-  border-radius: 1rem;
-  padding: 16px 20px;
+  min-height: 140px;
+  background: linear-gradient(135deg, #071631, #10254c);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  padding: 24px 32px;
   color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.decorations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+
+  .decX1 {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    color: #1E69DA;
+    opacity: 0.6;
+    font-size: 1.2rem;
+  }
+
+  .decPlus {
+    position: absolute;
+    bottom: 20%;
+    right: 30%;
+    color: #1E69DA;
+    opacity: 0.5;
+    font-size: 1.5rem;
+  }
+
+  .decStar {
+    position: absolute;
+    top: 40%;
+    right: 50%;
+    color: #1E69DA;
+    opacity: 0.5;
+    font-size: 1.1rem;
+  }
+
+  .decX2 {
+    position: absolute;
+    bottom: 30%;
+    right: 5%;
+    color: #1E69DA;
+    opacity: 0.6;
+    font-size: 1.3rem;
+  }
 }
 
 .sectionLabel {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.3px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
-  opacity: 0.6;
+  opacity: 0.7;
   margin: 0 0 6px 0;
-  color: #ffffff;
+  color: #cbd5e1;
+  position: relative;
+  z-index: 2;
 }
 
 .title {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
   margin: 0;
   color: #ffffff;
+  position: relative;
+  z-index: 2;
+  tracking-tight: -0.025em;
 }
 
 .rightSlot {
   position: absolute;
-  right: 20px;
+  right: 32px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   opacity: 0.8;
   color: #ffffff;
+  z-index: 2;
 }

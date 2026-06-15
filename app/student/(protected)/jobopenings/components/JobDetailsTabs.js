@@ -11,14 +11,59 @@ const PRIMARY = "#24A058";
 // ── Tab content components ────────────────────────────────────
 
 function OverviewTab({ job }) {
+  const isClosed = job?.status === "closed" || false;
+
   return (
-    <div className="w-full text-[18px] flex flex-col gap-4 h-auto max-h-[80%] overflow-y-auto pb-20 [&::-webkit-scrollbar]:w-[5px]">
-      {OVERVIEW_FIELDS.map(({ label, dataKey }) => (
-        <p key={label} className="w-full flex m-0">
-          <span className="font-black w-24 min-w-[6rem] flex">{label}: </span>
-          {job?.[dataKey] || "N/A"}
+    <div className="w-full h-auto max-h-[80%] overflow-y-auto pb-6 pr-2 [&::-webkit-scrollbar]:w-[5px]">
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="border border-[#e2e8f0] rounded-xl p-4 bg-white shadow-sm flex flex-col justify-center">
+          <p className="text-[11px] font-extrabold text-[#94a3b8] uppercase tracking-wider mb-1 m-0">
+            Category
+          </p>
+          <p className="text-[15px] font-bold text-[#1E69DA] m-0 leading-tight">
+            {job?.sector || "Not specified"}
+          </p>
+        </div>
+        <div className="border border-[#e2e8f0] rounded-xl p-4 bg-white shadow-sm flex flex-col justify-center">
+          <p className="text-[11px] font-extrabold text-[#94a3b8] uppercase tracking-wider mb-1 m-0">
+            Function
+          </p>
+          <p className="text-[15px] font-bold text-[#1E69DA] m-0 leading-tight">
+            {job?.jobTitle || "Not specified"}
+          </p>
+        </div>
+        <div className="border border-[#e2e8f0] rounded-xl p-4 bg-white shadow-sm flex flex-col justify-center">
+          <p className="text-[11px] font-extrabold text-[#94a3b8] uppercase tracking-wider mb-1 m-0">
+            CTC
+          </p>
+          <p className="text-[15px] font-bold text-[#1E69DA] m-0 leading-tight">
+            {job?.ctc || "Not Disclosed"}
+          </p>
+        </div>
+        <div className="border border-[#e2e8f0] rounded-xl p-4 bg-white shadow-sm flex flex-col justify-center">
+          <p className="text-[11px] font-extrabold text-[#94a3b8] uppercase tracking-wider mb-1 m-0">
+            Location
+          </p>
+          <p className="text-[15px] font-bold text-[#1E69DA] m-0 leading-tight">
+            {job?.city || "Not specified"}
+          </p>
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <h4 className="text-[16px] font-bold text-[#1E69DA] mb-2 m-0">Overview</h4>
+        <p className="text-[14px] text-[#334155] leading-relaxed m-0 whitespace-pre-wrap">
+          {job?.jobDescription || "No description provided."}
         </p>
-      ))}
+      </div>
+
+      {isClosed && (
+        <div className="w-full bg-[#f0f6ff] rounded-xl p-4 border border-[#e2e8f0] flex items-center justify-center text-center">
+          <p className="text-[15px] font-semibold text-[#64748b] m-0">
+            Application Closed
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -26,19 +71,19 @@ function OverviewTab({ job }) {
 function HiringTab({ job }) {
   return (
     <div className="w-full h-auto max-h-[80%] overflow-y-auto pb-20 flex flex-col gap-4 text-[20px] [&::-webkit-scrollbar]:w-[5px]">
-      <p className="font-black text-[18px] mb-2 w-full m-0">🛠 Hiring Workflow</p>
-      <div className="w-full text-[20px] h-full flex flex-col gap-4">
+      <p className="font-bold text-[16px] text-[#1E69DA] mb-2 w-full m-0">Hiring Workflow</p>
+      <div className="w-full text-[15px] text-[#334155] h-full flex flex-col gap-4">
         {job?.interviewRounds?.length ? (
           job.interviewRounds.map((round, index) => (
-            <div key={index} className="w-full flex">
-              <p className="font-extrabold leading-[2rem] m-0">
+            <div key={index} className="w-full flex p-3 border border-solid border-[#e5e7eb] rounded-[6px] shadow-sm">
+              <p className="font-semibold m-0">
                 {index + 1}. {round?.roundName}:{" "}
-                <span className="font-semibold">{round?.description}</span>
+                <span className="font-normal">{round?.description}</span>
               </p>
             </div>
           ))
         ) : (
-          <p className="m-0">No interview rounds specified.</p>
+          <p className="m-0 text-[#64748b]">No interview rounds specified.</p>
         )}
       </div>
     </div>
@@ -47,11 +92,11 @@ function HiringTab({ job }) {
 
 function EligibilityTab({ job }) {
   return (
-    <div className="w-full text-[20px] h-full flex flex-col gap-4 overflow-y-auto [&_h4]:text-[1.25rem] [&_h4]:mb-3 [&_h4]:text-[#111827] [&_h4]:m-0">
-      <h4>Eligibility Criteria</h4>
+    <div className="w-full h-full flex flex-col gap-4 overflow-y-auto [&::-webkit-scrollbar]:w-[5px]">
+      <h4 className="font-bold text-[16px] text-[#1E69DA] mb-2 m-0">Eligibility Criteria</h4>
       {job?.eligibilityCriteria?.length ? (
         job.eligibilityCriteria.map((item, index) => (
-          <div key={index} className="p-3 border border-solid border-[#e5e7eb] rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] [&_p]:text-[#374151] [&_p]:text-[0.95rem] [&_p_strong]:text-[#1f2937] [&_p_strong]:mr-2 [&_p]:m-0 [&_p]:mb-1 last:[&_p]:mb-0">
+          <div key={index} className="p-4 border border-solid border-[#e5e7eb] rounded-xl shadow-sm bg-white [&_p]:text-[#374151] [&_p]:text-[14px] [&_p_strong]:text-[#1f2937] [&_p_strong]:mr-2 [&_p]:m-0 [&_p]:mb-2 last:[&_p]:mb-0">
             <p>
               <strong>Education Level:</strong> {item?.educationLevel || "N/A"}
             </p>
@@ -62,7 +107,7 @@ function EligibilityTab({ job }) {
           </div>
         ))
       ) : (
-        <p className="m-0">No eligibility criteria specified.</p>
+        <p className="m-0 text-[#64748b]">No eligibility criteria specified.</p>
       )}
     </div>
   );
@@ -86,16 +131,18 @@ export default function JobDetailsTabs({ job, selectedTab, onTabChange }) {
   const ActiveContent = TAB_CONTENT[selectedTab] ?? OverviewTab;
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full flex flex-col">
       <ConfigProvider
         theme={{
           components: {
             Segmented: {
-              itemSelectedBg:    PRIMARY,
-              itemSelectedColor: "#ffffff",
-              itemActiveBg:      PRIMARY,
-              trackBg:           "rgba(39,174,96,0.1)",
-              fontSize:          15,
+              itemSelectedBg:    "#ffffff",
+              itemSelectedColor: "#1E69DA",
+              itemColor:         "#64748b",
+              itemHoverColor:    "#1E69DA",
+              trackBg:           "#f1f5f9",
+              trackPadding:      4,
+              fontSize:          14,
             },
           },
         }}
@@ -105,7 +152,7 @@ export default function JobDetailsTabs({ job, selectedTab, onTabChange }) {
           value={selectedTab}
           onChange={onTabChange}
           options={TAB_OPTIONS}
-          style={{ fontWeight: 600, padding: "3px", marginBottom: "1rem" }}
+          style={{ fontWeight: 600, padding: "4px", marginBottom: "1.5rem", borderRadius: "12px" }}
         />
       </ConfigProvider>
 
