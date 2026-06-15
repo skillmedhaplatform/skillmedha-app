@@ -1,0 +1,104 @@
+@mixin flexBox($direction, $aligment, $justify, $gap: 0) {
+  display: flex;
+  align-items: $aligment;
+  flex-direction: $direction;
+  justify-content: $justify;
+  gap: $gap;
+}
+
+@mixin button($padding, $bgColor, $color, $hoverBGColor, $hoverColor) {
+  outline: none;
+  border: none;
+  background-color: $bgColor;
+  color: $color;
+  padding: $padding;
+
+  &:hover {
+    background-color: $hoverBGColor;
+    color: $hoverColor;
+  }
+}
+
+@mixin fontMixin($fontSize: 1rem, $fontweight: 500) {
+  font-size: $fontSize;
+  font-weight: $fontweight;
+}
+
+@mixin custom-scrollbar($thumbColor: $primaryColor,
+  $trackColor: #9e9e9e79,
+  $thumbHoverDarken: 5%,
+  $scrollbarWidth: 6px,
+  $scrollbarHeight: 10px,
+  $borderRadius: 20px,
+  $buttonDisplay: none,
+  $buttonBg: transparent) {
+
+  /* Width of scrollbar */
+  &::-webkit-scrollbar {
+    width: $scrollbarWidth;
+    /* vertical scrollbar width */
+    height: $scrollbarHeight;
+    /* horizontal scrollbar height */
+  }
+
+  /* Track (background of scrollbar) */
+  &::-webkit-scrollbar-track {
+    background: $trackColor;
+    border-radius: $borderRadius;
+    cursor: pointer;
+  }
+
+  /* Thumb (scroll handle) */
+  &::-webkit-scrollbar-thumb {
+    background: $thumbColor;
+    border-radius: $borderRadius;
+    cursor: grab;
+  }
+
+  /* On hover over the thumb */
+  &::-webkit-scrollbar-thumb:hover {
+    background: darken($thumbColor, $thumbHoverDarken);
+  }
+
+  /* Buttons on the scrollbar */
+  &::-webkit-scrollbar-button {
+    display: $buttonDisplay;
+    background-color: $buttonBg;
+    height: 16px;
+  }
+
+  /* Up Arrow */
+  &::-webkit-scrollbar-button:vertical:start:decrement {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><polygon points='4,10 8,5 12,10' fill='%23666666'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  /* Down Arrow */
+  &::-webkit-scrollbar-button:vertical:end:increment {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><polygon points='4,6 8,11 12,6' fill='%23666666'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  /* Corner where two scrollbars meet */
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@mixin btnBase($bg-color: $primaryColor,
+  $text-color: white,
+  $font-size: 13px,
+  $padding: 0.4rem 1rem,
+  $radius: 5px) {
+  @include flexBox(row, center, center);
+  background-color: $bg-color;
+  color: $text-color;
+  font-size: $font-size;
+  padding: $padding;
+  border-radius: $radius;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 6rem;
+}

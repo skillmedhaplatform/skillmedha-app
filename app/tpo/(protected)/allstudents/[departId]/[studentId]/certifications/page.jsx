@@ -3,7 +3,6 @@ import React from "react";
 import certificationStyles from "./page.module.scss";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 const Page = () => {
   const studentDetails = useSelector(
     (state) => state.singleStudentDetails.singleStudent.value?.data
@@ -23,7 +22,6 @@ const Page = () => {
 
   return (
     <>
-      <PageHeader title="Certifications" />
 
       <div className={certificationStyles.container}>
         <div className={certificationStyles.eachCard}>

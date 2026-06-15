@@ -1,0 +1,14 @@
+@import "@/utils/universalUtils/colors.module.scss";
+
+.head {
+  float: right;
+  background-color: $bgcolor;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  width: fit-content;
+  padding: 0.5rem 2rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  margin: 1rem 0rem;
+}

@@ -26,7 +26,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 
 // ─── Helpers ────────────────────────────────────────────────
 const AVATAR_COLORS = [
-  "#24a058", "#1d70b8", "#593cc1", "#c5782b",
+  "#6BA8ED", "#1d70b8", "#593cc1", "#c5782b",
   "#e53e3e", "#0ea5e9", "#8b5cf6", "#d946ef",
 ];
 
@@ -129,7 +129,7 @@ export default function DriveDetails() {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
 
-  const { value: ALLPLACEMENTS } = useSelector(
+  const { value: ALLPLACEMENTS, status: placementsStatus } = useSelector(
     (state) => state.placement.AllPlacements
   );
 
@@ -159,8 +159,10 @@ export default function DriveDetails() {
   });
 
   useEffect(() => {
-    dispatch(GetAllPlacements());
-  }, []);
+    if (placementsStatus !== "succeeded" && placementsStatus !== "loading") {
+      dispatch(GetAllPlacements());
+    }
+  }, [dispatch, placementsStatus]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -429,7 +431,7 @@ export default function DriveDetails() {
           <div className={`${styles.statCard} ${styles.activeDrivesCard}`}>
             <div
               className={styles.statIcon}
-              style={{ backgroundColor: "rgba(29, 112, 184, 0.1)", color: "#1d70b8" }}
+              style={{ backgroundColor: "rgba(225, 29, 72, 0.1)", color: "#e11d48" }}
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 6V10L13 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -485,17 +487,22 @@ export default function DriveDetails() {
         </div>
 
         {/* ── Tabs ── */}
-        <div className={styles.tabBar}>
-          {TABS.map((tab) => (
-            <div
-              key={tab.key}
-              className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ""}`}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-              <span className={styles.tabCount}>{tabCounts[tab.key]}</span>
-            </div>
-          ))}
+        <div className={styles.tabBar} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex' }}>
+            {TABS.map((tab) => (
+              <div
+                key={tab.key}
+                className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ""}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
+                <span className={styles.tabCount}>{tabCounts[tab.key]}</span>
+              </div>
+            ))}
+          </div>
+          <Button type="primary" onClick={() => setIsModal(true)} style={{ marginBottom: "8px" }}>
+            + Create Company
+          </Button>
         </div>
 
         {/* ── Toolbar ── */}

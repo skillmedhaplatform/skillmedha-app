@@ -9,7 +9,6 @@ import { FaChevronDown } from "react-icons/fa";
 import dayjs from "dayjs";
 import { useRouter } from "@bprogress/next/app";
 import { useParams } from "next/navigation";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 export default function InterviewPage() {
   const { RangePicker } = DatePicker;
@@ -149,7 +148,6 @@ export default function InterviewPage() {
 
   return (
     <div className={styles.main}>
-      <PageHeader title="Interview Process" />
       {rounds.map((round, index) => (
         <div className={styles.mainCont} key={round.id}>
           <div className={styles.roundCont}>

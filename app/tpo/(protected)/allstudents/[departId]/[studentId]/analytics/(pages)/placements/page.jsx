@@ -6,21 +6,21 @@ import placementStyles from "./page.module.scss";
 import { useParams } from "next/navigation";
 import { getAllDetails } from "@/redux/slices/tpo/getAllDetailsSlice";
 import AnalyticsPage from "../../page";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 const { Text } = Typography;
 const Page = () => {
   const dispatch = useDispatch();
   const params = useParams();
-  useEffect(() => {
-    if (params.studentId) {
-      dispatch(getAllDetails(params.studentId));
-    }
-  }, [params.studentId, dispatch]);
   const studentDetails = useSelector(
     (state) => state.singleStudentDetails.singleStudent.value?.data
   );
   const appliedJobs = studentDetails?.appliedJobs || [];
   const studentId = studentDetails?._id;
+
+  useEffect(() => {
+    if (params.studentId && !studentDetails) {
+      dispatch(getAllDetails(params.studentId));
+    }
+  }, [params.studentId, dispatch, studentDetails]);
 
   // const columns = [
   //   {
@@ -181,14 +181,11 @@ const Page = () => {
   }));
 
   return (
-    <>
-      <PageHeader title="Placements" />
-      <AnalyticsPage>
+    <AnalyticsPage>
       <div className={placementStyles.tableWrapper}>
         <Table columns={columns} dataSource={dataSource} pagination={false} />
       </div>
     </AnalyticsPage>
-    </>
   );
 };
 

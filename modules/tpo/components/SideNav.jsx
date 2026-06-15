@@ -55,14 +55,14 @@ const SideNav = ({ activeView, setView }) => {
 
   const tpoMenuLinks = [
     {
-      name: "My Profile",
-      path: "/tpo/myprofile/personal",
-      icon: <HiOutlineUser size={22} />,
-    },
-    {
       name: "Dashboard",
       path: "/tpo/dashboard",
       icon: <HiOutlineSquares2X2 size={22} />,
+    },
+    {
+      name: "My Profile",
+      path: "/tpo/myprofile/personal",
+      icon: <HiOutlineUser size={22} />,
     },
     {
       name: "All Departments",

@@ -9,7 +9,6 @@ import { getLstorage } from "@/utils/universalUtils/windowMW";
 import { message } from "antd";
 import { useRouter } from "@bprogress/next/app";
 import { useParams } from "next/navigation";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 export default function ProfileDetailsPage() {
   const router = useRouter();
@@ -124,7 +123,6 @@ export default function ProfileDetailsPage() {
   }
   return (
     <div className={styles.mainCont}>
-      <PageHeader title="Profile Details" />
       <div className={styles.fieldCont}>
         <label>Job Type</label>
         <input
@@ -221,7 +219,7 @@ export default function ProfileDetailsPage() {
                   <FiPlusCircle
                     style={{
                       fontSize: "18px",
-                      color: isSelected ? "#fff" : "#24A058",
+                      color: isSelected ? "#fff" : "#6BA8ED",
                       transform: isSelected ? "rotate(45deg)" : "rotate(0deg)",
                       transition: "transform 0.2s ease",
                       marginLeft: "8px"

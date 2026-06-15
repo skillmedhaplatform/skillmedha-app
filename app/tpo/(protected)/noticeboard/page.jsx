@@ -49,6 +49,10 @@ const Page = () => {
   } = useSelector((state) => state.notice.AllNotices);
   const NoticeBoard = value?.notices || [];
 
+  const departmentStatus = useSelector(
+    (state) => state.department.getAllDepartments.status
+  );
+
   const showDrawer = (record = null) => {
     setSelectedNoticeId(record?._id);
     setOpen(true);
@@ -74,10 +78,12 @@ const Page = () => {
     setSelectedNoticeId(record?._id);
     showDrawer(record);
   };
+
   useEffect(() => {
-    dispatch(GetNoticeByStatus({ status: "active", limit: 7, page: 1 }));
-    dispatch(getAllDepartments());
-  }, []);
+    if (departmentStatus !== "sucess" && departmentStatus !== "loading") {
+      dispatch(getAllDepartments());
+    }
+  }, [dispatch, departmentStatus]);
 
   useEffect(() => {
     dispatch(GetNoticeByStatus({ status: currentTab, limit: 7, page: 1 }));
@@ -189,14 +195,33 @@ const Page = () => {
   return (
     <>
       <PageHeader
+        breadcrumb="Notice Board"
         title="Notice Board"
         subtitle="Create and manage system announcements"
         actionText="+ Create Notice"
         onActionClick={() => showDrawer(null)}
-        tabs={noticeTabs}
-        activeTabKey={currentTab}
-        onTabChange={handleTabChange}
       />
+      <div className={styles.tabsWrapper} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className={styles.tabsRow}>
+          {noticeTabs.map((tab) => {
+            const isActive = currentTab === tab.key;
+            return (
+              <div
+                key={tab.key}
+                className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
+                onClick={() => handleTabChange(tab.key)}
+              >
+                {tab.icon}
+                <span>{tab.name}</span>
+                {isActive && <div className={styles.activeIndicator} />}
+              </div>
+            );
+          })}
+        </div>
+        <Button type="primary" onClick={() => setOpen(true)}>
+          + Create Notice
+        </Button>
+      </div>
       <div className={styles.noticemainCont}>
         <div className={styles.bottomCont}>
           <div className={styles.contentCont}>
