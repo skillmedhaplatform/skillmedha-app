@@ -25,7 +25,7 @@ export default function MobileLoginView({
 }) {
   return (
     <div className="flex min-h-screen bg-white font-sans text-gray-900 overflow-y-auto relative flex-col">
-      
+
       {/* FULL-SCREEN LOADING OVERLAY */}
       {loading && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/80 backdrop-blur-md transition-all duration-300">
@@ -35,7 +35,7 @@ export default function MobileLoginView({
             <div className="absolute inset-2.5 rounded-full border-[3px] border-brand-400 border-b-transparent animate-[spin_1.5s_linear_infinite_reverse]"></div>
           </div>
           <h3 className="text-xl font-bold text-brand-900 animate-pulse tracking-tight">Authenticating</h3>
-          <p className="mt-1 text-sm text-gray-500 font-medium">Securing your {roleConfig[role]?.name || 'portal'} session...</p>
+          <p className="mt-1 text-sm text-gray-500 font-medium">Securing your {role === 'student' ? '' : roleConfig[role]?.name + ' '}session...</p>
         </div>
       )}
 
@@ -44,7 +44,7 @@ export default function MobileLoginView({
         <div className="flex items-center">
           <img src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg" alt="SkillMedha Logo" className="h-7 w-auto mr-2.5" />
           <div className="text-xl font-extrabold tracking-tighter flex items-center text-gray-900">
-            SKILLMEDHA<span className="text-brand-600 ml-0.5 text-3xl leading-[0]">.</span>
+            SKILLMEDHA
           </div>
         </div>
       </div>
@@ -65,7 +65,7 @@ export default function MobileLoginView({
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            
+
             {/* INPUT FIELDS */}
             <div className="space-y-3">
               <div className="relative group">
