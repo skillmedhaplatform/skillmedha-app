@@ -46,7 +46,7 @@
     "dayjs": "^1.11.20",
     "draft-js": "^0.11.7",
     "draftjs-to-html": "^0.9.1",
-    "framer-motion": "^12.40.0",
+    "framer-motion": "^11.11.11",
     "html-to-draftjs": "^1.5.0",
     "html-to-text": "^10.0.0",
     "html2canvas": "^1.4.1",
