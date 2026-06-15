@@ -16,6 +16,7 @@ import {
   message,
   Table,
   Modal,
+  Skeleton,
 } from "antd";
 import { FaArrowRight } from "react-icons/fa";
 import { BsX, BsPlus, BsStar } from "react-icons/bs";
@@ -43,7 +44,7 @@ const DashboardStats = ({ stats, router }) => (
           {stat.icon}
         </div>
         <div className="flex flex-col">
-<span className="text-[13px] text-[#8ea2b5] font-extrabold leading-none mb-1">{stat.title}</span>
+          <span className="text-[13px] text-[#8ea2b5] font-extrabold leading-none mb-1">{stat.title}</span>
           <span className="text-[22px] font-extrabold text-[#1e293b] leading-none">{stat.value}</span>
         </div>
       </div>
@@ -76,90 +77,89 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick }) => {
         key={item?._id}
         className="flex flex-col w-full h-full p-2 animate-[smoothFadeIn_0.5s_ease-out_forwards]"
       >
-      <div className="relative w-full h-[220px] shrink-0 bg-white overflow-hidden rounded-xl">
-        <img
-          src={item?.coverImage || item?.media?.coverImage || "/fallback.jpg"}
-          alt={item?.title || "Course cover"}
-          className="w-full h-full object-cover block transition-transform duration-200 group-hover:scale-105"
-          loading="lazy"
-        />
-        {item?.difficulty ? (
-          <span className="absolute left-2 top-2 z-10 text-[12px] leading-none px-2 py-1.5 rounded-full text-[#0f1115] bg-gradient-to-r from-[#ffd66b] to-[#ffb347] font-semibold">{item?.difficulty}</span>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
-        <div className="flex items-center justify-between min-h-[52px]">
-          <div className="text-[#1E69DA] text-[18px] font-bold leading-tight line-clamp-2">{item?.title}</div>
-        </div>
-
-        <div className="flex flex-wrap gap-1.5 h-[26px] overflow-hidden">
-          {item?.sections?.length ? (
-            <span className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
-              {item?.sections?.length} Modules
-            </span>
-          ) : null}
-
-          {item?.preRequisites?.slice(0, 2)?.map((p, i) => (
-            <span key={`${p}-${i}`} className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
-              {p}
-            </span>
-          ))}
-        </div>
-
-        <p
-          className="text-[#b9c7d6] text-[14px] leading-[1.5] my-0.5 line-clamp-2"
-          title={stripHtml?.(item?.description) || ""}
-        >
-          {(() => {
-            const t = stripHtml?.(item?.description) || "";
-            return t.slice(0, 140) + (t.length > 140 ? "…" : "");
-          })()}
-        </p>
-
-        <div className="flex items-center justify-between gap-2 mt-auto pt-2">
-          {item?.lastAssignmentUpdate || item?.updatedAt ? (
-            <div className="text-[#8ea2b5] text-[12px]" aria-label="Last updated">
-              Updated{" "}
-              {formatUpdatedDate?.(
-                item?.lastAssignmentUpdate || item?.updatedAt
-              )}
-            </div>
+        <div className="relative w-full h-[220px] shrink-0 bg-white overflow-hidden rounded-xl">
+          <img
+            src={item?.coverImage || item?.media?.coverImage || "/fallback.jpg"}
+            alt={item?.title || "Course cover"}
+            className="w-full h-full object-cover block transition-transform duration-200 group-hover:scale-105"
+            loading="lazy"
+          />
+          {item?.difficulty ? (
+            <span className="absolute left-2 top-2 z-10 text-[12px] leading-none px-2 py-1.5 rounded-full text-[#0f1115] bg-gradient-to-r from-[#ffd66b] to-[#ffb347] font-semibold">{item?.difficulty}</span>
           ) : null}
         </div>
 
-        {total > 0 && (
-          <div className="flex justify-center items-center gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
-            {Array.from({ length: Math.max(3, total) }).map((_, idx) => {
-              const displayTotal = Math.max(3, total);
-              const isActive = idx === (currentIndex % displayTotal);
-              return (
-                <button
-                  key={idx}
-                  className={`rounded-full transition-all duration-300 ${
-                    isActive 
-                      ? 'w-[10px] h-[10px] bg-[#1E69DA]' 
-                      : 'w-[8px] h-[8px] bg-transparent border-[1.5px] border-[#9ca3af]'
-                  }`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onDotClick?.(idx);
-                  }}
-                  aria-label={`Go to slide ${idx + 1}`}
-                />
-              );
-            })}
+        <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
+          <div className="flex items-center justify-between min-h-[52px]">
+            <div className="text-[#1E69DA] text-[18px] font-bold leading-tight line-clamp-2">{item?.title}</div>
           </div>
-        )}
-      </div>
+
+          <div className="flex flex-wrap gap-1.5 h-[26px] overflow-hidden">
+            {item?.sections?.length ? (
+              <span className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
+                {item?.sections?.length} Modules
+              </span>
+            ) : null}
+
+            {item?.preRequisites?.slice(0, 2)?.map((p, i) => (
+              <span key={`${p}-${i}`} className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
+                {p}
+              </span>
+            ))}
+          </div>
+
+          <p
+            className="text-[#b9c7d6] text-[14px] leading-[1.5] my-0.5 line-clamp-2"
+            title={stripHtml?.(item?.description) || ""}
+          >
+            {(() => {
+              const t = stripHtml?.(item?.description) || "";
+              return t.slice(0, 140) + (t.length > 140 ? "…" : "");
+            })()}
+          </p>
+
+          <div className="flex items-center justify-between gap-2 mt-auto pt-2">
+            {item?.lastAssignmentUpdate || item?.updatedAt ? (
+              <div className="text-[#8ea2b5] text-[12px]" aria-label="Last updated">
+                Updated{" "}
+                {formatUpdatedDate?.(
+                  item?.lastAssignmentUpdate || item?.updatedAt
+                )}
+              </div>
+            ) : null}
+          </div>
+
+          {total > 0 && (
+            <div className="flex justify-center items-center gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+              {Array.from({ length: Math.max(3, total) }).map((_, idx) => {
+                const displayTotal = Math.max(3, total);
+                const isActive = idx === (currentIndex % displayTotal);
+                return (
+                  <button
+                    key={idx}
+                    className={`rounded-full transition-all duration-300 ${
+                      isActive 
+                        ? 'w-[10px] h-[10px] bg-[#1E69DA]' 
+                        : 'w-[8px] h-[8px] bg-transparent border-[1.5px] border-[#9ca3af]'
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDotClick?.(idx);
+                    }}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-
-const ProfileSection = ({ profileValues, router, studentCreds }) => (
+const ProfileSection = ({ profileValues, router, studentCreds, mounted }) => (
   <div className="w-full flex flex-col items-center">
     <div className="w-full flex justify-between items-center mb-1">
       <div className="flex flex-col">
@@ -168,11 +168,11 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
       </div>
       <Progress
         type="circle"
-        percent={profileValues?.percentage || 12}
+        percent={mounted ? (profileValues?.percentage || 12) : 12}
         size={48}
         strokeWidth={10}
         strokeColor="#1E69DA"
-        trailColor="#f1f5f9"
+        railColor="#f1f5f9"
         format={(percent) => (
           <span className="text-[12px] font-black text-[#0f172a] leading-none">{percent}%</span>
         )}
@@ -260,23 +260,6 @@ export default function DashboardPage() {
         0% { width: 0%; left: 0; }
         100% { width: 100%; left: 0; }
       }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
-
-  // Inject keyframes for the timer bar
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      @keyframes fillRightToLeft {
-        0% { width: 0%; right: 0; }
-        100% { width: 100%; right: 0; }
-      }
-      @keyframes fillLeftToRight {
-        0% { width: 0%; left: 0; }
-        100% { width: 100%; left: 0; }
-      }
       @keyframes smoothFadeIn {
         from { opacity: 0.3; transform: scale(0.98); }
         to { opacity: 1; transform: scale(1); }
@@ -302,12 +285,10 @@ export default function DashboardPage() {
   const router = useAppRouter();
   const dispatch = useDispatch();
 
-  // Removed learningColumns as we will render cards directly
-
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(4); // Items per page
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [recCourseIndex, setRecCourseIndex] = useState(0);
@@ -496,8 +477,28 @@ export default function DashboardPage() {
             </div>
 
             {loading ? (
-              <div className="text-center p-8">
-                <Spin size="large" />
+              <div className="flex flex-col gap-4 mt-4 w-full">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex flex-col md:flex-row items-center justify-between p-4 bg-white border border-[#e2e8f0] rounded-[16px]">
+                    <div className="flex items-center gap-4 w-full md:w-auto animate-pulse">
+                      <div className="w-[50px] h-[50px] rounded-xl bg-gray-200 shrink-0"></div>
+                      <div className="flex flex-col gap-2">
+                        <div className="h-[18px] bg-gray-200 rounded w-[200px]"></div>
+                        <div className="flex items-center gap-2">
+                          <div className="h-[16px] bg-gray-200 rounded w-[60px]"></div>
+                          <div className="h-[14px] bg-gray-200 rounded w-[120px]"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2 w-full md:w-auto mt-4 md:mt-0 animate-pulse">
+                      <div className="flex items-center gap-2 w-[180px] justify-end">
+                        <div className="h-[6px] bg-gray-200 rounded-full w-[120px]"></div>
+                        <div className="h-[14px] bg-gray-200 rounded w-[24px]"></div>
+                      </div>
+                      <div className="h-[32px] bg-gray-200 rounded-[8px] w-[120px]"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <>
@@ -580,7 +581,56 @@ export default function DashboardPage() {
           </div>
           
           {/* Grouped Recommended Section */}
-          {(allCourses?.data?.length > 0 || allInternships?.data?.length > 0) && (
+          {loading ? (
+            <div className="w-full rounded-2xl bg-white p-4 lg:p-6 shadow-sm border border-[#e2e8f0] flex flex-col items-center">
+              <div className="w-full flex flex-col md:flex-row gap-6 items-stretch">
+                <div className="flex-1 flex flex-col items-center border-b md:border-b-0 pb-6 md:pb-0 md:pr-6 md:border-r border-[#e2e8f0]">
+                  <div className="w-full text-left mb-3">
+                    <div className="h-[22px] bg-gray-200 rounded w-[200px] animate-pulse"></div>
+                  </div>
+                  <div className="w-full h-[460px] bg-white border border-[#e2e8f0] rounded-[14px] p-2 animate-pulse flex flex-col">
+                    <div className="w-full h-[220px] bg-gray-200 rounded-xl shrink-0"></div>
+                    <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
+                      <div className="h-[24px] bg-gray-200 rounded w-3/4 mb-1"></div>
+                      <div className="flex gap-2">
+                        <div className="h-[26px] bg-gray-200 rounded-full w-20"></div>
+                        <div className="h-[26px] bg-gray-200 rounded-full w-24"></div>
+                      </div>
+                      <div className="h-[16px] bg-gray-200 rounded w-full mt-2"></div>
+                      <div className="h-[16px] bg-gray-200 rounded w-5/6"></div>
+                      <div className="h-[16px] bg-gray-200 rounded w-4/6"></div>
+                      <div className="h-[14px] bg-gray-200 rounded w-24 mt-auto"></div>
+                      <div className="flex justify-center items-center gap-2 mt-2">
+                        {[1,2,3].map(i => <div key={i} className="w-[8px] h-[8px] bg-gray-200 rounded-full"></div>)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1 flex flex-col items-center pt-6 md:pt-0 md:pl-6">
+                  <div className="w-full text-left mb-3">
+                    <div className="h-[22px] bg-gray-200 rounded w-[200px] animate-pulse"></div>
+                  </div>
+                  <div className="w-full h-[460px] bg-white border border-[#e2e8f0] rounded-[14px] p-2 animate-pulse flex flex-col">
+                    <div className="w-full h-[220px] bg-gray-200 rounded-xl shrink-0"></div>
+                    <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
+                      <div className="h-[24px] bg-gray-200 rounded w-3/4 mb-1"></div>
+                      <div className="flex gap-2">
+                        <div className="h-[26px] bg-gray-200 rounded-full w-20"></div>
+                        <div className="h-[26px] bg-gray-200 rounded-full w-24"></div>
+                      </div>
+                      <div className="h-[16px] bg-gray-200 rounded w-full mt-2"></div>
+                      <div className="h-[16px] bg-gray-200 rounded w-5/6"></div>
+                      <div className="h-[16px] bg-gray-200 rounded w-4/6"></div>
+                      <div className="h-[14px] bg-gray-200 rounded w-24 mt-auto"></div>
+                      <div className="flex justify-center items-center gap-2 mt-2">
+                        {[1,2,3].map(i => <div key={i} className="w-[8px] h-[8px] bg-gray-200 rounded-full"></div>)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (allCourses?.data?.length > 0 || allInternships?.data?.length > 0) ? (
             <div className="w-full rounded-2xl bg-white p-4 lg:p-6 shadow-sm border border-[#e2e8f0] flex flex-col items-center">
               <div className="w-full flex flex-col md:flex-row gap-6 items-stretch">
                 {allCourses?.data?.length > 0 && (
@@ -629,7 +679,7 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Sidebar */}
@@ -641,6 +691,7 @@ export default function DashboardPage() {
                 profileValues={profileValues}
                 router={router}
                 studentCreds={studentCreds}
+                mounted={mounted}
               />
             </div>
             
