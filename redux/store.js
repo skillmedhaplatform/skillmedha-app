@@ -107,4 +107,10 @@ export const store = configureStore({
     jobassessments: jobassessmentsSlice,
     practice: practiceSlice,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        warnAfter: 128,
+      },
+    }),
 });
