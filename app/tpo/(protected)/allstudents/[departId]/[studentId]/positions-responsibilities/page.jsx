@@ -18,7 +18,6 @@ import { Button } from "antd";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { parseIfJson } from "@/utils/universalUtils/windowMW";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const PositionsAndResponsibilities = () => {
   const dispatch = useDispatch();
@@ -120,7 +119,6 @@ const PositionsAndResponsibilities = () => {
   // 5️⃣ Render
   return (
     <>
-      <PageHeader title="Positions & Responsibilities" />
 
       <div className={styles.container}>
         {localResponsibilities.length > 0 ? (
@@ -153,7 +151,7 @@ const PositionsAndResponsibilities = () => {
                       style={{
                         color:
                           item?.verificationType === "approved"
-                            ? "green"
+                            ? "#6BA8ED"
                             : item?.verificationType === "resubmission"
                               ? "orange"
                               : "gray",
@@ -172,7 +170,7 @@ const PositionsAndResponsibilities = () => {
                   <div className={styles.mark}>
                     <Button
                       type="text"
-                      style={{ color: "#24A058" }}
+                      style={{ color: "#6BA8ED" }}
                       onClick={() => handleApprove(item.responsibility)}
                       icon={<FaRegCheckCircle />}
                     >

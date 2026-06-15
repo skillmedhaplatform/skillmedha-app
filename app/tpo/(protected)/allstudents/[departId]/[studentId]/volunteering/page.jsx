@@ -17,7 +17,6 @@ import { Button } from "antd";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { parseIfJson } from "@/utils/universalUtils/windowMW";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const Volunteering = () => {
   const dispatch = useDispatch();
@@ -118,7 +117,6 @@ const Volunteering = () => {
 
   return (
     <>
-      <PageHeader title="Volunteering" />
 
       <div className={education.container}>
         {localVolunteerings.length > 0 ? (
@@ -149,7 +147,7 @@ const Volunteering = () => {
                       style={{
                         color:
                           item.verificationType === "approved"
-                            ? "green"
+                            ? "#6BA8ED"
                             : item.verificationType === "resubmission"
                               ? "orange"
                               : "gray",
@@ -166,7 +164,7 @@ const Volunteering = () => {
                   <div className={education.mark}>
                     <Button
                       type="text"
-                      style={{ color: "#24A058" }}
+                      style={{ color: "#6BA8ED" }}
                       onClick={() => handleApprove(item.volunteering)}
                       icon={<FaRegCheckCircle />}
                     >

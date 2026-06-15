@@ -14,7 +14,6 @@ import {
   setResubmissionFlag,
   setApprovalFlag,
 } from '@/redux/slices/tpo/resubmissionSlice'
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const Accomplishments = () => {
   const dispatch = useDispatch()
@@ -91,7 +90,6 @@ const Accomplishments = () => {
   // 5) Render
   return (
     <>
-      <PageHeader title="Accomplishments" />
 
       <div className={educationStyles.container}>
         {localAccomplishments.length > 0 && (

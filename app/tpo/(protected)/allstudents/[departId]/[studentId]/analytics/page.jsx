@@ -7,7 +7,6 @@ import { getAllDetails } from "@/redux/slices/tpo/getAllDetailsSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, usePathname } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const AnalyticsPage = ({ children }) => {
   const nav = useRouter();
@@ -64,7 +63,6 @@ const AnalyticsPage = ({ children }) => {
   };
   return (
     <>
-      <PageHeader title="Analytics" />
 
       <div className={AnalyticsStyles.container}>
         <div className={AnalyticsStyles.headTitles}>

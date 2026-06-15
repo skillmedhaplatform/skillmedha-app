@@ -1,5 +1,4 @@
-@import "../../utils/universalUtils/colors.module.scss";
-
+@use "../../utils/universalUtils/colors.module.scss" as *;
 .headerContainer {
   display: flex;
   padding: 0.7rem 1rem;

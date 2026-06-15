@@ -1,12 +1,11 @@
-@import "@/utils/universalUtils/colors.module.scss";
-
+@use "@/utils/universalUtils/colors.module.scss" as *;
 .mainCont {
   height: 100%;
   width: 100%;
   display: flex;
   overflow-y: auto;
   flex-direction: column;
-  background-color: #fcfcfc;
+  background-color: transparent;
   font-family: 'Inter', sans-serif;
 
   &::-webkit-scrollbar {
@@ -18,16 +17,16 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #1fbb9c;
+    background-color: #6BA8ED;
     border-radius: 6px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #1ea78d;
+    background-color: #1555b0;
   }
 
   scrollbar-width: thin;
-  scrollbar-color: #1fbb9c transparent;
+  scrollbar-color: #6BA8ED transparent;
 }
 
 .dashboardContent {
@@ -193,7 +192,7 @@
 
     .progressBar {
       height: 100%;
-      background-color: #1fbb9c;
+      background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%);
       border-radius: 3px;
     }
   }
@@ -224,7 +223,11 @@
   }
 
   .ctcVal {
-    color: #1fbb9c;
+    background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
     font-weight: 700;
   }
 }

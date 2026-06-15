@@ -5,19 +5,19 @@ import academicStyles from "./page.module.scss";
 import { getAllDetails } from "@/redux/slices/tpo/getAllDetailsSlice";
 import { useParams } from "next/navigation";
 import AnalyticsPage from "../../page";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
-const page = () => {
+const AcademicResultsPage = () => {
   const dispatch = useDispatch();
   const params = useParams();
-  useEffect(() => {
-    if (params.studentId) {
-      dispatch(getAllDetails(params.studentId));
-    }
-  }, [params.studentId, dispatch]);
   const studentDetails = useSelector(
     (state) => state.singleStudentDetails.singleStudent.value?.data
   );
+
+  useEffect(() => {
+    if (params.studentId && !studentDetails) {
+      dispatch(getAllDetails(params.studentId));
+    }
+  }, [params.studentId, dispatch, studentDetails]);
 
   const latestEduObj = studentDetails?.educationDetails?.length
     ? studentDetails.educationDetails[
@@ -25,9 +25,7 @@ const page = () => {
     ]
     : {};
   return (
-    <>
-      <PageHeader title="Academic Results" />
-      <AnalyticsPage>
+    <AnalyticsPage>
       <div className={academicStyles.card}>
         <h2>{latestEduObj?.degreeName}</h2>
         <div>{latestEduObj?.department}</div>
@@ -44,8 +42,7 @@ const page = () => {
         <div>{latestEduObj?.description}</div>
       </div>
     </AnalyticsPage>
-    </>
   );
 };
 
-export default page;
+export default AcademicResultsPage;

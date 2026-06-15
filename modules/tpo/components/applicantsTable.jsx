@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "@bprogress/next/app";
 import { Select, Table, Input, Button } from "antd";
 import {
   FaCaretDown,
@@ -28,6 +29,7 @@ const { Search } = Input;
 export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
   const { jobid } = useParams();
   const dispatch = useDispatch();
+  const router = useRouter();
   const { value: ONEJOB } = useSelector((state) => state.placement.OneJob);
   const JOBPROFILE = ONEJOB?.data;
 
@@ -156,7 +158,7 @@ export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
       const getStepProps = (statusEntry) => {
         if (statusEntry?.status === "success")
           return {
-            icon: <FaCheckCircle style={{ color: "#24A058", fontSize: 22 }} />,
+            icon: <FaCheckCircle style={{ color: "#6BA8ED", fontSize: 22 }} />,
           };
         if (statusEntry?.status === "rejected")
           return {
@@ -348,12 +350,11 @@ export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
           scroll={{ y: 600 }}
           onRow={(record) => {
             const departmentId = record?.department || "noDept";
-            const studentId = record?._id;
+            const studentId = record?.globalId || record?._id;
             return {
               onClick: () =>
-                window.open(
-                  `https://tpo.skillmedha.com/allstudents/${departmentId}/${studentId}/basic-details`,
-                  "_blank"
+                router.push(
+                  `/tpo/allstudents/${departmentId}/${studentId}/basic-details`
                 ),
               style: {
                 cursor: "pointer",

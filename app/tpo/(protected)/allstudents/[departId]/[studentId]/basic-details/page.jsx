@@ -14,7 +14,6 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 import { updateStudent } from "@/redux/slices/tpo/getAllStudentsSlice";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { parseIfJson } from "@/utils/universalUtils/windowMW";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 
 const Basic = () => {
@@ -95,7 +94,6 @@ const Basic = () => {
 
   return (
     <>
-      <PageHeader title="Basic Details" />
 
       <div className={details.container}>
         {/* About Section */}
@@ -109,38 +107,53 @@ const Basic = () => {
             }}
           >
             <p className={details.head}>About</p>
-            <p
+            <div
               style={{
-                color:
-                  selectedStudent?.data?.aboutVerificationType === "approved"
-                    ? "green"
-                    : selectedStudent?.data?.aboutVerificationType ===
-                      "resubmission"
-                      ? "orange"
-                      : "gray",
-                fontWeight: "bold",
+                backgroundColor: selectedStudent?.data?.aboutVerificationType === "approved" ? "#e6f4ea" : selectedStudent?.data?.aboutVerificationType === "resubmission" ? "#fef0db" : "#f3f4f6",
+                color: selectedStudent?.data?.aboutVerificationType === "approved" ? "#1e8e3e" : selectedStudent?.data?.aboutVerificationType === "resubmission" ? "#e67c00" : "#6b7280",
+                padding: "4px 12px",
+                borderRadius: "16px",
+                fontSize: "12px",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px"
               }}
             >
+              {selectedStudent?.data?.aboutVerificationType === "approved" && <FaRegCheckCircle />}
               {selectedStudent?.data?.aboutVerificationType === "approved"
                 ? "Verified"
-                : selectedStudent?.data?.aboutVerificationType ===
-                  "resubmission"
-                  ? "Asked for Resubmission"
-                  : "Pending"}
-            </p>
+                : selectedStudent?.data?.aboutVerificationType === "resubmission"
+                ? "Asked for Resubmission"
+                : "Pending"}
+            </div>
           </div>
           <div className={details.mark}>
             <Button
-              type="text"
-              style={{ color: "#24A058" }}
+              type="default"
+              style={{
+                backgroundColor: "#f4f8fb",
+                borderColor: "#6BA8ED",
+                color: "#6BA8ED",
+                fontWeight: 600,
+                borderRadius: "8px",
+                boxShadow: "none"
+              }}
               onClick={() => approveSection("about")}
               icon={<FaRegCheckCircle />}
             >
               Mark as Verified
             </Button>
             <Button
-              type="text"
-              style={{ color: "red" }}
+              type="default"
+              style={{
+                backgroundColor: "#feeceb",
+                borderColor: "#fcb6b6",
+                color: "#e53e3e",
+                fontWeight: 600,
+                borderRadius: "8px",
+                boxShadow: "none"
+              }}
               onClick={() => requestResubmission("about")}
               icon={<IoMdCloseCircleOutline />}
             >
@@ -165,7 +178,7 @@ const Basic = () => {
             </div>
             <div className={details.detailRow}>
               <p className={details.label}>Gender :</p>
-              <strong>{selectedStudent?.data?.details?.gender || "N/A"}</strong>
+              <p className={details.value}>{selectedStudent?.data?.details?.gender || "N/A"}</p>
             </div>
             <div className={details.detailRow}>
               <p className={details.label}>Alternative Phone :</p>
@@ -205,7 +218,7 @@ const Basic = () => {
 
         <div className={details.collegeRow}>
           <p className={details.collegeLabel}>Current/Latest College :</p>
-          <strong>{selectedStudent?.data?.details?.collegeName ?? "N/A"}</strong>
+          <p className={details.value}>{selectedStudent?.data?.details?.collegeName ?? "N/A"}</p>
         </div>
 
         <div className={details.regNumberRow}>
@@ -224,38 +237,53 @@ const Basic = () => {
             }}
           >
             <p className={details.head}>Summary</p>
-            <p
+            <div
               style={{
-                color:
-                  selectedStudent?.data?.summaryVerificationType === "approved"
-                    ? "green"
-                    : selectedStudent?.data?.summaryVerificationType ===
-                      "resubmission"
-                      ? "orange"
-                      : "gray",
-                fontWeight: "bold",
+                backgroundColor: selectedStudent?.data?.summaryVerificationType === "approved" ? "#e6f4ea" : selectedStudent?.data?.summaryVerificationType === "resubmission" ? "#fef0db" : "#f3f4f6",
+                color: selectedStudent?.data?.summaryVerificationType === "approved" ? "#1e8e3e" : selectedStudent?.data?.summaryVerificationType === "resubmission" ? "#e67c00" : "#6b7280",
+                padding: "4px 12px",
+                borderRadius: "16px",
+                fontSize: "12px",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px"
               }}
             >
+              {selectedStudent?.data?.summaryVerificationType === "approved" && <FaRegCheckCircle />}
               {selectedStudent?.data?.summaryVerificationType === "approved"
                 ? "Verified"
-                : selectedStudent?.data?.summaryVerificationType ===
-                  "resubmission"
-                  ? "Asked for Resubmission"
-                  : "Pending"}
-            </p>
+                : selectedStudent?.data?.summaryVerificationType === "resubmission"
+                ? "Asked for Resubmission"
+                : "Pending"}
+            </div>
           </div>
           <div className={details.mark}>
             <Button
-              type="text"
-              style={{ color: "#24A058" }}
+              type="default"
+              style={{
+                backgroundColor: "#f4f8fb",
+                borderColor: "#6BA8ED",
+                color: "#6BA8ED",
+                fontWeight: 600,
+                borderRadius: "8px",
+                boxShadow: "none"
+              }}
               onClick={() => approveSection("summary")}
               icon={<FaRegCheckCircle />}
             >
               Mark as Verified
             </Button>
             <Button
-              type="text"
-              style={{ color: "red" }}
+              type="default"
+              style={{
+                backgroundColor: "#feeceb",
+                borderColor: "#fcb6b6",
+                color: "#e53e3e",
+                fontWeight: 600,
+                borderRadius: "8px",
+                boxShadow: "none"
+              }}
               onClick={() => requestResubmission("summary")}
               icon={<IoMdCloseCircleOutline />}
             >
@@ -281,202 +309,53 @@ const Basic = () => {
             }}
           >
             <p className={details.head}>Address</p>
-            <p
+            <div
               style={{
-                color:
-                  selectedStudent?.data?.addresses?.verificationType ===
-                    "approved"
-                    ? "green"
-                    : selectedStudent?.data?.addresses?.verificationType ===
-                      "resubmission"
-                      ? "orange"
-                      : "gray",
-                fontWeight: "bold",
+                backgroundColor: selectedStudent?.data?.linksVerificationType === "approved" ? "#e6f4ea" : selectedStudent?.data?.linksVerificationType === "resubmission" ? "#fef0db" : "#f3f4f6",
+                color: selectedStudent?.data?.linksVerificationType === "approved" ? "#1e8e3e" : selectedStudent?.data?.linksVerificationType === "resubmission" ? "#e67c00" : "#6b7280",
+                padding: "4px 12px",
+                borderRadius: "16px",
+                fontSize: "12px",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px"
               }}
             >
-              {selectedStudent?.data?.addresses?.verificationType === "approved"
-                ? "Verified"
-                : selectedStudent?.data?.addresses?.verificationType ===
-                  "resubmission"
-                  ? "Asked for Resubmission"
-                  : "Pending"}
-            </p>
-          </div>
-          <div className={details.mark}>
-            <Button
-              type="text"
-              style={{ color: "#24A058" }}
-              onClick={() => approveSection("addresses")}
-              icon={<FaRegCheckCircle />}
-            >
-              Mark as Verified
-            </Button>
-            <Button
-              type="text"
-              style={{ color: "red" }}
-              onClick={() => requestResubmission("addresses")}
-              icon={<IoMdCloseCircleOutline />}
-            >
-              Ask for Re-Submission
-            </Button>
-          </div>
-        </div>
-
-        <p className={details.addressTitle}>Current Address</p>
-        <div className={details.aboutsidedata}>
-          <div className={details.leftSection}>
-            <div className={details.detailRow}>
-              <p className={details.label}>Door No :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.currentAddress?.doorNo ||
-                  "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>Landmark :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.currentAddress?.landMark ||
-                  "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>Pincode :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.currentAddress?.pincode ||
-                  "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>District :</p>
-              <strong>{selectedStudent?.data?.details?.districtName || "N/A"}</strong>
-            </div>
-          </div>
-
-          <div className={details.rightSection}>
-            <div className={details.detailRow}>
-              <p className={details.label}>Street :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.currentAddress?.streetName ||
-                  "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>Area :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.currentAddress?.areaName ||
-                  "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>City :</p>
-              <strong>{selectedStudent?.data?.details?.cityName || "N/A"}</strong>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>State :</p>
-              <strong>{selectedStudent?.data?.details?.stateName || "N/A"}</strong>
-            </div>
-          </div>
-        </div>
-
-        <p className={details.addressTitle}>Permanent Address</p>
-        <div className={details.aboutsidedata}>
-          <div className={details.leftSection}>
-            <div className={details.detailRow}>
-              <p className={details.label}>Door No :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.permanentAddress?.doorNo ||
-                  "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>Landmark :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.permanentAddress?.landMark ||
-                  "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>Pincode :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.permanentAddress?.pincode ||
-                  "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>District :</p>
-              <strong>{selectedStudent?.data?.details?.districtName || "N/A"}</strong>
-            </div>
-          </div>
-
-          <div className={details.rightSection}>
-            <div className={details.detailRow}>
-              <p className={details.label}>Street :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.permanentAddress
-                  ?.streetName || "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>Area :</p>
-              <p className={details.value}>
-                {selectedStudent?.data?.addresses?.permanentAddress?.areaName ||
-                  "N/A"}
-              </p>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>City :</p>
-              <strong>{selectedStudent?.data?.details?.cityName || "N/A"}</strong>
-            </div>
-            <div className={details.detailRow}>
-              <p className={details.label}>State :</p>
-              <strong>{selectedStudent?.data?.details?.stateName || "N/A"}</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* Social Media Section */}
-        <div className={details.about}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "start",
-              alignItems: "center",
-              gap: "1rem",
-            }}
-          >
-            <p className={details.head}>Social Media Profiles</p>
-            <p
-              style={{
-                color:
-                  selectedStudent?.data?.linksVerificationType === "approved"
-                    ? "green"
-                    : selectedStudent?.data?.linksVerificationType ===
-                      "resubmission"
-                      ? "orange"
-                      : "gray",
-                fontWeight: "bold",
-              }}
-            >
+              {selectedStudent?.data?.linksVerificationType === "approved" && <FaRegCheckCircle />}
               {selectedStudent?.data?.linksVerificationType === "approved"
                 ? "Verified"
-                : selectedStudent?.data?.linksVerificationType ===
-                  "resubmission"
-                  ? "Asked for Resubmission"
-                  : "Pending"}
-            </p>
+                : selectedStudent?.data?.linksVerificationType === "resubmission"
+                ? "Asked for Resubmission"
+                : "Pending"}
+            </div>
           </div>
           <div className={details.mark}>
             <Button
-              type="text"
-              style={{ color: "#24A058" }}
+              type="default"
+              style={{
+                backgroundColor: "#f4f8fb",
+                borderColor: "#6BA8ED",
+                color: "#6BA8ED",
+                fontWeight: 600,
+                borderRadius: "8px",
+                boxShadow: "none"
+              }}
               onClick={() => approveSection("links")}
               icon={<FaRegCheckCircle />}
             >
               Mark as Verified
             </Button>
             <Button
-              type="text"
-              style={{ color: "red" }}
+              type="default"
+              style={{
+                backgroundColor: "#feeceb",
+                borderColor: "#fcb6b6",
+                color: "#e53e3e",
+                fontWeight: 600,
+                borderRadius: "8px",
+                boxShadow: "none"
+              }}
               onClick={() => requestResubmission("links")}
               icon={<IoMdCloseCircleOutline />}
             >

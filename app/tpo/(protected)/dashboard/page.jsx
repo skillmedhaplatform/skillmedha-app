@@ -12,7 +12,6 @@ import {
 } from "react-icons/fa";
 import { GetAllPlacements } from "@/redux/slices/tpo/placementsSlice";
 import { getAllDepartments } from "@/redux/slices/tpo/departmentSlice";
-import { getDashboardStats } from "@/redux/slices/tpo/dashboardStatsSlice";
 import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const SectorPlacementChart = dynamic(() => import("./piechart"), {
@@ -39,6 +38,12 @@ const PlacementRateWidget = ({ total = 0, placed = 0 }) => {
       <div className={styles.circularProgressContainer}>
         <div className={styles.svgWrapper}>
           <svg height={radius * 2} width={radius * 2}>
+            <defs>
+              <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#6BA8ED" />
+                <stop offset="100%" stopColor="#A3CCFA" />
+              </linearGradient>
+            </defs>
             <circle
               stroke="#f3f3f3"
               fill="transparent"
@@ -48,7 +53,7 @@ const PlacementRateWidget = ({ total = 0, placed = 0 }) => {
               cy={radius}
             />
             <circle
-              stroke="#1fbb9c"
+              stroke="url(#blueGradient)"
               fill="transparent"
               strokeWidth={stroke}
               strokeDasharray={circumference + ' ' + circumference}
@@ -74,52 +79,53 @@ const PlacementRateWidget = ({ total = 0, placed = 0 }) => {
 
 const Page = () => {
   const dispatch = useDispatch();
-  const StudentsLength = useSelector(
-    (state) => state.dashboard.AllStudents.value
+  const { value: StudentsLength, status: studentsStatus } = useSelector(
+    (state) => state.dashboard.AllStudents
   );
 
-  const { value: ALLPLACEMENTS } = useSelector(
+  const { value: ALLPLACEMENTS, status: placementsStatus } = useSelector(
     (state) => state.placement.AllPlacements
   );
 
-  const { value: departMent } = useSelector(
+  const { value: departMent, status: departmentStatus } = useSelector(
     (state) => state.department.getAllDepartments
   );
 
-  const { stats, loading: isDashboardLoading } = useSelector(
-    (state) => state.dashboardStats
-  );
-
   useEffect(() => {
-    dispatch(getAllStudents({}));
-    dispatch(GetAllPlacements());
-    dispatch(getAllDepartments());
-    dispatch(getDashboardStats());
-  }, [dispatch]);
+    if (studentsStatus !== "succeeded" && studentsStatus !== "loading") {
+      dispatch(getAllStudents({}));
+    }
+    if (placementsStatus !== "succeeded" && placementsStatus !== "loading") {
+      dispatch(GetAllPlacements());
+    }
+    if (departmentStatus !== "sucess" && departmentStatus !== "loading") {
+      dispatch(getAllDepartments());
+    }
+  }, [dispatch, studentsStatus, placementsStatus, departmentStatus]);
 
   const studentsList = Array.isArray(StudentsLength?.data)
     ? StudentsLength.data
     : Array.isArray(StudentsLength)
-    ? StudentsLength
-    : [];
+      ? StudentsLength
+      : [];
   const studentsCount = studentsList.length;
 
   const placementsList = Array.isArray(ALLPLACEMENTS?.data)
     ? ALLPLACEMENTS.data
     : Array.isArray(ALLPLACEMENTS)
-    ? ALLPLACEMENTS
-    : [];
+      ? ALLPLACEMENTS
+      : [];
 
   const departmentsList = Array.isArray(departMent?.data)
     ? departMent.data
     : Array.isArray(departMent)
-    ? departMent
-    : [];
+      ? departMent
+      : [];
 
   // Companies count: unique company names from all jobs in all placement drives
   const uniqueCompanies = new Set();
   let totalJobsCount = 0;
-  
+
   placementsList.forEach((drive) => {
     drive.companies?.forEach((job) => {
       totalJobsCount++;
@@ -129,7 +135,7 @@ const Page = () => {
       }
     });
   });
-  
+
   const companiesCount = uniqueCompanies.size;
   const jobProfilesCount = totalJobsCount;
 
@@ -321,7 +327,7 @@ const Page = () => {
         if (mIndex !== -1) {
           activityMonths[mIndex].count++;
         }
-        
+
         let timeDifferenceDays = 14; // Default fallback if no interview details
         if (appliedJob.interviewDetails?.date) {
           const applyDate = appliedJob.createdAt ? new Date(appliedJob.createdAt) : null;
@@ -358,9 +364,9 @@ const Page = () => {
       value: jobProfilesCount,
       icon: FaBriefcase,
       badge: "Active",
-      bgColor: "#1d70b8",
-      bgLightColor: "#e8f2ff",
-      iconBgColor: "rgba(29, 112, 184, 0.1)",
+      bgColor: "#e11d48",
+      bgLightColor: "#fff1f2",
+      iconBgColor: "rgba(225, 29, 72, 0.1)",
     },
     {
       label: "Placed",
@@ -382,46 +388,22 @@ const Page = () => {
     },
   ];
 
-  if (isDashboardLoading) {
-    return (
-      <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} style={{
-              height: "100px",
-              borderRadius: "12px",
-              background: "linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)",
-              backgroundSize: "200% 100%",
-              animation: "shimmer 1.5s infinite",
-            }} />
-          ))}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-          {[1, 2].map(i => (
-            <div key={i} style={{
-              height: "280px",
-              borderRadius: "12px",
-              background: "linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)",
-              backgroundSize: "200% 100%",
-              animation: "shimmer 1.5s infinite",
-            }} />
-          ))}
-        </div>
-        <style>{`
-          @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-          }
-        `}</style>
-      </div>
-    );
-  }
+  const { value: userDetailsVal } = useSelector(
+    (state) => state.user.UserDetails
+  );
+  const USER_DETAILS = userDetailsVal?.data;
+
+  const [mounted, setMounted] = React.useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className={styles.mainCont}>
       <PageHeader
-        title="Dashboard"
-        subtitle="June 2026 - Batch A"
+        breadcrumb="Dashboard"
+        showGreeting={true}
+        userName={mounted ? (USER_DETAILS?.firstName || "TPO") : "TPO"}
       />
 
       <div className={styles.dashboardContent}>
@@ -447,100 +429,100 @@ const Page = () => {
           ))}
         </div>
 
-      <div className={styles.secondCont}>
-        {/* Top Recruiters - Students Placed */}
-        <div className={styles.tableCard}>
-          <h3 className={styles.chartTitle}>Top recruiters - students placed</h3>
-          <div className={styles.listContent}>
-            {topRecruitersByPlacement && topRecruitersByPlacement.length > 0 ? (
-              topRecruitersByPlacement.map(({ recruiter, studentsPlaced }, index) => {
-                const maxPlaced = Math.max(...topRecruitersByPlacement.map(r => r.studentsPlaced)) || 1;
-                const pct = (studentsPlaced / maxPlaced) * 100;
-                return (
-                  <div className={styles.recruiterRow} key={index}>
-                    <span className={styles.rank}>{index + 1}</span>
-                    <span className={styles.name}>{recruiter}</span>
-                    <div className={styles.progressWrapper}>
-                      <div className={styles.progressBar} style={{ width: `${pct}%` }} />
+        <div className={styles.secondCont}>
+          {/* Top Recruiters - Students Placed */}
+          <div className={styles.tableCard}>
+            <h3 className={styles.chartTitle}>Top recruiters - students placed</h3>
+            <div className={styles.listContent}>
+              {topRecruitersByPlacement && topRecruitersByPlacement.length > 0 ? (
+                topRecruitersByPlacement.map(({ recruiter, studentsPlaced }, index) => {
+                  const maxPlaced = Math.max(...topRecruitersByPlacement.map(r => r.studentsPlaced)) || 1;
+                  const pct = (studentsPlaced / maxPlaced) * 100;
+                  return (
+                    <div className={styles.recruiterRow} key={index}>
+                      <span className={styles.rank}>{index + 1}</span>
+                      <span className={styles.name}>{recruiter}</span>
+                      <div className={styles.progressWrapper}>
+                        <div className={styles.progressBar} style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className={styles.val}>{studentsPlaced}</span>
                     </div>
-                    <span className={styles.val}>{studentsPlaced}</span>
-                  </div>
-                );
-              })
-            ) : (
-              <div className={styles.noDataMessage}>❕No data available</div>
-            )}
+                  );
+                })
+              ) : (
+                <div className={styles.noDataMessage}>❕No data available</div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Top Recruiters - CTC Offered */}
-        <div className={styles.tableCard}>
-          <h3 className={styles.chartTitle}>Top recruiters - CTC offered</h3>
-          <div className={styles.listContent}>
-            {topRecruitersByCTC && topRecruitersByCTC.length > 0 ? (
-              topRecruitersByCTC.map(({ recruiter, ctc }, index) => {
-                const valNum = parseFloat(ctc) || 0;
-                const maxCTC = Math.max(...topRecruitersByCTC.map(r => parseFloat(r.ctc) || 1)) || 1;
-                const pct = (valNum / maxCTC) * 100;
-                return (
-                  <div className={styles.recruiterRow} key={index}>
-                    <span className={styles.rank}>{index + 1}</span>
-                    <span className={styles.name}>{recruiter}</span>
-                    <div className={styles.progressWrapper}>
-                      <div className={styles.progressBar} style={{ width: `${pct}%` }} />
+          {/* Top Recruiters - CTC Offered */}
+          <div className={styles.tableCard}>
+            <h3 className={styles.chartTitle}>Top recruiters - CTC offered</h3>
+            <div className={styles.listContent}>
+              {topRecruitersByCTC && topRecruitersByCTC.length > 0 ? (
+                topRecruitersByCTC.map(({ recruiter, ctc }, index) => {
+                  const valNum = parseFloat(ctc) || 0;
+                  const maxCTC = Math.max(...topRecruitersByCTC.map(r => parseFloat(r.ctc) || 1)) || 1;
+                  const pct = (valNum / maxCTC) * 100;
+                  return (
+                    <div className={styles.recruiterRow} key={index}>
+                      <span className={styles.rank}>{index + 1}</span>
+                      <span className={styles.name}>{recruiter}</span>
+                      <div className={styles.progressWrapper}>
+                        <div className={styles.progressBar} style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className={styles.val}>{ctc}</span>
                     </div>
-                    <span className={styles.val}>{ctc}</span>
+                  );
+                })
+              ) : (
+                <div className={styles.noDataMessage}>❕No data available</div>
+              )}
+            </div>
+          </div>
+
+          {/* CTC Statistics */}
+          <div className={styles.tableCard}>
+            <h3 className={styles.chartTitle}>CTC statistics</h3>
+            <div className={styles.listContent}>
+              {ctcStats && Object.keys(ctcStats).length > 0 ? (
+                Object.entries(ctcStats).map(([key, value]) => (
+                  <div className={styles.ctcRow} key={key}>
+                    <span className={styles.ctcLabel}>{formatKey(key)}</span>
+                    <span className={styles.ctcVal}>{formatCTCValue(value)}</span>
                   </div>
-                );
-              })
-            ) : (
-              <div className={styles.noDataMessage}>❕No data available</div>
-            )}
+                ))
+              ) : (
+                <div className={styles.noDataMessage}>❕No data available</div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* CTC Statistics */}
-        <div className={styles.tableCard}>
-          <h3 className={styles.chartTitle}>CTC statistics</h3>
-          <div className={styles.listContent}>
-            {ctcStats && Object.keys(ctcStats).length > 0 ? (
-              Object.entries(ctcStats).map(([key, value]) => (
-                <div className={styles.ctcRow} key={key}>
-                  <span className={styles.ctcLabel}>{formatKey(key)}</span>
-                  <span className={styles.ctcVal}>{formatCTCValue(value)}</span>
-                </div>
-              ))
-            ) : (
-              <div className={styles.noDataMessage}>❕No data available</div>
-            )}
+        {/* Charts Section */}
+        <div className={styles.chartsCont}>
+          <div className={styles.chartAndWidgetRow}>
+            <div className={styles.mainChartCol}>
+              <DepartmentPlacementChart data={departmentPlacements} />
+            </div>
+            <div className={styles.widgetCol}>
+              <PlacementRateWidget total={studentsCount} placed={placedCount} />
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Charts Section */}
-      <div className={styles.chartsCont}>
-        <div className={styles.chartAndWidgetRow}>
-          <div className={styles.mainChartCol}>
-            <DepartmentPlacementChart data={departmentPlacements} />
-          </div>
-          <div className={styles.widgetCol}>
-            <PlacementRateWidget total={studentsCount} placed={placedCount} />
-          </div>
-        </div>
-        
-        <div className={styles.chartAndWidgetRow}>
-          <div className={styles.donutCol}>
-            <SectorPlacementChart data={sectorPlacements} />
-          </div>
-          <div className={styles.missingWidgetCol}>
-            <PlacementActivityChart 
-              data={activityMonths}
-              offersThisMonth={offersThisMonth}
-              averageTimeToOffer={averageTimeToOffer}
-            />
+          <div className={styles.chartAndWidgetRow}>
+            <div className={styles.donutCol}>
+              <SectorPlacementChart data={sectorPlacements} />
+            </div>
+            <div className={styles.missingWidgetCol}>
+              <PlacementActivityChart
+                data={activityMonths}
+                offersThisMonth={offersThisMonth}
+                averageTimeToOffer={averageTimeToOffer}
+              />
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );

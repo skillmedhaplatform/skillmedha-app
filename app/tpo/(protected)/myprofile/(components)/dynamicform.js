@@ -24,7 +24,6 @@ const DynamicForm = ({ schema }) => {
   const [hasUserId, setHasUserId] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [formReady, setFormReady] = useState(false);
 
   useEffect(() => {
     const id = getLstorage("userId");
@@ -32,11 +31,11 @@ const DynamicForm = ({ schema }) => {
       setHasUserId(true);
       setInitialValues(USER_DETAILS);
       initializeForm(USER_DETAILS);
+      setIsEditing(false);
     } else {
       initializeForm();
       setIsEditing(true);
     }
-    setFormReady(true);
   }, [USER_DETAILS]);
 
   useEffect(() => {
@@ -335,6 +334,8 @@ const DynamicForm = ({ schema }) => {
           type="primary"
           onClick={() => handleAddArrayItem(arrayName)}
           disabled={!isEditing}
+          className={styles.addNewBtn}
+          style={{ fontWeight: '600', borderRadius: '8px', padding: '4px 16px' }}
         >
           Add New {label.replace(/Courses\s\((.+?)\)/, "$1 Department")}
         </Button>
@@ -534,55 +535,20 @@ const DynamicForm = ({ schema }) => {
 
   // ======= RENDER FORM ======= //
 
-  if (!formReady) {
-    return (
-      <div style={{
-        padding: "24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-      }}>
-        {[1, 2, 3, 4, 5, 6].map(i => (
-          <div key={i} style={{
-            display: "grid",
-            gridTemplateColumns: "200px 1fr",
-            gap: "16px",
-            alignItems: "center",
-          }}>
-            <div style={{
-              height: "20px",
-              borderRadius: "6px",
-              background: "#f1f5f9",
-              animation: "formShimmer 1.5s infinite",
-              animationDelay: `${i * 0.05}s`,
-            }}/>
-            <div style={{
-              height: "40px",
-              borderRadius: "8px",
-              background: "#f1f5f9",
-              animation: "formShimmer 1.5s infinite",
-              animationDelay: `${i * 0.08}s`,
-            }}/>
-          </div>
-        ))}
-        <style>{`
-          @keyframes formShimmer {
-            0%   { opacity: 1; }
-            50%  { opacity: 0.5; }
-            100% { opacity: 1; }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className={styles.headertitleCont}>
-        <h1 className={styles.formTitle}>{schema?.title}</h1>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.formTitle}>{schema?.title}</h1>
+          <p className={styles.formSubtitle}>Update your {schema?.title?.toLowerCase()} below</p>
+        </div>
         {hasUserId && (
           <div className={styles.editButtonContainer}>
-            <Button type="dashed" onClick={() => setIsEditing((prev) => !prev)}>
+            <Button
+              className="!bg-gradient-to-br !from-[#6BA8ED] !to-[#A3CCFA] !border-none !text-white"
+              style={{ fontWeight: '600', borderRadius: '8px', padding: '4px 16px' }}
+              onClick={() => setIsEditing((prev) => !prev)}
+            >
               {isEditing ? "Cancel Edit" : "Edit"}
             </Button>
           </div>
@@ -592,8 +558,7 @@ const DynamicForm = ({ schema }) => {
         {schema?.fields?.map((field, idx) => (
           <div
             key={idx}
-            className={`${styles.formField} ${field?.type === "ImageUpload" && styles.uploadfieldmain
-              }`}
+            className={`${styles.formField} ${field?.type === "ImageUpload" && field.name !== "tpoLogo" && field.name !== "institutionLogo" ? styles.uploadfieldmain : ""} ${(field.name === "tpoLogo" || field.name === "institutionLogo") ? styles.tpoLogoField : ""} ${(field.type === "array" || field.type === "group") && field.name !== "ugCourses" && field.name !== "pgCourses" ? styles.fullWidthField : ""}`}
           >
             {field.type !== "array" && field.type !== "group" && (
               <label>{field.label}:</label>
@@ -606,10 +571,11 @@ const DynamicForm = ({ schema }) => {
           <Button
             type="primary"
             htmlType="submit"
-            className={styles.saveButton}
+            className={`${styles.saveButton} !bg-gradient-to-br !from-[#6BA8ED] !to-[#A3CCFA] !border-none !text-white`}
+            style={{ fontWeight: '600', borderRadius: '8px', padding: '4px 16px' }}
             disabled={!isChanged || !isEditing}
           >
-            {hasUserId ? "Update" : "Save"}
+            {hasUserId ? "Save Changes" : "Save"}
           </Button>
         </div>
       </form>
