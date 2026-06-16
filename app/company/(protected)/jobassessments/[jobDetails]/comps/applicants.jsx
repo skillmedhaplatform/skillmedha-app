@@ -13,9 +13,9 @@
 
 // const Applicants = () => {
 //   const dispatch = useDispatch();
-//   const appliedStudents = useSelector((s) => s.skillmedha.appliedStudents);
+//   const appliedStudents = useSelector((s) => s.companySkillMedhaData?.appliedStudents);
 //   const { value: { data: oneJobData } = {}, status } = useSelector(
-//     (state) => state.placement.OneJob || {}
+//     (state) => state.companyPlacements?.OneJob || {}
 //   );
 
 //   const [dateRange, setDateRange] = useState(null);
@@ -137,9 +137,9 @@ const dateFormat = "YYYY/MM/DD";
 
 const Applicants = () => {
   const dispatch = useDispatch();
-  const appliedStudents = useSelector((s) => s.skillmedha?.appliedStudents ?? {});
+  const appliedStudents = useSelector((s) => s.companySkillMedhaData?.appliedStudents ?? {});
   const { value: { data: oneJobData } = {}, status } = useSelector(
-    (state) => state.placement.OneJob || {}
+    (state) => state.companyPlacements?.OneJob || {}
   );
 
   const [dateRange, setDateRange] = useState(null);

@@ -183,7 +183,7 @@ export const GetOneJob = createAsyncThunk("/getOneJob", async (args) => {
         },
       }
     );
-    return data;
+    return data.data ? data : { data };
   } catch (error) {
     console.log(error);
   }

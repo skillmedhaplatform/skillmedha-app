@@ -33,10 +33,10 @@ export default function Home({ children }) {
   // }, [token, studentCreds?._id]);
 
   useEffect(() => {
-    if (currPath == "/") {
-      nav.replace("/myjobs");
+    if (currPath == "/" || currPath == "/company") {
+      nav.replace("/company/myjobs");
     }
-  }, []);
+  }, [currPath, nav]);
   const handleInputChange = (e) => {
     dispatch(setSearchTerm(e.target.value));
   };
@@ -44,29 +44,31 @@ export default function Home({ children }) {
   return (
 
       <div className={PageStyles.pageContainer}>
-        <Suspense fallback={null}>
-          <Header />
-        </Suspense>
-        {/* {currPath === "/AssessmentLibrary" && (
-          <div className={PageStyles.header2}>
-            <div className={PageStyles.headerTitle}>Assessment Library</div>
-            <div className={PageStyles.inputContainer}>
-              <Image
-                src={imgUrls.SearchIcon}
-                alt="SearchIcon"
-                className={PageStyles.svgIcon}
-              />
-              <input
-                placeholder="Search by role or skill"
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-        )} */}
         <div className={PageStyles.pageBody}>
           <SideBar />
 
-          <div className={PageStyles.content}>{children}</div>
+          <div className={PageStyles.mainContentWrapper}>
+            <Suspense fallback={null}>
+              <Header />
+            </Suspense>
+            {/* {currPath === "/AssessmentLibrary" && (
+              <div className={PageStyles.header2}>
+                <div className={PageStyles.headerTitle}>Assessment Library</div>
+                <div className={PageStyles.inputContainer}>
+                  <Image
+                    src={imgUrls.SearchIcon}
+                    alt="SearchIcon"
+                    className={PageStyles.svgIcon}
+                  />
+                  <input
+                    placeholder="Search by role or skill"
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+            )} */}
+            <div className={PageStyles.content}>{children}</div>
+          </div>
         </div>
       </div>
 

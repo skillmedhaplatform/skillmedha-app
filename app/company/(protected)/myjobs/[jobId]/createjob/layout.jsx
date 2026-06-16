@@ -1,5 +1,5 @@
 "use client";
-import Home from "@/app/page";
+
 import React, { useEffect } from "react";
 import styles from "./styles/layout.module.scss";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ export default function FormLayout({ children }) {
 
   const pathSegments = path?.split("/").filter((e) => e);
 
-  const ONEJOB = useSelector((state) => state.placement.OneJob?.value);
+  const ONEJOB = useSelector((state) => state.placement?.OneJob?.value || state.companyPlacements?.OneJob?.value);
 
   useEffect(() => {
     if (jobid) {
@@ -45,7 +45,7 @@ export default function FormLayout({ children }) {
     }
   };
 
-  const baseUrl = `/myjobs/${jobid}/createjob`;
+  const baseUrl = `/company/myjobs/${jobid}/createjob`;
 
   const routes = [
     { name: "Basic Details", path: `${baseUrl}/basicdetails` },
@@ -75,7 +75,7 @@ export default function FormLayout({ children }) {
   ];
 
   return (
-    <Home>
+    <>
       <div className={styles.mainContainer}>
         {/* Breadcrumbs */}
         <div className={styles.headerCont}>
@@ -110,7 +110,7 @@ export default function FormLayout({ children }) {
                   if (isLast) return;
 
                   if (index === 0 || index === 1) {
-                    router.push("/myjobs");
+                    router.push("/company/myjobs");
                   } else if (segment !== "job") {
                     router.push(pathToHere);
                   }
@@ -132,7 +132,7 @@ export default function FormLayout({ children }) {
               const isActive = path === e?.path;
 
               // ✅ global disable + per-route disable
-              const disabled = isDisabled() || e?.disabled;
+              const disabled = (isDisabled() && e?.name !== "Basic Details") || e?.disabled;
 
               return (
                 <Tooltip
@@ -159,6 +159,6 @@ export default function FormLayout({ children }) {
           <div className={styles.contentCont}>{children}</div>
         </div>
       </div>
-    </Home>
+    </>
   );
 }

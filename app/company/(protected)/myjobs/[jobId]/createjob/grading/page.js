@@ -16,10 +16,10 @@ const Page = () => {
   const params = useParams();
 
   const singleJobAssessment = useSelector(
-    (s) => s.skillmedha.singleJobAssessment
+    (s) => s.companySkillMedhaData?.singleJobAssessment
   );
 
-  const ONEJOB = useSelector((state) => state.placement.OneJob?.value);
+  const ONEJOB = useSelector((state) => state.companyPlacements?.OneJob?.value);
   const aId = ONEJOB?.data?.AssessmentId;
 
   useEffect(() => {

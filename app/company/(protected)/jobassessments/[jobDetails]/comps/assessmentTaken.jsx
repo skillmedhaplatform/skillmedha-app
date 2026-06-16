@@ -1,5 +1,5 @@
 "use client";
-import Home from "@/app/page";
+
 import React, { useEffect, useState } from "react";
 import AtStyles from "./styles/ts.module.scss";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,13 +14,13 @@ import { useParams, useRouter } from "next/navigation";
 
 const AssessmentTaken = () => {
   const { value: { data: oneJobData } = {}, status } = useSelector(
-    (state) => state.placement.OneJob || {}
+    (state) => state.companyPlacements?.OneJob || {}
   );
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useParams();
   const appliedStudentsWithAssesmentResults = useSelector(
-    (s) => s.skillmedha.appliedStudentsWithAssesmentResults
+    (s) => s.companySkillMedhaData?.appliedStudentsWithAssesmentResults
   );
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const AssessmentTaken = () => {
   const handleMenuClick = (e, sId) => {
     if (e.key === "1") {
       // ✅ View Details → Do nothing
-      router.push(`/jobassessments/${params?.jobDetails}/${sId}`);
+      router.push(`/company/jobassessments/${params?.jobDetails}/${sId}`);
       return;
     }
 
@@ -250,7 +250,7 @@ const AssessmentTaken = () => {
             className={AtStyles.viewBtn}
             onClick={() => {
               router.push(
-                `/jobassessments/${params?.jobDetails}/live_proctoring`
+                `/company/jobassessments/${params?.jobDetails}/live_proctoring`
               );
             }}
           >

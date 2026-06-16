@@ -14,10 +14,10 @@ const Page = () => {
 
   // Get test data from Redux
   const singleJobAssessment = useSelector(
-    (s) => s.skillmedha.singleJobAssessment
+    (s) => s.companySkillMedhaData?.singleJobAssessment
   );
 
-  const ONEJOB = useSelector((state) => state.placement.OneJob?.value);
+  const ONEJOB = useSelector((state) => state.companyPlacements?.OneJob?.value);
   const aId = ONEJOB?.data?.AssessmentId;
 
   // Local state for form data
@@ -31,7 +31,7 @@ const Page = () => {
   const [singleTestValues, setSingleTestValues] = useState({});
 
   // Base URL for navigation
-  const baseUrl = `/myjobs/${jobid}/createjob/nextpage`;
+  const baseUrl = `/company/myjobs/${jobid}/createjob/nextpage`;
 
   // Initialize form data when singleJobAssessment data loads
   useEffect(() => {
@@ -226,7 +226,7 @@ const Page = () => {
     try {
       // Send only the time object with aId
       await dispatch(updateJobAssessment({ time: timeData, aId }));
-      router.push(`/myjobs/${jobid}/createjob/questionManager`);
+      router.push(`/company/myjobs/${jobid}/createjob/questionManager`);
     } catch (error) {
       console.error("Error saving:", error);
     }

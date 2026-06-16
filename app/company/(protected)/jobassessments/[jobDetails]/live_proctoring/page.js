@@ -12,8 +12,8 @@ export default function LiveProc() {
   }
 
   return (
-    <Home>
+    <>
       <ProctorDashboard token={token} />
-    </Home>
+    </>
   );
 }

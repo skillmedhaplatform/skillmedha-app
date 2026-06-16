@@ -28,7 +28,7 @@ const { Search } = Input;
 export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
   const { jobid } = useParams();
   const dispatch = useDispatch();
-  const { value: ONEJOB } = useSelector((state) => state.placement?.OneJob ?? {});
+  const { value: ONEJOB } = useSelector((state) => state.companyPlacements?.OneJob ?? {});
   const JOBPROFILE = ONEJOB?.data;
 
   const [expandedRowKey, setExpandedRowKey] = useState(null);

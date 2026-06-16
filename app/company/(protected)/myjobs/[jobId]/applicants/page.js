@@ -20,9 +20,9 @@ const Applicants = () => {
   const dispatch = useDispatch();
   const params = useParams();
 
-  const appliedStudents = useSelector((s) => s.skillmedha?.appliedStudents ?? {});
+  const appliedStudents = useSelector((s) => s.companySkillMedhaData?.appliedStudents ?? {});
   const { value: { data: oneJobData } = {} } = useSelector(
-    (state) => state.placement.OneJob || {}
+    (state) => state.companyPlacements?.OneJob || {}
   );
 
   const [dateRange, setDateRange] = useState(null);
@@ -85,7 +85,7 @@ const Applicants = () => {
   };
 
   return (
-    <Home>
+    <>
       <div className={applicantStyles.container}>
         <div className={applicantStyles.headContainer}>
           <div className={applicantStyles.title}>{oneJobData?.jobTitle}</div>
@@ -130,7 +130,7 @@ const Applicants = () => {
           ))}
         </div>
       </div>
-    </Home>
+    </>
   );
 };
 

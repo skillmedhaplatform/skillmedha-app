@@ -49,15 +49,14 @@ export default function BasicDetailsPage() {
   //   (p) => p?._id === id
   // )?.companyName;
 
-  const { value: ONEJOB } = useSelector((state) => state.placement?.OneJob ?? {});
-  const { value: colleges, pagination: clgPagination } = useSelector(
-    (state) => state.skillmedha.partnerColleges
-  );
+  const ONEJOB = useSelector((state) => state.companyPlacements?.OneJob?.value);
+  const partnerColleges = useSelector((state) => state.companySkillMedhaData?.partnerColleges);
+  const { value: colleges = [], pagination: clgPagination = {} } = partnerColleges || {};
 
   const [originalDetails, setOriginalDetails] = useState(null);
 
   const SessionJobid = getSstorage("jobid");
-  const baseUrl = `/myjobs/${SessionJobid || jobid}/createjob/profiledetails`;
+  const baseUrl = `/company/myjobs/${SessionJobid || jobid}/createjob/profiledetails`;
   useEffect(() => {
     dispatch(fetchPartnerColleges());
   }, []);
@@ -191,7 +190,7 @@ export default function BasicDetailsPage() {
       const insertedId = data?.insertedId;
 
       if (insertedId) {
-        router.replace(`/myjobs/${insertedId}/createjob/profiledetails`);
+        router.replace(`/company/myjobs/${insertedId}/createjob/profiledetails`);
       } else {
         message.error("Something went wrong. Job ID not returned.");
       }
@@ -243,7 +242,7 @@ export default function BasicDetailsPage() {
       })
     );
     router.replace(
-      `/myjobs/${payload?.data?._id || jobid}/createjob/profiledetails`
+      `/company/myjobs/${payload?.data?._id || jobid}/createjob/profiledetails`
     );
   };
 

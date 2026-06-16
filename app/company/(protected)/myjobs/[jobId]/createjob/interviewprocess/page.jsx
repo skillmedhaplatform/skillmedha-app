@@ -10,14 +10,23 @@ import dayjs from "dayjs";
 import { getSstorage } from "@/utils/universalUtils/windowMW";
 import { createJobAssessment } from "@/redux/slices/company/skillMedhaData";
 
+const ROUND_TYPE_OPTIONS = [
+  { label: "Interview", value: "Interview" },
+  { label: "Assessment", value: "Assessment" },
+];
+
+const ROUND_MODE_OPTIONS = [
+  { label: "Offline", value: "Offline" },
+  { label: "Online", value: "Online" },
+];
+
 export default function InterviewPage() {
   const { RangePicker } = DatePicker;
   const dispatch = useDispatch();
   const router = useRouter();
   const { jobId: jobid } = useParams();
-  const { value: ONEJOB, status } = useSelector(
-    (state) => state.placement.OneJob
-  );
+  const ONEJOB = useSelector((state) => state.companyPlacements?.OneJob?.value);
+  const status = useSelector((state) => state.companyPlacements?.OneJob?.status);
   function generateId() {
     return Math.random().toString(36).substring(2, 8);
   }
@@ -39,7 +48,7 @@ export default function InterviewPage() {
     },
   ]);
 
-  const baseUrl = `/myjobs/${jobid}/createjob/createassessment`;
+  const baseUrl = `/company/myjobs/${jobid}/createjob/createassessment`;
 
   useEffect(() => {
     if (ONEJOB?.data?.interviewRounds?.length > 0) {
@@ -135,31 +144,25 @@ export default function InterviewPage() {
                 <Select
                   placeholder="Select Round Type"
                   style={{ width: "50%" }}
-                  value={round.type}
+                  value={round.type || undefined}
                   suffixIcon={<FaChevronDown />}
                   onChange={(value) =>
                     handleRoundChange(round.id, "type", value)
                   }
                   disabled={!round.isEditable}
-                  options={[
-                    { label: "Interview", value: "Interview" },
-                    { label: "Assessment", value: "Assessment" },
-                  ]}
+                  options={ROUND_TYPE_OPTIONS}
                 />
               </div>
               <div className={styles.fieldCont1}>
                 <label>Mode</label>
                 <Radio.Group
                   style={{ width: "70%" }}
-                  value={round.mode}
+                  value={round.mode || undefined}
                   onChange={(e) =>
                     handleRoundChange(round.id, "mode", e.target.value)
                   }
                   disabled={!round.isEditable}
-                  options={[
-                    { label: "Offline", value: "Offline" },
-                    { label: "Online", value: "Online" },
-                  ]}
+                  options={ROUND_MODE_OPTIONS}
                   optionType="button"
                   buttonStyle="solid"
                 />

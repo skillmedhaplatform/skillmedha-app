@@ -6,7 +6,7 @@ import html2pdf from "html2pdf.js";
 import styles from "./allstudents.module.scss";
 
 export default function JobDetailsModal({ open, loading, onClose }) {
-  const { value } = useSelector((state) => state.placement?.OneJob ?? {});
+  const { value } = useSelector((state) => state.companyPlacements?.OneJob ?? {});
   const jobDetails = value?.data;
 
   const contentRef = useRef();

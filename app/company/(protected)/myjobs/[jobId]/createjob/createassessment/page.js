@@ -13,14 +13,19 @@ import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { Button, Radio, Select, message } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 
+const LEAVE_OPTIONS = Array.from({ length: 6 }, (_, i) => i + 1).map((e) => ({
+  label: e,
+  value: e,
+}));
+
 export default function CreateAssessment() {
   const dispatch = useDispatch();
   const router = useRouter();
   const { jobId: jobid } = useParams();
 
-  const ONEJOB = useSelector((state) => state.placement.OneJob?.value);
+  const ONEJOB = useSelector((state) => state.companyPlacements?.OneJob?.value);
   const singleJobAssessment = useSelector(
-    (s) => s.skillmedha.singleJobAssessment
+    (s) => s.companySkillMedhaData?.singleJobAssessment
   );
 
   // defaults and local state
@@ -95,7 +100,7 @@ export default function CreateAssessment() {
           await dispatch(getOneJobAssessment({ id: created.insertedId }));
         }
       }
-      router.push(`/myjobs/${jobid}/createjob/startPage`);
+      router.push(`/company/myjobs/${jobid}/createjob/startPage`);
     } catch (err) {
       message.error(typeof err === "string" ? err : "Operation failed");
     }
@@ -168,10 +173,7 @@ export default function CreateAssessment() {
               onChange={(v) => setMaxLeaves(v)}
               disabled={hrtMode === "disabled"}
               className={styles.maxLeavesSelect}
-              options={Array.from({ length: 6 }, (_, i) => i + 1).map((e) => ({
-                label: e,
-                value: e,
-              }))}
+              options={LEAVE_OPTIONS}
             />
           </div>
         </div>

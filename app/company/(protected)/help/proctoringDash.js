@@ -830,8 +830,8 @@ const ProctorDashboard = ({ token, companyOrg }) => {
     value: jobData,
     status: jobStatus,
     error: jobErr,
-  } = useSelector((s) => s.placement.OneJob);
-  const appliedStudents = useSelector((s) => s.skillmedha.appliedStudents);
+  } = useSelector((s) => s.companyPlacements?.OneJob || {});
+  const appliedStudents = useSelector((s) => s.companySkillMedhaData?.appliedStudents || []);
   const dispatch = useDispatch();
   const {
     connectionStatus,
@@ -935,10 +935,9 @@ const ProctorDashboard = ({ token, companyOrg }) => {
         message: "Violation Detected",
         description: `Session ${latestViolation.sessionId
           ?.toString()
-          .slice(-8)}: ${
-          latestViolation.analysis?.overallViolations?.[0]?.message ||
+          .slice(-8)}: ${latestViolation.analysis?.overallViolations?.[0]?.message ||
           "Violation detected"
-        }`,
+          }`,
         placement: "topRight",
         duration: 5,
       });
@@ -1036,17 +1035,21 @@ const ProctorDashboard = ({ token, companyOrg }) => {
   }, [joinedSessions, playVideo]);
 
   useEffect(() => {
-    dispatch(
-      getAllAppliedStudents({
-        studentIds: jobData?.data?.applicants?.map((e) => e?._id),
-        jobId: jobDetails,
-        assessmentId: jobData?.data?.AssessmentId,
-      })
-    );
+    if (jobDetails && jobData?.data?.applicants?.length > 0) {
+      dispatch(
+        getAllAppliedStudents({
+          studentIds: jobData?.data?.applicants?.map((e) => e?._id),
+          jobId: jobDetails,
+          assessmentId: jobData?.data?.AssessmentId,
+        })
+      );
+    }
   }, [jobDetails, jobData]);
 
   useEffect(() => {
-    dispatch(GetOneJob({ jobid: jobDetails }));
+    if (jobDetails) {
+      dispatch(GetOneJob({ jobid: jobDetails }));
+    }
   }, [jobDetails]);
 
   // ✅ FIXED: Enhanced join session with immediate callback
@@ -1189,13 +1192,12 @@ const ProctorDashboard = ({ token, companyOrg }) => {
                 }
               />
               <div>
-                <div className={styles.proctorName}>{`${
-                  selectedCandidate
-                    ? selectedCandidate?.firstName +
-                      " " +
-                      selectedCandidate?.lastName
-                    : "Select Candidate"
-                }`}</div>
+                <div className={styles.proctorName}>{`${selectedCandidate
+                  ? selectedCandidate?.firstName +
+                  " " +
+                  selectedCandidate?.lastName
+                  : "Select Candidate"
+                  }`}</div>
                 <Badge status="success" />
               </div>
             </div>
@@ -1231,11 +1233,10 @@ const ProctorDashboard = ({ token, companyOrg }) => {
                 {filteredCandidates?.map((candidate) => (
                   <div
                     key={candidate._id}
-                    className={`${styles.candidateItem} ${
-                      selectedCandidate?._id === candidate._id
-                        ? styles.selected
-                        : ""
-                    }`}
+                    className={`${styles.candidateItem} ${selectedCandidate?._id === candidate._id
+                      ? styles.selected
+                      : ""
+                      }`}
                     onClick={() => handleCandidateClick(candidate)}
                   >
                     <Avatar

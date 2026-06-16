@@ -1,5 +1,5 @@
 "use client";
-import Home from "@/app/page";
+
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -29,10 +29,10 @@ const Page = () => {
   const { jobDetails } = params;
 
   const { value: { data: oneJobData } = {}, status } = useSelector(
-    (state) => state.placement.OneJob || {}
+    (state) => state.companyPlacements?.OneJob || {}
   );
 
-  const appliedStudents = useSelector((s) => s.skillmedha?.appliedStudents ?? {});
+  const appliedStudents = useSelector((s) => s.companySkillMedhaData?.appliedStudents ?? {});
 
   const [mounted, setMounted] = useState(false);
 
@@ -63,13 +63,7 @@ const Page = () => {
   useEffect(() => {
     if (jobDetails) {
       // reset before fetching new job
-      dispatch(
-        getAllAppliedStudents({
-          studentIds: oneJobData?.applicants?.map((e) => e?._id),
-          jobId: jobDetails,
-          assessmentId: oneJobData?.AssessmentId,
-        })
-      );
+
       dispatch(resetAllAppliedStudents());
       dispatch(GetOneJob({ jobid: jobDetails }));
     }
@@ -94,7 +88,7 @@ const Page = () => {
 
   if (!mounted) return null;
   return (
-    <Home>
+    <>
       <div className={jdStyles.container}>
         {/* Radio Buttons */}
         <div className={jdStyles.radioContainer}>
@@ -136,7 +130,7 @@ const Page = () => {
           )} */}
         </div>
       </div>
-    </Home>
+    </>
   );
 };
 

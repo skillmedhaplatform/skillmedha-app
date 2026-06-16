@@ -1,5 +1,5 @@
 "use client";
-import Home from "@/app/page";
+
 import {
   useParams,
   usePathname,
@@ -41,10 +41,10 @@ export default function JobPreviewPage() {
   // Redux data
 
   const { value: ONEJOB, status } = useSelector(
-    (state) => state.placement.OneJob
+    (state) => state.companyPlacements?.OneJob || {}
   );
   const ALLPLACEMENTS = useSelector(
-    (state) => state.placement.AllPlacements?.value
+    (state) => state.companyPlacements?.AllPlacements?.value || []
   );
 
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function JobPreviewPage() {
     }) || [];
 
   return (
-    <Home>
+    <>
       <div className={styles.mainContainer}>
         <div className={styles.headerCont}>
           {pathSegments.map((segment, index) => {
@@ -199,6 +199,6 @@ export default function JobPreviewPage() {
           </>
         </div>
       </div>
-    </Home>
+    </>
   );
 }

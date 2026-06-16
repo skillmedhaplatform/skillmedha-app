@@ -209,7 +209,7 @@ export const getAllAppliedStudentsWithAssesmentResults = createAsyncThunk(
   async (args) => {
     try {
       const { data } = await axios.post(
-        restUrl + "/getAllAppliedStudentsWithAssesmentResults",
+        restUrl + "/getAllAppliedStudentsWithAssessmentResults",
         {
           ...args,
         },

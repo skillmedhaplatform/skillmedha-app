@@ -665,7 +665,7 @@ const StudentCard = ({
     student?.resumeDoc
   )}&embedded=true`;
   const { value: { data: oneJobData } = {}, status } = useSelector(
-    (state) => state.placement.OneJob || {}
+    (state) => state.companyPlacements?.OneJob || {}
   );
 
   const fullName = `${firstName || ""} ${middleName ? middleName + " " : ""}${
@@ -837,7 +837,7 @@ const StudentCard = ({
 
   return (
     <Card
-      bodyStyle={{ padding: "1.5rem" }}
+      styles={{ body: { padding: "1.5rem" } }}
       style={{
         borderRadius: "0.75rem",
         boxShadow: "0 0.125rem 0.5rem rgba(0,0,0,0.06)",
@@ -1197,10 +1197,12 @@ const StudentCard = ({
           maxWidth: "90vw",
           marginTop: "-5rem",
         }}
-        bodyStyle={{
-          height: "80vh",
-          padding: 0,
-          overflow: "hidden",
+        styles={{
+          body: {
+            height: "80vh",
+            padding: 0,
+            overflow: "hidden",
+          }
         }}
         modalRender={(modal) => <div style={{ height: "80vh" }}>{modal}</div>}
       >

@@ -47,19 +47,19 @@ export default function ResultsPage() {
   const mainRef = useRef(null);
 
   const { value: { data: oneJobData } = {}, status } = useSelector(
-    (state) => state.placement.OneJob || {}
+    (state) => state.companyPlacements?.OneJob || {}
   );
 
   const AssessmentResults = useSelector(
-    (state) => state.placement.results?.JobAssessments?.assessmentResults || []
+    (state) => state.companyPlacements?.results?.JobAssessments?.assessmentResults || []
   );
   const Questions = useSelector(
-    (state) => state.placement.results?.JobAssessments?.questionData || []
+    (state) => state.companyPlacements?.results?.JobAssessments?.questionData || []
   );
   const StudentDetails = useSelector(
-    (state) => state.placement.results?.JobAssessments?.studentDetails || {}
+    (state) => state.companyPlacements?.results?.JobAssessments?.studentDetails || {}
   );
-  const StErrro = useSelector((state) => state.placement?.resultsError || {});
+  const StErrro = useSelector((state) => state.companyPlacements?.resultsError || {});
 
   // Fetch job details as soon as params are available
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function ResultsPage() {
   };
 
   return (
-    <Home>
+    <>
       <div className={styles.mainCont} ref={mainRef}>
         <Header
           candidate={StudentDetails}
@@ -131,7 +131,7 @@ export default function ResultsPage() {
         />
         {/* <ReviewInputCard /> */}
       </div>
-    </Home>
+    </>
   );
 }
 
@@ -419,10 +419,10 @@ const Header = ({ candidate, jobData, onDownload, AssessmentResults }) => {
   const router = useRouter();
 
   const { value: { data: oneJobData } = {}, status } = useSelector(
-    (state) => state.placement.OneJob || {}
+    (state) => state.companyPlacements?.OneJob || {}
   );
   const StudentDetails = useSelector(
-    (state) => state.placement.results?.JobAssessments?.studentDetails || {}
+    (state) => state.companyPlacements?.results?.JobAssessments?.studentDetails || {}
   );
 
   const handleScheduleInterview = async (interviewDetails) => {

@@ -15,7 +15,7 @@ const Interviews = () => {
   const dispatch = useDispatch();
 
   const scheduledInterviewsForJob = useSelector(
-    (state) => state.skillmedha.scheduledInterviewsForJob
+    (state) => state.companySkillMedhaData?.scheduledInterviewsForJob
   );
 
   useEffect(() => {

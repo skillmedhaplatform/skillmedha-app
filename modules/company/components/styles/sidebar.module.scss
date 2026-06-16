@@ -3,63 +3,211 @@
 .sidebarContainer {
   font-size: 0.8rem;
   font-weight: 600;
-  width: 18%;
+  width: 15%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: stretch;
   height: 100%;
-}
-.bottom {
-  height: 10%;
-  width: 90%;
-}
-.topLinksCont {
-  width: 90%;
-  flex: 1;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e6ed;
 }
 
-.name {
-  background-color: #f5f5f5;
-  font-size: 16px;
-  border-radius: 5px;
-  font-weight: 700;
-  text-align: center;
-  cursor: pointer;
-  flex: 1;
-  height: 3rem;
-  box-shadow: 0px 1px 4px 0px #00000040;
-  color: black;
+.logoContainer {
   display: flex;
   align-items: center;
-  padding-left: 1rem;
-  transition: background-color 0.3s, color 0.3s;
-  align-self: center;
+  gap: 0.8rem;
+  padding: 2rem 2rem;
+  cursor: pointer;
+
+  img {
+    width: 2.2rem;
+  }
+
+  .logoText {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #08334C;
+    letter-spacing: 2px;
+    white-space: nowrap;
+
+    span {
+      color: #0e8c8f;
+    }
+  }
+}
+
+.scrollableNav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 1rem;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 4px;
+  }
+}
+
+.menuSection {
+  margin-bottom: 1.5rem;
+
+  .sectionTitle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #a0aec0;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 1rem;
+  }
+
+  .sectionItems {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.navItem {
+  background-color: transparent;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  height: 2.8rem;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  transition: background-color 0.2s, color 0.2s;
+
+  .navItemLeft {
+    display: flex;
+    align-items: center;
+  }
+
+  .iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.8rem;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .dropdownIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a0aec0;
+  }
 
   &:hover {
-    background-color: #25a3a6;
-    color: white;
+    background-color: #f7fafc;
+    color: #2c3666;
   }
 }
 
 .active {
-  background-color: #25a3a6;
+  background-color: #1564bf;
   color: white;
+
+  .dropdownIcon {
+    color: white;
+  }
+
+  &:hover {
+    background-color: #11539d;
+    color: white;
+  }
+}
+
+.bottomSection {
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid #e0e6ed;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .logoutBtn {
-  background-color: #f5f5f5;
-  font-size: 16px;
-  border-radius: 5px;
-  font-weight: 700;
-  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  width: 90%;
-  height: 3rem;
-  box-shadow: 0px 1px 4px 0px #00000040;
-  color: black;
   display: flex;
   align-items: center;
-  padding-left: 1rem;
-  transition: background-color 0.3s, color 0.3s;
+  color: #e53e3e;
+  transition: opacity 0.2s;
+
+  .iconWrapperLogout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.8rem;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.avatarBlock {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem;
+  border: 1px solid #e0e6ed;
+  border-radius: 12px;
+  background-color: #f7fafc;
+
+  .avatarCircle {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    background-color: #ed8936;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-right: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .avatarText {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .avatarName {
+      font-weight: 700;
+      color: #2d3748;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .avatarEmail {
+      font-size: 0.75rem;
+      color: #a0aec0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 }

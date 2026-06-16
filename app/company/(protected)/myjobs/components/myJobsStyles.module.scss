@@ -1,62 +1,251 @@
 @import "@/utils/universalUtils/colors.module.scss";
 
-.createBtn {
-  width: 100%;
+.container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  width: 100%;
 }
-.headerFlex {
+
+.pageHeader {
   display: flex;
   justify-content: space-between;
-  width: 100%;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
 
-  .btnsCon {
-    width: 40%;
-    display: flex;
-    justify-content: space-between;
-
-    .btn {
-      background-color: $disabledColor;
-      border: none;
-      outline: none;
-      font-size: 1rem;
-      // font-weight: 600;
-      // border-radius: .5rem;
-      padding: 0.5rem 1.5rem;
-      cursor: pointer;
+  .pageHeaderLeft {
+    .pageTitle {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0d48a1;
+      margin-bottom: 0rem;
     }
-    .active {
-      background-color: #fff;
-      border: none;
-      outline: none;
-      font-size: 1rem;
-      // font-weight: 600;
-      padding: 0.5rem 1.5rem;
-      cursor: pointer;
-      color: $primaryColor;
-      border: 2px solid $disabledColor;
-      border-bottom: 2px solid $primaryColor;
+
+    .pageSubtitle {
+      font-size: 0.7rem;
+      color: #a0aec0;
+      font-weight: 500;
+    }
+  }
+
+  .createJobButton {
+    background-color: #1564bf;
+    border-radius: 8.5px;
+    padding: 0.4rem 1.2rem;
+    height: auto;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2);
+  }
+}
+
+.statsCardsContainer {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  .statsCard {
+    flex: 1;
+    background-color: white;
+    border-radius: 12px;
+    padding: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    border: 1px solid #e0e6ed;
+
+    .statsIconWrapper {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .statsInfo {
+      h3 {
+        font-size: 1rem;
+        font-weight: 900;
+        color: #37468e;
+        margin: 0;
+        line-height: 1.2;
+      }
+
+      p {
+        font-size: 0.65rem;
+        color: #718096;
+        margin: 0;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.tableControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid transparent;
+
+  .tabsContainer {
+    flex: 0;
+
+    .customTabs {
+      :global(.ant-tabs-nav) {
+        margin: 0;
+        background-color: #f0f4f8;
+        border-radius: 10px;
+        padding: 4px;
+        display: inline-flex;
+
+        &::before {
+          border-bottom: none;
+        }
+      }
+
+      :global(.ant-tabs-tab) {
+        padding: 0.4rem 1rem;
+        margin: 0 !important;
+        border-radius: 8px;
+        transition: all 0.3s;
+
+        &:hover {
+          color: #1564bf;
+        }
+      }
+
+      :global(.ant-tabs-tab-active) {
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      :global(.ant-tabs-ink-bar) {
+        display: none;
+      }
+    }
+
+    .tabLabel {
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #1564bf;
+    }
+
+    .tabBadge {
+      background-color: #e2e8f0;
+      color: #1564bf;
+      padding: 0.1rem 0.6rem;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    :global(.ant-tabs-tab-active .tabLabel) {
+      color: #1a365d;
+    }
+
+    :global(.ant-tabs-tab-active .tabBadge) {
+      background-color: #1564bf;
+      color: white;
+    }
+  }
+
+  .searchInput {
+    width: 320px;
+    height: 2.2rem;
+    border-radius: 8px;
+    background-color: #f7fafc;
+    border: 1px solid #e2e8f0;
+    box-shadow: none;
+
+    &:hover,
+    &:focus {
+      border-color: #3182ce;
+      background-color: white;
     }
   }
 }
 
 .bodyCon {
-  height: 70vh;
-  margin-top: 1rem;
-  overflow-y: scroll;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 220px);
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
 }
 
-.btn2 {
-  background-color: $primaryColor;
-  color: #fff;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 700;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.5rem 2rem;
+.tableWrapper {
+  flex: 1;
+  padding: 0;
+
+  :global(.ant-table-wrapper) {
+    height: 100%;
+  }
+
+  :global(.ant-table) {
+    background: transparent;
+  }
+
+  :global(.ant-table-thead > tr > th) {
+    background-color: #f8fafc !important;
+    color: #718096 !important;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #edf2f7 !important;
+    padding: 0.8rem 1.5rem !important;
+  }
+
+  :global(.ant-table-tbody > tr:not(.ant-table-measure-row) > td) {
+    border-bottom: 1px solid #edf2f7;
+    padding: 1rem 1.5rem !important;
+  }
+
+  :global(.ant-table-tbody > tr:hover > td) {
+    background-color: #fafbfc !important;
+  }
+
+  :global(.ant-table-pagination) {
+    margin: 1.2rem 1.5rem !important;
+  }
+
+  :global(.ant-pagination-item) {
+    border-radius: 8px;
+    border: none;
+    background-color: transparent;
+    font-weight: 600;
+  }
+
+  :global(.ant-pagination-item-active) {
+    background-color: #1564bf !important;
+
+    a {
+      color: white !important;
+    }
+  }
+
+  :global(.ant-pagination-prev),
+  :global(.ant-pagination-next) {
+    .ant-pagination-item-link {
+      border-radius: 8px;
+      border: none;
+      background-color: #f7fafc;
+    }
+  }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 6px;
+  }
 }

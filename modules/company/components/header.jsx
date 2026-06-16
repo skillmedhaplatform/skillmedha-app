@@ -9,18 +9,29 @@ import Image from "next/image";
 import { getLstorage, setLstorage } from "@/utils/universalUtils/windowMW";
 import { imgUrls } from "@/utils/universalUtils/images";
 import { useDispatch } from "react-redux";
-import { getOneUser } from "@/redux/slices/admin/cms/user";
+import { getOneUser } from "@/redux/slices/company/user";
 const Header = () => {
   const userCreds = useSelector((state) => state.user.singleUser);
   const path = usePathname();
   const params = useParams();
   const searchParams = useSearchParams();
 
-  const [userName, setUserName] = useState("Teja Karri");
+  const [greeting, setGreeting] = useState("Good Evening");
+  const [currentDate, setCurrentDate] = useState("");
+
   const nav = useRouter();
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good Morning");
+    else if (hour < 18) setGreeting("Good Afternoon");
+    else setGreeting("Good Evening");
+
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateStr = new Date().toLocaleDateString('en-US', options).toUpperCase();
+    setCurrentDate(dateStr);
+
     // First try localStorage, then fall back to URL param (handles Edge Tracking Prevention)
     let token = getLstorage("token");
 
@@ -41,45 +52,10 @@ const Header = () => {
       dispatch(getOneUser());
     }
   }, []);
-  // function devtoolIsOpening() {
-  //   console.clear();
-  //   let before = new Date().getTime();
-  //   debugger;
-  //   let after = new Date().getTime();
-  //   if (after - before > 200 && window !== undefined) {
-  //     // document.write(" Dont open Developer Tools.");
-  //     window.location.replace(WebsiteURL);
-  //   }
-  //   setTimeout(devtoolIsOpening, 100);
-  // }
-  // devtoolIsOpening();
 
   return (
-    <div className={`${bannerBase.bannerBase} ${headerStyles.headerContainer}`}>
-      <div className={headerStyles.icon}>
-        <img
-          src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"
-          alt="Synsper Logo"
-          onClick={() => nav.replace("/")}
-        />
-        <div className={headerStyles.logoText} onClick={() => nav.replace("/")}>
-          S K I L L <span> M E D H A</span>
-        </div>
-      </div>
-
-      <div className={headerStyles.credsCon}>
-        <button className={headerStyles.upgradeButton}>Upgrade Plan</button>
-        <Image
-          src={imgUrls.BellIcon}
-          alt="Notification Icon"
-          className={headerStyles.notificationIcon}
-        />
-
-        <p>
-          {userCreds?.companyName?.toUpperCase() ||
-            userCreds?.userName?.toUpperCase()}
-        </p>
-
+    <div className={headerStyles.dashboardBanner}>
+      <div className={headerStyles.leftContent}>
         <span className={headerStyles.avatar}>
           {userCreds?.companyLogo ? (
             <img
@@ -88,12 +64,32 @@ const Header = () => {
               className={headerStyles?.profileImage}
             />
           ) : (
-            userCreds?.userName
-              ?.split(" ")
-              ?.map((word, i) => (i < 2 ? word[0].toUpperCase() : ""))
-              ?.join(" ")
+            (userCreds?.companyName || userCreds?.userName || "A")
+              .charAt(0)
+              .toUpperCase()
           )}
         </span>
+        <div className={headerStyles.textContent}>
+          <div className={headerStyles.dashboardTitle}>COMPANY DASHBOARD</div>
+          <div className={headerStyles.greeting}>
+            Hi {userCreds?.companyName || userCreds?.userName || "Alphabet"}, {greeting} — here's what's happening with your jobs!
+          </div>
+        </div>
+      </div>
+
+      <div className={headerStyles.rightContent}>
+        <div className={headerStyles.dateText}>{currentDate}</div>
+        <button className={headerStyles.upgradeButton}>
+          <span className={headerStyles.starsIcon}>✨</span> Upgrade Plan
+        </button>
+        <div className={headerStyles.notificationIconWrapper}>
+          <Image
+            src={imgUrls.BellIcon}
+            alt="Notification Icon"
+            className={headerStyles.notificationIcon}
+          />
+          <span className={headerStyles.notificationDot}></span>
+        </div>
       </div>
     </div>
   );

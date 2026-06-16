@@ -23,6 +23,12 @@ import { useSelector } from "react-redux";
 const { TextArea } = Input;
 const { Panel } = Collapse;
 
+const AI_QUESTION_TYPE_OPTIONS = [
+  { value: "Single Choice", label: "Single Choice" },
+  { value: "Multiple Choice", label: "Multiple Choice" },
+  { value: "Text", label: "Text" },
+];
+
 // Render options for a questionContent + answer shape
 function RenderOptions({ questionContent, answer }) {
   if (!questionContent) return null;
@@ -82,7 +88,7 @@ export default function AIQuestionModal({ open, onClose, aId }) {
   const [showForm, setShowForm] = useState(true);
   const [addLoading, setAddLoading] = useState(false);
   const singleJobAssessment = useSelector(
-    (s) => s.skillmedha.singleJobAssessment
+    (s) => s.companySkillMedhaData?.singleJobAssessment
   );
   // Unified busy flag to lock UI and modal closing while async work is running
   const busy = loading || addLoading;
@@ -213,7 +219,7 @@ export default function AIQuestionModal({ open, onClose, aId }) {
       width={800}
       footer={null} // custom content controls actions
       destroyOnHidden={true}
-      maskClosable={false}
+      mask={{ closable: !busy }}
       closable={!busy} // disable close (X) while busy
       keyboard={!busy} // disable ESC close while busy
     >
@@ -250,11 +256,7 @@ export default function AIQuestionModal({ open, onClose, aId }) {
             rules={[{ required: true, message: "Please select question type" }]}
           >
             <Select
-              options={[
-                { value: "Single Choice", label: "Single Choice" },
-                { value: "Multiple Choice", label: "Multiple Choice" },
-                { value: "Text", label: "Text" },
-              ]}
+              options={AI_QUESTION_TYPE_OPTIONS}
               disabled={busy}
             />
           </Form.Item>

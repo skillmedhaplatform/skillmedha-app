@@ -42,7 +42,7 @@ const StudentData = ({ children }) => {
     }
   }, [params?.studentId, dispatch, router]);
   return (
-    <Home>
+    <>
       <div className={detail.container}>
         <div className={detail.first}>
           {/* <Button
@@ -79,7 +79,7 @@ const StudentData = ({ children }) => {
           </div>
         </div>
       </div>
-    </Home>
+    </>
   );
 };
 

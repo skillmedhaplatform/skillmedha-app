@@ -18,6 +18,23 @@ import styles from "../list.module.scss";
 
 const { Panel } = Collapse;
 
+const DIFFICULTY_OPTIONS = [
+  { value: "easy", label: "Easy" },
+  { value: "medium", label: "Medium" },
+  { value: "hard", label: "Hard" },
+  { value: "expert", label: "Expert" },
+];
+
+const QUESTION_TYPE_OPTIONS = [
+  { value: "Single Choice", label: "Single Choice" },
+  { value: "Multiple Choice", label: "Multiple Choice" },
+  { value: "True/False", label: "True / false" },
+  // { value: "Fill in the Blanks", label: "Fill in the Blanks" },
+  { value: "Audio", label: "Audio" },
+  { value: "Video", label: "Video" },
+  { value: "Text", label: "Text" },
+];
+
 export default function SkillLibraryModal({
   open,
   onClose,
@@ -364,7 +381,7 @@ export default function SkillLibraryModal({
                         <div>
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: parseIfJson(q?.answer?.explanation),
+                              __html: parseIfJson(q?.answer?.explanation || ""),
                             }}
                           />
                         </div>
@@ -482,12 +499,7 @@ export default function SkillLibraryModal({
             value={modalFilters?.difficulty}
             onChange={(value) => handleFilterChange("difficulty", value)}
             disabled={modalStatus === "loading"}
-            options={[
-              { value: "easy", label: "Easy" },
-              { value: "medium", label: "Medium" },
-              { value: "hard", label: "Hard" },
-              { value: "expert", label: "Expert" },
-            ]}
+            options={DIFFICULTY_OPTIONS}
           />
 
           <Select
@@ -499,15 +511,7 @@ export default function SkillLibraryModal({
             value={modalFilters?.questionType}
             onChange={(value) => handleFilterChange("questionType", value)}
             disabled={modalStatus === "loading"}
-            options={[
-              { value: "Single Choice", label: "Single Choice" },
-              { value: "Multiple Choice", label: "Multiple Choice" },
-              { value: "True/False", label: "True / false" },
-              // { value: "Fill in the Blanks", label: "Fill in the Blanks" },
-              { value: "Audio", label: "Audio" },
-              { value: "Video", label: "Video" },
-              { value: "Text", label: "Text" },
-            ]}
+            options={QUESTION_TYPE_OPTIONS}
           />
 
           <Select

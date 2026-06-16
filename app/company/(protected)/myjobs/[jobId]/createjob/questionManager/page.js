@@ -35,9 +35,9 @@ export default function QuestionListPage() {
 
   // Get data from Redux
   const singleJobAssessment = useSelector(
-    (s) => s.skillmedha.singleJobAssessment
+    (s) => s.companySkillMedhaData?.singleJobAssessment
   );
-  const ONEJOB = useSelector((state) => state.placement.OneJob?.value);
+  const ONEJOB = useSelector((state) => state.companyPlacements?.OneJob?.value);
   const aId = ONEJOB?.data?.AssessmentId;
   const USER_DETAILS = useSelector((state) => state?.user?.singleUser || null);
 
@@ -324,7 +324,7 @@ export default function QuestionListPage() {
 
   // Handle manually add (navigate to another page)
   const handleAddManually = () => {
-    router.push(`/myjobs/${params?.jobId}/AID_${aId}__NewQuestion`);
+    router.push(`/company/myjobs/${params?.jobId}/AID_${aId}__NewQuestion`);
   };
 
   // Dropdown menu items
@@ -406,7 +406,7 @@ export default function QuestionListPage() {
 
   // Edit handler
   const onEditQuestion = (question) => {
-    router.push(`/myjobs/${params?.jobId}/AID_${aId}__${question?._id}`);
+    router.push(`/company/myjobs/${params?.jobId}/AID_${aId}__${question?._id}`);
     console.log("Edit question:", question);
     message.info("Opening editor for this question in console."); // optional UX
   };
@@ -584,7 +584,7 @@ export default function QuestionListPage() {
                         <div>
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: parseIfJson(q?.answer?.explanation),
+                              __html: parseIfJson(q?.answer?.explanation || ""),
                             }}
                           />
                         </div>
