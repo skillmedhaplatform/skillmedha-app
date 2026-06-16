@@ -47,7 +47,6 @@ import courseSlice from "./slices/assessmentsSlice/courseSlice";
 import testSlice from "./slices/assessmentsSlice/testSlice";
 import UserFormSlice from "./slices/assessmentsSlice/userForm";
 import jobassessmentsSlice from "./slices/jobassessmentsSlice";
-import studentDashboardStatsReducer from "@/redux/slices/studentDashboardStatsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -107,6 +106,11 @@ export const store = configureStore({
     userForm: UserFormSlice,
     jobassessments: jobassessmentsSlice,
     practice: practiceSlice,
-    studentDashboardStats: studentDashboardStatsReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        warnAfter: 128,
+      },
+    }),
 });

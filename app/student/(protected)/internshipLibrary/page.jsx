@@ -1,7 +1,6 @@
 "use client";
 
 import LibraryPage from "@/universalUtils/LibraryPage/LibraryPage";
-import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { getAllInternships } from "@/redux/slices/internship";
 
 // Stable module-level selectors (avoids new reference on every render)
@@ -31,20 +30,17 @@ const renderInternshipMetaChips = (internship) =>
   ) : null;
 
 const InternshipLibraryPage = () => (
-  <>
-    <StudentPageHeader section="Learning" title="Internship Library" />
-    <LibraryPage
-      title="Internship Library"
-      fetchAction={getAllInternships}
-      dataSelector={selectInternships}
-      paginationSelector={selectPagination}
-      getItemUrl={getInternshipUrl}
-      viewLabel="View Internship"
-      searchPlaceholder="Search internships…"
-      idPrefix="internship"
-      renderMetaChips={renderInternshipMetaChips}
-    />
-  </>
+  <LibraryPage
+    title="Internship Library"
+    fetchAction={getAllInternships}
+    dataSelector={selectInternships}
+    paginationSelector={selectPagination}
+    getItemUrl={getInternshipUrl}
+    viewLabel="View Internship"
+    searchPlaceholder="Search internships…"
+    idPrefix="internship"
+    renderMetaChips={renderInternshipMetaChips}
+  />
 );
 
 export default InternshipLibraryPage;

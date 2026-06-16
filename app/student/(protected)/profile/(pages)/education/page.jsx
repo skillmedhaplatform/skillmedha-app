@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { useSelector, useDispatch } from "react-redux";
+import formStyles from "../../form.module.scss";
 import { DeleteOutline } from "@mui/icons-material";
 import { Button, DatePicker, message, Select, Upload } from "antd";
 import { getStudentCreds, updateStudent } from "@/redux/slices/student";
@@ -23,12 +24,15 @@ import dayjs from "dayjs";
 
 export default function EducationPage() {
   return (
-    <div className="flex flex-col items-start justify-start w-[99.5%] relative bg-[#f5f5f5]">
-      <StudentPageHeader section="Profile" title="Education" />
-      <div className="w-[98%] py-2 px-4 text-2xl font-[800] sticky top-0 bg-[#f5f5f5] z-[3] flex flex-row items-start justify-between">
-        <p className="text-2xl font-[800] m-0">Education Details</p>
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      {/* Header Card matching TPO */}
+      <div className={formStyles.formContainer} style={{ padding: "1.5rem 2rem", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <div className={formStyles.headerLeft}>
+          <h1 className={formStyles.formTitle}>Education Details</h1>
+          <p className={formStyles.formSubtitle}>Update your education qualifications below</p>
+        </div>
       </div>
-      <div className="w-full py-2 px-4 flex flex-col items-start justify-start gap-4">
+      <div style={{ width: "100%" }}>
         <EducationForm />
       </div>
     </div>
@@ -455,214 +459,214 @@ function EducationForm() {
   };
 
   return (
-    <div className="bg-[#f5f5f5] w-full">
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
       {entries.map((entry, i) => {
         return (
-          <div key={i} className="bg-[#f5f5f5] rounded-lg mb-8">
+          <div key={i} style={{ width: "100%" }}>
             {entry.isEditing ? (
-              <>
-                <div className="border border-solid border-[#24A058] rounded-lg py-2 px-4 shadow-sm mb-8">
-                  <div className="flex flex-row items-center justify-between">
-                    <h3 className="mb-4 text-xl font-semibold text-[#222] m-0">{entry.type.label}</h3>
-                    {i === entries.length - 1 && (
-                      <button
-                        type="button"
-                        className="border-0 outline-none bg-transparent cursor-pointer"
-                        onClick={() => deleteEntry(i)}
-                      >
-                        <DeleteOutline />
-                      </button>
-                    )}
+              <div className={formStyles.formContainer} style={{ marginBottom: "1.5rem" }}>
+                <div className={formStyles.headertitleCont} style={{ borderBottom: "none", paddingBottom: "1.5rem" }}>
+                  <div className={formStyles.headerLeft}>
+                    <h3 className={formStyles.formTitle}>{entry.type.label}</h3>
                   </div>
+                  {i === entries.length - 1 && (
+                    <button
+                      type="button"
+                      className="border-0 outline-none bg-transparent cursor-pointer text-slate-400 hover:text-red-500 transition-colors"
+                      onClick={() => deleteEntry(i)}
+                    >
+                      <DeleteOutline />
+                    </button>
+                  )}
+                </div>
 
-                  <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(550px,1fr))] gap-4">
-                    {entry.type.fields.map(([label, field, type]) => {
-                      if (
-                        (entry.type.label === "10th / Secondary Education" &&
-                          field === "board") ||
-                        (entry.type.label ===
-                          "Senior Secondary / Diploma / ITI" &&
-                          (field === "board" || field === "stream")) ||
-                        (entry.type.label === "Degree" &&
-                          field === "degreeName")
-                      ) {
-                        return (
-                          <div key={field} className="flex flex-row items-center justify-start gap-4 w-full [&>label]:w-[20%] [&>label]:overflow-hidden [&>label]:text-ellipsis [&>label]:whitespace-nowrap">
-                            <label>{label}</label>
-                            <Select
-                              style={{ width: "63%" }}
-                              value={entry.data[field]}
-                              onChange={(val) => updateField(i, field, val)}
-                              options={getSelectOptions(field, entry)}
-                              placeholder={`Select ${label.toLowerCase()}`}
-                            />
-                          </div>
-                        );
-                      }
-
-                      if (field === "yearofPass") {
-                        const currentYear = new Date().getFullYear();
-                        let startYear = 1950;
-
-                        // For Degree type, use startDate as the minimum year
-                        if (
-                          entry.type.label === "Degree" &&
-                          entry.data.startDate
-                        ) {
-                          const startVal = parseInt(entry.data.startDate, 10);
-                          if (!isNaN(startVal)) {
-                            startYear = startVal;
-                          }
-                        }
-
-                        const yearOptions = Array.from(
-                          { length: currentYear - startYear + 1 },
-                          (_, idx) => {
-                            const y = currentYear - idx;
-                            return { label: String(y), value: y };
-                          }
-                        );
-
-                        return (
-                          <div key={field} className="flex flex-row items-center justify-start gap-4 w-full [&>label]:w-[20%] [&>label]:overflow-hidden [&>label]:text-ellipsis [&>label]:whitespace-nowrap">
-                            <label>{label}</label>
-                            <Select
-                              style={{ width: "63%" }}
-                              value={entry.data[field]}
-                              onChange={(val) => updateField(i, field, val)}
-                              options={yearOptions}
-                              placeholder="Select year"
-                            />
-                          </div>
-                        );
-                      }
-
-                      if (type === "select") {
-                        return (
-                          <div key={field} className="flex flex-row items-center justify-start gap-4 w-full [&>label]:w-[20%] [&>label]:overflow-hidden [&>label]:text-ellipsis [&>label]:whitespace-nowrap">
-                            <label>{label}</label>
-                            <Select
-                              style={{ width: "63%" }}
-                              value={entry.data[field]}
-                              onChange={(val, opt) =>
-                                handleSelectChange(val, opt, i, field)
-                              }
-                              options={getSelectOptions(field, entry)}
-                              onDropdownVisibleChange={(open) => {
-                                getSelectOptions(field, entry);
-                                handleDropdownVisibleChange(open, field, entry);
-                              }}
-                            />
-                          </div>
-                        );
-                      }
-
-                      if (type === "date") {
-                        const startYear = entry?.data?.startDate
-                          ? dayjs(entry?.data?.startDate)
-                          : null;
-                        const isEndDate = field === "endDate";
-
-                        return (
-                          <div key={field} className="flex flex-row items-center justify-start gap-4 w-full [&>label]:w-[20%] [&>label]:overflow-hidden [&>label]:text-ellipsis [&>label]:whitespace-nowrap">
-                            <label>{label}</label>
-                            <DatePicker
-                              picker="year"
-                              value={
-                                entry.data[field]
-                                  ? dayjs(entry.data[field])
-                                  : null
-                              }
-                              onChange={(date) => {
-                                const yearValue = date
-                                  ? date.year().toString()
-                                  : "";
-                                updateField(i, field, yearValue);
-
-                                // If changing startDate, clear endDate if it's less than new startDate
-                                if (!isEndDate && entry.data.endDate && date) {
-                                  const endYear = parseInt(
-                                    entry.data.endDate,
-                                    10
-                                  );
-                                  if (endYear < date.year()) {
-                                    updateField(i, "endDate", "");
-                                  }
-                                }
-                              }}
-                              disabledDate={(current) => {
-                                // For endDate, disable years before startDate
-                                if (isEndDate && startYear) {
-                                  return (
-                                    current && current.year() < startYear.year()
-                                  );
-                                }
-                                return false;
-                              }}
-                              style={{
-                                width: "63%",
-                              }}
-                              placeholder="Select Year"
-                            />
-                          </div>
-                        );
-                      }
-
-                      if (field === "grade") {
-                        const isPercentage =
-                          entry.data.gradingSystem === "percentage";
-                        return (
-                          <div key={field} className="flex flex-row items-center justify-start gap-4 w-full [&>label]:w-[20%] [&>label]:overflow-hidden [&>label]:text-ellipsis [&>label]:whitespace-nowrap">
-                            <label>{label}</label>
-                            <input
-                              type="text"
-                              maxLength={isPercentage ? 3 : 4}
-                              value={entry.data[field] || ""}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                if (
-                                  !/^(?:100(?:\.0?)?|\d{0,2}(?:\.\d?)?)$/.test(
-                                    val
-                                  )
-                                )
-                                  return;
-                                const num = parseFloat(val);
-                                console.log(num);
-                                if (
-                                  val === "" ||
-                                  (!isNaN(num) &&
-                                    num >= 0 &&
-                                    num <= (isPercentage ? 101 : 10.1))
-                                ) {
-                                  updateField(i, field, val);
-                                }
-                              }}
-                              className="bg-gray-100 border-0 rounded-[5px] outline-none p-[0.6rem] text-[16px] w-[63%] max-w-full"
-                              placeholder={isPercentage ? "0–100" : "0.0–10.0"}
-                            />
-                          </div>
-                        );
-                      }
-
+                <div className={formStyles.dynamicFormContainer} style={{ paddingTop: 0 }}>
+                  {entry.type.fields.map(([label, field, type]) => {
+                    if (
+                      (entry.type.label === "10th / Secondary Education" &&
+                        field === "board") ||
+                      (entry.type.label ===
+                        "Senior Secondary / Diploma / ITI" &&
+                        (field === "board" || field === "stream")) ||
+                      (entry.type.label === "Degree" &&
+                        field === "degreeName")
+                    ) {
                       return (
-                        <div key={field} className="flex flex-row items-center justify-start gap-4 w-full [&>label]:w-[20%] [&>label]:overflow-hidden [&>label]:text-ellipsis [&>label]:whitespace-nowrap">
+                        <div key={field} className={formStyles.formField}>
                           <label>{label}</label>
-                          <input
-                            type={type}
-                            value={entry.data[field] || ""}
-                            onChange={(e) =>
-                              updateField(i, field, e.target.value)
-                            }
-                            className="w-[63%] border border-gray-300 bg-white outline-none p-2 rounded-[5px] text-[16px]"
+                          <Select
+                            className={formStyles.selectField}
+                            value={entry.data[field] || undefined}
+                            onChange={(val) => updateField(i, field, val)}
+                            options={getSelectOptions(field, entry)}
+                            placeholder={`Select ${label.toLowerCase()}`}
                           />
                         </div>
                       );
-                    })}
+                    }
 
-                    <div className="flex flex-row items-center justify-start gap-4 w-full [&>label]:w-[20%] [&>label]:overflow-hidden [&>label]:text-ellipsis [&>label]:whitespace-nowrap">
+                    if (field === "yearofPass") {
+                      const currentYear = new Date().getFullYear();
+                      let startYear = 1950;
+
+                      // For Degree type, use startDate as the minimum year
+                      if (
+                        entry.type.label === "Degree" &&
+                        entry.data.startDate
+                      ) {
+                        const startVal = parseInt(entry.data.startDate, 10);
+                        if (!isNaN(startVal)) {
+                          startYear = startVal;
+                        }
+                      }
+
+                      const yearOptions = Array.from(
+                        { length: currentYear - startYear + 1 },
+                        (_, idx) => {
+                          const y = currentYear - idx;
+                          return { label: String(y), value: y };
+                        }
+                      );
+
+                      return (
+                        <div key={field} className={formStyles.formField}>
+                          <label>{label}</label>
+                          <Select
+                            className={formStyles.selectField}
+                            value={entry.data[field] || undefined}
+                            onChange={(val) => updateField(i, field, val)}
+                            options={yearOptions}
+                            placeholder="Select year"
+                          />
+                        </div>
+                      );
+                    }
+
+                    if (type === "select") {
+                      return (
+                        <div key={field} className={formStyles.formField}>
+                          <label>{label}</label>
+                          <Select
+                            className={formStyles.selectField}
+                            value={entry.data[field] || undefined}
+                            onChange={(val, opt) =>
+                              handleSelectChange(val, opt, i, field)
+                            }
+                            options={getSelectOptions(field, entry)}
+                            onDropdownVisibleChange={(open) => {
+                              getSelectOptions(field, entry);
+                              handleDropdownVisibleChange(open, field, entry);
+                            }}
+                          />
+                        </div>
+                      );
+                    }
+
+                    if (type === "date") {
+                      const startYear = entry?.data?.startDate
+                        ? dayjs(entry?.data?.startDate)
+                        : null;
+                      const isEndDate = field === "endDate";
+
+                      return (
+                        <div key={field} className={formStyles.formField}>
+                          <label>{label}</label>
+                          <DatePicker
+                            picker="year"
+                            value={
+                              entry.data[field]
+                                ? dayjs(entry.data[field])
+                                : null
+                            }
+                            className={formStyles.selectField}
+                            onChange={(date) => {
+                              const yearValue = date
+                                ? date.year().toString()
+                                : "";
+                              updateField(i, field, yearValue);
+
+                              // If changing startDate, clear endDate if it's less than new startDate
+                              if (!isEndDate && entry.data.endDate && date) {
+                                const endYear = parseInt(
+                                  entry.data.endDate,
+                                  10
+                                );
+                                if (endYear < date.year()) {
+                                  updateField(i, "endDate", "");
+                                }
+                              }
+                            }}
+                            disabledDate={(current) => {
+                              // For endDate, disable years before startDate
+                              if (isEndDate && startYear) {
+                                  return (
+                                    current && current.year() < startYear.year()
+                                  );
+                              }
+                              return false;
+                            }}
+                            placeholder="Select Year"
+                          />
+                        </div>
+                      );
+                    }
+
+                    if (field === "grade") {
+                      const isPercentage =
+                        entry.data.gradingSystem === "percentage";
+                      return (
+                        <div key={field} className={formStyles.formField}>
+                          <label>{label}</label>
+                          <input
+                            type="text"
+                            maxLength={isPercentage ? 3 : 4}
+                            value={entry.data[field] || ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (
+                                !/^(?:100(?:\.0?)?|\d{0,2}(?:\.\d?)?)$/.test(
+                                  val
+                                )
+                              )
+                                return;
+                              const num = parseFloat(val);
+                              if (
+                                val === "" ||
+                                (!isNaN(num) &&
+                                  num >= 0 &&
+                                  num <= (isPercentage ? 101 : 10.1))
+                              ) {
+                                updateField(i, field, val);
+                              }
+                            }}
+                            className={formStyles.inputField}
+                            placeholder={isPercentage ? "0–100" : "0.0–10.0"}
+                          />
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={field} className={formStyles.formField}>
+                        <label>{label}</label>
+                        <input
+                          type={type}
+                          value={entry.data[field] || ""}
+                          onChange={(e) =>
+                            updateField(i, field, e.target.value)
+                          }
+                          className={formStyles.inputField}
+                        />
+                      </div>
+                    );
+                  })}
+
+                  <div className={formStyles.fullWidthField}>
+                    <div className={formStyles.formField}>
                       <label>Description</label>
                       <textarea
-                        className="bg-gray-100 border-0 rounded-[5px] outline-none p-[0.6rem] text-[16px] w-[63%] max-w-full resize-none overflow-y-auto"
+                        className={formStyles.inputField}
+                        style={{ minHeight: "80px", resize: "vertical" }}
                         rows={3}
                         value={entry.data.description || ""}
                         onChange={(e) =>
@@ -670,14 +674,17 @@ function EducationForm() {
                         }
                       />
                     </div>
+                  </div>
 
-                    <div className="flex flex-row items-center justify-start gap-4 w-full [&>label]:w-[20%] [&>label]:overflow-hidden [&>label]:text-ellipsis [&>label]:whitespace-nowrap">
+                  <div className={formStyles.fullWidthField}>
+                    <div className={formStyles.formField}>
                       <label>Upload Marksheet</label>
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: "16px",
+                          marginTop: "0.5rem"
                         }}
                       >
                         <Upload
@@ -694,6 +701,8 @@ function EducationForm() {
                           <Button
                             icon={<UploadOutlined />}
                             disabled={entry?.data?.fileName?.length >= 1}
+                            className={formStyles.addNewBtn}
+                            style={{ borderRadius: "8px", fontWeight: "600" }}
                           >
                             Select File
                           </Button>
@@ -705,9 +714,11 @@ function EducationForm() {
                               display: "flex",
                               alignItems: "center",
                               gap: "8px",
-                              background: "#f5f5f5",
-                              padding: "6px 10px",
+                              background: "#eef5fb",
+                              padding: "6px 12px",
                               borderRadius: "6px",
+                              color: "#1e293b",
+                              fontWeight: 500,
                               maxWidth: "auto",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
@@ -725,9 +736,11 @@ function EducationForm() {
                         )}
                       </div>
                     </div>
+                  </div>
 
-                    {entry.type.label === "Degree" && (
-                      <div className="flex flex-row items-center justify-start gap-4 w-full [&>label]:w-[20%] [&>label]:overflow-hidden [&>label]:text-ellipsis [&>label]:whitespace-nowrap">
+                  {entry.type.label === "Degree" && (
+                    <div className={formStyles.fullWidthField}>
+                      <div className={formStyles.formField} style={{ marginTop: "1rem" }}>
                         <label>Semester Marksheets</label>
 
                         {/* Existing semesters list */}
@@ -735,9 +748,11 @@ function EducationForm() {
                           <div
                             style={{
                               marginBottom: "20px",
-                              border: "1px solid #f0f0f0",
-                              borderRadius: "6px",
-                              padding: "10px",
+                              border: "1px solid #e2e8f0",
+                              borderRadius: "12px",
+                              padding: "15px",
+                              width: "100%",
+                              backgroundColor: "#f8fafc"
                             }}
                           >
                             {entry.semesters.map((sem, sIdx) => (
@@ -748,9 +763,10 @@ function EducationForm() {
                                   alignItems: "center",
                                   gap: "10px",
                                   marginBottom: "10px",
-                                  padding: "8px",
-                                  backgroundColor: "#fafafa",
-                                  borderRadius: "4px",
+                                  padding: "8px 12px",
+                                  backgroundColor: "white",
+                                  border: "1px solid #e2e8f0",
+                                  borderRadius: "8px",
                                 }}
                               >
                                 <Select
@@ -758,16 +774,18 @@ function EducationForm() {
                                   options={SEMESTERS}
                                   style={{ width: 180 }}
                                   disabled
+                                  className={formStyles.selectField}
                                 />
                                 <a
                                   href={sem.fileUrl}
                                   target="_blank"
                                   rel="noreferrer"
+                                  style={{ color: "#6BA8ED", fontWeight: "600" }}
                                 >
                                   {sem.fileName}
                                 </a>
                                 <DeleteOutlined
-                                  style={{ color: "red", cursor: "pointer" }}
+                                  style={{ color: "red", cursor: "pointer", marginLeft: "auto" }}
                                   onClick={() => removeSemester(i, sIdx)}
                                 />
                               </div>
@@ -780,10 +798,11 @@ function EducationForm() {
                           <div
                             style={{
                               marginBottom: "20px",
-                              border: "1px dashed #d9d9d9",
-                              borderRadius: "6px",
-                              padding: "15px",
-                              backgroundColor: "#f9f9f9",
+                              border: "1.5px dashed #cbd5e1",
+                              borderRadius: "12px",
+                              padding: "20px",
+                              width: "100%",
+                              backgroundColor: "#f8fafc",
                             }}
                           >
                             <div
@@ -791,7 +810,7 @@ function EducationForm() {
                                 display: "flex",
                                 gap: "12px",
                                 alignItems: "center",
-                                marginBottom: "10px",
+                                marginBottom: "15px",
                               }}
                             >
                               <Select
@@ -804,6 +823,7 @@ function EducationForm() {
                                 )}
                                 style={{ width: 180 }}
                                 value={entry.newSemester}
+                                className={formStyles.selectField}
                                 onChange={(val) =>
                                   setEntries((prev) =>
                                     prev.map((e, idx) =>
@@ -820,7 +840,7 @@ function EducationForm() {
                                 }
                                 accept=".pdf, image/*"
                               >
-                                <Button icon={<UploadOutlined />}>
+                                <Button icon={<UploadOutlined />} className={formStyles.addNewBtn} style={{ borderRadius: "8px", fontWeight: "600" }}>
                                   Upload Marksheet
                                 </Button>
                               </Upload>
@@ -828,6 +848,7 @@ function EducationForm() {
                             <Button
                               onClick={() => setShowSemesterUpload(false)}
                               danger
+                              style={{ borderRadius: "8px", fontWeight: "600" }}
                             >
                               Cancel
                             </Button>
@@ -843,140 +864,156 @@ function EducationForm() {
                               showSemesterUpload ||
                               SEMESTERS.length === entry.semesters?.length
                             }
-                            style={{ marginRight: "10px" }}
+                            className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                            style={{ marginRight: "10px", fontWeight: "600", borderRadius: "8px" }}
                           >
                             Add Semester Marksheet
                           </Button>
                           {SEMESTERS.length === entry.semesters?.length && (
-                            <span style={{ color: "#888" }}>
+                            <span style={{ color: "#64748b", fontWeight: "500" }}>
                               All semesters have been added
                             </span>
                           )}
                         </div>
                       </div>
-                    )}
-
-                    <div className="flex flex-row items-center justify-end gap-4 col-span-full mt-4">
-                      <button
-                        type="button"
-                        className="py-[0.4rem] px-6 bg-[#1E69DA] text-white text-base font-semibold border-0 rounded cursor-pointer place-self-end"
-                        onClick={() => saveEntry(i)}
-                      >
-                        Save
-                      </button>
                     </div>
+                  )}
+
+                  <div className={formStyles.fullWidthField} style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem" }}>
+                    <Button
+                      type="primary"
+                      onClick={() => saveEntry(i)}
+                      className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                      style={{ fontWeight: "600", borderRadius: "8px", padding: "8px 24px", height: "auto" }}
+                    >
+                      Save Qualification
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className={formStyles.formContainer} style={{ marginBottom: "1.5rem" }}>
+                <div className={formStyles.headertitleCont} style={{ borderBottom: "none", marginBottom: "1rem" }}>
+                  <div className={formStyles.headerLeft}>
+                    <h3 className={formStyles.formTitle} style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                      <span>{entry.type.label}</span>
+                      {entry?.data?.verificationType == "approved" ? (
+                        <span className="text-sm font-semibold text-green-500">Verified</span>
+                      ) : entry?.data?.verificationType == "resubmission" ? (
+                        <span className="text-sm font-semibold text-red-500">Re-Submit</span>
+                      ) : (
+                        <span className="text-sm font-semibold text-[#ffc400]">Not Verified</span>
+                      )}
+                    </h3>
+                  </div>
+                  <div className={formStyles.editButtonContainer} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                    <Button
+                      onClick={() => editEntry(i)}
+                      className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                      style={{ fontWeight: "600", borderRadius: "8px" }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      danger
+                      onClick={() => deleteEntry(i)}
+                      style={{ borderRadius: "8px", fontWeight: "600" }}
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
 
-                {i === entries.length - 1 &&
-                  entries.length < EDUCATION_TYPES.length && (
-                    <button
-                      type="button"
-                      className="border-0 py-[0.4rem] px-4 bg-[#1E69DA] text-white text-base font-semibold rounded cursor-pointer block min-w-[10%] w-[20%]"
-                      onClick={addEntry}
-                    >
-                      Add More
-                    </button>
-                  )}
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-between gap-4 w-full">
-                <div className="border border-solid border-gray-400 w-full flex flex-col items-center justify-between p-4 rounded-[10px]">
-                  <div className="flex justify-between w-full mb-4">
-                    <p className="text-[18px] font-[800] text-black w-full mt-[-2rem] flex gap-2 items-center m-0">
-                      {entry.type.label}
-                      <span>-</span>
-                      {entry?.data?.verificationType == "approved" ? (
-                        <div className="text-green-500">Verified</div>
-                      ) : entry?.data?.verificationType == "resubmission" ? (
-                        <div className="text-red-500">Re-Submit</div>
-                      ) : (
-                        <div className="text-[#ffc400]">Not Verified.</div>
-                      )}
-                    </p>
-                    <div className="flex flex-row items-center justify-end w-full">
-                      <button
-                        type="button"
-                        className="py-[0.4rem] px-6 bg-[#1E69DA] text-white text-base font-semibold border-0 rounded cursor-pointer self-start"
-                        onClick={() => editEntry(i)}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </div>
-                  <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(350px,1fr))] gap-4 [&>p:first-child]:col-span-full [&>p:last-child]:col-span-full">
-                    {entry.type.fields.map(([label, key]) => (
-                      <div key={key} className="w-full border border-solid border-transparent flex flex-row items-center justify-start gap-2">
-                        <strong className="w-[40%] overflow-hidden text-ellipsis whitespace-nowrap text-[17px] font-medium">
-                          {label}:
-                        </strong>
-                        <p className="text-[18px] font-bold w-full overflow-hidden text-ellipsis whitespace-nowrap m-0">
-                          {entry.data[key]}
-                        </p>
+                <div className={formStyles.dynamicFormContainer} style={{ padding: 0 }}>
+                  {entry.type.fields.map(([label, key]) => (
+                    <div key={key} className={formStyles.formField}>
+                      <label>{label}</label>
+                      <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                        {entry.data[key] || "—"}
                       </div>
-                    ))}
-                    {entry.data.description && (
-                      <p>
-                        <strong>Description:</strong> {entry.data.description}
-                      </p>
-                    )}
-                    {entry.data.fileName && (
-                      <p
-                        style={{
-                          display: "flex",
-                          gap: "2rem",
-                          alignItems: "center",
-                        }}
-                      >
-                        <strong>Marksheet:</strong>
-                        <span>
-                          {entry.data.fileUrl.replace(
-                            "https://skillmedha-student-docs.s3.ap-south-1.amazonaws.com/",
-                            ""
-                          )}
-                        </span>
-                      </p>
-                    )}
-                    {entry.semesters && entry.semesters.length > 0 && (
-                      <div style={{ marginTop: "1rem" }}>
-                        <strong>Semester Marksheets:</strong>
-                        <ul
-                          style={{ paddingLeft: "1.5rem", marginTop: "0.5rem" }}
+                    </div>
+                  ))}
+
+                  {entry.data.description && (
+                    <div className={formStyles.fullWidthField}>
+                      <div className={formStyles.formField}>
+                        <label>Description</label>
+                        <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8, height: "auto", padding: "10px 12px" }}>
+                          {entry.data.description}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {entry.data.fileName && (
+                    <div className={formStyles.fullWidthField}>
+                      <div className={formStyles.formField}>
+                        <label>Marksheet</label>
+                        <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                          <a
+                            href={entry.data.fileUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ color: "#6BA8ED", fontWeight: "600" }}
+                          >
+                            {entry.data.fileName}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {entry.semesters && entry.semesters.length > 0 && (
+                    <div className={formStyles.fullWidthField}>
+                      <div className={formStyles.formField}>
+                        <label>Semester Marksheets</label>
+                        <div
+                          style={{
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "12px",
+                            padding: "15px",
+                            width: "100%",
+                            backgroundColor: "#f8fafc",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "8px"
+                          }}
                         >
                           {entry.semesters.map((sem, idx) => (
-                            <li key={idx} style={{ marginBottom: "0.5rem" }}>
-                              <strong>{sem.name}:</strong>{" "}
-                              <p
+                            <div key={idx} style={{ display: "flex", gap: "10px", alignItems: "center", backgroundColor: "white", padding: "8px 12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                              <strong style={{ color: "#475569" }}>{sem.name}:</strong>
+                              <a
                                 href={sem.fileUrl}
                                 target="_blank"
                                 rel="noreferrer"
+                                style={{ color: "#6BA8ED", fontWeight: "600" }}
                               >
                                 {sem.fileName}
-                              </p>
-                            </li>
+                              </a>
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-                <div className="w-full">
-                  {i === entries.length - 1 &&
-                    entries.length < EDUCATION_TYPES.length && (
-                      <button
-                        type="button"
-                        className="border-0 py-[0.4rem] px-4 bg-[#1E69DA] text-white text-base font-semibold rounded cursor-pointer block min-w-[10%] w-[20%]"
-                        onClick={addEntry}
-                      >
-                        Add More
-                      </button>
-                    )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
           </div>
         );
       })}
+
+      {entries.length < EDUCATION_TYPES.length && (
+        <div style={{ width: "100%" }}>
+          <Button
+            onClick={addEntry}
+            className={formStyles.addNewBtn}
+            style={{ fontWeight: "600", borderRadius: "8px", padding: "10px 24px", height: "auto", width: "100%", marginBottom: "2rem" }}
+          >
+            + Add Qualification
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

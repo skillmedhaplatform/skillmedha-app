@@ -18,6 +18,7 @@ import InternshipsDetails from "./components/internship";
 import BasicDetails from "./components/basicDetails";
 import ExperienceDetails from "./components/experienceDetails";
 import EducationDetails from "./components/educationDetails";
+import { HiOutlineDocumentText } from "react-icons/hi2";
 
 import dynamic from "next/dynamic";
 import axios from "axios";
@@ -730,6 +731,37 @@ function Form() {
     }
   };
 
+  const sectionRefs = useRef({});
+  const [activeSection, setActiveSection] = useState(null);
+
+  const availableSections = isEditing
+    ? [
+      "Basic Details", "Links", "Experience", "Internships", "Education",
+      "Projects", "Certifications", "Volunteering", "Skills", "Languages"
+    ]
+    : [
+      "Basic Details",
+      links?.length > 0 && "Links",
+      experienceDetails?.length > 0 && "Experience",
+      internships?.length > 0 && "Internships",
+      educationDetails?.length > 0 && "Education",
+      projectDetails?.length > 0 && "Projects",
+      certificates?.length > 0 && "Certifications",
+      volunteerings?.length > 0 && "Volunteering",
+      skills?.length > 0 && "Skills",
+      languages?.length > 0 && "Languages"
+    ].filter(Boolean);
+
+  const scrollToSection = (sectionName) => {
+    setActiveSection(sectionName);
+    if (isEditing) {
+      sectionRefs.current[sectionName]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      const el = document.getElementById(`section-${sectionName.replace(" ", "-")}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const isMobile = useResponsive();
 
   if (isMobile) {
@@ -780,118 +812,169 @@ function Form() {
         addLanguage={addLanguage}
         removeLanguage={removeLanguage}
         Template2={Template2}
+        activeSection={activeSection}
       />
     );
   }
 
+
+
   return (
-    <div className="w-full mx-auto p-5">
-      <StudentPageHeader section="Tools" title="Resume Builder" />
-      <div className="flex justify-between px-4 mb-4 sticky left-0 top-0 z-[100]">
-        <Button type="primary" onClick={() => setIsEditing(!isEditing)}>
-          {isEditing ? "Disable Editing" : "Edit"}
-        </Button>
-        {isEditing && (
-          <Button type="primary" onClick={handleSubmit}>
-            Submit
-          </Button>
-        )}
-        <Button type="primary" onClick={() => setDownloadImage(true)}>
-          Download Resume
-        </Button>
+    <div className="flex flex-col gap-0 relative bg-white h-screen overflow-hidden">
+      <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center p-4 lg:px-8 shadow-sm bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+        {/* Decorative Icons */}
+        <div className="absolute inset-0 pointer-events-none z-[1]">
+          <div className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]">✕</div>
+          <div className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]">+</div>
+          <div className="absolute top-[40%] right-[50%] text-[#1E69DA] opacity-50 text-[1.1rem]">★</div>
+          <div className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]">✕</div>
+        </div>
+
+        {/* Top half: Title & Stats */}
+        <div className="flex items-center justify-between w-full relative z-[2]">
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-[56px] h-[56px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
+              <HiOutlineDocumentText className="text-white text-3xl" />
+            </div>
+            <div className="flex flex-col justify-center gap-1">
+              <h1
+                className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0"
+                style={{ border: 'none', marginBottom: 0 }}
+              >
+                Resume Builder
+              </h1>
+              <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
+                Build your professional resume and stand out to recruiters today.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Button onClick={() => setIsEditing(!isEditing)} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
+              {isEditing ? "Disable Editing" : "Edit Details"}
+            </Button>
+            {isEditing && (
+              <Button onClick={handleSubmit} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
+                Submit
+              </Button>
+            )}
+            <Button onClick={uploadResume} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
+              Download Resume
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-        {isEditing && (
-          <div
-            className="flex flex-col gap-4 h-full overflow-y-scroll border border-solid border-[#ccc] p-4 bg-[#f8f8f8] font-['Lexend_Deca'] [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-[#f4f4f4] [&::-webkit-scrollbar-thumb]:bg-[#f4f4f4] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-[#f4f4f4]"
-            style={{
-              width: "50%",
-              overflowY: "auto",
-              paddingRight: "1rem",
-              boxSizing: "border-box",
-              borderRight: "1px solid #ccc",
-              maxHeight: "80vh",
-            }}
-          >
-            <BasicDetails data={basicDetails} updateField={updateBasicDetail} />
-            <Links
-              links={links}
-              updateLink={updateLink}
-              addLink={addLink}
-              removeLink={removeLink}
-            />
-            <ExperienceDetails
-              experiences={experienceDetails}
-              updateExperience={updateExperience}
-              addExperience={addExperience}
-              removeExperience={removeExperience}
-            />
-            <InternshipsDetails
-              experiences={internships}
-              updateExperience={updateInternship}
-              addExperience={addInternship}
-              removeExperience={removeInternship}
-            />
-            <EducationDetails
-              educationDetails={educationDetails}
-              updateEducationDetail={updateEducationDetail}
-              addEducation={addEducation}
-              removeEducation={removeEducation}
-            />
-            <ProjectDetails
-              projects={projectDetails}
-              updateProject={updateProject}
-              addProject={addProject}
-              removeProject={removeProject}
-            />
-            {/* <AccomplishmentDetails
-                            accDetails={accDetails}
-                            updateAccomplishment={updateAccomplishment}
-                            addAccomplishment={addAccomplishment}
-                            removeAccomplishment={removeAccomplishment}
-                        /> */}
-            <CertificateDetails
-              certificates={certificates}
-              updateCertificate={updateCertificate}
-              addCertificate={addCertificate}
-              removeCertificate={removeCertificate}
-            />
-            <VolunteeringDetails
-              volunteerings={volunteerings}
-              updateVolunteering={updateVolunteering}
-              addVolunteering={addVolunteering}
-              removeVolunteering={removeVolunteering}
-            />
-            <SkillDetails
-              skills={skills}
-              updateSkill={updateSkill}
-              addSkill={addSkill}
-              removeSkill={removeSkill}
-            />
-            <Language
-              languages={languages}
-              updateLanguage={updateLanguage}
-              addLanguage={addLanguage}
-              removeLanguage={removeLanguage}
-            />
+      {/* Content Area */}
+      <div className="flex-1 w-full flex overflow-hidden">
+
+        {/* Left Sidebar */}
+        <div className="w-[280px] shrink-0 bg-white border-r border-[#e2e8f0] p-6 flex flex-col gap-6 overflow-y-auto hidden lg:flex">
+          <div className="text-[12px] font-bold text-[#94a3b8] tracking-wider uppercase mb-[-10px]">Sections</div>
+
+          {/* Profile Completion */}
+          <div className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] p-4 flex flex-col gap-3">
+            <div className="flex justify-between items-center">
+              <span className="text-[#334155] text-[13px] font-medium">Profile complete</span>
+              <span className="text-[#1E69DA] font-bold text-[14px]">35%</span>
+            </div>
+            <div className="w-full bg-[#e2e8f0] h-[6px] rounded-full overflow-hidden">
+              <div className="bg-[#1E69DA] h-full" style={{ width: "35%" }}></div>
+            </div>
+            <p className="text-[10px] text-[#94a3b8] m-0 leading-tight mt-1">Add more sections to strengthen your resume</p>
           </div>
-        )}
-        <div
-          style={{
-            width: isEditing ? "50%" : "100%",
-            overflowY: "auto",
-            maxHeight: "90vh",
-            paddingLeft: isEditing ? "1rem" : "0",
-            boxSizing: "border-box",
-          }}
-        >
-          <Template2
-            downloadImage={downloadImage}
-            setDownloadImage={setDownloadImage}
-            resumeTemplateRef={resumeTemplateRef}
-          />
+
+          {/* Navigation Menu */}
+          <div className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] p-2 flex flex-col gap-1">
+            {availableSections.map((item) => (
+              <div
+                key={item}
+                onClick={() => scrollToSection(item)}
+                className={`group px-4 py-2.5 rounded-lg text-[13px] font-medium cursor-pointer border flex justify-between items-center transition-all ${activeSection === item ? '!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !text-white !border-transparent shadow-sm' : '!bg-transparent !border-transparent text-[#64748b] hover:!bg-white hover:!text-[#1E69DA] hover:!border-[#1E69DA] hover:shadow-sm'}`}
+              >
+                {item}
+                <div className={`w-1.5 h-1.5 rounded-full transition-colors ${activeSection === item ? 'bg-white' : 'bg-[#cbd5e1] group-hover:!bg-[#1E69DA]'}`}></div>
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Right Canvas (Scrolling Editor) */}
+        <div className="flex-1 h-full overflow-y-auto bg-[#f8fafc] p-6 lg:p-12 relative" onClick={(e) => {
+          // Only clear active section if clicking outside the sidebar navigation
+          if (!e.target.closest('.group.px-4.py-2\\.5')) {
+            setActiveSection(null);
+          }
+        }}>
+          <div className="max-w-[800px] mx-auto flex flex-col gap-6">
+
+            {/* If not editing, show Template. If editing, show forms. */}
+            {!isEditing ? (
+              <div className="bg-white shadow-md rounded-lg overflow-hidden border border-[#e2e8f0]">
+                <Template2
+                  downloadImage={downloadImage}
+                  setDownloadImage={setDownloadImage}
+                  resumeTemplateRef={resumeTemplateRef}
+                  activeSection={activeSection}
+                />
+              </div>
+            ) : (
+              <>
+                <div ref={(el) => sectionRefs.current["Basic Details"] = el} data-section-name="Basic Details" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-[#1E69DA] text-white p-4 font-semibold">Basic Details</div>
+                  <BasicDetails data={basicDetails} updateField={updateBasicDetail} />
+                </div>
+
+                <div ref={(el) => sectionRefs.current["Links"] = el} data-section-name="Links" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Links <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <Links links={links} updateLink={updateLink} addLink={addLink} removeLink={removeLink} />
+                </div>
+
+                <div ref={(el) => sectionRefs.current["Experience"] = el} data-section-name="Experience" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Experience <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <ExperienceDetails experiences={experienceDetails} updateExperience={updateExperience} addExperience={addExperience} removeExperience={removeExperience} />
+                </div>
+
+                <div ref={(el) => sectionRefs.current["Internships"] = el} data-section-name="Internships" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Internships <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <InternshipsDetails experiences={internships} updateExperience={updateInternship} addExperience={addInternship} removeExperience={removeInternship} />
+                </div>
+
+                <div ref={(el) => sectionRefs.current["Education"] = el} data-section-name="Education" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Education <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <EducationDetails educationDetails={educationDetails} updateEducationDetail={updateEducationDetail} addEducation={addEducation} removeEducation={removeEducation} />
+                </div>
+
+                <div ref={(el) => sectionRefs.current["Projects"] = el} data-section-name="Projects" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Projects <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <ProjectDetails projects={projectDetails} updateProject={updateProject} addProject={addProject} removeProject={removeProject} />
+                </div>
+
+                <div ref={(el) => sectionRefs.current["Certifications"] = el} data-section-name="Certifications" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Certifications <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <CertificateDetails certificates={certificates} updateCertificate={updateCertificate} addCertificate={addCertificate} removeCertificate={removeCertificate} />
+                </div>
+
+                <div ref={(el) => sectionRefs.current["Volunteering"] = el} data-section-name="Volunteering" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Volunteering <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <VolunteeringDetails volunteerings={volunteerings} updateVolunteering={updateVolunteering} addVolunteering={addVolunteering} removeVolunteering={removeVolunteering} />
+                </div>
+
+                <div ref={(el) => sectionRefs.current["Skills"] = el} data-section-name="Skills" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Skills <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <SkillDetails skills={skills} updateSkill={updateSkill} addSkill={addSkill} removeSkill={removeSkill} />
+                </div>
+
+                <div ref={(el) => sectionRefs.current["Languages"] = el} data-section-name="Languages" className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] overflow-hidden [&_>div]:!border-none [&_>div]:!shadow-none [&_>div]:!bg-transparent">
+                  <div className="bg-white border-b border-[#e2e8f0] px-4 py-3 font-semibold text-[#071631] flex justify-between items-center text-[15px]">Languages <Button size="small" className="!bg-white !text-[#1E69DA] !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">Add</Button></div>
+                  <Language languages={languages} updateLanguage={updateLanguage} addLanguage={addLanguage} removeLanguage={removeLanguage} />
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+
       </div>
     </div>
   );

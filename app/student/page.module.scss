@@ -1,6 +1,5 @@
-@import "../../utils/universalUtils/colors.module.scss";
-@import "../../utils/universalUtils/mixins.scss";
-
+@use "../../utils/universalUtils/colors.module.scss" as *;
+@use "../../utils/universalUtils/mixins.scss" as *;
 .pageContainer {
   width: 100vw;
   height: 100vh;
@@ -23,14 +22,16 @@
     position: relative;
     width: 100%;
     flex: 1;
-    padding: 0rem 1rem 0rem 0.5rem;
+    padding: 0;
     overflow-y: auto;
     border-radius: 0;
     border: none;
-    animation: pageEnter 0.18s ease-out;
-    @include custom-scrollbar($scrollbarWidth: 6px,
+    @include custom-scrollbar(
+      $thumbColor: linear-gradient(135deg, #1E69DA, #5694F0),
+      $scrollbarWidth: 6px,
       $buttonDisplay: block,
-      $buttonBg: #f1f1f1);
+      $buttonBg: #f1f1f1
+    );
   }
 }
 
@@ -67,15 +68,4 @@
   top: 5px;
   right: 5px;
   z-index: 1000;
-}
-
-@keyframes pageEnter {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }

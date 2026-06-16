@@ -9,7 +9,8 @@ import {
   Button,
   message,
   Input,
-  Dropdown
+  Dropdown,
+  Pagination
 } from "antd";
 import { EllipsisOutlined, UploadOutlined } from "@ant-design/icons";
 import students from "./students.module.scss";
@@ -33,13 +34,27 @@ import axios from "axios";
 import { allFields, fieldDisplayNames } from "@/utils/universalUtils/fields";
 import StudentDownloader from "@/modules/tpo/components/downloadstdudents";
 import { getUpdatedFields } from "../../myprofile/(components)/functions";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
+import { FaCaretRight, FaCheckCircle } from "react-icons/fa";
+
+import { HiOutlineEnvelope, HiOutlinePhone } from "react-icons/hi2";
 
 const StudentData = () => {
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
+  const path = usePathname();
+  const pathSegments = path?.split("/").filter((e) => e);
+
+  const resolveName = (segment, index) => {
+    if (segment === "allstudents") return "All Departments";
+    if (index > 0 && pathSegments[index - 1] === "allstudents") {
+      return getSstorage("departmentTitle") || "Department";
+    }
+    return segment.charAt(0).toUpperCase() + segment.slice(1);
+  };
+
   const { value, loading } = useSelector((state) => state.students.allStudents);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState([]);
@@ -49,6 +64,7 @@ const StudentData = () => {
   const [modalType, setModalType] = useState("");
   const [fileList, setFileList] = useState([]);
   const [original, setOriginal] = useState({});
+  const [viewMode, setViewMode] = useState("cards"); // Default to cards view as tiles
   const [studentPayload, setStudentPayload] = useState({
     firstName: "",
     lastName: "",
@@ -245,6 +261,20 @@ const StudentData = () => {
   const openDownloadModal = () => setDownloadModal(true);
   const closeDownloadModal = () => setDownloadModal(false);
 
+  const handleUpload = () => {
+    message.info("Bulk upload is not configured yet.");
+    closeModal();
+  };
+
+  const uploadProps = {
+    beforeUpload: (file) => {
+      setFileList([file]);
+      return false;
+    },
+    fileList,
+    onRemove: () => setFileList([]),
+  };
+
   const [pagination, setPagination] = useState({ current: 1, pageSize: 8 });
 
   const yearOptions = Array.from(
@@ -256,6 +286,32 @@ const StudentData = () => {
       text: String(year),
       value: String(year)
     }));
+
+  const isStudentApproved = (record) => {
+    const topVals = Object.keys(record)
+      .filter((k) => k.endsWith("VerificationType"))
+      .map((k) => record[k]);
+
+    const nestedArrays = [
+      "accomplishments",
+      "projects",
+      "volunteerings",
+      "responsibilities",
+      "experiences",
+      "educationDetails",
+    ];
+    const nestedVals = nestedArrays.flatMap((arr) =>
+      (record[arr] || [])
+        .map((item) => item?.verificationType)
+        .filter(Boolean)
+    );
+
+    const allVerifications = [...topVals, ...nestedVals];
+    return (
+      allVerifications.length > 0 &&
+      allVerifications.every((v) => v === "approved")
+    );
+  };
 
   const columns = [
     {
@@ -293,16 +349,6 @@ const StudentData = () => {
         );
       }
     },
-    // {
-    //   title: "Username",
-    //   dataIndex: "userName",
-    //   key: "userName",
-    //   width: 130,
-    //   sorter: (a, b) =>
-    //     (a.userName || "")
-    //       .toLowerCase()
-    //       .localeCompare((b.userName || "").toLowerCase()),
-    // },
     { title: "Email", dataIndex: "email", key: "email", width: 180 },
     { title: "Phone", dataIndex: "phone", key: "phone", width: 80 },
     {
@@ -319,34 +365,15 @@ const StudentData = () => {
       key: "status",
       width: 50,
       render: (_, record) => {
-        const topVals = Object.keys(record)
-          .filter((k) => k.endsWith("VerificationType"))
-          .map((k) => record[k]);
-
-        const nestedArrays = [
-          "accomplishments",
-          "projects",
-          "volunteerings",
-          "responsibilities",
-          "experiences",
-          "educationDetails",
-        ];
-        const nestedVals = nestedArrays.flatMap((arr) =>
-          (record[arr] || [])
-            .map((item) => item?.verificationType)
-            .filter(Boolean)
-        );
-
-        const allVerifications = [...topVals, ...nestedVals];
-        const allApproved =
-          allVerifications.length > 0 &&
-          allVerifications.every((v) => v === "approved");
-
-        return (
+        const allApproved = isStudentApproved(record);
+        return allApproved ? (
+          <FaCheckCircle style={{ color: "#6BA8ED", fontSize: "20px" }} />
+        ) : (
           <Image
-            src={allApproved ? trueImage : falseImage}
+            src={falseImage}
             width={20}
             height={20}
+            alt="Status"
           />
         );
       }
@@ -392,58 +419,14 @@ const StudentData = () => {
     },
   ];
 
-  // Bulk upload handlers
-  const uploadProps = {
-    accept: ".xlsx,.csv",
-    beforeUpload: (file) => {
-      setFileList([file]);
-      return false;
-    },
-    onRemove: () => setFileList([]),
-    fileList,
-    maxCount: 1
+  const getInitials = (firstName = "", lastName = "") => {
+    return ((firstName?.[0] || "") + (lastName?.[0] || "")).toUpperCase();
   };
 
-  const handleUpload = async () => {
-    const token = getLstorage("token");
-    if (params?.departId === "noDept") {
-      message.error(
-        "Cannot upload students to 'No Department' category. Please select a valid department."
-      );
-      return;
-    }
-
-    const hide = message.loading(
-      "Please wait while creating student accounts",
-      0
-    );
-    if (fileList.length === 0) {
-      hide();
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", fileList[0]);
-
-    try {
-      await axios.post(
-        `${restUrl}/bulkUploadStudentsToDepartment/${params.departId}`,
-        formData,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-
-      dispatch(getStudentsInDepartments({ id: params.departId }));
-      message.success("Students uploaded successfully!");
-    } catch (e) {
-      console.error(e);
-      message.error(e || "Failed to upload students. Please try again.");
-    } finally {
-      hide();
-      closeModal();
-    }
-  };
+  const paginatedData = (filteredData || []).slice(
+    (pagination.current - 1) * pagination.pageSize,
+    pagination.current * pagination.pageSize
+  );
 
   return (
     <>
@@ -453,50 +436,278 @@ const StudentData = () => {
         subtitle="Manage students registered in this department"
       />
       <div className={students.container}>
+        {/* Breadcrumbs Trail */}
+        <div className={students.headerCont}>
+          {pathSegments.map((segment, index) => {
+            const displayName = resolveName(segment, index);
+            const isLast = index === pathSegments.length - 1;
+            let pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
+            if (pathToHere === "/tpo") {
+              pathToHere = "/tpo/dashboard";
+            }
+            return (
+              <span
+                key={index}
+                className={isLast ? students.activeCrumb : students.crumb}
+                onClick={() => {
+                  if (!isLast) router.push(pathToHere);
+                }}
+                style={{ display: "inline-flex", alignItems: "center" }}
+              >
+                {displayName}&nbsp;
+                {index < pathSegments.length - 1 && (
+                  <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />
+                )}
+              </span>
+            );
+          })}
+        </div>
+
         {params?.departId !== "noDept" && (
           <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end", marginBottom: "1rem" }}>
-            <Button onClick={() => showModal("bulk")} type="primary" style={{ background: "#24a058", borderColor: "#24a058" }}>
+            <Button onClick={() => showModal("bulk")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
               Bulk Upload Students
             </Button>
-            <Button onClick={() => showModal("single")} type="primary" style={{ background: "#24a058", borderColor: "#24a058" }}>
+            <Button onClick={() => showModal("single")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
               Add Single Student
             </Button>
-            <Button onClick={openDownloadModal} type="primary" style={{ background: "#24a058", borderColor: "#24a058" }}>
+            <Button onClick={openDownloadModal} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
               Download Students
             </Button>
           </div>
         )}
 
-        <Search
-          placeholder="Search by name, email, phone, or roll no."
-          style={{ width: "100%", margin: "1rem 0" }}
-          allowClear
-          value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
+        {/* Toolbar containing search query and layout controls */}
+        <div className={students.toolbar}>
+          <Search
+            placeholder="Search by name, email, phone, or roll no."
+            style={{ flex: 1 }}
+            allowClear
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+          <div className={students.viewToggle}>
+            <button
+              className={`${students.toggleBtn} ${viewMode === "cards" ? students.toggleBtnActive : ""}`}
+              onClick={() => setViewMode("cards")}
+              title="Tile view"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+                <rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+                <rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+                <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+              </svg>
+            </button>
+            <button
+              className={`${students.toggleBtn} ${viewMode === "table" ? students.toggleBtnActive : ""}`}
+              onClick={() => setViewMode("table")}
+              title="Table view"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4H14M2 8H14M2 12H14" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-        <Table
-          columns={columns}
-          dataSource={filteredData || []}
-          scroll={{ y: 600 }}
-          pagination={
-            filteredData && filteredData.length > 6
-              ? {
-                ...pagination,
-                onChange: (page, pageSize) =>
-                  setPagination({ current: page, pageSize })
-              }
-              : false
-          }
-          className={students.table}
-          loading={loading}
-          style={{ width: "100%" }}
-          rowKey="_id"
-          onRow={(rec) => ({
-            onClick: () => handleClick(rec),
-            style: { cursor: "pointer" }
-          })}
-        />
+        {/* Condition on View Mode */}
+        {viewMode === "cards" ? (
+          <>
+            {paginatedData.length > 0 ? (
+              <div className={students.cardsList}>
+                {paginatedData.map((record) => {
+                  const fullName = ((record?.firstName || "") + " " + (record?.lastName || "")).trim() || "Not Provided";
+                  const allApproved = isStudentApproved(record);
+                  return (
+                    <div
+                      key={record._id}
+                      className={students.studentCard}
+                      onClick={() => handleClick(record)}
+                    >
+                      <div className={students.cardHeader}>
+                        <div className={students.studentAvatar}>
+                          {getInitials(record.firstName, record.lastName) || "ST"}
+                        </div>
+                        <div className={students.studentInfo}>
+                          <span className={students.studentName}>{fullName}</span>
+                          <span className={students.studentYear}>Class of {record.yearOfPassing || "N/A"}</span>
+                        </div>
+                        <div style={{ marginLeft: "auto" }}>
+                          {allApproved ? (
+                            <FaCheckCircle style={{ color: "#6BA8ED", fontSize: "20px" }} />
+                          ) : (
+                            <Image
+                              src={falseImage}
+                              width={20}
+                              height={20}
+                              alt="Verification Status"
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={students.cardMeta}>
+                        <div className={students.metaRow}>
+                          <span className={students.metaIcon}><HiOutlineEnvelope /></span>
+                          <span>{record.email || "No Email"}</span>
+                        </div>
+                        <div className={students.metaRow}>
+                          <span className={students.metaIcon}><HiOutlinePhone /></span>
+                          <span>{record.phone || "No Phone"}</span>
+                        </div>
+                      </div>
+
+                      <div className={students.cardActions} onClick={(e) => e.stopPropagation()}>
+                        <button
+                          className={students.viewBtn}
+                          onClick={() => handleClick(record)}
+                        >
+                          View Profile
+                        </button>
+                        <Dropdown
+                          menu={{
+                            items: [
+                              { key: "edit", label: "Edit" },
+                              { key: "delete", label: "Delete", danger: true }
+                            ],
+                            onClick: (e) => {
+                              if (e.domEvent) e.domEvent.stopPropagation();
+                              if (e.key === "edit") {
+                                handleEdit(record);
+                              } else if (e.key === "delete") {
+                                handleDelete(record);
+                              }
+                            }
+                          }}
+                          trigger={["click"]}
+                        >
+                          <Button type="text" style={{ padding: 0 }}>
+                            <EllipsisOutlined style={{ fontSize: 20, cursor: "pointer" }} />
+                          </Button>
+                        </Dropdown>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", color: "#64748b", margin: "2rem 0" }}>
+                No students found matching current filters.
+              </div>
+            )}
+
+            {/* Pagination Component for Cards */}
+            {filteredData && filteredData.length > pagination.pageSize && (
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
+                <Pagination
+                  current={pagination.current}
+                  pageSize={pagination.pageSize}
+                  total={filteredData.length}
+                  onChange={(page) => setPagination((prev) => ({ ...prev, current: page }))}
+                  showSizeChanger={false}
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {paginatedData.length > 0 ? (
+              <div className={students.horizontalList}>
+                {paginatedData.map((record) => {
+                  const fullName = ((record?.firstName || "") + " " + (record?.lastName || "")).trim() || "Not Provided";
+                  const allApproved = isStudentApproved(record);
+                  return (
+                    <div
+                      key={record._id}
+                      className={students.horizontalCard}
+                      onClick={() => handleClick(record)}
+                    >
+                      <div className={students.cardHeader}>
+                        <div className={students.studentAvatar}>
+                          {getInitials(record.firstName, record.lastName) || "ST"}
+                        </div>
+                        <div className={students.studentInfo}>
+                          <span className={students.studentName}>{fullName}</span>
+                          <span className={students.studentYear}>Class of {record.yearOfPassing || "N/A"}</span>
+                        </div>
+                        <div style={{ marginLeft: "auto" }}>
+                          {allApproved ? (
+                            <FaCheckCircle style={{ color: "#6BA8ED", fontSize: "20px" }} />
+                          ) : (
+                            <Image
+                              src={falseImage}
+                              width={20}
+                              height={20}
+                              alt="Verification Status"
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={students.cardMeta}>
+                        <div className={students.metaRow}>
+                          <span className={students.metaIcon}><HiOutlineEnvelope /></span>
+                          <span>{record.email || "No Email"}</span>
+                        </div>
+                        <div className={students.metaRow}>
+                          <span className={students.metaIcon}><HiOutlinePhone /></span>
+                          <span>{record.phone || "No Phone"}</span>
+                        </div>
+                      </div>
+
+                      <div className={students.cardActions} onClick={(e) => e.stopPropagation()}>
+                        <button
+                          className={students.viewBtn}
+                          onClick={() => handleClick(record)}
+                        >
+                          View Profile
+                        </button>
+                        <Dropdown
+                          menu={{
+                            items: [
+                              { key: "edit", label: "Edit" },
+                              { key: "delete", label: "Delete", danger: true }
+                            ],
+                            onClick: (e) => {
+                              if (e.domEvent) e.domEvent.stopPropagation();
+                              if (e.key === "edit") {
+                                handleEdit(record);
+                              } else if (e.key === "delete") {
+                                handleDelete(record);
+                              }
+                            }
+                          }}
+                          trigger={["click"]}
+                        >
+                          <Button type="text" style={{ padding: 0 }}>
+                            <EllipsisOutlined style={{ fontSize: 20, cursor: "pointer" }} />
+                          </Button>
+                        </Dropdown>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", color: "#64748b", margin: "2rem 0" }}>
+                No students found matching current filters.
+              </div>
+            )}
+
+            {filteredData && filteredData.length > pagination.pageSize && (
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
+                <Pagination
+                  current={pagination.current}
+                  pageSize={pagination.pageSize}
+                  total={filteredData.length}
+                  onChange={(page) => setPagination((prev) => ({ ...prev, current: page }))}
+                  showSizeChanger={false}
+                />
+              </div>
+            )}
+          </>
+        )}
 
         {/* Single / Bulk Add Modal */}
         <Modal

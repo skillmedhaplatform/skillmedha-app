@@ -25,6 +25,8 @@ const TopicContentRouter = memo(({
   markTopicCompleted,
   setTopicDurationOverrides,
   handleNextTopic,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _currentSection,
 }) => {
   if (!currentTopic) {
     return (
@@ -37,7 +39,7 @@ const TopicContentRouter = memo(({
   // Priority 1: Live Meeting or Recorded Lecture (handled by ZoomClient)
   const meetingId = currentTopic?.meetingId || currentTopic?.meetings?._id;
   if (meetingId) {
-    return <ZoomClient meetingId={meetingId} orgId={orgId} />;
+    return <ZoomClient meetingId={meetingId} orgId={orgId} currentTopic={currentTopic} />;
   }
 
   // Priority 2: PDF Resource

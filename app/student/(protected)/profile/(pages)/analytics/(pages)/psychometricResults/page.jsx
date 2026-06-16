@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { useSelector } from "react-redux";
-import { Table, Modal, Tooltip } from "antd";
+import { Table, Modal, Tooltip, Button } from "antd";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { getLstorage } from "@/universalUtils/windowMW";
+import formStyles from "../../../../form.module.scss";
 
 const PsychometricTestResultPage = dynamic(
   () => import("../../../psychometrictestresult/page"),
@@ -51,21 +52,21 @@ const Page = () => {
         <button
           onClick={() => handleDownloadClick(record.id)}
           style={{
-            padding: "6px 12px",
-            backgroundColor: "#1890ff",
+            padding: "6px 16px",
+            background: "linear-gradient(135deg, #1E69DA, #5694F0)",
             color: "white",
             border: "none",
-            borderRadius: "4px",
+            borderRadius: "8px",
             cursor: "pointer",
+            fontWeight: "600",
+            fontSize: "13px"
           }}
         >
-          Download
+          Download PDF
         </button>
       ),
     },
   ];
-
-
 
   const lastTestDate =
     studentDetails?.psychometricTestResults?.[
@@ -89,25 +90,37 @@ const Page = () => {
         }`;
     }
   }
+
   return (
-    <>
-      <StudentPageHeader section="Profile · Analytics" title="Psychometric Results" />
-      <Tooltip title={isDisabled ? remainingTimeText : ""}>
-        <button
-          disabled={isDisabled}
-          className={`float-right bg-[#24A058] font-bold text-base text-white w-fit py-2 px-8 rounded-lg cursor-pointer my-4 disabled:opacity-50 disabled:cursor-not-allowed`}
-          onClick={() =>
-            nav.push(
-              `/testPortal?token=${getLstorage("token")}&sId=${studentDetails?._id
-              }`
-            )
-          }
-        >
-          Re-Attempt Test
-        </button>
-      </Tooltip>
-      <div className="">
-        <Table columns={columns} dataSource={dataSource} pagination={false} />
+    <div className={formStyles.formContainer}>
+      <div style={{ marginBottom: "1.5rem", borderBottom: "1px solid #eef5fb", width: "100%", paddingBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+        <div>
+          <h3 className={formStyles.formTitle} style={{ fontSize: "1.125rem", fontWeight: "800", color: "#0f172a", margin: 0 }}>
+            Psychometric Test Results
+          </h3>
+          <p className={formStyles.formSubtitle} style={{ fontSize: "0.8rem", color: "#64748b", margin: 0, marginTop: "0.25rem" }}>
+            History of all attempted psychometric tests and their detailed results
+          </p>
+        </div>
+        <Tooltip title={isDisabled ? remainingTimeText : ""}>
+          <Button
+            type="primary"
+            disabled={isDisabled}
+            className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+            style={{ fontWeight: "600", borderRadius: "8px", height: "auto", padding: "8px 20px" }}
+            onClick={() =>
+              nav.push(
+                `/testPortal?token=${getLstorage("token")}&sId=${studentDetails?._id}`
+              )
+            }
+          >
+            Re-Attempt Test
+          </Button>
+        </Tooltip>
+      </div>
+
+      <div style={{ width: "100%" }}>
+        <Table columns={columns} dataSource={dataSource} pagination={false} size="middle" bordered />
       </div>
 
       <Modal
@@ -129,8 +142,9 @@ const Page = () => {
           />
         )}
       </Modal>
-    </>
+    </div>
   );
 };
 
 export default Page;
+

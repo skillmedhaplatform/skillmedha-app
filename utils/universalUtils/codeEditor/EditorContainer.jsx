@@ -111,13 +111,18 @@ export default function EditorContainer({
       <div className={playGroundStyles.headerCon}>
         <div className={playGroundStyles.headerConLeft}>Code</div>
         <div className={playGroundStyles.headerConRight}>
+          <span className={playGroundStyles.autoSavedText}>Auto-saved</span>
           <Select
             options={languageOptions}
             value={selectedOption}
             onChange={handleLanguageChange}
             className={playGroundStyles.select}
           />
-          <Button onClick={runCode} type="default" style={{ fontSize: "17px" }}>
+          <Button
+            onClick={runCode}
+            type="primary"
+            className={playGroundStyles.runBtn}
+          >
             Run Code
           </Button>
         </div>

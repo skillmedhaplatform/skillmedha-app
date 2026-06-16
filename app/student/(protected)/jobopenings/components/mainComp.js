@@ -105,18 +105,18 @@ export default function MainComp() {
     <div className="flex items-start h-full gap-4">
 
       {/* ════════ LEFT: Job List panel ════════ */}
-      <div className="w-[30%] min-w-[300px] h-full flex flex-col border border-solid border-gray-200 rounded-lg overflow-hidden bg-white">
+      <div className="w-[30%] min-w-[300px] h-full flex flex-col gap-4 overflow-hidden bg-white border border-[#e2e8f0] rounded-xl shadow-sm p-4">
 
         {/* List filter — antd Segmented (themed) */}
-        <div style={{ padding: "0.5rem", borderBottom: "1px solid rgba(128,128,128,0.2)" }}>
+        <div className="mb-0">
           <ConfigProvider
             theme={{
               components: {
                 Segmented: {
-                  itemSelectedBg:    "#24A058",
+                  itemSelectedBg:    "linear-gradient(to bottom right, #1E69DA, #5694F0)",
                   itemSelectedColor: "#ffffff",
-                  itemActiveBg:      "#24A058",
-                  trackBg:           "rgba(39,174,96,0.1)",
+                  itemActiveBg:      "linear-gradient(to bottom right, #1E69DA, #5694F0)",
+                  trackBg:           "rgba(30,105,218,0.1)",
                   fontSize:          15,
                 },
               },
@@ -135,7 +135,7 @@ export default function MainComp() {
           </ConfigProvider>
         </div>
 
-        <div className="overflow-y-auto flex-1 bg-slate-50 cursor-pointer [&::-webkit-scrollbar]:w-[4px]">
+        <div className="overflow-y-auto flex-1 flex flex-col gap-3 pb-4 cursor-pointer [&::-webkit-scrollbar]:w-[4px]">
           {isFetching && !JOBS.length ? (
             Array.from({ length: 6 }).map((_, i) => <JobListSkeleton key={i} />)
           ) : filteredJobs.length === 0 ? (
@@ -171,7 +171,7 @@ export default function MainComp() {
       </div>
 
       {/* ════════ RIGHT: Job Details panel ════════ */}
-      <div className="w-[70%] p-6 h-full overflow-hidden bg-white border border-solid border-gray-200 rounded-lg shadow-sm flex flex-col">
+      <div className="w-[70%] p-6 h-full overflow-hidden bg-white border border-[#e2e8f0] rounded-xl shadow-sm flex flex-col">
         {isFetching && !selectedJob ? (
           <JobDetailsSkeleton />
         ) : (

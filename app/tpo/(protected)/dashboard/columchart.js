@@ -121,7 +121,7 @@ const DepartmentPlacementChart = ({ data = [] }) => {
       }
     },
     fill: { opacity: 1 },
-    colors: ["#5bbcda", "#1fbb9c"],
+    colors: ["#5bbcda", "#6BA8ED"],
   };
 
   const series = [

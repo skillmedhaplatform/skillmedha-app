@@ -17,7 +17,6 @@ import {
 import { Button } from "antd";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { IoMdCloseCircleOutline } from "react-icons/io";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const Educational = () => {
   const dispatch = useDispatch();
@@ -144,7 +143,6 @@ const Educational = () => {
 
   return (
     <>
-      <PageHeader title="Education" />
       <div className={educationStyles.container}>
         {/* Default card when no data available */}
         {!hasRealData && (
@@ -237,7 +235,7 @@ const Educational = () => {
                       style={{
                         color:
                           item?.verificationType === "approved"
-                            ? "green"
+                            ? "#6BA8ED"
                             : item?.verificationType === "resubmission"
                               ? "orange"
                               : "gray",
@@ -254,7 +252,7 @@ const Educational = () => {
                   <div className={educationStyles.mark}>
                     <Button
                       type="text"
-                      style={{ color: "#24A058" }}
+                      style={{ color: "#6BA8ED" }}
                       onClick={() =>
                         item && handleApprove(item.type, sectionKey)
                       }

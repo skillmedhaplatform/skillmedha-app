@@ -6,7 +6,6 @@ import { Table, Modal, Tooltip } from "antd";
 import dynamic from "next/dynamic";
 import { useRouter } from "@bprogress/next/app";
 import AnalyticsPage from "../../page";
-import PageHeader from "@/modules/tpo/components/PageHeader";
 const PsychometricTestResultPage = dynamic(
   () => import("../psychometrictestresult/page"),
   { ssr: false }
@@ -105,9 +104,7 @@ const Page = () => {
     }
   }
   return (
-    <>
-      <PageHeader title="Psychometric Results" />
-      <AnalyticsPage>
+    <AnalyticsPage>
       <div className={psyStyles.cards}>
         <Table columns={columns} dataSource={dataSource} pagination={false} />
       </div>
@@ -132,7 +129,6 @@ const Page = () => {
         )}
       </Modal>
     </AnalyticsPage>
-    </>
   );
 };
 

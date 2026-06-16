@@ -1,287 +1,369 @@
 @import "./styles/colors.scss";
 
+// Redefine theme colors locally for premium blue design
+$smBluePrimary: #1E69DA;
+$smBlueLight: #eef5fb;
+$smBlueHover: #5694F0;
+$smSlateBg: #f8fafc;
+$smSlateBorder: #e2e8f0;
+$smTextPrimary: #0f172a;
+$smTextSecondary: #475569;
+
 .container {
   height: 100%;
   width: 100%;
   overflow-y: hidden;
-  max-height: 100vh;
-
-  .titleContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    .title {
-      color: #24A058;
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-
-    .finishButton {
-      border: none;
-      padding: 0.5rem 2rem;
-      background-color: #24A0581a;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #fff;
-    }
-  }
+  background-color: $smSlateBg;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   .boxContainer {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-wrap: nowrap;
+    gap: 16px;
     width: 100%;
     height: 100%;
-    padding: 10px;
+    padding: 16px;
     box-sizing: border-box;
 
-    .questionContainer {
-      position: relative;
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      transition: flex 0.3s ease-in-out;
-      overflow: hidden;
-      height: 100%;
-      width: 30%;
-      display: flex;
+    @media (max-width: 1024px) {
       flex-direction: column;
-      padding-bottom: 0;
+      overflow-y: auto;
+      height: auto;
     }
 
-    // Add these new styles
-    .toggleButton {
-      display: flex;
-      align-items: center;
-      padding: 12px;
-      background: #24A058;
-      color: white;
-      font-weight: 500;
-      min-height: 50px;
-      gap: 10px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .questionContent {
-      padding: 1rem;
-      overflow-y: auto;
+    .questionContainer {
+      background: #ffffff;
+      border: 1px solid $smSlateBorder;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
       height: 100%;
-      padding-bottom: 0;
-      .question {
-        font-size: clamp(14px, 2vw, 20px);
+      width: 38%;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+
+      @media (max-width: 1024px) {
+        width: 100%;
+        height: 500px;
       }
     }
 
     .box {
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
-      flex: 1 1 50%;
-      max-width: 100%;
-      min-width: 40%;
+      overflow: hidden;
+      flex: 1;
       height: 100%;
-      overflow-y: auto;
-      overflow-y: hidden;
-
-      font-weight: bold;
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-start;
-      border-radius: 8px;
-      background-color: #24A0581a;
-
-      scrollbar-width: thin;
-      scrollbar-color: #24A058 transparent;
-
-      &::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background-color: #24A0581a;
-        border-radius: 10px;
-      }
-
-      .outputHeader {
-        width: 96%;
-        font-size: 1.2rem;
-        border-bottom: 1px solid;
-        padding: 0.5rem;
-        color: #24A058;
-        display: flex;
-        justify-content: space-between;
-        background-color: #24A0581a;
-
-        button {
-          background-color: #24A0581a;
-          color: black;
-          font-weight: 700;
-          border: none;
-          padding: 0.3rem 0.5rem;
-          border-radius: 0.3rem;
-          min-width: 20%;
-          cursor: pointer;
-        }
-      }
-    }
-
-    .output {
-      flex: 1 1 20%;
-      min-width: 20%;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-      overflow-y: auto;
-      height: 100%;
-      overflow-y: hidden;
-
-      font-weight: bold;
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-start;
-      border-radius: 8px;
-      background-color: #24A0581a;
-
-      scrollbar-width: thin;
-      scrollbar-color: #24A058 transparent;
-      .suggestionCont {
-        width: 100%;
-        padding: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .outputHeader {
-        width: 100%;
-        font-size: 1.2rem;
-        border-bottom: 1px solid;
-        padding: 0.5rem;
-        color: #24A058;
-        display: flex;
-        justify-content: space-between;
-        background-color: #24A0581a;
-      }
-
-      .outputBody {
-        padding: 1rem;
-        border-radius: 8px;
-        overflow-y: auto;
-        max-height: 300px;
-        line-height: 1.4;
-        font-size: 0.95rem;
-        width: 90%;
-
-        scrollbar-width: thin;
-        scrollbar-color: #24A058 transparent;
-
-        &::-webkit-scrollbar {
-          width: 8px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-          background: #24A0581a;
-          border-radius: 10px;
-        }
-
-        &.error {
-          color: #ff4d4f;
-        }
-      }
-    }
-
-    .aiSuggestions {
-      width: 95%;
-      padding: 0.5rem;
-      overflow-y: scroll;
+      border-radius: 12px;
+      border: 1px solid $smSlateBorder;
+      background-color: #ffffff;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
   }
 }
 
-.testCasesSection {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e1e5e9;
+// Tabs Navigation styling
+.tabHeader {
+  border-bottom: 1px solid $smSlateBorder;
+  background: #ffffff;
+  padding: 0 16px;
+}
 
-  .testCasesTitle {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 16px;
+.tabsList {
+  display: flex;
+  gap: 24px;
+}
+
+.tabItem {
+  background: none;
+  border: none;
+  padding: 14px 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: $smTextSecondary;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  outline: none;
+
+  &:hover {
+    color: $smBluePrimary;
   }
 
-  .testCase {
-    margin-bottom: 20px;
-    padding: 16px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border-left: 4px solid #24A058;
+  &.tabActive {
+    color: $smBluePrimary;
 
-    .testCaseHeader {
-      font-size: 14px;
-      font-weight: 600;
-      color: #2c3e50;
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: $smBluePrimary;
+      border-radius: 2px;
+    }
+  }
+}
+
+// Left container content area
+.questionContent {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+  }
+
+  .metaSection {
+    margin-bottom: 20px;
+
+    .questionTitle {
+      font-size: 22px;
+      font-weight: 700;
+      color: $smTextPrimary;
+      margin: 0 0 12px 0;
+      line-height: 1.3;
+    }
+
+    .badgesRow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+
+      .categoryBadge {
+        background-color: $smBlueLight;
+        color: $smBluePrimary;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .difficultyBadge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+    }
+  }
+
+  .question {
+    font-size: 15px;
+    line-height: 1.6;
+    color: $smTextSecondary;
+    margin-bottom: 24px;
+
+    p {
       margin-bottom: 12px;
     }
 
-    .testCaseInput,
-    .testCaseOutput {
-      margin-bottom: 8px;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
+    // Modern examples styling inside rich text / HTML output
+    pre, code, .example, blockquote {
+      background-color: $smBlueLight;
+      border-left: 4px solid $smBluePrimary;
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13.5px;
+      color: #1e293b;
+      margin: 16px 0;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
 
-      .label {
-        font-weight: 500;
-        color: #555;
-        min-width: 50px;
-        font-size: 13px;
+    h3, h4 {
+      color: $smTextPrimary;
+      font-weight: 600;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+  }
+}
+
+// Test case card redesign
+.testCasesSection {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid $smSlateBorder;
+
+  .testCasesTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: $smTextPrimary;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .testCasesCountBadge {
+      background-color: #f1f5f9;
+      color: #64748b;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+  }
+
+  .testCaseCard {
+    background: #ffffff;
+    border: 1px solid $smSlateBorder;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .testCaseHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      .testCaseName {
+        font-size: 14px;
+        font-weight: 600;
+        color: $smTextPrimary;
       }
 
-      .codeBlock {
-        background-color: #fff;
-        padding: 6px 10px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-        font-family: "Consolas", "Monaco", "Courier New", monospace;
-        font-size: 13px;
-        color: #d63384;
-        flex: 1;
-        white-space: pre-wrap;
-        word-break: break-word;
-        line-height: 1.4;
-
-        // Handle rich text editor content
-        p {
-          margin: 0;
-          padding: 0;
-        }
-
-        pre {
-          margin: 0;
-          padding: 0;
-          font-family: inherit;
-          background: transparent;
-          border: none;
-        }
-
-        code {
-          background: transparent;
-          padding: 0;
-          border: none;
-          font-family: inherit;
-        }
+      .testCaseStatusBadge {
+        font-size: 12px;
+        font-weight: 600;
+        background-color: #f1f5f9;
+        color: #64748b;
+        padding: 2px 8px;
+        border-radius: 6px;
       }
     }
 
-    .testCaseOutput .codeBlock {
-      color: #198754;
+    .testCaseDetail {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .detailLabel {
+        font-size: 12px;
+        font-weight: 550;
+        color: #64748b;
+        width: 60px;
+        flex-shrink: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .detailCodeBlock {
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 13px;
+        color: #0f172a;
+        flex: 1;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+    }
+  }
+}
+
+// Hints & Solutions tabs layout
+.editorialContainer {
+  padding: 8px 0;
+
+  .editorialHeading {
+    font-size: 18px;
+    font-weight: 700;
+    color: $smTextPrimary;
+    margin-bottom: 16px;
+  }
+
+  .editorialBody {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: $smTextSecondary;
+  }
+
+  .fallbackEditorial {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .editorialHintItem {
+      background-color: #fff8f2;
+      border-left: 4px solid #f97316;
+      padding: 14px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #7c2d12;
+      margin: 0;
+    }
+
+    .solutionBlock {
+      .solutionSubheading {
+        font-size: 15px;
+        font-weight: 650;
+        color: $smTextPrimary;
+        margin: 0 0 10px 0;
+      }
+
+      .solutionCodeBlock {
+        background-color: #0f172a;
+        color: #f8fafc;
+        border-radius: 8px;
+        padding: 16px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 13px;
+        overflow-x: auto;
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+
+      .complexityBlock {
+        background-color: #f8fafc;
+        border: 1px solid $smSlateBorder;
+        padding: 12px 16px;
+        border-radius: 6px;
+
+        p {
+          font-weight: 600;
+          color: $smTextPrimary;
+          margin-bottom: 6px;
+        }
+
+        ul {
+          margin: 0;
+          padding-left: 20px;
+          color: $smTextSecondary;
+          font-size: 13.5px;
+        }
+      }
     }
   }
 }

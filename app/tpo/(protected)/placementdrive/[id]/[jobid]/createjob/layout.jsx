@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import styles from "./styles/layout.module.scss";
-;
+import PageHeader from "@/modules/tpo/components/PageHeader";
 import drives from "@/modules/tpo/Data/placementsDrive";
 import { useDispatch, useSelector } from "react-redux";
 import { GetAllPlacements, GetOneJob } from "@/redux/slices/tpo/placementsSlice";
@@ -14,19 +14,24 @@ export default function FormLayout({ children }) {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const pathSegments = path?.split("/").filter((e) => e);
+  const pathSegments = path?.split("/").filter((e) => e) || [];
 
   const { value: ONEJOB, status } = useSelector(
     (state) => state.placement.OneJob
   );
-  const { value: ALLPLACEMENTS } = useSelector(
+  const { value: ALLPLACEMENTS, status: placementsStatus } = useSelector(
     (state) => state.placement.AllPlacements
   );
 
   useEffect(() => {
     dispatch(GetOneJob({ jobid }));
-    dispatch(GetAllPlacements());
-  }, []);
+  }, [dispatch, jobid]);
+
+  useEffect(() => {
+    if (placementsStatus !== "succeeded" && placementsStatus !== "loading") {
+      dispatch(GetAllPlacements());
+    }
+  }, [dispatch, placementsStatus]);
 
   const isDisabled = () => {
     try {
@@ -57,6 +62,11 @@ export default function FormLayout({ children }) {
 
   return (
     <>
+      <PageHeader
+        breadcrumb="Placement Drive"
+        title={ONEJOB?.data?.jobTitle ? `Configure ${ONEJOB?.data?.jobTitle}` : "Create Job"}
+        subtitle="Manage basic information, profile details and interview rounds"
+      />
       <div className={styles.mainContainer}>
         <div className={styles.headerCont}>
           {pathSegments.map((segment, index) => {
@@ -86,7 +96,10 @@ export default function FormLayout({ children }) {
               displayName = `${matchedJob?.jobTitle}`;
             }
             const isLast = index === pathSegments.length - 1;
-            const pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
+            let pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
+            if (pathToHere === "/tpo") {
+              pathToHere = "/tpo/dashboard";
+            }
             return (
               <span
                 key={index}
@@ -96,34 +109,39 @@ export default function FormLayout({ children }) {
                     router.push(pathToHere);
                   }
                 }}
+                style={{ display: "inline-flex", alignItems: "center" }}
               >
                 {displayName}&nbsp;
                 {index < pathSegments.length - 1 && (
-                  <FaCaretRight style={{ fontSize: "24px" }} />
+                  <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />
                 )}
               </span>
             );
           })}
         </div>
-        <div className={styles.bottomCont}>
-          <div className={styles.sidebarCont}>
+
+        <div className={styles.tabsWrapper}>
+          <div className={styles.tabsRow}>
             {routes.map((e) => {
               const isActive = path === e?.path;
               const disabled = isDisabled();
               return (
-                <button
-                  disabled={disabled}
-                  className={`${styles.routeNames} ${isActive ? styles.active : ""
-                    } ${disabled ? styles.disabled : ""}`}
+                <div
+                  key={e.path}
+                  className={`${styles.tabItem} ${isActive ? styles.activeTab : ""} ${disabled ? styles.disabled : ""}`}
                   onClick={() => {
                     if (!disabled) router.push(e?.path);
                   }}
                 >
-                  {e?.name}
-                </button>
+                  <span>{e?.name}</span>
+                  {isActive && <div className={styles.activeIndicator} />}
+                </div>
               );
             })}
           </div>
+        </div>
+
+        <div className={styles.bottomCont}>
           <div className={styles.contentCont}>{children}</div>
         </div>
       </div>

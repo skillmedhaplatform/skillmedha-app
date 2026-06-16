@@ -1,3 +1,6 @@
+@use "colors.module.scss" as *;
+$primaryColor: #1E69DA !default;
+
 @mixin flexBox($direction, $aligment, $justify, $gap: 0) {
   display: flex;
   align-items: $aligment;
@@ -57,7 +60,11 @@
 
   /* On hover over the thumb */
   &::-webkit-scrollbar-thumb:hover {
-    background: darken($thumbColor, $thumbHoverDarken);
+    @if type-of($thumbColor) == 'color' {
+      background: darken($thumbColor, $thumbHoverDarken);
+    } @else {
+      background: $thumbColor;
+    }
   }
 
   /* Buttons on the scrollbar */

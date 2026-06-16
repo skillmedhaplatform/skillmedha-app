@@ -1,5 +1,4 @@
-@import "../../universalutils/colors.module.scss";
-
+@use "../../universalutils/colors.module.scss" as *;
 .container {
   min-height: 100vh;
   display: flex;
@@ -271,7 +270,7 @@
 
     &:focus {
       outline: none;
-      border-color: #24A058;
+      border-color: #6BA8ED;
     }
 
     &:hover {
@@ -307,7 +306,7 @@
 
 .inputWrapper input:focus ~ .inputIcon,
 .inputWrapper:focus-within .inputIcon {
-  color: #24A058;
+  color: #6BA8ED;
 }
 
 .passwordToggle {
@@ -342,7 +341,7 @@
   }
 
   &:hover {
-    color: #24A058;
+    color: #6BA8ED;
   }
 
   &:focus {
@@ -355,9 +354,9 @@
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
-  background: #24A058;
+  background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%);
   border: none;
-  box-shadow: 0 2px 4px rgba(37, 163, 166, 0.2);
+  box-shadow: 0 2px 4px rgba(30, 105, 218, 0.2);
   transition: all 0.2s ease;
 
   @media (max-width: 768px) {
@@ -382,8 +381,8 @@
   }
 
   &:hover:not(:disabled) {
-    background: #1f8d90;
-    box-shadow: 0 4px 8px rgba(37, 163, 166, 0.25);
+    background: #1555b0;
+    box-shadow: 0 4px 8px rgba(30, 105, 218, 0.25);
   }
 
   &:active:not(:disabled) {
@@ -469,7 +468,7 @@
   }
 
   &:hover {
-    border-color: #24A058;
-    color: #24A058;
+    border-color: #6BA8ED;
+    color: #6BA8ED;
   }
 }

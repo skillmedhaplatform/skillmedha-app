@@ -1,5 +1,4 @@
-@import "../../utils/universalUtils/colors.module.scss";
-
+@use "../../utils/universalUtils/colors.module.scss" as *;
 .sideBarContainer {
   position: relative;
   height: 100%;
@@ -113,10 +112,13 @@
 
   :global(.ant-menu-item):not(:global(.ant-menu-item-selected)):hover,
   :global(.ant-menu-submenu-title):hover {
-    background-color: transparent !important;
+    background-color: #ffffff !important;
 
     > :global(.ant-menu-title-content) {
-      background-color: rgba(30, 105, 218, 0.1) !important;
+      background: linear-gradient(135deg, #1E69DA 0%, #5694F0 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
       border-radius: 8px !important;
       padding: 8px 12px !important;
       margin-left: 8px !important;
@@ -124,6 +126,11 @@
       align-items: center;
       width: 175px !important;
       line-height: 1.5;
+    }
+
+    :global(.ant-menu-item-icon) svg,
+    :global(svg) {
+      color: #1E69DA !important;
     }
   }
 
@@ -267,12 +274,12 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #24A058;
+    background-color: #1E69DA;
     border-radius: 6px;
   }
 
   scrollbar-width: thin;
-  scrollbar-color: #24A058 transparent;
+  scrollbar-color: #1E69DA transparent;
 }
 
 .bottom {

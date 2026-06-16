@@ -288,9 +288,10 @@ export default function MobileLibraryPage({
               {/* Thumbnail */}
               <div className={styles.tileThumbnail}>
                 <img
-                  src={item?.coverImage || item?.media?.coverImage || ""}
+                  src={item?.media?.thumbnailImage || item?.thumbnail || item?.image || item?.bannerImage || item?.coverImage || item?.companyLogo || item?.media?.coverImage || "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80"}
                   alt={item?.title || title}
                   loading="lazy"
+                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80"; }}
                 />
               </div>
 

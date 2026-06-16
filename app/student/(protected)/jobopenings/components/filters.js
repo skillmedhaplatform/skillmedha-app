@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
-import { Button, Input, Select } from "antd";
+import { Button, Input, Select, ConfigProvider } from "antd";
 import {
   CloseCircleOutlined,
   SearchOutlined,
@@ -82,74 +82,81 @@ export default function JobHeader() {
   }
 
   return (
-    <div className="flex items-center justify-between gap-2 flex-nowrap mb-4">
-      {/* ── Left: Selects ── */}
-      <div className="w-[60%] max-w-[60%] flex items-center justify-between gap-2">
-        <Select
-          id="job-selector"
-          style={{ width: "100%", minWidth: 160 }}
-          value={filters.profileName}
-          options={jobOptions}
-          placeholder="Job Profile"
-          loading={isLoading}
-          onChange={(value) => {
-            setFilters((prev) => ({ ...prev, profileName: value }));
-            router.push(
-              pathname + "?" + createQueryString("profileName", value)
-            );
-            handleDispatchFilter("profileName", value);
-          }}
-        />
+    <ConfigProvider theme={{ token: { colorPrimary: "#1E69DA" } }}>
+      <div className="flex items-center justify-between gap-2 flex-nowrap mb-4 bg-white/50 backdrop-blur-sm p-3 rounded-xl border border-[#e2e8f0]">
+        {/* ── Left: Selects ── */}
+        <div className="w-[60%] max-w-[60%] flex items-center justify-start gap-3">
+          <Select
+            id="job-selector"
+            style={{ width: "100%", maxWidth: 180 }}
+            value={filters.profileName}
+            options={jobOptions}
+            placeholder="Job Profile"
+            loading={isLoading}
+            onChange={(value) => {
+              setFilters((prev) => ({ ...prev, profileName: value }));
+              router.push(
+                pathname + "?" + createQueryString("profileName", value)
+              );
+              handleDispatchFilter("profileName", value);
+            }}
+          />
 
-        <Select
-          id="sort-selector"
-          style={{ width: "100%", minWidth: 160 }}
-          value={filters.sort}
-          options={sortOptions}
-          suffixIcon={<SortAscendingOutlined />}
-          onChange={(value) => {
-            setFilters((prev) => ({ ...prev, sort: value }));
-            router.push(pathname + "?" + createQueryString("sort", value));
-            handleDispatchFilter("sort", value);
-          }}
-        />
-      </div>
+          <Select
+            id="sort-selector"
+            style={{ width: "100%", maxWidth: 180 }}
+            value={filters.sort}
+            options={sortOptions}
+            suffixIcon={<SortAscendingOutlined />}
+            onChange={(value) => {
+              setFilters((prev) => ({ ...prev, sort: value }));
+              router.push(pathname + "?" + createQueryString("sort", value));
+              handleDispatchFilter("sort", value);
+            }}
+          />
+        </div>
 
-      {/* ── Right: Search + Clear ── */}
-      <div className="w-[40%] max-w-[40%] flex items-center justify-start gap-2">
-        <Search
-          id="job-search"
-          placeholder="Search by job position…"
-          allowClear
-          enterButton={<SearchOutlined />}
-          className="max-w-full w-full text-[16px] [&_.ant-input]:p-2"
-          value={filters.search}
-          loading={isLoading}
-          onChange={(e) => {
-            const value = e.target.value;
-            setFilters((prev) => ({ ...prev, search: value }));
-            if (!value) handleClearFilter();
-          }}
-          onSearch={(value) => {
-            if (value) {
-              router.push(pathname + "?" + createQueryString("search", value));
-              handleDispatchFilter("search", value);
-            } else {
-              handleClearFilter();
+        {/* ── Right: Search + Clear ── */}
+        <div className="w-[40%] max-w-[40%] flex items-center justify-end gap-2">
+          <Search
+            id="job-search"
+            placeholder="Search by job position, company..."
+            allowClear
+            enterButton={
+              <Button
+                type="primary"
+                className="px-4 !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
+              >
+                Search
+              </Button>
             }
-          }}
-        />
+            className="max-w-full w-full text-[16px]"
+            value={filters.search}
+            loading={isLoading}
+            onChange={(e) => {
+              const value = e.target.value;
+              setFilters((prev) => ({ ...prev, search: value }));
+              if (!value) handleClearFilter();
+            }}
+            onSearch={(value) => {
+              if (value) {
+                router.push(pathname + "?" + createQueryString("search", value));
+                handleDispatchFilter("search", value);
+              } else {
+                handleClearFilter();
+              }
+            }}
+          />
 
-        <Button
-          type="link"
-          danger
-          icon={<CloseCircleOutlined />}
-          className="whitespace-nowrap text-[#24A058] font-extrabold underline mx-2 cursor-pointer"
-          onClick={handleClearFilter}
-        >
-          Clear
-        </Button>
+          <Button
+            type="text"
+            className="whitespace-nowrap text-[#ef4444] font-semibold hover:!text-[#dc2626] hover:!bg-red-50 mx-1"
+            onClick={handleClearFilter}
+          >
+            Clear
+          </Button>
+        </div>
       </div>
-    </div>
+    </ConfigProvider>
   );
 }

@@ -3,7 +3,7 @@ import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const Page = () => {
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#f7fafc" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#ffffff" }}>
       <PageHeader
         breadcrumb="My Tests"
         title="My Tests"

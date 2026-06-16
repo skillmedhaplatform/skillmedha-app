@@ -6,9 +6,10 @@ import { useSelector, useDispatch } from "react-redux";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import {
   fetchSubjectsByType,
-  fetchPracQuestions,
 } from "@/redux/slices/practiceSlice";
-import { Button, Divider, Result, Spin, Tooltip, message } from "antd";
+import PracticeFilters from "@/modules/student/components/PracticeFilters";
+import PracticeCard from "@/modules/student/components/PracticeCard";
+import { Divider, Result, Spin, Tooltip, message } from "antd";
 import useResponsive from "@/hooks/useResponsive";
 import styles from "@/mobile_views/practice/mobilePracticeLayout.module.scss";
 
@@ -20,7 +21,6 @@ export default function CodingPage() {
   const subjects = useSelector((s) => s.practice.subjects);
   const studentCreds = useSelector((state) => state.student.student?.data);
   const [loading, setLoading] = useState(false);
-  const [loadingques, setLoadingques] = useState(false);
   const isMobile = useResponsive();
 
   const categoryTabs = [
@@ -35,32 +35,6 @@ export default function CodingPage() {
       setLoading(false);
     });
   }, [dispatch]);
-
-  const handleClick = async (subject) => {
-    setLoadingques(true);
-
-    try {
-      const result = await dispatch(
-        fetchPracQuestions({
-          refId: subject._id,
-          type: "subjectId",
-          userId: studentCreds?._id,
-        })
-      ).unwrap();
-
-      // Check if questions exist
-      if (result && result?.data?.questionsData?.length > 0) {
-        router.push(`/student/practice-new/coding/codingtest?sub=${subject?._id}`);
-      } else {
-        message.warning("No questions available for this subject");
-      }
-    } catch (error) {
-      message.error("Failed to fetch questions. Please try again.");
-      console.error("Error fetching questions:", error);
-    } finally {
-      setLoadingques(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -94,39 +68,24 @@ export default function CodingPage() {
         </div>
         <div className={styles.contentArea}>
           {subjects && subjects.length > 0 ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-6 py-2 pb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 py-6">
               {subjects.map((subject, index) => (
-                <Tooltip
+                <PracticeCard 
                   key={subject._id || index}
-                  title={subject?.title}
-                  arrow
-                  placement="top"
-                >
-                  <div className="flex items-start justify-center flex-col rounded-lg p-8 gap-[1.8rem] bg-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.25)] hover:shadow-lg transition-shadow">
-                    <p className="text-[20px] font-bold text-[#24A058] max-w-[95%] break-words overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer m-0">
-                      {subject?.title || subject?.key}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <p className="text-black text-[15px] font-bold m-0">Number of Questions:</p>
-                      <p className="text-[#24A058] text-[15px] font-bold m-0">{subject?.totalQuestions}</p>
-                    </div>
-                    <Button
-                      type="primary"
-                      style={{ width: "8rem" }}
-                      onClick={() => handleClick(subject)}
-                      disabled={loadingques}
-                    >
-                      Start
-                    </Button>
-                  </div>
-                </Tooltip>
+                  title={subject.title || subject.key}
+                  category="CODING"
+                  totalQuestions={subject.totalQuestions || 0}
+                  onStart={() => {
+                    router.push(`/student/practice-new/coding/codingtest?sub=${subject._id}`);
+                  }}
+                />
               ))}
             </div>
           ) : (
             <Result
               status="404"
-              title="No Subjects Found"
-              subTitle="Sorry, there are no subjects available for this topic right now."
+              title="No Practice Data Found"
+              subTitle="Sorry, there is no practice data available right now."
             />
           )}
         </div>
@@ -134,39 +93,55 @@ export default function CodingPage() {
     );
   }
 
+  const dynamicSubtitle = subjects?.map(s => s.title).join(" • ") || "Master your programming skills with our coding challenges.";
+  const totalTopics = subjects?.length || 0;
+  const totalQuestions = subjects?.reduce((acc, curr) => acc + (curr.totalQuestions || 0), 0) || 0;
+
+  const RightStats = (
+    <div className="flex items-center gap-6 lg:gap-10 text-white mr-2 lg:mr-8">
+      <div className="flex flex-col items-center">
+        <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalTopics}</span>
+        <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">TOPICS</span>
+      </div>
+      <div className="flex flex-col items-center">
+        <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalQuestions}</span>
+        <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">QUESTIONS</span>
+      </div>
+      <div className="flex flex-col items-center">
+        <span className="text-[24px] lg:text-[28px] font-bold leading-none bg-gradient-to-br from-[#1E69DA] to-[#5694F0] bg-clip-text text-transparent">0%</span>
+        <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">DONE</span>
+      </div>
+    </div>
+  );
+
   return (
-    
-      <div>
-        <StudentPageHeader section="Practice" title="Coding Practice" />
+      <div className="flex flex-col h-[calc(100vh-60px)] overflow-hidden">
+        <div className="flex-shrink-0">
+          <StudentPageHeader 
+            title="Coding practice" 
+            subtitle={dynamicSubtitle}
+            rightSlot={RightStats}
+          />
+          
+          <PracticeFilters categories={["All", "C++", "Java", "Python"]} />
+        </div>
+
         {subjects && subjects.length > 0 ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-6 py-2 pb-16">
+        <div className="bg-gray-50/30 px-4 lg:px-8 py-6 flex-1 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {subjects.map((subject, index) => (
-              <Tooltip
+              <PracticeCard 
                 key={subject._id || index}
-                title={subject?.title}
-                arrow
-                placement="top"
-              >
-                <div className="flex items-start justify-center flex-col rounded-lg p-8 gap-[1.8rem] bg-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.25)] hover:shadow-lg transition-shadow">
-                  <p className="text-[20px] font-bold text-[#24A058] max-w-[95%] break-words overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer m-0">
-                    {subject?.title || subject?.key}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-black text-[15px] font-bold m-0">Number of Questions:</p>
-                    <p className="text-[#24A058] text-[15px] font-bold m-0">{subject?.totalQuestions}</p>
-                  </div>
-                  <Button
-                    type="primary"
-                    style={{ width: "8rem" }}
-                    onClick={() => handleClick(subject)}
-                    disabled={loadingques}
-                  >
-                    Start
-                  </Button>
-                </div>
-              </Tooltip>
+                title={subject.title || subject.key}
+                category="CODING"
+                totalQuestions={subject.totalQuestions || 0}
+                onStart={() => {
+                  router.push(`/student/practice-new/coding/codingtest?sub=${subject._id}`);
+                }}
+              />
             ))}
           </div>
+        </div>
         ) : (
           <Result
             status="404"

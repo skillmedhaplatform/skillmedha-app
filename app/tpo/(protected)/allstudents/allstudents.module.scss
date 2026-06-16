@@ -1,11 +1,10 @@
-@import "@/utils/universalUtils/colors.module.scss";
-
+@use "@/utils/universalUtils/colors.module.scss" as *;
 .container {
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #f7fafc;
+  background-color: transparent;
   overflow-y: auto;
 
   &::-webkit-scrollbar {
@@ -17,16 +16,16 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #24a058;
+    background: linear-gradient(135deg, #6BA8ED, #A3CCFA);
     border-radius: 6px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #1a743e;
+    background-color: #1555b0;
   }
 
   scrollbar-width: thin;
-  scrollbar-color: #24a058 transparent;
+  scrollbar-color: #6BA8ED transparent;
 }
 
 .headerSection {
@@ -70,8 +69,8 @@
   }
 
   .addBtn {
-    background-color: #24a058 !important;
-    border-color: #24a058 !important;
+    background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%) !important;
+    border: none !important;
     color: white !important;
     font-weight: 600 !important;
     height: 2.3rem !important;
@@ -81,12 +80,11 @@
     align-items: center !important;
     gap: 0.5rem !important;
     cursor: pointer !important;
-    box-shadow: 0 2px 4px rgba(36, 160, 88, 0.2) !important;
+    box-shadow: 0 2px 4px rgba(30, 105, 218, 0.2) !important;
     transition: all 0.2s ease-in-out !important;
 
     &:hover {
-      background-color: #1e8749 !important;
-      border-color: #1e8749 !important;
+      opacity: 0.9 !important;
       transform: translateY(-1px) !important;
     }
   }
@@ -117,11 +115,11 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 
   &.deptsCard {
-    background: #e8f7ee;
+    background: #e8f8f0;
   }
 
   &.studentsCard {
-    background: #e8f2ff;
+    background: #fff1f2;
   }
 
   &.spocsCard {
@@ -144,8 +142,8 @@
     }
 
     &.students {
-      background-color: rgba(30, 112, 184, 0.1);
-      color: #1e70b8;
+      background-color: rgba(225, 29, 72, 0.1);
+      color: #e11d48;
     }
 
     &.spocs {
@@ -202,8 +200,8 @@
     .chip {
       background: white;
       border: 1px solid #e2e8f0;
-      border-radius: 20px;
-      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+      padding: 0.35rem 0.9rem;
       font-size: 0.76rem;
       font-weight: 600;
       color: #4a5568;
@@ -214,14 +212,15 @@
       transition: all 0.2s ease-in-out;
 
       &:hover {
-        border-color: #24a058;
-        color: #24a058;
+        border-color: #6BA8ED;
+        color: #6BA8ED;
+        background: linear-gradient(135deg, rgba(30, 105, 218, 0.05) 0%, rgba(86, 148, 240, 0.08) 100%);
       }
 
       &.activeChip {
-        background: rgba(36, 160, 88, 0.08);
-        border-color: #24a058;
-        color: #24a058;
+        background: linear-gradient(135deg, rgba(30, 105, 218, 0.1) 0%, rgba(86, 148, 240, 0.15) 100%);
+        border-color: #6BA8ED;
+        color: #6BA8ED;
       }
     }
   }
@@ -275,8 +274,8 @@
   box-sizing: border-box;
 
   &:hover:not(:disabled) {
-    border-color: #24a058;
-    color: #24a058;
+    border-color: #6BA8ED;
+    color: #6BA8ED;
   }
 
   &:disabled {
@@ -288,7 +287,7 @@
 }
 
 .activePageBtn {
-  background: rgba(36, 160, 88, 0.08) !important;
-  border-color: #24a058 !important;
-  color: #24a058 !important;
+  background: rgba(30, 105, 218, 0.08) !important;
+  border-color: #6BA8ED !important;
+  color: #6BA8ED !important;
 }
