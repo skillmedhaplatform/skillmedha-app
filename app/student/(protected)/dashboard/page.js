@@ -36,14 +36,14 @@ const DashboardStats = ({ stats, router }) => (
         className="bg-white rounded-[12px] p-4 flex-1 min-w-[200px] flex flex-row items-center gap-4 border border-[rgba(81,81,81,0.2)] hover:border-gray-400 cursor-pointer transition-all duration-200"
         onClick={() => stat.link && router.push(stat.link)}
       >
-        <div 
+        <div
           className="w-[48px] h-[48px] rounded-[10px] flex items-center justify-center shrink-0"
           style={stat.iconBgStyle || { backgroundColor: '#f8fafc' }}
         >
           {stat.icon}
         </div>
         <div className="flex flex-col">
-<span className="text-[13px] text-[#8ea2b5] font-extrabold leading-none mb-1">{stat.title}</span>
+          <span className="text-[13px] text-[#8ea2b5] font-extrabold leading-none mb-1">{stat.title}</span>
           <span className="text-[22px] font-extrabold text-[#1e293b] leading-none">{stat.value}</span>
         </div>
       </div>
@@ -51,7 +51,7 @@ const DashboardStats = ({ stats, router }) => (
   </div>
 );
 
-const RecommendedCard = ({ item, total, currentIndex, onDotClick }) => {
+const RecommendedCard = ({ item, total, currentIndex, onDotClick,onCardClick }) => {
   function stripHtml(html) {
     return typeof html === "string" ? html.replace(/<[^>]*>/g, "") : "";
   }
@@ -68,91 +68,91 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick }) => {
       className="w-full h-[460px] bg-white text-black border border-[rgba(81,81,81,0.3)] rounded-[14px] overflow-hidden cursor-pointer transition-all duration-200 hover:border-gray-400 group shrink-0"
       role="button"
       tabIndex={0}
+      onClick={() => onCardClick?.(item)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") onClick?.(item);
       }}
     >
-      <div 
+      <div
         key={item?._id}
         className="flex flex-col w-full h-full p-2 animate-[smoothFadeIn_0.5s_ease-out_forwards]"
       >
-      <div className="relative w-full h-[220px] shrink-0 bg-white overflow-hidden rounded-xl">
-        <img
-          src={item?.coverImage || item?.media?.coverImage || "/fallback.jpg"}
-          alt={item?.title || "Course cover"}
-          className="w-full h-full object-cover block transition-transform duration-200 group-hover:scale-105"
-          loading="lazy"
-        />
-        {item?.difficulty ? (
-          <span className="absolute left-2 top-2 z-10 text-[12px] leading-none px-2 py-1.5 rounded-full text-[#0f1115] bg-gradient-to-r from-[#ffd66b] to-[#ffb347] font-semibold">{item?.difficulty}</span>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
-        <div className="flex items-center justify-between min-h-[52px]">
-          <div className="text-[#1E69DA] text-[18px] font-bold leading-tight line-clamp-2">{item?.title}</div>
-        </div>
-
-        <div className="flex flex-wrap gap-1.5 h-[26px] overflow-hidden">
-          {item?.sections?.length ? (
-            <span className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
-              {item?.sections?.length} Modules
-            </span>
-          ) : null}
-
-          {item?.preRequisites?.slice(0, 2)?.map((p, i) => (
-            <span key={`${p}-${i}`} className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
-              {p}
-            </span>
-          ))}
-        </div>
-
-        <p
-          className="text-[#b9c7d6] text-[14px] leading-[1.5] my-0.5 line-clamp-2"
-          title={stripHtml?.(item?.description) || ""}
-        >
-          {(() => {
-            const t = stripHtml?.(item?.description) || "";
-            return t.slice(0, 140) + (t.length > 140 ? "…" : "");
-          })()}
-        </p>
-
-        <div className="flex items-center justify-between gap-2 mt-auto pt-2">
-          {item?.lastAssignmentUpdate || item?.updatedAt ? (
-            <div className="text-[#8ea2b5] text-[12px]" aria-label="Last updated">
-              Updated{" "}
-              {formatUpdatedDate?.(
-                item?.lastAssignmentUpdate || item?.updatedAt
-              )}
-            </div>
+        <div className="relative w-full h-[220px] shrink-0 bg-white overflow-hidden rounded-xl">
+          <img
+            src={item?.coverImage || item?.media?.coverImage || "/fallback.jpg"}
+            alt={item?.title || "Course cover"}
+            className="w-full h-full object-cover block transition-transform duration-200 group-hover:scale-105"
+            loading="lazy"
+          />
+          {item?.difficulty ? (
+            <span className="absolute left-2 top-2 z-10 text-[12px] leading-none px-2 py-1.5 rounded-full text-[#0f1115] bg-gradient-to-r from-[#ffd66b] to-[#ffb347] font-semibold">{item?.difficulty}</span>
           ) : null}
         </div>
 
-        {total > 0 && (
-          <div className="flex justify-center items-center gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
-            {Array.from({ length: Math.max(3, total) }).map((_, idx) => {
-              const displayTotal = Math.max(3, total);
-              const isActive = idx === (currentIndex % displayTotal);
-              return (
-                <button
-                  key={idx}
-                  className={`rounded-full transition-all duration-300 ${
-                    isActive 
-                      ? 'w-[10px] h-[10px] bg-[#1E69DA]' 
-                      : 'w-[8px] h-[8px] bg-transparent border-[1.5px] border-[#9ca3af]'
-                  }`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onDotClick?.(idx);
-                  }}
-                  aria-label={`Go to slide ${idx + 1}`}
-                />
-              );
-            })}
+        <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
+          <div className="flex items-center justify-between min-h-[52px]">
+            <div className="text-[#1E69DA] text-[18px] font-bold leading-tight line-clamp-2">{item?.title}</div>
           </div>
-        )}
-      </div>
+
+          <div className="flex flex-wrap gap-1.5 h-[26px] overflow-hidden">
+            {item?.sections?.length ? (
+              <span className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
+                {item?.sections?.length} Modules
+              </span>
+            ) : null}
+
+            {item?.preRequisites?.slice(0, 2)?.map((p, i) => (
+              <span key={`${p}-${i}`} className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
+                {p}
+              </span>
+            ))}
+          </div>
+
+          <p
+            className="text-[#b9c7d6] text-[14px] leading-[1.5] my-0.5 line-clamp-2"
+            title={stripHtml?.(item?.description) || ""}
+          >
+            {(() => {
+              const t = stripHtml?.(item?.description) || "";
+              return t.slice(0, 140) + (t.length > 140 ? "…" : "");
+            })()}
+          </p>
+
+          <div className="flex items-center justify-between gap-2 mt-auto pt-2">
+            {item?.lastAssignmentUpdate || item?.updatedAt ? (
+              <div className="text-[#8ea2b5] text-[12px]" aria-label="Last updated">
+                Updated{" "}
+                {formatUpdatedDate?.(
+                  item?.lastAssignmentUpdate || item?.updatedAt
+                )}
+              </div>
+            ) : null}
+          </div>
+
+          {total > 0 && (
+            <div className="flex justify-center items-center gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+              {Array.from({ length: Math.max(3, total) }).map((_, idx) => {
+                const displayTotal = Math.max(3, total);
+                const isActive = idx === (currentIndex % displayTotal);
+                return (
+                  <button
+                    key={idx}
+                    className={`rounded-full transition-all duration-300 ${isActive
+                      ? 'w-[10px] h-[10px] bg-[#1E69DA]'
+                      : 'w-[8px] h-[8px] bg-transparent border-[1.5px] border-[#9ca3af]'
+                      }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDotClick?.(idx);
+                    }}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -167,7 +167,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
         <span className="text-[12px] text-[#64748b] font-bold">Profile completion rate</span>
       </div>
     </div>
-    
+
     <div className="relative flex justify-center mb-1 mt-6">
       <Progress
         type="dashboard"
@@ -184,7 +184,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
         )}
       />
     </div>
-    
+
     <Button
       className="w-full mt-4 h-9 font-bold text-[14px] flex items-center justify-center gap-2 transition-all hover:opacity-90 !text-white !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
       style={{ borderRadius: '8px' }}
@@ -536,12 +536,12 @@ export default function DashboardPage() {
                       {/* Right Side: Progress & Button */}
                       <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-4 md:mt-0">
                         <div className="flex items-center gap-2 w-[180px] justify-end">
-                          <Progress 
-                            percent={item?.progress || 0} 
-                            size="small" 
-                            showInfo={false} 
-                            strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'} 
-        trailColor="#f1f5f9"
+                          <Progress
+                            percent={item?.progress || 0}
+                            size="small"
+                            showInfo={false}
+                            strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'}
+                            trailColor="#f1f5f9"
                             className="m-0 w-[120px]"
                           />
                           <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{item?.progress || 0}%</span>
@@ -578,16 +578,21 @@ export default function DashboardPage() {
                     <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Course</span>
                   </div>
                   <div className="w-full h-full flex flex-col justify-between">
-                    <RecommendedCard 
-                      item={allCourses.data[recCourseIndex % allCourses.data.length]} 
+                    <RecommendedCard
+                      item={allCourses.data[recCourseIndex % allCourses.data.length]}
                       total={allCourses.data.length}
                       currentIndex={recCourseIndex}
                       onDotClick={setRecCourseIndex}
+                      onCardClick={(item) => {
+                        router.push(
+                          `/student/course`
+                        );
+                      }}
                     />
                     <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
-                      <div 
+                      <div
                         key={`course-${recCourseIndex}`}
-                        className="absolute top-0 right-0 h-full bg-[#1E69DA]" 
+                        className="absolute top-0 right-0 h-full bg-[#1E69DA]"
                         style={{ animation: 'fillRightToLeft 10s linear forwards' }}
                       />
                     </div>
@@ -600,16 +605,21 @@ export default function DashboardPage() {
                     <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Internship</span>
                   </div>
                   <div className="w-full h-full flex flex-col justify-between">
-                    <RecommendedCard 
-                      item={allInternships.data[recInternshipIndex % allInternships.data.length]} 
+                    <RecommendedCard
+                      item={allInternships.data[recInternshipIndex % allInternships.data.length]}
                       total={allInternships.data.length}
                       currentIndex={recInternshipIndex}
                       onDotClick={setRecInternshipIndex}
+                      onCardClick={(item) => {
+                        router.push(
+                          `/student/internshipLibrary`                          
+                        );
+                      }}
                     />
                     <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
-                      <div 
+                      <div
                         key={`internship-${recInternshipIndex}`}
-                        className="absolute top-0 left-0 h-full bg-[#1E69DA]" 
+                        className="absolute top-0 left-0 h-full bg-[#1E69DA]"
                         style={{ animation: 'fillLeftToRight 10s linear forwards' }}
                       />
                     </div>
@@ -632,7 +642,7 @@ export default function DashboardPage() {
               studentCreds={studentCreds}
             />
           </div>
-          
+
           {/* Section 2: Notice Board */}
           <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden w-full mt-4 flex flex-col relative border-t border-[#f1f5f9] pt-4">
             <div className="w-full flex items-center justify-between mb-4 sticky top-0 bg-white z-10">
@@ -646,7 +656,7 @@ export default function DashboardPage() {
               <CardsList type="notifications" />
             </div>
           </div>
-          
+
           {/* Section 3: Achievements */}
           <div className="shrink-0 w-full mt-4 relative border-t border-[#f1f5f9] pt-4">
             <Achievements />
