@@ -35,8 +35,7 @@ export const useLogout = () => {
         //    navigation can race against the cookie deletion and middleware
         //    bounces the user back to /dashboard or /tests.
         nav.refresh();
-        const loginUrl = process.env.NEXT_PUBLIC_LOGIN_APP_URL || "http://localhost:2025";
-        window.location.href = `${loginUrl}?portal=student`;
+        window.location.href = "/login?portal=student";
       },
     });
   };

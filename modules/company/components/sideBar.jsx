@@ -105,8 +105,7 @@ const SideBar = ({ activeView, setView }) => {
           onClick={() => {
             clearLstorageVals();
             clearSstorageVals();
-            const loginUrl = process.env.NEXT_PUBLIC_LOGIN_APP_URL || "http://localhost:2025";
-            window.location.href = `${loginUrl}?portal=company`;
+            window.location.href = "/login?portal=company";
           }}
           icon={
             <img

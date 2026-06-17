@@ -4,8 +4,7 @@ import { useEffect } from "react";
 export default function LoginPage() {
   useEffect(() => {
     // Redirect to the centralized Unified Login portal
-    const loginUrl = process.env.NEXT_PUBLIC_LOGIN_APP_URL || "http://localhost:2025";
-    window.location.href = `${loginUrl}/login?portal=tpo`;
+    window.location.href = `/login?portal=tpo`;
   }, []);
 
   return (
