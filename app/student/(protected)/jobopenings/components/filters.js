@@ -15,12 +15,28 @@ import { GetAllJobs } from "@/redux/slices/jobopenings";
 const { Search } = Input;
 
 export default function JobHeader() {
-  const dispatch = useDispatch();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const profileNameParam = searchParams.get("profileName") || "all";
+  const sortParam = searchParams.get("sort") || "createdAt";
+  const searchParam = searchParams.get("search") || "";
+
   const [filters, setFilters] = useState({
-    profileName: "all",
-    sort: "createdAt",
-    search: "",
+    profileName: profileNameParam,
+    sort: sortParam,
+    search: searchParam,
   });
+
+  // Sync local filters state with URL changes (e.g. on clear or reload)
+  React.useEffect(() => {
+    setFilters({
+      profileName: searchParams.get("profileName") || "all",
+      sort: searchParams.get("sort") || "createdAt",
+      search: searchParams.get("search") || "",
+    });
+  }, [searchParams]);
 
   const { jobs } = useSelector(
     (state) => state.jonOpenings.allJobOpenings.value
@@ -46,40 +62,20 @@ export default function JobHeader() {
     { value: "relevance", label: "Sort By Relevance" },
   ];
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-
   const createQueryString = useCallback(
     (name, value) => {
       const params = new URLSearchParams(searchParams);
       params.set(name, value);
+      params.set("page", "1"); // Reset to page 1 on search or filter change
       return params.toString().replace(/\+/g, "%20");
     },
     [searchParams]
   );
 
   const handleClearFilter = () => {
-    const hasQueryParams = Array.from(searchParams.entries()).length > 0;
-    if (hasQueryParams) {
-      dispatch(GetAllJobs({ fetchType: "initial" }));
-    }
     router.push(pathname);
     setFilters({ profileName: "all", sort: "createdAt", search: "" });
   };
-
-  function handleDispatchFilter(key, value) {
-    if (key === "profileName" && value === "all") {
-      handleClearFilter();
-      return;
-    }
-    const queryObj = {};
-    for (const [k, v] of searchParams.entries()) {
-      queryObj[k] = v;
-    }
-    queryObj[key] = value;
-    dispatch(GetAllJobs({ fetchType: "initial", queryObj }));
-  }
 
   return (
     <ConfigProvider theme={{ token: { colorPrimary: "#1E69DA" } }}>
@@ -98,7 +94,6 @@ export default function JobHeader() {
               router.push(
                 pathname + "?" + createQueryString("profileName", value)
               );
-              handleDispatchFilter("profileName", value);
             }}
           />
 
@@ -111,7 +106,6 @@ export default function JobHeader() {
             onChange={(value) => {
               setFilters((prev) => ({ ...prev, sort: value }));
               router.push(pathname + "?" + createQueryString("sort", value));
-              handleDispatchFilter("sort", value);
             }}
           />
         </div>
@@ -141,7 +135,6 @@ export default function JobHeader() {
             onSearch={(value) => {
               if (value) {
                 router.push(pathname + "?" + createQueryString("search", value));
-                handleDispatchFilter("search", value);
               } else {
                 handleClearFilter();
               }

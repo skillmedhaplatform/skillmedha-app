@@ -31,8 +31,8 @@ export default function MobileJobOpenings() {
   const searchParams = useSearchParams();
 
   // ── Redux selectors ──────────────────────────────────────────
-  const { jobs: JOBS, next, nextCursor } = useSelector(
-    (state) => state.jonOpenings.allJobOpenings?.value || { jobs: [], next: false, nextCursor: null }
+  const { jobs: JOBS, pagination = { totalDocs: 0, totalPages: 1, currentPage: 1, limit: 10 } } = useSelector(
+    (state) => state.jonOpenings.allJobOpenings?.value || { jobs: [], pagination: { totalDocs: 0, totalPages: 1, currentPage: 1, limit: 10 } }
   );
   const jobsStatus = useSelector((state) => state.jonOpenings.allJobOpenings?.status);
   const student = useSelector((state) => state.student.student?.data);
@@ -40,7 +40,7 @@ export default function MobileJobOpenings() {
 
   // ── Baseline applied IDs from Redux (real server state) ───
   const realAppliedIds = (student?.appliedJobs ?? [])
-    .map((j) => j?.jobDetails?._id)
+    .map((j) => j?.jobDetails?._id || j?.id || j?.jobId || j?._id || (typeof j === "string" ? j : null))
     .filter(Boolean);
 
   // ── useOptimistic & useTransition ─────────────────────────
@@ -53,18 +53,29 @@ export default function MobileJobOpenings() {
   // ── UI state ───────────────────────────────────────────────
   const [viewMode, setViewMode] = useState("list"); // "list" or "details"
   const [selectedId, setSelectedId] = useState("");
-  const [selectedJob, setSelectedJob] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [listFilter, setListFilter] = useState("all");
-  const [loadingMore, setLoadingMore] = useState(false);
   const [isDeadlineOver, setIsDeadlineOver] = useState(false);
 
   // local filters matching desktop
+  const profileNameParam = searchParams.get("profileName") || "all";
+  const sortParam = searchParams.get("sort") || "createdAt";
+  const searchParam = searchParams.get("search") || "";
+
   const [filters, setFilters] = useState({
-    profileName: "all",
-    sort: "createdAt",
-    search: "",
+    profileName: profileNameParam,
+    sort: sortParam,
+    search: searchParam,
   });
+
+  // Sync filters state with URL changes
+  React.useEffect(() => {
+    setFilters({
+      profileName: searchParams.get("profileName") || "all",
+      sort: searchParams.get("sort") || "createdAt",
+      search: searchParams.get("search") || "",
+    });
+  }, [searchParams]);
 
   const jobOptions = [
     { value: "all", label: "All Jobs" },
@@ -87,62 +98,87 @@ export default function MobileJobOpenings() {
     optimisticAppliedIds.includes(jobId) ||
     checkIfJobApplied(jobId, student?.appliedJobs);
 
-  // ── Auto-select first job on load (but don't force details view) ──
+  // ── Auto-select first job on load ──
   useEffect(() => {
-    if (!JOBS?.length) return;
-    const stillExists = JOBS.some((j) => j._id === selectedId);
-    if (!selectedId || !stillExists) setSelectedId(JOBS[0]?._id || "");
-  }, [JOBS]);
+    if (!filteredJobs?.length) return;
+    const stillExists = filteredJobs.some((j) => j._id === selectedId);
+    if (!selectedId || !stillExists) setSelectedId(filteredJobs[0]?._id || "");
+  }, [filteredJobs]);
 
-  // ── Sync selectedJob ───────────────────────────────────────
+  // ── Reset active tab when selected ID changes ─────────────
   useEffect(() => {
-    const job = JOBS?.find((j) => j._id === selectedId) || null;
-    setSelectedJob(job);
-  }, [selectedId, JOBS]);
+    setActiveTab("overview");
+  }, [selectedId]);
 
   // ── Filter helpers ─────────────────────────────────────────
   const createQueryString = useCallback(
     (name, value) => {
       const params = new URLSearchParams(searchParams);
       params.set(name, value);
+      params.set("page", "1"); // Reset to page 1 on search or filter change
       return params.toString().replace(/\+/g, "%20");
     },
     [searchParams]
   );
 
   const handleClearFilter = () => {
-    const hasQueryParams = Array.from(searchParams.entries()).length > 0;
-    if (hasQueryParams) {
-      dispatch(GetAllJobs({ fetchType: "initial" }));
-    }
     router.push(pathname);
     setFilters({ profileName: "all", sort: "createdAt", search: "" });
   };
 
   const handleDispatchFilter = (key, value) => {
-    if (key === "profileName" && value === "all") {
-      handleClearFilter();
-      return;
-    }
-    const queryObj = {};
-    for (const [k, v] of searchParams.entries()) {
-      queryObj[k] = v;
-    }
-    queryObj[key] = value;
-    dispatch(GetAllJobs({ fetchType: "initial", queryObj }));
+    const params = new URLSearchParams(searchParams);
+    params.set(key, value);
+    params.set("page", "1");
+    router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
   };
 
-  const filteredJobs = (
-    listFilter === "applied"
-      ? JOBS.filter((j) => isJobApplied(j._id))
-      : JOBS
-  ).filter((j) => j?.status !== "pending");
+  const appliedJobsList = (student?.appliedJobs || [])
+    .map((aj) => {
+      const jobId = aj?.jobDetails?._id || aj?.id || aj?.jobId || aj?._id || (typeof aj === "string" ? aj : null);
+      if (!jobId) return null;
+      const localDetails = JOBS.find((job) => String(job._id) === String(jobId));
+      const details = localDetails || aj?.jobDetails;
+      if (!details) return null;
+      return {
+        ...details,
+        applicationStatus: aj.status || "applied",
+      };
+    })
+    .filter((j) => {
+      if (!j || !j._id) return false;
+      if (j.status === "pending") return false;
 
-  const handleLoadMore = async () => {
-    setLoadingMore(true);
-    await dispatch(GetAllJobs({ limit: 10, cursor: nextCursor }));
-    setLoadingMore(false);
-  };
+      // Filter by search locally
+      if (searchParam) {
+        const query = searchParam.toLowerCase();
+        const matchesSearch =
+          (j.jobTitle || "").toLowerCase().includes(query) ||
+          (j.companyName || "").toLowerCase().includes(query) ||
+          (j.city || "").toLowerCase().includes(query) ||
+          (j.sector || "").toLowerCase().includes(query);
+        if (!matchesSearch) return false;
+      }
+
+      // Filter by job profile locally
+      if (profileNameParam && profileNameParam !== "all") {
+        if (j.profileName !== profileNameParam) return false;
+      }
+
+      return true;
+    });
+
+  // Sort locally
+  appliedJobsList.sort((a, b) => {
+    if (sortParam === "createdAt") {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
+  const filteredJobs = listFilter === "applied" ? appliedJobsList : JOBS.filter((j) => j?.status !== "pending");
+
+  const selectedJob = filteredJobs?.find((j) => j._id === selectedId) || null;
 
   const handleApply = () => {
     if (!selectedJob || !student) return;
@@ -328,15 +364,101 @@ export default function MobileJobOpenings() {
               })
             )}
 
-            {next && listFilter === "all" && (
-              <div className="flex items-center justify-center my-4">
-                <Button
-                  className="bg-[#1E69DA] py-2 px-6 text-white h-auto border-none hover:opacity-90"
-                  onClick={handleLoadMore}
-                  loading={loadingMore}
-                >
-                  Load more
-                </Button>
+            {listFilter === "all" && pagination && (
+              <div className="flex flex-col gap-3 pt-3 border-t border-[#e2e8f0] bg-white mt-4 pb-2">
+                {/* Top row: items per page and showing info */}
+                <div className="flex items-center justify-between text-xs text-gray-500 font-medium px-2">
+                  <div className="flex items-center gap-1.5">
+                    <span>Show:</span>
+                    <Select
+                      size="small"
+                      value={pagination.limit}
+                      onChange={(val) => {
+                        const params = new URLSearchParams(searchParams);
+                        params.set("limit", String(val));
+                        params.set("page", "1");
+                        router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                      }}
+                      options={[
+                        { value: 10, label: "10" },
+                        { value: 25, label: "25" },
+                        { value: 50, label: "50" },
+                        { value: 100, label: "100" },
+                      ]}
+                      style={{ width: 65 }}
+                    />
+                  </div>
+                  <span>
+                    Showing {Math.min(pagination.totalDocs, (pagination.currentPage - 1) * pagination.limit + 1)}–
+                    {Math.min(pagination.totalDocs, pagination.currentPage * pagination.limit)} of {pagination.totalDocs}
+                  </span>
+                </div>
+
+                {/* Bottom row: Page buttons */}
+                <div className="flex items-center justify-center gap-1 flex-wrap px-2">
+                  <Button
+                    size="small"
+                    disabled={pagination.currentPage === 1}
+                    onClick={() => {
+                      const params = new URLSearchParams(searchParams);
+                      params.set("page", String(pagination.currentPage - 1));
+                      router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                    }}
+                  >
+                    ‹
+                  </Button>
+
+                  {Array.from({ length: pagination.totalPages }, (_, i) => {
+                    const pageNum = i + 1;
+                    // Limit showing max 4 pages around current page for mobile
+                    if (
+                      pagination.totalPages > 4 &&
+                      Math.abs(pagination.currentPage - pageNum) > 1 &&
+                      pageNum !== 1 &&
+                      pageNum !== pagination.totalPages
+                    ) {
+                      if (
+                        (pageNum === 2 && pagination.currentPage > 3) ||
+                        (pageNum === pagination.totalPages - 1 && pagination.currentPage < pagination.totalPages - 2)
+                      ) {
+                        return <span key={pageNum} className="text-gray-400 px-0.5">...</span>;
+                      }
+                      return null;
+                    }
+
+                    return (
+                      <Button
+                        key={pageNum}
+                        size="small"
+                        type={pagination.currentPage === pageNum ? "primary" : "default"}
+                        className={
+                          pagination.currentPage === pageNum
+                            ? "!bg-[#24A058] !border-[#24A058] !text-white"
+                            : ""
+                        }
+                        onClick={() => {
+                          const params = new URLSearchParams(searchParams);
+                          params.set("page", String(pageNum));
+                          router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                        }}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+
+                  <Button
+                    size="small"
+                    disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
+                    onClick={() => {
+                      const params = new URLSearchParams(searchParams);
+                      params.set("page", String(pagination.currentPage + 1));
+                      router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                    }}
+                  >
+                    ›
+                  </Button>
+                </div>
               </div>
             )}
           </div>
@@ -395,11 +517,11 @@ export default function MobileJobOpenings() {
                 </div>
                 <div className={styles.metaItem}>
                   <span className={styles.metaLabel}>Category</span>
-                  <span className={styles.metaValue}>{selectedJob?.category || "Job"}</span>
+                  <span className={styles.metaValue}>{selectedJob?.sector || "Job"}</span>
                 </div>
                 <div className={styles.metaItem}>
                   <span className={styles.metaLabel}>Function</span>
-                  <span className={styles.metaValue}>{selectedJob?.profileName || "Engineering"}</span>
+                  <span className={styles.metaValue}>{selectedJob?.jobTitle || "Engineering"}</span>
                 </div>
               </div>
 
@@ -415,8 +537,10 @@ export default function MobileJobOpenings() {
                       children: (
                         <div 
                           className={styles.detailsSectionText}
-                          dangerouslySetInnerHTML={{ __html: selectedJob?.description || "No description available." }}
-                        />
+                          style={{ whiteSpace: "pre-wrap" }}
+                        >
+                          {selectedJob?.jobDescription || "No description provided."}
+                        </div>
                       )
                     },
                     {
@@ -425,18 +549,46 @@ export default function MobileJobOpenings() {
                       children: (
                         <div 
                           className={styles.detailsSectionText}
-                          dangerouslySetInnerHTML={{ __html: selectedJob?.hiringProcess || "Hiring process details are not provided." }}
-                        />
+                          style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+                        >
+                          {selectedJob?.interviewRounds?.length ? (
+                            selectedJob.interviewRounds.map((round, index) => (
+                              <div key={index} style={{ padding: "12px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "#ffffff" }}>
+                                <p style={{ margin: 0, fontWeight: "600" }}>
+                                  {index + 1}. {round?.roundName}:{" "}
+                                  <span style={{ fontWeight: "normal" }}>{round?.description}</span>
+                                </p>
+                              </div>
+                            ))
+                          ) : (
+                            <p style={{ margin: 0, color: "#64748b" }}>No interview rounds specified.</p>
+                          )}
+                        </div>
                       )
                     },
                     {
                       key: "eligibility",
                       label: "Eligibility",
                       children: (
-                        <div className={styles.detailsSectionText}>
-                          <p><strong>Required Education:</strong> {selectedJob?.educationRequirement || "Open to all graduates"}</p>
-                          <p><strong>Minimum Percentage:</strong> {selectedJob?.percentageRequirement ? `${selectedJob.percentageRequirement}%` : "No minimum cut-off"}</p>
-                          <p><strong>Eligible Branches:</strong> {selectedJob?.branchRequirement || "All branches eligible"}</p>
+                        <div 
+                          className={styles.detailsSectionText}
+                          style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+                        >
+                          {selectedJob?.eligibilityCriteria?.length ? (
+                            selectedJob.eligibilityCriteria.map((item, index) => (
+                              <div key={index} style={{ padding: "12px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "#ffffff" }}>
+                                <p style={{ margin: "0 0 8px 0" }}>
+                                  <strong>Education Level:</strong> {item?.educationLevel || "N/A"}
+                                </p>
+                                <p style={{ margin: 0 }}>
+                                  <strong>Minimum Marks Percentage:</strong>{" "}
+                                  {item?.minMarksPercentage || "N/A"}%
+                                </p>
+                              </div>
+                            ))
+                          ) : (
+                            <p style={{ margin: 0, color: "#64748b" }}>No eligibility criteria specified.</p>
+                          )}
                         </div>
                       )
                     }
