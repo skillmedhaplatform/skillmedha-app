@@ -15,13 +15,15 @@ import { useState, useEffect } from "react";
  */
 export default function useResponsive(breakpoint = 1024) {
   const [isResponsive, setIsResponsive] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const check = () => setIsResponsive(window.innerWidth < breakpoint);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, [breakpoint]);
 
-  return isResponsive;
+  return mounted ? isResponsive : false;
 }

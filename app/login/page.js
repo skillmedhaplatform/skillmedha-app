@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { authService, roleConfig } from '../../lib/auth';
 import MobileLoginView from '../../mobile_views/login/MobileLoginView';
 import useResponsive from '@/hooks/useResponsive';
+import LoginPromoSection from '@/components/LoginPromoSection';
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -41,8 +42,9 @@ function LoginForm() {
     try {
       const result = await authService.loginByRole(role, email, password);
       if (result.success) {
+        setRole(result.resolvedRole);
         // Save the authenticated user's portal role to localStorage
-        localStorage.setItem("portalRole", role);
+        localStorage.setItem("portalRole", result.resolvedRole);
         window.location.href = result.redirectUrl || "/student/dashboard";
       }
     } catch (err) {
@@ -100,7 +102,7 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen bg-white font-sans text-gray-900 overflow-hidden relative">
-      
+
       {/* FULL-SCREEN LOADING OVERLAY */}
       {loading && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/80 backdrop-blur-md transition-all duration-300">
@@ -110,7 +112,7 @@ function LoginForm() {
             <div className="absolute inset-3 rounded-full border-[4px] border-brand-400 border-b-transparent animate-[spin_1.5s_linear_infinite_reverse]"></div>
           </div>
           <h3 className="text-2xl font-bold text-brand-900 animate-pulse tracking-tight">Authenticating</h3>
-          <p className="mt-2 text-gray-500 font-medium">Securing your {roleConfig[role]?.name || 'portal'} session...</p>
+          <p className="mt-2 text-gray-500 font-medium">Securing your {role === 'student' && !searchParams.get('portal') ? '' : roleConfig[role]?.name + ' '}session...</p>
         </div>
       )}
 
@@ -119,7 +121,7 @@ function LoginForm() {
         <div className="absolute top-8 left-8 sm:left-16 md:left-24 flex items-center">
           <img src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg" alt="SkillMedha Logo" className="h-8 w-auto mr-3 hover:scale-105 transition-transform cursor-pointer" />
           <div className="text-2xl font-extrabold tracking-tighter flex items-center text-gray-900 cursor-pointer">
-            SKILLMEDHA<span className="text-brand-600 ml-0.5 text-4xl leading-[0]">.</span>
+            SKILLMEDHA
           </div>
         </div>
 
@@ -137,7 +139,7 @@ function LoginForm() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+
             {/* INPUT FIELDS */}
             <div className="space-y-4">
               <div className="relative group">
@@ -214,38 +216,7 @@ function LoginForm() {
       </div>
 
       {/* RIGHT COLUMN - ANIMATED BRANDING */}
-      <div className="hidden lg:flex w-[55%] relative overflow-hidden bg-brand-900 flex-col items-center justify-center">
-        {/* Animated dynamic gradient orbs */}
-        <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-brand-600/50 rounded-full mix-blend-screen filter blur-[100px] animate-[pulse_8s_ease-in-out_infinite]"></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[35vw] h-[35vw] bg-blue-500/40 rounded-full mix-blend-screen filter blur-[100px] animate-[pulse_10s_ease-in-out_infinite_reverse]"></div>
-        <div className="absolute top-[30%] left-[20%] w-[25vw] h-[25vw] bg-purple-500/40 rounded-full mix-blend-screen filter blur-[80px] animate-[pulse_12s_ease-in-out_infinite]"></div>
-        
-        {/* Glassmorphic content card */}
-        <div className="relative z-10 p-12 w-full max-w-xl">
-          <div className="backdrop-blur-2xl bg-white/5 border border-white/10 p-12 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform transition-transform duration-700 hover:scale-[1.02]">
-            <div className="w-16 h-16 bg-gradient-to-br from-brand-400 to-brand-600 rounded-2xl mb-8 flex items-center justify-center shadow-lg shadow-brand-500/30">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-              </svg>
-            </div>
-            <h2 className="text-4xl font-extrabold mb-4 text-white leading-tight tracking-tight">
-              Elevate Your <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-brand-200 to-purple-300">
-                Learning Journey
-              </span>
-            </h2>
-            <p className="text-lg text-blue-100/70 leading-relaxed font-medium">
-              Access all your tools in one seamless platform. Connect, learn, and grow with the next generation of education technology.
-            </p>
-            
-            <div className="flex items-center space-x-3 mt-10">
-              <div className="w-12 h-1 bg-gradient-to-r from-transparent via-brand-400 to-transparent rounded-full"></div>
-              <div className="w-2 h-2 rounded-full bg-brand-400"></div>
-              <div className="w-12 h-1 bg-gradient-to-r from-transparent via-brand-400 to-transparent rounded-full"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LoginPromoSection />
 
       {/* FORGOT PASSWORD MODAL */}
       {showForgot && (

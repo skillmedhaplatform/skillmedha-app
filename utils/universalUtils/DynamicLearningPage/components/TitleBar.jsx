@@ -1,6 +1,6 @@
 "use client";
 import React, { memo, useEffect } from "react";
-import { Progress, Popover, Button, Modal } from "antd";
+import { Progress, Popover, Modal } from "antd";
 import { TrophyOutlined, DownOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import interPageStyles from "../page.module.scss";
@@ -48,8 +48,9 @@ const TitleBar = memo(({
           type="circle"
           percent={displayProgress}
           size={45}
-          // Subtle spin animation during page transition
-          strokeColor={isNavigating ? "#faad14" : undefined}
+          strokeColor={isNavigating ? "#faad14" : "#2563eb"}
+          trailColor="#eff6ff"
+          strokeWidth={10}
         />
         <div className={interPageStyles.courseHeading}>
           {courseHeading}
@@ -73,22 +74,20 @@ const TitleBar = memo(({
         >
           <button type="button" className={interPageStyles.progressButton} style={{ marginRight: 0 }}>
             <span className={interPageStyles.progressIconWrap}>
-              <TrophyOutlined />
+              <TrophyOutlined style={{ color: "#2563eb" }} />
             </span>
             <span className={interPageStyles.progressLabel}>Your progress</span>
             <DownOutlined className={interPageStyles.progressChevron} />
           </button>
         </Popover>
 
-        <Button
-          type="default"
-          danger
-          icon={<LogoutOutlined />}
+        <button
           onClick={handleExit}
-          style={{ borderRadius: "999px", padding: "0.45rem 1rem", height: "auto", fontWeight: 600 }}
+          className={interPageStyles.exitBtn}
         >
-          Exit
-        </Button>
+          <LogoutOutlined />
+          <span>Exit</span>
+        </button>
       </div>
     </div>
   );

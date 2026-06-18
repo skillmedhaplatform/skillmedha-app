@@ -225,11 +225,12 @@ export default function MainProfileUploader() {
               onClick={handleCropSave}
               style={{
                 padding: "8px 16px",
-                backgroundColor: "#0070f3",
+                background: "linear-gradient(135deg, #1E69DA, #5694F0)",
                 color: "#fff",
                 border: "none",
-                borderRadius: "4px",
+                borderRadius: "8px",
                 cursor: "pointer",
+                fontWeight: "600"
               }}
             >
               Save

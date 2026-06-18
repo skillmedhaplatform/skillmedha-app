@@ -1,8 +1,8 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import axios from "axios";
+import formStyles from "../../form.module.scss";
 import {
   Upload,
   Button,
@@ -37,7 +37,6 @@ import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_c
 // Month format for storage and parsing
 const monthFormat = "MM/YYYY";
 
-// Only customDocs now; removed joiningFiles and relievingFiles
 const initialResponsibility = {
   company: "",
   responsibility: "",
@@ -57,7 +56,7 @@ export default function WorkAndResponsibilitiesPage() {
 
   // Initialize from studentDetails.responsibilities or default
   useEffect(() => {
-    if (Array.isArray(studentDetails?.responsibilities)) {
+    if (Array.isArray(studentDetails?.responsibilities) && studentDetails.responsibilities.length > 0) {
       setResponsibilities(
         studentDetails.responsibilities.map((item) => ({
           ...initialResponsibility,
@@ -180,16 +179,19 @@ export default function WorkAndResponsibilitiesPage() {
       message.error("End Date cannot be before Start Date");
       return;
     }
-    setResponsibilities((prev) => {
-      const arr = [...prev];
-      arr[idx].editing = false;
-      arr[idx].status = "pending";
-      return arr;
+
+    const updatedResponsibilities = responsibilities.map((r, i) => {
+      if (i === idx) {
+        return { ...r, editing: false, status: "pending" };
+      }
+      return r;
     });
+
+    setResponsibilities(updatedResponsibilities);
     dispatch(
       updateStudent({
         dispatch,
-        aboutDetails: { responsibilities },
+        aboutDetails: { responsibilities: updatedResponsibilities },
       })
     );
   };
@@ -208,7 +210,8 @@ export default function WorkAndResponsibilitiesPage() {
       return updated;
     });
   };
-  const getSafeContent = (value = "", maxLength = 300) => {
+
+  const getSafeContent = (value = "", maxLength = 400) => {
     const parsed = parseIfJson(value);
 
     // If it's an object/array after parsing → stringify
@@ -220,38 +223,42 @@ export default function WorkAndResponsibilitiesPage() {
       ? content.substring(0, maxLength) + "..."
       : content;
   };
+
   return (
-    <div className="max-w-full mx-auto">
-      <StudentPageHeader section="Profile" title="Responsibilities" />
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      {/* Header Card matching TPO */}
+      <div className={formStyles.formContainer} style={{ padding: "1.5rem 2rem", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <div className={formStyles.headerLeft}>
+          <h1 className={formStyles.formTitle}>Responsibilities</h1>
+          <p className={formStyles.formSubtitle}>Update your positions of responsibility and leadership roles below</p>
+        </div>
+      </div>
+
       {responsibilities.map((item, idx) => (
-        <div key={idx} className="border border-solid border-[#24A058] rounded-lg p-6 mb-6 relative bg-white">
+        <div key={idx} className={formStyles.formContainer} style={{ marginBottom: "1.5rem" }}>
           {/* Header */}
-          <div className="flex justify-between items-center text-[#24A058]">
-            <div className="flex gap-2 justify-start items-center">
-              {item.status === "success" ? (
-                <CheckCircleOutlined />
-              ) : (
-                <ExclamationCircleOutlined />
-              )}
-              <div className="text-[1.2rem] font-bold flex gap-2 items-center">
-                {item.responsibility}
-                <span>-</span>
-                {item?.verificationType == "approved" ? (
-                  <div className="text-base text-green-500">Verified</div>
-                ) : item?.verificationType == "resubmission" ? (
-                  <div className="text-base text-red-500">Re-Submit</div>
+          <div className={formStyles.headertitleCont} style={{ borderBottom: "none", marginBottom: "1rem" }}>
+            <div className={formStyles.headerLeft}>
+              <h3 className={formStyles.formTitle} style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                <span>{item.responsibility || "New Position"}</span>
+                {item?.verificationType === "approved" ? (
+                  <span className="text-sm font-semibold text-green-500">Verified</span>
+                ) : item?.verificationType === "resubmission" ? (
+                  <span className="text-sm font-semibold text-red-500">Re-Submit</span>
                 ) : (
-                  <div className="text-base text-[#ffc400]">Not Verified.</div>
+                  <span className="text-sm font-semibold text-[#ffc400]">Not Verified</span>
                 )}
-              </div>
+              </h3>
             </div>
-            <div className="flex gap-2">
+            <div className={formStyles.editButtonContainer} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               {!item.editing && (
                 <Button
-                  type="text"
-                  icon={<EditOutlined />}
                   onClick={() => updateField(idx, "editing", true)}
-                />
+                  className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                  style={{ fontWeight: "600", borderRadius: "8px" }}
+                >
+                  Edit
+                </Button>
               )}
               {responsibilities.length > 1 && (
                 <Popconfirm
@@ -263,7 +270,9 @@ export default function WorkAndResponsibilitiesPage() {
                   placement="left"
                   onConfirm={() => deleteResponsibilites(idx)}
                 >
-                  <Button type="text" danger icon={<DeleteOutlined />} />
+                  <Button danger style={{ borderRadius: "8px", fontWeight: "600" }}>
+                    Delete
+                  </Button>
                 </Popconfirm>
               )}
             </div>
@@ -271,131 +280,102 @@ export default function WorkAndResponsibilitiesPage() {
 
           {/* Form View */}
           {item.editing ? (
-            <div className="mt-4">
-              <Row gutter={[16, 16]}>
-                {/* Company */}
-                <Col span={24}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">Company</label>
-                    <Input
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      value={item.company}
-                      placeholder="Company / organisation name"
-                      onChange={(e) =>
-                        updateField(idx, "company", e.target.value)
-                      }
-                    />
-                  </div>
-                </Col>
+            <div className={formStyles.dynamicFormContainer} style={{ paddingTop: 0 }}>
+              {/* Company */}
+              <div className={formStyles.formField}>
+                <label>Company / Organisation Name*</label>
+                <input
+                  type="text"
+                  className={formStyles.inputField}
+                  value={item.company}
+                  placeholder="Company / organisation name"
+                  onChange={(e) => updateField(idx, "company", e.target.value)}
+                />
+              </div>
 
-                {/* Responsibility */}
-                <Col span={24}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">Responsibilities</label>
-                    <Input
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      value={item.responsibility}
-                      placeholder="Describe your responsibilities"
-                      onChange={(e) =>
-                        updateField(idx, "responsibility", e.target.value)
-                      }
-                    />
-                  </div>
-                </Col>
+              {/* Responsibility */}
+              <div className={formStyles.formField}>
+                <label>Position / Title*</label>
+                <input
+                  type="text"
+                  className={formStyles.inputField}
+                  value={item.responsibility}
+                  placeholder="e.g. Student Coordinator, Club President"
+                  onChange={(e) => updateField(idx, "responsibility", e.target.value)}
+                />
+              </div>
 
-                {/* Dates */}
-                <Col span={12}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">Start Date</label>
-                    <DatePicker
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      picker="month"
-                      format={monthFormat}
-                      value={item.start ? dayjs(item.start, monthFormat) : null}
-                      onChange={(date) =>
-                        updateField(
-                          idx,
-                          "start",
-                          date ? date.format(monthFormat) : null
-                        )
-                      }
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                </Col>
-                <Col span={12}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">End Date</label>
-                    <DatePicker
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      picker="month"
-                      format={monthFormat}
-                      value={item.end ? dayjs(item.end, monthFormat) : null}
-                      onChange={(date) =>
-                        updateField(
-                          idx,
-                          "end",
-                          date ? date.format(monthFormat) : null
-                        )
-                      }
-                      disabledDate={(current) =>
-                        disabledEndDate(current, item.start)
-                      }
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                </Col>
+              {/* Start Date */}
+              <div className={formStyles.formField}>
+                <label>Start Date*</label>
+                <DatePicker
+                  className={formStyles.selectField}
+                  picker="month"
+                  format={monthFormat}
+                  value={item.start ? dayjs(item.start, monthFormat) : null}
+                  onChange={(date) =>
+                    updateField(idx, "start", date ? date.format(monthFormat) : null)
+                  }
+                  style={{ width: "100%" }}
+                />
+              </div>
 
-                {/* City */}
-                <Col span={24}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">City</label>
-                    <Input
-                      className="flex-auto bg-[#eafaf1] border-none outline-none"
-                      value={item.city}
-                      placeholder="City"
-                      onChange={(e) => updateField(idx, "city", e.target.value)}
-                    />
-                  </div>
-                </Col>
+              {/* End Date */}
+              <div className={formStyles.formField}>
+                <label>End Date*</label>
+                <DatePicker
+                  className={formStyles.selectField}
+                  picker="month"
+                  format={monthFormat}
+                  value={item.end ? dayjs(item.end, monthFormat) : null}
+                  onChange={(date) =>
+                    updateField(idx, "end", date ? date.format(monthFormat) : null)
+                  }
+                  disabledDate={(current) => disabledEndDate(current, item.start)}
+                  style={{ width: "100%" }}
+                />
+              </div>
 
-                {/* Description */}
-                <Col span={24}>
-                  <div className="flex items-center mb-4">
-                    <label className="flex-none w-[200px] m-0 text-[#555] font-medium">Description</label>
-                    <textarea
-                      className="max-w-full w-full overflow-y-auto resize-none min-h-[8rem] h-auto rounded-[5px] p-4 text-[16px] bg-[#eafaf1] border-none outline-none"
-                      value={item.description}
-                      placeholder={`* Describe about Responsibilities`}
-                      onChange={(e) =>
-                        updateField(idx, "description", e.target.value)
-                      }
-                    />
-                  </div>
-                </Col>
+              {/* City */}
+              <div className={formStyles.formField}>
+                <label>City</label>
+                <input
+                  type="text"
+                  className={formStyles.inputField}
+                  value={item.city}
+                  placeholder="City"
+                  onChange={(e) => updateField(idx, "city", e.target.value)}
+                />
+              </div>
 
-                {/* Custom Docs */}
-                {item.customDocs.map((doc, didx) => (
-                  <Col span={24} key={didx}>
-                    <div className="flex items-center mb-4">
-                      {/* Header row with title and delete button */}
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <label className="flex-none w-[200px] m-0 text-[#555] font-medium">{doc.title}</label>
-                        <Button
-                          type="text"
-                          icon={<DeleteOutlined />}
-                          onClick={() => deleteCustomDoc(idx, didx)}
-                          danger
-                        />
-                      </div>
+              {/* Description */}
+              <div className={formStyles.fullWidthField}>
+                <div className={formStyles.formField}>
+                  <label>Description</label>
+                  <textarea
+                    className={formStyles.inputField}
+                    style={{ minHeight: "100px", resize: "vertical" }}
+                    value={item.description}
+                    placeholder="Describe your responsibilities and achievements in detail"
+                    onChange={(e) => updateField(idx, "description", e.target.value)}
+                  />
+                </div>
+              </div>
 
-                      {/* Upload control */}
+              {/* Custom Docs */}
+              {item.customDocs.map((doc, didx) => (
+                <div className={formStyles.fullWidthField} key={didx}>
+                  <div className={formStyles.formField}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <label style={{ marginBottom: 0 }}>{doc.title}</label>
+                      <Button
+                        type="text"
+                        icon={<DeleteOutlined />}
+                        onClick={() => deleteCustomDoc(idx, didx)}
+                        danger
+                      />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "4px" }}>
                       <Upload
                         multiple={false}
                         beforeUpload={(file) => {
@@ -409,70 +389,129 @@ export default function WorkAndResponsibilitiesPage() {
                         <Button
                           icon={<UploadOutlined />}
                           disabled={(doc.files?.length || 0) >= 1}
+                          className={formStyles.addNewBtn}
+                          style={{ borderRadius: "8px", fontWeight: "600" }}
                         >
                           Select File
                         </Button>
                       </Upload>
-
-                      {/* Render uploaded files as tags */}
-                      <div className="my-4">
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                         {(doc.files || []).map((f) => (
                           <Tag
                             key={f.uid}
                             closable
                             onClose={() => removeFile(idx, f, didx)}
+                            style={{ background: "#eef5fb", border: "none", padding: "4px 8px", borderRadius: "4px" }}
                           >
                             {f.name}
                           </Tag>
                         ))}
                       </div>
                     </div>
-                  </Col>
-                ))}
-              </Row>
+                  </div>
+                </div>
+              ))}
 
-              <div className="flex justify-between mt-6">
+              <div className={formStyles.fullWidthField} style={{ display: "flex", justifyContent: "space-between", marginTop: "1.5rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem" }}>
                 <Button
                   onClick={() => addCustomDoc(idx)}
-                  icon={<PlusOutlined />}
+                  className={formStyles.addNewBtn}
+                  style={{ borderRadius: "8px", fontWeight: "600", padding: "6px 16px" }}
                 >
-                  Add Document
+                  + Add Document
                 </Button>
-                <Button type="primary" onClick={() => saveResponsibility(idx)}>
-                  Save
+                <Button
+                  type="primary"
+                  onClick={() => saveResponsibility(idx)}
+                  className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                  style={{ fontWeight: "600", borderRadius: "8px", padding: "6px 20px" }}
+                >
+                  Save Position
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="w-full">
-              <div className="w-full flex items-center justify-start gap-2">
-                <span>{item.company}</span>
-                <span>
-                  {" "}
-                  | {item.start} to {item.end}
-                </span>
-                <span> | {item.city}</span>
+            <div className={formStyles.dynamicFormContainer} style={{ padding: 0 }}>
+              <div className={formStyles.formField}>
+                <label>Company / Organisation</label>
+                <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                  {item.company || "—"}
+                </div>
               </div>
-              <hr />
-              <div
-                className="w-full"
-                dangerouslySetInnerHTML={{
-                  __html: getSafeContent(item.description, 300),
-                }}
-              />
+              <div className={formStyles.formField}>
+                <label>Position / Title</label>
+                <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                  {item.responsibility || "—"}
+                </div>
+              </div>
+              <div className={formStyles.formField}>
+                <label>Duration</label>
+                <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                  {item.start || "—"} to {item.end || "—"}
+                </div>
+              </div>
+              <div className={formStyles.formField}>
+                <label>City</label>
+                <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+                  {item.city || "—"}
+                </div>
+              </div>
+
+              {item.description && (
+                <div className={formStyles.fullWidthField}>
+                  <div className={formStyles.formField}>
+                    <label>Description</label>
+                    <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8, height: "auto", padding: "10px 12px" }}>
+                      <div dangerouslySetInnerHTML={{ __html: getSafeContent(item.description) }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Custom Documents attached list */}
+              {item.customDocs?.some(doc => doc.files?.length > 0) && (
+                <div className={formStyles.fullWidthField}>
+                  <div className={formStyles.formField}>
+                    <label>Attached Documents</label>
+                    <div
+                      style={{
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "12px",
+                        padding: "15px",
+                        width: "100%",
+                        backgroundColor: "#f8fafc",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px"
+                      }}
+                    >
+                      {item.customDocs.map((doc, i) => (
+                        doc.files?.map((f, fi) => (
+                          <div key={`doc-${i}-${fi}`} style={{ display: "flex", gap: "10px", alignItems: "center", backgroundColor: "white", padding: "8px 12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                            <strong style={{ color: "#475569" }}>{doc.title}:</strong>
+                            <a href={f.url} target="_blank" rel="noreferrer" style={{ color: "#6BA8ED", fontWeight: "600" }}>{f.name}</a>
+                          </div>
+                        ))
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
       ))}
 
-      <Button
-        type="dashed"
-        icon={<PlusOutlined />}
-        onClick={addResponsibility}
-        className="w-full text-center"
-      >
-        Add More Responsibilities
-      </Button>
+      <div style={{ width: "100%" }}>
+        <Button
+          onClick={addResponsibility}
+          className={formStyles.addNewBtn}
+          style={{ fontWeight: "600", borderRadius: "8px", padding: "10px 24px", height: "auto", width: "100%", marginBottom: "2rem" }}
+        >
+          + Add Position
+        </Button>
+      </div>
     </div>
   );
 }
+

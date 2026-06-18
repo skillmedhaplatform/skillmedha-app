@@ -1,129 +1,136 @@
 "use client";
-import {
-  fetchSubtopicsByTopic,
-  fetchPracQuestions,
-} from "@/redux/slices/practiceSlice";
-import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
-import { Button, Divider, Result, Spin, Tooltip, message } from "antd";
-import { useSearchParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { InfoCircleOutlined } from "@ant-design/icons";
 
-export default function NontechnicalPage() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
+import {
+  fetchSubjectsByType,
+} from "@/redux/slices/practiceSlice";
+import PracticeFilters from "@/modules/student/components/PracticeFilters";
+import PracticeSubjectRow from "@/modules/student/components/PracticeSubjectRow";
+import { Divider, Result, Spin, Tooltip, message } from "antd";
+import useResponsive from "@/hooks/useResponsive";
+import styles from "@/mobile_views/practice/mobilePracticeLayout.module.scss";
+
+export default function TechnicalPage() {
   const dispatch = useDispatch();
-  const subtopics = useSelector((s) => s.practice.subtopics);
+  const router = useRouter();
+  const currPath = usePathname();
+  const searchParams = useSearchParams();
+  const subjects = useSelector((s) => s.practice.subjects);
   const studentCreds = useSelector((state) => state.student.student?.data);
   const [loading, setLoading] = useState(false);
-  const [loadingSubtopicId, setLoadingSubtopicId] = useState(null);
+  const isMobile = useResponsive();
 
-  // Get specific parameters
-  const subjectId = searchParams.get("sub");
-  const topicId = searchParams.get("top");
+  const categoryTabs = [
+    { name: "Technical", path: "/student/practice-new/technical" },
+    { name: "Non-Technical", path: "/student/practice-new/nontechnical" },
+    { name: "Coding", path: "/student/practice-new/coding" },
+  ];
 
   useEffect(() => {
-    if (topicId) {
-      setLoading(true);
-      dispatch(fetchSubtopicsByTopic(topicId)).finally(() => {
-        setLoading(false);
-      });
-    }
-  }, [topicId, dispatch]);
-
-  const handleClick = async (subtopic) => {
-    setLoadingSubtopicId(subtopic._id);
-
-    try {
-      const result = await dispatch(
-        fetchPracQuestions({
-          refId: subtopic._id,
-          type: "subTopicId",
-          userId: studentCreds?._id,
-        })
-      ).unwrap();
-
-      // Check if questions exist
-      if (result && result?.data?.questionsData?.length > 0) {
-        router.push(
-          `/student/practice-new/test?sub=${subjectId}&top=${topicId}&subT=${subtopic?._id}&t=${subtopic?.title}`
-        );
-      } else {
-        message.warning("No questions available for this subtopic");
-      }
-    } catch (error) {
-      message.error("Failed to fetch questions. Please try again.");
-      console.error("Error fetching questions:", error);
-    } finally {
-      setLoadingSubtopicId(null);
-    }
-  };
-
-  if (!topicId) {
-    return (
-      <Result
-        icon={<InfoCircleOutlined style={{ color: "#faad14", fontSize: 50 }} />}
-        title="No Topic Selected"
-        subTitle="Please select a topic from the sidebar to view its subtopics."
-      />
-    );
-  }
+    setLoading(true);
+    dispatch(fetchSubjectsByType("technical")).finally(() => {
+      setLoading(false);
+    });
+  }, [dispatch]);
 
   if (loading) {
     return (
       <div>
-        <h2>Nontechnical Practice Page</h2>
+        <h2>Technical Practice Page</h2>
         <Divider />
         <div style={{ textAlign: "center", padding: "20px" }}>
           <Spin size="large" />
-          <p style={{ marginTop: "10px" }}>Loading subtopics...</p>
+          <p style={{ marginTop: "10px" }}>Loading subjects...</p>
         </div>
       </div>
     );
   }
 
+  if (isMobile) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.categoryTabs}>
+          {categoryTabs.map((tab) => {
+            const isActive = tab.path === "/student/practice-new/technical";
+            return (
+              <button
+                key={tab.path}
+                onClick={() => router.push(tab.path)}
+                className={`${styles.tabBtn} ${isActive ? styles.activeTab : ""}`}
+              >
+                {tab.name}
+              </button>
+            );
+          })}
+        </div>
+        <div className={styles.contentArea}>
+          {subjects && subjects.length > 0 ? (
+            <div className="px-4 py-6">
+              {subjects.map((subject, index) => (
+                <PracticeSubjectRow key={subject._id || index} subject={subject} />
+              ))}
+            </div>
+          ) : (
+            <Result
+              status="404"
+              title="No Practice Data Found"
+              subTitle="Sorry, there is no practice data available right now."
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const dynamicSubtitle = subjects?.map(s => s.title).join(" • ") || "Sharpen your technical knowledge and core concepts.";
+  const totalTopics = subjects?.length || 0;
+  const totalQuestions = subjects?.reduce((acc, curr) => acc + (curr.totalQuestions || 0), 0) || 0;
+
+  const RightStats = (
+    <div className="flex items-center gap-6 lg:gap-10 text-white mr-2 lg:mr-8">
+      <div className="flex flex-col items-center">
+        <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalTopics}</span>
+        <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">TOPICS</span>
+      </div>
+      <div className="flex flex-col items-center">
+        <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalQuestions}</span>
+        <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">QUESTIONS</span>
+      </div>
+      <div className="flex flex-col items-center">
+        <span className="text-[24px] lg:text-[28px] font-bold leading-none bg-gradient-to-br from-[#1E69DA] to-[#5694F0] bg-clip-text text-transparent">0%</span>
+        <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">DONE</span>
+      </div>
+    </div>
+  );
+
   return (
-    <div>
-      <StudentPageHeader section="Practice" title="Technical Practice" />
-      {subtopics && subtopics.length > 0 ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-6 py-2 pb-16">
-          {subtopics.map((subtopic, index) => (
-            <Tooltip
-              key={subtopic._id || index}
-              title={subtopic?.title}
-              arrow
-              placement="top"
-            >
-              <div className="flex items-start justify-center flex-col rounded-lg p-8 gap-[1.8rem] bg-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.25)] hover:shadow-lg transition-shadow">
-                <p className="text-[20px] font-bold text-[#24A058] max-w-[95%] break-words overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer m-0">
-                  {subtopic?.title || subtopic?.key}
-                </p>
-                <div className="flex items-center gap-2">
-                  <p className="text-black text-[15px] font-bold m-0">Number of Questions:</p>
-                  <p className="text-[#24A058] text-[15px] font-bold m-0">{subtopic?.totalQuestions}</p>
-                </div>
-                <Button
-                  type="primary"
-                  style={{ width: "8rem" }}
-                  loading={loadingSubtopicId === subtopic._id}
-                  onClick={() => handleClick(subtopic)}
-                  disabled={loading}
-                >
-                  Start
-                </Button>
-              </div>
-            </Tooltip>
+      <div className="flex flex-col h-[calc(100vh-60px)] overflow-hidden">
+        <div className="flex-shrink-0">
+          <StudentPageHeader 
+            title="Technical practice" 
+            subtitle={dynamicSubtitle}
+            rightSlot={RightStats}
+          />
+          
+          <PracticeFilters categories={["All", "C++", "Java", "Python"]} />
+        </div>
+
+        {subjects && subjects.length > 0 ? (
+        <div className="bg-gray-50/30 px-4 lg:px-8 py-6 flex-1 overflow-y-auto">
+          {subjects.map((subject, index) => (
+            <PracticeSubjectRow key={subject._id || index} subject={subject} />
           ))}
         </div>
-      ) : (
-        <Result
-          status="404"
-          title="No Subtopics Found"
-          subTitle="Sorry, there are no subtopics available for this topic right now."
-        />
-      )}
-    </div>
+        ) : (
+          <Result
+            status="404"
+            title="No Subjects Found"
+            subTitle="Sorry, there are no subjects available right now."
+          />
+        )}
+      </div>
   );
 }

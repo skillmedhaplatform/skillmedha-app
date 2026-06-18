@@ -120,10 +120,12 @@ export default function CardsList({ type }) {
       return null;
   }
   if (type === "notifications") {
+    console.log(data)
     return (
       <>
-        {data
-          ?.filter((d) => d?.status !== "pending")
+        {
+        // data?.filter((d) => d?.status !== "pending")        
+        data?.filter((d) => d?.status === "active")
           .map((e, i) => {
             return (
               <Collapse

@@ -7,7 +7,7 @@ import interPageStyles from "../page.module.scss";
 import TopicContentRouter from "./players/TopicContentRouter";
 import ContentTabs from "./ContentTabs";
 
-import { getTopicType } from "../utils/topicUtils";
+import { getTopicType, isTopicCompleted } from "../utils/topicUtils";
 
 /**
  * TopicViewer
@@ -41,6 +41,9 @@ const TopicViewer = memo(({
   handleSaveNewNote,
   handleUpdateNote,
   handleDeleteNote,
+  completedTopics,
+  manualTopicChecks,
+  toggleTopicCheck,
 }) => {
   const rightBodyRef = useRef(null);
 
@@ -60,6 +63,7 @@ const TopicViewer = memo(({
   const shouldUseWhiteDisplayBg = currentTopicType === "topic";
   const shouldUseMediaDisplayStyle = currentTopicType === "video" || currentTopicType === "pdf";
   const shouldShowSideNavButtons = Boolean(currentTopic);
+  const isCompleted = currentTopic ? isTopicCompleted(currentTopic, completedTopics, manualTopicChecks) : false;
 
   return (
     <div className={`${interPageStyles.bodyStylesRight} ${isExpandedView ? interPageStyles.bodyStylesRightExpanded : ""}`}
@@ -94,6 +98,12 @@ const TopicViewer = memo(({
           overflow: shouldUseMediaDisplayStyle ? "hidden" : undefined,
         }}
       >
+        {currentTopic && currentSection && (
+          <div className={interPageStyles.canvasBadge}>
+            {currentSection?.title} • {currentTopic?.title}
+          </div>
+        )}
+
         {shouldShowSideNavButtons && (
           <Button
             className={`${interPageStyles.sideNavButton} ${interPageStyles.sideNavButtonLeft}`}
@@ -123,6 +133,7 @@ const TopicViewer = memo(({
             markTopicCompleted={markTopicCompleted}
             setTopicDurationOverrides={setTopicDurationOverrides}
             handleNextTopic={handleNext}
+            currentSection={currentSection}
           />
         </div>
 
@@ -149,14 +160,33 @@ const TopicViewer = memo(({
       </div>
 
       <div className={interPageStyles.rightBodyBotom}>
-        <Button onClick={handlePrev} type="text" size="large" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <img src="https://res.cloudinary.com/dug3awue8/image/upload/v1746777649/order_icon_zlry2a.svg" width={"18px"} height={"18px"} alt="Prev" />
-          <strong style={{ fontSize: "19px" }}>Previous</strong>
-        </Button>
-        <Button onClick={handleNext} type="text" size="large" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <strong style={{ fontSize: "19px" }}>Next</strong>
-          <img src="https://res.cloudinary.com/dug3awue8/image/upload/v1746777649/order_icon_1_sxg14p.svg" width={"18px"} height={"18px"} alt="Next" />
-        </Button>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button
+            onClick={handlePrev}
+            className={interPageStyles.navBtnOutlined}
+            disabled={!currentTopic}
+          >
+            <LeftOutlined />
+            <span>Previous</span>
+          </button>
+          <button
+            onClick={handleNext}
+            className={interPageStyles.navBtnOutlined}
+            disabled={!currentTopic}
+          >
+            <span>Next</span>
+            <RightOutlined />
+          </button>
+        </div>
+
+        {currentTopic && (
+          <button
+            onClick={() => toggleTopicCheck(currentTopic)}
+            className={isCompleted ? interPageStyles.markDoneBtnCompleted : interPageStyles.markDoneBtn}
+          >
+            {isCompleted ? "Completed ✓" : "Mark as Done"}
+          </button>
+        )}
       </div>
 
       <ContentTabs
