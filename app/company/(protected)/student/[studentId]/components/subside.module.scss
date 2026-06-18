@@ -69,9 +69,36 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: block;
-  max-width: 100%;
-  border-color: lightgray;
   display: flex;
   justify-content: flex-start;
+  align-items: center;
+  max-width: 100%;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  height: 40px !important;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 8px 16px !important;
+  transition: all 0.2s ease;
+
+  &:global(.ant-btn-text) {
+    color: #64748b !important;
+    background: transparent !important;
+
+    &:hover {
+      background-color: #f1f5f9 !important;
+      color: #25a3a6 !important;
+    }
+  }
+
+  &:global(.ant-btn-primary) {
+    background: #25a3a6 !important;
+    color: #ffffff !important;
+
+    &:hover {
+      background: #1e888a !important;
+    }
+  }
 }
+

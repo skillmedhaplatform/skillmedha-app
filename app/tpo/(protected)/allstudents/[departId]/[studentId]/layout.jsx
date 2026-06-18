@@ -45,7 +45,10 @@ const StudentLayout = ({ children }) => {
         : "Student Profile";
 
     const lastSegment = pathname?.split("/").pop() || "";
-    const displayTabName = lastSegment.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(lastSegment);
+    const displayTabName = isObjectId
+        ? ""
+        : lastSegment.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
     return (
         <>
@@ -67,10 +70,14 @@ const StudentLayout = ({ children }) => {
                     <p style={{ color: "#0f172a", fontWeight: "600", cursor: "default" }}>
                         {selectedStudent?.data?.userName || "Profile"}
                     </p>
-                    <span>{symbol}</span>
-                    <p style={{ color: "#0f172a", fontWeight: "600", cursor: "default" }}>
-                        {displayTabName}
-                    </p>
+                    {displayTabName && (
+                        <>
+                            <span>{symbol}</span>
+                            <p style={{ color: "#0f172a", fontWeight: "600", cursor: "default" }}>
+                                {displayTabName}
+                            </p>
+                        </>
+                    )}
                 </div>
                 <div className={detail.mainContainer}>
                     <div className={detail.child1}>
