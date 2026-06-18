@@ -560,123 +560,57 @@ export default function DashboardPage() {
                             className="m-0 w-[120px]"
                           />
                           <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{item?.progress || 0}%</span>
-                        {/* Right Side: Progress & Button */}
-                        <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-4 md:mt-0">
-                          <div className="flex items-center gap-2 w-[180px] justify-end">
-                            <Progress 
-                              percent={item?.progress || 0} 
-                              size="small" 
-                              showInfo={false} 
-                              strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'} 
-                              trailColor="#f1f5f9"
-                              className="m-0 w-[120px]"
-                            />
-                            <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{item?.progress || 0}%</span>
-                          </div>
-                          <Button
-                            onClick={handleNavigate}
-                            className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
-                            style={{
-                              fontWeight: '600',
-                              borderRadius: '8px',
-                              padding: '4px 16px',
-                              height: '32px'
-                            }}
-                          >
-                            {hasLastAccessed ? "Continue" : "Start Learning"}
-                          </Button>
                         </div>
+                        <Button
+                          onClick={handleNavigate}
+                          className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                          style={{
+                            fontWeight: '600',
+                            borderRadius: '8px',
+                            padding: '4px 16px',
+                            height: '32px'
+                          }}
+                        >
+                          {hasLastAccessed ? "Continue" : "Start Learning"}
+                        </Button>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
+              </div>
               </>
             )}
           </div>
-          
           {/* Grouped Recommended Section */}
           {(allCourses?.data?.length > 0 || allInternships?.data?.length > 0) && (
-            <div className="w-full rounded-2xl bg-white p-4 lg:p-6 shadow-sm border border-[#e2e8f0] flex flex-col items-center">
+            <div className="w-full rounded-2xl bg-white p-4 lg:p-6 mt-4 flex flex-col items-center">
               <div className="w-full flex flex-col md:flex-row gap-6 items-stretch">
                 {allCourses?.data?.length > 0 && (
                   <div className="flex-1 flex flex-col items-center border-b md:border-b-0 pb-6 md:pb-0 md:pr-6 md:border-r border-[#e2e8f0]">
                     <div className="w-full text-left mb-3">
                       <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Course</span>
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Pagination Removed */}
-            </>
-          )}
-        </div>
-        {/* Grouped Recommended Section */}
-        {(allCourses?.data?.length > 0 || allInternships?.data?.length > 0) && (
-          <div className="w-full rounded-2xl bg-white p-4 lg:p-6 mt-4 flex flex-col items-center">
-            <div className="w-full flex flex-col md:flex-row gap-6 items-stretch">
-              {allCourses?.data?.length > 0 && (
-                <div className="flex-1 flex flex-col items-center border-b md:border-b-0 pb-6 md:pb-0 md:pr-6">
-                  <div className="w-full text-left mb-3">
-                    <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Course</span>
-                  </div>
-                  <div className="w-full h-full flex flex-col justify-between">
-                    <RecommendedCard
-                      item={allCourses.data[recCourseIndex % allCourses.data.length]}
-                      total={allCourses.data.length}
-                      currentIndex={recCourseIndex}
-                      onDotClick={setRecCourseIndex}
-                      onCardClick={(item) => {
-                        router.push(
-                          `/student/course`
-                        );
-                      }}
-                    />
-                    <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
-                      <div
-                        key={`course-${recCourseIndex}`}
-                        className="absolute top-0 right-0 h-full bg-[#1E69DA]"
-                        style={{ animation: 'fillRightToLeft 10s linear forwards' }}
                     <div className="w-full h-full flex flex-col justify-between">
-                      <RecommendedCard 
-                        item={allCourses.data[recCourseIndex % allCourses.data.length]} 
+                      <RecommendedCard
+                        item={allCourses.data[recCourseIndex % allCourses.data.length]}
                         total={allCourses.data.length}
                         currentIndex={recCourseIndex}
                         onDotClick={setRecCourseIndex}
+                        onCardClick={(item) => {
+                          router.push(
+                            `/student/course`
+                          );
+                        }}
                       />
                       <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
-                        <div 
+                        <div
                           key={`course-${recCourseIndex}`}
-                          className="absolute top-0 right-0 h-full bg-[#1E69DA]" 
+                          className="absolute top-0 right-0 h-full bg-[#1E69DA]"
                           style={{ animation: 'fillRightToLeft 10s linear forwards' }}
                         />
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {allInternships?.data?.length > 0 && (
-                <div className="flex-1 flex flex-col items-center pt-6 md:pt-0 md:pl-6">
-                  <div className="w-full text-left mb-3">
-                    <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Internship</span>
-                  </div>
-                  <div className="w-full h-full flex flex-col justify-between">
-                    <RecommendedCard
-                      item={allInternships.data[recInternshipIndex % allInternships.data.length]}
-                      total={allInternships.data.length}
-                      currentIndex={recInternshipIndex}
-                      onDotClick={setRecInternshipIndex}
-                      onCardClick={(item) => {
-                        router.push(
-                          `/student/internshipLibrary`                          
-                        );
-                      }}
-                    />
-                    <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
-                      <div
-                        key={`internship-${recInternshipIndex}`}
-                        className="absolute top-0 left-0 h-full bg-[#1E69DA]"
-                        style={{ animation: 'fillLeftToRight 10s linear forwards' }}
                 )}
                 {allInternships?.data?.length > 0 && (
                   <div className="flex-1 flex flex-col items-center pt-6 md:pt-0 md:pl-6">
@@ -684,16 +618,21 @@ export default function DashboardPage() {
                       <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Internship</span>
                     </div>
                     <div className="w-full h-full flex flex-col justify-between">
-                      <RecommendedCard 
-                        item={allInternships.data[recInternshipIndex % allInternships.data.length]} 
+                      <RecommendedCard
+                        item={allInternships.data[recInternshipIndex % allInternships.data.length]}
                         total={allInternships.data.length}
                         currentIndex={recInternshipIndex}
                         onDotClick={setRecInternshipIndex}
+                        onCardClick={(item) => {
+                          router.push(
+                            `/student/internshipLibrary`                          
+                          );
+                        }}
                       />
                       <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
-                        <div 
+                        <div
                           key={`internship-${recInternshipIndex}`}
-                          className="absolute top-0 left-0 h-full bg-[#1E69DA]" 
+                          className="absolute top-0 left-0 h-full bg-[#1E69DA]"
                           style={{ animation: 'fillLeftToRight 10s linear forwards' }}
                         />
                       </div>
@@ -705,25 +644,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-      {/* Sidebar */}
-      <div className="hidden lg:flex fixed top-0 right-0 w-[280px] xl:w-[320px] h-screen flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] p-4 pb-2 z-[100]">
-        <div className="w-full flex flex-col overflow-hidden flex-1 h-full">
-          {/* Section 1: Overall Performance */}
-          <div className="shrink-0 w-full">
-            <ProfileSection
-              profileValues={profileValues}
-              router={router}
-              studentCreds={studentCreds}
-            />
-          </div>
-
-          {/* Section 2: Notice Board */}
-          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden w-full mt-4 flex flex-col relative border-t border-[#f1f5f9] pt-4">
-            <div className="w-full flex items-center justify-between mb-4 sticky top-0 bg-white z-10">
-              <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px]">Notice Board</h3>
-              <HiOutlineArrowsExpand
-                className="text-[1.2rem] cursor-pointer text-[#24A058] transition-transform duration-200 hover:scale-125"
-                onClick={() => setIsNoticeModalOpen(true)}
         {/* Sidebar */}
         <div className="hidden lg:flex w-[280px] xl:w-[320px] h-full flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] p-4 pb-2 shrink-0 z-10 shadow-sm relative">
           <div className="w-full flex flex-col overflow-hidden flex-1 h-full">
@@ -755,11 +675,6 @@ export default function DashboardPage() {
               <Achievements />
             </div>
           </div>
-
-          {/* Section 3: Achievements */}
-          <div className="shrink-0 w-full mt-4 relative border-t border-[#f1f5f9] pt-4">
-            <Achievements />
-          </div>
         </div>
 
           <Modal
@@ -774,7 +689,6 @@ export default function DashboardPage() {
             </div>
           </Modal>
         </div>
-      </div>
     </section>
   );
 }
