@@ -14,16 +14,30 @@ const PERMISSIONS_OPTS = {
   // permissions must be httpOnly — JS must never read/write it directly
 };
 
-// CORS configuration for the unified login portal
-const corsHeaders = {
-  "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_LOGIN_APP_URL || "http://localhost:2025",
-  "Access-Control-Allow-Methods": "POST, PATCH, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  "Access-Control-Allow-Credentials": "true",
+// List of trusted domains that are allowed to make login requests
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:2025",
+  "https://skillmedha.com",
+  "https://www.skillmedha.com"
+];
+
+const getCorsHeaders = (request) => {
+  const origin = request ? request.headers.get("origin") : null;
+  // If the origin is in our safe list, allow it. Otherwise, fallback to a safe default (or block).
+  const isAllowed = ALLOWED_ORIGINS.includes(origin);
+  
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin : "http://localhost:3000",
+    "Access-Control-Allow-Methods": "POST, PATCH, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Credentials": "true",
+  };
 };
 
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
+export async function OPTIONS(request) {
+  return NextResponse.json({}, { headers: getCorsHeaders(request) });
 }
 
 // ── POST — login ──────────────────────────────────────────────────────────────
@@ -42,7 +56,7 @@ export async function POST(request) {
       pt: psychometricDone === true,
     });
 
-    const response = NextResponse.json({ success: true }, { headers: corsHeaders });
+    const response = NextResponse.json({ success: true }, { headers: getCorsHeaders(request) });
     response.cookies.set("token", token, TOKEN_OPTS);
     response.cookies.set("permissions", permissionsEncrypted, PERMISSIONS_OPTS);
     return response;
@@ -62,7 +76,7 @@ export async function PATCH(request) {
       pt: psychometricDone === true,
     });
 
-    const response = NextResponse.json({ success: true }, { headers: corsHeaders });
+    const response = NextResponse.json({ success: true }, { headers: getCorsHeaders(request) });
     response.cookies.set("permissions", permissionsEncrypted, PERMISSIONS_OPTS);
     return response;
   } catch (error) {
@@ -72,8 +86,8 @@ export async function PATCH(request) {
 }
 
 // ── DELETE — logout ───────────────────────────────────────────────────────────
-export async function DELETE() {
-  const response = NextResponse.json({ success: true }, { headers: corsHeaders });
+export async function DELETE(request) {
+  const response = NextResponse.json({ success: true }, { headers: getCorsHeaders(request) });
   response.cookies.delete("token");
   response.cookies.delete("permissions");
   return response;

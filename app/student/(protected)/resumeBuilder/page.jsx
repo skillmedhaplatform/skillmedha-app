@@ -44,15 +44,33 @@ function Form() {
   const studentDetails = useSelector((state) => state.student.student?.data);
 
   const personalDetailsResumeBuilder = useSelector((state) => state.personalDetailsResumeBuilder);
+  // const [basicDetails, setBasicDetails] = useState({
+  //   middleName: "",
+  //   firstName: "",
+  //   lastName: "",
+  //   email: "",
+  //   phone: "",
+  //   dob: "",
+  //   professionalSummary: "",
+  //   profile: personalDetailsResumeBuilder?.value?.profile || "",
+  // });
   const [basicDetails, setBasicDetails] = useState({
-    middleName: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    dob: "",
-    professionalSummary: "",
-    profile: personalDetailsResumeBuilder?.value?.profile || "",
+    // middleName: "",
+    // firstName: "",
+    // lastName: "",
+    // email: "",
+    // phone: "",
+    // dob: "",
+    // professionalSummary: "",
+    // profile: personalDetailsResumeBuilder?.value?.profile || "",
+    middleName: studentDetails?.middleName || "",
+      firstName: studentDetails?.firstName || "",
+      lastName: studentDetails?.lastName || "",
+      email: studentDetails?.email || "",
+      phone: studentDetails?.phone || "",
+      dob: studentDetails?.dob || "",
+      professionalSummary: studentDetails?.professionalSummary || "",
+      profile:personalDetailsResumeBuilder?.value?.profile || "",
   });
 
   const [educationDetails, setEducationDetails] = useState([

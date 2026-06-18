@@ -6,7 +6,7 @@ export default async function RootPage() {
   const token = cookieStore.get("token")?.value;
 
   if (!token) {
-    redirect(process.env.NEXT_PUBLIC_LOGIN_APP_URL ? `${process.env.NEXT_PUBLIC_LOGIN_APP_URL}?portal=student` : "http://localhost:2025?portal=student");
+    redirect("/login?portal=student");
   }
 
   // Authenticated users are handled by (protected)/layout.js

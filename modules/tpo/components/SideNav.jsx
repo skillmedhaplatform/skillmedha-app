@@ -49,8 +49,7 @@ const SideNav = ({ activeView, setView }) => {
     clearLstorageVals();
     clearSstorageVals();
     Cookies.remove("token");
-    const loginUrl = process.env.NEXT_PUBLIC_LOGIN_APP_URL || "http://localhost:2025";
-    window.location.href = `${loginUrl}?portal=tpo`;
+    window.location.href = "/login?portal=tpo";
   };
 
   const tpoMenuLinks = [

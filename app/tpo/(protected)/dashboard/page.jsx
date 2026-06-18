@@ -71,7 +71,7 @@ const PlacementRateWidget = ({ total = 0, placed = 0 }) => {
         </div>
       </div>
       <div className={styles.targetText}>
-        Target: 80% by Dec 2026
+        {placementRate >= 80 ? "Target 80% Achieved! 🎉" : "Target: 80% by Dec 2026"}
       </div>
     </div>
   );
@@ -349,12 +349,45 @@ const Page = () => {
   const offersThisMonth = activityMonths[5].count;
   const averageTimeToOffer = offersWithTimeCount > 0 ? Math.round(totalTimeToOfferDays / offersWithTimeCount) : 0;
 
+  const getStudentRegistrationDate = (student) => {
+    if (student.createdAt) return new Date(student.createdAt);
+    if (student._id) {
+      const idStr = student._id.toString();
+      if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+        return new Date(parseInt(idStr.substring(0, 8), 16) * 1000);
+      }
+    }
+    return null;
+  };
+
+  const nowTime = new Date();
+  const oneWeekAgo = new Date(nowTime.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const studentsThisWeek = studentsList.filter((s) => {
+    const regDate = getStudentRegistrationDate(s);
+    return regDate && regDate >= oneWeekAgo;
+  }).length;
+
+  let activeJobsCount = 0;
+  const activeCompanies = new Set();
+  placementsList.forEach((drive) => {
+    drive.companies?.forEach((job) => {
+      if (job.status === "active") {
+        activeJobsCount++;
+        const name = job.companyName || job.company;
+        if (name) {
+          activeCompanies.add(name);
+        }
+      }
+    });
+  });
+  const activeCompaniesCount = activeCompanies.size;
+
   const dashboardStats = [
     {
       label: "Students",
       value: studentsCount,
       icon: FaUserGraduate,
-      badge: "+2 this wk",
+      badge: `+${studentsThisWeek} this wk`,
       bgColor: "#1fbb9c",
       bgLightColor: "#e8f7ee",
       iconBgColor: "rgba(31, 187, 156, 0.1)",
@@ -363,7 +396,7 @@ const Page = () => {
       label: "Job profiles",
       value: jobProfilesCount,
       icon: FaBriefcase,
-      badge: "Active",
+      badge: `${activeJobsCount} Active`,
       bgColor: "#e11d48",
       bgLightColor: "#fff1f2",
       iconBgColor: "rgba(225, 29, 72, 0.1)",
@@ -381,7 +414,7 @@ const Page = () => {
       label: "Companies",
       value: companiesCount,
       icon: FaBuilding,
-      badge: "Hiring",
+      badge: `${activeCompaniesCount} Hiring`,
       bgColor: "#593cc1",
       bgLightColor: "#f3ecff",
       iconBgColor: "rgba(89, 60, 193, 0.1)",
