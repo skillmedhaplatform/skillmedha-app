@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Pagination, Tooltip, Button, Select, Input, Modal, Tag, Row, Col } from "antd";
@@ -11,6 +9,7 @@ import { useAppRouter } from "@/helpers/useAppRouter";
 import CourseCardSkeleton from "@/universalUtils/CourseCardSkeleton/CourseCardSkeleton";
 import useResponsive from "@/hooks/useResponsive";
 import MobileLibraryPage from "@/mobile_views/library/MobileLibraryPage";
+import {getOneInternsip} from "@/redux/slices/internship";
 
 // --- Helpers ---
 const stripHtml = (html) =>
@@ -18,10 +17,10 @@ const stripHtml = (html) =>
 
 const getCardTheme = (category, index) => {
   const themes = [
-    { bg: "linear-gradient(135deg, #0e1e3e, #1a3673)", icon: <BsCodeSlash size={32} color="white" /> }, // blue
-    { bg: "linear-gradient(135deg, #2a0a4a, #4a158a)", icon: <BsBarChartFill size={32} color="white" /> }, // purple
-    { bg: "linear-gradient(135deg, #0a3a2a, #156a4a)", icon: <BsCpuFill size={32} color="white" /> }, // green
-    { bg: "linear-gradient(135deg, #4a2a0a, #8a4a15)", icon: <BsBook size={32} color="white" /> }, // brown
+    { bg: "linear-gradient(135deg, #0e1e3e, #1a3673)", icon: <BsCodeSlash size={32} color="white" /> },
+    { bg: "linear-gradient(135deg, #2a0a4a, #4a158a)", icon: <BsBarChartFill size={32} color="white" /> },
+    { bg: "linear-gradient(135deg, #0a3a2a, #156a4a)", icon: <BsCpuFill size={32} color="white" /> },
+    { bg: "linear-gradient(135deg, #4a2a0a, #8a4a15)", icon: <BsBook size={32} color="white" /> },
   ];
   return themes[index % themes.length];
 };
@@ -34,11 +33,8 @@ const formatUpdatedDate = (dateInput) => {
     : d.toLocaleString("en-IN", { month: "short", year: "numeric" });
 };
 
-const DIFFICULTY_OPTIONS = ["Beginner", "Intermediate", "Advanced", "Expert"];
-
 // --- Info Popover content ---
 const InfoContent = ({ item }) => {
-  const description = stripHtml(item?.description) || "";
   const ci = item?.courseIncludes || {};
   const difficultyColorMap = {
     Beginner: "green",
@@ -58,7 +54,6 @@ const InfoContent = ({ item }) => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24, overflowX: "hidden" }}>
-      {/* Top Tags row */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, paddingBottom: 16, borderBottom: "1px solid #f0f0f0" }}>
         {item?.category && <Tag color="geekblue" style={{ fontSize: 14, padding: "2px 8px" }}>{item.category}</Tag>}
         {item?.difficulty && <Tag color={difficultyColorMap[item.difficulty] || "default"} style={{ fontSize: 14, padding: "2px 8px" }}>{item.difficulty}</Tag>}
@@ -71,7 +66,6 @@ const InfoContent = ({ item }) => {
       </div>
 
       <Row gutter={[24, 12]} style={{ margin: 0 }}>
-        {/* Left Column: What you'll learn & Includes */}
         <Col xs={24} md={14} style={{ paddingLeft: 0 }}>
           {item?.learningPoints?.length > 0 && (
             <div style={boxStyle}>
@@ -107,7 +101,6 @@ const InfoContent = ({ item }) => {
           )}
         </Col>
 
-        {/* Right Column: Tools, Prerequisites, Audience */}
         <Col xs={24} md={10} style={{ paddingRight: 0 }}>
           {item?.toolsWithIcons?.length > 0 && (
             <div style={boxStyle}>
@@ -117,9 +110,7 @@ const InfoContent = ({ item }) => {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
                 {item.toolsWithIcons.slice(0, 8).map((tool, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, backgroundColor: "#f3f4f6", padding: "6px 12px", borderRadius: "6px" }}>
-                    {tool.icon && (
-                      <img src={tool.icon} alt={tool.name} style={{ width: 18, height: 18, objectFit: "contain" }} />
-                    )}
+                    {tool.icon && <img src={tool.icon} alt={tool.name} style={{ width: 18, height: 18, objectFit: "contain" }} />}
                     <span style={{ color: "#374151", fontWeight: 500 }}>{tool.name}</span>
                   </div>
                 ))}
@@ -155,7 +146,6 @@ const InfoContent = ({ item }) => {
         </Col>
       </Row>
 
-      {/* Footer Meta */}
       {item?.updatedAt && (
         <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid #f0f0f0", fontSize: 13, color: "#9ca3af" }}>
           Last updated: {formatUpdatedDate(item.updatedAt)}
@@ -165,42 +155,35 @@ const InfoContent = ({ item }) => {
   );
 };
 
-/**
- * Unified library page for Courses and Internships.
- *
- * Props:
- *  - title          {string}   Page heading, e.g. "Course Library"
- *  - fetchAction    {thunk}    Redux async thunk to call (getAllCourses / getAllInternships)
- *  - dataSelector   {fn}       State selector for the data array
- *  - paginationSelector {fn}   State selector for pagination object
- *  - getItemUrl     {fn}       (item) => URL string to navigate to on click
- *  - viewLabel      {string}   Button label, e.g. "View Course"
- *  - searchPlaceholder {string} Input placeholder
- *  - idPrefix       {string}   Used for unique element IDs ("course" | "internship")
- *  - renderMetaChips {fn}      Optional: (item) => extra <span> chips beyond category
- */
-
 const MobileLibraryPageWrapper = ({ title, items, ...props }) => {
   return <MobileLibraryPage title={title} items={items} {...props} />;
 };
 
 const LibraryPage = ({
   title,
-  fetchAction,
-  dataSelector,
-  paginationSelector,
+  fetchAction,          // my courses thunk (getAllCourses)
+  getAllCoursesOnly,    // all courses thunk (getAllCoursesOnly) — optional
+  dataSelector,         // selector for my courses data array
+  paginationSelector,   // selector for my courses pagination
+  allCoursesSelector,   // selector for all courses array — optional
+  allPaginationSelector,
   getItemUrl,
   viewLabel = "View",
   searchPlaceholder = "Search…",
   idPrefix = "lib",
-  renderMetaChips,
+  renderMetaChips
 }) => {
   const nav = useAppRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
-
+const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
+  // My courses data (from getAllCourses / getAllInternships)
   const items = useSelector(dataSelector);
+
+  // All courses data (from getAllCoursesOnly) — safe fallback if selector not provided
+  const allItems = useSelector(allCoursesSelector || (() => []));
+
   const paginationData = useSelector(paginationSelector);
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
@@ -212,24 +195,48 @@ const LibraryPage = ({
   const [searchInput, setSearchInput] = useState(urlSearch);
   const debounceRef = useRef(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
+  const [selectedItem, setSelectedItem] = useState(null);
 
-  // Sync local input if URL changes (back/forward navigation)
+  // NEW: per-course progress map, keyed by course id.
+  // Shape per entry: { completedCount, totalCount, totalProgress, loading }
+  const [progressById, setProgressById] = useState({});
+  // Tracks which course ids we've already requested (or are requesting) so we
+  // don't re-fire the same call every render / tab switch / pagination change.
+  const requestedIdsRef = useRef(new Set());
+
   useEffect(() => {
     setSearchInput(urlSearch);
   }, [urlSearch]);
 
   useEffect(() => {
     setLoading(true);
-    dispatch(
-      fetchAction({
+
+    const calls = [
+      dispatch(fetchAction({
         page: currentPage,
         limit: pageSize,
         searchTerm: urlSearch,
         category: urlCategory,
         difficulty: urlDifficulty,
-      })
-    ).finally(() => setLoading(false));
-  }, [dispatch, fetchAction, currentPage, pageSize, urlSearch, urlCategory, urlDifficulty]);
+      })),
+    ];
+
+    // Only dispatch getAllCoursesOnly if it was passed as a prop
+    if (getAllCoursesOnly) {
+      calls.push(
+        dispatch(getAllCoursesOnly({
+          page: currentPage,
+          limit: 1000,
+          searchTerm: urlSearch,
+          category: urlCategory,
+          difficulty: urlDifficulty,
+        }))
+      );
+    }
+
+    Promise.all(calls).finally(() => setLoading(false));
+  }, [dispatch, fetchAction, getAllCoursesOnly, currentPage, pageSize, urlSearch, urlCategory, urlDifficulty]);
 
   const pushParams = useCallback(
     (updates) => {
@@ -255,9 +262,7 @@ const LibraryPage = ({
     }, 400);
   };
 
-  const handleDifficultyChange = (val) => {
-    pushParams({ difficulty: val });
-  };
+  const handleDifficultyChange = (val) => pushParams({ difficulty: val });
 
   const handleClearAll = () => {
     const params = new URLSearchParams(searchParams);
@@ -269,22 +274,116 @@ const LibraryPage = ({
     nav.push(`${pathname}?${params.toString()}`);
   };
 
+  const handleCategoryChange = (val) => pushParams({ category: val || "" });
+
+  const removeFilter = (key) => {
+    if (key === "search") setSearchInput("");
+    pushParams({ [key]: "" });
+  };
+
+  const handlePageChange = (page, size) => {
+    pushParams({ page: page.toString(), limit: size.toString() });
+  };
+
+  // safeItems = my courses (enrolled)
   const safeItems = Array.isArray(items) ? items : [];
 
-  const categories = useMemo(() => {
-    if (!safeItems.length) return [];
-    const catMap = new Map();
-    safeItems.forEach((item) => {
-      if (item.category) {
-        catMap.set(item.category, (catMap.get(item.category) || 0) + 1);
-      }
-    });
-    return Array.from(catMap.entries()).map(([value, count]) => ({ value, count }));
-  }, [items]);
+  // safeAllItems = all courses from getAllCoursesOnly API: response is { data: [...], hasNext: bool }
+  // allItems in redux is already payload.data (array) after slice handles it
+  const safeAllItems = Array.isArray(allItems) ? allItems : [];
 
-  const categoryOptions = [
-    ...new Set(safeItems.map((item) => item.category).filter(Boolean)),
-  ].map((cat) => ({ label: cat, value: cat }));
+  // Tab filtering:
+  // "all"    → show all courses from getAllCoursesOnly API
+  // "my"     → show my enrolled courses from getAllCourses API
+  // "recent" → filter all courses created in last 6 months
+  const filteredTabItems = (() => {
+    if (activeTab === "all") {
+      return safeAllItems;
+    }
+
+    if (activeTab === "my") {
+      return safeItems;
+    }
+
+    if (activeTab === "recent") {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      return safeAllItems.filter((item) => {
+        if (!item.createdAt) return false;
+        return new Date(item.createdAt) >= sixMonthsAgo;
+      });
+    }
+
+    return [];
+  })();
+
+  // NEW: helper to resolve the org id for a given course item.
+  // "My courses" payloads carry sourceOrgId; "all courses" payloads only have
+  // assignedOrgs. Try both so this works regardless of which API produced the card.
+  const resolveOrgId = (item) => item?.sourceOrgId || item?.assignedOrgs?.[0] || null;
+
+  // NEW: fetch per-course progress for every item currently visible on this tab.
+  // Fires one getOneInternsip call per course (in parallel), skipping ids we've
+  // already requested so tab switches / re-renders don't re-trigger duplicate calls.
+  useEffect(() => {
+    if (!userId) return;
+
+    const itemsNeedingProgress = filteredTabItems.filter((item) => {
+      const courseId = item?._id;
+      if (!courseId) return false;
+      if (requestedIdsRef.current.has(courseId)) return false;
+      const orgId = resolveOrgId(item);
+      if (!orgId) return false;
+      return true;
+    });
+
+    if (itemsNeedingProgress.length === 0) return;
+
+    itemsNeedingProgress.forEach((item) => {
+      const courseId = item._id;
+      const orgId = resolveOrgId(item);
+
+      requestedIdsRef.current.add(courseId);
+      setProgressById((prev) => ({
+        ...prev,
+        [courseId]: { ...(prev[courseId] || {}), loading: true },
+      }));
+
+      dispatch(getOneInternsip({ id: courseId, orgId, userId }))
+        .then((res) => {
+          // Adjust this unwrap to match your thunk's actual return shape
+          // (e.g. res.payload vs res for non-RTK dispatchers).
+          const payload = res?.payload ?? res;
+          setProgressById((prev) => ({
+            ...prev,
+            [courseId]: {
+              completedCount: payload?.completedCount ?? 0,
+              totalCount: payload?.totalCount ?? 0,
+              totalProgress: payload?.totalProgress ?? 0,
+              loading: false,
+            },
+          }));
+        })
+        .catch(() => {
+          setProgressById((prev) => ({
+            ...prev,
+            [courseId]: { ...(prev[courseId] || {}), loading: false, error: true },
+          }));
+        });
+    });
+    // filteredTabItems is intentionally not a stable reference across renders,
+    // so we depend on the tab + underlying source arrays instead to avoid
+    // re-running this effect every render.
+  }, [activeTab, safeItems, safeAllItems, userId, dispatch]);
+
+  // Categories from current tab items for pill bar
+  const categoryOptions = useMemo(() => {
+    const source = activeTab === "my" ? safeItems : safeAllItems;
+    return [...new Set(source.map((item) => item.category).filter(Boolean))].map((cat) => ({
+      label: cat,
+      value: cat,
+    }));
+  }, [safeItems, safeAllItems, activeTab]);
 
   const difficultyOptions = [
     { label: "Beginner", value: "Beginner" },
@@ -300,41 +399,26 @@ const LibraryPage = ({
 
   const hasActiveFilters = activeFilters.length > 0;
 
-  const handleCategoryChange = (val) => pushParams({ category: val || "" });
-
-  const removeFilter = (key) => {
-    if (key === "search") setSearchInput("");
-    pushParams({ [key]: "" });
-  };
-
-  const handlePageChange = (page, size) => {
-    pushParams({ page: page.toString(), limit: size.toString() });
-  };
-
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  const [activeTab, setActiveTab] = useState("all");
-
-  const filteredTabItems = safeItems.filter((item) => {
-    if (activeTab === "my") {
-      return item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled;
-    }
-    if (activeTab === "recent") {
-      if (!item.createdAt) return false;
-      const createdAtDate = new Date(item.createdAt);
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      return createdAtDate >= sixMonthsAgo;
-    }
-    return true;
+  // Stats for banner
+  const totalAvailable = safeAllItems.length || paginationData?.totalLength || 0;
+  // NEW: "enrolled" + "progress" now read from the fetched progressById map,
+  // falling back to the old item-shape checks for items we haven't fetched yet.
+  const enrolledItems = safeItems.filter((item) => {
+    const fetched = progressById[item._id];
+    if (fetched) return fetched.totalCount > 0;
+    return item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled;
   });
-
-  const totalAvailable = paginationData?.totalLength || safeItems.length || 0;
-  const enrolledItems = safeItems.filter(item => item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled);
   const totalEnrolled = enrolledItems.length;
-  const avgProgress = totalEnrolled > 0
-    ? Math.round(enrolledItems.reduce((acc, curr) => acc + (curr.progress || 0), 0) / totalEnrolled)
-    : 0;
+  const avgProgress =
+    totalEnrolled > 0
+      ? Math.round(
+          enrolledItems.reduce((acc, curr) => {
+            const fetched = progressById[curr._id];
+            const val = fetched ? fetched.totalProgress : curr.progress || 0;
+            return acc + val;
+          }, 0) / totalEnrolled
+        )
+      : 0;
 
   const isCourse = title ? title.toLowerCase().includes("course") : false;
   const moduleName = isCourse ? "courses" : "internships";
@@ -350,7 +434,7 @@ const LibraryPage = ({
         idPrefix={idPrefix}
         renderMetaChips={renderMetaChips}
         getItemUrl={getItemUrl}
-        items={filteredTabItems} // pass filtered items to mobile as well
+        items={filteredTabItems}
         loading={loading}
         paginationData={paginationData}
         searchInput={searchInput}
@@ -372,16 +456,15 @@ const LibraryPage = ({
         selectedItem={selectedItem}
         setSelectedItem={setSelectedItem}
         nav={nav}
+        progressById={progressById}
       />
     );
   }
 
   return (
     <div className="flex flex-col gap-0 relative bg-white min-h-screen">
-      {/* Banner Section - Matching TPO Portal & Dashboard */}
+      {/* Banner */}
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-between p-4 lg:px-8 pt-6 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
-
-        {/* Decorative Icons */}
         <div className="absolute inset-0 pointer-events-none z-[1]">
           <div className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]">✕</div>
           <div className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]">+</div>
@@ -389,21 +472,22 @@ const LibraryPage = ({
           <div className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]">✕</div>
         </div>
 
-        {/* Top half: Title & Stats */}
         <div className="flex items-center justify-between w-full relative z-[2]">
           <div className="flex items-center gap-4 relative z-10">
             <div className="w-[56px] h-[56px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
-              {moduleName.toLowerCase().includes('internship') ? <HiOutlineBuildingOffice2 className="text-white text-3xl" /> : <HiOutlineBookOpen className="text-white text-3xl" />}
+              {moduleName.toLowerCase().includes("internship") ? (
+                <HiOutlineBuildingOffice2 className="text-white text-3xl" />
+              ) : (
+                <HiOutlineBookOpen className="text-white text-3xl" />
+              )}
             </div>
             <div className="flex flex-col justify-center gap-1">
-              <h1
-                className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0"
-                style={{ border: 'none', marginBottom: 0 }}
-              >
+              <h1 className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0" style={{ border: "none", marginBottom: 0 }}>
                 {title}
               </h1>
               <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
-                Explore all available {moduleName.toLowerCase()} and {moduleName.toLowerCase().includes('internship') ? 'kickstart your career' : 'start learning'} today.
+                Explore all available {moduleName.toLowerCase()} and{" "}
+                {moduleName.toLowerCase().includes("internship") ? "kickstart your career" : "start learning"} today.
               </p>
             </div>
           </div>
@@ -425,19 +509,20 @@ const LibraryPage = ({
         </div>
       </div>
 
-      {/* Tabs Row (Attached directly below banner) */}
+      {/* Tabs Row */}
       <div className="w-full bg-[#f1f5f9] border-b border-[#e2e8f0] px-4 lg:px-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-sm gap-2 md:gap-0">
         <div className="flex items-center gap-8">
           {[
-            { id: "all", label: `All ${moduleName.toLowerCase().includes('internship') ? 'internships' : 'courses'}` },
-            { id: "my", label: `My ${moduleName.toLowerCase().includes('internship') ? 'internships' : 'courses'}` },
-            { id: "recent", label: "Recently added" }
-          ].map(tab => (
+            { id: "all", label: `All ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
+            { id: "my", label: `My ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
+            { id: "recent", label: "Recently added" },
+          ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer
-                ${activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"}`}
+              className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer ${
+                activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"
+              }`}
             >
               {tab.label}
               {activeTab === tab.id && (
@@ -447,7 +532,6 @@ const LibraryPage = ({
           ))}
         </div>
 
-        {/* Search & Difficulty Filter Moved Here */}
         <div className="flex items-center gap-4 py-2 md:py-0">
           <Input
             id={`${idPrefix}-search`}
@@ -460,7 +544,6 @@ const LibraryPage = ({
             className="w-[160px] rounded-[20px] shadow-sm border-[#e2e8f0] [&>input]:text-[#64748b] [&>input]:font-medium [&>input::placeholder]:text-[#94a3b8]"
             style={{ color: "#64748b" }}
           />
-
           <Select
             id={`${idPrefix}-difficulty`}
             placeholder="All Levels"
@@ -471,7 +554,6 @@ const LibraryPage = ({
             className="w-[130px] shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
             popupMatchSelectWidth={false}
           />
-
           {hasActiveFilters && (
             <Button type="text" danger size="middle" onClick={handleClearAll} className="font-medium hover:bg-red-50 rounded-lg px-2">
               Clear
@@ -484,23 +566,25 @@ const LibraryPage = ({
       <div className="w-full px-4 lg:px-8 py-3 bg-white border-b border-[#e2e8f0] flex items-center gap-3 overflow-x-auto no-scrollbar">
         <button
           onClick={() => pushParams({ category: "" })}
-          className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer
-            ${!urlCategory
+          className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer ${
+            !urlCategory
               ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
-              : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"}`}
+              : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"
+          }`}
         >
           <span className={!urlCategory ? "text-white" : "text-[#3b82f6]"}>☷</span> All categories
         </button>
-        {categoryOptions.map(cat => {
+        {categoryOptions.map((cat) => {
           const isActive = urlCategory === cat.value;
           return (
             <button
               key={cat.value}
               onClick={() => pushParams({ category: cat.value })}
-              className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer
-                ${isActive
+              className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer ${
+                isActive
                   ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
-                  : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"}`}
+                  : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"
+              }`}
             >
               {cat.label}
             </button>
@@ -508,7 +592,7 @@ const LibraryPage = ({
         })}
       </div>
 
-      {/* Cards */}
+      {/* Cards Grid */}
       <div className="w-full flex-1 mb-8 pb-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 lg:gap-x-16 gap-y-8 p-2 px-4 lg:px-6 max-w-[1500px] mx-auto w-full">
           {loading ? (
@@ -522,15 +606,7 @@ const LibraryPage = ({
               </span>
               {hasActiveFilters && (
                 <button
-                  style={{
-                    marginTop: "0.5rem",
-                    background: "none",
-                    border: "none",
-                    color: "#1a56db",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    fontSize: "0.95rem",
-                  }}
+                  style={{ marginTop: "0.5rem", background: "none", border: "none", color: "#1a56db", cursor: "pointer", textDecoration: "underline", fontSize: "0.95rem" }}
                   onClick={handleClearAll}
                 >
                   Clear all filters
@@ -539,48 +615,58 @@ const LibraryPage = ({
             </div>
           ) : (
             filteredTabItems.map((item, index) => {
-              const isEnrolled = item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled;
-              const progressVal = item.progress || 0;
+              // NEW: prefer fetched per-course progress; fall back to old item-shape checks.
+              const fetchedProgress = progressById[item._id];
+              const isProgressLoading = fetchedProgress?.loading;
+
+              const isEnrolled = fetchedProgress
+                ? fetchedProgress.totalCount > 0
+                : item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled;
+
+              const progressVal = fetchedProgress
+                ? fetchedProgress.totalProgress ?? 0
+                : item.progress || 0;
+
               const duration = item?.duration || item?.courseIncludes?.videoDuration;
               const modulesCount = item?.sections?.length || 0;
-              const createdAtDate = item?.createdAt ? formatUpdatedDate(item.createdAt) : '';
+              const createdAtDate = item?.createdAt ? formatUpdatedDate(item.createdAt) : "";
 
               let statusText = "Not started";
               let buttonText = "Start";
               let statusColor = "text-[#94a3b8]";
 
-              if (isEnrolled) {
-                if (progressVal === 0) {
-                  statusText = "Not started";
-                  buttonText = "Start";
-                  statusColor = "text-[#94a3b8]";
-                } else {
+              if (isProgressLoading) {
+                statusText = "Loading…";
+              } else if (isEnrolled) {
+                if (progressVal > 0) {
                   statusText = `${progressVal}% complete`;
                   buttonText = "Continue";
-                  statusColor = "text-[#10b981]"; // Green for in-progress
+                  statusColor = "text-[#10b981]";
                 }
               }
 
-                  const theme = getCardTheme(item.category || "General", index);
+              const imageUrl =
+                item?.media?.thumbnailImage ||
+                item?.media?.coverImage ||
+                item?.thumbnail ||
+                item?.image ||
+                item?.bannerImage ||
+                item?.coverImage ||
+                item?.companyLogo ||
+                "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80";
 
-                  const imageUrl = item?.media?.thumbnailImage || item?.media?.coverImage || item?.thumbnail || item?.image || item?.bannerImage || item?.coverImage || item?.companyLogo || "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80";
-
-                  return (
+              return (
                 <div
                   key={item?._id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    nav.push(getItemUrl(item));
-                  }}
+                  onClick={(e) => { e.stopPropagation(); nav.push(getItemUrl(item)); }}
                   className="group flex flex-col bg-white text-black border-[1px] border-[#e2e8f0] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-sm"
                   role="button"
                   tabIndex={0}
                 >
-                  {/* Top Image Section */}
+                  {/* Card Image */}
                   <div className="relative w-full h-[170px] flex flex-col items-center justify-center overflow-hidden bg-[#071631]">
                     <img src={imageUrl} alt={item.title || "Thumbnail"} className="w-full h-full object-cover" />
 
-                    {/* Absolute Overlays */}
                     {isEnrolled && (
                       <div className="absolute top-3 left-3 bg-[#022c22] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-[#047857]">
                         <BsCheckCircleFill className="text-[#10b981] text-[10px]" />
@@ -590,24 +676,22 @@ const LibraryPage = ({
                     <div className="absolute top-3 right-3 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10">
                       <BsBookmark className="text-white text-[14px]" />
                     </div>
-
                     <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-0.5">
                       <BsCodeSlash className="text-white/80 text-[12px]" />
                       <span className="text-white/90 text-[11px] font-medium">{item.category || "General"}</span>
                     </div>
-
                     {item.difficulty && (
                       <div className={`absolute bottom-3 right-3 px-2.5 py-0.5 rounded-sm text-[10px] font-bold tracking-wider uppercase ${
-                        item.difficulty?.toLowerCase() === 'beginner' ? 'bg-[#047857] text-white' :
-                        item.difficulty?.toLowerCase() === 'intermediate' ? 'bg-[#d97706] text-white' :
-                        'bg-[#dc2626] text-white'
+                        item.difficulty?.toLowerCase() === "beginner" ? "bg-[#047857] text-white" :
+                        item.difficulty?.toLowerCase() === "intermediate" ? "bg-[#d97706] text-white" :
+                        "bg-[#dc2626] text-white"
                       }`}>
                         {item.difficulty}
                       </div>
                     )}
                   </div>
 
-                  {/* Bottom Content Section */}
+                  {/* Card Content */}
                   <div className="flex flex-col p-3 flex-1">
                     <Tooltip title={item?.title} placement="topLeft" mouseEnterDelay={0.5}>
                       <h3 className="text-[15px] font-bold text-[#1e293b] leading-tight mb-2 line-clamp-2 min-h-[36px]">
@@ -630,11 +714,11 @@ const LibraryPage = ({
                         )}
                       </div>
                       <span className="text-[13px] font-bold text-[#64748b] min-w-[32px] text-right">
-                        {isEnrolled ? `${progressVal}%` : '0%'}
+                        {isEnrolled ? `${progressVal}%` : "0%"}
                       </span>
                     </div>
 
-                    {/* Meta Info Row */}
+                    {/* Meta Row */}
                     <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] font-bold mb-4">
                       {duration && <span className="flex items-center gap-1"><BsClock /> {duration}</span>}
                       {duration && modulesCount > 0 && <span>•</span>}
@@ -643,18 +727,14 @@ const LibraryPage = ({
                       {createdAtDate && <span>{createdAtDate}</span>}
                     </div>
 
-                    {/* Footer Row */}
+                    {/* Footer */}
                     <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f1f5f9]">
                       <span className={`text-[12px] font-bold flex items-center gap-1 ${statusColor}`}>
                         {statusText}
                       </span>
-
                       <button
                         className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white text-[13px] font-medium py-1.5 px-5 rounded-[20px] border-none cursor-pointer transition-opacity flex items-center gap-1.5 shadow-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          nav.push(getItemUrl(item));
-                        }}
+                        onClick={(e) => { e.stopPropagation(); nav.push(getItemUrl(item)); }}
                       >
                         {buttonText === "Start" ? "+ Start" : `▷ ${buttonText}`}
                       </button>
@@ -667,15 +747,13 @@ const LibraryPage = ({
         </div>
       </div>
 
-      {/* Info Modal — one instance shared across all cards */}
+      {/* Info Modal */}
       <Modal
         open={!!selectedItem}
         onCancel={() => setSelectedItem(null)}
         title={
           <div style={{ paddingRight: 24 }}>
-            <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.3 }}>
-              {selectedItem?.title}
-            </div>
+            <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.3 }}>{selectedItem?.title}</div>
             {selectedItem?.subtitle && (
               <div style={{ fontWeight: 400, fontSize: 12, color: "#888", marginTop: 4, fontStyle: "italic" }}>
                 {selectedItem.subtitle}
@@ -685,11 +763,7 @@ const LibraryPage = ({
         }
         footer={[
           <Button key="close" onClick={() => setSelectedItem(null)}>Close</Button>,
-          <Button
-            key="view"
-            type="primary"
-            onClick={() => { nav.push(getItemUrl(selectedItem)); setSelectedItem(null); }}
-          >
+          <Button key="view" type="primary" onClick={() => { nav.push(getItemUrl(selectedItem)); setSelectedItem(null); }}>
             {viewLabel}
           </Button>,
         ]}
@@ -705,8 +779,8 @@ const LibraryPage = ({
         </div>
       </Modal>
 
-      {/* Pagination */}
-      {paginationData && paginationData.totalLength > 0 && !loading && (
+      {/* Pagination — only show for my courses tab which has server pagination */}
+      {activeTab === "my" && paginationData && paginationData.totalLength > 0 && !loading && (
         <div className="mt-auto w-full bg-white z-10 py-4 px-4 lg:px-8 flex justify-center border-t border-[#f1f5f9]">
           <Pagination
             current={currentPage}
