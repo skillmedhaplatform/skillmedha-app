@@ -109,14 +109,14 @@ const CaptureModal = memo(function CaptureModal(props) {
         )}
 
         <div className="w-full h-[20rem] flex items-center justify-center">
-          <span className="flex items-center justify-center w-[35rem] object-cover [&_img]:w-full [&_img]:h-full">
+          <span className="flex items-center justify-center w-[35rem] object-cover [&_img]:w-full [&_img]:h-full [&_img]:-scale-x-100">
             {uploadedImageUrl?.length ? (
               <img src={uploadedImageUrl} alt="captured Image" />
             ) : (
               <>
                 <video
                   ref={videoRef}
-                  className="rounded-2xl w-full h-full mx-auto object-cover aspect-video"
+                  className="rounded-2xl w-full h-full mx-auto object-cover aspect-video -scale-x-100"
                   autoPlay
                   muted
                   playsInline

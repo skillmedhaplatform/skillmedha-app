@@ -18,7 +18,7 @@ import { parseIfJson } from "../../reusable_comp/jsonparse";
 import { getLstorage, getSstorage, setSstorage } from "@/universalUtils/windowMW";
 
 export default function Page() {
-  const testRes = useSelector((state) => state?.student?.testResults);
+  const testRes = useSelector((state) => state.student.testResults);
   const testData = useSelector((state) => state?.tests?.finishedTestData);
   const studentData = useSelector((state) => state?.student?.student?.data);
   const StudentData_New = useSelector(
@@ -116,7 +116,7 @@ export default function Page() {
       finishedTestData?.grading?.scoreRange?.length - 1
       ];
   } else {
-    testValues = finishedTestData?.grading?.scoreRange?.find((obj) => {
+    testValues = (finishedTestData?.grading?.scoreRange || []).find((obj) => {
       const totalScore = parseInt(score?.totalScore);
       const scoreFrom = parseInt(obj?.scoreFrom);
       const scoreTo = parseInt(obj?.scoreTo);
@@ -157,7 +157,7 @@ export default function Page() {
         colors: ["#87CC85", "#E43E5F", "#869DF0", "#4e4eff"],
       });
     }
-  }, [testData?.value?.length, testRes?.value]);
+  }, [testData?.value, testRes?.value]);
 
   const shortAns = useRef({});
   const dispatch = useDispatch();
@@ -215,7 +215,7 @@ export default function Page() {
       ques?.length > 0 &&
       chartData?.series?.length > 0 &&
       score?.totalScore !== undefined &&
-      totalMarks > 0
+      totalMarks >= 0
     );
   }, [finishedTestData, ques, chartData, score, totalMarks]);
 
