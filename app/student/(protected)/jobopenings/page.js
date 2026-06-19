@@ -14,10 +14,28 @@ export default function JobOpenings() {
   const router = useRouter();
   const dispatch = useDispatch();
   const isMobile = useResponsive();
+  const searchParams = useSearchParams();
+
+  const page = searchParams.get("page") || "1";
+  const limit = searchParams.get("limit") || "10";
+  const search = searchParams.get("search") || "";
+  const profileName = searchParams.get("profileName") || "all";
+  const sort = searchParams.get("sort") || "createdAt";
 
   useEffect(() => {
-    dispatch(GetAllJobs({ limit: 10, fetchType: "initial" }));
-  }, []);
+    const queryObj = {};
+    if (search) queryObj.search = search;
+    if (profileName && profileName !== "all") queryObj.profileName = profileName;
+    if (sort) queryObj.sort = sort;
+
+    dispatch(
+      GetAllJobs({
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        queryObj,
+      })
+    );
+  }, [page, limit, search, profileName, sort, dispatch]);
 
   if (isMobile) {
     return <MobileJobOpenings />;

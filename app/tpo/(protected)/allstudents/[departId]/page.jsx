@@ -10,7 +10,8 @@ import {
   message,
   Input,
   Dropdown,
-  Pagination
+  Pagination,
+  Select
 } from "antd";
 import { EllipsisOutlined, UploadOutlined } from "@ant-design/icons";
 import students from "./students.module.scss";
@@ -96,6 +97,7 @@ const StudentData = () => {
     if (trimmedQuery.length === 0 || trimmedQuery.length < 3) {
       setFilteredData(dataArray);
       setIsSearchPerformed(false);
+      setPagination((prev) => ({ ...prev, current: 1 }));
       return;
     }
     setIsSearchPerformed(true);
@@ -107,6 +109,7 @@ const StudentData = () => {
     );
 
     setFilteredData(filtered);
+    setPagination((prev) => ({ ...prev, current: 1 }));
   };
 
   const handleEdit = (student) => {
@@ -596,19 +599,6 @@ const StudentData = () => {
                 No students found matching current filters.
               </div>
             )}
-
-            {/* Pagination Component for Cards */}
-            {filteredData && filteredData.length > pagination.pageSize && (
-              <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
-                <Pagination
-                  current={pagination.current}
-                  pageSize={pagination.pageSize}
-                  total={filteredData.length}
-                  onChange={(page) => setPagination((prev) => ({ ...prev, current: page }))}
-                  showSizeChanger={false}
-                />
-              </div>
-            )}
           </>
         ) : (
           <>
@@ -694,19 +684,47 @@ const StudentData = () => {
                 No students found matching current filters.
               </div>
             )}
-
-            {filteredData && filteredData.length > pagination.pageSize && (
-              <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
-                <Pagination
-                  current={pagination.current}
-                  pageSize={pagination.pageSize}
-                  total={filteredData.length}
-                  onChange={(page) => setPagination((prev) => ({ ...prev, current: page }))}
-                  showSizeChanger={false}
-                />
-              </div>
-            )}
           </>
+        )}
+
+        {/* Unified Pagination Row */}
+        {filteredData && filteredData.length > 0 && (
+          <div className={students.paginationRow}>
+            <div className={students.paginationLeft}>
+              <span className={students.pageSizeLabel}>Items per page</span>
+              <Select
+                value={pagination.pageSize}
+                onChange={(value) => {
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageSize: value,
+                    current: 1,
+                  }));
+                }}
+                options={[
+                  { value: 8, label: "8" },
+                  { value: 10, label: "10" },
+                  { value: 25, label: "25" },
+                  { value: 50, label: "50" },
+                  { value: 100, label: "100" },
+                ]}
+                className={students.pageSizeSelect}
+                size="small"
+              />
+              <span className={students.showingText}>
+                Showing {paginatedData.length} students • Page {pagination.current} of {Math.ceil(filteredData.length / pagination.pageSize) || 1}
+              </span>
+            </div>
+            <div className={students.paginationRight}>
+              <Pagination
+                current={pagination.current}
+                pageSize={pagination.pageSize}
+                total={filteredData.length}
+                onChange={(page) => setPagination((prev) => ({ ...prev, current: page }))}
+                showSizeChanger={false}
+              />
+            </div>
+          </div>
         )}
 
         {/* Single / Bulk Add Modal */}

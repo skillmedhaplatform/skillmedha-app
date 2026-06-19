@@ -12,8 +12,12 @@ const JobOpeningSlice = createSlice({
     allJobOpenings: {
       value: {
         jobs: [],
-        nextCursor: "",
-        next: "",
+        pagination: {
+          totalDocs: 0,
+          totalPages: 1,
+          currentPage: 1,
+          limit: 10,
+        },
       },
       status: "",
       error: null,
@@ -35,17 +39,14 @@ const JobOpeningSlice = createSlice({
       state.allJobOpenings.status = "pending";
     });
     builder.addCase(GetAllJobs.fulfilled, (state, { payload }) => {
-      const { fetchType = "", data } = payload;
-      if (fetchType === "initial") {
-        state.allJobOpenings.value.jobs = data?.data || [];
-      } else {
-        state.allJobOpenings.value.jobs = [
-          ...state.allJobOpenings.value.jobs,
-          ...data?.data,
-        ];
-      }
-      state.allJobOpenings.value.nextCursor = data?.nextCursor;
-      state.allJobOpenings.value.next = data?.next;
+      const { data } = payload;
+      state.allJobOpenings.value.jobs = data?.data || [];
+      state.allJobOpenings.value.pagination = data?.pagination || {
+        totalDocs: 0,
+        totalPages: 1,
+        currentPage: 1,
+        limit: 10,
+      };
       state.allJobOpenings.status = "fulfilled";
     });
     builder.addCase(GetAllJobs.rejected, (state, action) => {
@@ -77,10 +78,10 @@ const JobOpeningSlice = createSlice({
 });
 export const GetAllJobs = createAsyncThunk("/getAllJobs", async (args) => {
   try {
-    const { queryObj = {}, cursor = "", limit = 10, fetchType } = args;
+    const { queryObj = {}, page = 1, limit = 10 } = args || {};
 
     const params = new URLSearchParams({
-      cursor,
+      page,
       limit,
       ...queryObj,
     });
@@ -95,7 +96,7 @@ export const GetAllJobs = createAsyncThunk("/getAllJobs", async (args) => {
       },
     });
 
-    return { data, fetchType };
+    return { data };
   } catch (error) {
     console.error("Error fetching jobs:", error);
     throw error;

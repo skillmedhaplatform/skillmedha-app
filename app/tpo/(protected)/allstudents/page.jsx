@@ -17,7 +17,7 @@ import {
 import { getAllStudents as fetchAllStudents } from "@/redux/slices/tpo/dashboardSlice";
 import DepartmentCard from "@/modules/tpo/components/DepartmentCard";
 import PageHeader from "@/modules/tpo/components/PageHeader";
-import { Button, Col, Input, message, Modal, Row, Upload } from "antd";
+import { Button, Col, Input, message, Modal, Row, Select, Upload } from "antd";
 import { restUrl } from "@/utils/universalUtils/urls";
 import { handleS3Upload as uploadToS3 } from "@/utils/universalUtils/s3uploads";
 import { FaUniversity, FaUserGraduate, FaUserTie } from "react-icons/fa";
@@ -28,7 +28,7 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 3;
+  const [pageSize, setPageSize] = useState(3);
   
   const [inputChange, setInputChange] = useState({
     title: "",
@@ -304,33 +304,54 @@ export default function Page() {
 
         {/* Pagination Row */}
         <div className={allStudents.paginationRow}>
-          <div className={allStudents.showingText}>
-            Showing {paginatedDepartments.length} departments • Page {activePage} of {totalPages}
+          <div className={allStudents.paginationLeft}>
+            <span className={allStudents.pageSizeLabel}>Items per page</span>
+            <Select
+              value={pageSize}
+              onChange={(value) => {
+                setPageSize(value);
+                setCurrentPage(1);
+              }}
+              options={[
+                { value: 3, label: "3" },
+                { value: 10, label: "10" },
+                { value: 25, label: "25" },
+                { value: 50, label: "50" },
+                { value: 100, label: "100" },
+              ]}
+              className={allStudents.pageSizeSelect}
+              size="small"
+            />
+            <span className={allStudents.showingText}>
+              Showing {paginatedDepartments.length} departments • Page {activePage} of {totalPages}
+            </span>
           </div>
-          <div className={allStudents.paginationControls}>
-            <button
-              className={allStudents.pageBtn}
-              disabled={activePage === 1}
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            >
-              Prev
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <div className={allStudents.paginationRight}>
+            <div className={allStudents.paginationControls}>
               <button
-                key={page}
-                className={`${allStudents.pageBtn} ${activePage === page ? allStudents.activePageBtn : ""}`}
-                onClick={() => setCurrentPage(page)}
+                className={allStudents.pageBtn}
+                disabled={activePage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               >
-                {page}
+                Prev
               </button>
-            ))}
-            <button
-              className={allStudents.pageBtn}
-              disabled={activePage === totalPages || totalPages === 0}
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            >
-              Next
-            </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  className={`${allStudents.pageBtn} ${activePage === page ? allStudents.activePageBtn : ""}`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                className={allStudents.pageBtn}
+                disabled={activePage === totalPages || totalPages === 0}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </div>

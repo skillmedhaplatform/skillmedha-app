@@ -4,7 +4,11 @@
 
 /** Returns true if the student has already applied to this job */
 export const checkIfJobApplied = (jobId, appliedJobs = []) =>
-  appliedJobs.some((job) => job?.jobDetails?._id === jobId);
+  !!jobId &&
+  appliedJobs.some(
+    (job) =>
+      (job?.jobDetails?._id || job?.id || (typeof job === "string" ? job : "")) === jobId
+  );
 
 /** Tab config — drives tab bar & content rendering (data-driven) */
 export const JOB_DETAIL_TABS = [

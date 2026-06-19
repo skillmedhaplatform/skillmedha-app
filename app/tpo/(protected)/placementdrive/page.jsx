@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "@bprogress/next/app";
 import {
   Button,
@@ -102,7 +102,7 @@ const SORT_OPTIONS = [
   { value: "za", label: "Z → A" },
 ];
 
-const PAGE_SIZES = [10, 20, 50];
+const PAGE_SIZES = [10, 25, 50, 100];
 
 // ─── Status Badge ──────────────────────────────────────────
 const StatusBadge = ({ status }) => {
@@ -127,7 +127,7 @@ const StatusBadge = ({ status }) => {
 export default function DriveDetails() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const inputRef = useRef(null);
+
 
   const { value: ALLPLACEMENTS, status: placementsStatus } = useSelector(
     (state) => state.placement.AllPlacements
@@ -705,14 +705,31 @@ export default function DriveDetails() {
 
         {/* ── Pagination ── */}
         {filteredData.length > 0 && (
-          <div className={styles.paginationBar}>
-            <span className={styles.paginationInfo}>
-              Showing {(currentPage - 1) * pageSize + 1}–
-              {Math.min(currentPage * pageSize, filteredData.length)} of{" "}
-              {filteredData.length} companies
-            </span>
+          <div className={styles.paginationRow}>
+            <div className={styles.paginationLeft}>
+              <span className={styles.pageSizeLabel}>Items per page:</span>
+              <Select
+                className={styles.pageSizeSelect}
+                value={pageSize}
+                onChange={(val) => {
+                  setPageSize(val);
+                  setCurrentPage(1);
+                }}
+                options={PAGE_SIZES.map((s) => ({
+                  value: s,
+                  label: `${s}`,
+                }))}
+                size="middle"
+                style={{ width: 80 }}
+              />
+              <span className={styles.showingText}>
+                Showing {(currentPage - 1) * pageSize + 1}–
+                {Math.min(currentPage * pageSize, filteredData.length)} of{" "}
+                {filteredData.length} companies
+              </span>
+            </div>
 
-            <div className={styles.paginationControls}>
+            <div className={styles.paginationRight}>
               <button
                 className={styles.pageBtn}
                 disabled={currentPage === 1}
@@ -750,21 +767,6 @@ export default function DriveDetails() {
               >
                 ›
               </button>
-
-              <Select
-                className={styles.pageSizeSelect}
-                value={pageSize}
-                onChange={(val) => {
-                  setPageSize(val);
-                  setCurrentPage(1);
-                }}
-                options={PAGE_SIZES.map((s) => ({
-                  value: s,
-                  label: `${s} / page`,
-                }))}
-                size="small"
-                style={{ width: 100 }}
-              />
             </div>
           </div>
         )}

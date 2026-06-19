@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import allStudents from "./allstudents.module.scss";
 import Search from "antd/es/input/Search";
-import { Button, message, Table, Select } from "antd";
+import { Button, message, Select } from "antd";
+
+const PAGE_SIZES = [10, 25, 50, 100];
 import { useRouter } from "@bprogress/next/app";
 import { useDispatch, useSelector } from "react-redux";
 import PageHeader from "@/modules/tpo/components/PageHeader";
@@ -35,6 +37,9 @@ const PlacementDetails = () => {
   const [selectedJobId, setSelectedJobId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProfile, setSelectedProfile] = useState("All");
+  
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { value: ALLJOBS } = useSelector((state) => state.placement.AllJobs);
   const { value: ALLPLACEMENTS, status: placementsStatus } = useSelector(
@@ -42,7 +47,7 @@ const PlacementDetails = () => {
   );
 
   useEffect(() => {
-    dispatch(GetAllJobs({ limit: 10, profileId: id }));
+    dispatch(GetAllJobs({ limit: 1000, profileId: id }));
   }, [dispatch, id]);
 
   useEffect(() => {
@@ -76,79 +81,7 @@ const PlacementDetails = () => {
     setSelectedJobId(null);
   };
 
-  const columns = [
-    // {
-    //   title: "Company",
-    //   dataIndex: "companyName",
-    //   key: "companyName",
-    // },
-    {
-      title: "Job Title",
-      dataIndex: "jobTitle",
-      key: "jobTitle",
-    },
-    {
-      title: "Interview Rounds",
-      dataIndex: "interviewRounds",
-      key: "interviewRounds",
-      render: (rounds) =>
-        Array.isArray(rounds) && rounds.length > 0
-          ? `${rounds.length} Round${rounds.length > 1 ? "s" : ""}`
-          : "0 Rounds",
-    },
-    {
-      title: "Applicants",
-      dataIndex: "applicants",
-      key: "applicants",
-      render: (applicants) =>
-        Array.isArray(applicants) && applicants.length > 0
-          ? `${applicants.length} Applicant${applicants.length > 1 ? "s" : ""}`
-          : "0 Applicants",
-    },
-    {
-      title: "Application Start",
-      key: "applicationStart",
-      render: (_, record) => {
-        const date = new Date(record.startDate);
-        return isNaN(date) ? (
-          <p>{record.startDate}</p>
-        ) : (
-          date.toLocaleDateString()
-        );
-      },
-    },
-    {
-      title: "Application Deadline",
-      key: "applicationDeadline",
-      render: (_, record) => {
-        const date = new Date(record.endDate);
-        return isNaN(date) ? (
-          <p>{record.endDate}</p>
-        ) : (
-          date.toLocaleDateString()
-        );
-      },
-    },
 
-    {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
-        <div style={{ minWidth: "8rem" }}>
-          <Button
-            loading={isLoading && selectedJobId === record._id}
-            type="primary"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAction(record._id);
-            }}
-          >
-            Download
-          </Button>
-        </div>
-      ),
-    },
-  ];
 
   const baseUrl = `/tpo/placementdrive/${id}`;
 
@@ -182,6 +115,23 @@ const PlacementDetails = () => {
 
       return matchesSearch && matchesProfile;
     }) || [];
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedProfile]);
+
+  const handlePageSizeChange = (val) => {
+    setPageSize(val);
+    setCurrentPage(1);
+  };
+
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredJobs.length / pageSize);
+  const paginatedJobs = filteredJobs.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <>
@@ -251,8 +201,8 @@ const PlacementDetails = () => {
         </div>
 
         <div className={allStudents.cardsList}>
-          {filteredJobs && filteredJobs.length > 0 ? (
-            filteredJobs.map((record) => {
+          {paginatedJobs && paginatedJobs.length > 0 ? (
+            paginatedJobs.map((record) => {
               const dateStart = new Date(record.startDate);
               const dateEnd = new Date(record.endDate);
 
@@ -324,6 +274,71 @@ const PlacementDetails = () => {
             </div>
           )}
         </div>
+
+        {/* ── Pagination ── */}
+        {filteredJobs.length > 0 && (
+          <div className={allStudents.paginationRow}>
+            <div className={allStudents.paginationLeft}>
+              <span className={allStudents.pageSizeLabel}>Items per page:</span>
+              <Select
+                className={allStudents.pageSizeSelect}
+                value={pageSize}
+                onChange={handlePageSizeChange}
+                options={PAGE_SIZES.map((s) => ({
+                  value: s,
+                  label: `${s}`,
+                }))}
+                size="middle"
+                style={{ width: 80 }}
+              />
+              <span className={allStudents.showingText}>
+                Showing {(currentPage - 1) * pageSize + 1}–
+                {Math.min(currentPage * pageSize, filteredJobs.length)} of{" "}
+                {filteredJobs.length} job profiles
+              </span>
+            </div>
+
+            <div className={allStudents.paginationRight}>
+              <button
+                className={allStudents.pageBtn}
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                ‹
+              </button>
+
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                let page;
+                if (totalPages <= 5) {
+                  page = i + 1;
+                } else if (currentPage <= 3) {
+                  page = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  page = totalPages - 4 + i;
+                } else {
+                  page = currentPage - 2 + i;
+                }
+                return (
+                  <button
+                    key={page}
+                    className={`${allStudents.pageBtn} ${currentPage === page ? allStudents.pageBtnActive : ""}`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              <button
+                className={allStudents.pageBtn}
+                disabled={currentPage === totalPages || totalPages === 0}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                ›
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <JobDetailsModal

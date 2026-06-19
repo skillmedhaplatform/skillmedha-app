@@ -413,24 +413,44 @@
 }
 
 /* ===== Pagination ===== */
-.paginationBar {
+.paginationRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 0;
+  padding: 1rem 0;
   border-top: 1px solid #e2e8f0;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.paginationInfo {
-  font-size: 0.8rem;
-  color: #718096;
+.paginationLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-.paginationControls {
+.paginationRight {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.pageSizeLabel {
+  font-size: 0.85rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.pageSizeSelect {
+  min-width: 80px;
+}
+
+.showingText {
+  font-size: 0.85rem;
+  color: #718096;
+  font-weight: 500;
 }
 
 .pageBtn {
@@ -467,10 +487,6 @@
   &:hover {
     opacity: 0.9 !important;
   }
-}
-
-.pageSizeSelect {
-  margin-left: 1rem;
 }
 
 /* ===== Table View (Alternative) ===== */
