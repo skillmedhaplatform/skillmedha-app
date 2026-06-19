@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getAllCourses,
   getAllInternships,
+  getOneInternsip,
 } from "@/redux/slices/internship";
 import { GetAllNotifiocations } from "@/redux/slices/jobopenings";
 import {
@@ -240,6 +241,18 @@ const Achievements = () => (
   </div>
 );
 
+// Resolve current user id: prefer studentCreds._id, fall back to sessionStorage
+// (studentCreds may not be hydrated yet on first paint).
+const resolveUserId = (studentCreds) => {
+  if (studentCreds?._id) return studentCreds._id;
+  if (typeof window === "undefined") return null; // SSR guard
+  try {
+    return sessionStorage.getItem("studentId") || null;
+  } catch {
+    return null;
+  }
+};
+
 export default function DashboardPage() {
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
   const studentCreds = useSelector((state) => state.student.student?.data);
@@ -315,6 +328,15 @@ export default function DashboardPage() {
 
   const [recCourseIndex, setRecCourseIndex] = useState(0);
   const [recInternshipIndex, setRecInternshipIndex] = useState(0);
+
+  // Per-course/internship progress, keyed by item id.
+  // Shape per entry: { completedCount, totalCount, totalProgress, loading, error }
+  const [progressById, setProgressById] = useState({});
+  // Ids already requested (or in flight) — prevents re-firing the same call
+  // every render / pagination change.
+  const requestedIdsRef = useRef(new Set());
+
+  const userId = resolveUserId(studentCreds);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -394,6 +416,63 @@ export default function DashboardPage() {
     return combinedLearningData.slice(startIndex, endIndex);
   }, [combinedLearningData, currentPage, pageSize]);
 
+  // Fetch real per-item progress for whatever's visible on the current page.
+  // getOneInternsip only needs { id, userId } — it doesn't use orgId at all.
+  useEffect(() => {
+    if (!userId) return;
+
+    const itemsNeedingProgress = paginatedLearningData.filter((item) => {
+      const itemId = item?._id;
+      if (!itemId) return false;
+      return !requestedIdsRef.current.has(itemId);
+    });
+
+    if (itemsNeedingProgress.length === 0) return;
+
+    itemsNeedingProgress.forEach((item) => {
+      const itemId = item._id;
+      requestedIdsRef.current.add(itemId);
+
+      setProgressById((prev) => ({
+        ...prev,
+        [itemId]: { ...(prev[itemId] || {}), loading: true },
+      }));
+
+      dispatch(getOneInternsip({ id: itemId, userId }))
+        .then((res) => {
+          // getOneInternsip uses thunkAPI.rejectWithValue on failure, which
+          // makes the dispatched promise resolve (not reject) with an
+          // action whose type ends in "/rejected". Handle that explicitly
+          // instead of relying on .catch().
+          if (res?.type?.endsWith("/rejected")) {
+            setProgressById((prev) => ({
+              ...prev,
+              [itemId]: { ...(prev[itemId] || {}), loading: false, error: true },
+            }));
+            return;
+          }
+
+          const payload = res?.payload;
+          setProgressById((prev) => ({
+            ...prev,
+            [itemId]: {
+              completedCount: payload?.completedCount ?? 0,
+              totalCount: payload?.totalCount ?? 0,
+              totalProgress: payload?.totalProgress ?? 0,
+              loading: false,
+            },
+          }));
+        })
+        .catch((err) => {
+          console.error("getOneInternsip failed for", itemId, err);
+          setProgressById((prev) => ({
+            ...prev,
+            [itemId]: { ...(prev[itemId] || {}), loading: false, error: true },
+          }));
+        });
+    });
+  }, [paginatedLearningData, userId, dispatch]);
+
   // Handle pagination change
   const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
@@ -432,6 +511,7 @@ export default function DashboardPage() {
         loading={loading}
         router={router}
         dispatch={dispatch}
+        progressById={progressById}
       />
     );
   }
@@ -524,6 +604,14 @@ export default function DashboardPage() {
 
                     const isInternship = item?.type === "internship";
 
+                    // Real progress from getOneInternsip, falling back to 0
+                    // while the per-item fetch is still in flight or hasn't
+                    // started (item.progress never actually exists on these
+                    // payloads, so that old fallback never did anything).
+                    const fetchedProgress = progressById[item._id];
+                    const progressVal = fetchedProgress?.totalProgress ?? 0;
+                    const isProgressLoading = fetchedProgress?.loading;
+
                     return (
                       <div key={item._id} className="flex flex-col md:flex-row items-center justify-between p-4 bg-white border border-[#e2e8f0] rounded-[16px] hover:shadow-md transition-shadow">
                         {/* Left Side: Icon & Info */}
@@ -542,24 +630,37 @@ export default function DashboardPage() {
                                 {isInternship ? 'Internship' : 'Course'}
                               </span>
                               <span className="text-[12px] text-[#64748b]">
-                                {lastAccessedInfo} · Added {new Date(item?.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                {isProgressLoading ? "Loading…" : lastAccessedInfo} · Added {new Date(item?.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                               </span>
                             </div>
                           </div>
                         </div>
 
-                      {/* Right Side: Progress & Button */}
-                      <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-4 md:mt-0">
-                        <div className="flex items-center gap-2 w-[180px] justify-end">
-                          <Progress
-                            percent={item?.progress || 0}
-                            size="small"
-                            showInfo={false}
-                            strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'}
-                            trailColor="#f1f5f9"
-                            className="m-0 w-[120px]"
-                          />
-                          <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{item?.progress || 0}%</span>
+                        {/* Right Side: Progress & Button */}
+                        <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-4 md:mt-0">
+                          <div className="flex items-center gap-2 w-[180px] justify-end">
+                            <Progress 
+                              percent={progressVal} 
+                              size="small" 
+                              showInfo={false} 
+                              strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'} 
+                              trailColor="#f1f5f9"
+                              className="m-0 w-[120px]"
+                            />
+                            <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{progressVal}%</span>
+                          </div>
+                          <Button
+                            onClick={handleNavigate}
+                            className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                            style={{
+                              fontWeight: '600',
+                              borderRadius: '8px',
+                              padding: '4px 16px',
+                              height: '32px'
+                            }}
+                          >
+                            {hasLastAccessed ? "Continue" : "Start Learning"}
+                          </Button>
                         </div>
                         <Button
                           onClick={handleNavigate}

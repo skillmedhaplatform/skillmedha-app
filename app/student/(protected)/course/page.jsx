@@ -1,11 +1,12 @@
 "use client";
 
 import LibraryPage from "@/universalUtils/LibraryPage/LibraryPage";
-import { getAllCourses } from "@/redux/slices/internship";
+import { getAllCourses, getAllCoursesOnly} from "@/redux/slices/internship";
 
-// Stable module-level selectors (avoids new reference on every render)
+// Selectors
 const selectCourses = (state) => state.internship.allCourses?.data;
 const selectPagination = (state) => state.internship.allCourses?.pagination;
+const selectAllCourses = (state) => state.internship.allCoursesOnly;
 
 const getCourseUrl = (course) => {
   const title = course?.title?.split(" ")?.join("");
@@ -35,8 +36,10 @@ const CourseLibraryPage = () => (
   <LibraryPage
     title="Course Library"
     fetchAction={getAllCourses}
+    getAllCoursesOnly={getAllCoursesOnly}
     dataSelector={selectCourses}
     paginationSelector={selectPagination}
+    allCoursesSelector={selectAllCourses}
     getItemUrl={getCourseUrl}
     viewLabel="View Course"
     searchPlaceholder="Search courses…"

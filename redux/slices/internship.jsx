@@ -20,6 +20,9 @@ const InternshipSlice = createSlice({
     serverTotalProgress: 0,     // overall % (0-100)
     serverCompletedCount: 0,    // how many topics finished
     serverTotalCount: 0,        // how many topics exist
+    allCoursesOnly: [],
+    allInternshipsOnly: [],
+
   },
   reducers: {},
 
@@ -65,6 +68,12 @@ const InternshipSlice = createSlice({
         state.lastAccessedTopic = payload.topicIndex;
       }
     });
+    builder.addCase(getAllCoursesOnly.fulfilled, (state, { payload }) => {
+  state.allCoursesOnly = payload?.data || [];  // ← extract the array
+});
+builder.addCase(getAllInternshipsOnly.fulfilled, (state, { payload }) => {
+  state.allInternshipsOnly = payload?.data || [];
+});
   },
 });
 
@@ -303,6 +312,35 @@ export const updateTotalProgress = createAsyncThunk(
     }
   }
 );
-
+export const getAllCoursesOnly = createAsyncThunk(
+  "/getAllCoursesOnly",
+  async (args) => {
+    try {
+      const { data } = await axios.post(
+        internShipUrl + "/getAllCourses",
+        { ...args },
+        { headers: { Authorization: `Bearer ${getLstorage("token")}` } }
+      );
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+export const getAllInternshipsOnly = createAsyncThunk(
+  "/getAllInternshipsOnly",
+  async (args) => {
+    try {
+      const { data } = await axios.post(
+        internShipUrl + "/getAllInternShips",
+        { ...args },
+        { headers: { Authorization: `Bearer ${getLstorage("token")}` } }
+      );
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 export const { } = InternshipSlice.actions;
 export default InternshipSlice.reducer;

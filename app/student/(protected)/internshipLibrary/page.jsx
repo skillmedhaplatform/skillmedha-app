@@ -1,11 +1,11 @@
 "use client";
 
 import LibraryPage from "@/universalUtils/LibraryPage/LibraryPage";
-import { getAllInternships } from "@/redux/slices/internship";
+import { getAllInternships, getAllInternshipsOnly } from "@/redux/slices/internship";
 
-// Stable module-level selectors (avoids new reference on every render)
 const selectInternships = (state) => state.internship.allInternships?.data;
 const selectPagination = (state) => state.internship.allInternships?.pagination;
+const selectAllInternships = (state) => state.internship.allInternshipsOnly;
 
 const getInternshipUrl = (internship) => {
   const title = internship?.title?.split(" ")?.join("");
@@ -33,8 +33,10 @@ const InternshipLibraryPage = () => (
   <LibraryPage
     title="Internship Library"
     fetchAction={getAllInternships}
+    getAllCoursesOnly={getAllInternshipsOnly}
     dataSelector={selectInternships}
     paginationSelector={selectPagination}
+    allCoursesSelector={selectAllInternships}
     getItemUrl={getInternshipUrl}
     viewLabel="View Internship"
     searchPlaceholder="Search internships…"
