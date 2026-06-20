@@ -8,149 +8,9 @@ import { useRouter } from "next/navigation";
 import { Button, Tag, Divider, Spin, Empty } from "antd";
 import ResponsiveAssessmentCard from "@/mobile_views/assessments/ResponsiveAssessmentCard";
 import useResponsive from "@/hooks/useResponsive";
+import TestCard from "@/app/student/(protected)/tests/utils/testCard";
 
-const AssessmentCard = ({ job, onInsightClick, countdown }) => {
-  const title = job?.jobTitle || "Untitled";
-
-  const testDuration =
-    job?.time?.testDuration?.testDuration?.duration?.val1 &&
-    job?.time?.testDuration?.testDuration?.duration?.val2
-      ? `${job.time.testDuration.testDuration.duration.val1}H : ${job.time.testDuration.testDuration.duration.val2}M`
-      : "NA";
-
-  const handleInsightClick = () => {
-    if (job?._id) {
-      onInsightClick(job);
-    }
-  };
-
-  const isResponsive = useResponsive(); // < 1024px → mobile layout
-
-  if (isResponsive) {
-    return (
-      <ResponsiveAssessmentCard
-        title={title}
-        thumbnail={job?.thumbnail}
-        category={job?.category?.[0]?.name || "Job Assessment"}
-        accessType={job?.access?.type || "Public"}
-        questionCount={job?.questionIds?.length || job?.questions?.length || 0}
-        duration={testDuration}
-        shortDescription={job?.shortDescription}
-        countdown={countdown}
-        isExpired={countdown === "Expired"}
-        isTestActivated={true}
-        isAssessment={true}
-        status={job?.status || "Active"}
-        liveProctoring={job?.liveProctoring}
-        snapShotTechnology={job?.snapShotTechnology}
-        honestRespondent={job?.honestRespondent}
-        createdAt={job?.createdAt}
-        maxAttempts={job?.honestRespondent?.maxAttempts}
-        renderButton={() => (
-          <Button
-            onClick={handleInsightClick}
-            type="primary"
-            disabled={countdown === "Expired"}
-          >
-            Start Test
-          </Button>
-        )}
-      />
-    );
-  }
-
-  return (
-    <div className="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-[0_1px_2px_rgba(16,24,40,0.06),0_1px_3px_rgba(16,24,40,0.1)]">
-      <div className="flex items-center justify-between h-[25%]">
-        <p style={{ fontSize: "18px", fontWeight: "700" }}>{title}</p>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingBottom: "10px",
-          }}
-        >
-          {countdown === "Expired" ? (
-            <Button type="dashed" danger>
-              Expired
-            </Button>
-          ) : countdown === "No expiry set" ? (
-            <Button type="text" style={{ color: "#24A058" }}>
-              Active
-            </Button>
-          ) : countdown ? (
-            <Button type="dashed" danger>
-              {countdown}
-            </Button>
-          ) : null}
-        </div>
-      </div>
-      <Divider style={{ margin: "4px 0" }} />
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-          padding: ".5rem 0",
-        }}
-      >
-        <div>
-          <label>Test Duration : </label>
-          <strong>{testDuration}</strong>
-        </div>
-        <div>
-          <label>No of Questions : </label>
-          <strong>{job?.questionIds?.length || 0}</strong>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          <div>
-            <label>Live Proctoring:</label>{" "}
-            <Tag color={job?.liveProctoring === "Enable" ? "green" : "red"}>
-              {job?.liveProctoring || "Not Set"}
-            </Tag>
-          </div>
-
-          <div>
-            <label>Snapshot Technology:</label>{" "}
-            <Tag
-              color={job?.snapShotTechnology === "Enable" ? "blue" : "volcano"}
-            >
-              {job?.snapShotTechnology || "Not Set"}
-            </Tag>
-          </div>
-
-          {job?.honestRespondent && (
-            <div>
-              <label>Honest Respondent:</label>{" "}
-              <Tag>{job?.honestRespondent?.type}</Tag>
-              <Tag>Max Attempts: {job?.honestRespondent?.maxAttempts}</Tag>
-            </div>
-          )}
-        </div>
-      </div>
-      <Divider style={{ margin: "4px 0" }} />
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          height: "25%",
-          paddingTop: "10px",
-        }}
-      >
-        <Button
-          onClick={handleInsightClick}
-          type="primary"
-          style={{ width: "8rem" }}
-          disabled={countdown === "Expired"}
-        >
-          Start Test
-        </Button>
-      </div>
-    </div>
-  );
-};
+// AssessmentCard removed, using shared TestCard instead
 
 export default function JobAssessments() {
   const dispatch = useDispatch();
@@ -277,10 +137,13 @@ export default function JobAssessments() {
   const renderAssessmentCards = () =>
     jobData.map((job, index) => (
       <div key={job._id} className="w-full h-full">
-        <AssessmentCard
-          job={job}
-          onInsightClick={navigateToTest}
-          countdown={countdowns[index]}
+        <TestCard
+          testData={job}
+          index={index}
+          countdowns={countdowns}
+          isTestActivated={true}
+          navigateToTest={navigateToTest}
+          isAssessment={true}
         />
       </div>
     ));

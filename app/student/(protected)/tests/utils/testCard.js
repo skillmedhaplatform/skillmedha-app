@@ -6,8 +6,9 @@ import { Button, message, Popover } from "antd";
 import { fetchTestData } from "@/redux/slices/assessmentsSlice/testSlice";
 import { getLstorage } from "@/universalUtils/windowMW";
 import { parseIfJson } from "../reusable_comp/jsonparse";
-import ResponsiveAssessmentCard from "@/mobile_views/assessments/ResponsiveAssessmentCard";
 import useResponsive from "@/hooks/useResponsive";
+import ResponsiveAssessmentCard from "@/mobile_views/assessments/ResponsiveAssessmentCard";
+import { HelpCircle, Clock, Star, Play } from 'lucide-react';
 
 const formatTimeDiff = (timeDifference) => {
   const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
@@ -216,6 +217,7 @@ export default function TestCard({
   let mainButtonText = "Start test";
   let mainButtonColor = undefined;
   let mainButtonTextColor = undefined;
+  let isGradient = false;
 
   switch (true) {
     case attemptsExceeded:
@@ -224,16 +226,16 @@ export default function TestCard({
       mainButtonTextColor = "#000000";
       break;
     case hasAttempted:
-      mainButtonText = "ReAttempt";
-      mainButtonColor = "#56d2d4";
-      mainButtonTextColor = "#000000";
+      mainButtonText = "Continue";
+      isGradient = true;
       break;
     case testData?.access?.type === "private":
       mainButtonText = "Enter Code";
+      mainButtonColor = "#e74c3c";
+      mainButtonTextColor = "#ffffff";
       break;
     default:
-      mainButtonColor = "#1da469"; // For "Start test"
-      mainButtonTextColor = "#ffffff";
+      isGradient = true; // For "Start test"
       break;
   }
 
@@ -294,8 +296,10 @@ export default function TestCard({
             type="primary"
             onClick={handleStartTestClick}
             disabled={!isTestActivated || countdowns[index] === "Expired"}
-            style={mainButtonColor ? { backgroundColor: mainButtonColor, color: mainButtonTextColor } : {}}
+            style={!isGradient && mainButtonColor ? { backgroundColor: mainButtonColor, color: mainButtonTextColor } : {}}
+            className={isGradient ? "!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white flex items-center gap-1 font-semibold rounded-lg px-4" : "font-semibold"}
           >
+            {isGradient && <Play className="w-4 h-4" />}
             {mainButtonText}
           </Button>
         );
@@ -330,159 +334,118 @@ export default function TestCard({
     );
   }
 
+  let rawDesc = parseIfJson(testData?.shortDescription) || "";
+  let cleanDesc = rawDesc.replace(/<[^>]+>/g, '').trim();
+  let firstSentence = cleanDesc;
+  if (firstSentence.includes('.')) {
+    firstSentence = firstSentence.split('.')[0] + '.';
+  }
+
   return (
-    <section className="bg-[#fdfdfd] flex items-center justify-center p-[0.5rem_1rem_1rem_1rem] cursor-pointer rounded-[10px] shadow-[rgba(0,0,0,0.05)_0px_0px_0px_1px,rgb(209,213,219)_0px_0px_0px_1px_inset]">
-      <div className="flex items-start justify-start flex-col w-full gap-[0.2rem]">
+    <section className="bg-white shadow-md hover:shadow-lg transition-shadow flex flex-col cursor-pointer rounded-2xl border border-gray-200 h-full relative overflow-hidden">
+      
+      {/* Top Section: Title & Active Tag */}
+      <div className="flex items-center justify-between w-full px-5 pt-3 pb-2">
+        <h3 className="text-[18px] font-extrabold text-[#1a3b8b] leading-tight line-clamp-2 pr-2">
+          {isAssessment ? testData?.jobTitle : testData?.title}
+        </h3>
         {!isAssessment && (
-          <div className="w-full flex items-center justify-end gap-16 text-[0.7rem]">
+          <div className="shrink-0">
             {countdowns[index] === "Expired" ? (
-              <button className="bg-[#e74c3c] text-white border-0 py-[0.3rem] px-[0.5rem] font-semibold text-[0.7rem] rounded-[5px] cursor-pointer flex gap-[0.3rem]">Expired</button>
+              <span className="bg-red-50 text-red-600 text-[11px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                Expired
+              </span>
+            ) : testData?.time?.expiryDates?.expiry ? (
+              <span className="text-gray-500 text-[11px] font-bold">{countdowns[index]}</span>
             ) : (
-              <>
-                {testData?.time?.expiryDates?.expiry ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      width: "100%",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <button className="border-0 py-[0.3rem] px-[0.5rem] font-semibold text-[0.7rem] rounded-[5px] cursor-pointer flex gap-[0.3rem]">{countdowns[index]}</button>
-                    {!isTestActivated && activationCountdown && (
-                      <div
-                        style={{
-                          padding: "2px 5px",
-                          backgroundColor: "#fff3cd",
-                          borderRadius: "4px",
-                          textAlign: "center",
-                        }}
-                      >
-                        <p
-                          style={{
-                            margin: 0,
-                            fontSize: "12px",
-                            color: "#856404",
-                            fontWeight: 600,
-                          }}
-                        >
-                          🕒 {activationCountdown}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    className={`bg-[#f0f0f0] py-[0.15rem] px-[0.5rem] flex items-center justify-center rounded-[1rem] cursor-pointer mb-[0.2rem] text-[0.6rem] font-bold text-center border-0 gap-[0.3rem] ${testData?.status?.toLowerCase() === "active"
-                      ? "!bg-[#24A058] !text-white"
-                      : "!bg-[#f39c12] !text-white"
-                      }`}
-                  >
-                    {testData?.status?.charAt(0).toUpperCase() +
-                      testData?.status?.slice(1)}
-                  </button>
-                )}
-              </>
+              <span className={`text-[11px] font-bold px-2 py-1 rounded-full flex items-center gap-1 ${
+                testData?.status?.toLowerCase() === "active" ? "bg-green-50 text-green-600" : "bg-yellow-50 text-yellow-600"
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  testData?.status?.toLowerCase() === "active" ? "bg-green-600" : "bg-yellow-600"
+                }`}></span>
+                {testData?.status?.charAt(0).toUpperCase() + testData?.status?.slice(1)}
+              </span>
             )}
           </div>
         )}
-
-        <div className="w-full text-start h-[3.2rem]">
-          <p className="text-[18px] font-bold w-full">
-            {isAssessment
-              ? testData?.jobTitle
-              : testData?.title?.length > 40
-                ? testData?.title?.substring(0, 42) + "..."
-                : testData?.title}
-          </p>
-        </div>
-        <div className="w-full flex items-start justify-between">
-          {testData?.category && testData.category.length > 0 && (
-            <div className="bg-[#f0f0f0] py-[0.15rem] px-[0.5rem] flex items-center justify-center rounded-[1rem] cursor-pointer mb-[0.2rem] [&_p]:font-bold [&_p]:text-[0.6rem] [&_p]:text-center">
-              <p>
-                {testData.category.length === 1
-                  ? `${testData?.category[0]?.name}`
-                  : `${testData?.category[0]?.name} +${testData?.category?.length - 1
-                  }`}
-              </p>
-            </div>
-          )}
-
-          {testData?.access && (
-            <div
-              className={`bg-[#f0f0f0] py-[0.15rem] px-[0.5rem] flex items-center justify-center rounded-[1rem] cursor-pointer mb-[0.2rem] [&_p]:font-bold [&_p]:text-[0.6rem] [&_p]:text-center ${testData?.access?.type === "private"
-                ? "!bg-[#e74c3c] !text-white"
-                : testData?.access?.type === "public"
-                  ? "!bg-[#24A05859] !text-black"
-                  : "!bg-[#e8f0fe] !text-black"
-                }`}
-            >
-              <p>
-                {testData?.access?.type?.charAt(0).toUpperCase() +
-                  testData?.access?.type?.slice(1)}
-              </p>
-            </div>
-          )}
-        </div>
-        <div className="w-full flex items-center justify-between flex-row mb-2 [&_div]:flex [&_div]:items-center [&_div]:justify-start [&_div]:flex-row [&_p]:text-[0.7rem] [&_strong]:text-[0.7rem]">
-          <div>
-            <p>Questions : </p>
-            &nbsp;<strong>{testData?.questions?.length || 0}</strong>
-          </div>
-          <div>
-            <p>Duration : </p>
-            &nbsp;
-            {isAssessment ? (
-              <strong>
-                {" "}
-                {testData?.testDurationDisplay?.hours &&
-                  testData?.testDurationDisplay?.minutes
-                  ? `${testData?.testDurationDisplay?.hours}H : ${testData?.testDurationDisplay?.minutes}M`
-                  : "NA"}
-              </strong>
-            ) : (
-              <strong>
-                {testDuration?.val1 && testDuration?.val2
-                  ? `${testDuration?.val1}H : ${testDuration?.val2}M`
-                  : "NA"}
-              </strong>
-            )}
-          </div>
-          {!isAssessment && (
-            <>
-              <div>
-                <p>Marks : </p>
-                &nbsp;<strong>{totalMarks}</strong>
-              </div>
-            </>
-          )}
-        </div>
-        {!isAssessment && testData?.thumbnail && (
-          <div className="w-full flex items-center justify-center overflow-hidden [&_img]:w-full [&_img]:aspect-video [&_img]:object-contain">
-            <img src={testData.thumbnail} alt="thumbnail" />
-          </div>
-        )}
-
-        <div className="w-full h-[8.5rem] text-[0.7rem] font-medium text-justify mt-[0.7rem] overflow-hidden [&_span]:leading-[18px]">
-          <span
-            className="line-clamp-6"
-            dangerouslySetInnerHTML={{
-              __html:
-                parseIfJson(testData?.shortDescription)?.substring(0, 260) +
-                (parseIfJson(testData?.shortDescription)?.length > 260 ? "..." : ""),
-            }}
-          ></span>
-        </div>
-        <div className="w-full flex items-center justify-between mt-2">
-          {renderMainButton()}
-
-          {/* <Button
-            onClick={navigateToResults}
-            type="default"
-          >
-            Results
-          </Button> */}
-        </div>
       </div>
+
+      {/* Tags Row */}
+      <div className="flex flex-wrap items-center gap-2 px-5 mb-4">
+        {testData?.category?.slice(0, 2).map((cat, i) => (
+          <span key={i} className="bg-[#eff4ff] text-[#1E69DA] text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+            {cat.name}
+          </span>
+        ))}
+        <span className="bg-green-50 text-green-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+          All Levels
+        </span>
+      </div>
+
+      {/* Metrics Row */}
+      <div className="flex items-center w-full px-5 pb-4">
+        <div className="flex flex-col w-1/3 border-r border-gray-100 shrink-0 pr-2">
+          <span className="text-[#8c94a3] text-[11px] uppercase font-bold flex items-center gap-1.5 whitespace-nowrap mb-1">
+            <HelpCircle className="w-3.5 h-3.5" /> QUESTIONS
+          </span>
+          <strong className="text-[#1a3b8b] text-[16px] font-bold leading-tight truncate">{testData?.questions?.length || 0}</strong>
+        </div>
+        <div className="flex flex-col w-1/3 px-3 border-r border-gray-100 shrink-0">
+          <span className="text-[#8c94a3] text-[11px] uppercase font-bold flex items-center gap-1.5 whitespace-nowrap mb-1">
+            <Clock className="w-3.5 h-3.5" /> DURATION
+          </span>
+          <strong className="text-[#1a3b8b] text-[16px] font-bold leading-tight uppercase whitespace-nowrap">
+            {isAssessment 
+              ? (testData?.testDurationDisplay?.hours || testData?.testDurationDisplay?.minutes ? `${testData?.testDurationDisplay?.hours || 0}H : ${testData?.testDurationDisplay?.minutes || 0}M` : "NA")
+              : (testDuration?.val1 || testDuration?.val2 ? `${testDuration?.val1 || 0}H : ${testDuration?.val2 || 0}M` : "NA")}
+          </strong>
+        </div>
+        {!isAssessment && (
+          <div className="flex flex-col w-1/3 px-3 shrink-0">
+            <span className="text-[#8c94a3] text-[11px] uppercase font-bold flex items-center gap-1.5 whitespace-nowrap mb-1">
+              <Star className="w-3.5 h-3.5" /> MARKS
+            </span>
+            <strong className="text-[#1a3b8b] text-[16px] font-bold leading-tight truncate">{totalMarks}</strong>
+          </div>
+        )}
+      </div>
+
+      {/* Thumbnail */}
+      <div className="w-full aspect-[16/9] bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+        {testData?.thumbnail ? (
+          <img src={testData.thumbnail} alt="thumbnail" className="w-full h-full object-contain" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-r from-yellow-300 to-yellow-500 flex items-center justify-center">
+            <span className="text-4xl font-extrabold text-black/50">
+              {testData?.title?.substring(0, 2)?.toUpperCase() || "JS"}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Description */}
+      <div className="px-5 pt-3 pb-5 text-[14.5px] text-[#475467] leading-relaxed line-clamp-2">
+        {firstSentence}
+      </div>
+
+      {/* Footer / Actions */}
+      <div className="mt-auto flex items-center justify-between px-5 py-4 w-full border-t border-gray-100">
+        <div className="flex flex-col w-[120px]">
+          <div className="text-[#8c94a3] text-[11px] font-bold uppercase mb-1.5 tracking-wider">
+            COMPLETION • {percentage !== undefined ? percentage : 0}%
+          </div>
+          <div className="w-full bg-[#f1f5f9] rounded-full h-1.5">
+            <div 
+              className="h-1.5 rounded-full bg-[#1E69DA]" 
+              style={{ width: `${Math.min(100, Math.max(0, percentage || 0))}%` }}
+            ></div>
+          </div>
+        </div>
+        {renderMainButton()}
+      </div>
+
     </section>
   );
 }

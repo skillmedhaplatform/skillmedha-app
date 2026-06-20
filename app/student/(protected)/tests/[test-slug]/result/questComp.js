@@ -21,25 +21,19 @@ export default function QuesComp({
   const sqTestId = searchQuery.get("testId");
   const testId = sqTestId || sstestId;
 
-  const options = Object.keys(e?.questionContent)
+  const options = Object.keys(e?.questionContent || {})
     .filter((qe) => qe?.includes("option"))
     .map((op) => ({ [op]: e?.questionContent[op] }))
     .sort((a, b) => Object.keys(a)[0].slice(-1) - Object.keys(b)[0].slice(-1));
 
-  const toLowerFun = (arr) =>
-    arr?.map((item) => {
-      if (item) return item;
-      else return;
-    });
-
   const correctAnswers = () => {
-    if (Object.keys(e?.answer)[0] === "truefalse") {
+    if (Object.keys(e?.answer || {})[0] === "truefalse") {
       return [e?.answer?.truefalse?.toString()];
     }
-    if (Object.keys(e?.answer)[0] === "shortpara") {
+    if (Object.keys(e?.answer || {})[0] === "shortpara") {
       return [e?.answer?.shortpara?.toString()];
     }
-    if (Object.keys(e?.answer)[0] == "multipleChoice") {
+    if (Object.keys(e?.answer || {})[0] == "multipleChoice") {
       return Object.entries(e?.answer[Object.keys(e?.answer)[0]])
         .filter(([key, value]) => value === true)
         .map(([key]) => key.toLowerCase());
@@ -56,7 +50,7 @@ export default function QuesComp({
         );
         answer = key?.toLowerCase();
       }
-      return answer;
+      return answer ? [answer] : [];
     }
   };
 
@@ -85,7 +79,6 @@ export default function QuesComp({
   }
   const singleQuestion = testRes?.value[testId]?.response[e?._id];
 
-  // Helper function to get programming language from language_id
   const getLanguageName = (languageId) => {
     const languageMap = {
       63: "javascript",
@@ -93,18 +86,15 @@ export default function QuesComp({
       54: "cpp",
       62: "java",
       51: "csharp",
-      // Add more mappings as needed
     };
     return languageMap[languageId] || "javascript";
   };
 
-  // Helper function to clean HTML from test case strings
   const cleanHtmlFromTestCase = (htmlString) => {
     if (!htmlString) return "";
-    // Remove quotes and HTML tags, then decode HTML entities
     const cleaned = htmlString
-      .replace(/^"|"$/g, "") // Remove surrounding quotes
-      .replace(/<[^>]*>/g, "") // Remove HTML tags
+      .replace(/^"|"$/g, "")
+      .replace(/<[^>]*>/g, "")
       .replace(/&lt;/g, "<")
       .replace(/&gt;/g, ">")
       .replace(/&amp;/g, "&")
@@ -113,439 +103,228 @@ export default function QuesComp({
     return cleaned;
   };
 
+  let totalScoreGained = 0;
+  if (singleQuestion && singleQuestion?.status !== "notanswered") {
+    if (
+      singleQuestion?.correctScore == 0 &&
+      singleQuestion?.negativeScore == 0 &&
+      !singleQuestion?.answers?.length
+    ) {
+      totalScoreGained = 0;
+    } else if (singleQuestion?.status === "correct") {
+      totalScoreGained = Number(singleQuestion?.correctScore || 0) + Number(singleQuestion?.bonusScore || 0);
+    } else if (singleQuestion?.status === "incorrect") {
+      totalScoreGained = Number(singleQuestion?.correctScore || 0) + Number(singleQuestion?.negativeScore || 0);
+    }
+  }
+
   return (
-    <>
-      <div key={e?._id} className={resultStyles.questionContainer}>
-        <div className={resultStyles.questionHeader}>
-          <p className={resultStyles.sno} id={`question_${questionNo}`}>
-            Question {questionNo}
-            {flagged && (
-              <Tooltip
-                placement="top"
-                title={flagged?.flag?.map((e, I) => (
-                  <p key={I}>{e}</p>
-                ))}
-              >
-                <FlagFilled className={resultStyles.flaggedIcon} />
-              </Tooltip>
-            )}
-          </p>
-          <p className={resultStyles.type}>{e?.questionType}</p>
-          <div className={resultStyles.scoreContainer}>
-            {correctScore ? (
-              <span className={resultStyles.queScore}>
-                Que Score: {+correctScore}
-              </span>
-            ) : (
-              ""
-            )}
-            &nbsp;&nbsp;
-            {partialScore ? (
-              <span className={resultStyles.partialScore}>
-                Partial Score: {+partialScore}
-              </span>
-            ) : (
-              ""
-            )}
-            &nbsp;&nbsp;
-            {bonusScore ? (
-              <span className={resultStyles.bonusScore}>
-                Bonus Points: {+bonusScore}
-              </span>
-            ) : (
-              ""
-            )}
-            &nbsp;&nbsp;
-            {negativeScore ? (
-              <span className={resultStyles.negScore}>
-                Negative Score: {+negativeScore}
-              </span>
-            ) : (
-              ""
+    <div key={e?._id} className={resultStyles.qBlock}>
+      <div className={resultStyles.qBlockHeader}>
+        <div className={resultStyles.qBlockNum} id={`question_${questionNo}`}>
+          <i className="ti ti-help" /> Question {questionNo}
+          {flagged && (
+            <Tooltip
+              placement="top"
+              title={flagged?.flag?.map((e, I) => (
+                <p key={I}>{e}</p>
+              ))}
+            >
+              <FlagFilled className={resultStyles.flaggedIcon} />
+            </Tooltip>
+          )}
+        </div>
+        <div className={resultStyles.qBlockType}>{e?.questionType}</div>
+        <div className={resultStyles.qBlockScores}>
+          {(correctScore || partialScore) ? (
+            <div className={`${resultStyles.scoreChip} ${resultStyles.due}`}>
+              Score Due: {correctScore ? correctScore : partialScore}
+            </div>
+          ) : null}
+          {bonusScore ? (
+            <div className={`${resultStyles.scoreChip} ${resultStyles.due}`}>
+              Bonus: {bonusScore}
+            </div>
+          ) : null}
+          {negativeScore ? (
+            <div className={`${resultStyles.scoreChip} ${resultStyles.neg}`}>
+              Penalty: -{negativeScore}
+            </div>
+          ) : null}
+        </div>
+      </div>
+      
+      <div
+        className={resultStyles.qBlockText}
+        dangerouslySetInnerHTML={{
+          __html: parseIfJson(e?.questionContent?.question),
+        }}
+      ></div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {(e?.questionType == "Single Choice" ||
+          e?.questionType == "Audio Question" ||
+          e?.questionType == "Video Question" ||
+          e?.questionType == "Multiple Choice") &&
+          options.map((opt, idx) => {
+            const key = Object.keys(opt)[0];
+            const isCorrect = correctAnswers()?.includes(key.toLowerCase());
+
+            const isSelected =
+              Array.isArray(studentAnswers) &&
+              studentAnswers
+                .map((stAns) => stAns?.toLowerCase())
+                .includes(key.toLowerCase());
+
+            let optClass = "";
+            let iconClass = "";
+            
+            if (isCorrect && isSelected) {
+              optClass = resultStyles.correct;
+              iconClass = "ti ti-circle-check";
+            } else if (!isCorrect && isSelected) {
+              optClass = resultStyles.wrongSelected;
+              iconClass = "ti ti-circle-x";
+            } else if (isCorrect && !isSelected) {
+              optClass = resultStyles.correctNotSelected;
+              iconClass = "ti ti-circle-check";
+            }
+
+            return (
+              <div key={idx} className={`${resultStyles.akOption} ${optClass}`}>
+                <div className={resultStyles.akOptLetter}>{String.fromCharCode(65 + idx)}</div>
+                <div className={resultStyles.akOptText} dangerouslySetInnerHTML={{ __html: parseIfJson(opt[key]) }}></div>
+                {iconClass && <i className={`${iconClass} ${resultStyles.akOptIcon}`} />}
+                
+                {e?.scoreSettings?.scoreType == "partialScore" && (
+                  <span style={{ fontSize: '11px', fontWeight: 600, marginLeft: '10px', color: 'rgba(0,0,0,0.5)' }}>
+                    {isSelected && isCorrect
+                      ? `(+${+partialScore})`
+                      : isSelected && !isCorrect
+                      ? `(${e?.scoreSettings?.pointsForEachIncorrectAns || 0})`
+                      : ""}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+
+        {e?.questionType == "True - False" &&
+          ["True", "False"]?.map((op, idx) => {
+            const isCorrect = correctAnswers()?.includes(op.toLowerCase());
+            const isSelected =
+              Array.isArray(studentAnswers) &&
+              studentAnswers[0]?.toLowerCase()?.includes(op.toLowerCase());
+
+            let optClass = "";
+            let iconClass = "";
+            
+            if (isCorrect && isSelected) {
+              optClass = resultStyles.correct;
+              iconClass = "ti ti-circle-check";
+            } else if (!isCorrect && isSelected) {
+              optClass = resultStyles.wrongSelected;
+              iconClass = "ti ti-circle-x";
+            } else if (isCorrect && !isSelected) {
+              optClass = resultStyles.correctNotSelected;
+              iconClass = "ti ti-circle-check";
+            }
+
+            return (
+              <div key={idx} className={`${resultStyles.akOption} ${optClass}`}>
+                <div className={resultStyles.akOptLetter}>{String.fromCharCode(65 + idx)}</div>
+                <div className={resultStyles.akOptText}>{op}</div>
+                {iconClass && <i className={`${iconClass} ${resultStyles.akOptIcon}`} />}
+              </div>
+            );
+          })}
+
+        {e?.questionType == "Short Paragraph" && (
+          <div style={{ marginTop: '10px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text3)', marginBottom: '4px' }}>Student Answer</div>
+            <div className={`${resultStyles.akOption} ${totalScoreGained > 0 ? resultStyles.correct : (totalScoreGained < 0 ? resultStyles.wrongSelected : '')}`} style={{ padding: '12px 14px' }}>
+              <div className={resultStyles.akOptText}>{currentTestRes?.[e?._id]?.answers || "Not Answered"}</div>
+            </div>
+            
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text3)', marginTop: '10px', marginBottom: '4px' }}>Actual Answer</div>
+            {e?.answer?.shortpara && (
+              <div className={resultStyles.akOption} style={{ padding: '12px 14px', background: 'var(--bg-success)' }}>
+                <div className={resultStyles.akOptText} dangerouslySetInnerHTML={{ __html: parseIfJson(e?.answer?.shortpara) }} />
+              </div>
             )}
           </div>
-        </div>
-        <div
-          className={resultStyles.questionText}
-          dangerouslySetInnerHTML={{
-            __html: parseIfJson(e?.questionContent?.question),
-          }}
-        ></div>
-        <div className={resultStyles.optionsContainer}>
-          {/* Existing question types... */}
-          {(e?.questionType == "Single Choice" ||
-            e?.questionType == "Audio Question" ||
-            e?.questionType == "Video Question" ||
-            e?.questionType == "Multiple Choice") &&
-            options.map((opt, i) => {
-              const key = Object.keys(opt)[0];
-              const isCorrect = correctAnswers()?.includes(key.toLowerCase());
+        )}
 
-              const isSelected =
-                Array.isArray(studentAnswers) &&
-                studentAnswers
-                  .map((stAns) => stAns?.toLowerCase())
-                  .includes(key.toLowerCase());
-              let clsName = "";
-              if (isCorrect && isSelected) {
-                clsName = "correct_selected";
-              } else if (
-                isCorrect &&
-                Array.isArray(studentAnswers) &&
-                !studentAnswers.length &&
-                quesTime &&
-                currentTestRes[e?._id]?.status == "notanswered"
-              ) {
-                clsName = "correct";
-              } else if (!isCorrect && isSelected) {
-                clsName = "incorrect";
-              } else if (
-                Array.isArray(studentAnswers) &&
-                !studentAnswers.length &&
-                quesTime
-              ) {
-                clsName = "notanswered";
-              } else if (!Array.isArray(studentAnswers) && !quesTime) {
-                clsName = "unattempted";
-              }
-              if (currentTestRes?.[e?._id]?.status == "notanswered")
-                clsName = "notanswered";
-              return (
-                <label
-                  key={i}
-                  className={`${resultStyles.optionLable} ${resultStyles[clsName]}`}
-                >
-                  <div className={resultStyles.options_div}>
-                    <span>
-                      <span className={resultStyles.optionsOrderChar}>
-                        {String.fromCharCode(65 + i)}{" "}
-                      </span>
-                    </span>
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: parseIfJson(opt[key]),
-                      }}
-                      className={resultStyles.optionsOrderChar}
-                    ></span>
-                  </div>
-                  {e?.scoreSettings?.scoreType == "partialScore" && (
-                    <span className={resultStyles.points_span}>
-                      {e?.scoreSettings?.scoreType == "partialScore" &&
-                      isSelected &&
-                      isCorrect
-                        ? `Points : +${+partialScore}`
-                        : `Points : ${
-                            isSelected && !isCorrect
-                              ? e?.scoreSettings?.pointsForEachIncorrectAns !=
-                                undefined
-                                ? e?.scoreSettings?.pointsForEachIncorrectAns
-                                : 0
-                              : 0
-                          }`}
-                    </span>
-                  )}
-                </label>
-              );
-            })}
-
-          {e?.questionType == "True - False" &&
-            ["True", "False"]?.map((op, i) => {
-              const key = op;
-
-              const isCorrect = correctAnswers()?.includes(key.toLowerCase());
-              const isSelected =
-                Array.isArray(studentAnswers) &&
-                studentAnswers[0]?.toLowerCase()?.includes(key.toLowerCase());
-              let clsName = "";
-              if (isCorrect && isSelected) {
-                clsName = "correct_selected";
-              } else if (
-                isCorrect &&
-                currentTestRes?.[e?._id]?.status == "notanswered" &&
-                !Array.isArray(studentAnswers) &&
-                !quesTime
-              ) {
-                clsName = "correct";
-              } else if (!isCorrect && isSelected) {
-                clsName = "incorrect";
-              } else if (!Array.isArray(studentAnswers) && !quesTime) {
-                clsName = "unattempted";
-              }
-              if (currentTestRes?.[e?._id]?.status == "notanswered")
-                clsName = "notanswered";
-              return (
-                <label
-                  key={i}
-                  className={`${resultStyles.optionLable} ${resultStyles[clsName]}`}
-                >
-                  <span></span>
-                  <span className={resultStyles.optionValue}>{" " + op}</span>
-                </label>
-              );
-            })}
-
-          {e?.questionType == "Short Paragraph" && (
-            <div className={resultStyles.paraanswers_div}>
-              <h3
-                className={`${resultStyles.shortParaAnsLabel} ${
-                  testRes?.value[testId]?.response[e?._id]?.status ==
-                    "notanswered" &&
-                  testRes?.value[testId]?.response[e?._id]?.correctScore == 0 &&
-                  testRes?.value[testId]?.response[e?._id]?.negativeScore ==
-                    0 &&
-                  !testRes?.value[testId]?.response[e?._id]?.answers?.length
-                    ? resultStyles.notanswered
-                      ? resultStyles.unattempted
-                        ? resultStyles.incorrect
-                        : resultStyles.correct
-                      : resultStyles.notanswered
-                    : ""
-                }`}
-              >
-                Student Answer
+        {e?.questionType == "Coding Question" && (
+          <div style={{ marginTop: '10px' }}>
+            {/* Kept minimal formatting for coding questions since they require complex nested elements. We use standard nested divs but styled with the new theme colors */}
+            <div style={{ background: 'var(--bg2)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <h3 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--blue2)', marginBottom: '8px' }}>
+                Student's Solution {studentAnswers?.languageKey && <span style={{ background: 'var(--bg-info)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px' }}>{studentAnswers.languageKey.key.toUpperCase()}</span>}
               </h3>
-
-              <div
-                className={`${resultStyles.shortParaAns} ${
-                  testRes?.value[testId]?.response[e?._id]?.correctScore == 0 &&
-                  testRes?.value[testId]?.response[e?._id]?.negativeScore ==
-                    0 &&
-                  !testRes?.value[testId]?.response[e?._id]?.answers?.length &&
-                  testRes?.value[testId]?.response[e?._id]?.status ==
-                    "notanswered"
-                    ? resultStyles.notanswered
-                      ? resultStyles.unattempted
-                        ? resultStyles.incorrect
-                        : resultStyles.correct
-                      : resultStyles.unattempted
-                    : ""
-                }`}
-              >
-                {currentTestRes?.[e?._id]?.answers}
-              </div>
-              <h3>Actual Answer</h3>
-              {e?.answer?.shortpara && (
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: parseIfJson(e?.answer?.shortpara),
-                  }}
-                  ref={(elem) => (shortAns.current[e?._id] = elem)}
-                ></span>
+              
+              {studentAnswers?.code ? (
+                <>
+                  <pre style={{ background: 'var(--navy2)', color: '#fff', padding: '12px', borderRadius: '6px', overflowX: 'auto', fontSize: '12px', fontFamily: 'monospace', marginBottom: '10px' }}>
+                    <code>{studentAnswers.code}</code>
+                  </pre>
+                  
+                  {studentAnswers?.aisuggestion && studentAnswers.aisuggestion.length > 0 && (
+                    <div>
+                      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: '6px' }}>Test Case Results:</h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {studentAnswers.aisuggestion.map((result, index) => {
+                          const testCaseKey = Object.keys(result)[0];
+                          const status = result[testCaseKey];
+                          const isPass = status.toLowerCase() === "pass";
+                          return (
+                            <div key={index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: isPass ? 'var(--bg-success)' : 'var(--bg-danger)', borderRadius: '4px', border: `1px solid ${isPass ? 'var(--green)' : 'var(--red)'}`, fontSize: '11px', fontWeight: 600 }}>
+                              <span>Test Case {index + 1}</span>
+                              <span style={{ color: isPass ? 'var(--green-txt)' : 'var(--red-txt)' }}>{status.toUpperCase()}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ fontSize: '12px', color: 'var(--text3)', fontStyle: 'italic' }}>No code was submitted.</div>
               )}
             </div>
-          )}
+          </div>
+        )}
+      </div>
 
-          {/* NEW: Coding Question Section */}
-          {e?.questionType == "Coding Question" && (
-            <div className={resultStyles.codingQuestionContainer}>
-              {/* Test Cases Display */}
-              {e?.questionContent?.testCases &&
-                e.questionContent.testCases.length > 0 && (
-                  <div className={resultStyles.testCasesSection}>
-                    <h3 className={resultStyles.testCasesTitle}>Test Cases:</h3>
-                    {e.questionContent.testCases.map((testCase, index) => (
-                      <div
-                        key={testCase._id || index}
-                        className={resultStyles.testCaseItem}
-                      >
-                        <h4 className={resultStyles.testCaseHeader}>
-                          Test Case {index + 1}:
-                        </h4>
-
-                        <div className={resultStyles.testCaseContent}>
-                          <div className={resultStyles.inputSection}>
-                            <strong>Input:</strong>
-                            <pre className={resultStyles.codeBlock}>
-                              <code>
-                                {cleanHtmlFromTestCase(testCase.input)}
-                              </code>
-                            </pre>
-                          </div>
-
-                          <div className={resultStyles.outputSection}>
-                            <strong>Expected Output:</strong>
-                            <pre className={resultStyles.codeBlock}>
-                              <code>
-                                {cleanHtmlFromTestCase(testCase.expectedOutput)}
-                              </code>
-                            </pre>
-                          </div>
-
-                          {testCase.explanation && (
-                            <div className={resultStyles.explanationSection}>
-                              <strong>Explanation:</strong>
-                              <div
-                                className={resultStyles.explanationText}
-                                dangerouslySetInnerHTML={{
-                                  __html: parseIfJson(testCase.explanation),
-                                }}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-              {/* Student's Code Submission */}
-              <div className={resultStyles.studentCodeSection}>
-                <h3 className={resultStyles.studentCodeTitle}>
-                  Student's Solution:
-                  {studentAnswers?.languageKey && (
-                    <span className={resultStyles.languageBadge}>
-                      {studentAnswers.languageKey.key.toUpperCase()}
-                    </span>
-                  )}
-                </h3>
-
-                {studentAnswers?.code ? (
-                  <div className={resultStyles.codeSubmissionContainer}>
-                    <pre className={resultStyles.studentCodeBlock}>
-                      <code
-                        className={`language-${getLanguageName(
-                          studentAnswers?.language_id
-                        )}`}
-                      >
-                        {studentAnswers.code}
-                      </code>
-                    </pre>
-
-                    {/* AI Suggestions/Test Results */}
-                    {studentAnswers?.aisuggestion &&
-                      studentAnswers.aisuggestion.length > 0 && (
-                        <div className={resultStyles.testResultsSection}>
-                          <h4 className={resultStyles.testResultsTitle}>
-                            Test Case Results:
-                          </h4>
-                          <div className={resultStyles.testResultsList}>
-                            {studentAnswers.aisuggestion.map(
-                              (result, index) => {
-                                const testCaseKey = Object.keys(result)[0];
-                                const status = result[testCaseKey];
-                                const statusClass =
-                                  status.toLowerCase() === "pass"
-                                    ? "pass"
-                                    : "fail";
-
-                                return (
-                                  <div
-                                    key={index}
-                                    className={`${resultStyles.testResult} ${resultStyles[statusClass]}`}
-                                  >
-                                    <span
-                                      className={resultStyles.testCaseNumber}
-                                    >
-                                      Test Case {index + 1}:
-                                    </span>
-                                    <span
-                                      className={`${resultStyles.testStatus} ${resultStyles[statusClass]}`}
-                                    >
-                                      {status.toUpperCase()}
-                                    </span>
-                                  </div>
-                                );
-                              }
-                            )}
-                          </div>
-                        </div>
-                      )}
-                  </div>
-                ) : (
-                  <div className={resultStyles.noCodeSubmitted}>
-                    <p>No code was submitted for this question.</p>
-                  </div>
-                )}
-              </div>
+      <div className={resultStyles.scoreDetailsBox}>
+        <div className={resultStyles.scoreDetailsRow}>
+          <div className={`${resultStyles.scoreDetailChip} ${resultStyles.cs}`}>
+            Correct Score: {singleQuestion?.correctScore || 0}
+          </div>
+          <div className={`${resultStyles.scoreDetailChip} ${resultStyles.ns}`}>
+            Negative Score: {singleQuestion?.negativeScore || 0}
+          </div>
+          {singleQuestion?.bonusScore > 0 && (
+            <div className={`${resultStyles.scoreDetailChip} ${resultStyles.cs}`} style={{ background: '#e8eaf6', color: '#3f51b5' }}>
+              Bonus Score: {singleQuestion?.bonusScore}
             </div>
           )}
-
-          <div className={resultStyles.scoreContainer}>
-            Scores Details :
-            {testRes?.value[testId]?.response[e?._id]?.status ==
-            "notanswered" ? (
-              <span className={resultStyles.notanswered}>Not Answered</span>
-            ) : (
-              <>
-                {testRes?.value[testId]?.response[e?._id] ? (
-                  <>
-                    {testRes?.value[testId]?.response[e?._id]?.correctScore ==
-                      0 &&
-                    testRes?.value[testId]?.response[e?._id]?.negativeScore ==
-                      0 &&
-                    !testRes?.value[testId]?.response[e?._id]?.answers
-                      ?.length ? (
-                      <span className={resultStyles.notanswered}>
-                        Not answered
-                      </span>
-                    ) : (
-                      <>
-                        <span className={resultStyles.queScore}>
-                          Correct Score :{" "}
-                          {
-                            testRes?.value[testId]?.response[e?._id]
-                              ?.correctScore
-                          }
-                        </span>
-                        <span className={resultStyles.negScore}>
-                          Negative Score :{" "}
-                          {
-                            testRes?.value[testId]?.response[e?._id]
-                              ?.negativeScore
-                          }
-                        </span>
-                        {testRes?.value[testId]?.response[e?._id]?.bonusScore >
-                          0 && (
-                          <span className={resultStyles.bonusScore}>
-                            Bonus Score:{" "}
-                            {
-                              testRes?.value[testId]?.response[e?._id]
-                                ?.bonusScore
-                            }
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <span className={resultStyles.unattempted}>Unattempted</span>
-                )}
-              </>
-            )}
+          <div className={`${resultStyles.scoreDetailChip} ${totalScoreGained >= 0 ? resultStyles.gainedPos : resultStyles.gainedNeg}`}>
+            Score Gained: {totalScoreGained}
           </div>
-          <div className={resultStyles.scoreContainer}>
-            <strong>Score Gained : </strong>
-            <strong>
-              {singleQuestion?.status === "notanswered"
-                ? "0"
-                : singleQuestion
-                ? singleQuestion?.correctScore == 0 &&
-                  singleQuestion?.negativeScore == 0 &&
-                  !singleQuestion?.answers?.length
-                  ? "0"
-                  : singleQuestion?.status === "correct"
-                  ? Number(singleQuestion?.correctScore || 0) +
-                    Number(singleQuestion?.bonusScore || 0)
-                  : singleQuestion?.status === "incorrect"
-                  ? Number(singleQuestion?.correctScore || 0) +
-                    Number(singleQuestion?.negativeScore || 0)
-                  : "0"
-                : "0"}
-            </strong>
-          </div>
-          {e?.answer?.explanation && (
-            <div className={resultStyles.explainContainer}>
-              <strong>Explanation : </strong>
-              <div
-                className={resultStyles.questionText}
-                dangerouslySetInnerHTML={{
-                  __html: parseIfJson(e?.answer?.explanation),
-                }}
-              ></div>
+          {singleQuestion?.status === "notanswered" && (
+            <div className={`${resultStyles.scoreDetailChip}`} style={{ background: '#f5f5f5', color: '#757575' }}>
+              Not Answered
             </div>
           )}
         </div>
       </div>
-    </>
+
+      {e?.answer?.explanation && (
+        <div className={resultStyles.explanationBox}>
+          <b>Explanation:</b> <span dangerouslySetInnerHTML={{ __html: parseIfJson(e?.answer?.explanation) }} />
+        </div>
+      )}
+    </div>
   );
 }

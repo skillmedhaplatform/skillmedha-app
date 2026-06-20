@@ -1,5 +1,4 @@
-@use "colors.module.scss" as *;
-$primaryColor: #1E69DA !default;
+@use "colors.module.scss" as colors;
 
 @mixin flexBox($direction, $aligment, $justify, $gap: 0) {
   display: flex;
@@ -27,7 +26,7 @@ $primaryColor: #1E69DA !default;
   font-weight: $fontweight;
 }
 
-@mixin custom-scrollbar($thumbColor: $primaryColor,
+@mixin custom-scrollbar($thumbColor: colors.$primaryColor,
   $trackColor: #9e9e9e79,
   $thumbHoverDarken: 5%,
   $scrollbarWidth: 6px,
@@ -94,7 +93,7 @@ $primaryColor: #1E69DA !default;
   }
 }
 
-@mixin btnBase($bg-color: $primaryColor,
+@mixin btnBase($bg-color: colors.$primaryColor,
   $text-color: white,
   $font-size: 13px,
   $padding: 0.4rem 1rem,

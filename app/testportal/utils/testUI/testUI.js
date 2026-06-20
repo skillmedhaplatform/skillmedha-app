@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { decryptObject } from "../encryptionMiddleware";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Modal, Progress, Spin } from "antd";
+import { Maximize, Minimize, Send, Shield, Monitor } from 'lucide-react';
 import {
   clear_response,
   getSingleJobTest,
@@ -1226,373 +1227,463 @@ export default function TestUI({
     <Suspense>
       {/* Add proctoring status indicator */}
       <ProctorMessageDisplay />
-      <Modal />
       {testData && (
-        <div className={testStyles.container}>
-          {/* YOUR EXISTING HEADER - UNCHANGED */}
-          <div className={testStyles.header}>
-            <div className={testStyles.logo_div}>
-              <img
-                src={
-                  testData?.logo ||
-                  "https://res.cloudinary.com/cliqtick/image/upload/v1719655704/sysnper/0453fc71095e542039bc12d663b51f15_ob8vur.png"
-                }
-                alt="user logo"
-                className={testStyles.user_logo}
-              />
-              <h2 className={testStyles.name}>
-                {testData?.title || testData?.jobTitle}
-              </h2>
-            </div>
-            <div className={testStyles.header2Btns}>
-              <Button type="default" onClick={requestFullScreen}>
-                {fullScreen ? "Exit" : "Enter"} Full Screen
-              </Button>
-              <Button type="primary" onClick={showModal}>
-                Submit
-              </Button>
-            </div>
-
-          </div>
-
-          {/* HEADER2 — only shown after student enters fullscreen */}
-          {testStarted && fullScreen && (
-            <div className={testStyles.header2}>
-              <div className={testStyles.fullScreenBtn}>
-                {/* Sections (category) tabs — moved here from right panel */}
-                {testData?.questions?.length > 0 && (() => {
-                  const cats = [];
-                  testData.questions.forEach((q) => {
-                    const name = q.questionCategory?.[0]?.name || "Uncategorized";
-                    if (!cats.includes(name)) cats.push(name);
-                  });
-
-                  const selected = activeCategory || cats[0] || "Uncategorized";
-                  return cats.length >= 1 ? (
-                    <div className={testStyles.headerCategoryTabs}>
-                      {cats.map((cat) => {
-                        const firstIndex = testData.questions.findIndex(
-                          (q) => (q.questionCategory?.[0]?.name || "Uncategorized") === cat
-                        );
-                        const catQs = testData.questions.filter(
-                          (q) => (q.questionCategory?.[0]?.name || "Uncategorized") === cat
-                        );
-                        const answered = catQs.filter((q) => {
-                          const hasResp = responses?.value?.[q._id]?.answers?.length > 0;
-                          return q.status === "answered" || hasResp;
-                        }).length;
-                        return (
-                          <Button
-                            key={cat}
-                            ref={(el) => (categoryTabsRef.current[cat] = el)}
-                            id={`category-tab-${cat.replace(/\s+/g, '-')}`}
-                            onClick={() => {
-                              setActiveCategory(cat);
-                              if (firstIndex !== -1) setCurrentQues(firstIndex);
-                            }}
-                            type={activeCategory === cat ? "primary" : "default"}
-                          >
-                            <span className={testStyles.categoryTabName}>{cat}&nbsp;: &nbsp;</span>
-                            <span className={testStyles.categoryTabProgress}>{answered}/{catQs.length}</span>
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  ) : null;
-                })()}
-                <div className={testStyles.headerRight}>
-                  <p className={testStyles.maxScore}>
-                    Maximum Score : <span>{totalScor}</span>
-                  </p>
-                  <p>
-                    Total Test Duration :&nbsp;
-                    <strong>
-                      {duration?.val1 && !isNaN(duration.val1)
-                        ? `${String(duration.val1).padStart(2, "00")}H : ${String(
-                          isNaN(duration.val2) ? "00" : duration.val2,
-                        ).padStart(2, "00")}M`
-                        : `00 : ${String(
-                          isNaN(duration.val2) ? "00" : duration.val2,
-                        ).padStart(2, "00")}M`}
-                    </strong>
-                  </p>
-                </div>
-
+        <div className={`${testStyles.container} ${(!testStarted || !fullScreen) ? '!bg-[#f4f8fd] !p-0' : ''} flex flex-col min-h-screen`}>
+          {/* YOUR EXISTING HEADER - Hidden when test is started and in full screen */}
+          {(!testStarted || !fullScreen) && (
+            <div className={`${testStyles.header} bg-[#ffffff] px-6 py-[10px] border-b-[0.5px] border-[#ddeaf6] z-50 relative`} style={{ marginBottom: 0 }}>
+              <div className={testStyles.logo_div}>
+                <img
+                  src={
+                    testData?.logo ||
+                    "https://res.cloudinary.com/cliqtick/image/upload/v1719655704/sysnper/0453fc71095e542039bc12d663b51f15_ob8vur.png"
+                  }
+                  alt="user logo"
+                  className={testStyles.user_logo}
+                />
+                <h2 className={testStyles.name}>
+                  {testData?.title || testData?.jobTitle}
+                </h2>
               </div>
+              <div className={testStyles.header2Btns} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <Button 
+                  type="default" 
+                  onClick={requestFullScreen}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f4f8fd', color: '#4a6fa5', border: '1.5px solid #c8ddf5', fontWeight: 600, fontSize: '13px', padding: '7px 16px', borderRadius: '8px', height: 'auto' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eef3fa'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f4f8fd'}
+                >
+                  {fullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />} 
+                  {fullScreen ? "Exit Full Screen" : "Enter Full Screen"}
+                </Button>
+                <Button 
+                  type="primary" 
+                  onClick={showModal}
+                  className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '13px', padding: '8px 18px', borderRadius: '8px', height: 'auto' }}
+                >
+                  <Send className="w-4 h-4" /> Submit
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* HEADER2 REMOVED - The new playerApp topbar now handles category tabs and test duration */}
+          
+          {testData?.messageText && (
+            <div
+              style={{
+                width: "100%",
+                background: "black",
+                color: "white",
+                padding: "2px",
+              }}
+            >
+              {/* <Marquee pauseOnHover={true}>{testData?.messageText}</Marquee> */}
             </div>
           )}
 
           {/* Three states: initial prompt → fullscreen warning → exam body */}
           {!testStarted ? (
             // STATE 1: Before first fullscreen — show start prompt
-            <div className={testStyles.fullscreenPrompt}>
-              <div className={testStyles.fullscreenIcon}>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1da469" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                </svg>
+            <div className={testStyles.gateWrap}>
+              <div className={testStyles.gateCard}>
+                <div className={testStyles.gateIconWrap}>
+                  <div className={testStyles.pulseRing}></div>
+                  <div className={`${testStyles.pulseRing} ${testStyles.pulseRing2}`}></div>
+                  <div className={testStyles.gateIconRing}></div>
+                  <div className={testStyles.gateIconInner}>
+                    <Maximize size={24} color="#43a047" strokeWidth={2.5} />
+                  </div>
+                </div>
+
+                <div className={testStyles.gateTitle}>
+                  Fullscreen Required to<br /><span>Start the Exam</span>
+                </div>
+
+                <div className={testStyles.gateDesc}>
+                  For exam integrity, you must enter fullscreen mode before the test begins. The timer will only start once you are in fullscreen.
+                </div>
+
+                <div className={testStyles.gateSteps}>
+                  <div className={testStyles.gateStep}>
+                    <div className={testStyles.stepNum}>1</div>
+                    <div className={testStyles.stepText}>
+                      <b>Click the button below</b> to enter fullscreen mode and begin your exam session.
+                    </div>
+                  </div>
+                  <div className={testStyles.gateStep}>
+                    <div className={testStyles.stepNum}>2</div>
+                    <div className={testStyles.stepText}>
+                      <b>Do not exit fullscreen</b> during the test — this may be flagged by the proctoring system.
+                    </div>
+                  </div>
+                  <div className={testStyles.gateStep}>
+                    <div className={testStyles.stepNum}>3</div>
+                    <div className={testStyles.stepText}>
+                      <b>Timer starts immediately</b> once you enter fullscreen. Manage your time wisely.
+                    </div>
+                  </div>
+                </div>
+
+                <button className={testStyles.gateBtn} onClick={requestFullScreen}>
+                  <Monitor size={18} strokeWidth={2.5} />
+                  Enter Full Screen &amp; Start Test
+                </button>
+
+                <div className={testStyles.securityNote}>
+                  <Shield size={14} color="#c8ddf5" strokeWidth={2} />
+                  Secured by Honest Respondent Technology
+                </div>
               </div>
-              <h2>Fullscreen Required to Start the Exam</h2>
-              <p className={testStyles.fullscreenDesc}>
-                For exam integrity, you must enter fullscreen mode before the test begins.
-                The timer will only start once you are in fullscreen.
-              </p>
-              <Button
-                type="primary"
-                size="large"
-                onClick={requestFullScreen}
-                style={{
-                  background: 'linear-gradient(135deg, #1da469, #17875a)',
-                  border: 'none',
-                  borderRadius: '2rem',
-                  padding: '0.6rem 2.5rem',
-                  height: 'auto',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  boxShadow: '0 4px 15px rgba(29, 164, 105, 0.35)',
-                }}
-              >
-                🖥️ Enter Full Screen & Start Test
-              </Button>
+
+              {/* User Chip */}
+              {studentCreds && (
+                <div className={testStyles.userChip}>
+                  {(studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture) ? (
+                    <img 
+                      src={studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture} 
+                      alt="User Profile" 
+                      className={testStyles.userChipAv}
+                      style={{ objectFit: 'cover', padding: 0 }}
+                    />
+                  ) : (
+                    <div className={testStyles.userChipAv}>
+                      {studentCreds?.userName?.charAt(0)?.toUpperCase() || studentCreds?.FullName?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                  )}
+                  <div className={testStyles.userChipName}>
+                    {studentCreds?.userName || studentCreds?.FullName || 'User'}
+                  </div>
+                </div>
+              )}
             </div>
           ) : !fullScreen ? (
             // STATE 2: Test started but exited fullscreen — warning, timer keeps running
-            <div className={testStyles.fullscreenPrompt}>
-              <div className={testStyles.fullscreenIcon} style={{ background: 'linear-gradient(135deg, rgba(255, 57, 57, 0.15), rgba(255, 57, 57, 0.08))' }}>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff3939" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
+            <div className="flex-1 w-full flex flex-col items-center justify-center p-6">
+              <div className="bg-white rounded-3xl shadow-[0_12px_40px_rgb(0,0,0,0.08)] border border-red-50 max-w-md w-full p-12 flex flex-col items-center text-center mt-[-40px]">
+                
+                {/* Icon */}
+                <div className="w-20 h-20 rounded-full border-[2px] border-dashed border-[#ff3939] flex items-center justify-center bg-white mb-6">
+                  <div className="w-14 h-14 rounded-full bg-[#fff1f1] flex items-center justify-center">
+                    <Monitor className="w-7 h-7 text-[#ff3939]" />
+                  </div>
+                </div>
+
+                <h2 className="text-[24px] font-extrabold text-[#ff3939] mb-4 leading-tight flex items-center gap-2 justify-center">
+                  <span className="text-yellow-400">⚠️</span> You Have Exited Fullscreen
+                </h2>
+                
+                <p className="text-[15px] text-[#64748b] leading-relaxed mb-8 px-2">
+                  The exam timer is still running. Please return to fullscreen mode immediately to continue your exam.
+                </p>
+
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={requestFullScreen}
+                  className="w-auto px-8 !bg-[#ff3939] hover:!bg-[#cc2e2e] !text-white !border-none h-12 rounded-xl font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(255,57,57,0.25)] transition-all"
+                >
+                  <Maximize className="w-5 h-5" /> Return to Fullscreen
+                </Button>
               </div>
-              <h2 style={{ color: '#ff3939' }}>⚠️ You Have Exited Fullscreen</h2>
-              <p className={testStyles.fullscreenDesc}>
-                The exam timer is still running. Please return to fullscreen mode immediately to continue your exam.
-              </p>
-              <Button
-                type="primary"
-                size="large"
-                onClick={requestFullScreen}
-                style={{
-                  background: 'linear-gradient(135deg, #ff3939, #cc2e2e)',
-                  border: 'none',
-                  borderRadius: '2rem',
-                  padding: '0.6rem 2.5rem',
-                  height: 'auto',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  boxShadow: '0 4px 15px rgba(255, 57, 57, 0.35)',
-                }}
-              >
-                🖥️ Return to Fullscreen
-              </Button>
             </div>
           ) : (
-            <div className={testStyles.body}>
-              {/* LEFT SIDE - YOUR EXISTING QUESTION CONTAINER */}
-              <div className={testStyles.questionContainer}>
+            <div className={testStyles.playerApp}>
+              {/* Top bar */}
+              <div className={testStyles.topbar}>
+                <div className={testStyles.testLogo}>CS</div>
+                <div className={testStyles.testName}>{testData?.testName || "SkillMedha Test"}</div>
+                
+                {/* Restored topbarMid */}
                 {testData?.questions?.length && (() => {
-                  // Compute per-category display number
-                  const currentQuestion = testData?.questions[currentQues];
-                  const currentCatName = currentQuestion?.questionCategory?.[0]?.name || "Uncategorized";
-                  const sameCategory = testData?.questions?.filter(
-                    (q) => (q.questionCategory?.[0]?.name || "Uncategorized") === currentCatName
-                  );
-                  const categoryLocalIndex = sameCategory.findIndex((q) => q._id === currentQuestion?._id);
-                  const displayNumber = categoryLocalIndex + 1;
-                  const totalInCategory = sameCategory.length;
+                   const currentQuestion = testData?.questions[currentQues];
+                   const currentCatName = currentQuestion?.questionCategory?.[0]?.name || "Uncategorized";
+                   const sameCategory = testData?.questions?.filter(
+                     (q) => (q.questionCategory?.[0]?.name || "Uncategorized") === currentCatName
+                   );
+                   const categoryLocalIndex = sameCategory.findIndex((q) => q._id === currentQuestion?._id);
+                   const displayNumber = categoryLocalIndex + 1;
+                   const totalInCategory = sameCategory.length;
+                   const pct = (displayNumber / totalInCategory) * 100;
 
-                  return (
-                    <QuestionUI
-                      setAnswers={setAnswers}
-                      answers={responses[testData?.questions[currentQues]._id]}
-                      questionData={testData?.questions[currentQues]}
-                      currentIndex={currentQues}
-                      displayNumber={displayNumber}
-                      categoryName={currentCatName}
-                      totalInCategory={totalInCategory}
-                      clearRespFun={clearRespFun}
-                      flagCheck={flagCheck}
-                    />
-                  );
-                })()}
-
-                {/* YOUR EXISTING QUESTION FOOTER */}
-                <div className={testStyles.questionFooter}>
-                  <div className={testStyles.questionFooterLeft}>
-                    <Button
-                      type="primary"
-                      // className={testStyles.questionFooterBtn}
-                      onClick={() =>
-                        dispatch(
-                          mark_for_review({
-                            questionId: testData?.questions[currentQues]?._id,
-                          }),
-                        )
-                      }
-                    >
-                      Mark for Review
-                    </Button>
-                    <Button
-                      type="primary"
-                      // className={testStyles.questionFooterBtn}
-                      onClick={clearRespFun}
-                    >
-                      Clear Response
-                    </Button>
-                  </div>
-
-                  <div className={testStyles.questionFooterRight}>
-                    <Button
-                      type="primary"
-                      icon={
-                        <img
-                          src="https://res.cloudinary.com/cliqtick/image/upload/v1721625379/sysnper/a59ab59c0357c4d72adbea66b7496401_yzsdgy.png"
-                          width={"20px"}
-                          height={"20px"}
-                        />
-                      }
-                      // className={testStyles.flagQues}
-                      onClick={() => {
-                        setIsFlaggedOn(true);
-                        setOpenFlag(true);
-                      }}
-                    >
-                      Flag The Question
-                    </Button>
-
-                    {currentQues > 0 ? (
-                      <div className={testStyles.questionFooterRight}>
-                        <Button
-                          type="primary"
-                          // className={testStyles.questionFooterBtn}
-                          onClick={() => {
-                            const totalTimeTaken = stopTimer();
-
-                            if (
-                              !Object.keys(responses?.value)?.includes(
-                                testData?.questions[currentQues]?._id,
-                              )
-                            ) {
-                              dispatch(
-                                save_response({
-                                  questionId:
-                                    testData?.questions[currentQues]._id,
-                                  response: answers,
-                                  questionType:
-                                    testData?.questions[currentQues]
-                                      ?.questionType,
-                                }),
-                              );
-                            } else {
-                              dispatch(
-                                save_response({
-                                  questionId:
-                                    testData?.questions[currentQues]._id,
-                                  response:
-                                    responses?.value[
-                                      testData?.questions[currentQues]?._id
-                                    ]?.answers,
-                                  questionType:
-                                    testData?.questions[currentQues]
-                                      ?.questionType,
-                                }),
-                              );
-                            }
-
-                            setCurrentQues(currentQues - 1);
-                            // Auto-switch category tab if previous question is in a different category
-                            const prevCat = getCategoryForQuestion(currentQues - 1);
-                            const currCat = getCategoryForQuestion(currentQues);
-                            if (prevCat !== currCat) {
-                              setActiveCategory(prevCat);
-                            }
-                          }}
-                        >
-                          Previous Question
-                        </Button>
-                        <Button
-                          type="primary"
-                          // className={testStyles.questionFooterBtn}
-                          onClick={handleSaveQuestion}
-                        >
-                          {currentQues == testData?.questions?.length - 1
-                            ? "Finish"
-                            : "Next"}
-                        </Button>
+                   return (
+                      <div className={testStyles.topbarMid}>
+                        <div className={testStyles.catBadge}>
+                          <i className="ti ti-tag" style={{fontSize:"13px"}}></i> {currentCatName} &nbsp;·&nbsp; {displayNumber} / {totalInCategory}
+                        </div>
+                        <div className={testStyles.progressMini}>
+                          <div className={testStyles.progressMiniBar}>
+                            <div className={testStyles.progressMiniFill} style={{width: `${pct}%`}}></div>
+                          </div>
+                          <div className={testStyles.progressMiniLbl}>Question {currentQues + 1} of {testData?.questions?.length}</div>
+                        </div>
                       </div>
-                    ) : (
-                      <Button
-                        type="primary"
-                        // className={testStyles.questionFooterBtn}
-                        onClick={handleSaveQuestion}
-                      >
-                        {currentQues == testData?.questions?.length - 1
-                          ? "Finish"
-                          : "Next"}
-                      </Button>
-                    )}
+                   )
+                })()}                <div className={testStyles.topbarRight}>
+                  <div className={testStyles.scoreInfo}>
+                    <div className={testStyles.scoreLbl}>Duration</div>
+                    <div className={testStyles.scoreVal}>
+                      {hours ? String(hours).padStart(2, "0") : "00"} : {minutes ? String(minutes).padStart(2, "0") : "00"} : {seconds ? String(seconds).padStart(2, "0") : "00"}
+                    </div>
                   </div>
+                  <button className={testStyles.exitBtn} onClick={requestFullScreen}>
+                    <i className="ti ti-arrows-minimize" style={{fontSize:"13px"}}></i> Exit Full Screen
+                  </button>
+                  <button className={testStyles.submitBtn} onClick={() => setOpen(true)}>
+                    <i className="ti ti-send" style={{fontSize:"13px"}}></i> Submit
+                  </button>
                 </div>
               </div>
 
-              {/* RIGHT SIDE - YOUR EXISTING REVIEW CONTAINER WITH ENHANCED VIDEO */}
-              <div className={testStyles.reviewTestContainer}>
-                {/* YOUR EXISTING STUDENT NAME */}
-                <div className={testStyles.studentName}>
-                  <img
-                    src="https://res.cloudinary.com/cliqtick/image/upload/v1719655704/sysnper/0453fc71095e542039bc12d663b51f15_ob8vur.png"
-                    alt={userData.studentData.firstName}
-                    className={testStyles.userImg}
-                  />
-                  <p>
-                    {userData.studentData.firstName}
-                    {studentCreds?.userName?.substring(0, 10) ||
-                      " Student Name "}
-                    {userData.studentData.lastName}
-                  </p>
+              {/* Body */}
+              <div className={testStyles.playerBody}>
+                {/* Question Area */}
+                <div className={testStyles.questionArea}>
+                  {/* Category info */}
+                  {testData?.questions?.length && (() => {
+                     const currentQuestion = testData?.questions[currentQues];
+                     const currentCatName = currentQuestion?.questionCategory?.[0]?.name || "Uncategorized";
+                     const qScore = testData?.questions[currentQues]?.marks || 0;
+                     const qType = testData?.questions[currentQues]?.questionType || "Objective";
+
+                     return (
+                        <div className={testStyles.sectionHeader}>
+                          <div className={testStyles.sectionName}><i className="ti ti-folder"></i> {currentCatName}</div>
+                          <div className={testStyles.qCounter}>—&nbsp; Question <span>{currentQues + 1}</span> of {testData?.questions?.length}</div>
+                          <div className={testStyles.qTypeBadge}><i className="ti ti-list-check" style={{fontSize:"12px"}}></i> {qType}</div>
+                          <div className={testStyles.qScoreBadge}><i className="ti ti-star"></i> Score: {qScore}</div>
+                        </div>
+                     )
+                  })()}
+
+                  <div className={testStyles.qScroll}>
+                    {/* The original QuestionUI goes here */}
+                    {testData?.questions?.length && (() => {
+                      const currentQuestion = testData?.questions[currentQues];
+                      const currentCatName = currentQuestion?.questionCategory?.[0]?.name || "Uncategorized";
+                      const sameCategory = testData?.questions?.filter(
+                        (q) => (q.questionCategory?.[0]?.name || "Uncategorized") === currentCatName
+                      );
+                      const categoryLocalIndex = sameCategory.findIndex((q) => q._id === currentQuestion?._id);
+                      const displayNumber = categoryLocalIndex + 1;
+                      const totalInCategory = sameCategory.length;
+
+                      return (
+                        <QuestionUI
+                          setAnswers={setAnswers}
+                          answers={responses[testData?.questions[currentQues]._id]}
+                          questionData={testData?.questions[currentQues]}
+                          currentIndex={currentQues}
+                          displayNumber={displayNumber}
+                          categoryName={currentCatName}
+                          totalInCategory={totalInCategory}
+                          clearRespFun={clearRespFun}
+                          flagCheck={flagCheck}
+                        />
+                      );
+                    })()}
+                  </div>
+
+                  {/* Action Bar */}
+                  <div className={testStyles.actionBar}>
+                    <div className={testStyles.actionLeft}>
+                      <button className={`${testStyles.actBtn} ${testStyles.actBtnReview}`} onClick={() => dispatch(mark_for_review({ questionId: testData?.questions[currentQues]?._id }))}>
+                        <i className="ti ti-bookmark" style={{fontSize:"14px"}}></i> Mark for Review
+                      </button>
+                      <button className={`${testStyles.actBtn} ${testStyles.actBtnClear}`} onClick={clearRespFun}>
+                        <i className="ti ti-eraser" style={{fontSize:"14px"}}></i> Clear Response
+                      </button>
+                    </div>
+                    <div className={testStyles.actionRight}>
+                      <button className={`${testStyles.actBtn} ${testStyles.actBtnFlag}`} onClick={() => { setIsFlaggedOn(true); setOpenFlag(true); }}>
+                        <i className="ti ti-flag" style={{fontSize:"14px"}}></i> Flag Question
+                      </button>
+                      
+                      {currentQues > 0 ? (
+                        <button className={`${testStyles.actBtn} ${testStyles.actBtnNav}`} onClick={() => {
+                          const totalTimeTaken = stopTimer();
+
+                          if (!Object.keys(responses?.value)?.includes(testData?.questions[currentQues]?._id)) {
+                            dispatch(save_response({
+                              questionId: testData?.questions[currentQues]._id,
+                              response: answers,
+                              questionType: testData?.questions[currentQues]?.questionType,
+                            }));
+                          } else {
+                            dispatch(save_response({
+                              questionId: testData?.questions[currentQues]._id,
+                              response: responses?.value[testData?.questions[currentQues]?._id]?.answers,
+                              questionType: testData?.questions[currentQues]?.questionType,
+                            }));
+                          }
+
+                          setCurrentQues(currentQues - 1);
+                          const prevCat = getCategoryForQuestion(currentQues - 1);
+                          const currCat = getCategoryForQuestion(currentQues);
+                          if (prevCat !== currCat) {
+                            setActiveCategory(prevCat);
+                          }
+                        }}>
+                          <i className="ti ti-chevron-left" style={{fontSize:"14px"}}></i> Previous
+                        </button>
+                      ) : null}
+
+                      <button className={`${testStyles.actBtn} ${testStyles.actBtnNext}`} onClick={handleSaveQuestion}>
+                        {currentQues === (testData?.questions?.length || 0) - 1 ? "Finish" : "Next"} <i className="ti ti-chevron-right" style={{fontSize:"14px"}}></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                {/* YOUR EXISTING COUNTDOWN */}
-                <div className={testStyles.countdownContainer}>
-                  <Progress
-                    type="circle"
-                    percent={100 - percentage}
-                    size={100}
-                    strokeColor={{
-                      "0%": TimerColors["0%"],
-                      "30%": TimerColors["30%"],
-                      "50%": TimerColors["50%"],
-                      "70%": TimerColors["70%"],
-                      "100%": TimerColors["100%"],
-                    }}
-                    format={() => (
-                      <div className={testStyles.timer_div}>
-                        <span className={testStyles.timer}>
-                          {hours ? String(hours).padStart(2, "0") : "00"}
-                        </span>
-                        :
-                        <span className={testStyles.timer}>
-                          {minutes ? String(minutes).padStart(2, "0") : "00"}
-                        </span>
-                        :
-                        <span className={testStyles.timer}>
-                          {seconds ? String(seconds).padStart(2, "0") : "00"}
-                        </span>
+                {/* Right Panel */}
+                <div className={testStyles.rightPanel}>
+                  {/* User */}
+                  <div className={`${testStyles.rpUser} ${testStyles.rpSection}`}>
+                    {(studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture) ? (
+                      <img 
+                        src={studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture} 
+                        alt="User Profile" 
+                        className={testStyles.rpAv}
+                        style={{ objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div className={testStyles.rpAv}>
+                        {studentCreds?.userName?.charAt(0)?.toUpperCase() || studentCreds?.FullName?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                     )}
-                  />
-                </div>
+                    <div>
+                      <div className={testStyles.rpName}>{studentCreds?.userName || studentCreds?.FullName || 'User'}</div>
+                      <div className={testStyles.rpRole}>Test Candidate</div>
+                    </div>
+                  </div>
 
-                {/* YOUR EXISTING CAMERA STREAM */}
-                <div
-                  className={testStyles.cameraStreamContainer}
-                  id="local-video-container"
-                >
-                  <video ref={videoFaceRef} autoPlay={true} />
-                </div>
+                  {/* Timer */}
+                  <div className={`${testStyles.timerWrap} ${testStyles.rpSection}`}>
+                    <div className={testStyles.timerRingOuter}>
+                      <svg width="80" height="80" viewBox="0 0 80 80">
+                        <circle className={testStyles.timerRingBg} cx="40" cy="40" r="36" />
+                        <circle 
+                          className={testStyles.timerRingFill} 
+                          cx="40" cy="40" r="36" 
+                          style={{
+                            strokeDashoffset: 226 * (1 - ((hours * 3600 + minutes * 60 + seconds) / (testData?.timeLimit * 60 || 1))),
+                            stroke: (hours * 3600 + minutes * 60 + seconds) < 300 ? '#e53935' : (hours * 3600 + minutes * 60 + seconds) < 600 ? '#ffa726' : '#1565c0'
+                          }}
+                        />
+                      </svg>
+                      <div className={testStyles.timerCenter}>
+                        <div className={testStyles.timerVal} style={{color: (hours * 3600 + minutes * 60 + seconds) < 300 ? '#c62828' : (hours * 3600 + minutes * 60 + seconds) < 600 ? '#e65100' : '#0d47a1'}}>
+                          {minutes ? String(minutes).padStart(2, "0") : "00"}:{seconds ? String(seconds).padStart(2, "0") : "00"}
+                        </div>
+                        <div className={testStyles.timerLbl}>Remaining</div>
+                      </div>
+                    </div>
+                  </div>
 
-                {/* ALL YOUR EXISTING RIGHT SIDE CONTENT */}
-                {(() => {
+                  {/* Webcam */}
+                  <div className={testStyles.webcamBox}>
+                    <video ref={videoFaceRef} autoPlay={true} muted={true} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'10px', transform: 'scaleX(-1)'}} />
+                    <div className={testStyles.recBadge}><div className={testStyles.recDot}></div> REC</div>
+                  </div>
+
+                  {/* Status Legend */}
+                  {(() => {
+                    const questions = testData?.questions || [];
+                    const responseKeys = Object.keys(responses?.value || {});
+                    const markedIds = questionsAddedMark || [];
+
+                    let answeredCount = 0;
+                    let notAnsweredCount = 0;
+                    let markedCount = 0;
+                    let markedAndAnsweredCount = 0;
+                    let unattemptedCount = 0;
+
+                    questions.forEach((q) => {
+                      const hasResponse = responseKeys.includes(q._id) && responses?.value[q._id]?.answers?.length > 0;
+                      const isMarked = markedIds.includes(q._id);
+
+                      if (isMarked && hasResponse) markedAndAnsweredCount++;
+                      else if (isMarked) markedCount++;
+                      else if (q.status === "answered" || hasResponse) answeredCount++;
+                      else if (q.status === "not answered") notAnsweredCount++;
+                      else unattemptedCount++;
+                    });
+
+                    return (
+                      <div className={`${testStyles.statusLegend} ${testStyles.rpSection}`}>
+                        <div className={testStyles.legendTitle}>Question Status</div>
+                        <div className={testStyles.legendGrid}>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.answered}`}>{answeredCount}</div> Answered
+                          </div>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.notAnswered}`} style={{color:"var(--text2)"}}>{unattemptedCount + notAnsweredCount}</div> Not Answered
+                          </div>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.marked}`}>{markedCount}</div> Marked
+                          </div>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.markedAnswered}`}>{markedAndAnsweredCount}</div> Marked & Answered
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* Question grid */}
+                  {(() => {
+                    // Filter questions by selected category or all
+                    const selectedCategory = activeCategory || testData?.questions?.[0]?.questionCategory?.[0]?.name || "Uncategorized";
+                    const filteredQuestions = testData?.questions
+                      ?.map((q, globalIndex) => ({ ...q, globalIndex }))
+                      ?.filter((q) => {
+                        const catName = q.questionCategory?.[0]?.name || "Uncategorized";
+                        return catName === selectedCategory;
+                      });
+
+                    return (
+                      <div className={testStyles.qgridWrap}>
+                        <div className={testStyles.qgridLabel}>Jump to question</div>
+                        <div className={testStyles.qgrid}>
+                          {filteredQuestions?.map((e, localIndex) => {
+                            const ind = e.globalIndex;
+                            let cName = testStyles.qnumBtn;
+                            
+                            if (ind === currentQues) {
+                              cName += ` ${testStyles.current}`;
+                            } else if (questionsAddedMark?.includes(e._id) && (e.status === "answered" || (Object.keys(responses?.value || {}).includes(e._id) && responses?.value[e._id]?.answers?.length > 0))) {
+                              cName += ` ${testStyles.markedAnswered}`;
+                            } else if (questionsAddedMark?.includes(e._id)) {
+                              cName += ` ${testStyles.marked}`;
+                            } else if (e.status === "answered" || (Object.keys(responses?.value || {}).includes(e._id) && responses?.value[e._id]?.answers?.length > 0)) {
+                              cName += ` ${testStyles.answered}`;
+                            }
+
+                            const displayNum = localIndex + 1;
+                            return (
+                              <button
+                                key={ind}
+                                className={cName}
+                                onClick={() => setCurrentQues(ind)}
+                              >
+                                {displayNum < 10 ? "0" + displayNum : displayNum}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                </div>
+              </div>
+
+
+
+                {/* ALL YOUR EXISTING MODALS */}
+                <>
+                {open && (() => {
                   const questions = testData?.questions || [];
                   const responseKeys = Object.keys(responses?.value || {});
                   const markedIds = questionsAddedMark || [];
@@ -1615,131 +1706,40 @@ export default function TestUI({
                   });
 
                   return (
-                    <div className={testStyles.testStatusContainer}>
-                      <section>
-                        <div>
-                          <span className={testStyles.answered}>{answeredCount}</span>
-                          <p>Answered</p>
+                    <div className={`${testStyles.modalOverlay} ${testStyles.show}`}>
+                      <div className={testStyles.modalBox}>
+                        <div className={testStyles.modalIcon}><i className="ti ti-alert-triangle"></i></div>
+                        <div className={testStyles.modalTitle}>Are you sure you want to end this test?</div>
+                        <div className={testStyles.modalSub}>
+                          You still have <strong>{testData?.questions?.length - Object.keys(responses?.value || {}).length}</strong> unanswered question(s). 
+                          Once submitted, you cannot change your answers. This action cannot be undone.
                         </div>
-                        <div>
-                          <span className={testStyles.notAnswered}>{notAnsweredCount}</span>
-                          <p>Not Answered</p>
+                        <div className={testStyles.modalStatsRow}>
+                          <div className={testStyles.modalStat} style={{background: 'var(--green-bg)', color: 'var(--green-txt)'}}>
+                            <div className={testStyles.statNum}>{answeredCount}</div>
+                            <div className={testStyles.statLbl}>Answered</div>
+                          </div>
+                          <div className={testStyles.modalStat} style={{background: 'var(--red-bg)', color: 'var(--red-txt)'}}>
+                            <div className={testStyles.statNum}>{notAnsweredCount + unattemptedCount}</div>
+                            <div className={testStyles.statLbl}>Unanswered</div>
+                          </div>
+                          <div className={testStyles.modalStat} style={{background: 'var(--orange-bg)', color: 'var(--orange)'}}>
+                            <div className={testStyles.statNum}>{markedCount + markedAndAnsweredCount}</div>
+                            <div className={testStyles.statLbl}>Marked</div>
+                          </div>
                         </div>
-                      </section>
-                      <section>
-                        <div>
-                          <span className={testStyles.marked}>{markedCount}</span>
-                          <p>Marked</p>
+                        <div className={testStyles.modalBtns}>
+                          <button type="button" className={testStyles.modalCancel} onClick={handleCancel}>
+                            <i className="ti ti-x" style={{fontSize: "13px", marginRight: "4px"}}></i> No, Go Back
+                          </button>
+                          <button type="button" className={testStyles.modalConfirm} onClick={submitTest}>
+                            <i className="ti ti-check" style={{fontSize: "13px", marginRight: "4px"}}></i> Yes, End Test
+                          </button>
                         </div>
-                        <div>
-                          <span className={testStyles.markedAndAnswered}>
-                            {markedAndAnsweredCount}
-                          </span>
-                          <p>Marked & Answered</p>
-                        </div>
-                      </section>
-                      <div>
-                        <span className={testStyles.unattempted}>{unattemptedCount}</span>
-                        <p>Unattempted</p>
                       </div>
                     </div>
                   );
                 })()}
-
-                {/* Category Tabs */}
-                {(() => {
-                  // Derive unique categories preserving order from questions
-                  const categories = [];
-                  testData?.questions?.forEach((q) => {
-                    const catName = q.questionCategory?.[0]?.name || "Uncategorized";
-                    if (!categories.includes(catName)) categories.push(catName);
-                  });
-
-                  // Auto-select first category if none selected
-                  const selectedCategory = activeCategory || categories[0] || "Uncategorized";
-
-                  // Filter questions by selected category
-                  const filteredQuestions = testData?.questions
-                    ?.map((q, globalIndex) => ({ ...q, globalIndex }))
-                    ?.filter((q) => {
-                      const catName = q.questionCategory?.[0]?.name || "Uncategorized";
-                      return catName === selectedCategory;
-                    });
-
-                  return (
-                    <>
-                      {/* Question number grid - numbered 1,2,3... per category */}
-                      <div className={testStyles.questionMap}>
-                        {filteredQuestions?.map((e, localIndex) => {
-                          const ind = e.globalIndex;
-                          let cName = "unattempted";
-                          switch (e.status) {
-                            case "answered":
-                              cName = "answered";
-                              break;
-                            case "not answered":
-                              cName = "notAnswered";
-                              break;
-                            case "marked":
-                              cName = "marked";
-                              break;
-                            case "markedAndAnswered":
-                              cName = "markedAndAnswered";
-                              break;
-                            default:
-                              cName = "unattempted";
-                          }
-
-                          if (
-                            questionsAddedMark?.includes(e._id) &&
-                            e.status == "answered"
-                          )
-                            cName = "markedAndAnswered";
-
-                          const displayNum = localIndex + 1;
-                          const isActive = ind === currentQues;
-                          return (
-                            <span
-                              key={ind}
-                              className={`${testStyles[cName]} ${isActive ? `${testStyles.bgSelected}` : ""}`}
-                              onClick={() => {
-                                setCurrentQues(ind);
-                              }}
-                              ref={(el) => {
-                                // Auto-scroll active question into view
-                                if (isActive && el) {
-                                  el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                                }
-                              }}
-                            >
-                              {displayNum < 10 ? "0" + displayNum : displayNum}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </>
-                  );
-                })()}
-
-                {/* <div className={testStyles.honestResponse}>
-                    <img
-                      src="https://res.cloudinary.com/cliqtick/image/upload/v1719659846/sysnper/da347a56e3f1327b71bb2b55070e042f_fxuzyu.png"
-                      alt="honest respondent technology"
-                      className={testStyles.honestResImg}
-                    />
-                    <p>Test is protected by Honest Respondent Technology</p>
-                  </div> */}
-
-                {/* ALL YOUR EXISTING MODALS */}
-                <>
-                  <Modal
-                    title="Are you Sure You Want to End this Test"
-                    open={open}
-                    onOk={submitTest}
-                    onCancel={handleCancel}
-                    okText="Yes"
-                    cancelText="No"
-                  ></Modal>
                   <Modal
                     title="Time is Up"
                     open={openTime}
@@ -1813,7 +1813,6 @@ export default function TestUI({
                   </Modal>
                 </>
               </div>
-            </div>
           )}
         </div>
       )}
