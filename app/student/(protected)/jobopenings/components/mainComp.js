@@ -48,17 +48,22 @@ export default function MainComp() {
   const [selectedId,     setSelectedId]     = useState("");
   const [activeTab,      setActiveTab]       = useState("overview");
   const [listFilter,     setListFilter]      = useState("all");
-  const [isDeadlineOver, setIsDeadlineOver]  = useState(false);
-
-  // ── Helper: check both real + optimistic applied state ────
-  const isJobApplied = (jobId) =>
-    optimisticAppliedIds.includes(jobId) ||
-    checkIfJobApplied(jobId, student?.appliedJobs);
+  const [appliedPage,    setAppliedPage]     = useState(1);
+  const [appliedLimit,   setAppliedLimit]    = useState(10);
 
   // ── Derived applied jobs list with local filters ───────────
   const searchParam = searchParams.get("search") || "";
   const profileNameParam = searchParams.get("profileName") || "all";
   const sortParam = searchParams.get("sort") || "createdAt";
+
+  useEffect(() => {
+    setAppliedPage(1);
+  }, [searchParam, profileNameParam, listFilter]);
+
+  // ── Helper: check both real + optimistic applied state ────
+  const isJobApplied = (jobId) =>
+    optimisticAppliedIds.includes(jobId) ||
+    checkIfJobApplied(jobId, student?.appliedJobs);
 
   const appliedJobsList = (student?.appliedJobs || [])
     .map((aj) => {
@@ -103,7 +108,14 @@ export default function MainComp() {
     return new Date(b.createdAt) - new Date(a.createdAt);
   });
 
-  const filteredJobs = listFilter === "applied" ? appliedJobsList : JOBS.filter((j) => j?.status !== "pending");
+  const appliedTotalDocs = appliedJobsList.length;
+  const appliedTotalPages = Math.ceil(appliedTotalDocs / appliedLimit) || 1;
+  const paginatedAppliedJobs = appliedJobsList.slice(
+    (appliedPage - 1) * appliedLimit,
+    appliedPage * appliedLimit
+  );
+
+  const filteredJobs = listFilter === "applied" ? paginatedAppliedJobs : JOBS.filter((j) => j?.status !== "pending");
 
   const selectedJob = filteredJobs?.find((j) => j._id === selectedId) || null;
 
@@ -197,7 +209,7 @@ export default function MainComp() {
         </div>
 
         {/* ── Pagination ── */}
-        {listFilter === "all" && pagination && (
+        {((listFilter === "all" && pagination) || listFilter === "applied") && (
           <div className="flex flex-col gap-3 pt-3 border-t border-[#e2e8f0] bg-white">
             {/* Top row: items per page and showing info */}
             <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
@@ -205,12 +217,17 @@ export default function MainComp() {
                 <span>Show:</span>
                 <Select
                   size="small"
-                  value={pagination.limit}
+                  value={listFilter === "all" ? pagination.limit : appliedLimit}
                   onChange={(val) => {
-                    const params = new URLSearchParams(searchParams);
-                    params.set("limit", String(val));
-                    params.set("page", "1");
-                    router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                    if (listFilter === "all") {
+                      const params = new URLSearchParams(searchParams);
+                      params.set("limit", String(val));
+                      params.set("page", "1");
+                      router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                    } else {
+                      setAppliedLimit(val);
+                      setAppliedPage(1);
+                    }
                   }}
                   options={[
                     { value: 10, label: "10" },
@@ -222,8 +239,12 @@ export default function MainComp() {
                 />
               </div>
               <span>
-                Showing {Math.min(pagination.totalDocs, (pagination.currentPage - 1) * pagination.limit + 1)}–
-                {Math.min(pagination.totalDocs, pagination.currentPage * pagination.limit)} of {pagination.totalDocs}
+                Showing {listFilter === "all"
+                  ? (pagination.totalDocs === 0 ? 0 : Math.min(pagination.totalDocs, (pagination.currentPage - 1) * pagination.limit + 1))
+                  : (appliedTotalDocs === 0 ? 0 : Math.min(appliedTotalDocs, (appliedPage - 1) * appliedLimit + 1))}–
+                {listFilter === "all"
+                  ? Math.min(pagination.totalDocs, pagination.currentPage * pagination.limit)
+                  : Math.min(appliedTotalDocs, appliedPage * appliedLimit)} of {listFilter === "all" ? pagination.totalDocs : appliedTotalDocs}
               </span>
             </div>
 
@@ -231,28 +252,35 @@ export default function MainComp() {
             <div className="flex items-center justify-center gap-1">
               <Button
                 size="small"
-                disabled={pagination.currentPage === 1}
+                disabled={listFilter === "all" ? pagination.currentPage === 1 : appliedPage === 1}
                 onClick={() => {
-                  const params = new URLSearchParams(searchParams);
-                  params.set("page", String(pagination.currentPage - 1));
-                  router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                  if (listFilter === "all") {
+                    const params = new URLSearchParams(searchParams);
+                    params.set("page", String(pagination.currentPage - 1));
+                    router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                  } else {
+                    setAppliedPage(p => Math.max(1, p - 1));
+                  }
                 }}
               >
                 ‹
               </Button>
 
-              {Array.from({ length: pagination.totalPages }, (_, i) => {
+              {Array.from({ length: listFilter === "all" ? pagination.totalPages : appliedTotalPages }, (_, i) => {
                 const pageNum = i + 1;
+                const totalPgs = listFilter === "all" ? pagination.totalPages : appliedTotalPages;
+                const currPage = listFilter === "all" ? pagination.currentPage : appliedPage;
+
                 // Limit showing max 5 pages around current page
                 if (
-                  pagination.totalPages > 5 &&
-                  Math.abs(pagination.currentPage - pageNum) > 2 &&
+                  totalPgs > 5 &&
+                  Math.abs(currPage - pageNum) > 2 &&
                   pageNum !== 1 &&
-                  pageNum !== pagination.totalPages
+                  pageNum !== totalPgs
                 ) {
                   if (
-                    (pageNum === 2 && pagination.currentPage > 4) ||
-                    (pageNum === pagination.totalPages - 1 && pagination.currentPage < pagination.totalPages - 3)
+                    (pageNum === 2 && currPage > 4) ||
+                    (pageNum === totalPgs - 1 && currPage < totalPgs - 3)
                   ) {
                     return <span key={pageNum} className="text-gray-400 px-0.5">...</span>;
                   }
@@ -263,16 +291,20 @@ export default function MainComp() {
                   <Button
                     key={pageNum}
                     size="small"
-                    type={pagination.currentPage === pageNum ? "primary" : "default"}
+                    type={currPage === pageNum ? "primary" : "default"}
                     className={
-                      pagination.currentPage === pageNum
+                      currPage === pageNum
                         ? "!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white"
                         : ""
                     }
                     onClick={() => {
-                      const params = new URLSearchParams(searchParams);
-                      params.set("page", String(pageNum));
-                      router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                      if (listFilter === "all") {
+                        const params = new URLSearchParams(searchParams);
+                        params.set("page", String(pageNum));
+                        router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                      } else {
+                        setAppliedPage(pageNum);
+                      }
                     }}
                   >
                     {pageNum}
@@ -282,11 +314,17 @@ export default function MainComp() {
 
               <Button
                 size="small"
-                disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
+                disabled={listFilter === "all" 
+                  ? pagination.currentPage === pagination.totalPages || pagination.totalPages === 0
+                  : appliedPage === appliedTotalPages || appliedTotalPages === 0}
                 onClick={() => {
-                  const params = new URLSearchParams(searchParams);
-                  params.set("page", String(pagination.currentPage + 1));
-                  router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                  if (listFilter === "all") {
+                    const params = new URLSearchParams(searchParams);
+                    params.set("page", String(pagination.currentPage + 1));
+                    router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                  } else {
+                    setAppliedPage(p => Math.min(appliedTotalPages, p + 1));
+                  }
                 }}
               >
                 ›
@@ -303,13 +341,12 @@ export default function MainComp() {
         ) : (
           <>
             <JobDetailsHeader
+              key={selectedJob?._id}
               job={selectedJob}
               student={student}
-              isApplied={isJobApplied(selectedJob?._id)}  // ← optimistic-aware
-              isDeadlineOver={isDeadlineOver}
-              onDeadlineOver={setIsDeadlineOver}
+              isApplied={isJobApplied(selectedJob?._id)}
               onApply={handleApply}
-              applyPending={isPending}                     // ← transition pending
+              applyPending={isPending}
             />
             <JobDetailsTabs
               job={selectedJob}

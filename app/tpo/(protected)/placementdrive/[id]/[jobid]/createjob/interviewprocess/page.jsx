@@ -44,6 +44,7 @@ export default function InterviewPage() {
     if (ONEJOB?.data?.interviewRounds?.length > 0) {
       const enrichedRounds = ONEJOB.data.interviewRounds.map((round) => ({
         ...round,
+        type: round.type ? round.type.trim().charAt(0).toUpperCase() + round.type.trim().slice(1).toLowerCase() : "",
         id: generateId(),
         isEditable: false
       }));
@@ -158,7 +159,7 @@ export default function InterviewPage() {
                 <Select
                   placeholder="Select Round Type"
                   style={{ width: "50%" }}
-                  value={round.type}
+                  value={round.type || null}
                   suffixIcon={<FaChevronDown />}
                   onChange={(value) =>
                     handleRoundChange(round.id, "type", value)
