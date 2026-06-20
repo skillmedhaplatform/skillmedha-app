@@ -299,6 +299,19 @@ export default function BasicDetailsPage() {
       message.info("No changes to update.");
       return;
     }
+
+    // Auto-update status if endDate changes
+    if (updatedFields.endDate) {
+      const newEndDate = new Date(updatedFields.endDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Start of today
+
+      if (newEndDate >= today && ONEJOB?.data?.status === 'inactive') {
+        updatedFields.status = 'active';
+      } else if (newEndDate < today && ONEJOB?.data?.status === 'active') {
+        updatedFields.status = 'inactive';
+      }
+    }
     // console.log(updatedFields);
 
     await dispatch(UpdateJob({ dispatch, jobid, payload: updatedFields }));

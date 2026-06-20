@@ -662,20 +662,7 @@ export default function DashboardPage() {
                             {hasLastAccessed ? "Continue" : "Start Learning"}
                           </Button>
                         </div>
-                        <Button
-                          onClick={handleNavigate}
-                          className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
-                          style={{
-                            fontWeight: '600',
-                            borderRadius: '8px',
-                            padding: '4px 16px',
-                            height: '32px'
-                          }}
-                        >
-                          {hasLastAccessed ? "Continue" : "Start Learning"}
-                        </Button>
                       </div>
-                    </div>
                   );
                 })}
               </div>

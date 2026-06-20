@@ -235,6 +235,16 @@ export default function BasicDetailsPage() {
       return;
     }
 
+    // Auto-update status if endDate changes
+    if (updatedFields.endDate) {
+      const isFutureOrToday = dayjs(updatedFields.endDate).isAfter(dayjs().subtract(1, 'day'));
+      if (isFutureOrToday && ONEJOB?.data?.status === 'inactive') {
+        updatedFields.status = 'active';
+      } else if (!isFutureOrToday && ONEJOB?.data?.status === 'active') {
+        updatedFields.status = 'inactive';
+      }
+    }
+
     const { payload } = dispatch(
       UpdateJob({
         dispatch,
