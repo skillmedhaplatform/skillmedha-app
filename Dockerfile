@@ -1,4 +1,4 @@
-FROM node:current-alpine3.22
+FROM node:22-alpine
 
 WORKDIR /usr/src/app
 
@@ -9,6 +9,8 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 COPY .env.prod .env.production
+
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 RUN npm run build
 

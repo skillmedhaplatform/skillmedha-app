@@ -36,9 +36,7 @@ const BusinessSlice = createSlice({
 });
 
 export const fetchBusiness = createAsyncThunk("business/fetch", async (arg) => {
-  const { data } = await axios.post(
-    gqlUrl,
-    // "http://localhost:1111",
+  const { data } = await axios.post(gqlUrl,
     {
       variables: { businessId: arg.businessId },
       query: getBusinessQuery,
