@@ -1,15 +1,7 @@
 // For App Router (app/api/chat/route.js)
 import OpenAI from "openai";
 
-const orgId = process.env.orgId;
-const projId = process.env.projId;
-const apiKey = process.env.apiKey;
-
-const openai = new OpenAI({
-  apiKey: apiKey,
-  organization: orgId,
-  project: projId,
-});
+export const dynamic = "force-dynamic";
 
 // const EDUCATION_SYSTEM_PROMPT = {
 //   role: "system",
@@ -44,6 +36,12 @@ const openai = new OpenAI({
 export async function POST(req) {
   try {
     const { messages } = await req.json();
+
+    const openai = new OpenAI({
+      apiKey: process.env.apiKey,
+      organization: process.env.orgId,
+      project: process.env.projId,
+    });
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",

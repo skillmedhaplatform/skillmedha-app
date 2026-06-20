@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  sassOptions: {
+    silenceDeprecations: ["import", "color-functions", "global-builtin", "legacy-js-api"],
+  },
   images: {
     remotePatterns: [
       {

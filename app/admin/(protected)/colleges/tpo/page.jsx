@@ -244,8 +244,6 @@ function Page() {
         <Button
           style={{ width: "100%", marginTop: "16px" }}
           onClick={() => {
-            console.log(11111);
-
             dispatch(DeleteTPO({ tpoId: tpo?.globalId, orgId: tpo?.orgId }));
           }}
         >

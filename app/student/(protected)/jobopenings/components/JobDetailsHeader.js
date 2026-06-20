@@ -15,13 +15,24 @@ export default function JobDetailsHeader({
   job,
   student,
   isApplied,
-  isDeadlineOver,
-  onDeadlineOver,
   onApply,
   applyPending,
 }) {
+  const [timerExpired, setTimerExpired] = React.useState(false);
+
   const { eligible, reason } = getEligibilityStatus(student, job);
   const firstLetter = job?.companyName ? job.companyName.charAt(0).toUpperCase() : "C";
+
+  // Check if deadline is already over based on job.endDate
+  let isDeadlinePassed = false;
+  if (job?.endDate) {
+    const endTime = new Date(job.endDate).getTime();
+    if (!isNaN(endTime)) {
+      isDeadlinePassed = endTime <= new Date().getTime();
+    }
+  }
+
+  const isDeadlineOver = isDeadlinePassed || timerExpired;
 
   const renderApplyButton = () => {
     if (isApplied) {
@@ -97,7 +108,7 @@ export default function JobDetailsHeader({
       <div className="flex items-center justify-end gap-4">
         {!isDeadlineOver && job?.status !== "closed" && (
           <div className="hidden md:block">
-            <CountdownTimer jobEndDate={job?.endDate} onDeadlineOver={onDeadlineOver} />
+            <CountdownTimer jobEndDate={job?.endDate} onDeadlineOver={setTimerExpired} />
           </div>
         )}
         {renderApplyButton()}
