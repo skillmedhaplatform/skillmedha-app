@@ -10,7 +10,7 @@ export const getDashboardStats = createAsyncThunk(
     try {
       const token = getLstorage("token");
       const { data } = await axios.get(
-        `${restUrl}/tpo/dashboard/stats`,
+        `${restUrl}/api/dashboard/stats`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       return data;

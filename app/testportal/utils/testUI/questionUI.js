@@ -351,6 +351,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Editor } from "@monaco-editor/react";
 
 import queStyles from "./question.module.scss";
+import testStyles from "./testUI.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { startTimer } from "./timer";
 import { save_response } from "@/app/testportal/redux/slices/testSlice";
@@ -566,28 +567,6 @@ export default function QuestionUI({
   if (questionData?.questionType === "Coding Question") {
     return (
       <div className={queStyles.container}>
-        <div className={queStyles.header}>
-          {categoryName && (
-            <p className={queStyles.categoryBreadcrumb}>
-              {categoryName} — Question {displayNumber || (currentIndex + 1)} of {totalInCategory}
-            </p>
-          )}
-          <p className={queStyles.type}>
-            <strong>
-              {questionData?.compType && questionData?.compType + " >"}
-            </strong>{" "}
-            Question Type : {questionData?.questionType}
-          </p>
-          <div className={queStyles.scoreContainer}>
-            {questionData?.scoreSettings?.pointsForCorrectAns && (
-              <span className={queStyles.queScore}>
-                Question Score:{" "}
-                {questionData?.scoreSettings?.pointsForCorrectAns}
-              </span>
-            )}
-          </div>
-        </div>
-
         <div className={queStyles.bodyCon}>
           {/* Render the full CodingQuestion component */}
           {/* <CodingQuestion
@@ -605,182 +584,123 @@ export default function QuestionUI({
 
   // Original QuestionUI for other question types
   return (
-    <div className={queStyles.container}>
-      <div className={queStyles.header}>
-        {categoryName && (
-          <p className={queStyles.categoryBreadcrumb}>
-            {categoryName} — Question {displayNumber || (currentIndex + 1)} of {totalInCategory}
-          </p>
-        )}
-        <p className={queStyles.type}>
-          <strong>
-            {questionData?.compType && questionData?.compType + " >"}
-          </strong>{" "}
-          Question Type : {questionData?.questionType}
-        </p>
-        <div className={queStyles.scoreContainer}>
-          {questionData?.scoreSettings?.pointsForCorrectAns && (
-            <span className={queStyles.queScore}>
-              Question Score: {questionData?.scoreSettings?.pointsForCorrectAns}
-            </span>
-          )}
-          &nbsp;&nbsp;
-          {questionData?.scoreSettings?.PointsForEachCorrectAnswer && (
-            <span className={queStyles.partialScore}>
-              Partial Score:{" "}
-              {questionData?.scoreSettings?.PointsForEachCorrectAnswer}
-            </span>
-          )}
-          &nbsp;&nbsp;
-          {questionData?.scoreSettings?.bonusPointsForAllCorrect && (
-            <span className={queStyles.bonusScore}>
-              Bonus Points:{" "}
-              {questionData?.scoreSettings?.bonusPointsForAllCorrect}
-            </span>
-          )}
-          &nbsp;&nbsp;
-          {questionData?.scoreSettings?.pointsForEachIncorrectAns && (
-            <span className={queStyles.negScore}>
-              Negative Score:{" "}
-              {questionData?.scoreSettings?.pointsForEachIncorrectAns}
-            </span>
-          )}
+    <div className={testStyles.questionCard}>
+      {/* Comprehension / resource block */}
+      {questionData?.compText && (
+        <div className={queStyles.comprehension_div}>
+          <div
+            className={queStyles.questionText}
+            dangerouslySetInnerHTML={{
+              __html: parseIfJson(questionData?.compText),
+            }}
+          ></div>
         </div>
+      )}
+      {questionData?.resource?.url && (
+        <div className={queStyles.comprehension_div}>
+          <video
+            className={queStyles.video_cont}
+            src={questionData?.resource?.url}
+            controls
+          />
+        </div>
+      )}
+
+      {/* Flag icon (if any) */}
+      <div className={queStyles.flagImg} style={{ position: 'absolute', top: 10, right: 10 }}>
+        {isFlagged.find((isPresent) => isPresent == questionData?._id) ? (
+          <img
+            src="https://res.cloudinary.com/cliqtick/image/upload/v1721625379/sysnper/a59ab59c0357c4d72adbea66b7496401_yzsdgy.png"
+            width="10px"
+          />
+        ) : null}
       </div>
 
-      <div className={queStyles.bodyCon}>
-        <div className={queStyles.quesContainer_main_cont}>
-          <div className={queStyles.flagImg}>
-            {isFlagged.find((isPresent) => isPresent == questionData?._id) ? (
-              <img
-                src="https://res.cloudinary.com/cliqtick/image/upload/v1721625379/sysnper/a59ab59c0357c4d72adbea66b7496401_yzsdgy.png"
-                width="10px"
-              />
-            ) : null}
-          </div>
+      <div className={testStyles.qNumRow}>
+        <div className={testStyles.qNum} id="qNum">{displayNumber || (currentIndex + 1)}</div>
+        <div
+          className={testStyles.qText}
+          id="qText"
+          dangerouslySetInnerHTML={{
+            __html: parseIfJson(
+              questionData?.questionContent?.question
+            ),
+          }}
+        ></div>
+      </div>
 
-          <div className={queStyles.quesContainerMain}>
-            <div className={queStyles.quesContainer}>
-              {questionData?.compText && (
-                <div className={queStyles.comprehension_div}>
-                  {questionData?.compText && (
-                    <div
-                      className={queStyles.questionText}
-                      dangerouslySetInnerHTML={{
-                        __html: parseIfJson(questionData?.compText),
-                      }}
-                    ></div>
-                  )}
-                </div>
-              )}
-              {questionData?.resource && (
-                <div className={queStyles.comprehension_div}>
-                  {questionData?.resource?.url && (
-                    <video
-                      className={queStyles.video_cont}
-                      src={questionData?.resource?.url}
-                      controls
-                    />
-                  )}
-                </div>
-              )}
+      {questionData?.resources?.type === "video" && (
+        <video
+          src={questionData.resources.file}
+          controls
+          className={queStyles.videoElement}
+          controlsList="noplaybackrate nodownload nofullscreen"
+          disablePictureInPicture={true}
+        />
+      )}
 
-              <div className={queStyles.question_div}>
-                <span className={queStyles.index_span}>{displayNumber || (currentIndex + 1)}</span>
-                <div
-                  className={queStyles.questionText}
-                  dangerouslySetInnerHTML={{
-                    __html: parseIfJson(
-                      questionData?.questionContent?.question
-                    ),
-                  }}
-                ></div>
-              </div>
+      {questionData?.resources?.type === "audio" && (
+        <audio
+          src={questionData.resources.file}
+          controls
+          className={queStyles.player}
+          controlsList="noplaybackrate nodownload nofullscreen"
+        />
+      )}
+
+      <div className={testStyles.options} id="optionsList">
+        {questionData?.questionContent?.options?.map((opt, i) => {
+          const key = _.capitalize(Object.keys(opt)[0]);
+
+          let cls = "";
+
+          if (
+            ans?.find((e) => e == key) &&
+            currResponse?.find((e) => e == key)
+          )
+            cls = "selected";
+          return (
+            <div
+              key={i}
+              onClick={(e) => selectAns(cls == "selected", key)}
+              className={`${testStyles.option} ${cls === "selected" ? testStyles.selected : ""}`}
+            >
+              <div className={testStyles.optRadio}></div>
+              <div className={testStyles.optLetter}>{String.fromCharCode(65 + i)}</div>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: parseIfJson(opt[_.lowerFirst(key)]),
+                }}
+                className={testStyles.optText}
+              ></div>
             </div>
-            {questionData?.resources?.type === "video" && (
-              <video
-                src={questionData.resources.file}
-                controls
-                className={queStyles.videoElement}
-                controlsList="noplaybackrate nodownload nofullscreen"
-                disablePictureInPicture={true}
-              />
-            )}
+          );
+        })}
 
-            {questionData?.resources?.type === "audio" && (
-              <audio
-                src={questionData.resources.file}
-                controls
-                className={queStyles.player}
-                controlsList="noplaybackrate nodownload nofullscreen"
-              />
-            )}
-          </div>
-        </div>
+        {(questionData?.questionType == "True - False" ||
+          questionData?.questionType == "True/False") &&
+          ["True", "False"]?.map((op, i) => {
+            const key = op;
 
-        <div className={queStyles.optionsContaiuer}>
-          {questionData?.questionContent?.options?.map((opt, i) => {
-            const key = _.capitalize(Object.keys(opt)[0]);
-
-            let cls = "unchecked";
+            let cls = "";
 
             if (
               ans?.find((e) => e == key) &&
               currResponse?.find((e) => e == key)
             )
-              cls = "checked";
+              cls = "selected";
             return (
-              <label
+              <div
                 key={i}
-                onClick={(e) => selectAns(cls == "checked", key)}
-                className={queStyles.optionLable}
+                onClick={(e) => selectAns(cls == "selected", key)}
+                className={`${testStyles.option} ${cls === "selected" ? testStyles.selected : ""}`}
               >
-                <span
-                  className={`${queStyles.optionsInput} ${queStyles[cls]} ${questionData?.questionType === "Multiple Choice"
-                    ? queStyles.borderRadius
-                    : ""
-                    }`}
-                />
-                <span>
-                  <span className={queStyles.optionsOrderChar}>
-                    {String.fromCharCode(65 + i)}{" "}
-                  </span>
-                </span>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: parseIfJson(opt[_.lowerFirst(key)]),
-                  }}
-                  className={queStyles.optionValue}
-                ></span>
-              </label>
+                <div className={testStyles.optRadio}></div>
+                <div className={testStyles.optLetter}>{String.fromCharCode(65 + i)}</div>
+                <div className={testStyles.optText}>{op}</div>
+              </div>
             );
           })}
-
-          {(questionData?.questionType == "True - False" ||
-            questionData?.questionType == "True/False") &&
-            ["True", "False"]?.map((op, i) => {
-              const key = op;
-
-              let cls = "unchecked";
-
-              if (
-                ans?.find((e) => e == key) &&
-                currResponse?.find((e) => e == key)
-              )
-                cls = "checked";
-              return (
-                <label
-                  key={i}
-                  onClick={(e) => selectAns(cls == "checked", key)}
-                  className={queStyles.optionLable}
-                >
-                  <span
-                    className={`${queStyles.optionsInput} ${queStyles[cls]}`}
-                  />
-                  <span className={queStyles.optionValue}>{op}</span>
-                </label>
-              );
-            })}
 
           {/* Fill in the Blank Input */}
           {questionData?.questionType === "Fill in the Blanks" && (
@@ -811,7 +731,6 @@ export default function QuestionUI({
                 </legend>
               </span>
             )}
-        </div>
       </div>
     </div>
   );

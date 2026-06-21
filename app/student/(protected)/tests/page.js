@@ -11,7 +11,7 @@ import {
   fetchTestData,
 } from "@/redux/slices/assessmentsSlice/testSlice";
 
-import { Button, message, Modal, notification, Spin } from "antd";
+import { Button, message, Modal, notification, Spin, Pagination } from "antd";
 import { getLstorage, getSstorage } from "@/universalUtils/windowMW";
 import { formVals } from "@/redux/slices/assessmentsSlice/userForm";
 import CardSkeleton from "./reusable_comp/cardSkeleton";
@@ -28,6 +28,7 @@ export default function Tests() {
   const [showPopup, setShowPopup] = useState(false);
   const [lastRespondents, setLastRespondents] = useState("");
   const [codeIn, setCodeIn] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
 
   const nav = useRouter();
   const searchParams = useSearchParams();
@@ -153,13 +154,68 @@ export default function Tests() {
     );
   };
 
-  return (
-    <div className="relative flex flex-col gap-2">
-      <StudentPageHeader section="Assessment" title="Tests" />
-      <div className="text-[#24A058] text-[1.8rem] font-extrabold w-full bg-white py-2 sticky top-0 z-[1]">My Tests</div>
+  // Filter tests based on tab
+  const filteredTests = allTests?.filter((test) => {
+    const status = test?.status?.toLowerCase();
+    if (activeTab === "all") return true;
+    if (activeTab === "active") return status === "active";
+    if (activeTab === "expired") return status === "expired" || status === "completed";
+    return true;
+  });
 
-      <section className="w-full overflow-y-hidden [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-[#f0f0f0] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-[rgba(255,255,255,0.5)]">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-[0.7rem] overflow-hidden 2xl:grid-cols-[repeat(auto-fill,minmax(17rem,1fr))]">
+  const activeCount = allTests?.filter(t => t?.status?.toLowerCase() === "active").length || 0;
+  const expiredCount = allTests?.filter(t => t?.status?.toLowerCase() === "expired" || t?.status?.toLowerCase() === "completed").length || 0;
+
+  const bannerStats = (
+    <div className="flex items-center gap-8 pr-4">
+      <div className="flex flex-col items-center">
+        <span className="text-[32px] font-extrabold leading-none text-white">{allTests?.length || 0}</span>
+        <span className="text-[14px] text-white/70 font-semibold tracking-wide">Total tests</span>
+      </div>
+      <div className="w-[1px] h-12 bg-white/20"></div>
+      <div className="flex flex-col items-center">
+        <span className="text-[32px] font-extrabold leading-none text-white">{activeCount}</span>
+        <span className="text-[14px] text-white/70 font-semibold tracking-wide">Active</span>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="relative flex flex-col bg-white h-screen overflow-hidden">
+      <StudentPageHeader title="Tests" rightSlot={bannerStats} />
+
+      {/* Tabs Section */}
+      <div className="w-full bg-[#F1F5F9] flex items-center border-b border-gray-200 sticky top-0 z-[1]">
+        <div className="flex gap-8 px-6 pt-2">
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`pb-3 text-[14px] font-bold transition-all border-b-[3px] ${
+              activeTab === "all" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
+            }`}
+          >
+            All {allTests?.length || 0}
+          </button>
+          <button
+            onClick={() => setActiveTab("active")}
+            className={`pb-3 text-[14px] font-bold transition-all border-b-[3px] ${
+              activeTab === "active" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
+            }`}
+          >
+            Active {activeCount}
+          </button>
+          <button
+            onClick={() => setActiveTab("expired")}
+            className={`pb-3 text-[14px] font-bold transition-all border-b-[3px] ${
+              activeTab === "expired" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
+            }`}
+          >
+            Expired {expiredCount}
+          </button>
+        </div>
+      </div>
+
+      <section className="w-full flex-1 overflow-y-auto px-4 mt-4 pb-12 [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#e2e8f0] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-hidden">
           {loading ? (
             <>
               <CardSkeleton />
@@ -168,10 +224,10 @@ export default function Tests() {
             </>
           ) : allTests?.length === 0 ? (
             <div style={{ textAlign: "center", padding: "60px 0", width: "100%", color: "#888" }}>
-              <p style={{ fontSize: "16px" }}>No tests available for you right now.</p>
+              <p style={{ fontSize: "16px" }}>No tests available in this category right now.</p>
             </div>
           ) : (
-            allTests?.map((e, index) => {
+            filteredTests?.map((e, index) => {
               return (
                 <div
                   key={e._id}
@@ -192,25 +248,22 @@ export default function Tests() {
           )}
         </div>
 
-        {/* Load More Button */}
-        {!loading && pageinfo?.hasNextPage && (
-          <div className="flex justify-center mt-8">
-            <Button
-              onClick={fetchMore}
-              loading={loadingMore}
-              type="primary"
-              size="large"
-              style={{ minWidth: 140 }}
-            >
-              {loadingMore ? "Loading..." : "Load More"}
-            </Button>
+        {/* Pagination Controls */}
+        {!loading && filteredTests?.length > 8 && (
+          <div className="flex justify-center mt-8 pb-4">
+            <Pagination 
+              defaultCurrent={1} 
+              total={filteredTests.length} 
+              pageSize={8} 
+              showSizeChanger={false} 
+            />
           </div>
         )}
 
         {/* End of list message */}
-        {!loading && allTests?.length > 0 && !pageinfo?.hasNextPage && (
+        {!loading && filteredTests?.length > 0 && !pageinfo?.hasNextPage && (
           <div style={{ textAlign: "center", padding: "20px 0", color: "#aaa", fontSize: "13px" }}>
-            You&apos;ve seen all {allTests.length} test{allTests.length !== 1 ? "s" : ""}
+            You&apos;ve seen all {filteredTests.length} test{filteredTests.length !== 1 ? "s" : ""}
           </div>
         )}
       </section>

@@ -17,7 +17,7 @@ const ResultSkeleton = () => {
           <div
             style={{ display: "flex", flexDirection: "column", gap: "20px" }}
           >
-            <Card bordered={false} style={{ borderRadius: "10px" }}>
+            <Card variant="borderless" style={{ borderRadius: "10px" }}>
               <Skeleton.Input
                 active
                 size="small"
@@ -34,7 +34,7 @@ const ResultSkeleton = () => {
               />
             </Card>
 
-            <Card bordered={false} style={{ borderRadius: "10px" }}>
+            <Card variant="borderless" style={{ borderRadius: "10px" }}>
               <Skeleton.Input
                 active
                 size="small"
@@ -57,7 +57,7 @@ const ResultSkeleton = () => {
         </Col>
         <Col span={12}>
           <Card
-            bordered={false}
+            variant="borderless"
             style={{
               borderRadius: "10px",
               height: "90%",
