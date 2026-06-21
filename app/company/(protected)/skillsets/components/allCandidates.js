@@ -65,7 +65,6 @@ export default function AllCandidates() {
     async (page = 1, isNewFilter = false) => {
       // Prevent multiple simultaneous requests
       if (isRequestInProgress.current) {
-        console.log("Request already in progress, skipping...");
         return;
       }
 

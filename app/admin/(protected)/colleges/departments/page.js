@@ -143,7 +143,6 @@ function Page() {
     (searchQuery ? 1 : 0) + (sortBy !== "name-asc" ? 1 : 0);
 
   const handleDepartmentClick = (department) => {
-    console.log(department);
     router.push(
       `/admin/colleges/departments/students?orgId=${encryptedOrgId}&orgName=${encryptedOrgName}&deptId=${encrypt(
         department?._id

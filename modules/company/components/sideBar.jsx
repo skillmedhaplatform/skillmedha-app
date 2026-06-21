@@ -58,7 +58,6 @@ const SideBar = ({ activeView, setView }) => {
 
     const pathToCheck = activeView || pathName;
     const currentPath = pathToCheck?.slice(1).toLowerCase();
-    console.log(pathToCheck, orgDetails);
 
     // Check if user is trying to access job assessments
     if (currentPath === "jobassessments") {

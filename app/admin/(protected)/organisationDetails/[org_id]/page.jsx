@@ -1602,8 +1602,7 @@ function DashboardPage() {
   if (loading) {
     return <DashboardSkeleton />;
   }
-  console.log(stats);
-
+  
   // Prepare stats cards based on organization type
   const statsCards = isCompany
     ? [

@@ -220,9 +220,6 @@ const Page = () => {
       router.push(baseUrl);
       return;
     }
-
-    // console.log("Dispatching only time object:", { time: timeData });
-
     try {
       // Send only the time object with aId
       await dispatch(updateJobAssessment({ time: timeData, aId }));

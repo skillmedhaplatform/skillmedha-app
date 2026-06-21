@@ -99,7 +99,6 @@ export default function StudentProfileForm() {
     }
 
     setFormData((prev) => ({ ...prev, [name]: processedValue }));
-    console.log(name, value);
   };
 
   const handleNestedChange = (parentName, itemName, fieldName, value) => {
@@ -173,7 +172,6 @@ export default function StudentProfileForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // console.log(formData);
     if (!formData.gender || formData.gender.trim() === "") {
       message.error("Please select your gender.");
       return;
@@ -187,9 +185,6 @@ export default function StudentProfileForm() {
     }
 
     const updates = getUpdatedFields(initialVal, formData);
-
-    // console.log("Submitted updates:", updates);
-
     if (!studentDetails || !studentDetails._id) {
       message.error("Student ID missing, can't update.");
       return;

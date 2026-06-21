@@ -858,9 +858,6 @@ const ProctorDashboard = ({ token, companyOrg }) => {
   };
   // Get approved students with session data
   const getApprovedStudentsWithSessions = () => {
-    console.log("====================================");
-    console.log(appliedStudents);
-    console.log("====================================");
     const approvedStudents = appliedStudents?.filter((s) =>
       jobData?.data?.approvedStudents?.includes(s._id)
     );

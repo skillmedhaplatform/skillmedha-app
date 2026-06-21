@@ -654,7 +654,6 @@ const Page = () => {
       },
       ...visibility,
     };
-    console.log(courseData);
 
     if (params.createInternship?.split("/")?.join("") !== "newCourse") {
       dispatch(

@@ -62,8 +62,6 @@ function Dropzone(props) {
         "video/*": [],
       },
       onDrop: (acceptedFiles) => {
-        console.log(acceptedFiles);
-
         setFiles(
           acceptedFiles.map((file) =>
             Object.assign(file, {

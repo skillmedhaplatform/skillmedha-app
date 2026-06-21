@@ -108,7 +108,6 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
     try {
       // Wait for image to be loaded and converted
       if (!isImageLoaded) {
-        console.log("Waiting for image to load...");
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 

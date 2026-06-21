@@ -708,8 +708,6 @@ const Page = () => {
       time: updates.time,
     };
 
-    console.log("Update payload:", updateVals);
-
     // Dispatch update action
     dispatch(updateTest({ id: selectedId, updates: updateVals })).then(
       (resp) => {

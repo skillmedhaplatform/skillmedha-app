@@ -149,7 +149,6 @@ const Page = () => {
       };
 
       if (singleJobAssessment && singleJobAssessment?._id) {
-        // console.log(payload, aId, ONEJOB);
         await dispatch(updateJobAssessment({ ...payload, aId, dispatch }));
         // message.success("Test configuration saved successfully!");
       } else {

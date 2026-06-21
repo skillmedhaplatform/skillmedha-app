@@ -81,7 +81,6 @@ export const createZoomMeeting = createAsyncThunk(
       return data.meeting;
     } catch (error) {
       message.error(error?.response?.data?.msg || "Failed to create meeting");
-      console.log(error?.response?.data?.msg);
     } finally {
       hide();
     }

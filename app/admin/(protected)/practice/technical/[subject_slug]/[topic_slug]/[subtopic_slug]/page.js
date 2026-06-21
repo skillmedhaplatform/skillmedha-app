@@ -429,7 +429,6 @@ export default function QuestionsPage() {
         message.info(getPermissionMessage(PERMISSION_VALUES.DELETE));
         return;
       }
-      console.log("Delete question:", questionId);
       dispatch(deleteQuestion(questionId));
     },
     [dispatch, canAccess, getPermissionMessage]

@@ -52,7 +52,6 @@ export default function SocketComp() {
     if (socket) {
       socket.emit("newUser", getSstorage("studentId"));
       socket.on("conn", (data) => {
-        // console.log(data);
       });
 
       socket.on("userUpdates", (data) => {

@@ -43,9 +43,7 @@ const students =
 
   // Map API data into AntD table format
   const dataSource = students.map((s, index) => {
-    const d = s.interviewDetails;
-    console.log(s);
-    
+    const d = s.interviewDetails;    
     return {
       key: d?.interviewId || index,
       candidate: d?.candidateDetails,
@@ -141,8 +139,6 @@ const handleMenuClick = (e, studentId) => {
       dataIndex: "date",
       key: "date",
       render: (_,record) => {
-        console.log(record);
-        
         return(
         <strong className={styles.nameLink}>
          ScheduledAt : {record?.date?.val},{record?.date?.time}
@@ -154,8 +150,6 @@ const handleMenuClick = (e, studentId) => {
       dataIndex: "interviewer",
       key: "interviewer",
       render: (_,{interviewer}) => {
-        console.log(interviewer);
-        
         return(
         <div>
         <div className={styles.nameLink}><strong>Name :</strong> {interviewer.name}</div>

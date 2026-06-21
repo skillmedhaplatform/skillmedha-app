@@ -34,9 +34,7 @@ export default function TpoSessionBridge({ children }) {
       newParams.delete("userId");
       const newQuery = newParams.toString();
       const newUrl = pathname + (newQuery ? `?${newQuery}` : "");
-      window.history.replaceState({}, "", newUrl);
-
-      console.log("[tpo-session-bridge] TPO tokens synchronized successfully.");
+      window.history.replaceState({}, "", newUrl);      
     }
   }, [searchParams, pathname]);
 

@@ -426,7 +426,6 @@ const Header = ({ candidate, jobData, onDownload, AssessmentResults }) => {
   );
 
   const handleScheduleInterview = async (interviewDetails) => {
-    console.log("Interview Details:", interviewDetails);
     const hide = message.loading("Please wait while scheduling interview", 0);
     try {
       const { data } = await axios.post(
@@ -456,7 +455,6 @@ const Header = ({ candidate, jobData, onDownload, AssessmentResults }) => {
       }
     } catch (error) {
       message.error("Failed to schedule interview");
-      console.log(error);
     } finally {
       hide();
     }

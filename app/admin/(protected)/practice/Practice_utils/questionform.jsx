@@ -303,9 +303,6 @@ const QuestionEditorUI = () => {
       topicId: topic_slug,
       subTopicId: subtopic_slug,
     };
-
-    console.log("Question payload:", questionData);
-
     const hide = message.loading(
       isNewQuestion ? "Creating question..." : "Updating question...",
       0

@@ -139,7 +139,7 @@ const Dictaphone = () => {
 
       const formData = new FormData();
       formData.append("file", blob, isAudioOnly ? "audio.webm" : "video.webm");
-      console.log("File size:", blob.size / 1024 / 1024, "MB");
+      //console.log("File size:", blob.size / 1024 / 1024, "MB");
       const uploadUrl = isAudioOnly
         ? `${resturl}/uploadtos3?bucketName=skillmedha-speech&task=transcribe`
         : `${resturl}/uploadtos3?bucketName=skillmedha-speech`;
@@ -161,8 +161,6 @@ const Dictaphone = () => {
         setTranscript(response?.data?.transcription?.text || "");
         setIsProcessingAudio(false);
       }
-
-      console.log(`${resultKey} uploaded:`, response.data);
     } catch (err) {
       console.error(`Upload ${isAudioOnly ? "audio" : "video"} failed`, err);
       if (isAudioOnly) {

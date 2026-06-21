@@ -128,10 +128,7 @@ export const createAssessment = createAsyncThunk(
       nav.replace("/MyAssessments/" + data?.data?.insertedId);
       return data;
     } catch (error) {
-      console.log(456);
-
       message.error("Failed to create assessment");
-      console.log(error);
     } finally {
       hide();
     }

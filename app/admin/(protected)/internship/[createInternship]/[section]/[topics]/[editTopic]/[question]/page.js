@@ -301,8 +301,6 @@ const QuestionEditorUI = () => {
       },
     };
 
-    console.log("Question payload:", questionData);
-
     // Prepare updated quiz array
     const currentQuiz = Array.isArray(singleTopic?.quiz)
       ? [...singleTopic.quiz]

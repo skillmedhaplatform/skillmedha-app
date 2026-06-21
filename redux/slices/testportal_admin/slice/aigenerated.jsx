@@ -19,8 +19,6 @@ const aiSlice = createSlice({
       state.generatedQuestions.questions[index].questionContent[key] = newValue;
     },
     cancelAiQues: (state, { payload }) => {
-      console.log(state.originalQuestions);
-
       if (state.originalQuestions) {
         state.generatedQuestions = state.originalQuestions;
       }

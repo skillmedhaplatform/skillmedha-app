@@ -407,7 +407,6 @@ export default function QuestionListPage() {
   // Edit handler
   const onEditQuestion = (question) => {
     router.push(`/myjobs/${params?.jobId}/AID_${aId}__${question?._id}`);
-    console.log("Edit question:", question);
     message.info("Opening editor for this question in console."); // optional UX
   };
 

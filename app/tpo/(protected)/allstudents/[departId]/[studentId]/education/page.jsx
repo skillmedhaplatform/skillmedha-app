@@ -86,12 +86,9 @@ const Educational = () => {
   };
 
   const handleApprove = (type, sectionKey) => {
-    console.log(type, sectionKey);
-
     if (!type) return;
     const updated = produceUpdatedEducation(localEdDetails, type, "approved");
     setLocalEdDetails(updated);
-    console.log(studentId);
 
     dispatch(
       updateStudent({
@@ -205,7 +202,6 @@ const Educational = () => {
         {hasRealData &&
           localEdDetails.map((item, idx) => {
             const sectionKey = mapSectionKey(item?.type);
-            console.log(sectionKey);
 
             return (
               <div

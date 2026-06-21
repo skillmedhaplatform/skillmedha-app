@@ -116,9 +116,6 @@ const QuestionSlice = createSlice({
     setQuestionVals: (state, { payload }) => {
       const data = { ...payload };
       delete data.err;
-
-      // console.log(data);
-
       state.questionVals = data;
       // state.questionVals = updateObject(payload.keysArr, payload.value, {
       //   ...state.questionVals,
@@ -243,8 +240,6 @@ const QuestionSlice = createSlice({
       state.updateQuestionVal.error = null;
     });
     builder.addCase(updateQuestion.fulfilled, (state, action) => {
-      // message.info(action.payload.message)
-      console.log(action.payload);
       state.updateQuestionVal.status = "fulfilled";
       state.updateQuestionVal.value = action.payload;
       state.updateQuestionVal.error = null;
@@ -262,8 +257,6 @@ const QuestionSlice = createSlice({
       state.saveCompQuestionVal.error = null;
     });
     builder.addCase(saveCompQuestion.fulfilled, (state, action) => {
-      // message.info(action.payload.message)
-      console.log(action.payload);
       state.saveCompQuestionVal.status = "fulfilled";
       state.saveCompQuestionVal.value = action.payload;
       state.saveCompQuestionVal.error = null;
@@ -281,8 +274,6 @@ const QuestionSlice = createSlice({
       state.getCompQuestionVal.error = null;
     });
     builder.addCase(getCompQuestion.fulfilled, (state, action) => {
-      // message.info(action.payload.message)
-      console.log(action.payload);
       state.getCompQuestionVal.status = "fulfilled";
       state.getCompQuestionVal.value = action.payload;
       state.getCompQuestionVal.error = null;
@@ -300,8 +291,6 @@ const QuestionSlice = createSlice({
       state.addQuestionCompQuestionVal.error = null;
     });
     builder.addCase(addQuestionCompQuestion.fulfilled, (state, action) => {
-      // message.info(action.payload.message)
-      console.log(action.payload);
       state.addQuestionCompQuestionVal.status = "fulfilled";
       state.addQuestionCompQuestionVal.value = action.payload;
       state.compQuestions.questionContentArr =

@@ -6,7 +6,6 @@ import { resetStudent, updateStudent } from "@/redux/slices/student";
 export default function SaveBtn({ children, type,sameAsCurrent }) {
   const dispatch = useDispatch();
   const basicDetailsData = useSelector((state) => state.basicDetails.value);
-  // console.log(basicDetailsData)
 
   const handleSave = () => {
     dispatch(resetStudent());
@@ -38,12 +37,6 @@ export default function SaveBtn({ children, type,sameAsCurrent }) {
           }, {});
 
         const socialMedia = basicDetailsData?.socialMedia || [];
-        // console.log("About Details:", aboutDetails);
-        // console.log("Summary:", summary);
-        // console.log("Permanent Address:", permanentAddress);
-        // console.log("Current Address:", currentAddress);
-        console.log("Social Media:", socialMedia);
-
         dispatch(
           updateStudent({
             dispatch,

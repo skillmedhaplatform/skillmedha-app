@@ -320,7 +320,6 @@ const page = () => {
             onSelect={(value, option) => {
               setSelectedTopicValue(option.label);
               setSelectedTopicId(option.key);
-              // console.log(value);
             }}
           />
         </div>

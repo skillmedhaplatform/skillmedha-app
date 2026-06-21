@@ -61,7 +61,6 @@ const Page = () => {
       }
       // Add your delete logic here
       message.success("Skill deleted successfully");
-      console.log("Deleting skill:", skillId);
     },
     [canAccess, getPermissionMessage]
   );

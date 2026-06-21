@@ -131,10 +131,6 @@ export default function AIQuestionModal({ open, onClose, aId }) {
       const failures = results
         .filter((r) => r.status === "rejected")
         .map((r) => r.reason);
-
-      console.log("Created questions (fulfilled):", successes);
-      console.log("Create failures (rejected):", failures);
-
       const createdIds = successes
         .map((payload) => payload?.data?._id)
         .filter(Boolean);

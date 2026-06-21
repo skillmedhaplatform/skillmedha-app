@@ -32,8 +32,6 @@ const TestPortalSlice = createSlice({
     },
     saveUserResponse: (state, action) => {
       const { questionId, userSelectedOption } = action.payload;
-      console.log("payload", action.payload);
-
       const existingResponse = state.userResponse.find(
         (resp) => resp.questionId === questionId
       );

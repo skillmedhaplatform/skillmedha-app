@@ -309,7 +309,6 @@ export default function Page() {
           return null;
         }
       } catch (error) {
-        console.log(error);
         message.error("An error occurred while uploading the image.");
         return null;
       }

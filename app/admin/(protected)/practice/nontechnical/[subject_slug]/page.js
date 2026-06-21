@@ -174,8 +174,6 @@ const TopicManager = () => {
       message.warning("Please save the topic first");
       return;
     }
-
-    console.log("Opening topic:", topic);
     nav.push(`/admin/practice/nontechnical/${subject_slug}/${topic._id}`);
   };
 

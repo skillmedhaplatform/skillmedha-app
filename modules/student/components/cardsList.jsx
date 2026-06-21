@@ -120,7 +120,6 @@ export default function CardsList({ type }) {
       return null;
   }
   if (type === "notifications") {
-    console.log(data)
     return (
       <>
         {

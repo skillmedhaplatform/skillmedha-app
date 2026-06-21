@@ -180,8 +180,6 @@ export default function Page() {
     )
       .unwrap()
       .then((res) => {
-        console.log(res);
-
         if (
           !res?.data?.questionsData ||
           res?.data?.questionsData.length === 0

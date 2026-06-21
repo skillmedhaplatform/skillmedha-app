@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'SkillMedha | Unified Login',
+  title: 'SkillMedha | Login',
   description: 'Single sign-on for all SkillMedha portals',
 }
 

@@ -36,7 +36,6 @@ const Page = () => {
       const data = await res.json();
 
       setUploadResult(data?.internships);
-      console.log("Uploaded Data:", data);
     } catch (err) {
       console.error("Upload failed:", err);
     }

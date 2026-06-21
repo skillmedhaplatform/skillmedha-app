@@ -249,7 +249,6 @@ export default function BasicDetailsPage() {
       applicableCourses: courses,
       eligibilityCriteria
     };
-    // console.log(payload);
 
     const response = await dispatch(
       CreateJob({ dispatch, placementId: id, payload })
@@ -312,8 +311,6 @@ export default function BasicDetailsPage() {
         updatedFields.status = 'inactive';
       }
     }
-    // console.log(updatedFields);
-
     await dispatch(UpdateJob({ dispatch, jobid, payload: updatedFields }));
     router.replace(baseUrl);
   };

@@ -59,8 +59,7 @@ const Projects = () => {
   // Approve handler
   const handleApprove = (projectName) => {
     const updated = produceUpdatedProjects(projectName, "approved");
-    setLocalProjects(updated);
-    console.log(updated);
+    setLocalProjects(updated);    
     dispatch(
       updateStudent({
         aboutDetails: { _id: studentId, projects: updated },

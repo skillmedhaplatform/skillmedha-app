@@ -167,8 +167,6 @@ const SubjectManager = () => {
       message.warning("Please save the subject first");
       return;
     }
-
-    console.log("Opening subject:", subject);
     nav.push(`/admin/practice/nontechnical/${subject._id}`);
   };
 

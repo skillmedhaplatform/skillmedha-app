@@ -82,10 +82,7 @@ export default function CompanyDetailsForm() {
     if (!isEditing) return;
 
     const updates = getUpdatedFields(initialValues || {}, formData || {});
-    // console.log(updates);
-
     dispatch(UpdateUser({ payload: updates || {}, dispatch }));
-
     setIsEditing(false);
     setInitialValues(formData || {});
     setIsChanged(false);

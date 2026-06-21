@@ -138,7 +138,6 @@ export default function InterviewPage() {
     }
 
     const sanitizedRounds = rounds.map(({ isEditable, ...rest }) => rest);
-    console.log("Final Interview Process Array:", sanitizedRounds);
     const payload = {
       interviewRounds: sanitizedRounds
     };

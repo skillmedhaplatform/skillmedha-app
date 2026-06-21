@@ -223,7 +223,6 @@ const Applicants = () => {
 
         // Clear selection after successful invite
         setSelectedStudentIds([]);
-        console.log("Bulk assessment assigned successfully");
       } else {
         console.error("Failed to add assessment to students");
       }

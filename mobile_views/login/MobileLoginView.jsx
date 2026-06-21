@@ -34,7 +34,7 @@ export default function MobileLoginView({
             <div className="absolute inset-0 rounded-full border-[3px] border-brand-600 border-t-transparent animate-spin"></div>
             <div className="absolute inset-2.5 rounded-full border-[3px] border-brand-400 border-b-transparent animate-[spin_1.5s_linear_infinite_reverse]"></div>
           </div>
-          <h3 className="text-xl font-bold text-brand-900 animate-pulse tracking-tight">Authenticating</h3>
+          <h3 className="text-xl font-bold text-brand-900 animate-pulse tracking-tight">Signing you in…</h3>
           <p className="mt-1 text-sm text-gray-500 font-medium">Securing your {role === 'student' ? '' : roleConfig[role]?.name + ' '}session...</p>
         </div>
       )}

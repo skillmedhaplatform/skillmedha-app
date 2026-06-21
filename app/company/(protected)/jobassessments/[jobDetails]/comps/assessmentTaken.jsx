@@ -136,8 +136,6 @@ const AssessmentTaken = () => {
       dataIndex: "jobStatus",
       key: "jobStatus",
       render: (status) => {
-        console.log();
-
         if (status === "shortlisted" || status == "approved") {
           return <Tag color="green">Shortlisted</Tag>;
         } else if (status === "rejected") {

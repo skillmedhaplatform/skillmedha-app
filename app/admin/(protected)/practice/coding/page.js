@@ -168,8 +168,6 @@ const CodingSubjectManager = () => {
       message.warning("Please save the subject first");
       return;
     }
-
-    console.log("Opening coding subject:", subject);
     nav.push(`/admin/practice/coding/${subject._id}`);
   };
 

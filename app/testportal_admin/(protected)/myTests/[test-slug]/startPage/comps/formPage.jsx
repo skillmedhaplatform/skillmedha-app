@@ -25,9 +25,7 @@ const AddMoreComponent = () => {
   const prevDefaultItemsRef = useRef();
   const prevAdditionalItemsRef = useRef();
 
-  useEffect(() => {
-    console.log({ formRequirements: [...defaultItems, ...additionalItems] });
-
+  useEffect(() => { 
     dispatch(
       updateTestValues({
         formRequirements: [...defaultItems, ...additionalItems],

@@ -34,7 +34,6 @@ export function joinMeeting(ZoomMtg, {
 
           // optional: listen for in-meeting events
           ZoomMtg.inMeetingServiceListener("onMeetingStatus", (data) => {
-            console.log("meeting status:", data.status);
             if (data.status === 3 && onMeetingEnd) {
               onMeetingEnd();
             }

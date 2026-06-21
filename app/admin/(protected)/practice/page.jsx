@@ -73,7 +73,6 @@ function PracticeCard({ category, onClick }) {
 export default function PracticePage() {
   const router = useRouter();
   const handleCardClick = (category) => {
-    console.log(`Selected category: ${category.name} (ID: ${category.id})`);
     router.push(category?.path);
   };
 

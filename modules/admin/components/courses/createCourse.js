@@ -1174,7 +1174,6 @@ const CreateCourse = ({ type = "course" }) => {
 
       // Only dispatch if there are actual changes
       if (Object.keys(updates).length > 0) {
-        console.log("Sending updates:", updates);
         dispatch(
           updateInternship({
             id: params.createInternship,

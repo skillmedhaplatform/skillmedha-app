@@ -187,8 +187,6 @@ const SubtopicManager = () => {
       message.warning("Please save the subtopic first");
       return;
     }
-
-    console.log("Opening subtopic:", subtopic);
     nav.push(
       `/admin/practice/nontechnical/${subject_slug}/${topic_slug}/${subtopic._id}`
     );

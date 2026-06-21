@@ -214,14 +214,11 @@ export const updateStudent = createAsyncThunk(
       );
       if (data) {
         message.success("Student updated successfully");
-        console.log(data);
         // dispatch(getStudentCreds());
       }
-      console.log(data);
       return data;
     } catch (error) {
       message.error("Failed update details");
-      console.log(error);
     } finally {
       hide();
     }
