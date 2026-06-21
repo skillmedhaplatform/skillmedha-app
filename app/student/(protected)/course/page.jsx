@@ -1,7 +1,7 @@
 "use client";
 
 import LibraryPage from "@/universalUtils/LibraryPage/LibraryPage";
-import { getAllCourses, getAllCoursesOnly} from "@/redux/slices/internship";
+import { getAllCourses, getAllCoursesOnly } from "@/redux/slices/internship";
 
 // Selectors
 const selectCourses = (state) => state.internship.allCourses?.data;
@@ -45,6 +45,8 @@ const CourseLibraryPage = () => (
     searchPlaceholder="Search courses…"
     idPrefix="course"
     renderMetaChips={renderCourseMetaChips}
+    showBuyNow={true}
+    showWishlist={true}
   />
 );
 
