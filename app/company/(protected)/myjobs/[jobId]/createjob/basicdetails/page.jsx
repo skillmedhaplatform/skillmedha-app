@@ -57,7 +57,7 @@ export default function BasicDetailsPage() {
   const [originalDetails, setOriginalDetails] = useState(null);
 
   const SessionJobid = getSstorage("jobid");
-  const baseUrl = `/myjobs/${SessionJobid || jobid}/createjob/profiledetails`;
+  const baseUrl = `/company/myjobs/${SessionJobid || jobid}/createjob/profiledetails`;
   useEffect(() => {
     dispatch(fetchPartnerColleges());
   }, []);
@@ -191,7 +191,7 @@ export default function BasicDetailsPage() {
       const insertedId = data?.insertedId;
 
       if (insertedId) {
-        router.replace(`/myjobs/${insertedId}/createjob/profiledetails`);
+        router.replace(`/company/myjobs/${insertedId}/createjob/profiledetails`);
       } else {
         message.error("Something went wrong. Job ID not returned.");
       }
@@ -253,7 +253,7 @@ export default function BasicDetailsPage() {
       })
     );
     router.replace(
-      `/myjobs/${payload?.data?._id || jobid}/createjob/profiledetails`
+      `/company/myjobs/${payload?.data?._id || jobid}/createjob/profiledetails`
     );
   };
 

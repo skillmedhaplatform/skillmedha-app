@@ -19,26 +19,27 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #25a3a6;
+    background-color: #6BA8ED;
     border-radius: 6px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #1b8184;
+    background-color: #1555b0;
   }
 
   /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: #25a3a6 transparent;
+  scrollbar-color: #6BA8ED transparent;
   .mainCont {
-    border: 1px solid $bgcolor;
+    border: 1px solid #cbd5e0;
     max-height: 100%;
     width: 95%;
-    border-radius: 1rem;
-    padding: 1rem;
+    border-radius: 8px;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    background: white;
     .roundCont {
       display: flex;
       flex-direction: column;
@@ -93,7 +94,7 @@
           border: 0;
           outline: 0;
           font-size: 16px;
-          background-color: $primary10;
+          background-color: #f4f7fe;
           border-radius: 5px;
           border: 0.1px solid rgba(211, 211, 211, 0.35);
           &::placeholder {
@@ -106,10 +107,60 @@
           min-height: 12rem;
           overflow-y: auto;
         }
+
+        :global {
+          .ant-select,
+          .ant-select-selector,
+          .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+            background-color: #f4f7fe !important;
+            border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
+            border-radius: 5px !important;
+          }
+          .ant-picker {
+            background-color: #f4f7fe !important;
+            border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
+            border-radius: 5px !important;
+            input {
+              background-color: transparent !important;
+              border: none !important;
+            }
+          }
+          .ant-select-dropdown {
+            background-color: #f4f7fe !important;
+          }
+          .ant-select-item {
+            color: #0f172a !important;
+          }
+          .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+            background-color: #eef5fb !important;
+          }
+          /* Mode Toggle */
+          .ant-radio-button-wrapper {
+            background-color: #eef5fb !important; /* light blue instead of gray */
+            border-color: rgba(211, 211, 211, 0.35) !important;
+            color: #0f172a !important;
+            &:hover {
+              color: #6BA8ED !important;
+            }
+          }
+          .ant-radio-button-wrapper-checked {
+            background-color: #6BA8ED !important; /* darker shade of light blue */
+            border-color: #6BA8ED !important;
+            color: #ffffff !important;
+            &::before {
+              background-color: #6BA8ED !important;
+            }
+          }
+          /* Optionally, dim disabled unselected buttons a bit more */
+          .ant-radio-button-wrapper-disabled {
+            opacity: 0.7;
+            cursor: not-allowed !important;
+          }
+        }
         .button {
           border: 0;
           padding: 0.5rem 1rem;
-          background-color: $primary10;
+          background-color: #eef5fb;
           border-radius: 5px;
           border: 0.1px solid rgba(211, 211, 211, 0.35);
           font-weight: 600;
@@ -118,10 +169,10 @@
           justify-content: center;
           gap: 0.5rem;
           cursor: pointer;
-          color: $bgcolor;
+          color: #6BA8ED;
         }
         .selected {
-          background-color: $bgcolor;
+          background-color: #6BA8ED;
           color: white;
         }
       }
@@ -141,7 +192,7 @@
   .saveBtn {
     border: 0;
     padding: 0.3rem 1.5rem;
-    background-color: $bgcolor;
+    background-color: #6BA8ED;
     border-radius: 5px;
     border: 0.1px solid rgba(211, 211, 211, 0.35);
     font-weight: 600;

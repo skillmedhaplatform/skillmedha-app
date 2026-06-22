@@ -1,5 +1,5 @@
 "use client";
-import Home from "@/app/page";
+// Removed Home import
 import React, { useEffect } from "react";
 import styles from "./styles/layout.module.scss";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ import {
   resetSingleJobAssessment,
 } from "@/redux/slices/company/skillMedhaData";
 import { Button, Tooltip } from "antd";
-
+import PageHeader from "@/modules/tpo/components/PageHeader";
 export default function FormLayout({ children }) {
   const { jobId: jobid } = useParams();
   const path = usePathname();
@@ -45,7 +45,7 @@ export default function FormLayout({ children }) {
     }
   };
 
-  const baseUrl = `/myjobs/${jobid}/createjob`;
+  const baseUrl = `/company/myjobs/${jobid}/createjob`;
 
   const routes = [
     { name: "Basic Details", path: `${baseUrl}/basicdetails` },
@@ -74,91 +74,103 @@ export default function FormLayout({ children }) {
     },
   ];
 
+  const pageTitle = ONEJOB?.data?._id ? (ONEJOB?.data?.jobTitle || "Update Job") : "Create Job";
+  const pageSubtitle = ONEJOB?.data?._id ? "Manage your job details and interview process" : "Set up a new job posting";
+
   return (
-    <Home>
-      <div className={styles.mainContainer}>
-        {/* Breadcrumbs */}
-        <div className={styles.headerCont}>
-          {pathSegments.map((segment, index) => {
-            let displayName = segment;
-
-            if (segment === "createjob")
-              displayName = ONEJOB?.data?._id ? "Update Job" : "Create Job";
-            else if (segment === "basicdetails") displayName = "Basic Details";
-            else if (segment === "profiledetails")
-              displayName = "Profile Details";
-            else if (segment === "interviewprocess")
-              displayName = "Interview Process";
-
-            const matchedJob =
-              ONEJOB?.data && ONEJOB?.data?._id === segment
-                ? ONEJOB?.data
-                : null;
-
-            if (matchedJob) {
-              displayName = `${matchedJob?.jobTitle}`;
-            }
-
-            const isLast = index === pathSegments.length - 1;
-            const pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
+    <>
+      <PageHeader
+        breadcrumb="My Jobs"
+        title={pageTitle}
+        subtitle={pageSubtitle}
+      />
+      
+      {/* Tabs */}
+      <div className={styles.tabsWrapper}>
+        <div className={styles.tabsRow}>
+          {routes.map((e, index) => {
+            const isActive = path === e?.path;
+            const disabled = isDisabled() || e?.disabled;
 
             return (
-              <span
-                key={index}
-                className={isLast ? styles.activeCrumb : styles.crumb}
-                onClick={() => {
-                  if (isLast) return;
-
-                  if (index === 0 || index === 1) {
-                    router.push("/myjobs");
-                  } else if (segment !== "job") {
-                    router.push(pathToHere);
-                  }
-                }}
+              <Tooltip
+                key={e.path}
+                title={disabled ? "Complete previous steps first" : ""}
+                placement="bottom"
               >
-                {displayName}&nbsp;
-                {index < pathSegments.length - 1 && (
-                  <FaCaretRight style={{ fontSize: "24px" }} />
-                )}
-              </span>
+                <div
+                  className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
+                  onClick={() => {
+                    if (!disabled) router.replace(e?.path);
+                  }}
+                  style={{
+                    opacity: disabled ? 0.5 : 1,
+                    cursor: disabled ? "not-allowed" : "pointer"
+                  }}
+                >
+                  <span>{e?.name}</span>
+                  {isActive && <span className={styles.activeIndicator} />}
+                </div>
+              </Tooltip>
             );
           })}
         </div>
-
-        {/* Sidebar + Content */}
-        <div className={styles.bottomCont}>
-          <div className={styles.sidebarCont}>
-            {routes.map((e) => {
-              const isActive = path === e?.path;
-
-              // ✅ global disable + per-route disable
-              const disabled = isDisabled() || e?.disabled;
-
-              return (
-                <Tooltip
-                  key={e.path}
-                  title={disabled ? "Complete previous steps first" : ""}
-                  placement="right"
-                >
-                  <Button
-                    type={isActive ? "primary" : "text"}
-                    disabled={disabled}
-                    onClick={() => {
-                      if (!disabled) router.replace(e?.path);
-                    }}
-                    // block
-                    style={{ display: "flex", justifyContent: "flex-start" }}
-                  >
-                    {e?.name}
-                  </Button>
-                </Tooltip>
-              );
-            })}
-          </div>
-
-          <div className={styles.contentCont}>{children}</div>
-        </div>
       </div>
-    </Home>
+
+      <div className={styles.mainContainer}>
+      {/* Breadcrumbs */}
+      <div className={styles.headerCont}>
+        {pathSegments.map((segment, index) => {
+          let displayName = segment;
+
+          if (segment === "createjob")
+            displayName = ONEJOB?.data?._id ? "Update Job" : "Create Job";
+          else if (segment === "basicdetails") displayName = "Basic Details";
+          else if (segment === "profiledetails")
+            displayName = "Profile Details";
+          else if (segment === "interviewprocess")
+            displayName = "Interview Process";
+
+          const matchedJob =
+            ONEJOB?.data && ONEJOB?.data?._id === segment
+              ? ONEJOB?.data
+              : null;
+
+          if (matchedJob) {
+            displayName = `${matchedJob?.jobTitle}`;
+          }
+
+          const isLast = index === pathSegments.length - 1;
+          const pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
+
+          return (
+            <span
+              key={index}
+              className={isLast ? styles.activeCrumb : styles.crumb}
+              onClick={() => {
+                if (isLast) return;
+
+                if (index === 0 || index === 1) {
+                  router.push("/company/myjobs");
+                } else if (segment !== "job") {
+                  router.push(pathToHere);
+                }
+              }}
+            >
+              {displayName}&nbsp;
+              {index < pathSegments.length - 1 && (
+                <FaCaretRight style={{ fontSize: "24px" }} />
+              )}
+            </span>
+          );
+        })}
+      </div>
+
+      {/* Content */}
+      <div className={styles.bottomCont} style={{ width: "100%" }}>
+        <div className={styles.contentCont} style={{ width: "100%", padding: 0 }}>{children}</div>
+      </div>
+      </div>
+    </>
   );
 }

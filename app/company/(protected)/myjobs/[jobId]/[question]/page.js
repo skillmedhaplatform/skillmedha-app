@@ -71,7 +71,7 @@ const QuestionEditor = () => {
 
   useEffect(() => {
     if (!AssessmentId || !questionId) {
-      router.replace(`/myjobs/${params?.jobId}/createjob/questionManager`);
+      router.replace(`/company/myjobs/${params?.jobId}/createjob/questionManager`);
     }
   }, [AssessmentId, questionId, router]);
 
@@ -369,7 +369,7 @@ const QuestionEditor = () => {
 
         alert("Question updated successfully!");
         resetFormValues();
-        router.replace(`/myjobs/${params?.jobId}/createjob/questionManager`);
+        router.replace(`/company/myjobs/${params?.jobId}/createjob/questionManager`);
       } else {
         const created = await dispatch(addQuestions(questionData)).unwrap();
 
@@ -394,7 +394,7 @@ const QuestionEditor = () => {
 
         alert("Question created successfully!");
         resetFormValues();
-        router.replace(`/myjobs/${params?.jobId}/createjob/questionManager`);
+        router.replace(`/company/myjobs/${params?.jobId}/createjob/questionManager`);
       }
     } catch (e) {
       console.error("Error:", e);
@@ -414,7 +414,7 @@ const QuestionEditor = () => {
 
   const handleCancel = () => {
     resetFormValues();
-    router.replace(`/myjobs/${params?.jobId}/createjob/questionManager`);
+    router.replace(`/company/myjobs/${params?.jobId}/createjob/questionManager`);
   };
 
   const isChoiceType =

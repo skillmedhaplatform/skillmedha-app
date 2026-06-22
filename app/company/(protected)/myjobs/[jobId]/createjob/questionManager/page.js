@@ -324,7 +324,7 @@ export default function QuestionListPage() {
 
   // Handle manually add (navigate to another page)
   const handleAddManually = () => {
-    router.push(`/myjobs/${params?.jobId}/AID_${aId}__NewQuestion`);
+    router.push(`/company/myjobs/${params?.jobId}/AID_${aId}__NewQuestion`);
   };
 
   // Dropdown menu items
@@ -406,7 +406,8 @@ export default function QuestionListPage() {
 
   // Edit handler
   const onEditQuestion = (question) => {
-    router.push(`/myjobs/${params?.jobId}/AID_${aId}__${question?._id}`);
+    router.push(`/company/myjobs/${params?.jobId}/AID_${aId}__${question?._id}`);
+    console.log("Edit question:", question);
     message.info("Opening editor for this question in console."); // optional UX
   };
 
@@ -513,7 +514,7 @@ export default function QuestionListPage() {
                             <Tooltip
                               title={"Uploaded by you"}
                               placement="topLeft"
-                              color="#25a3a6"
+                              color="#6BA8ED"
                             >
                               <Button
                                 type="link"

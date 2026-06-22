@@ -51,7 +51,7 @@ const AssessmentTaken = () => {
   const handleMenuClick = (e, sId) => {
     if (e.key === "1") {
       // ✅ View Details → Do nothing
-      router.push(`/jobassessments/${params?.jobDetails}/${sId}`);
+      router.push(`/company/jobassessments/${params?.jobDetails}/${sId}`);
       return;
     }
 
@@ -248,7 +248,7 @@ const AssessmentTaken = () => {
             className={AtStyles.viewBtn}
             onClick={() => {
               router.push(
-                `/jobassessments/${params?.jobDetails}/live_proctoring`
+                `/company/jobassessments/${params?.jobDetails}/live_proctoring`
               );
             }}
           >

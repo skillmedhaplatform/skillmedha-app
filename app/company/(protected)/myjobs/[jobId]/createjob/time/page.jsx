@@ -31,7 +31,7 @@ const Page = () => {
   const [singleTestValues, setSingleTestValues] = useState({});
 
   // Base URL for navigation
-  const baseUrl = `/myjobs/${jobid}/createjob/nextpage`;
+  const baseUrl = `/company/myjobs/${jobid}/createjob/nextpage`;
 
   // Initialize form data when singleJobAssessment data loads
   useEffect(() => {
@@ -223,7 +223,7 @@ const Page = () => {
     try {
       // Send only the time object with aId
       await dispatch(updateJobAssessment({ time: timeData, aId }));
-      router.push(`/myjobs/${jobid}/createjob/questionManager`);
+      router.push(`/company/myjobs/${jobid}/createjob/questionManager`);
     } catch (error) {
       console.error("Error saving:", error);
     }
@@ -232,7 +232,7 @@ const Page = () => {
   return (
     <div className={timeStyles.container}>
       {/* Test Duration Section */}
-      <div className={timeStyles.respTitle} style={{ color: "#25a3a6" }}>
+      <div className={timeStyles.respTitle}>
         Test Duration*
       </div>
       <div className={timeStyles.option}>
@@ -251,7 +251,7 @@ const Page = () => {
       {/* Test Activation Method Section */}
       <div
         className={timeStyles.respTitle}
-        style={{ color: "#25a3a6", marginTop: "30px" }}
+        style={{ marginTop: "30px" }}
       >
         Test Activation Method
       </div>

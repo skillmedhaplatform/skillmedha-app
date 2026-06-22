@@ -6,11 +6,12 @@
   max-width: 100%;
   margin: 0 auto;
   padding: 24px;
-  border: 1px solid;
-  border-radius: 0.5rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
   margin-bottom: 2rem;
   height: 70vh;
   overflow-y: hidden;
+  background: white;
   /* Custom Scrollbar Styling */
   &::-webkit-scrollbar {
     width: 6px; // reduced width
@@ -21,17 +22,17 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #25a3a6;
+    background-color: #6BA8ED;
     border-radius: 6px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #1b8184;
+    background-color: #1555b0;
   }
 
   /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: #25a3a6 transparent;
+  scrollbar-color: #6BA8ED transparent;
   .header {
     display: flex;
     align-items: center;
@@ -59,20 +60,20 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #25a3a6;
+    background-color: #6BA8ED;
     border-radius: 6px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #1b8184;
+    background-color: #1555b0;
   }
 
   /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: #25a3a6 transparent;
+  scrollbar-color: #6BA8ED transparent;
 }
 .questionItem {
-  border: 1px solid #25a3a64d;
+  border: 1px solid #6BA8ED4d;
   border-radius: 8px;
   background: white;
 
@@ -100,18 +101,18 @@
   align-items: center;
   gap: 16px;
   div {
-    border: 1px solid #25a3a6;
+    border: 1px solid #6BA8ED;
     padding: 0.2rem 0.5rem;
     border-radius: 5px;
     font-size: 14px;
     font-weight: 600;
-    background-color: #25a3a64d;
+    background-color: #eef5fb;
   }
 }
 
 .questionText {
   font-weight: 600;
-  color: #25a3a6;
+  color: #6BA8ED;
 }
 
 .question {

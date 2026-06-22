@@ -274,7 +274,7 @@ export const getJobAssessmentResultsForStudent = createAsyncThunk(
         "No progress found for this student and assessment";
 
       message.error(errMsg);
-      if(router) router.push(`/jobassessments/${params?.jobDetails}`);
+      if(router) router.push(`/company/jobassessments/${params?.jobDetails}`);
 
       return thunkAPI.rejectWithValue(errMsg);
     }
