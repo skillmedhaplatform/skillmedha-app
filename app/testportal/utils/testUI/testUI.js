@@ -3,7 +3,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { decryptObject } from "../encryptionMiddleware";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Modal, Progress, Spin } from "antd";
+import { Button, Modal, Progress, Spin, ConfigProvider } from "antd";
 import { Maximize, Minimize, Send, Shield, Monitor } from 'lucide-react';
 import {
   clear_response,
@@ -1179,8 +1179,10 @@ export default function TestUI({
     return (
       <div className={testStyles.message_div}>
         <div style={{ textAlign: "center", padding: "2.5rem 3rem" }}>
-          <Spin size="large" tip="" />
-          <h2 style={{ marginTop: "1.5rem", color: "#1da469", fontWeight: 700, fontSize: "1.2rem" }}>
+          <ConfigProvider theme={{ token: { colorPrimary: '#2563eb' } }}>
+            <Spin size="large" tip="" />
+          </ConfigProvider>
+          <h2 style={{ marginTop: "1.5rem", color: "#2563eb", fontWeight: 700, fontSize: "1.2rem" }}>
             Preparing Your Test
           </h2>
           <p style={{ marginTop: "0.5rem", color: "#555", fontSize: "0.95rem" }}>
@@ -1361,31 +1363,34 @@ export default function TestUI({
           ) : !fullScreen ? (
             // STATE 2: Test started but exited fullscreen — warning, timer keeps running
             <div className="flex-1 w-full flex flex-col items-center justify-center p-6">
-              <div className="bg-white rounded-3xl shadow-[0_12px_40px_rgb(0,0,0,0.08)] border border-red-50 max-w-md w-full p-12 flex flex-col items-center text-center mt-[-40px]">
+              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] max-w-[480px] w-full p-10 flex flex-col items-center text-center">
                 
                 {/* Icon */}
-                <div className="w-20 h-20 rounded-full border-[2px] border-dashed border-[#ff3939] flex items-center justify-center bg-white mb-6">
-                  <div className="w-14 h-14 rounded-full bg-[#fff1f1] flex items-center justify-center">
-                    <Monitor className="w-7 h-7 text-[#ff3939]" />
+                <div className="w-24 h-24 rounded-full border-[2px] border-dashed border-[#ff3939] flex items-center justify-center mb-6 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-[#fff1f1] to-white rounded-full"></div>
+                  <div className="relative z-10 w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,57,57,0.2)]">
+                    <Monitor className="w-8 h-8 text-[#ff3939]" />
                   </div>
                 </div>
 
-                <h2 className="text-[24px] font-extrabold text-[#ff3939] mb-4 leading-tight flex items-center gap-2 justify-center">
-                  <span className="text-yellow-400">⚠️</span> You Have Exited Fullscreen
+                <h2 className="text-[22px] font-extrabold text-[#ff3939] mb-4 leading-tight flex items-center gap-2 justify-center">
+                  <span className="text-[#ffb800] text-2xl">⚠️</span> You Have Exited Fullscreen
                 </h2>
                 
-                <p className="text-[15px] text-[#64748b] leading-relaxed mb-8 px-2">
+                <p className="text-[15px] text-[#64748b] leading-relaxed mb-8 px-4 font-medium">
                   The exam timer is still running. Please return to fullscreen mode immediately to continue your exam.
                 </p>
 
-                <Button
-                  type="primary"
-                  size="large"
-                  onClick={requestFullScreen}
-                  className="w-auto px-8 !bg-[#ff3939] hover:!bg-[#cc2e2e] !text-white !border-none h-12 rounded-xl font-bold text-[15px] flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(255,57,57,0.25)] transition-all"
-                >
-                  <Maximize className="w-5 h-5" /> Return to Fullscreen
-                </Button>
+                <div className="w-full border-t border-gray-200/60 pt-8 mt-2">
+                  <Button
+                    type="primary"
+                    size="large"
+                    onClick={requestFullScreen}
+                    className="w-full !bg-[#ff3939] hover:!bg-[#cc2e2e] !text-white !border-none h-14 rounded-xl font-bold text-[16px] flex items-center justify-center gap-2 transition-all shadow-none"
+                  >
+                    <Maximize className="w-5 h-5" /> Return to Fullscreen
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
