@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import styles from "./styles/layout.module.scss";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { GetOneJob } from "@/redux/slices/company/placementsSlice";
+import { GetOneJob, resetOneJob } from "@/redux/slices/company/placementsSlice";
 import { FaCaretRight } from "react-icons/fa";
 import {
   getOneJobAssessment,
@@ -23,9 +23,12 @@ export default function FormLayout({ children }) {
   const ONEJOB = useSelector((state) => state.placement.OneJob?.value);
 
   useEffect(() => {
-    if (jobid) {
+    if (jobid && jobid !== "Newjob") {
       dispatch(resetSingleJobAssessment());
       dispatch(GetOneJob({ jobid }));
+    } else if (jobid === "Newjob") {
+      dispatch(resetSingleJobAssessment());
+      dispatch(resetOneJob());
     }
   }, [dispatch, jobid]);
   const isAssessmentId = ONEJOB?.data?.AssessmentId;

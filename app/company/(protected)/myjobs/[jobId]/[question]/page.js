@@ -20,7 +20,6 @@ import {
 import { restUrl } from "@/utils/universalUtils/urls";
 import VideoUpload from "../utils/video";
 import AudioUpload from "../utils/audio";
-import Home from "@/app/page";
 import { updateJobAssessment } from "@/redux/slices/company/skillMedhaData";
 
 const QUESTION_TYPES = {
@@ -428,7 +427,7 @@ const QuestionEditor = () => {
   }
 
   return (
-    <Home>
+    <>
       <div className={QuestionStyles.QuestionContainer}>
         <div className={QuestionStyles.QuestionHeader}>
           <div>{isUpdateMode ? "Update Question" : "Create New Question"}</div>
@@ -738,7 +737,7 @@ const QuestionEditor = () => {
           </div>
         </div>
       </div>
-    </Home>
+    </>
   );
 };
 

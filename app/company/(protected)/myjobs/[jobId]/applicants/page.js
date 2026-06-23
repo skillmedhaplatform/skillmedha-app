@@ -9,7 +9,6 @@ import {
   getAllAppliedStudents,
   addAssessmentToStudent,
 } from "@/redux/slices/company/skillMedhaData";
-import Home from "@/app/page";
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { useParams } from "next/navigation";
 
@@ -85,7 +84,7 @@ const Applicants = () => {
   };
 
   return (
-    <Home>
+    <>
       <div className={applicantStyles.container}>
         <div className={applicantStyles.headContainer}>
           <div className={applicantStyles.title}>{oneJobData?.jobTitle}</div>
@@ -130,7 +129,7 @@ const Applicants = () => {
           ))}
         </div>
       </div>
-    </Home>
+    </>
   );
 };
 

@@ -1,5 +1,4 @@
 "use client";
-import Home from "@/app/page";
 import React, { useEffect, useState } from "react";
 import AtStyles from "./styles/ts.module.scss";
 import { useSelector, useDispatch } from "react-redux";

@@ -47,6 +47,13 @@ const JobsSlice = createSlice({
     clearJobs: (state) => {
       state.jobs = [];
     },
+    resetOneJob: (state) => {
+      state.OneJob = {
+        value: {},
+        status: "idle",
+        error: null,
+      };
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -281,5 +288,5 @@ export const getJobAssessmentResultsForStudent = createAsyncThunk(
   }
 );
 
-export const { clearError, clearJobs } = JobsSlice.actions;
+export const { clearError, clearJobs, resetOneJob } = JobsSlice.actions;
 export default JobsSlice.reducer;

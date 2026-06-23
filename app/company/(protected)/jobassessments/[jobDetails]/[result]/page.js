@@ -1,5 +1,4 @@
 "use client";
-import Home from "@/app/page";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -114,7 +113,7 @@ export default function ResultsPage() {
   };
 
   return (
-    <Home>
+    <>
       <div className={styles.mainCont} ref={mainRef}>
         <Header
           candidate={StudentDetails}
@@ -131,7 +130,7 @@ export default function ResultsPage() {
         />
         {/* <ReviewInputCard /> */}
       </div>
-    </Home>
+    </>
   );
 }
 

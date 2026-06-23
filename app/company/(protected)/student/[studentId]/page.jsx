@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
-import Home from "@/app/page";
 import detail from "./detail.module.scss";
 import { Button, Spin } from "antd";
 import { useSelector } from "react-redux";
@@ -42,7 +41,7 @@ const StudentData = ({ children }) => {
     }
   }, [params?.studentId, dispatch, router]);
   return (
-    <Home>
+    <>
       <div className={detail.container}>
         <div className={detail.first}>
           {/* <Button
@@ -79,7 +78,7 @@ const StudentData = ({ children }) => {
           </div>
         </div>
       </div>
-    </Home>
+    </>
   );
 };
 

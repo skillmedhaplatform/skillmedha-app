@@ -1,5 +1,4 @@
 "use client";
-import Home from "@/app/page";
 import {
   useParams,
   usePathname,
@@ -48,10 +47,12 @@ export default function JobPreviewPage() {
   );
 
   useEffect(() => {
-    dispatch(GetOneJob({ jobid }));
+    if (jobid && jobid !== "Newjob") {
+      dispatch(GetOneJob({ jobid }));
+    }
     // dispatch(GetAllPlacements());
     dispatch(availableSkills());
-  }, []);
+  }, [dispatch, jobid]);
 
   const resolveName = (segment, index) => {
     if (index > 0) {
@@ -123,7 +124,7 @@ export default function JobPreviewPage() {
     }) || [];
 
   return (
-    <Home>
+    <>
       <div className={styles.mainContainer}>
         <div className={styles.headerCont}>
           {pathSegments.map((segment, index) => {
@@ -199,6 +200,6 @@ export default function JobPreviewPage() {
           </>
         </div>
       </div>
-    </Home>
+    </>
   );
 }
