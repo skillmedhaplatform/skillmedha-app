@@ -163,7 +163,7 @@ export const getAllDepartments = createAsyncThunk(
   "/getAllDepartments",
   async () => {
     try {
-      const { data } = await axios.get(`${restUrl}/getAllDepartments`, {
+      const { data } = await axios.get(`${restUrl}/getAllDepartments?limit=1000`, {
         headers: {
           Authorization: `Bearer ${getLstorage("token") || token}`,
         },

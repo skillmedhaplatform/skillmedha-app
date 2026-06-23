@@ -81,7 +81,7 @@ const DepartmentCard = ({ handleClick, item, cardType, studentsList = [] }) => {
 
   // Dynamic calculations using passed student list
   const deptStudents = studentsList.filter(s => s.department?.toString() === item?._id?.toString());
-  const studentsCount = item?.students?.length || deptStudents.length || 0;
+  const studentsCount = deptStudents.length || 0;
   const placedCount = deptStudents.filter(s => s.placementStatus === "placed").length;
 
   const spocName = item?.spoc && item.spoc !== "N/A" ? item.spoc : null;

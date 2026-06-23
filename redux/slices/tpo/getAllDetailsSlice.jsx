@@ -69,7 +69,7 @@ export const CreateStudentAccount = createAsyncThunk(
         }
       );
 
-      if (data.msg) {
+      if (data.success || data.data) {
         message.success("Account created successfully!");
         dispatch(getStudentsInDepartments({ id: payload?.department }));
       }

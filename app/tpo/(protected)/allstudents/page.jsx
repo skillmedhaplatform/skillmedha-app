@@ -153,7 +153,10 @@ export default function Page() {
 
   // Summary Metrics
   const departmentsCount = departMent?.data?.length || 0;
-  const studentsCount = studentsList.length;
+  const studentsCount = (departMent?.data || []).reduce((acc, dept) => {
+    const count = studentsList.filter(s => s.department?.toString() === dept?._id?.toString()).length || 0;
+    return acc + count;
+  }, 0);
   const spocsCount = departMent?.data?.filter(
     (d) => d.spoc && d.spoc !== "N/A" && d.spoc !== "Not set" && d.spoc.trim() !== ""
   ).length || 0;
