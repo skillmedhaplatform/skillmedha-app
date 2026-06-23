@@ -1,5 +1,5 @@
 "use client";
-import Home from "@/app/page";
+
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -94,7 +94,7 @@ const Page = () => {
 
   if (!mounted) return null;
   return (
-    <Home>
+    <>
       <div className={jdStyles.container}>
         {/* Radio Buttons */}
         <div className={jdStyles.radioContainer}>
@@ -136,7 +136,7 @@ const Page = () => {
           )} */}
         </div>
       </div>
-    </Home>
+    </>
   );
 };
 

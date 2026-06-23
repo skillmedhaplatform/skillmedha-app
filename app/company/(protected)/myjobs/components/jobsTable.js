@@ -313,6 +313,17 @@ export default function JobsTable({
 
   const [currentPage, setCurrentPage] = React.useState(1);
   const pageSize = 5;
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [currTab?.fetchType]);
+
+  React.useEffect(() => {
+    if ((currentPage - 1) * pageSize >= data.length && currentPage > 1) {
+      setCurrentPage(1);
+    }
+  }, [data.length, currentPage, pageSize]);
+
   const paginatedData = data.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   if (loading) {

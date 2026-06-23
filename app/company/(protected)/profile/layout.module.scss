@@ -354,7 +354,11 @@
   flex-direction: column;
   gap: 1rem;
   width: 100%;
-  padding: 0 1rem;
+  padding: 2.5rem;
+  background-color: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .dynamicFormContainer {
@@ -365,7 +369,7 @@
   z-index: 1;
   .buttonContainer {
     width: 100%;
-    background-color: #f5f5f5;
+    background-color: white;
     padding: 0.5rem 0;
     position: sticky;
     bottom: 0;
@@ -376,11 +380,11 @@
   }
 }
 .headertitleCont {
-  border-bottom: 1px solid;
+  border-bottom: 1px solid #eef5fb;
   width: 100%;
   position: sticky;
   top: 1.3px;
-  background-color: #f5f5f5;
+  background-color: white;
   z-index: 4;
   display: flex;
   align-items: center;
@@ -393,7 +397,7 @@
 }
 
 .formField {
-  background-color: #f5f5f5;
+  background-color: transparent;
   width: 100%;
   display: flex;
   align-items: center;
@@ -407,18 +411,30 @@
   }
   .inputField {
     flex: 1 1 60%;
-    padding: 8px;
-    font-size: 16px;
     align-self: flex-start;
-    border-radius: 5px;
+    padding: 10px 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
     outline: 0;
-    border: 1px solid gray;
-    background-color: transparent;
+    border: none;
+    background-color: #eef5fb;
+    color: #1e293b;
+    transition: all 0.2s;
+
     &:focus {
-      outline: 1px solid ;
+      outline: 2px solid #6BA8ED;
+      background-color: white;
     }
+
     &::placeholder {
-      color: rgb(195, 195, 195);
+      color: #94a3b8;
+    }
+
+    &:disabled {
+      color: #334155;
+      cursor: not-allowed;
+      opacity: 0.8;
     }
   }
   .selectField {
