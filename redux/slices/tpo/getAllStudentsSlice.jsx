@@ -164,7 +164,7 @@ export const DeleteStudentAccount = createAsyncThunk(
         }
       );
 
-      if (data.msg) {
+      if (data.success || data.message) {
         hide();
         message.success("Student deleted successfully!");
         dispatch(getStudentsInDepartments({ id: dapartment }));
@@ -194,7 +194,7 @@ export const deleteAllStudents = createAsyncThunk(
         }
       );
 
-      if (data.msg) {
+      if (data.success || data.message) {
         hide();
         message.success("All students deleted successfully!");
         dispatch(getStudentsInDepartments({ id: departmentId }));

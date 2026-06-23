@@ -47,6 +47,8 @@ import courseSlice from "./slices/assessmentsSlice/courseSlice";
 import testSlice from "./slices/assessmentsSlice/testSlice";
 import UserFormSlice from "./slices/assessmentsSlice/userForm";
 import jobassessmentsSlice from "./slices/jobassessmentsSlice";
+import cartReducer from "./slices/cartSlice";
+import wishlistReducer from "./slices/wishlistSlice";
 
 export const store = configureStore({
   reducer: {
@@ -106,6 +108,8 @@ export const store = configureStore({
     userForm: UserFormSlice,
     jobassessments: jobassessmentsSlice,
     practice: practiceSlice,
+      wishlist: wishlistReducer,
+        cart: cartReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

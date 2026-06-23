@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Pagination, Tooltip, Button, Select, Input, Modal, Tag, Row, Col } from "antd";
-import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { Pagination, Tooltip, Button, Select, Input, Modal, Tag, Row, Col, message, Badge, Popover } from "antd";
+import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined, HeartOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase } from "react-icons/bs";
 import { HiOutlineBuildingOffice2, HiOutlineBookOpen } from "react-icons/hi2";
 import { useSearchParams, usePathname } from "next/navigation";
@@ -9,7 +9,13 @@ import { useAppRouter } from "@/helpers/useAppRouter";
 import CourseCardSkeleton from "@/universalUtils/CourseCardSkeleton/CourseCardSkeleton";
 import useResponsive from "@/hooks/useResponsive";
 import MobileLibraryPage from "@/mobile_views/library/MobileLibraryPage";
-import {getOneInternsip} from "@/redux/slices/internship";
+import { getOneInternsip } from "@/redux/slices/internship";
+import { getWishlist, addToWishlist, removeFromWishlist } from "@/redux/slices/wishlistSlice";
+import { getCart, addToCart } from "@/redux/slices/cartSlice";
+import WishlistDrawer from "./WishlistDrawer";
+import CartDrawer from "./CartDrawer";
+import BuyNowPopoverContent from "./BuyNowPopoverContent";
+import PriceChip from "./PriceChip";
 
 // --- Helpers ---
 const stripHtml = (html) =>
@@ -171,7 +177,9 @@ const LibraryPage = ({
   viewLabel = "View",
   searchPlaceholder = "Search…",
   idPrefix = "lib",
-  renderMetaChips
+  renderMetaChips,
+  showWishlist = false,  // NEW: toggle to enable/disable wishlist (favorites) feature
+  showBuyNow = false,    // NEW: toggle to enable/disable Cart / Buy Now feature
 }) => {
   const nav = useAppRouter();
   const searchParams = useSearchParams();
@@ -185,6 +193,79 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   const allItems = useSelector(allCoursesSelector || (() => []));
 
   const paginationData = useSelector(paginationSelector);
+
+  // --- Wishlist (favorites) state ---
+  const wishlistItems = useSelector((state) => state.wishlist?.items ?? []);
+  const wishlistLoading = useSelector((state) => state.wishlist?.loading ?? false);
+  const wishlistPendingIds = useSelector((state) => state.wishlist?.pendingIds ?? []);
+  const [wishlistOpen, setWishlistOpen] = useState(false);
+
+  const wishlistIdSet = useMemo(
+    () => new Set(wishlistItems.map((i) => i.courseId?._id || i.courseId)),
+    [wishlistItems]
+  );
+
+  useEffect(() => {
+    if (showWishlist) {
+      dispatch(getWishlist());
+    }
+  }, [dispatch, showWishlist]);
+
+  const handleWishlistToggle = async (item, e) => {
+    e?.stopPropagation?.();
+    const courseId = item?._id;
+    if (!courseId) return;
+
+    try {
+      if (wishlistIdSet.has(courseId)) {
+        await dispatch(removeFromWishlist(courseId)).unwrap();
+        message.success("Removed from wishlist");
+      } else {
+        await dispatch(addToWishlist(courseId)).unwrap();
+        message.success("Added to wishlist");
+      }
+    } catch (err) {
+      message.error(err || "Something went wrong");
+    }
+  };
+
+  // --- Cart / Buy Now state ---
+  const cartItems = useSelector((state) => state.cart?.items ?? []);
+  const cartTotalAmount = useSelector((state) => state.cart?.totalAmount ?? 0);
+  const cartLoading = useSelector((state) => state.cart?.loading ?? false);
+  const cartPendingIds = useSelector((state) => state.cart?.pendingIds ?? []);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const cartIdSet = useMemo(
+    () => new Set(cartItems.map((i) => i.courseId?._id || i.courseId)),
+    [cartItems]
+  );
+
+  useEffect(() => {
+    if (showBuyNow) {
+      dispatch(getCart());
+    }
+  }, [dispatch, showBuyNow]);
+
+  // Add to cart; if item already in cart, just open the drawer instead of re-adding
+  const handleAddToCart = async (item, e) => {
+    e?.stopPropagation?.();
+    const courseId = item?._id;
+    if (!courseId) return;
+
+    if (cartIdSet.has(courseId)) {
+      setCartOpen(true);
+      return;
+    }
+
+    try {
+      await dispatch(addToCart(courseId)).unwrap();
+      message.success("Added to cart");
+      setCartOpen(true);
+    } catch (err) {
+      message.error(err || "Failed to add to cart");
+    }
+  };
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("limit") || "6", 10);
@@ -293,9 +374,10 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   const safeAllItems = Array.isArray(allItems) ? allItems : [];
 
   // Tab filtering:
-  // "all"    → show all courses from getAllCoursesOnly API
-  // "my"     → show my enrolled courses from getAllCourses API
-  // "recent" → filter all courses created in last 6 months
+  // "all"       → show all courses from getAllCoursesOnly API
+  // "my"        → show my enrolled courses from getAllCourses API
+  // "recent"    → filter all courses created in last 6 months
+  // "wishlist"  → show only courses that are in the wishlist
   const filteredTabItems = (() => {
     if (activeTab === "all") {
       return safeAllItems;
@@ -312,6 +394,11 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
         if (!item.createdAt) return false;
         return new Date(item.createdAt) >= sixMonthsAgo;
       });
+    }
+
+    if (activeTab === "wishlist") {
+      const pool = safeAllItems.length ? safeAllItems : safeItems;
+      return pool.filter((item) => wishlistIdSet.has(item._id));
     }
 
     return [];
@@ -457,6 +544,14 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
         setSelectedItem={setSelectedItem}
         nav={nav}
         progressById={progressById}
+        showWishlist={showWishlist}
+        wishlistIdSet={wishlistIdSet}
+        wishlistPendingIds={wishlistPendingIds}
+        onWishlistToggle={handleWishlistToggle}
+        showBuyNow={showBuyNow}
+        cartIdSet={cartIdSet}
+        cartPendingIds={cartPendingIds}
+        onAddToCart={handleAddToCart}
       />
     );
   }
@@ -493,6 +588,28 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
           </div>
 
           <div className="flex items-center gap-6 lg:gap-10">
+            {showWishlist && (
+              <Badge count={wishlistItems.length} size="small" offset={[-4, 4]}>
+                <button
+                  onClick={() => setWishlistOpen(true)}
+                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group"
+                >
+                  <HeartOutlined className="text-white text-[22px] group-hover:text-[#f87171] transition-colors" />
+                  <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Wishlist</span>
+                </button>
+              </Badge>
+            )}
+            {showBuyNow && (
+              <Badge count={cartItems.length} size="small" offset={[-4, 4]}>
+                <button
+                  onClick={() => setCartOpen(true)}
+                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group"
+                >
+                  <ShoppingCartOutlined className="text-white text-[22px] group-hover:text-[#5694F0] transition-colors" />
+                  <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Cart</span>
+                </button>
+              </Badge>
+            )}
             <div className="flex flex-col items-center justify-center">
               <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">{totalEnrolled}</span>
               <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Enrolled</span>
@@ -516,6 +633,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
             { id: "all", label: `All ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
             { id: "my", label: `My ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
             { id: "recent", label: "Recently added" },
+            ...(showWishlist ? [{ id: "wishlist", label: `Wishlist (${wishlistItems.length})` }] : []),
           ].map((tab) => (
             <button
               key={tab.id}
@@ -599,12 +717,13 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
             Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
           ) : !filteredTabItems?.length ? (
             <div className="col-span-full flex flex-col items-center justify-center gap-2 py-20 px-4 text-[#8ea2b5] text-base text-center w-full">
-              <span style={{ fontSize: "2.5rem" }}>🔍</span>
+              <span style={{ fontSize: "2.5rem" }}>{activeTab === "wishlist" ? "❤️" : "🔍"}</span>
               <span>
-                No {title ? title.toLowerCase() : ""} found
-                {hasActiveFilters ? " matching your filters" : ""}.
+                {activeTab === "wishlist"
+                  ? "Your wishlist is empty."
+                  : `No ${title ? title.toLowerCase() : ""} found${hasActiveFilters ? " matching your filters" : ""}.`}
               </span>
-              {hasActiveFilters && (
+              {hasActiveFilters && activeTab !== "wishlist" && (
                 <button
                   style={{ marginTop: "0.5rem", background: "none", border: "none", color: "#1a56db", cursor: "pointer", textDecoration: "underline", fontSize: "0.95rem" }}
                   onClick={handleClearAll}
@@ -631,6 +750,11 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
               const modulesCount = item?.sections?.length || 0;
               const createdAtDate = item?.createdAt ? formatUpdatedDate(item.createdAt) : "";
 
+              const inWishlist = wishlistIdSet.has(item?._id);
+              const isWishlistLoading = wishlistPendingIds.includes(item?._id);
+              const inCart = cartIdSet.has(item?._id);
+              const isCartLoading = cartPendingIds.includes(item?._id);
+
               let statusText = "Not started";
               let buttonText = "Start";
               let statusColor = "text-[#94a3b8]";
@@ -655,7 +779,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                 item?.companyLogo ||
                 "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80";
 
-              return (
+              const cardNode = (
                 <div
                   key={item?._id}
                   onClick={(e) => { e.stopPropagation(); nav.push(getItemUrl(item)); }}
@@ -673,9 +797,20 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                         <span className="text-[#10b981] text-[11px] font-medium tracking-wide">Enrolled</span>
                       </div>
                     )}
-                    <div className="absolute top-3 right-3 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10">
-                      <BsBookmark className="text-white text-[14px]" />
-                    </div>
+                    {showWishlist && (
+                      <button
+                        onClick={(e) => handleWishlistToggle(item, e)}
+                        disabled={isWishlistLoading}
+                        aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                        className="absolute top-3 right-3 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10 cursor-pointer hover:bg-black/50 transition-colors disabled:opacity-60"
+                      >
+                        {inWishlist ? (
+                          <BsBookmarkFill className="text-[#facc15] text-[14px]" />
+                        ) : (
+                          <BsBookmark className="text-white text-[14px]" />
+                        )}
+                      </button>
+                    )}
                     <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-0.5">
                       <BsCodeSlash className="text-white/80 text-[12px]" />
                       <span className="text-white/90 text-[11px] font-medium">{item.category || "General"}</span>
@@ -727,6 +862,12 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                       {createdAtDate && <span>{createdAtDate}</span>}
                     </div>
 
+                    {showBuyNow && !isEnrolled && (
+                      <div className="mb-3">
+                        <PriceChip item={item} />
+                      </div>
+                    )}
+
                     {/* Footer */}
                     <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f1f5f9]">
                       <span className={`text-[12px] font-bold flex items-center gap-1 ${statusColor}`}>
@@ -741,6 +882,33 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                     </div>
                   </div>
                 </div>
+              );
+
+              if (!showBuyNow) {
+                return cardNode;
+              }
+
+              return (
+                <Popover
+                  key={item?._id}
+                  trigger="hover"
+                  placement="right"
+                  overlayStyle={{ maxWidth: 380 }}
+                  overlayInnerStyle={{ borderRadius: 16, padding: 0, overflow: "hidden" }}
+                  content={
+                    <BuyNowPopoverContent
+                      item={item}
+                      onAddToWishlist={(it) => handleWishlistToggle(it)}
+                      onAddToCart={(it) => handleAddToCart(it)}
+                      isInCart={inCart}
+                      isInWishlist={inWishlist}
+                      cartLoading={isCartLoading}
+                      wishlistLoading={isWishlistLoading}
+                    />
+                  }
+                >
+                  {cardNode}
+                </Popover>
               );
             })
           )}
@@ -778,6 +946,29 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
           {selectedItem && <InfoContent item={selectedItem} />}
         </div>
       </Modal>
+
+      {/* Wishlist Drawer */}
+      {showWishlist && (
+        <WishlistDrawer
+          open={wishlistOpen}
+          onClose={() => setWishlistOpen(false)}
+          items={wishlistItems}
+          loading={wishlistLoading}
+          cartIds={cartIdSet}
+        />
+      )}
+
+      {/* Cart Drawer */}
+      {showBuyNow && (
+        <CartDrawer
+          open={cartOpen}
+          onClose={() => setCartOpen(false)}
+          cartItems={cartItems}
+          totalAmount={cartTotalAmount}
+          loading={cartLoading}
+          nav={nav}
+        />
+      )}
 
       {/* Pagination — only show for my courses tab which has server pagination */}
       {activeTab === "my" && paginationData && paginationData.totalLength > 0 && !loading && (

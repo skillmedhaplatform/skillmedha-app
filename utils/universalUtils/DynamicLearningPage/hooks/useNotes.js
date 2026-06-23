@@ -45,26 +45,26 @@ export const useNotes = ({ internshipId }) => {
   const [isLoadingNote, setIsLoadingNote] = useState(false);
 
   const fetchNote = useCallback(
-    async (topicId) => {
-      if (!topicId || !internshipId) return;
-      setIsLoadingNote(true);
-      try {
-        const res = await dispatch(
-          getStudentNotes({ courseid: internshipId, topicid: topicId })
-        ).unwrap();
-        if (res?.success && Array.isArray(res.data)) {
-          setNotesList(res.data);
-        } else {
-          setNotesList([]);
-        }
-      } catch {
+  async (topicId) => {
+    if (!topicId || !internshipId) return;
+    setIsLoadingNote(true);
+    try {
+      const res = await dispatch(
+        getStudentNotes({ courseid: internshipId, topicid: topicId })
+      ).unwrap();
+      if (res?.success && Array.isArray(res.data)) {
+        setNotesList(res.data);
+      } else {
         setNotesList([]);
-      } finally {
-        setIsLoadingNote(false);
       }
-    },
-    [dispatch, internshipId]
-  );
+    } catch {
+      setNotesList([]);
+    } finally {
+      setIsLoadingNote(false);
+    }
+  },
+  [dispatch, internshipId]
+);
 
   const handleSaveNewNote = useCallback(
     async (currentTopic, currentSection) => {

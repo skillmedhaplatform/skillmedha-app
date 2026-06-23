@@ -48,9 +48,14 @@ export default function StudentAuthGuard({ children, serverToken }) {
   }, [studentCreds?._id, dispatch]);
 
   useEffect(() => {
-    if (currPath === "/") {
-      if (isSpecialOrg) nav.replace("/student/tests");
-      else nav.replace("/dashboard");
+    if (isSpecialOrg) {
+      if (currPath === "/" || currPath === "/student/dashboard" || currPath === "/dashboard") {
+        nav.replace("/student/tests");
+      }
+    } else {
+      if (currPath === "/") {
+        nav.replace("/dashboard");
+      }
     }
   }, [currPath, isSpecialOrg, nav]);
 
