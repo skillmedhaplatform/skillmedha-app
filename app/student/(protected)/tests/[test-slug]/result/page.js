@@ -330,8 +330,10 @@ export default function Page() {
   }
 
   return (
-    <>
-      <StudentPageHeader section="Assessment" title="Test Result" />
+    <div style={{ height: "calc(100vh - 72px)", display: "flex", flexDirection: "column", overflow: "hidden", margin: "0", padding: "0" }}>
+      <div className="z-50 shrink-0">
+        <StudentPageHeader title="Test Result" />
+      </div>
       <div className={resultStyles.main}>
         <div className={resultStyles.content}>
           
@@ -418,6 +420,8 @@ export default function Page() {
                           series={chartData?.series}
                           labels={chartData?.labels}
                           colors={chartData?.colors}
+                          width={"100%"}
+                          height={"100%"}
                         />
                       )}
                     </div>
@@ -584,6 +588,6 @@ export default function Page() {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
