@@ -43,16 +43,23 @@ export default function ProfileLayout({ children }) {
         const allJobs = response.data?.data || [];
         
         let applicantsCount = 0;
-        let jobsCount = allJobs.length;
+        let activeJobsCount = 0;
 
         allJobs.forEach((job) => {
-          if (job.applicants && Array.isArray(job.applicants)) {
+          if (job.status === "active") {
+            activeJobsCount++;
+          }
+          if (
+            job.status === "active" &&
+            job.applicants &&
+            Array.isArray(job.applicants)
+          ) {
             applicantsCount += job.applicants.length;
           }
         });
 
         setStats({
-          totalJobs: jobsCount,
+          totalJobs: activeJobsCount,
           totalApplicants: applicantsCount,
         });
       } catch (err) {

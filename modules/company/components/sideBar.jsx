@@ -19,7 +19,8 @@ import {
   HiOutlineBriefcase,
   HiOutlineClipboardDocumentCheck,
   HiOutlineUser,
-  HiOutlineQuestionMarkCircle
+  HiOutlineQuestionMarkCircle,
+  HiOutlineVideoCamera
 } from "react-icons/hi2";
 
 const sideBarTitles = [
@@ -42,10 +43,10 @@ const sideBarTitles = [
     icon: <HiOutlineClipboardDocumentCheck size={22} />,
   },
   {
-    name: "Help",
+    name: "Live Monitoring",
     slug: "help",
     path: "/company/help",
-    icon: <HiOutlineQuestionMarkCircle size={22} />,
+    icon: <HiOutlineVideoCamera size={22} />,
   },
 ];
 

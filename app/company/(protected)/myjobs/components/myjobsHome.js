@@ -86,7 +86,11 @@ export default function MyjobsHome() {
           else if (job.status === "expired") expired++;
           else if (job.status === "pending") drafts++;
           
-          if (job.applicants && Array.isArray(job.applicants)) {
+          if (
+            (job.status === "active" || job.status === "expired") &&
+            job.applicants &&
+            Array.isArray(job.applicants)
+          ) {
             applicantsCount += job.applicants.length;
           }
         });
