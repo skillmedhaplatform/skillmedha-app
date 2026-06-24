@@ -121,7 +121,7 @@ export default function CardsList({ type }) {
   }
   if (type === "notifications") {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden max-h-[255px] pb-2 px-1">
         {
         // data?.filter((d) => d?.status !== "pending")        
         data?.filter((d) => d?.status === "active")
