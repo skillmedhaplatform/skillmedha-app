@@ -86,7 +86,7 @@ export default function PracticeCard({
       />
       
       {/* Top Section */}
-      <div className="p-6 pb-4 flex items-start gap-4">
+      <div className="p-4 xl:p-6 pb-4 flex items-center gap-3 xl:gap-4">
         {/* Icon Box */}
         <div 
           className="w-[42px] h-[42px] rounded-lg flex items-center justify-center shrink-0 shadow-sm"
@@ -95,14 +95,14 @@ export default function PracticeCard({
           {getIcon()}
         </div>
         
-        <div className="flex-1 mt-0.5">
-          <h3 className="text-[15px] font-bold text-gray-900 m-0 leading-tight mb-1.5">{title}</h3>
+        <div className="flex-1">
+          <h3 className="text-[15px] font-bold text-gray-900 m-0 leading-tight mb-1">{title}</h3>
           <p className="text-[10px] font-bold text-gray-500 m-0 uppercase tracking-widest">{subjectTitle} • {category}</p>
         </div>
       </div>
       
       {/* Stats Section */}
-      <div className="flex px-6 py-2">
+      <div className="flex px-4 xl:px-6 py-2">
         <div className="flex flex-col items-center justify-center flex-1">
           <span className="text-[16px] font-bold text-gray-800 leading-none mb-1.5">{totalQuestions}</span>
           <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">QUESTIONS</span>
@@ -115,9 +115,9 @@ export default function PracticeCard({
       </div>
       
       {/* Progress Section */}
-      <div className="px-6 pt-4 pb-5">
+      <div className="px-4 xl:px-6 pt-4 pb-5">
         <div className="flex justify-between items-center gap-3">
-          <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div 
               className="h-full rounded-full transition-all duration-500" 
               style={{ width: `${progress}%`, backgroundColor: theme.border }}
@@ -128,7 +128,7 @@ export default function PracticeCard({
       </div>
       
       {/* Footer Section */}
-      <div className="px-6 pb-6 flex items-center justify-between mt-auto">
+      <div className="px-4 xl:px-6 pb-4 xl:pb-6 flex items-center justify-between mt-auto">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-[#24A058]"></div>
           <span className="text-[11px] font-bold text-[#24A058]">Active</span>

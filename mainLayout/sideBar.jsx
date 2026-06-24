@@ -188,21 +188,6 @@ const SideBar = ({ activeView, setView }) => {
             { key: "/student/tests", label: "My Tests", style: itemStyle },
           ],
         };
-      } else if (isPractice) {
-        menuItem = {
-          key: "practice",
-          icon: currentItem.icon,
-          label: "Practice",
-          style: itemStyle,
-          children: practiceSubs.map((sub) => ({
-            key: `practice|${sub.name}|${sub.path}`,
-            label: sub.name,
-            style: {
-              opacity: sub.active && !locked ? 1 : 0.5,
-              cursor: sub.active && !locked ? "pointer" : "not-allowed",
-            },
-          })),
-        };
       } else {
         menuItem = {
           key: currentItem.path,

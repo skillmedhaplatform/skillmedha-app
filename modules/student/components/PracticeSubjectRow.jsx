@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Pagination, Spin } from "antd";
 import PracticeCard from "./PracticeCard";
 import { useRouter, usePathname } from "next/navigation";
@@ -14,13 +15,13 @@ const getAuthHeaders = () => ({
   Authorization: `Bearer ${getLstorage("token")}`,
 });
 
-export default function PracticeSubjectRow({ subject }) {
+export default function PracticeSubjectRow({ subject, pageSizeOverride }) {
   const router = useRouter();
   const pathname = usePathname();
   const [currentPage, setCurrentPage] = useState(1);
   const [subtopics, setSubtopics] = useState([]);
   const [loading, setLoading] = useState(true);
-  const pageSize = 3; // 1 row of 3
+  const pageSize = pageSizeOverride || 4; // default 1 row of 4
 
   useEffect(() => {
     let isMounted = true;
@@ -85,9 +86,40 @@ export default function PracticeSubjectRow({ subject }) {
     router.push(`${basePath}?subT=${subtopic._id}&t=${subtopic.topicId}&sub=${subject._id}`);
   };
 
+  // Variants for scroll-in animation
+  const rowVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
+
+  // Variants for pagination changes
+  const cardVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: { duration: 0.3, ease: "easeOut" }
+    },
+    exit: { 
+      opacity: 0, 
+      x: 20,
+      transition: { duration: 0.2, ease: "easeIn" }
+    }
+  };
+
   return (
-    <div className="mb-12">
-      <div className="flex items-center justify-between mb-6">
+    <motion.div 
+      className="mb-2 last:mb-6 mt-1"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.1 }}
+      variants={rowVariants}
+    >
+      <div className="flex items-center justify-between mb-2">
         <h2 className="text-[20px] font-bold text-[#071631] m-0">{subject.title}</h2>
         {subtopics.length > pageSize && (
           <Pagination
@@ -101,19 +133,28 @@ export default function PracticeSubjectRow({ subject }) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentSubtopics.map((subtopic) => (
-          <PracticeCard
-            key={subtopic._id}
-            title={subtopic.title}
-            category={subtopic.topicTitle || subject.title}
-            totalQuestions={subtopic.totalQuestions || 0}
-            attempts={0}
-            onStart={() => handleStart(subtopic)}
-            subjectTitle={subject.title}
-          />
-        ))}
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div 
+          key={currentPage}
+          className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6"
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={cardVariants}
+        >
+          {currentSubtopics.map((subtopic) => (
+            <PracticeCard
+              key={subtopic._id}
+              title={subtopic.title}
+              category={subtopic.topicTitle || subject.title}
+              totalQuestions={subtopic.totalQuestions || 0}
+              attempts={0}
+              onStart={() => handleStart(subtopic)}
+              subjectTitle={subject.title}
+            />
+          ))}
+        </motion.div>
+      </AnimatePresence>
       
       {/* Pagination on bottom for mobile */}
       <div className="flex justify-end mt-6 lg:hidden">
@@ -128,6 +169,6 @@ export default function PracticeSubjectRow({ subject }) {
           />
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
