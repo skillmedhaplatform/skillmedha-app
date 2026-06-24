@@ -121,7 +121,7 @@ export default function CardsList({ type }) {
   }
   if (type === "notifications") {
     return (
-      <>
+      <div className="flex flex-col gap-3">
         {
         // data?.filter((d) => d?.status !== "pending")        
         data?.filter((d) => d?.status === "active")
@@ -209,7 +209,7 @@ export default function CardsList({ type }) {
               />
             );
           })}
-      </>
+      </div>
     );
   }
 }

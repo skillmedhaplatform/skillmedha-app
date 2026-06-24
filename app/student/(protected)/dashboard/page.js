@@ -161,19 +161,14 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick,onCardClick }) 
 
 
 const ProfileSection = ({ profileValues, router, studentCreds }) => (
-  <div className="w-full flex flex-col items-center">
-    <div className="w-full flex justify-between items-center mb-1">
-      <div className="flex flex-col">
-        <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px]">Overall performance</h3>
-        <span className="text-[12px] text-[#64748b] font-bold mt-1">Profile completion rate</span>
-      </div>
-    </div>
-
-    <div className="relative flex justify-center mb-1 mt-6">
+  <div className="w-full flex flex-col items-start h-full pb-2">
+    <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 shrink-0">Overall performance</h3>
+    <div className="flex items-center justify-between w-full mt-2 shrink-0 px-1">
+      <span className="text-[13px] text-[#64748b] font-bold">Profile completion rate</span>
       <Progress
         type="circle"
         percent={profileValues?.percentage || 12}
-        size={48}
+        size={42}
         strokeWidth={10}
         strokeColor="#1E69DA"
         trailColor="#f1f5f9"
@@ -183,20 +178,22 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
       />
     </div>
 
-    <Button
-      className="w-full mt-4 h-9 font-bold text-[14px] flex items-center justify-center gap-2 transition-all hover:opacity-90 !text-white !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
-      style={{ borderRadius: '8px' }}
-      onClick={() => router.push("/student/profile/basic-details")}
-    >
-      <span className="text-[16px] ">⚡</span> Complete your profile
-    </Button>
+    <div className="mt-auto w-full pt-2 shrink-0">
+      <Button
+        className="w-full h-9 font-bold text-[14px] flex items-center justify-center gap-2 transition-all hover:opacity-90 !text-white !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
+        style={{ borderRadius: '8px' }}
+        onClick={() => router.push("/student/profile/basic-details")}
+      >
+        <span className="text-[16px] ">⚡</span> Complete your profile
+      </Button>
+    </div>
   </div>
 );
 
 const Achievements = () => (
-  <div className="w-full">
-    <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-4 sticky top-0 bg-white z-10 pt-2">Achievements</h3>
-    <div className="flex flex-col gap-3">
+  <div className="w-full h-full flex flex-col">
+    <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 sticky top-0 bg-white z-10 pt-1 shrink-0">Achievements</h3>
+    <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden flex-1 pb-2">
       <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white">
         <div className="flex items-center gap-3">
           <div className="text-[24px]">⭐</div>
@@ -555,7 +552,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Continue Learning Section with Pagination */}
-          <div className="w-full rounded-2xl bg-white py-6 px-4 lg:px-8 shadow-sm border border-[#e2e8f0]">
+          <div className="w-full rounded-2xl bg-white py-4 px-4 lg:px-6 shadow-sm border border-[#e2e8f0]">
             <div className="flex items-center justify-between mb-4">
               <div className="text-[18px] lg:text-[22px] font-extrabold">
                 <span>Continue Learning</span>
@@ -584,7 +581,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <>
-                <div className="flex flex-col gap-4 w-full min-h-[380px]">
+                <div className="flex flex-col gap-3 w-full">
                   {paginatedLearningData.map((item) => {
                     const hasLastAccessed = item?.lastAccessedSection !== undefined && item?.lastAccessedSection !== null;
                     const handleNavigate = () => {
@@ -613,7 +610,7 @@ export default function DashboardPage() {
                     const isProgressLoading = fetchedProgress?.loading;
 
                     return (
-                      <div key={item._id} className="flex flex-col md:flex-row items-center justify-between p-4 bg-white border border-[#e2e8f0] rounded-[16px] hover:shadow-md transition-shadow">
+                      <div key={item._id} className="flex flex-col md:flex-row items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-[16px] hover:shadow-md transition-shadow">
                         {/* Left Side: Icon & Info */}
                         <div className="flex items-center gap-4 w-full md:w-auto">
                           <div className={`w-[50px] h-[50px] rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${isInternship ? 'bg-[#e1f5fe]' : 'bg-[#e8f5e9]'}`}>
@@ -733,10 +730,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="hidden lg:flex w-[280px] xl:w-[320px] h-full flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] p-4 pb-2 shrink-0 z-10 shadow-sm relative">
+        <div className="hidden lg:flex w-[280px] xl:w-[320px] h-full flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] px-4 pt-2 pb-2 shrink-0 z-10 shadow-sm relative">
           <div className="w-full flex flex-col overflow-hidden flex-1 h-full">
             {/* Section 1: Overall Performance */}
-            <div className="shrink-0 w-full">
+            <div className="w-full min-h-0" style={{ flex: 20 }}>
               <ProfileSection
                 profileValues={profileValues}
                 router={router}
@@ -745,21 +742,28 @@ export default function DashboardPage() {
             </div>
             
             {/* Section 2: Notice Board */}
-            <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden w-full mt-4 flex flex-col relative border-t border-[#f1f5f9] pt-4">
-              <div className="w-full flex items-center justify-between mb-4 sticky top-0 bg-white z-10">
+            <div className="w-full flex flex-col relative border-t border-[#f1f5f9] pt-2 min-h-0" style={{ flex: 40 }}>
+              <div className="w-full flex items-center justify-between mb-3 sticky top-0 bg-white z-10 shrink-0">
                 <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px]">Notice Board</h3>
+                <svg width="0" height="0" className="absolute">
+                  <linearGradient id="expandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop stopColor="#1E69DA" offset="0%" />
+                    <stop stopColor="#5694F0" offset="100%" />
+                  </linearGradient>
+                </svg>
                 <HiOutlineArrowsExpand
-                  className="text-[1.2rem] cursor-pointer text-[#24A058] transition-transform duration-200 hover:scale-125"
+                  className="text-[1.2rem] cursor-pointer transition-transform duration-200 hover:scale-125"
+                  style={{ stroke: "url(#expandGradient)" }}
                   onClick={() => setIsNoticeModalOpen(true)}
                 />
               </div>
-              <div className="w-full flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+              <div className="w-full flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pb-1">
                 <CardsList type="notifications" />
               </div>
             </div>
             
             {/* Section 3: Achievements */}
-            <div className="shrink-0 w-full mt-4 relative border-t border-[#f1f5f9] pt-4">
+            <div className="w-full relative border-t border-[#f1f5f9] pt-1 min-h-0" style={{ flex: 40 }}>
               <Achievements />
             </div>
           </div>
