@@ -517,7 +517,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <section className="w-full h-full flex flex-col items-stretch lg:pt-0">
+    <section className="w-full h-full flex flex-col items-stretch lg:pt-0 bg-[#EFF5FB]">
       {/* Welcome Section - Top Full Width */}
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         {/* Decorative Icons matching TPO Portal */}

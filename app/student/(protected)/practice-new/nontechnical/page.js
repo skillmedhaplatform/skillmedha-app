@@ -109,7 +109,7 @@ export default function NontechnicalPage() {
   );
 
   return (
-      <div className="flex flex-col h-[calc(100vh-60px)] overflow-hidden">
+      <div className="flex flex-col h-[calc(100vh-60px)] overflow-hidden bg-[#EFF5FB]">
         <div className="flex-shrink-0">
           <StudentPageHeader 
             title="Non-technical practice" 

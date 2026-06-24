@@ -557,7 +557,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   }
 
   return (
-    <div className="flex flex-col gap-0 relative bg-white min-h-screen">
+    <div className="flex flex-col gap-0 relative bg-[#EFF5FB] min-h-screen">
       {/* Banner */}
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-between p-4 lg:px-8 pt-6 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         <div className="absolute inset-0 pointer-events-none z-[1]">
