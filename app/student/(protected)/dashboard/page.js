@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getAllCourses,
@@ -96,12 +97,12 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, o
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
+        <div className="flex flex-col gap-2 px-3 pt-3 pb-2 flex-1">
           <div className="flex items-center justify-between min-h-[52px]">
             <div className="text-[#1E69DA] text-[18px] font-bold leading-tight line-clamp-2">{item?.title}</div>
           </div>
 
-          <div className="flex flex-wrap gap-1.5 h-[26px] overflow-hidden">
+          <div className="flex flex-wrap gap-1.5 h-[26px] overflow-hidden shrink-0">
             {item?.sections?.length ? (
               <span className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
                 {item?.sections?.length} Modules
@@ -125,19 +126,20 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, o
             })()}
           </p>
 
-          <div className="flex items-center justify-between gap-2 mt-auto pt-2">
-            {item?.lastAssignmentUpdate || item?.updatedAt ? (
-              <div className="text-[#8ea2b5] text-[12px]" aria-label="Last updated">
-                Updated{" "}
-                {formatUpdatedDate?.(
-                  item?.lastAssignmentUpdate || item?.updatedAt
-                )}
-              </div>
-            ) : null}
-          </div>
+          <div className="mt-auto flex flex-col justify-end pt-2">
+            <div className="flex items-center justify-between gap-2 h-[20px]">
+              {item?.lastAssignmentUpdate || item?.updatedAt ? (
+                <div className="text-[#8ea2b5] text-[12px]" aria-label="Last updated">
+                  Updated{" "}
+                  {formatUpdatedDate?.(
+                    item?.lastAssignmentUpdate || item?.updatedAt
+                  )}
+                </div>
+              ) : null}
+            </div>
 
-          {total > 0 && (
-            <div className="flex justify-center items-center gap-3 mt-2" onClick={(e) => e.stopPropagation()}>
+            {total > 0 && (
+              <div className="flex justify-center items-center gap-3 mt-2 h-[24px]" onClick={(e) => e.stopPropagation()}>
               {total > 1 && (
                 <button
                   className="text-[#9ca3af] hover:text-[#1E69DA] transition-colors p-1"
@@ -191,6 +193,7 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, o
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
@@ -202,7 +205,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
   <div className="w-full flex flex-col items-start pb-2">
     <h3 className="m-0 font-extrabold text-[#0f172a] text-[16px] xl:text-[18px] mb-3 shrink-0">Overall Performance</h3>
 
-    <div className="w-full bg-white rounded-[16px] py-2 px-3 flex items-center gap-3 border border-[#e2e8f0] shrink-0 mb-3">
+    <div className="w-full bg-[#FAFAFA] rounded-[16px] py-2 px-3 flex items-center gap-3 border border-[#e2e8f0] shrink-0 mb-3">
       <div className="shrink-0 relative">
         <Progress
           type="circle"
@@ -224,7 +227,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
 
     <div className="w-full shrink-0">
       <Button
-        className="w-full h-[38px] flex items-center justify-between px-2 transition-all hover:opacity-90 !text-white !bg-[#3b82f6] !border-none"
+        className="w-full h-[38px] flex items-center justify-between px-2 transition-all hover:opacity-90 !text-white !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
         style={{ borderRadius: '8px' }}
         onClick={() => router.push("/student/profile/basic-details")}
       >
@@ -249,7 +252,7 @@ const Achievements = () => (
   <div className="w-full flex flex-col">
     <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 sticky top-0 bg-white z-10 pt-1 shrink-0">Achievements</h3>
     <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden max-h-[250px] pb-2">
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
         <div className="flex items-center gap-3">
           <div className="text-[24px]">⭐</div>
           <div className="flex flex-col">
@@ -259,7 +262,7 @@ const Achievements = () => (
         </div>
         <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
       </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
         <div className="flex items-center gap-3">
           <div className="text-[24px]">🔥</div>
           <div className="flex flex-col">
@@ -269,7 +272,7 @@ const Achievements = () => (
         </div>
         <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
       </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
         <div className="flex items-center gap-3">
           <div className="text-[24px]">🎓</div>
           <div className="flex flex-col">
@@ -279,7 +282,7 @@ const Achievements = () => (
         </div>
         <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
       </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
         <div className="flex items-center gap-3">
           <div className="text-[24px]">🎉</div>
           <div className="flex flex-col">
@@ -639,8 +642,15 @@ export default function DashboardPage() {
                 <Spin size="large" />
               </div>
             ) : (
-              <>
-                <div className="flex flex-col gap-3 w-full">
+              <AnimatePresence mode="wait">
+                <motion.div 
+                  key={currentPage}
+                  className="flex flex-col gap-3 w-full"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
                   {paginatedLearningData.map((item) => {
                     const hasLastAccessed = item?.lastAccessedSection !== undefined && item?.lastAccessedSection !== null;
                     const handleNavigate = () => {
@@ -721,8 +731,8 @@ export default function DashboardPage() {
                       </div>
                   );
                 })}
-              </div>
-              </>
+              </motion.div>
+              </AnimatePresence>
             )}
           </div>
           {/* Grouped Recommended Section */}
@@ -734,20 +744,31 @@ export default function DashboardPage() {
                     <div className="w-full text-left mb-3 pl-4">
                       <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Course</span>
                     </div>
-                    <div className="w-full h-full flex flex-col justify-between">
-                      <RecommendedCard
-                        item={allCoursesOnly[recCourseIndex % allCoursesOnly.length]}
-                        total={allCoursesOnly.length}
-                        currentIndex={recCourseIndex}
-                        onDotClick={setRecCourseIndex}
-                        onPrevClick={() => setRecCourseIndex(prev => prev === 0 ? allCoursesOnly.length - 1 : prev - 1)}
-                        onNextClick={() => setRecCourseIndex(prev => prev + 1)}
-                        onCardClick={(item) => {
-                          router.push(
-                            `/student/course`
-                          );
-                        }}
-                      />
+                    <div className="w-full h-full flex flex-col justify-between overflow-hidden">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={recCourseIndex}
+                          initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.96, y: -10 }}
+                          transition={{ duration: 0.35, ease: "easeInOut" }}
+                          className="w-full h-full"
+                        >
+                          <RecommendedCard
+                            item={allCoursesOnly[recCourseIndex % allCoursesOnly.length]}
+                            total={allCoursesOnly.length}
+                            currentIndex={recCourseIndex}
+                            onDotClick={setRecCourseIndex}
+                            onPrevClick={() => setRecCourseIndex(prev => prev === 0 ? allCoursesOnly.length - 1 : prev - 1)}
+                            onNextClick={() => setRecCourseIndex(prev => prev + 1)}
+                            onCardClick={(item) => {
+                              router.push(
+                                `/student/course`
+                              );
+                            }}
+                          />
+                        </motion.div>
+                      </AnimatePresence>
                       <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
                         <div
                           key={`course-${recCourseIndex}`}
@@ -763,20 +784,31 @@ export default function DashboardPage() {
                     <div className="w-full text-left mb-3 pl-4">
                       <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Internship</span>
                     </div>
-                    <div className="w-full h-full flex flex-col justify-between">
-                      <RecommendedCard
-                        item={allInternshipsOnly[recInternshipIndex % allInternshipsOnly.length]}
-                        total={allInternshipsOnly.length}
-                        currentIndex={recInternshipIndex}
-                        onDotClick={setRecInternshipIndex}
-                        onPrevClick={() => setRecInternshipIndex(prev => prev === 0 ? allInternshipsOnly.length - 1 : prev - 1)}
-                        onNextClick={() => setRecInternshipIndex(prev => prev + 1)}
-                        onCardClick={(item) => {
-                          router.push(
-                            `/student/internshipLibrary`                          
-                          );
-                        }}
-                      />
+                    <div className="w-full h-full flex flex-col justify-between overflow-hidden">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={recInternshipIndex}
+                          initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.96, y: -10 }}
+                          transition={{ duration: 0.35, ease: "easeInOut" }}
+                          className="w-full h-full"
+                        >
+                          <RecommendedCard
+                            item={allInternshipsOnly[recInternshipIndex % allInternshipsOnly.length]}
+                            total={allInternshipsOnly.length}
+                            currentIndex={recInternshipIndex}
+                            onDotClick={setRecInternshipIndex}
+                            onPrevClick={() => setRecInternshipIndex(prev => prev === 0 ? allInternshipsOnly.length - 1 : prev - 1)}
+                            onNextClick={() => setRecInternshipIndex(prev => prev + 1)}
+                            onCardClick={(item) => {
+                              router.push(
+                                `/student/internshipLibrary`                          
+                              );
+                            }}
+                          />
+                        </motion.div>
+                      </AnimatePresence>
                       <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
                         <div
                           key={`internship-${recInternshipIndex}`}

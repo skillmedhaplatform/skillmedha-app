@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import {
   fetchSubjectsByType,
@@ -138,20 +139,29 @@ export default function CodingPage() {
         </div>
 
         {filteredSubjects && filteredSubjects.length > 0 ? (
-        <div className="bg-gray-50/30 px-4 lg:px-8 pt-6 pb-6 flex-1 overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
-            {filteredSubjects.map((subject, index) => (
-              <PracticeCard 
-                key={subject._id || index}
-                title={subject.title || subject.key}
-                category="CODING"
-                totalQuestions={subject.totalQuestions || 0}
-                onStart={() => {
-                  router.push(`/student/practice-new/coding/codingtest?sub=${subject._id}`);
-                }}
-              />
-            ))}
-          </div>
+        <div className={`bg-gray-50/30 px-4 lg:px-8 pt-6 pb-6 flex-1 ${activeCategory === "All" ? "overflow-y-auto" : "overflow-hidden"}`}>
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={activeCategory}
+              className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              {filteredSubjects.map((subject, index) => (
+                <PracticeCard 
+                  key={subject._id || index}
+                  title={subject.title || subject.key}
+                  category="CODING"
+                  totalQuestions={subject.totalQuestions || 0}
+                  onStart={() => {
+                    router.push(`/student/practice-new/coding/codingtest?sub=${subject._id}`);
+                  }}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
         ) : (
           <Result

@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import {
   fetchSubjectsByType,
@@ -134,13 +135,24 @@ export default function NontechnicalPage() {
 
         {filteredSubjects && filteredSubjects.length > 0 ? (
         <div className={`bg-gray-50/30 px-4 lg:px-8 pt-0 pb-6 flex-1 ${activeCategory === "All" ? "overflow-y-auto" : "overflow-hidden"}`}>
-          {filteredSubjects.map((subject, index) => (
-            <PracticeSubjectRow 
-              key={subject._id || index} 
-              subject={subject} 
-              pageSizeOverride={activeCategory === "All" ? 4 : 8}
-            />
-          ))}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeCategory}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full"
+            >
+              {filteredSubjects.map((subject, index) => (
+                <PracticeSubjectRow 
+                  key={subject._id || index} 
+                  subject={subject} 
+                  pageSizeOverride={activeCategory === "All" ? 4 : 8}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
         ) : (
           <Result
