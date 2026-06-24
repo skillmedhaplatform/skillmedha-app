@@ -8,6 +8,7 @@ import { FaDownload } from "react-icons/fa6";
 import { FaShareAlt } from "react-icons/fa";
 import { HiDotsVertical } from "react-icons/hi";
 import html2pdf from "html2pdf.js";
+import PageHeader from "@/modules/tpo/components/PageHeader";
 import {
   Modal,
   Form,
@@ -92,9 +93,8 @@ export default function ResultsPage() {
 
     const opt = {
       margin: 0.5,
-      filename: `${
-        StudentDetails?.userName || "candidate"
-      }_assessment_results.pdf`,
+      filename: `${StudentDetails?.userName || "candidate"
+        }_assessment_results.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: {
         scale: 2,
@@ -115,20 +115,26 @@ export default function ResultsPage() {
   return (
     <>
       <div className={styles.mainCont} ref={mainRef}>
-        <Header
-          candidate={StudentDetails}
-          jobData={oneJobData}
-          onDownload={handleDownload}
-          AssessmentResults={AssessmentResults[0]}
+        <PageHeader
+          title={oneJobData?.jobTitle ? `${oneJobData.jobTitle} - ${StudentDetails?.userName || "Candidate"} Results` : "Assessment Results"}
+          subtitle="View detailed assessment results and schedule interviews"
         />
-        <About candidate={StudentDetails} />
-        <TestSummaryCard AssessmentResults={AssessmentResults[0]} />
-        {/* <ProctoringCard /> */}
-        <ReportCard
-          AssessmentResults={AssessmentResults[0]}
-          Questions={Questions}
-        />
-        {/* <ReviewInputCard /> */}
+        <div style={{ padding: "0 1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <Header
+            candidate={StudentDetails}
+            jobData={oneJobData}
+            onDownload={handleDownload}
+            AssessmentResults={AssessmentResults[0]}
+          />
+          <About candidate={StudentDetails} />
+          <TestSummaryCard AssessmentResults={AssessmentResults[0]} />
+          {/* <ProctoringCard /> */}
+          <ReportCard
+            AssessmentResults={AssessmentResults[0]}
+            Questions={Questions}
+          />
+          {/* <ReviewInputCard /> */}
+        </div>
       </div>
     </>
   );
@@ -356,7 +362,7 @@ const ReportCard = ({ AssessmentResults, Questions }) => {
 
   return (
     <div className={styles.questionListCont}>
-      <h2 style={{ color: "#25A3A6" }}>Detailed Submission report</h2>
+      <h2 style={{ color: "#6BA8ED" }}>Detailed Submission report</h2>
       {Questions?.map((q, i) => {
         const renderCurrQues = AssessmentResults?.response?.[q?._id];
         const selectedAns = renderCurrQues?.answers?.[0];
@@ -528,20 +534,20 @@ const Header = ({ candidate, jobData, onDownload, AssessmentResults }) => {
             height={"100%"}
           />
         </div>
-        <p style={{ color: "#25a3a6", fontSize: "1.2rem", fontWeight: "800" }}>
+        <p style={{ color: "#6BA8ED", fontSize: "1.2rem", fontWeight: "800" }}>
           {candidate?.userName || ""}
         </p>
         <p>{currJobStatus?.status?.toUpperCase() || "Pending"}</p>
       </div>
       <div className={styles.right}>
         <Button type="text" onClick={onDownload}>
-          <FaDownload style={{ color: "#25a3a6" }} /> Download
+          <FaDownload style={{ color: "#6BA8ED" }} /> Download
         </Button>
 
         <Dropdown menu={{ items }} trigger={["click"]} placement="bottomLeft">
           <Button
             type="primary"
-            style={{ backgroundColor: "#25A3A6", borderColor: "#25A3A6" }}
+            style={{ backgroundColor: "#6BA8ED", borderColor: "#6BA8ED" }}
           >
             Actions <DownOutlined />
           </Button>
@@ -562,7 +568,7 @@ const About = ({ candidate }) => {
   return (
     <div className={styles.AboutCard}>
       <div className={styles.aboutHeader}>
-        <p style={{ color: "#25a3a6", fontSize: "1.2rem", fontWeight: "800" }}>
+        <p style={{ color: "#6BA8ED", fontSize: "1.2rem", fontWeight: "800" }}>
           About {candidate?.userName}
         </p>
       </div>
@@ -617,9 +623,8 @@ const TestSummaryCard = ({ AssessmentResults }) => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
 
-    return `${hours > 0 ? hours + " Hr " : ""}${
-      minutes > 0 ? minutes + " Min " : ""
-    }${seconds > 0 ? seconds + " Sec" : ""}`;
+    return `${hours > 0 ? hours + " Hr " : ""}${minutes > 0 ? minutes + " Min " : ""
+      }${seconds > 0 ? seconds + " Sec" : ""}`;
   }
 
   const results = {
@@ -637,8 +642,8 @@ const TestSummaryCard = ({ AssessmentResults }) => {
     testDuration:
       AssessmentResults?.testStartedAt && AssessmentResults?.testEndedAt
         ? formatDuration(
-            +AssessmentResults?.testEndedAt - +AssessmentResults?.testStartedAt
-          )
+          +AssessmentResults?.testEndedAt - +AssessmentResults?.testStartedAt
+        )
         : "",
   };
 
@@ -857,7 +862,7 @@ const ScheduleInterviewModal = ({
         </Form.Item>
 
         <div style={{ marginBottom: "24px" }}>
-          <h4 style={{ color: "#25A3A6", marginBottom: "16px" }}>
+          <h4 style={{ color: "#6BA8ED", marginBottom: "16px" }}>
             Candidate Details
           </h4>
 
@@ -913,7 +918,7 @@ const ScheduleInterviewModal = ({
         </div>
 
         <div style={{ marginBottom: "24px" }}>
-          <h4 style={{ color: "#25A3A6", marginBottom: "16px" }}>
+          <h4 style={{ color: "#6BA8ED", marginBottom: "16px" }}>
             Interviewer Details
           </h4>
 
@@ -966,7 +971,7 @@ const ScheduleInterviewModal = ({
             type="primary"
             htmlType="submit"
             loading={loading}
-            style={{ backgroundColor: "#25A3A6", borderColor: "#25A3A6" }}
+            style={{ backgroundColor: "#6BA8ED", borderColor: "#6BA8ED" }}
           >
             Schedule Interview
           </Button>

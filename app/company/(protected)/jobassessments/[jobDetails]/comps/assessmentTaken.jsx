@@ -6,10 +6,16 @@ import {
   getAllAppliedStudentsWithAssesmentResults,
   updateStudentAndJobStatus,
 } from "@/redux/slices/company/skillMedhaData";
-import { Dropdown, Modal, Table, Tag } from "antd";
+import { Dropdown, Modal, Table, Tag, Pagination } from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { useParams, useRouter } from "next/navigation";
+import JobStyles from "../../../myjobs/components/myJobsStyles.module.scss";
+import {
+  HiOutlineUser,
+  HiOutlineCheckCircle,
+  HiOutlineVideoCamera,
+} from "react-icons/hi2";
 
 const AssessmentTaken = () => {
   const { value: { data: oneJobData } = {}, status } = useSelector(
@@ -214,57 +220,157 @@ const AssessmentTaken = () => {
     }
   );
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(4);
+
+  const onPageChange = (page, newPageSize) => {
+    setCurrentPage(page);
+    setPageSize(newPageSize);
+  };
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentDataSource = dataSource?.slice(startIndex, endIndex) || [];
+
   return (
     <div className={AtStyles.container}>
-      <div className={AtStyles.headContainer}>
-        <div className={AtStyles.title}>{oneJobData?.jobTitle}</div>
-      </div>
-
-      <div className={AtStyles.cardsGrid}>
+      <div className={JobStyles.statsGrid} style={{ padding: "1rem" }}>
         {/* Card 1 */}
-        <div className={AtStyles.card}>
-          <h2 className={AtStyles.cardTitle}>Active Applicants</h2>
-          <p className={AtStyles.cardNumber}>
-            {appliedStudentsWithAssesmentResults?.length}
-          </p>
+        <div className={JobStyles.statCard}>
+          <div className={JobStyles.statIcon} style={{ backgroundColor: "rgba(107, 168, 237, 0.1)", color: "#6BA8ED" }}>
+            <HiOutlineUser size={22} />
+          </div>
+          <div className={JobStyles.statTextCont}>
+            <span className={JobStyles.statValue}>{appliedStudentsWithAssesmentResults?.length || 0}</span>
+            <span className={JobStyles.statLabel}>Active Applicants</span>
+          </div>
         </div>
 
         {/* Card 2 */}
-        <div className={AtStyles.card}>
-          <h2 className={AtStyles.cardTitle}>Applicants Processed</h2>
-          <p className={AtStyles.cardNumber}>
-            {appliedStudentsWithAssesmentResults?.reduce(
-              (count, s) => (s?.jobProgress?._id ? count + 1 : count),
-              0
-            )}
-          </p>
+        <div className={JobStyles.statCard}>
+          <div className={JobStyles.statIcon} style={{ backgroundColor: "rgba(34, 197, 94, 0.1)", color: "#22c55e" }}>
+            <HiOutlineCheckCircle size={22} />
+          </div>
+          <div className={JobStyles.statTextCont}>
+            <span className={JobStyles.statValue}>
+              {appliedStudentsWithAssesmentResults?.reduce(
+                (count, s) => (s?.jobProgress?._id ? count + 1 : count),
+                0
+              ) || 0}
+            </span>
+            <span className={JobStyles.statLabel}>Applicants Processed</span>
+          </div>
         </div>
 
         {/* Card 3 */}
-        <div className={AtStyles.card}>
-          <h2 className={AtStyles.cardTitle}>Live Proctoring</h2>
-          <p
-            className={AtStyles.viewBtn}
-            onClick={() => {
+        <div className={JobStyles.statCard} style={{ cursor: "pointer" }} onClick={() => {
               router.push(
                 `/company/jobassessments/${params?.jobDetails}/live_proctoring`
               );
-            }}
-          >
-            View
-          </p>
+            }}>
+          <div className={JobStyles.statIcon} style={{ backgroundColor: "rgba(249, 115, 22, 0.1)", color: "#f97316" }}>
+            <HiOutlineVideoCamera size={22} />
+          </div>
+          <div className={JobStyles.statTextCont}>
+            <span className={JobStyles.statValue} style={{ fontSize: "1rem", color: "#f97316" }}>View</span>
+            <span className={JobStyles.statLabel}>Live Proctoring</span>
+          </div>
         </div>
       </div>
 
-      <div className={AtStyles.tableContainer}>
-        <Table
-          columns={columns}
-          dataSource={dataSource}
-          pagination={false}
-          className={AtStyles.table}
-          loading={status === "loading"}
-        />
+      <div style={{ padding: "0 1rem", marginTop: "1rem" }}>
+        {dataSource?.length > 0 ? (
+          <div className={JobStyles.cardsList}>
+            {currentDataSource.map((item) => (
+              <div
+                key={item.key}
+                className={JobStyles.jobCard}
+              >
+                {/* Checkbox and Candidate Name */}
+                <div style={{ flex: 1, minWidth: "220px", display: "flex", alignItems: "center", gap: "1rem" }}>
+                  <input type="checkbox" />
+                  <span style={{ fontWeight: "600", color: "#1e293b", fontSize: "0.95rem" }}>{item.result}</span>
+                </div>
+
+                {/* Meta information */}
+                <div className={JobStyles.cardMeta}>
+                  <div className={JobStyles.metaItem}>
+                    <span className={JobStyles.metaLabel}>Status</span>
+                    <span className={JobStyles.metaValue}>
+                      {item.status === "Completed" ? (
+                        <Tag color="green">Completed</Tag>
+                      ) : (
+                        <Tag color="blue">{item.status}</Tag>
+                      )}
+                    </span>
+                  </div>
+                  <div className={JobStyles.metaItem}>
+                    <span className={JobStyles.metaLabel}>Job Status</span>
+                    <span className={JobStyles.metaValue}>
+                      {item.jobStatus === "Shortlisted" || item.jobStatus === "approved" ? (
+                        <Tag color="green">Shortlisted</Tag>
+                      ) : item.jobStatus === "Rejected" || item.jobStatus === "rejected" ? (
+                        <Tag color="red">Rejected</Tag>
+                      ) : (
+                        <Tag color="blue">{item.jobStatus || "Pending"}</Tag>
+                      )}
+                    </span>
+                  </div>
+                  <div className={JobStyles.metaItem}>
+                    <span className={JobStyles.metaLabel}>Score</span>
+                    <span className={JobStyles.metaValue}>{item.overAllScore || 0}</span>
+                  </div>
+                  <div className={JobStyles.metaItem}>
+                    <span className={JobStyles.metaLabel}>Duration</span>
+                    <span className={JobStyles.metaValue}>{item.overAllTime || 0}</span>
+                  </div>
+                  <div className={JobStyles.metaItem}>
+                    <span className={JobStyles.metaLabel}>Resume</span>
+                    <span className={JobStyles.metaValue}>
+                      {item.resume ? (
+                        <a className={AtStyles.viewLink} onClick={() => showModal(item.resume)}>
+                          View
+                        </a>
+                      ) : (
+                        <span style={{ color: "#999", fontSize: "0.8rem" }}>No Resume</span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <div className={JobStyles.cardActions}>
+                  <Dropdown
+                    menu={{
+                      items: menuItems,
+                      onClick: (e) => handleMenuClick(e, item.student._id),
+                    }}
+                    placement="bottomRight"
+                    arrow
+                  >
+                    <EllipsisOutlined className={AtStyles.moreIcon} style={{ cursor: "pointer", fontSize: "1.5rem", color: "#64748b" }} />
+                  </Dropdown>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>No candidates found</div>
+        )}
       </div>
+
+      {dataSource?.length > 0 && (
+        <div style={{ marginTop: "2rem", display: "flex", justifyContent: "flex-end", paddingRight: "1rem" }}>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={dataSource.length}
+            onChange={onPageChange}
+            showSizeChanger
+            pageSizeOptions={['4', '10', '20', '50']}
+          />
+        </div>
+      )}
 
       <Modal
         title="PDF Viewer"

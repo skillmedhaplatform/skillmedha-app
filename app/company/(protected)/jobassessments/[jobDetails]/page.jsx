@@ -15,6 +15,7 @@ import Applicants from "./comps/applicants";
 import AssessmentTaken from "./comps/assessmentTaken";
 import Interviews from "./comps/interviews";
 import EligibleStudents from "./comps/eligibleStudents";
+import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const options = [
   // { label: "Eligible Students", value: "Eligible Students" },
@@ -56,7 +57,6 @@ const Page = () => {
   //     );
   //   }
   // }, [jobDetails]);
-
   // 1️⃣ First effect → fetch job details
   // 1️⃣ First effect → fetch job details
   // 1️⃣ First effect → fetch job details
@@ -96,17 +96,29 @@ const Page = () => {
   return (
     <>
       <div className={jdStyles.container}>
-        {/* Radio Buttons */}
-        <div className={jdStyles.radioContainer}>
-          <Radio.Group
-            block
-            options={options}
-            value={selectedTab}
-            onChange={(e) => setSelectedTab(e.target.value)}
-            optionType="button"
-            buttonStyle="solid"
-            className={jdStyles.customRadio}
-          />
+        {/* Header Banner */}
+        <PageHeader 
+          title={oneJobData?.jobTitle ? `${oneJobData.jobTitle} Insights` : "Job Assessment Insights"} 
+          subtitle="View and manage insights, applicants, and assessments" 
+        />
+
+        {/* Tabs */}
+        <div className={jdStyles.tabsWrapper}>
+          <div className={jdStyles.tabsRow}>
+            {options.map((opt) => {
+              const isActive = selectedTab === opt.value;
+              return (
+                <div
+                  key={opt.value}
+                  className={`${jdStyles.tabItem} ${isActive ? jdStyles.activeTab : ""}`}
+                  onClick={() => setSelectedTab(opt.value)}
+                >
+                  <span>{opt.label}</span>
+                  {isActive && <span className={jdStyles.activeIndicator} />}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Content Rendering */}
@@ -141,3 +153,4 @@ const Page = () => {
 };
 
 export default Page;
+
