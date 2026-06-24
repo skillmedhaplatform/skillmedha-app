@@ -78,7 +78,8 @@ const StudentData = () => {
 
   // Download modal state
   const [downloadModal, setDownloadModal] = useState(false);
-
+  const [uploadResultModal, setUploadResultModal] = useState(false);
+  const [uploadResultData, setUploadResultData] = useState(null);
   useEffect(() => {
     dispatch(getStudentsInDepartments({ id: params?.departId }));
   }, [dispatch, params?.departId]);
@@ -264,9 +265,57 @@ const StudentData = () => {
   const openDownloadModal = () => setDownloadModal(true);
   const closeDownloadModal = () => setDownloadModal(false);
 
-  const handleUpload = () => {
-    message.info("Bulk upload is not configured yet.");
-    closeModal();
+  const handleUpload = async () => {
+    if (params?.departId === "noDept") {
+      message.error(
+        "Cannot upload students to 'No Department' category. Please select a valid department."
+      );
+      return;
+    }
+
+    const hide = message.loading(
+      "Please wait while creating student accounts",
+      0
+    );
+    if (fileList.length === 0) {
+      hide();
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", fileList[0]);
+
+    try {
+      const response = await axios.post(
+        `${restUrl}/bulkUploadStudentsToDepartment/${params.departId}`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${getLstorage("token") || GetToken()}` }
+        }
+      );
+
+      dispatch(getStudentsInDepartments({ id: params.departId }));
+      
+      const { success, failed, errors } = response.data;
+      if (failed > 0) {
+        if (success > 0) {
+          message.success(`${success} students created successfully. ${failed} students failed.`);
+        } else {
+          message.error(`Failed to create students. ${failed} students failed.`);
+        }
+        setUploadResultData({ success, failed, errors: errors || [] });
+        setUploadResultModal(true);
+      } else {
+        message.success(`Students uploaded successfully. ${success} students created.`);
+      }
+    } catch (e) {
+      console.error(e);
+      const errMsg = e?.response?.data?.message || e?.response?.data?.error || e?.message || "Failed to upload students. Please try again.";
+      message.error(errMsg);
+    } finally {
+      hide();
+      closeModal();
+    }
   };
 
   const uploadProps = {
@@ -853,6 +902,43 @@ const StudentData = () => {
                   📩 Download Sample File
                 </Button>
               </a>
+            </div>
+          )}
+        </Modal>
+
+        <Modal
+          title="Bulk Upload Summary"
+          open={uploadResultModal}
+          onCancel={() => setUploadResultModal(false)}
+          footer={[
+            <Button key="close" type="primary" onClick={() => setUploadResultModal(false)}>
+              Close
+            </Button>
+          ]}
+          width={700}
+        >
+          {uploadResultData && (
+            <div style={{ marginTop: '1rem' }}>
+              <p>
+                <strong>{uploadResultData.success}</strong> students created successfully.
+              </p>
+              <p style={{ color: 'red' }}>
+                <strong>{uploadResultData.failed}</strong> students failed.
+              </p>
+              {uploadResultData.errors && uploadResultData.errors.length > 0 && (
+                <Table
+                  dataSource={uploadResultData.errors}
+                  rowKey={(record, index) => `${record.row}-${index}`}
+                  pagination={{ pageSize: 5 }}
+                  columns={[
+                    { title: "Row", dataIndex: "row", key: "row", width: 80 },
+                    { title: "Email", dataIndex: "email", key: "email" },
+                    { title: "Reason", dataIndex: "reason", key: "reason" }
+                  ]}
+                  size="small"
+                  style={{ marginTop: '1rem' }}
+                />
+              )}
             </div>
           )}
         </Modal>

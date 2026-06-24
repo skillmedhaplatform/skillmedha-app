@@ -59,7 +59,7 @@ export const renderHtml = (text) => {
 };
 
 export const parseIfJson = (val) => {
-  if (!val) return val;
+  if (!val) return "";
   try {
     return JSON.parse(val);
   } catch (e) {
