@@ -45,6 +45,9 @@ const TestPortalSlice = createSlice({
     resetAisugg: (state, action) => {
       state.aiSuggestions = "";
     },
+    resetUserResponse: (state) => {
+      state.userResponse = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -91,6 +94,7 @@ export const {
   findQuestion,
   saveUserResponse,
   resetAisugg,
+  resetUserResponse,
 } = TestPortalSlice.actions;
 
 export default TestPortalSlice.reducer;

@@ -9,6 +9,7 @@ export default function PracticeCard({
   category,
   totalQuestions,
   attempts = 0,
+  progress = 0,
   onStart,
   loading = false,
   subjectTitle = ""
@@ -72,8 +73,6 @@ export default function PracticeCard({
 
     return <Activity size={20} color={theme.text} />;
   };
-
-  const progress = 0; // Simulated progress as 0 for now
 
   return (
     <div 
@@ -147,15 +146,23 @@ export default function PracticeCard({
           <button 
             onClick={!loading ? onStart : undefined}
             disabled={loading}
-            className="bg-transparent text-[#1E69DA] p-0 text-[13px] font-bold border-none cursor-pointer hover:underline"
+            className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white px-5 py-1.5 rounded text-[13px] font-bold border-none cursor-pointer transition-opacity"
           >
             {loading ? "..." : "Resume"}
           </button>
         )}
         {progress === 100 && (
-          <span className="text-[#24A058] text-[13px] font-bold">
-            Completed
-          </span>
+          <button 
+            onClick={!loading ? onStart : undefined}
+            disabled={loading}
+            className={totalQuestions <= 20 
+              ? "bg-transparent text-[#1E69DA] p-0 text-[13px] font-bold border-none cursor-pointer hover:underline"
+              : "bg-transparent text-[#24A058] p-0 text-[13px] font-bold border-none"
+            }
+            style={totalQuestions > 20 ? { cursor: 'default', textDecoration: 'none' } : {}}
+          >
+            {totalQuestions <= 20 ? (loading ? "..." : "Re-attempt") : "Completed"}
+          </button>
         )}
       </div>
     </div>

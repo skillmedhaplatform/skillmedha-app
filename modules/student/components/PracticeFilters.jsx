@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Select } from "antd";
+import { useSelector } from "react-redux";
 
 export default function PracticeFilters({
   categories = ["All", "English", "Quant", "Maths", "Reasoning"],
@@ -7,6 +8,7 @@ export default function PracticeFilters({
   onCategoryChange,
 }) {
   const [activeTab, setActiveTab] = useState("All topics");
+  const categoryProgressData = useSelector((state) => state.practice.categoryProgress || {});
 
   const tabs = ["All topics", "Recent", "Saved", "My scores"];
 
@@ -17,7 +19,7 @@ export default function PracticeFilters({
     .filter(cat => cat !== "All")
     .map((cat, index) => ({
       name: cat,
-      progress: cat === "English" ? 40 : 0, // Mock progress, ideally passed as a prop later
+      progress: categoryProgressData[cat] || 0,
       color: defaultColors[index % defaultColors.length]
     }));
 

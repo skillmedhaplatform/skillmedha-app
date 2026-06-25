@@ -4,7 +4,7 @@ import "./play.css";
 import React, { useEffect, useState } from "react";
 import EditorContainer from "./EditorContainer";
 import OutputConsole from "./OutputConsole";
-import playGroundStyles from "./play.module.scss";
+import playGroundStyles from "./page.module.scss";
 import { Buffer } from "buffer";
 import axios from "axios";
 import { Button, Drawer, message, Spin } from "antd";
@@ -197,8 +197,8 @@ const Playground = ({ questionData }) => {
 
   // Main function to run code with stdin
   const runCode = async () => {
-    // Open drawer immediately
-    setOpen(true);
+    // Switch to output tab immediately
+    setDrawerTab("output");
     setIsLoading(true); // Start loading
 
     const hideMessage = message.loading("Running your code...", 0);
@@ -278,8 +278,14 @@ const Playground = ({ questionData }) => {
     }
   }, [currentOutput, dispatch]);
 
+  const handleReset = () => {
+    setCurrentCode(languageKey?.defaultCode ?? "");
+    setCurrentOutput("");
+    dispatch(AIsuggestion([]));
+  };
+
   return (
-    <div className={`${playGroundStyles.container}`}>
+    <div className={playGroundStyles.editorPanel}>
       <EditorContainer
         currentLanguage={languageKey}
         setCurrentLanguage={setLanguageKey}
@@ -287,140 +293,82 @@ const Playground = ({ questionData }) => {
         setCurrentCode={setCurrentCode}
         runCode={runCode}
         languageId={languageId}
+        onReset={handleReset}
       />
-      <Drawer
-        title={
+      
+      <div className={playGroundStyles.outputPanel}>
+        <div className={playGroundStyles.outputTabs}>
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
+            className={`${playGroundStyles.outTab} ${drawerTab === "output" ? playGroundStyles.outTabActive : ""}`}
+            onClick={() => setDrawerTab("output")}
           >
-            <span style={{ fontWeight: 700, fontSize: "16px", color: "#0f172a" }}>Execution Results</span>
-            <Button
-              type="text"
-              icon={<CloseOutlined style={{ fontSize: "16px", color: "#64748b" }} />}
-              onClick={onClose}
-              className="hover:!bg-[#f1f5f9] !rounded-full !w-8 !h-8 !flex !items-center !justify-center"
-            />
+            Output
           </div>
-        }
-        placement="right"
-        closable={false}
-        onClose={onClose}
-        open={open}
-        getContainer={false}
-        width={"60%"}
-        destroyOnHidden={true}
-        mask={false}
-        styles={{
-          body: {
-            padding: 0,
-            background: "#0f172a", // Dark theme container
-          },
-        }}
-      >
-        {isLoading ? (
           <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-              flexDirection: "column",
-              color: "#94a3b8",
-            }}
+            className={`${playGroundStyles.outTab} ${drawerTab === "results" ? playGroundStyles.outTabActive : ""}`}
+            onClick={() => setDrawerTab("results")}
           >
-            <Spin size="large" />
-            <div style={{ marginTop: "16px", fontWeight: 500 }}>Running your code...</div>
+            Test Results
           </div>
-        ) : (
-          <div className={playGroundStyles.drawerWrapper}>
-            {/* Drawer Tabs Header */}
-            <div className={playGroundStyles.drawerTabHeader}>
-              <button
-                onClick={() => setDrawerTab("output")}
-                className={`${playGroundStyles.drawerTabItem} ${
-                  drawerTab === "output" ? playGroundStyles.drawerTabActive : ""
-                }`}
-              >
-                Output
-              </button>
-              <button
-                onClick={() => setDrawerTab("results")}
-                className={`${playGroundStyles.drawerTabItem} ${
-                  drawerTab === "results" ? playGroundStyles.drawerTabActive : ""
-                }`}
-              >
-                Test Results
-              </button>
-              <button
-                onClick={() => setDrawerTab("console")}
-                className={`${playGroundStyles.drawerTabItem} ${
-                  drawerTab === "console" ? playGroundStyles.drawerTabActive : ""
-                }`}
-              >
-                Console
-              </button>
-            </div>
+          <div
+            className={`${playGroundStyles.outTab} ${drawerTab === "console" ? playGroundStyles.outTabActive : ""}`}
+            onClick={() => setDrawerTab("console")}
+          >
+            Console
+          </div>
+        </div>
 
-            {/* Tab Contents */}
-            <div className={playGroundStyles.drawerTabContent}>
+        <div className={playGroundStyles.outputBody}>
+          {isLoading ? (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", flexDirection: "column", color: "#8b949e" }}>
+              <Spin size="large" />
+              <div style={{ marginTop: "16px", fontWeight: 500 }}>Running your code...</div>
+            </div>
+          ) : (
+            <>
               {drawerTab === "output" && (
-                <div className={playGroundStyles.consolePanel}>
-                  <pre>{currentOutput || "No output yet..."}</pre>
-                </div>
+                <pre className={playGroundStyles.outLine}>{currentOutput || "Run code to see output..."}</pre>
               )}
 
               {drawerTab === "results" && (
                 <div className={playGroundStyles.resultsPanel}>
-                  <div className={playGroundStyles.suggestionCont}>
-                    {aiSuggestions && aiSuggestions.length > 0 ? (
-                      aiSuggestions.map((item, index) => {
+                  {aiSuggestions && aiSuggestions.length > 0 ? (
+                    <div className={playGroundStyles.tcDetail}>
+                      {aiSuggestions.map((item, index) => {
                         const key = Object.keys(item)?.[0];
                         const value = item?.[key];
-
-                        const isFail =
-                          value?.toLowerCase() === "fail" ||
-                          value?.toLowerCase().includes("fail");
-                        const statusClass = isFail
-                          ? playGroundStyles.fail
-                          : playGroundStyles.pass;
+                        const isFail = value?.toLowerCase() === "fail" || value?.toLowerCase().includes("fail");
+                        const statusClass = isFail ? playGroundStyles.tcDetailItemFail : playGroundStyles.tcDetailItemPass;
 
                         return (
-                          <div
-                            key={index}
-                            className={`${playGroundStyles.outputBody} ${statusClass}`}
-                          >
-                            <span className={playGroundStyles.resultIcon}>
-                              {isFail ? "❌" : "✅"}
-                            </span>
-                            <span className={playGroundStyles.resultText}>
-                              <strong>{key}:</strong> {value}
+                          <div key={index} className={`${playGroundStyles.tcDetailItem} ${statusClass}`}>
+                            <span style={{ fontSize: "12px", color: "#c9d1d9", fontWeight: 600 }}>
+                              {isFail ? "❌" : "✅"} {key}:
+                            </span>{" "}
+                            <span style={{ fontSize: "12px", color: isFail ? "#f85149" : "#3fb950" }}>
+                              {value}
                             </span>
                           </div>
                         );
-                      })
-                    ) : (
-                      <div className={playGroundStyles.emptyStateText}>
-                        No test cases run yet.
-                      </div>
-                    )}
-                  </div>
+                      })}
+                    </div>
+                  ) : (
+                    <div className={playGroundStyles.outPlaceholder}>
+                      <i>ℹ️</i> No test cases run yet.
+                    </div>
+                  )}
                 </div>
               )}
 
               {drawerTab === "console" && (
-                <div className={playGroundStyles.consolePanel}>
-                  <div className={playGroundStyles.consoleHeader}>Standard Output Stream</div>
-                  <pre>{currentOutput || "Console is empty."}</pre>
+                <div>
+                  <pre className={playGroundStyles.outLine}>{currentOutput || "Console is empty."}</pre>
                 </div>
               )}
-            </div>
-          </div>
-        )}
-      </Drawer>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,568 +1,812 @@
 @use "../../../../../utils/universalUtils/colors.module.scss" as *;
 @use "../../../../../utils/universalUtils/mixins.scss" as *;
 
-// ─── Design Tokens ────────────────────────────────────────────
-$navy-900: #071631;
-$navy-800: #0c1e3f;
-$navy-700: #10254c;
-$blue-600: #1e69da;
-$blue-500: #3b82f6;
-$blue-400: #60a5fa;
-$blue-50: #eff6ff;
-$green-600: #16a34a;
-$green-500: #22c55e;
-$green-50: #f0fdf4;
-$red-500: #ef4444;
-$red-50: #fef2f2;
-$slate-50: #f8fafc;
-$slate-100: #f1f5f9;
-$slate-200: #e2e8f0;
-$slate-300: #cbd5e1;
-$slate-400: #94a3b8;
-$slate-500: #64748b;
-$slate-600: #475569;
-$slate-700: #334155;
-$slate-800: #1e293b;
-$radius-sm: 6px;
-$radius-md: 10px;
-$radius-lg: 14px;
-$radius-xl: 18px;
-$shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-$shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-$shadow-soft: 0 2px 8px rgba(30, 105, 218, 0.08);
-$transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-$transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+$bg: #ffffff;
+$bg2: #f2f6fa;
+$bg3: #eef3fa;
+$bg-info: #e8f1fb;
+$bg-success: #e8f5e9;
+$bg-warning: #fff3e0;
+$bg-danger: #fce4ec;
+$border: #ddeaf6;
+$border-md: #c8ddf5;
+$text: #0d1b2e;
+$text2: #4a6fa5;
+$text3: #90aac8;
+$blue: #1565c0;
+$blue2: #0d47a1;
+$blue-lt: #90c2f5;
+$blue-xl: #42a5f5;
+$green: #43a047;
+$green-lt: #a5d6a7;
+$green-bg: #e8f5e9;
+$green-txt: #2e7d32;
+$red: #e53935;
+$red-txt: #c62828;
+$red-bg: #fce4ec;
+$orange: #e65100;
+$orange-bg: #fff3e0;
+$yellow: #ffa726;
+$yellow-bg: #fff8e1;
+$r-md: 8px;
+$r-lg: 12px;
+$r-xl: 16px;
 
-// ─── Main Container ───────────────────────────────────────────
-.mainCont {
-  width: 100%;
-  height: 100%;
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  @include flexBox(column, flex-start, flex-start);
-  background-color: $slate-50;
+  height: 100%;
+  background: $bg2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
-  .headerCont {
-    width: 100%;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: $navy-800;
+.topbar {
+  background: $bg;
+  border-bottom: 0.5px solid $border;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 10px;
+
+  .topbarLeft {
     display: flex;
-    justify-content: flex-start;
     align-items: center;
-    padding: 0.75rem 1.5rem;
-    background: white;
-    border-bottom: 1px solid $slate-200;
-    letter-spacing: -0.01em;
-
-    &::before {
-      content: '';
-      display: inline-block;
-      width: 4px;
-      height: 20px;
-      background: linear-gradient(180deg, $blue-600, $blue-400);
-      border-radius: 2px;
-      margin-right: 12px;
-    }
+    gap: 10px;
+    flex-wrap: wrap;
   }
-
-  :global(.ant-divider) {
-    display: none !important;
+  .topicTitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: $blue2;
   }
-
-  .contentCont {
-    width: 100%;
-    height: calc(100% - 55px);
-    @include flexBox(row, flex-start, flex-start);
-    padding: 1rem 1.25rem;
-    gap: 1rem;
-    overflow: hidden;
-
-    .testCont {
-      width: 58%;
-      height: 100%;
-      min-width: 0;
-    }
-
-    .SuggestionsCont {
-      width: 42%;
-      height: 100%;
-      @include flexBox(column, flex-start, flex-start, 0.75rem);
-      min-width: 0;
-
-      .aiSuggCont {
-        width: 100%;
-        height: 50%;
-      }
-
-      .explCont {
-        width: 100%;
-        height: 50%;
-      }
-    }
+  .topicBadge {
+    font-size: 13px;
+    background: $bg-info;
+    color: $blue;
+    padding: 4px 13px;
+    border-radius: 20px;
+    font-weight: 500;
   }
-}
-
-// ─── Question Card ────────────────────────────────────────────
-.questionCard {
-  width: 100%;
-  height: 100%;
-  background-color: $blue-50;
-  border-radius: $radius-lg;
-  @include flexBox(column, center, flex-start);
-  border: 1px solid $slate-200;
-  box-shadow: $shadow-card;
-  overflow: hidden;
-
-  .headerContbtn {
-    width: 100%;
+  .topbarRight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex-shrink: 0;
-    background: #0F2449;
-    @include flexBox(row, center, space-between);
-    padding: 0.85rem 1.25rem;
-
-    // Style the Ant Design buttons inside the header
-    :global(.ant-btn) {
-      background: rgba(255, 255, 255, 0.1) !important;
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
-      color: white !important;
-      font-weight: 600;
-      font-size: 13px;
-      border-radius: $radius-sm;
-      padding: 4px 16px;
-      height: 34px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all $transition-fast;
-      backdrop-filter: blur(4px);
-
-      &:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.2) !important;
-        border-color: rgba(255, 255, 255, 0.35) !important;
-        transform: translateY(-1px);
-      }
-
-      &:disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
-      }
-
-      svg {
-        font-size: 12px;
-      }
-    }
-
-    .quesText {
-      font-size: 15px;
-      font-weight: 600;
-      color: white;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-      background: rgba(255, 255, 255, 0.08);
-      padding: 6px 16px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
   }
-
-  .questionCont {
-    width: 100%;
-    height: 100%;
-    padding: 1.25rem 1.5rem;
-    overflow-y: auto;
-    overflow-x: hidden;
-    @include custom-scrollbar($thumbColor: $blue-500, $scrollbarWidth: 5px, $trackColor: $slate-100);
-
-    .questionText {
-      font-weight: 600;
-      font-size: 15px;
-      line-height: 1.7;
-      color: $slate-800;
-      margin-bottom: 1.25rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px dashed $slate-200;
-
-      p {
-        margin: 0;
-      }
-    }
-
-    .optionLable {
-      border: 1.5px solid $slate-200;
-      border-radius: $radius-md;
-      padding: 0.85rem 1.15rem;
-      margin: 0.6rem 0;
-      @include flexBox(row, center, flex-start, 0.85rem);
-      cursor: pointer;
-      background-color: white;
-      transition: all $transition-fast;
-      position: relative;
-
-      &:hover {
-        border-color: $blue-400;
-        background-color: $blue-50;
-        box-shadow: $shadow-soft;
-        transform: translateX(3px);
-      }
-
-      .optionsOrderChar {
-        font-weight: 700;
-        font-size: 14px;
-        color: $blue-600;
-        background: $blue-50;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        border: 1.5px solid rgba($blue-600, 0.2);
-        transition: all $transition-fast;
-      }
-
-      .optionValue {
-        font-size: 14px;
-        color: $slate-700;
-        line-height: 1.5;
-
-        p {
-          margin: 0;
-        }
-      }
-    }
-
-    .selectedOption {
-      background-color: rgba($blue-600, 0.08);
-      border-color: $blue-600;
-      box-shadow: 0 0 0 3px rgba($blue-600, 0.1);
-
-      .optionsOrderChar {
-        background: $blue-600;
-        color: white;
-        border-color: $blue-600;
-      }
-    }
-
-    .correctAns {
-      background-color: $green-50;
-      border-color: $green-500;
-      box-shadow: 0 0 0 3px rgba($green-500, 0.1);
-
-      .optionsOrderChar {
-        background: $green-500;
-        color: white;
-        border-color: $green-500;
-      }
-
-      .optionValue {
-        color: darken($green-600, 5%);
-      }
-    }
-
-    .wrongAns {
-      background-color: $red-50;
-      border-color: $red-500;
-      box-shadow: 0 0 0 3px rgba($red-500, 0.1);
-
-      .optionsOrderChar {
-        background: $red-500;
-        color: white;
-        border-color: $red-500;
-      }
-
-      .optionValue {
-        color: darken($red-500, 10%);
-      }
-    }
-  }
-}
-
-// ─── Submit Button ────────────────────────────────────────────
-.submitButtonContainer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px dashed $slate-200;
-
-  :global(.ant-btn-primary) {
-    background: linear-gradient(135deg, $blue-600, $blue-500) !important;
-    border: none !important;
-    border-radius: $radius-sm;
-    font-weight: 600;
+  .timerPill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: $orange-bg;
+    color: $orange;
+    border-radius: 20px;
+    padding: 6px 14px;
     font-size: 14px;
-    padding: 8px 32px;
-    height: 42px;
-    box-shadow: 0 4px 14px rgba($blue-600, 0.35);
-    transition: all $transition-smooth;
-    letter-spacing: 0.02em;
-
-    &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba($blue-600, 0.45);
+    font-weight: 600;
+    &.danger {
+      background: $red-bg;
+      color: $red-txt;
     }
-
-    &:active {
-      transform: translateY(0);
-    }
-
-    &:disabled {
-      opacity: 0.5;
+  }
+  .quitBtn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: $red-bg;
+    color: $red-txt;
+    border: 1px solid #f8bbd0;
+    border-radius: $r-md;
+    padding: 6px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.15s;
+    &:hover {
+      background: #f8bbd0;
     }
   }
 }
 
-// ─── Suggestion / Explanation Cards ───────────────────────────
-.suggestionContainer {
-  width: 100%;
-  height: 100%;
-  background-color: $blue-50;
-  border-radius: $radius-lg;
-  @include flexBox(column, center, flex-start);
-  border: 1px solid $slate-200;
-  box-shadow: $shadow-card;
-  overflow: hidden;
-
-  .PageHeader {
-    flex-shrink: 0;
-    width: 100%;
-    background: #0F2449;
-    @include flexBox(row, center, space-between);
-    padding: 0.75rem 1.25rem;
-
-    p {
-      color: white;
-      font-size: 14px;
-      font-weight: 600;
-      margin: 0;
-      letter-spacing: 0.02em;
-    }
-
-    img {
-      width: 26px;
-      height: 26px;
-      filter: brightness(0) invert(1) opacity(0.85);
-    }
-  }
-
-  .PageContent {
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    padding: 1rem 1.25rem;
-    @include flexBox(column, flex-start, flex-start);
-    @include custom-scrollbar($thumbColor: $blue-500, $scrollbarWidth: 5px, $trackColor: $slate-100);
-    font-size: 13.5px;
-    line-height: 1.65;
-    color: $slate-600;
-
-    p {
-      margin: 0;
-      color: $slate-500;
-      font-style: italic;
-    }
-  }
-
-  .Suggestionheader {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid $slate-200;
-    @include flexBox(row, center, center);
-    gap: 65%;
-
-    .contentCont {
-      width: 100%;
-      height: 80%;
-    }
-  }
-}
-
-// ─── Question Type Badge ──────────────────────────────────────
-.questionTypeBadge {
+.body {
+  flex: 1;
   display: flex;
-  justify-content: flex-start;
-  padding: 0.75rem 1.5rem 0;
+  gap: 14px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.quizCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.progressCard {
+  background: $bg;
+  border-radius: $r-lg;
+  border: 0.5px solid $border;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   flex-shrink: 0;
 
-  .questionTypeLabel {
-    padding: 0.3rem 0.9rem;
-    border: 1.5px solid $blue-400;
-    border-radius: 20px;
-    display: inline-flex;
+  .progNav {
+    display: flex;
     align-items: center;
-    font-size: 12px;
+    gap: 5px;
+  }
+  .navArrow {
+    width: 30px;
+    height: 30px;
+    border-radius: $r-md;
+    background: $bg2;
+    border: 1px solid $border-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: $text2;
+    font-size: 14px;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+    &:hover {
+      background: $bg-info;
+      color: $blue;
+    }
+    &.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+  .progCenter {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .progLabel {
+    font-size: 13px;
     font-weight: 600;
-    color: $blue-600;
-    background: $blue-50;
-    letter-spacing: 0.03em;
-    text-transform: capitalize;
+    color: $blue2;
+  }
+  .progBarBg {
+    width: 100%;
+    height: 5px;
+    background: $bg-info;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progBar {
+    height: 100%;
+    background: linear-gradient(90deg, $blue-xl, $blue);
+    border-radius: 10px;
+    transition: width 0.35s ease;
+  }
+  .typeBadge {
+    font-size: 11px;
+    background: $bg-info;
+    color: $blue;
+    padding: 5px 13px;
+    border-radius: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 }
 
-// ─── True/False Styles ────────────────────────────────────────
+.questionCard {
+  background: $bg;
+  border-radius: $r-xl;
+  border: 0.5px solid $border;
+  padding: 22px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-thumb { background: $border-md; border-radius: 4px; }
+
+  .qNum {
+    font-size: 11px;
+    font-weight: 600;
+    color: $text3;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .qText {
+    font-size: 15px;
+    font-weight: 500;
+    color: $text;
+    line-height: 1.65;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 20px;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 13px 16px;
+    background: $bg2;
+    border: 1.5px solid $border;
+    border-radius: $r-lg;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+
+    &:hover:not(.locked) {
+      border-color: $blue-lt;
+      background: $bg-info;
+    }
+
+    &.selectedOption {
+      border-color: $blue;
+      background: $bg-info;
+      .optLetter {
+        background: $blue;
+        color: #fff;
+        border-color: $blue;
+      }
+    }
+
+    &.correctAns {
+      border-color: $green;
+      background: $green-bg;
+      .optLetter {
+        background: $green;
+        color: #fff;
+        border-color: $green;
+      }
+      .optIcon {
+        color: $green;
+      }
+    }
+
+    &.wrongAns {
+      border-color: $red;
+      background: $red-bg;
+      .optLetter {
+        background: $red;
+        color: #fff;
+        border-color: $red;
+      }
+      .optIcon {
+        color: $red;
+      }
+    }
+
+    &.locked {
+      cursor: default;
+    }
+
+    .optLetter {
+      width: 30px;
+      height: 30px;
+      border-radius: $r-md;
+      background: $bg;
+      border: 1.5px solid $border-md;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: $blue;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .optText {
+      font-size: 13px;
+      color: $text;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .optIcon {
+      font-size: 18px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+  }
+
+  .actionRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    margin-top: 4px;
+
+    .skipBtn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: $bg-info;
+      border: 1px solid $blue;
+      border-radius: $r-md;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: $blue;
+      cursor: pointer;
+      transition: background 0.15s;
+      &:hover {
+        background: $bg2;
+      }
+    }
+
+    .submitBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: $blue;
+      color: #fff;
+      border: none;
+      border-radius: $r-lg;
+      padding: 10px 24px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+      min-width: 140px;
+
+      &:hover:not(:disabled) {
+        background: $blue2;
+      }
+      &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+.dotsRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 8px;
+  flex: 1;
+
+  .dot {
+    width: 100%;
+    height: 100%;
+    min-height: 28px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: $bg2;
+    border: 1px solid $border;
+    color: $text2;
+    transition: background 0.12s;
+
+    &:hover { border-color: $blue-lt; }
+    &.current { background: $bg-info; color: $blue; border-color: $blue; }
+    &.answeredCorrect { background: $green; color: #fff; border-color: $green; }
+    &.answeredWrong { background: $red; color: #fff; border-color: $red; }
+    &.skipped { background: $orange-bg; color: $orange; border-color: #ffcc80; }
+  }
+}
+
+.navLegend {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  justify-content: center;
+  column-gap: 24px;
+  row-gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+
+  .legendItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: $blue2;
+    font-weight: 500;
+
+    .legendDot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      
+      &.dotCurrent { border: 2px solid $blue; background: #fff; }
+      &.dotAnswered { background: $green; }
+      &.dotIncorrect { background: $red; }
+      &.dotUnanswered { background: #9ca3af; }
+    }
+  }
+}
+
+.rightCol {
+  width: 290px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-thumb { background: $border-md; border-radius: 4px; }
+
+  .scoreRow {
+    background: $bg;
+    border-radius: $r-lg;
+    border: 0.5px solid $border;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .scoreIcon {
+      width: 34px;
+      height: 34px;
+      border-radius: $r-md;
+      background: $yellow-bg;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: $yellow;
+      font-size: 18px;
+    }
+    .scoreMain { flex: 1; }
+    .scoreLbl {
+      font-size: 10px;
+      color: $text3;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .scoreNum { font-size: 16px; font-weight: 700; color: $blue2; }
+    .scoreStat { text-align: right; }
+    .statNumG { font-size: 15px; font-weight: 700; color: $green; }
+    .statNumR { font-size: 15px; font-weight: 700; color: $red; }
+  }
+}
+
+.panelCard {
+  background: $bg;
+  border-radius: $r-xl;
+  border: 0.5px solid $border;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  .panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    border-bottom: 0.5px solid $border;
+  }
+  .panelTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: $blue2;
+    svg { font-size: 20px; }
+  }
+  .panelIconBtn {
+    width: 28px;
+    height: 28px;
+    border-radius: $r-md;
+    background: $bg-info;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $blue;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s;
+    &:hover { background: $border-md; }
+  }
+  .panelBody {
+    padding: 14px 16px;
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 0;
+
+  .emptyIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: $r-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &.blue { background: $bg-info; color: $blue-xl; font-size: 22px; }
+    &.yellow { background: $yellow-bg; color: $yellow; font-size: 22px; }
+  }
+  .emptyText {
+    font-size: 12px;
+    color: $text3;
+    text-align: center;
+    line-height: 1.7;
+    max-width: 200px;
+  }
+}
+
+.aiContent {
+  font-size: 12px;
+  color: $blue2;
+  line-height: 1.75;
+  background: $bg2;
+  border-radius: $r-md;
+  padding: 12px;
+  border-left: 3px solid $blue-xl;
+}
+.expContent {
+  font-size: 15px;
+  color: $blue2;
+  line-height: 1.75;
+}
+.resultBanner {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: $r-md;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  &.correct { background: $green-bg; color: $green-txt; }
+  &.wrong { background: $red-bg; color: $red-txt; }
+  svg { font-size: 16px; }
+}
+
+.quickTipBox {
+  background: #fff8e1;
+  border-radius: $r-md;
+  padding: 16px;
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  
+  .qtIcon {
+    color: #f59e0b;
+    font-size: 20px;
+    margin-top: 2px;
+  }
+  .qtText {
+    font-size: 13px;
+    color: $text2;
+    line-height: 1.6;
+    strong {
+      color: #f59e0b;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+  }
+}
+
+.whyIncorrectBox {
+  background: #fef2f2;
+  border-radius: $r-md;
+  padding: 16px;
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  
+  .wiIcon {
+    color: #ef4444;
+    font-size: 20px;
+    margin-top: 2px;
+  }
+  .wiText {
+    font-size: 13px;
+    color: $text2;
+    line-height: 1.6;
+    strong {
+      color: #ef4444;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+  }
+}
+
 .trueFalseContainer {
   display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin: 24px 0;
-}
-
-.trueFalseButton {
-  padding: 14px 36px;
-  border: 2px solid $slate-200;
-  border-radius: $radius-md;
-  background: white;
-  cursor: pointer;
-  transition: all $transition-smooth;
-  min-width: 130px;
-  font-family: inherit;
-
-  &:hover:not(:disabled) {
-    border-color: $blue-500;
-    color: $blue-600;
-    background: $blue-50;
-    transform: translateY(-2px);
-    box-shadow: $shadow-soft;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-}
-
-.trueFalseLabel {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-// True/False selected states
-.trueFalseButton.selectedOption {
-  background: linear-gradient(135deg, $blue-600, $blue-500);
-  color: white;
-  border-color: $blue-600;
-  box-shadow: 0 4px 14px rgba($blue-600, 0.3);
-}
-
-.trueFalseButton.correctAns {
-  background: linear-gradient(135deg, $green-600, $green-500);
-  color: white;
-  border-color: $green-500;
-  box-shadow: 0 4px 14px rgba($green-500, 0.3);
-}
-
-.trueFalseButton.wrongAns {
-  background: linear-gradient(135deg, $red-500, lighten($red-500, 8%));
-  color: white;
-  border-color: $red-500;
-  box-shadow: 0 4px 14px rgba($red-500, 0.3);
-}
-
-// ─── Media Container Styles ──────────────────────────────────
-.mediaContainer {
-  margin: 20px 0;
-  text-align: center;
-  padding: 16px;
-  background: $slate-50;
-  border-radius: $radius-md;
-  border: 1px solid $slate-200;
-}
-
-.videoPlayer {
-  width: 100%;
-  max-width: 800px;
-  height: auto;
-  border-radius: $radius-md;
-  box-shadow: $shadow-elevated;
-}
-
-.audioPlayer {
-  width: 100%;
-  max-width: 500px;
-  margin: 10px auto;
-}
-
-// ─── Text Answer Styles ──────────────────────────────────────
-.textAnswerContainer {
-  margin: 20px 0;
-}
-
-.textAnswerArea {
-  margin-bottom: 15px;
-  border-radius: $radius-sm;
-  border: 1.5px solid $slate-200;
-  transition: border-color $transition-fast;
-
-  &:focus,
-  &:hover {
-    border-color: $blue-500;
-  }
-
-  &:disabled {
-    background-color: $slate-50;
-    cursor: not-allowed;
-  }
-}
-
-.submitTextButton {
-  display: block;
-  margin: 0 auto;
-  background: linear-gradient(135deg, $blue-600, $blue-500) !important;
-  border: none !important;
-  border-radius: $radius-sm;
-  font-weight: 600;
-  box-shadow: 0 4px 14px rgba($blue-600, 0.35);
-}
-
-.submittedAnswer {
-  margin-top: 15px;
-  padding: 16px;
-  background-color: $green-50;
-  border: 1.5px solid lighten($green-500, 20%);
-  border-radius: $radius-md;
-
-  strong {
-    color: $green-600;
-    display: block;
-    margin-bottom: 8px;
-    font-size: 13px;
-  }
-
-  p {
-    margin: 0;
-    color: $slate-700;
-    white-space: pre-wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  .trueFalseButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 16px;
+    background: $bg2;
+    border: 1.5px solid $border;
+    border-radius: $r-lg;
+    cursor: pointer;
+    transition: all 0.2s;
     font-size: 14px;
-    line-height: 1.6;
+    font-weight: 600;
+    color: $text;
+
+    &:hover:not([disabled]) {
+      border-color: $blue-lt;
+      background: $bg-info;
+    }
+    &.selectedOption {
+      border-color: $blue;
+      background: $bg-info;
+      color: $blue;
+    }
+    &.correctAns {
+      border-color: $green;
+      background: $green-bg;
+      color: $green-txt;
+    }
+    &.wrongAns {
+      border-color: $red;
+      background: $red-bg;
+      color: $red-txt;
+    }
+    &[disabled] {
+      cursor: not-allowed;
+      &:active { opacity: 0.8; }
+    }
   }
 }
 
-// ─── Explanation Content ──────────────────────────────────────
-.explanation {
-  font-size: 13.5px;
-  line-height: 1.7;
-  color: $slate-700;
-
-  p {
-    margin: 0 0 0.75rem 0;
-    font-style: normal !important;
-    color: $slate-700 !important;
+// End Test Modal Styling
+.endTestModal {
+  :global(.ant-modal-content) {
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  
+  .modalIconWrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: #fce4e4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    
+    svg {
+      font-size: 28px;
+      color: #d32f2f;
+    }
   }
 
-  ul, ol {
-    padding-left: 1.25rem;
-    margin: 0.5rem 0;
+  .modalTitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 12px;
   }
 
-  li {
-    margin: 0.25rem 0;
+  .modalDesc {
+    font-size: 15px;
+    color: #4b5563;
+    margin-bottom: 24px;
+    line-height: 1.5;
   }
 
-  code {
-    background: $slate-100;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 12.5px;
+  .modalStats {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    
+    .statBox {
+      flex: 1;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      
+      .statNum {
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .statLabel {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      &.answered {
+        background: #eef8f0;
+        .statNum, .statLabel { color: #2e7d32; }
+      }
+      &.unanswered {
+        background: #fce4e4;
+        .statNum, .statLabel { color: #c62828; }
+      }
+      &.marked {
+        background: #fff3e0;
+        .statNum, .statLabel { color: #e65100; }
+      }
+    }
+  }
+
+  .modalActions {
+    display: flex;
+    gap: 12px;
+    
+    button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+      
+      &:hover { opacity: 0.9; }
+    }
+    
+    .cancelBtn {
+      background: white;
+      border: 1px solid #e5e7eb;
+      color: #374151;
+      &:hover { background: #f9fafb; }
+    }
+    
+    .confirmBtn {
+      background: #ef4444;
+      border: 1px solid #ef4444;
+      color: white;
+    }
+  }
+}
+
+.subjectiveContainer {
+  margin-top: 1rem;
+  .textArea {
+    border-radius: $r-md;
+    border: 1.5px solid $border-md;
+    padding: 12px;
+    font-size: 14px;
+    &:focus {
+      border-color: $blue;
+      box-shadow: 0 0 0 2px rgba($blue, 0.2);
+    }
   }
 }

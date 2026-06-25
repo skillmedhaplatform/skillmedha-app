@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pagination, Spin } from "antd";
 import PracticeCard from "./PracticeCard";
+import { useSelector, useDispatch } from "react-redux";
+import { setCategoryProgress } from "@/redux/slices/practiceSlice";
 import { useRouter, usePathname } from "next/navigation";
 import { getLstorage } from "@/universalUtils/windowMW";
 import axios from "axios";
@@ -22,6 +24,8 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride }) {
   const [subtopics, setSubtopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const pageSize = pageSizeOverride || 4; // default 1 row of 4
+  const studentPracResults = useSelector((state) => state.practice.studentPracResults || []);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let isMounted = true;
@@ -67,6 +71,36 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride }) {
     return () => { isMounted = false; };
   }, [subject._id, subject.title]);
   
+  const getSubtopicStats = (subtopic) => {
+    const sessions = studentPracResults.filter(
+      (session) => session.refId === subtopic._id
+    );
+    if (sessions.length === 0) return { progress: 0, attempts: 0 };
+
+    const totalQuestions = Math.min(subtopic.totalQuestions || 20, 20);
+    const uniqueCorrectIds = new Set();
+    
+    sessions.forEach((s) => {
+      if (Array.isArray(s.correctQuestionIds)) {
+        s.correctQuestionIds.forEach((id) => uniqueCorrectIds.add(id));
+      }
+    });
+
+    const correctCount = uniqueCorrectIds.size;
+    let progress = Math.round((correctCount / totalQuestions) * 100);
+    if (progress > 100) progress = 100;
+
+    return { progress, attempts: sessions.length };
+  };
+
+  useEffect(() => {
+    if (subtopics.length > 0) {
+      const totalProgress = subtopics.reduce((acc, st) => acc + getSubtopicStats(st).progress, 0);
+      const avgProgress = Math.round(totalProgress / subtopics.length);
+      dispatch(setCategoryProgress({ category: subject.title, progress: avgProgress }));
+    }
+  }, [subtopics, studentPracResults, subject.title, dispatch]);
+
   if (loading) {
     return <div className="py-8 flex justify-center"><Spin /></div>;
   }
@@ -83,8 +117,10 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride }) {
     const isCoding = pathname.includes("/coding");
     const basePath = isCoding ? "/student/practice-new/coding/codingtest" : "/student/practice-new/test";
     
-    router.push(`${basePath}?subT=${subtopic._id}&t=${subtopic.topicId}&sub=${subject._id}`);
+    router.push(`${basePath}?subT=${subtopic._id}&t=${subtopic.topicId}&sub=${subject._id}&title=${encodeURIComponent(subtopic.title)}&subjectTitle=${encodeURIComponent(subject.title)}&type=${encodeURIComponent(subject.type || "Technical")}`);
   };
+
+
 
   // Variants for scroll-in animation
   const rowVariants = {
@@ -142,17 +178,21 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride }) {
           exit="exit"
           variants={cardVariants}
         >
-          {currentSubtopics.map((subtopic) => (
-            <PracticeCard
-              key={subtopic._id}
-              title={subtopic.title}
-              category={subtopic.topicTitle || subject.title}
-              totalQuestions={subtopic.totalQuestions || 0}
-              attempts={0}
-              onStart={() => handleStart(subtopic)}
-              subjectTitle={subject.title}
-            />
-          ))}
+          {currentSubtopics.map((subtopic) => {
+            const stats = getSubtopicStats(subtopic);
+            return (
+              <PracticeCard 
+                key={subtopic._id}
+                title={subtopic.title}
+                category={subtopic.topicTitle || subject.title}
+                totalQuestions={Math.min(subtopic.totalQuestions || 20, 20)}
+                attempts={stats.attempts}
+                progress={stats.progress}
+                onStart={() => handleStart(subtopic)}
+                subjectTitle={subject.title}
+              />
+            );
+          })}
         </motion.div>
       </AnimatePresence>
       

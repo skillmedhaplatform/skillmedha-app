@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import {
   fetchSubjectsByType,
+  getStudentPracResults,
 } from "@/redux/slices/practiceSlice";
 import PracticeFilters from "@/modules/student/components/PracticeFilters";
 import PracticeSubjectRow from "@/modules/student/components/PracticeSubjectRow";
@@ -37,7 +38,10 @@ export default function TechnicalPage() {
     dispatch(fetchSubjectsByType("technical")).finally(() => {
       setLoading(false);
     });
-  }, [dispatch]);
+    if (studentCreds?._id) {
+      dispatch(getStudentPracResults(studentCreds._id));
+    }
+  }, [dispatch, studentCreds?._id]);
 
   if (loading) {
     return (

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import pageStyles from "./page.module.scss";
 import { useDispatch, useSelector } from "react-redux";
-import { Divider, Spin, Tag, Tooltip } from "antd";
+import { TbBulb, TbCode, TbArrowRight, TbClock, TbCpu, TbStack, TbDatabase, TbChevronDown, TbChevronUp } from "react-icons/tb";
 import {
   resetOutput,
   setQuestion,
@@ -20,141 +20,162 @@ const parseIfJson = (text) => {
 };
 
 const CodingPage = ({ questionData }) => {
-  const output = useSelector((state) => state.codeEditor.output);
-  const aiSuggestions =
-    useSelector((state) => state.codeEditor.aiSuggestions) || [];
-
-  const codingQuestionsss = [];
-
-  // State for collapsible question container
-  const [isQuestionOpen, setIsQuestionOpen] = useState(true);
-
-  const [questionIndex, setQuestionIndex] = useState(0);
-
   const dispatch = useDispatch();
+  const [activeTab, setActiveTab] = useState("problem");
+  const [expandedTC, setExpandedTC] = useState({});
 
   useEffect(() => {
     dispatch(resetOutput());
     dispatch(resetAiSuggestions());
-  }, []);
+  }, [dispatch]);
 
-  const toggleQuestionContainer = () => {
-    setIsQuestionOpen(!isQuestionOpen);
+  const toggleTC = (index) => {
+    setExpandedTC((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
   const getDifficultyColors = (difficulty) => {
     const diff = difficulty?.toLowerCase() || "";
     if (diff === "easy") {
-      return { bg: "#DEF7EC", text: "#03543F" };
+      return { bg: "#e8f5e9", text: "#2e7d32" };
     } else if (diff === "hard") {
-      return { bg: "#FDE8E8", text: "#9B1C1C" };
+      return { bg: "#fce4ec", text: "#c62828" };
     }
-    return { bg: "#FEF08A", text: "#854D0E" }; // medium
+    return { bg: "#fff3e0", text: "#e65100" }; // medium
   };
 
   const diffStyle = getDifficultyColors(questionData?.difficulty || "Medium");
+  const testCases = questionData?.questionContent?.testCases || [];
+  const tags = questionData?.tags?.length ? questionData.tags.join(", ") : "Algorithms";
 
   return (
-    <div className={pageStyles.container}>
-      <div className={pageStyles.boxContainer}>
-        <div className={`${pageStyles.questionContainer}`}>
-          {/* Header section displaying Question */}
-          <div className={pageStyles.tabHeader} style={{ padding: "14px 16px" }}>
-            <span style={{ fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>Question</span>
+    <div className={pageStyles.split}>
+      {/* Question Panel */}
+      <div className={pageStyles.questionPanel}>
+        <div className={pageStyles.qpTabs}>
+          <div
+            className={`${pageStyles.qpTab} ${activeTab === "problem" ? pageStyles.qpTabActive : ""}`}
+            onClick={() => setActiveTab("problem")}
+          >
+            Problem
+          </div>
+          <div
+            className={`${pageStyles.qpTab} ${activeTab === "hints" ? pageStyles.qpTabActive : ""}`}
+            onClick={() => setActiveTab("hints")}
+          >
+            Hints
+          </div>
+          <div
+            className={`${pageStyles.qpTab} ${activeTab === "solution" ? pageStyles.qpTabActive : ""}`}
+            onClick={() => setActiveTab("solution")}
+          >
+            Solution
+          </div>
+        </div>
+
+        {/* Problem Tab */}
+        <div className={`${pageStyles.qpContent} ${activeTab === "problem" ? pageStyles.qpContentVisible : ""}`}>
+          <div className={pageStyles.qTitleRow}>
+            <h1 className={pageStyles.qMainTitle}>
+              {questionData?.title || questionData?.questionName || "Coding Question"}
+            </h1>
+            <span
+              className={pageStyles.difficulty}
+              style={{ backgroundColor: diffStyle.bg, color: diffStyle.text, fontSize: "10px" }}
+            >
+              {questionData?.difficulty || "Medium"}
+            </span>
           </div>
 
-          <div className={pageStyles.questionContent}>
-            {/* Meta details */}
-            <div className={pageStyles.metaSection}>
-              <h1 className={pageStyles.questionTitle}>
-                {questionData?.title || questionData?.questionName || "Coding Question"}
-              </h1>
-              <div className={pageStyles.badgesRow}>
-                <span className={pageStyles.categoryBadge}>
-                  Coding - {questionData?.tags?.length ? questionData.tags.join(", ") : "Arrays"}
-                </span>
-                <span
-                  className={pageStyles.difficultyBadge}
-                  style={{
-                    backgroundColor: diffStyle.bg,
-                    color: diffStyle.text,
-                  }}
-                >
-                  {questionData?.difficulty || "Medium"}
+          <div
+            className={pageStyles.qDesc}
+            dangerouslySetInnerHTML={{
+              __html: parseIfJson(questionData?.questionContent?.question || "<p>No description provided.</p>"),
+            }}
+          />
+
+          {testCases.length > 0 && (
+            <div>
+              <div className={pageStyles.secLabel}>
+                Test Cases
+                <span style={{ background: "var(--bg-info)", color: "var(--blue)", fontSize: "10px", padding: "2px 8px", borderRadius: "10px", marginLeft: "4px", fontWeight: 600 }}>
+                  {testCases.length}
                 </span>
               </div>
-            </div>
-
-            {/* Question HTML Description */}
-            <div
-              className={pageStyles.question}
-              dangerouslySetInnerHTML={{
-                __html: parseIfJson(questionData?.questionContent?.question),
-              }}
-            />
-
-            {/* Test Cases List */}
-            {questionData?.questionContent?.testCases &&
-              questionData?.questionContent?.testCases?.length > 0 && (
-                <div className={pageStyles.testCasesSection}>
-                  <h3 className={pageStyles.testCasesTitle}>
-                    Test Cases
-                    <span className={pageStyles.testCasesCountBadge}>
-                      {questionData?.questionContent?.testCases?.length || 0}
-                    </span>
-                  </h3>
-                  {questionData?.questionContent?.testCases?.map(
-                    (testCase, index) => (
-                      <div
-                        key={testCase._id || index}
-                        className={pageStyles.testCaseCard}
-                      >
-                        <div className={pageStyles.testCaseHeader}>
-                          <span className={pageStyles.testCaseName}>
-                            ⚡ Test Case {index + 1}
-                          </span>
-                          <span className={pageStyles.testCaseStatusBadge}>
-                            Pending
-                          </span>
-                        </div>
-
-                        {testCase.input && (
-                          <div className={pageStyles.testCaseDetail}>
-                            <span className={pageStyles.detailLabel}>Input</span>
-                            <div
-                              className={pageStyles.detailCodeBlock}
-                              dangerouslySetInnerHTML={{
-                                __html: parseIfJson(testCase.input),
-                              }}
-                            />
+              <div>
+                {testCases.map((tc, index) => (
+                  <div key={tc._id || index} className={pageStyles.tcCard}>
+                    <div className={pageStyles.tcHeader} onClick={() => toggleTC(index)}>
+                      <span className={pageStyles.tcNum}><TbCode size={16} /> Test Case {index + 1}</span>
+                      <span className={`${pageStyles.tcStatus} ${pageStyles.tcStatusPending}`}>Pending</span>
+                    </div>
+                    {expandedTC[index] && (
+                      <div className={pageStyles.tcBody}>
+                        {tc.input && (
+                          <div className={pageStyles.tcRow}>
+                            <span className={pageStyles.tcLbl}>Input</span>
+                            <span className={pageStyles.tcVal}>{parseIfJson(tc.input)}</span>
                           </div>
                         )}
-
-                        {testCase.expectedOutput && (
-                          <div className={pageStyles.testCaseDetail}>
-                            <span className={pageStyles.detailLabel}>Expected</span>
-                            <div
-                              className={pageStyles.detailCodeBlock}
-                              dangerouslySetInnerHTML={{
-                                __html: parseIfJson(testCase.expectedOutput),
-                              }}
-                            />
+                        {tc.expectedOutput && (
+                          <div className={pageStyles.tcRow}>
+                            <span className={pageStyles.tcLbl}>Expected</span>
+                            <span className={pageStyles.tcVal}>{parseIfJson(tc.expectedOutput)}</span>
                           </div>
                         )}
                       </div>
-                    )
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Dummy Constraints for visual completeness based on design */}
+          <div>
+            <div className={pageStyles.secLabel}>Constraints</div>
+            <div className={pageStyles.constraintsBox}>
+              <div className={pageStyles.cItem}><TbArrowRight size={14} /> Time limit: 1 second</div>
+              <div className={pageStyles.cItem}><TbCpu size={14} /> Memory limit: 256 MB</div>
+            </div>
           </div>
         </div>
 
-        <div className={pageStyles.box}>
-          <PlaygroundProvider>
-            <Playground questionData={questionData} />
-          </PlaygroundProvider>
+        {/* Hints Tab */}
+        <div className={`${pageStyles.qpContent} ${activeTab === "hints" ? pageStyles.qpContentVisible : ""}`}>
+          <div className={pageStyles.hintCard} style={{ borderLeftColor: "#ffa726" }}>
+            <div className={pageStyles.hintTitle} style={{ color: "#e65100" }}><TbBulb size={16} /> Hint 1</div>
+            <div className={pageStyles.hintText}>Read the problem description carefully and identify edge cases.</div>
+          </div>
+          <div className={pageStyles.hintCard}>
+            <div className={pageStyles.hintTitle}><TbCode size={16} /> Hint 2</div>
+            <div className={pageStyles.hintText}>Consider the optimal data structure that can provide the best time complexity for your solution.</div>
+          </div>
+        </div>
+
+        {/* Solution Tab */}
+        <div className={`${pageStyles.qpContent} ${activeTab === "solution" ? pageStyles.qpContentVisible : ""}`}>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--blue2)", marginBottom: "4px" }}>Step-by-step approach</div>
+          <div className={pageStyles.solStep}>
+            <div className={pageStyles.solNum}>1</div>
+            <div className={pageStyles.solContent}>
+              <div className={pageStyles.solStepTitle}>Understand the input</div>
+              <div className={pageStyles.solStepText}>Analyze the constraints and structure of the input variables provided.</div>
+            </div>
+          </div>
+          <div className={pageStyles.solStep}>
+            <div className={pageStyles.solNum}>2</div>
+            <div className={pageStyles.solContent}>
+              <div className={pageStyles.solStepTitle}>Implement logic</div>
+              <div className={pageStyles.solStepText}>Write the main logic adhering to optimal time and space complexity.</div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Editor Panel via Playground */}
+      <PlaygroundProvider>
+        <Playground questionData={questionData} />
+      </PlaygroundProvider>
     </div>
   );
 };
