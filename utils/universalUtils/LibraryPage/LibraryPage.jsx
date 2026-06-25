@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Pagination, Tooltip, Button, Select, Input, Modal, Tag, Row, Col, message, Badge, Popover } from "antd";
-import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined, HeartOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined, HeartOutlined, ShoppingCartOutlined, LockOutlined, LoadingOutlined } from "@ant-design/icons";
 import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase } from "react-icons/bs";
 import { HiOutlineBuildingOffice2, HiOutlineBookOpen } from "react-icons/hi2";
 import { useSearchParams, usePathname } from "next/navigation";
@@ -76,7 +76,7 @@ const InfoContent = ({ item }) => {
           {item?.learningPoints?.length > 0 && (
             <div style={boxStyle}>
               <div style={{ fontSize: 16, fontWeight: 700, color: "#1f2937", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                What you'll learn
+                What you&apos;ll learn
               </div>
               <Row gutter={[16, 16]}>
                 {item.learningPoints.slice(0, 8).map((point, i) => (
@@ -193,6 +193,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   const allItems = useSelector(allCoursesSelector || (() => []));
 
   const paginationData = useSelector(paginationSelector);
+  const allPaginationData = useSelector(allPaginationSelector || (() => null));
 
   // --- Wishlist (favorites) state ---
   const wishlistItems = useSelector((state) => state.wishlist?.items ?? []);
@@ -379,29 +380,38 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   // "recent"    → filter all courses created in last 6 months
   // "wishlist"  → show only courses that are in the wishlist
   const filteredTabItems = (() => {
+    let pool = [];
     if (activeTab === "all") {
-      return safeAllItems;
-    }
-
-    if (activeTab === "my") {
-      return safeItems;
-    }
-
-    if (activeTab === "recent") {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      return safeAllItems.filter((item) => {
-        if (!item.createdAt) return false;
-        return new Date(item.createdAt) >= sixMonthsAgo;
+      pool = [...safeAllItems];
+      // Sort so unenrolled (Buy) comes first, enrolled (Start) comes last
+      pool.sort((a, b) => {
+        const aEnrolled = safeItems.some(myCourse => myCourse._id === a._id);
+        const bEnrolled = safeItems.some(myCourse => myCourse._id === b._id);
+        if (aEnrolled === bEnrolled) return 0;
+        return aEnrolled ? 1 : -1; // Unenrolled (false) goes before Enrolled (true)
       });
+    } else if (activeTab === "my") {
+      pool = [...safeItems];
+    } else if (activeTab === "recent") {
+      pool = [...safeAllItems];
+      // Sort by createdAt descending and take the top 6
+      pool.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      pool = pool.slice(0, 6);
+    } else if (activeTab === "wishlist") {
+      pool = safeAllItems.length ? safeAllItems : safeItems;
+      pool = pool.filter((item) => wishlistIdSet.has(item._id));
     }
 
-    if (activeTab === "wishlist") {
-      const pool = safeAllItems.length ? safeAllItems : safeItems;
-      return pool.filter((item) => wishlistIdSet.has(item._id));
+    // Apply Local Filters
+    if (urlCategory) {
+      pool = pool.filter((item) => item.category === urlCategory);
+    }
+    if (urlSearch) {
+      const s = urlSearch.toLowerCase();
+      pool = pool.filter((item) => item.title?.toLowerCase().includes(s) || item.subtitle?.toLowerCase().includes(s));
     }
 
-    return [];
+    return pool;
   })();
 
   // NEW: helper to resolve the org id for a given course item.
@@ -487,14 +497,9 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   const hasActiveFilters = activeFilters.length > 0;
 
   // Stats for banner
-  const totalAvailable = safeAllItems.length || paginationData?.totalLength || 0;
-  // NEW: "enrolled" + "progress" now read from the fetched progressById map,
-  // falling back to the old item-shape checks for items we haven't fetched yet.
-  const enrolledItems = safeItems.filter((item) => {
-    const fetched = progressById[item._id];
-    if (fetched) return fetched.totalCount > 0;
-    return item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled;
-  });
+  // const totalAvailable = safeAllItems.length || paginationData?.totalLength || 0;
+  // All items in safeItems (My Courses) are enrolled by definition
+  const enrolledItems = safeItems;
   const totalEnrolled = enrolledItems.length;
   const avgProgress =
     totalEnrolled > 0
@@ -557,8 +562,10 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   }
 
   return (
-    <div className="flex flex-col gap-0 relative bg-[#EFF5FB] min-h-screen">
-      {/* Banner */}
+    <div className="flex flex-col gap-0 absolute inset-0 bg-[#EFF5FB] overflow-hidden">
+      {/* Fixed Header Section */}
+      <div className="flex flex-col w-full z-[40] bg-[#EFF5FB] shrink-0">
+        {/* Banner */}
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-between p-4 lg:px-8 pt-6 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         <div className="absolute inset-0 pointer-events-none z-[1]">
           <div className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]">✕</div>
@@ -587,53 +594,61 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
             </div>
           </div>
 
-          <div className="flex items-center gap-6 lg:gap-10">
-            {showWishlist && (
+          <div className="flex items-center gap-6 lg:gap-10 lg:mr-10">
+            {activeTab === "all" && (
+              <div className="flex flex-col items-center justify-center w-[80px]">
+                <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">
+                  {allPaginationData ? allPaginationData.totalLength : safeAllItems.length}
+                </span>
+                <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Courses</span>
+              </div>
+            )}
+            {showWishlist && activeTab !== "my" && (
               <Badge count={wishlistItems.length} size="small" offset={[-4, 4]}>
                 <button
                   onClick={() => setWishlistOpen(true)}
-                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group"
+                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group w-[80px]"
                 >
-                  <HeartOutlined className="text-white text-[22px] group-hover:text-[#f87171] transition-colors" />
-                  <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Wishlist</span>
+                  <HeartOutlined className="text-white text-[24px] lg:text-[28px] leading-none group-hover:text-[#f87171] transition-colors" style={{ color: "white" }} />
+                  <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Wishlist</span>
                 </button>
               </Badge>
             )}
-            {showBuyNow && (
+            {showBuyNow && activeTab !== "my" && (
               <Badge count={cartItems.length} size="small" offset={[-4, 4]}>
                 <button
                   onClick={() => setCartOpen(true)}
-                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group"
+                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group w-[80px]"
                 >
-                  <ShoppingCartOutlined className="text-white text-[22px] group-hover:text-[#5694F0] transition-colors" />
-                  <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Cart</span>
+                  <ShoppingCartOutlined className="text-white text-[24px] lg:text-[28px] leading-none group-hover:text-[#5694F0] transition-colors" style={{ color: "white" }} />
+                  <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Cart</span>
                 </button>
               </Badge>
             )}
-            <div className="flex flex-col items-center justify-center">
-              <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">{totalEnrolled}</span>
-              <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Enrolled</span>
-            </div>
-            <div className="flex flex-col items-center justify-center">
-              <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">{totalAvailable}</span>
-              <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Available</span>
-            </div>
-            <div className="flex flex-col items-center justify-center">
-              <span className="text-[24px] lg:text-[28px] font-bold leading-none bg-gradient-to-br from-[#1E69DA] to-[#5694F0] bg-clip-text text-transparent">{avgProgress}%</span>
-              <span className="text-[10px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5">Avg. Done</span>
-            </div>
+            {activeTab === "my" && (
+              <div className="flex flex-col items-center justify-center w-[80px]">
+                <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">{totalEnrolled}</span>
+                <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Enrolled</span>
+              </div>
+            )}
+            {activeTab === "my" && (
+              <div className="flex flex-col items-center justify-center w-[80px]">
+                <span className="text-[24px] lg:text-[28px] font-bold leading-none bg-gradient-to-br from-[#1E69DA] to-[#5694F0] bg-clip-text text-transparent">{avgProgress}%</span>
+                <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Avg. Done</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Tabs Row */}
-      <div className="w-full bg-[#f1f5f9] border-b border-[#e2e8f0] px-4 lg:px-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-sm gap-2 md:gap-0">
+      <div className="w-full bg-white border-b border-[#e2e8f0] px-4 lg:px-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-sm gap-2 md:gap-0">
         <div className="flex items-center gap-8">
           {[
             { id: "all", label: `All ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
-            { id: "my", label: `My ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
             { id: "recent", label: "Recently added" },
             ...(showWishlist ? [{ id: "wishlist", label: `Wishlist (${wishlistItems.length})` }] : []),
+            { id: "my", label: `My ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -709,9 +724,9 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
           );
         })}
       </div>
-
-      {/* Cards Grid */}
-      <div className="w-full flex-1 mb-8 pb-4">
+      </div> {/* End Fixed Header Section */}
+      {/* Cards Grid (Scrollable) */}
+      <div className="w-full flex-1 overflow-y-auto pt-8 pb-8 no-scrollbar">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 lg:gap-x-16 gap-y-8 p-2 px-4 lg:px-6 max-w-[1500px] mx-auto w-full">
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
@@ -733,18 +748,21 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
               )}
             </div>
           ) : (
-            filteredTabItems.map((item, index) => {
-              // NEW: prefer fetched per-course progress; fall back to old item-shape checks.
-              const fetchedProgress = progressById[item._id];
-              const isProgressLoading = fetchedProgress?.loading;
-
-              const isEnrolled = fetchedProgress
-                ? fetchedProgress.totalCount > 0
-                : item.progress !== undefined || item.lastAccessedSection !== undefined || item.enrolled;
-
-              const progressVal = fetchedProgress
-                ? fetchedProgress.totalProgress ?? 0
-                : item.progress || 0;
+            (() => {
+              const isClientPaginated = activeTab === "wishlist" || activeTab === "all";
+              const displayItems = isClientPaginated 
+                ? filteredTabItems.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                : filteredTabItems;
+              
+              return displayItems.map((item, index) => {
+                const fetchedProgress = progressById[item._id];
+                const isProgressLoading = fetchedProgress?.loading;
+                
+                // We use safeItems to determine true enrollment since safeItems contains "My courses"
+                const inMyCourses = safeItems.some(myCourse => myCourse._id === item._id);
+                const isEnrolled = activeTab === "my" || inMyCourses;
+                
+                const progressVal = fetchedProgress ? (fetchedProgress.totalProgress ?? 0) : (item.progress || 0);
 
               const duration = item?.duration || item?.courseIncludes?.videoDuration;
               const modulesCount = item?.sections?.length || 0;
@@ -767,6 +785,8 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                   buttonText = "Continue";
                   statusColor = "text-[#10b981]";
                 }
+              } else {
+                buttonText = "Buy";
               }
 
               const imageUrl =
@@ -783,47 +803,49 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                 <div
                   key={item?._id}
                   onClick={(e) => { e.stopPropagation(); nav.push(getItemUrl(item)); }}
-                  className="group flex flex-col bg-white text-black border-[1px] border-[#e2e8f0] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-sm"
+                  className="group flex flex-col bg-white text-black border-[1px] border-[#cbd5e1] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-md"
                   role="button"
                   tabIndex={0}
                 >
                   {/* Card Image */}
-                  <div className="relative w-full h-[170px] flex flex-col items-center justify-center overflow-hidden bg-[#071631]">
-                    <img src={imageUrl} alt={item.title || "Thumbnail"} className="w-full h-full object-cover" />
+                  <div className="relative w-full h-[170px] p-2 pb-0 bg-white">
+                    <div className="relative w-full h-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
+                      <img src={imageUrl} alt={item.title || "Thumbnail"} className="w-full h-full object-contain" />
 
-                    {isEnrolled && (
-                      <div className="absolute top-3 left-3 bg-[#022c22] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-[#047857]">
-                        <BsCheckCircleFill className="text-[#10b981] text-[10px]" />
-                        <span className="text-[#10b981] text-[11px] font-medium tracking-wide">Enrolled</span>
+                      {isEnrolled && (
+                        <div className="absolute top-2 left-2 bg-[#022c22] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-[#047857]">
+                          <BsCheckCircleFill className="text-[#10b981] text-[10px]" />
+                          <span className="text-[#10b981] text-[11px] font-medium tracking-wide">Enrolled</span>
+                        </div>
+                      )}
+                      {showWishlist && (
+                        <button
+                          onClick={(e) => handleWishlistToggle(item, e)}
+                          disabled={isWishlistLoading}
+                          aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                          className="absolute top-2 right-2 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10 cursor-pointer hover:bg-black/50 transition-colors disabled:opacity-60"
+                        >
+                          {inWishlist ? (
+                            <BsBookmarkFill className="text-[#facc15] text-[14px]" />
+                          ) : (
+                            <BsBookmark className="text-white text-[14px]" />
+                          )}
+                        </button>
+                      )}
+                      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-0.5 bg-black/20 backdrop-blur-sm rounded-lg">
+                        <BsCodeSlash className="text-white/80 text-[12px]" />
+                        <span className="text-white/90 text-[11px] font-medium">{item.category || "General"}</span>
                       </div>
-                    )}
-                    {showWishlist && (
-                      <button
-                        onClick={(e) => handleWishlistToggle(item, e)}
-                        disabled={isWishlistLoading}
-                        aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                        className="absolute top-3 right-3 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10 cursor-pointer hover:bg-black/50 transition-colors disabled:opacity-60"
-                      >
-                        {inWishlist ? (
-                          <BsBookmarkFill className="text-[#facc15] text-[14px]" />
-                        ) : (
-                          <BsBookmark className="text-white text-[14px]" />
-                        )}
-                      </button>
-                    )}
-                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-0.5">
-                      <BsCodeSlash className="text-white/80 text-[12px]" />
-                      <span className="text-white/90 text-[11px] font-medium">{item.category || "General"}</span>
+                      {item.difficulty && (
+                        <div className={`absolute bottom-2 right-2 px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase backdrop-blur-sm ${
+                          item.difficulty?.toLowerCase() === "beginner" ? "bg-[#047857]/90 text-white" :
+                          item.difficulty?.toLowerCase() === "intermediate" ? "bg-[#d97706]/90 text-white" :
+                          "bg-[#dc2626]/90 text-white"
+                        }`}>
+                          {item.difficulty}
+                        </div>
+                      )}
                     </div>
-                    {item.difficulty && (
-                      <div className={`absolute bottom-3 right-3 px-2.5 py-0.5 rounded-sm text-[10px] font-bold tracking-wider uppercase ${
-                        item.difficulty?.toLowerCase() === "beginner" ? "bg-[#047857] text-white" :
-                        item.difficulty?.toLowerCase() === "intermediate" ? "bg-[#d97706] text-white" :
-                        "bg-[#dc2626] text-white"
-                      }`}>
-                        {item.difficulty}
-                      </div>
-                    )}
                   </div>
 
                   {/* Card Content */}
@@ -862,11 +884,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                       {createdAtDate && <span>{createdAtDate}</span>}
                     </div>
 
-                    {showBuyNow && !isEnrolled && (
-                      <div className="mb-3">
-                        <PriceChip item={item} />
-                      </div>
-                    )}
+
 
                     {/* Footer */}
                     <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f1f5f9]">
@@ -875,16 +893,32 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                       </span>
                       <button
                         className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white text-[13px] font-medium py-1.5 px-5 rounded-[20px] border-none cursor-pointer transition-opacity flex items-center gap-1.5 shadow-sm"
-                        onClick={(e) => { e.stopPropagation(); nav.push(getItemUrl(item)); }}
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          if (isEnrolled) {
+                            nav.push(getItemUrl(item)); 
+                          } else {
+                            if (!inCart) handleAddToCart(item);
+                            else nav.push("/student/cart");
+                          }
+                        }}
                       >
-                        {buttonText === "Start" ? "+ Start" : `▷ ${buttonText}`}
+                        {isCartLoading && !isEnrolled ? (
+                          <><LoadingOutlined /> Adding...</>
+                        ) : buttonText === "Buy" ? (
+                          inCart ? "✓ Go to Cart" : <><LockOutlined /> Buy</>
+                        ) : buttonText === "Start" ? (
+                          "+ Start"
+                        ) : (
+                          `▷ ${buttonText}`
+                        )}
                       </button>
                     </div>
                   </div>
                 </div>
               );
 
-              if (!showBuyNow) {
+              if (!showBuyNow || activeTab === "my") {
                 return cardNode;
               }
 
@@ -894,7 +928,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                   trigger="hover"
                   placement="right"
                   overlayStyle={{ maxWidth: 380 }}
-                  overlayInnerStyle={{ borderRadius: 16, padding: 0, overflow: "hidden" }}
+                  overlayInnerStyle={{ borderRadius: 16, padding: 0, overflow: "hidden", border: "1px solid #cbd5e1", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
                   content={
                     <BuyNowPopoverContent
                       item={item}
@@ -910,9 +944,35 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                   {cardNode}
                 </Popover>
               );
-            })
+            });
+          })()
           )}
         </div>
+
+        {/* Pagination */}
+        {(() => {
+          let total = 0;
+          if (activeTab === "my" && paginationData) total = paginationData.totalLength;
+          else if (activeTab === "all" && allPaginationData) total = allPaginationData.totalLength;
+          else if (activeTab === "wishlist") total = wishlistItems.length;
+          else total = filteredTabItems.length;
+          
+          if (total > 0 && !loading && activeTab !== "recent") {
+            return (
+              <div className="w-full z-10 py-6 flex justify-center mt-6">
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={total}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                  pageSizeOptions={["6"]}
+                />
+              </div>
+            );
+          }
+          return null;
+        })()}
       </div>
 
       {/* Info Modal */}
@@ -968,20 +1028,6 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
           loading={cartLoading}
           nav={nav}
         />
-      )}
-
-      {/* Pagination — only show for my courses tab which has server pagination */}
-      {activeTab === "my" && paginationData && paginationData.totalLength > 0 && !loading && (
-        <div className="mt-auto w-full bg-white z-10 py-4 px-4 lg:px-8 flex justify-center border-t border-[#f1f5f9]">
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={paginationData.totalLength}
-            onChange={handlePageChange}
-            showSizeChanger={false}
-            pageSizeOptions={["6"]}
-          />
-        </div>
       )}
     </div>
   );
