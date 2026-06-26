@@ -47,6 +47,13 @@ const JobsSlice = createSlice({
     clearJobs: (state) => {
       state.jobs = [];
     },
+    resetOneJob: (state) => {
+      state.OneJob = {
+        value: {},
+        status: "idle",
+        error: null,
+      };
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -274,12 +281,12 @@ export const getJobAssessmentResultsForStudent = createAsyncThunk(
         "No progress found for this student and assessment";
 
       message.error(errMsg);
-      if(router) router.push(`/jobassessments/${params?.jobDetails}`);
+      if(router) router.push(`/company/jobassessments/${params?.jobDetails}`);
 
       return thunkAPI.rejectWithValue(errMsg);
     }
   }
 );
 
-export const { clearError, clearJobs } = JobsSlice.actions;
+export const { clearError, clearJobs, resetOneJob } = JobsSlice.actions;
 export default JobsSlice.reducer;

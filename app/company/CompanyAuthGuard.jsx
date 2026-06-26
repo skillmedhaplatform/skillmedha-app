@@ -11,7 +11,7 @@ export default function CompanyAuthGuard({ children }) {
   useEffect(() => {
     const token = getLstorage("token");
     if (!token) nav.replace("/company/login");
-    if (currPath === "/company") nav.replace("/company/myjobs");
+    if (currPath === "/company") nav.replace("/company/profile");
   }, []);
 
   return <>{children}</>;

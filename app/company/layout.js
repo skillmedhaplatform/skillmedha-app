@@ -3,6 +3,8 @@ import "./company-globals.css";
 import { ConfigProvider } from "antd";
 import SessionBridge from "./SessionBridge";
 import CompanyStoreProvider from "@/redux/companyProvider";
+import CompanyAuthGuard from "./CompanyAuthGuard";
+import CompanySidebarShell from "./CompanySidebarShell";
 
 export const metadata = {
   title: "SkillMedha Company Dashboard",
@@ -16,18 +18,35 @@ export default function RootLayout({ children }) {
         theme={{
           token: {
             fontSize: 16,
-            colorPrimary: "#25A3A6",
-            colorBorder: "#808080",
-            colorPrimaryHover: "#1f8f92",
+            colorPrimary: "#6BA8ED",
+            colorPrimaryHover: "#1555b0",
+            colorPrimaryActive: "#0f3e82",
+            colorBorder: "#cbd5e0",
             controlHeight: 38,
+            borderRadius: 8,
           },
+          components: {
+            Button: {
+              controlHeight: 38,
+              borderRadius: 8,
+              fontWeight: 600,
+            },
+            Tooltip: {
+              colorBgSpotlight: "#ffffff",
+              colorTextLightSolid: "#6BA8ED",
+            }
+          }
         }}
       >
         {/* SessionBridge gets its own Suspense so it never blocks body mounting */}
         <Suspense fallback={null}>
           <SessionBridge />
         </Suspense>
-        {children}
+        <CompanyAuthGuard>
+          <CompanySidebarShell>
+            {children}
+          </CompanySidebarShell>
+        </CompanyAuthGuard>
       </ConfigProvider>
     </CompanyStoreProvider>
   );

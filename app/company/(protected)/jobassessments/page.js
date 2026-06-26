@@ -20,6 +20,7 @@ import {
 } from "@/redux/slices/company/skillMedhaData";
 import { useRouter } from "next/navigation";
 import { Tooltip } from "@mui/material";
+import PageHeader from "@/modules/tpo/components/PageHeader";
 
 // Constants
 const ASSESSMENT_CONFIG = {
@@ -266,7 +267,7 @@ export default function AssessmentsPage() {
 
   const handleInsightClick = (jobId) => {
     dispatch(resetAllAppliedStudents([]));
-    router.push(`/jobassessments/${jobId}`);
+    router.push(`/company/jobassessments/${jobId}`);
   };
 
   const handlePageChange = (page) => {
@@ -275,13 +276,16 @@ export default function AssessmentsPage() {
 
   // ===== RENDER FUNCTIONS =====
   const renderHeader = () => (
-    <div className={JaStyles.headStyles}>
-      <div>Created Assessments</div>
-      <Input
-        prefix={<SearchOutlined />}
-        placeholder="Search A Job here"
-        onChange={handleSearch}
-      />
+    <div style={{ padding: "0 0 1rem 0" }}>
+      <PageHeader title="Job Assessments" subtitle="Manage created assessments and view insights" />
+      <div style={{ padding: "1.5rem 1.5rem 0", display: "flex", justifyContent: "flex-end" }}>
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="Search A Job here"
+          onChange={handleSearch}
+          style={{ width: "300px", height: "40px" }}
+        />
+      </div>
     </div>
   );
 

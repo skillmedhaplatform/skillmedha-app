@@ -95,7 +95,7 @@ export default function CreateAssessment() {
           await dispatch(getOneJobAssessment({ id: created.insertedId }));
         }
       }
-      router.push(`/myjobs/${jobid}/createjob/startPage`);
+      router.push(`/company/myjobs/${jobid}/createjob/startPage`);
     } catch (err) {
       message.error(typeof err === "string" ? err : "Operation failed");
     }

@@ -178,12 +178,16 @@ export default function CompanyDetailsForm() {
   ];
 
   return (
-    <>
+    <div className={styles?.formContainer || ""}>
       <div className={styles?.headertitleCont || ""}>
         <p className={styles?.formTitle || ""}>Company Details</p>
         {hasUserId && (
           <div className={styles?.editButtonContainer || ""}>
-            <Button type="dashed" onClick={() => setIsEditing((prev) => !prev)}>
+            <Button
+              className="!bg-gradient-to-br !from-[#6BA8ED] !to-[#A3CCFA] !border-none !text-white"
+              style={{ fontWeight: '600', borderRadius: '8px', padding: '4px 16px' }}
+              onClick={() => setIsEditing((prev) => !prev)}
+            >
               {isEditing ? "Cancel Edit" : "Edit"}
             </Button>
           </div>
@@ -213,13 +217,14 @@ export default function CompanyDetailsForm() {
           <Button
             type="primary"
             htmlType="submit"
-            className={styles?.saveButton || ""}
+            className={`${styles?.saveButton || ""} !bg-gradient-to-br !from-[#6BA8ED] !to-[#A3CCFA] !border-none !text-white`}
+            style={{ fontWeight: '600', borderRadius: '8px', padding: '4px 16px' }}
             disabled={!isChanged || !isEditing}
           >
             {hasUserId ? "Update" : "Save"}
           </Button>
         </div>
       </form>
-    </>
+    </div>
   );
 }

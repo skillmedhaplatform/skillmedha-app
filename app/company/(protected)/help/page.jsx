@@ -3,7 +3,6 @@
 
 import { getLstorage } from "@/utils/universalUtils/windowMW";
 import ProctorDashboard from "./proctoringDash";
-import Home from "@/app/company/CompanyShell";
 
 export default function ProctorDashboardPage() {
   const token = getLstorage("token");
@@ -12,9 +11,5 @@ export default function ProctorDashboardPage() {
     return <div>Please login as a proctor</div>;
   }
 
-  return (
-    <Home>
-      <ProctorDashboard token={token} />
-    </Home>
-  );
+  return <ProctorDashboard token={token} />;
 }

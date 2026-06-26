@@ -39,7 +39,7 @@ export default function InterviewPage() {
     },
   ]);
 
-  const baseUrl = `/myjobs/${jobid}/createjob/createassessment`;
+  const baseUrl = `/company/myjobs/${jobid}/createjob/createassessment`;
 
   useEffect(() => {
     if (ONEJOB?.data?.interviewRounds?.length > 0) {

@@ -1,16 +1,18 @@
 @import "@/utils/universalUtils/colors.module.scss";
 
 .mainCont {
-  border: 1px solid $bgcolor;
+  border: 1px solid #cbd5e0;
   width: 100%;
   max-height: 90%;
-  border-radius: 1rem;
-  padding: 1rem;
+  border-radius: 8px;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   overflow-y: auto;
   padding-bottom: 3rem;
+  background: white;
+
   &::-webkit-scrollbar {
     width: 6px;
   }
@@ -20,21 +22,23 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #25a3a6;
+    background-color: #6BA8ED;
     border-radius: 6px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #1b8184;
+    background-color: #1555b0;
   }
 
   /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: #25a3a6 transparent;
+  scrollbar-color: #6BA8ED transparent;
+
   .coursefieldCont {
     display: flex;
     flex-direction: row;
     width: 100%;
+
     label {
       min-width: 25%;
       width: 18%;
@@ -42,11 +46,13 @@
       font-weight: 600;
       word-wrap: break-word;
     }
+
     .courseInputmainCont {
       width: 100%;
       display: flex;
       flex-direction: column;
       gap: 1rem;
+
       .CourseInpuCont {
         align-self: flex-end;
         display: flex;
@@ -56,6 +62,7 @@
         flex-wrap: wrap;
         gap: 1rem;
         width: 100%;
+
         .deleteBtn {
           margin-left: 8px;
           background: transparent;
@@ -76,10 +83,11 @@
           border: 0;
           outline: 0;
           font-size: 16px;
-          background-color: $primary10;
+          background-color: #f4f7fe;
           border-radius: 5px;
           border: 0.1px solid rgba(211, 211, 211, 0.35);
         }
+
         .departmentInput {
           flex: 1;
         }
@@ -92,6 +100,7 @@
     align-items: center;
     justify-content: space-between;
   }
+
   label {
     min-width: 25%;
     width: 18%;
@@ -99,6 +108,7 @@
     font-weight: 600;
     word-wrap: break-word;
   }
+
   .inpuCont {
     flex: 1;
     display: flex;
@@ -115,6 +125,7 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+
     .btnsCont {
       display: flex;
       flex-wrap: wrap;
@@ -122,6 +133,7 @@
       gap: 1rem;
     }
   }
+
   .textarea,
   input {
     flex: 1;
@@ -129,22 +141,47 @@
     border: 0;
     outline: 0;
     font-size: 16px;
-    background-color: $primary10;
+    background-color: #f4f7fe;
     border-radius: 5px;
     border: 0.1px solid rgba(211, 211, 211, 0.35);
+
     &::placeholder {
       color: lightgray;
     }
   }
+
   .textarea {
     resize: none;
     min-height: 12rem;
     overflow-y: auto;
   }
+
+  :global {
+
+    .ant-select,
+    .ant-select-selector,
+    .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+      background-color: #f4f7fe !important;
+      border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
+      border-radius: 5px !important;
+    }
+
+    .ant-picker {
+      background-color: #f4f7fe !important;
+      border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
+      border-radius: 5px !important;
+
+      input {
+        background-color: transparent !important;
+        border: none !important;
+      }
+    }
+  }
+
   .button {
     border: 0;
     padding: 0.5rem 1rem;
-    background-color: $primary10;
+    background-color: #eef5fb;
     border-radius: 5px;
     border: 0.1px solid rgba(211, 211, 211, 0.35);
     font-weight: 600;
@@ -153,17 +190,19 @@
     justify-content: center;
     gap: 0.5rem;
     cursor: pointer;
-    color: $bgcolor;
+    color: #6BA8ED;
   }
+
   .selected {
-    background-color: $bgcolor;
+    background-color: #6BA8ED;
     color: white;
   }
 }
+
 .saveBtn {
   border: 0;
   padding: 0.5rem 1.5rem;
-  background-color: $bgcolor;
+  background-color: #6BA8ED;
   border-radius: 5px;
   border: 0.1px solid rgba(211, 211, 211, 0.35);
   font-weight: 600;

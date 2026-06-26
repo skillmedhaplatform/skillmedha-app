@@ -36,7 +36,7 @@ export default function ProfileDetailsPage() {
   const [newSupplemental, setNewSupplemental] = useState("");
   const [profileDetails, setprofileDetails] = useState({});
   const SessionJobid = getSstorage("jobid");
-  const baseUrl = `/myjobs/${jobid}/createjob/interviewprocess`;
+  const baseUrl = `/company/myjobs/${jobid}/createjob/interviewprocess`;
 
   const { value: ONEJOB, status } = useSelector(
     (state) => state.placement.OneJob

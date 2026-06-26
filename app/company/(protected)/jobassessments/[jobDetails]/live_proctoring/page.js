@@ -2,7 +2,6 @@
 
 import React from "react";
 import { getLstorage } from "@/utils/universalUtils/windowMW";
-import Home from "@/app/page";
 import ProctorDashboard from "@/app/company/(protected)/help/proctoringDash";
 
 export default function LiveProc() {
@@ -12,8 +11,8 @@ export default function LiveProc() {
   }
 
   return (
-    <Home>
+    <>
       <ProctorDashboard token={token} />
-    </Home>
+    </>
   );
 }

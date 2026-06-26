@@ -4,7 +4,7 @@ import styles from "../[jobId]/job.module.scss";
 export default function JobDetails({ JOBPROFILE, ALLPLACEMENTS }) {
   const { id, jobId:jobid } = useParams();
   const router = useRouter();
-  const baseurl = `/myjobs/${jobid}/createjob/basicdetails`;
+  const baseurl = `/company/myjobs/${jobid}/createjob/basicdetails`;
   return (
     <div className={styles.contentCont}>
       <button

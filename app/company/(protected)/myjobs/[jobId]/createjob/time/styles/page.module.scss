@@ -8,8 +8,8 @@ $min-width1025: 1024px;
   margin: 0 auto;
   padding: 24px;
   background: #fff;
-  border: 1px solid;
-  border-radius: 0.5rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
   margin-bottom: 2rem;
   max-height: 70vh;
   // height: 90%;
@@ -25,20 +25,20 @@ $min-width1025: 1024px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #25a3a6;
+    background-color: #6BA8ED;
     border-radius: 6px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #1b8184;
+    background-color: #1555b0;
   }
 
   /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: #25a3a6 transparent;
+  scrollbar-color: #6BA8ED transparent;
   .respTitle {
     margin: 0.7rem 0rem;
-    color: $navbarColor;
+    color: #6BA8ED;
     font-weight: 700;
     font-size: 1.2rem;
   }
@@ -53,8 +53,8 @@ $min-width1025: 1024px;
     transition: all 0.2s ease-in-out;
 
     &:checked {
-      background-color: $iconBackground;
-      border-color: $iconBackground;
+      background-color: #6BA8ED;
+      border-color: #6BA8ED;
     }
 
     &:focus {
@@ -111,8 +111,8 @@ $min-width1025: 1024px;
       transition: all 0.2s ease-in-out;
 
       &:checked {
-        background-color: $iconBackground;
-        border-color: $iconBackground;
+        background-color: #6BA8ED;
+        border-color: #6BA8ED;
       }
 
       &:focus {
@@ -184,8 +184,8 @@ $min-width1025: 1024px;
         margin-right: 1rem;
 
         &:checked {
-          background-color: $iconBackground !important;
-          border-color: $iconBackground;
+          background-color: #6BA8ED !important;
+          border-color: #6BA8ED;
         }
 
         &:focus {
@@ -249,8 +249,8 @@ $min-width1025: 1024px;
       margin-left: 0.3rem;
 
       &:checked {
-        background-color: $iconBackground !important;
-        border-color: $iconBackground;
+        background-color: #6BA8ED !important;
+        border-color: #6BA8ED;
       }
 
       &:focus {

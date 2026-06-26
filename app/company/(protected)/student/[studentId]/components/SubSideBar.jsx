@@ -28,7 +28,7 @@ const SubSideBar = ({ name, id, depart }) => {
   );
 
   const handleClick = (path) => {
-    router.push(`/student/${params?.studentId}${path}`);
+    router.push(`/company/student/${params?.studentId}${path}`);
   };
 
   return (
