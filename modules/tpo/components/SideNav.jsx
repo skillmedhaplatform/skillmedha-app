@@ -82,7 +82,6 @@ const SideNav = ({ activeView, setView }) => {
       name: "My Tests",
       path: "/testportal_admin",
       icon: <HiOutlineDocumentText size={22} />,
-      isExternal: true,
     },
   ];
 
