@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Pagination, Spin } from "antd";
 import PracticeCard from "./PracticeCard";
+import { useSelector, useDispatch } from "react-redux";
+import { setCategoryProgress } from "@/redux/slices/practiceSlice";
 import { useRouter, usePathname } from "next/navigation";
 import { getLstorage } from "@/universalUtils/windowMW";
 import axios from "axios";
@@ -14,13 +17,15 @@ const getAuthHeaders = () => ({
   Authorization: `Bearer ${getLstorage("token")}`,
 });
 
-export default function PracticeSubjectRow({ subject }) {
+export default function PracticeSubjectRow({ subject, pageSizeOverride }) {
   const router = useRouter();
   const pathname = usePathname();
   const [currentPage, setCurrentPage] = useState(1);
   const [subtopics, setSubtopics] = useState([]);
   const [loading, setLoading] = useState(true);
-  const pageSize = 3; // 1 row of 3
+  const pageSize = pageSizeOverride || 4; // default 1 row of 4
+  const studentPracResults = useSelector((state) => state.practice.studentPracResults || []);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let isMounted = true;
@@ -66,6 +71,36 @@ export default function PracticeSubjectRow({ subject }) {
     return () => { isMounted = false; };
   }, [subject._id, subject.title]);
   
+  const getSubtopicStats = (subtopic) => {
+    const sessions = studentPracResults.filter(
+      (session) => session.refId === subtopic._id
+    );
+    if (sessions.length === 0) return { progress: 0, attempts: 0 };
+
+    const totalQuestions = Math.min(subtopic.totalQuestions || 20, 20);
+    const uniqueCorrectIds = new Set();
+    
+    sessions.forEach((s) => {
+      if (Array.isArray(s.correctQuestionIds)) {
+        s.correctQuestionIds.forEach((id) => uniqueCorrectIds.add(id));
+      }
+    });
+
+    const correctCount = uniqueCorrectIds.size;
+    let progress = Math.round((correctCount / totalQuestions) * 100);
+    if (progress > 100) progress = 100;
+
+    return { progress, attempts: sessions.length };
+  };
+
+  useEffect(() => {
+    if (subtopics.length > 0) {
+      const totalProgress = subtopics.reduce((acc, st) => acc + getSubtopicStats(st).progress, 0);
+      const avgProgress = Math.round(totalProgress / subtopics.length);
+      dispatch(setCategoryProgress({ category: subject.title, progress: avgProgress }));
+    }
+  }, [subtopics, studentPracResults, subject.title, dispatch]);
+
   if (loading) {
     return <div className="py-8 flex justify-center"><Spin /></div>;
   }
@@ -82,12 +117,45 @@ export default function PracticeSubjectRow({ subject }) {
     const isCoding = pathname.includes("/coding");
     const basePath = isCoding ? "/student/practice-new/coding/codingtest" : "/student/practice-new/test";
     
-    router.push(`${basePath}?subT=${subtopic._id}&t=${subtopic.topicId}&sub=${subject._id}`);
+    router.push(`${basePath}?subT=${subtopic._id}&t=${subtopic.topicId}&sub=${subject._id}&title=${encodeURIComponent(subtopic.title)}&subjectTitle=${encodeURIComponent(subject.title)}&type=${encodeURIComponent(subject.type || "Technical")}`);
+  };
+
+
+
+  // Variants for scroll-in animation
+  const rowVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
+
+  // Variants for pagination changes
+  const cardVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: { duration: 0.3, ease: "easeOut" }
+    },
+    exit: { 
+      opacity: 0, 
+      x: 20,
+      transition: { duration: 0.2, ease: "easeIn" }
+    }
   };
 
   return (
-    <div className="mb-12">
-      <div className="flex items-center justify-between mb-6">
+    <motion.div 
+      className="mb-2 last:mb-6 mt-1"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.1 }}
+      variants={rowVariants}
+    >
+      <div className="flex items-center justify-between mb-2">
         <h2 className="text-[20px] font-bold text-[#071631] m-0">{subject.title}</h2>
         {subtopics.length > pageSize && (
           <Pagination
@@ -101,19 +169,32 @@ export default function PracticeSubjectRow({ subject }) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentSubtopics.map((subtopic) => (
-          <PracticeCard
-            key={subtopic._id}
-            title={subtopic.title}
-            category={subtopic.topicTitle || subject.title}
-            totalQuestions={subtopic.totalQuestions || 0}
-            attempts={0}
-            onStart={() => handleStart(subtopic)}
-            subjectTitle={subject.title}
-          />
-        ))}
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div 
+          key={currentPage}
+          className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6"
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={cardVariants}
+        >
+          {currentSubtopics.map((subtopic) => {
+            const stats = getSubtopicStats(subtopic);
+            return (
+              <PracticeCard 
+                key={subtopic._id}
+                title={subtopic.title}
+                category={subtopic.topicTitle || subject.title}
+                totalQuestions={Math.min(subtopic.totalQuestions || 20, 20)}
+                attempts={stats.attempts}
+                progress={stats.progress}
+                onStart={() => handleStart(subtopic)}
+                subjectTitle={subject.title}
+              />
+            );
+          })}
+        </motion.div>
+      </AnimatePresence>
       
       {/* Pagination on bottom for mobile */}
       <div className="flex justify-end mt-6 lg:hidden">
@@ -128,6 +209,6 @@ export default function PracticeSubjectRow({ subject }) {
           />
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

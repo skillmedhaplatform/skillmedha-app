@@ -3,12 +3,15 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import {
   fetchSubjectsByType,
+  getStudentPracResults,
 } from "@/redux/slices/practiceSlice";
 import PracticeFilters from "@/modules/student/components/PracticeFilters";
 import PracticeSubjectRow from "@/modules/student/components/PracticeSubjectRow";
+import PracticeBannerTabs from "../components/PracticeBannerTabs";
 import { Divider, Result, Spin, Tooltip, message } from "antd";
 import useResponsive from "@/hooks/useResponsive";
 import styles from "@/mobile_views/practice/mobilePracticeLayout.module.scss";
@@ -21,6 +24,7 @@ export default function NontechnicalPage() {
   const subjects = useSelector((s) => s.practice.subjects);
   const studentCreds = useSelector((state) => state.student.student?.data);
   const [loading, setLoading] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("All");
   const isMobile = useResponsive();
 
   const categoryTabs = [
@@ -34,7 +38,10 @@ export default function NontechnicalPage() {
     dispatch(fetchSubjectsByType("nontechnical")).finally(() => {
       setLoading(false);
     });
-  }, [dispatch]);
+    if (studentCreds?._id) {
+      dispatch(getStudentPracResults(studentCreds._id));
+    }
+  }, [dispatch, studentCreds?._id]);
 
   if (loading) {
     return (
@@ -108,23 +115,48 @@ export default function NontechnicalPage() {
     </div>
   );
 
+  const dynamicCategories = ["All", ...(subjects?.map(s => s.title) || [])];
+  
+  const filteredSubjects = activeCategory === "All" 
+    ? subjects 
+    : subjects.filter(subject => subject.title === activeCategory);
+
   return (
-      <div className="flex flex-col h-[calc(100vh-60px)] overflow-hidden">
-        <div className="flex-shrink-0">
+      <div className="flex flex-col h-full overflow-hidden bg-[#EFF5FB]">
+        <div className="flex-shrink-0 bg-[#EFF5FB] shadow-sm">
           <StudentPageHeader 
-            title="Non-technical practice" 
-            subtitle={dynamicSubtitle}
+            title="Practice" 
+            subtitleSlot={<PracticeBannerTabs />}
             rightSlot={RightStats}
           />
           
-          <PracticeFilters categories={["All", "English", "Quant", "Maths", "Reasoning"]} />
+          <PracticeFilters 
+            categories={dynamicCategories} 
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+          />
         </div>
 
-        {subjects && subjects.length > 0 ? (
-        <div className="bg-gray-50/30 px-4 lg:px-8 py-6 flex-1 overflow-y-auto">
-          {subjects.map((subject, index) => (
-            <PracticeSubjectRow key={subject._id || index} subject={subject} />
-          ))}
+        {filteredSubjects && filteredSubjects.length > 0 ? (
+        <div className={`bg-gray-50/30 px-4 lg:px-8 pt-0 pb-6 flex-1 ${activeCategory === "All" ? "overflow-y-auto" : "overflow-hidden"}`}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeCategory}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full"
+            >
+              {filteredSubjects.map((subject, index) => (
+                <PracticeSubjectRow 
+                  key={subject._id || index} 
+                  subject={subject} 
+                  pageSizeOverride={activeCategory === "All" ? 4 : 8}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
         ) : (
           <Result

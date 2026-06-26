@@ -21,6 +21,8 @@ const initialState = {
   topics: [],
   subtopics: [],
   pracQuestions: {},
+  studentPracResults: [],
+  categoryProgress: {},
   // status can be 'idle' | 'loading' | 'succeeded' | 'failed'
   status: "idle",
   error: null,
@@ -107,6 +109,36 @@ export const fetchPracQuestions = createAsyncThunk(
   }
 );
 
+export const savePracResults = createAsyncThunk(
+  "studentPractice/savePracResults",
+  async ({ pracId, payload }, { rejectWithValue }) => {
+    try {
+      const response = await api.post(
+        `/savePracResults/${pracId}`,
+        { ...payload },
+        { headers: getAuthHeaders() }
+      );
+      return { data: response.data };
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const getStudentPracResults = createAsyncThunk(
+  "studentPractice/getStudentPracResults",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/getStudentPracResults/${userId}`, {
+        headers: getAuthHeaders(),
+      });
+      return { data: response.data };
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 // =================================================================
 // --- STUDENT PRACTICE SLICE ---
 // =================================================================
@@ -115,6 +147,10 @@ const StudentPracticeSlice = createSlice({
   name: "studentPractice",
   initialState,
   reducers: {
+    setCategoryProgress: (state, action) => {
+      const { category, progress } = action.payload;
+      state.categoryProgress[category] = progress;
+    },
     // Clear topics and subtopics when selecting a new subject
     clearTopicsAndSubtopics: (state) => {
       state.topics = [];
@@ -174,6 +210,9 @@ const StudentPracticeSlice = createSlice({
         state.status = "succeeded";
         state.error = null;
         state.pracQuestions = action.payload.data;
+      })
+      .addCase(getStudentPracResults.fulfilled, (state, action) => {
+        state.studentPracResults = action.payload.data?.data || [];
       });
 
     // --- Generic Loading/Error States ---
@@ -203,6 +242,7 @@ const StudentPracticeSlice = createSlice({
 });
 
 export const {
+  setCategoryProgress,
   clearTopicsAndSubtopics,
   clearSubtopics,
   clearError,

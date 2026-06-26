@@ -10,7 +10,7 @@ import {
   HiOutlineSquares2X2
 } from "react-icons/hi2";
 
-export default function StudentPageHeader({ section, title, rightSlot, subtitle, breadcrumb }) {
+export default function StudentPageHeader({ section, title, rightSlot, subtitle, subtitleSlot, breadcrumb }) {
   const getIcon = () => {
     const s = (section || "").toLowerCase();
     const t = (title || "").toLowerCase();
@@ -46,9 +46,13 @@ export default function StudentPageHeader({ section, title, rightSlot, subtitle,
             <h1 className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0" style={{ border: 'none', marginBottom: 0 }}>
               {title}
             </h1>
-            <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight mt-1">
-              {subtitle || "Explore and manage your learning journey."}
-            </p>
+            {subtitleSlot ? (
+              <div className="mt-1">{subtitleSlot}</div>
+            ) : (
+              <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight mt-1">
+                {subtitle || "Explore and manage your learning journey."}
+              </p>
+            )}
           </div>
         </div>
 

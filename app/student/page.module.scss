@@ -26,12 +26,13 @@
     overflow-y: auto;
     border-radius: 0;
     border: none;
-    @include custom-scrollbar(
-      $thumbColor: linear-gradient(135deg, #1E69DA, #5694F0),
-      $scrollbarWidth: 6px,
-      $buttonDisplay: block,
-      $buttonBg: #f1f1f1
-    );
+    
+    /* Hide scrollbar completely to match user request */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 

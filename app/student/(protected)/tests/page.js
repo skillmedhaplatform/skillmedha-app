@@ -181,7 +181,7 @@ export default function Tests() {
   );
 
   return (
-    <div className="relative flex flex-col bg-white h-screen overflow-hidden">
+    <div className="relative flex flex-col bg-[#EFF5FB] h-screen overflow-hidden">
       <StudentPageHeader title="Tests" rightSlot={bannerStats} />
 
       {/* Tabs Section */}

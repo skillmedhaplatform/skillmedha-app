@@ -1,10 +1,13 @@
 "use client";
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getAllCourses,
   getAllInternships,
   getOneInternsip,
+  getAllCoursesOnly,
+  getAllInternshipsOnly,
 } from "@/redux/slices/internship";
 import { GetAllNotifiocations } from "@/redux/slices/jobopenings";
 import {
@@ -52,7 +55,7 @@ const DashboardStats = ({ stats, router }) => (
   </div>
 );
 
-const RecommendedCard = ({ item, total, currentIndex, onDotClick,onCardClick }) => {
+const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, onPrevClick, onCardClick }) => {
   function stripHtml(html) {
     return typeof html === "string" ? html.replace(/<[^>]*>/g, "") : "";
   }
@@ -79,23 +82,27 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick,onCardClick }) 
         className="flex flex-col w-full h-full p-2 animate-[smoothFadeIn_0.5s_ease-out_forwards]"
       >
         <div className="relative w-full h-[220px] shrink-0 bg-white overflow-hidden rounded-xl">
-          <img
-            src={item?.coverImage || item?.media?.coverImage || "/fallback.jpg"}
-            alt={item?.title || "Course cover"}
-            className="w-full h-full object-cover block transition-transform duration-200 group-hover:scale-105"
-            loading="lazy"
-          />
+          {(item?.coverImage || item?.media?.coverImage) ? (
+            <img
+              src={item?.coverImage || item?.media?.coverImage}
+              alt={item?.title || "Course cover"}
+              className="w-full h-full object-cover block transition-transform duration-200 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full bg-[#EFF5FB] block transition-transform duration-200 group-hover:scale-105" />
+          )}
           {item?.difficulty ? (
             <span className="absolute left-2 top-2 z-10 text-[12px] leading-none px-2 py-1.5 rounded-full text-[#0f1115] bg-gradient-to-r from-[#ffd66b] to-[#ffb347] font-semibold">{item?.difficulty}</span>
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-2 px-3 pt-3 pb-2 h-full">
+        <div className="flex flex-col gap-2 px-3 pt-3 pb-2 flex-1">
           <div className="flex items-center justify-between min-h-[52px]">
             <div className="text-[#1E69DA] text-[18px] font-bold leading-tight line-clamp-2">{item?.title}</div>
           </div>
 
-          <div className="flex flex-wrap gap-1.5 h-[26px] overflow-hidden">
+          <div className="flex flex-wrap gap-1.5 h-[26px] overflow-hidden shrink-0">
             {item?.sections?.length ? (
               <span className="text-[12px] text-black bg-white border border-[rgba(159,176,195,0.22)] px-2 py-1 rounded-full">
                 {item?.sections?.length} Modules
@@ -119,40 +126,74 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick,onCardClick }) 
             })()}
           </p>
 
-          <div className="flex items-center justify-between gap-2 mt-auto pt-2">
-            {item?.lastAssignmentUpdate || item?.updatedAt ? (
-              <div className="text-[#8ea2b5] text-[12px]" aria-label="Last updated">
-                Updated{" "}
-                {formatUpdatedDate?.(
-                  item?.lastAssignmentUpdate || item?.updatedAt
-                )}
-              </div>
-            ) : null}
-          </div>
+          <div className="mt-auto flex flex-col justify-end pt-2">
+            <div className="flex items-center justify-between gap-2 h-[20px]">
+              {item?.lastAssignmentUpdate || item?.updatedAt ? (
+                <div className="text-[#8ea2b5] text-[12px]" aria-label="Last updated">
+                  Updated{" "}
+                  {formatUpdatedDate?.(
+                    item?.lastAssignmentUpdate || item?.updatedAt
+                  )}
+                </div>
+              ) : null}
+            </div>
 
-          {total > 0 && (
-            <div className="flex justify-center items-center gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
-              {Array.from({ length: Math.max(3, total) }).map((_, idx) => {
-                const displayTotal = Math.max(3, total);
-                const isActive = idx === (currentIndex % displayTotal);
-                return (
-                  <button
-                    key={idx}
-                    className={`rounded-full transition-all duration-300 ${isActive
-                      ? 'w-[10px] h-[10px] bg-[#1E69DA]'
-                      : 'w-[8px] h-[8px] bg-transparent border-[1.5px] border-[#9ca3af]'
-                      }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onDotClick?.(idx);
-                    }}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  />
-                );
-              })}
+            {total > 0 && (
+              <div className="flex justify-center items-center gap-3 mt-2 h-[24px]" onClick={(e) => e.stopPropagation()}>
+              {total > 1 && (
+                <button
+                  className="text-[#9ca3af] hover:text-[#1E69DA] transition-colors p-1"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onPrevClick?.();
+                  }}
+                  aria-label="Previous"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                </button>
+              )}
+              <div className="flex items-center gap-2">
+                {Array.from({ length: Math.min(3, total) }).map((_, idx) => {
+                  const displayTotal = Math.min(3, total);
+                  const isActive = idx === (currentIndex % displayTotal);
+                  return (
+                    <button
+                      key={idx}
+                      className={`rounded-full transition-all duration-300 ${isActive
+                        ? 'w-[14px] h-[14px] bg-gradient-to-br from-[#1E69DA] to-[#5694F0] border-none'
+                        : 'w-[10px] h-[10px] bg-transparent border-[2px] border-[#9ca3af]'
+                        }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onDotClick?.(idx);
+                      }}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  );
+                })}
+              </div>
+              {total > 1 && (
+                <button
+                  className="text-[#9ca3af] hover:text-[#1E69DA] transition-colors p-1"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onNextClick?.();
+                  }}
+                  aria-label="Next"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              )}
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
@@ -161,43 +202,57 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick,onCardClick }) 
 
 
 const ProfileSection = ({ profileValues, router, studentCreds }) => (
-  <div className="w-full flex flex-col items-center">
-    <div className="w-full flex justify-between items-center mb-1">
-      <div className="flex flex-col">
-        <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px]">Overall performance</h3>
-        <span className="text-[12px] text-[#64748b] font-bold mt-1">Profile completion rate</span>
+  <div className="w-full flex flex-col items-start pb-2">
+    <h3 className="m-0 font-extrabold text-[#0f172a] text-[16px] xl:text-[18px] mb-3 shrink-0">Overall Performance</h3>
+
+    <div className="w-full bg-[#FAFAFA] rounded-[16px] py-2 px-3 flex items-center gap-3 border border-[#e2e8f0] shrink-0 mb-3">
+      <div className="shrink-0 relative">
+        <Progress
+          type="circle"
+          percent={profileValues?.percentage ?? 0}
+          size={46}
+          strokeWidth={8}
+          strokeColor="#3b82f6"
+          trailColor="#e2e8f0"
+          format={(percent) => (
+            <span className="text-[13px] font-black text-[#0f172a] leading-none">{percent}%</span>
+          )}
+        />
+      </div>
+      <div className="flex flex-col gap-0.5">
+        <span className="font-extrabold text-[#334155] text-[13px] leading-tight">Profile completion rate</span>
+        <span className="text-[#64748b] text-[11px] leading-tight">Complete your profile to unlock a better experience</span>
       </div>
     </div>
 
-    <div className="relative flex justify-center mb-1 mt-6">
-      <Progress
-        type="circle"
-        percent={profileValues?.percentage || 12}
-        size={48}
-        strokeWidth={10}
-        strokeColor="#1E69DA"
-        trailColor="#f1f5f9"
-        format={(percent) => (
-          <span className="text-[12px] font-black text-[#0f172a] leading-none">{percent}%</span>
-        )}
-      />
+    <div className="w-full shrink-0">
+      <Button
+        className="w-full h-[38px] flex items-center justify-between px-2 transition-all hover:opacity-90 !text-white !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
+        style={{ borderRadius: '8px' }}
+        onClick={() => router.push("/student/profile/basic-details")}
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+            <span className="text-[12px]">⚡</span>
+          </div>
+          <span className="font-semibold text-[13px]">Complete your profile</span>
+        </div>
+        <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14"></path>
+            <path d="M12 5l7 7-7 7"></path>
+          </svg>
+        </div>
+      </Button>
     </div>
-
-    <Button
-      className="w-full mt-4 h-9 font-bold text-[14px] flex items-center justify-center gap-2 transition-all hover:opacity-90 !text-white !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
-      style={{ borderRadius: '8px' }}
-      onClick={() => router.push("/student/profile/basic-details")}
-    >
-      <span className="text-[16px] ">⚡</span> Complete your profile
-    </Button>
   </div>
 );
 
 const Achievements = () => (
-  <div className="w-full">
-    <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-4 sticky top-0 bg-white z-10 pt-2">Achievements</h3>
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white">
+  <div className="w-full flex flex-col">
+    <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 sticky top-0 bg-white z-10 pt-1 shrink-0">Achievements</h3>
+    <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden max-h-[250px] pb-2">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
         <div className="flex items-center gap-3">
           <div className="text-[24px]">⭐</div>
           <div className="flex flex-col">
@@ -207,7 +262,7 @@ const Achievements = () => (
         </div>
         <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
       </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
         <div className="flex items-center gap-3">
           <div className="text-[24px]">🔥</div>
           <div className="flex flex-col">
@@ -217,7 +272,7 @@ const Achievements = () => (
         </div>
         <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
       </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
         <div className="flex items-center gap-3">
           <div className="text-[24px]">🎓</div>
           <div className="flex flex-col">
@@ -227,7 +282,7 @@ const Achievements = () => (
         </div>
         <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
       </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
         <div className="flex items-center gap-3">
           <div className="text-[24px]">🎉</div>
           <div className="flex flex-col">
@@ -315,6 +370,8 @@ export default function DashboardPage() {
     (state) => state.internship.allInternships
   );
   const allCourses = useSelector((state) => state.internship.allCourses);
+  const allCoursesOnly = useSelector((state) => state.internship.allCoursesOnly);
+  const allInternshipsOnly = useSelector((state) => state.internship.allInternshipsOnly);
   const router = useAppRouter();
   const dispatch = useDispatch();
 
@@ -354,6 +411,8 @@ export default function DashboardPage() {
       await Promise.all([
         dispatch(getAllInternships({ cursor: null, limit: 20 })),
         dispatch(getAllCourses({ limit: 20, cursor: null, type: "course" })),
+        dispatch(getAllCoursesOnly({ limit: 20, cursor: null, type: "course" })),
+        dispatch(getAllInternshipsOnly({ limit: 20, cursor: null })),
         dispatch(GetAllNotifiocations()),
       ]);
     } catch (error) {
@@ -517,7 +576,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <section className="w-full h-full flex flex-col items-stretch lg:pt-0">
+    <section className="w-full h-full flex flex-col items-stretch lg:pt-0 bg-[#EFF5FB]">
       {/* Welcome Section - Top Full Width */}
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         {/* Decorative Icons matching TPO Portal */}
@@ -555,7 +614,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Continue Learning Section with Pagination */}
-          <div className="w-full rounded-2xl bg-white py-6 px-4 lg:px-8 shadow-sm border border-[#e2e8f0]">
+          <div className="w-full rounded-2xl bg-white py-4 px-4 lg:px-6 shadow-sm border border-[#e2e8f0]">
             <div className="flex items-center justify-between mb-4">
               <div className="text-[18px] lg:text-[22px] font-extrabold">
                 <span>Continue Learning</span>
@@ -583,8 +642,15 @@ export default function DashboardPage() {
                 <Spin size="large" />
               </div>
             ) : (
-              <>
-                <div className="flex flex-col gap-4 w-full min-h-[380px]">
+              <AnimatePresence mode="wait">
+                <motion.div 
+                  key={currentPage}
+                  className="flex flex-col gap-3 w-full"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
                   {paginatedLearningData.map((item) => {
                     const hasLastAccessed = item?.lastAccessedSection !== undefined && item?.lastAccessedSection !== null;
                     const handleNavigate = () => {
@@ -613,7 +679,7 @@ export default function DashboardPage() {
                     const isProgressLoading = fetchedProgress?.loading;
 
                     return (
-                      <div key={item._id} className="flex flex-col md:flex-row items-center justify-between p-4 bg-white border border-[#e2e8f0] rounded-[16px] hover:shadow-md transition-shadow">
+                      <div key={item._id} className={`flex flex-col md:flex-row items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-[12px] hover:shadow-md transition-shadow border-l-[4px] ${isInternship ? 'border-l-[#0284c7]' : 'border-l-[#24A058]'}`}>
                         {/* Left Side: Icon & Info */}
                         <div className="flex items-center gap-4 w-full md:w-auto">
                           <div className={`w-[50px] h-[50px] rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${isInternship ? 'bg-[#e1f5fe]' : 'bg-[#e8f5e9]'}`}>
@@ -665,62 +731,88 @@ export default function DashboardPage() {
                       </div>
                   );
                 })}
-              </div>
-              </>
+              </motion.div>
+              </AnimatePresence>
             )}
           </div>
           {/* Grouped Recommended Section */}
-          {(allCourses?.data?.length > 0 || allInternships?.data?.length > 0) && (
+          {(allCoursesOnly?.length > 0 || allInternshipsOnly?.length > 0) && (
             <div className="w-full rounded-2xl bg-white p-4 lg:p-6 mt-4 flex flex-col items-center">
-              <div className="w-full flex flex-col md:flex-row gap-6 items-stretch">
-                {allCourses?.data?.length > 0 && (
+              <div className="w-full flex flex-col md:flex-row gap-6 md:gap-0 items-stretch">
+                {allCoursesOnly?.length > 0 && (
                   <div className="flex-1 flex flex-col items-center border-b md:border-b-0 pb-6 md:pb-0 md:pr-6 md:border-r border-[#e2e8f0]">
-                    <div className="w-full text-left mb-3">
+                    <div className="w-full text-left mb-3 pl-4">
                       <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Course</span>
                     </div>
-                    <div className="w-full h-full flex flex-col justify-between">
-                      <RecommendedCard
-                        item={allCourses.data[recCourseIndex % allCourses.data.length]}
-                        total={allCourses.data.length}
-                        currentIndex={recCourseIndex}
-                        onDotClick={setRecCourseIndex}
-                        onCardClick={(item) => {
-                          router.push(
-                            `/student/course`
-                          );
-                        }}
-                      />
+                    <div className="w-full h-full flex flex-col justify-between overflow-hidden">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={recCourseIndex}
+                          initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.96, y: -10 }}
+                          transition={{ duration: 0.35, ease: "easeInOut" }}
+                          className="w-full h-full"
+                        >
+                          <RecommendedCard
+                            item={allCoursesOnly[recCourseIndex % allCoursesOnly.length]}
+                            total={allCoursesOnly.length}
+                            currentIndex={recCourseIndex}
+                            onDotClick={setRecCourseIndex}
+                            onPrevClick={() => setRecCourseIndex(prev => prev === 0 ? allCoursesOnly.length - 1 : prev - 1)}
+                            onNextClick={() => setRecCourseIndex(prev => prev + 1)}
+                            onCardClick={(item) => {
+                              router.push(
+                                `/student/course`
+                              );
+                            }}
+                          />
+                        </motion.div>
+                      </AnimatePresence>
                       <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
                         <div
                           key={`course-${recCourseIndex}`}
-                          className="absolute top-0 right-0 h-full bg-[#1E69DA]"
+                          className="absolute top-0 right-0 h-full bg-gradient-to-br from-[#1E69DA] to-[#5694F0]"
                           style={{ animation: 'fillRightToLeft 10s linear forwards' }}
                         />
                       </div>
                     </div>
                   </div>
                 )}
-                {allInternships?.data?.length > 0 && (
+                {allInternshipsOnly?.length > 0 && (
                   <div className="flex-1 flex flex-col items-center pt-6 md:pt-0 md:pl-6">
-                    <div className="w-full text-left mb-3">
+                    <div className="w-full text-left mb-3 pl-4">
                       <span className="text-[16px] lg:text-[18px] font-extrabold text-[#1e293b]">Recommended Internship</span>
                     </div>
-                    <div className="w-full h-full flex flex-col justify-between">
-                      <RecommendedCard
-                        item={allInternships.data[recInternshipIndex % allInternships.data.length]}
-                        total={allInternships.data.length}
-                        currentIndex={recInternshipIndex}
-                        onDotClick={setRecInternshipIndex}
-                        onCardClick={(item) => {
-                          router.push(
-                            `/student/internshipLibrary`                          
-                          );
-                        }}
-                      />
+                    <div className="w-full h-full flex flex-col justify-between overflow-hidden">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={recInternshipIndex}
+                          initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.96, y: -10 }}
+                          transition={{ duration: 0.35, ease: "easeInOut" }}
+                          className="w-full h-full"
+                        >
+                          <RecommendedCard
+                            item={allInternshipsOnly[recInternshipIndex % allInternshipsOnly.length]}
+                            total={allInternshipsOnly.length}
+                            currentIndex={recInternshipIndex}
+                            onDotClick={setRecInternshipIndex}
+                            onPrevClick={() => setRecInternshipIndex(prev => prev === 0 ? allInternshipsOnly.length - 1 : prev - 1)}
+                            onNextClick={() => setRecInternshipIndex(prev => prev + 1)}
+                            onCardClick={(item) => {
+                              router.push(
+                                `/student/internshipLibrary`                          
+                              );
+                            }}
+                          />
+                        </motion.div>
+                      </AnimatePresence>
                       <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
                         <div
                           key={`internship-${recInternshipIndex}`}
-                          className="absolute top-0 left-0 h-full bg-[#1E69DA]"
+                          className="absolute top-0 left-0 h-full bg-gradient-to-br from-[#1E69DA] to-[#5694F0]"
                           style={{ animation: 'fillLeftToRight 10s linear forwards' }}
                         />
                       </div>
@@ -733,10 +825,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="hidden lg:flex w-[280px] xl:w-[320px] h-full flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] p-4 pb-2 shrink-0 z-10 shadow-sm relative">
-          <div className="w-full flex flex-col overflow-hidden flex-1 h-full">
+        <div className="hidden lg:flex w-[280px] xl:w-[320px] h-full flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] px-4 pt-0 pb-2 shrink-0 z-10 shadow-sm relative">
+          <div className="w-full flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden flex-1 h-full">
             {/* Section 1: Overall Performance */}
-            <div className="shrink-0 w-full">
+            <div className="w-full shrink-0 pt-0 pb-3">
               <ProfileSection
                 profileValues={profileValues}
                 router={router}
@@ -745,21 +837,28 @@ export default function DashboardPage() {
             </div>
             
             {/* Section 2: Notice Board */}
-            <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden w-full mt-4 flex flex-col relative border-t border-[#f1f5f9] pt-4">
-              <div className="w-full flex items-center justify-between mb-4 sticky top-0 bg-white z-10">
+            <div className="w-full flex flex-col relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
+              <div className="w-full flex items-center justify-between mb-3 sticky top-0 bg-white z-10 shrink-0">
                 <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px]">Notice Board</h3>
+                <svg width="0" height="0" className="absolute">
+                  <linearGradient id="expandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop stopColor="#1E69DA" offset="0%" />
+                    <stop stopColor="#5694F0" offset="100%" />
+                  </linearGradient>
+                </svg>
                 <HiOutlineArrowsExpand
-                  className="text-[1.2rem] cursor-pointer text-[#24A058] transition-transform duration-200 hover:scale-125"
+                  className="text-[1.2rem] cursor-pointer transition-transform duration-200 hover:scale-125"
+                  style={{ stroke: "url(#expandGradient)" }}
                   onClick={() => setIsNoticeModalOpen(true)}
                 />
               </div>
-              <div className="w-full flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+              <div className="w-full shrink-0 flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pb-1">
                 <CardsList type="notifications" />
               </div>
             </div>
             
             {/* Section 3: Achievements */}
-            <div className="shrink-0 w-full mt-4 relative border-t border-[#f1f5f9] pt-4">
+            <div className="w-full relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
               <Achievements />
             </div>
           </div>

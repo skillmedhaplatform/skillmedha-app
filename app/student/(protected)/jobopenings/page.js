@@ -42,7 +42,7 @@ export default function JobOpenings() {
   }
 
   return (
-    <div className="flex flex-col gap-0 relative bg-white h-screen overflow-hidden">
+    <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-screen overflow-hidden">
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center p-4 lg:px-8 shadow-sm bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         {/* Decorative Icons */}
         <div className="absolute inset-0 pointer-events-none z-[1]">

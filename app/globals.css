@@ -33,3 +33,13 @@
   Tailwind base colors from polluting legacy Ant Design / custom CSS text colors.
   Legacy CSS assumes light mode and browser defaults.
 */
+
+/* Hide main scrollbar globally to maintain clean app-like UI */
+html, body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
