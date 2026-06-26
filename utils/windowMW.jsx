@@ -133,6 +133,7 @@ export const sideBarTitles = [
   },
 ];
 export const parseIfJson = (text) => {
+  if (!text) return "";
   try {
     return JSON.parse(text);
   } catch (error) {
