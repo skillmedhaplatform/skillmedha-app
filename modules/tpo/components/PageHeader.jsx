@@ -4,6 +4,16 @@ import { Button } from "antd";
 import styles from "./styles/pageheader.module.scss";
 
 import { BsX, BsPlus, BsStar } from "react-icons/bs";
+import { 
+  HiOutlineAcademicCap, 
+  HiOutlineClipboardDocumentCheck, 
+  HiOutlineUser, 
+  HiOutlineQuestionMarkCircle,
+  HiOutlineDocumentText,
+  HiOutlineSquares2X2,
+  HiOutlineBriefcase,
+  HiOutlineVideoCamera
+} from "react-icons/hi2";
 
 const PageHeader = ({
   breadcrumb,
@@ -28,6 +38,18 @@ const PageHeader = ({
     else setGreetingText("Good Evening");
   }, []);
 
+  const getIcon = () => {
+    const t = (title || "").toLowerCase();
+    if (t.includes("practice")) return <HiOutlineAcademicCap style={{ fontSize: '1.875rem', color: 'white' }} />;
+    if (t.includes("assessment")) return <HiOutlineClipboardDocumentCheck style={{ fontSize: '1.875rem', color: 'white' }} />;
+    if (t.includes("profile")) return <HiOutlineUser style={{ fontSize: '1.875rem', color: 'white' }} />;
+    if (t.includes("monitoring")) return <HiOutlineVideoCamera style={{ fontSize: '1.875rem', color: 'white' }} />;
+    if (t.includes("help")) return <HiOutlineQuestionMarkCircle style={{ fontSize: '1.875rem', color: 'white' }} />;
+    if (t.includes("resume")) return <HiOutlineDocumentText style={{ fontSize: '1.875rem', color: 'white' }} />;
+    if (t.includes("job")) return <HiOutlineBriefcase style={{ fontSize: '1.875rem', color: 'white' }} />;
+    return <HiOutlineSquares2X2 style={{ fontSize: '1.875rem', color: 'white' }} />;
+  };
+
   return (
     <div className={styles.headerSection}>
       <div className={styles.bgIcons}>
@@ -38,24 +60,35 @@ const PageHeader = ({
       </div>
 
       <div className={styles.headerTop}>
-        <div className={styles.headerLeft} style={showGreeting ? { width: '100%', gap: '0.4rem' } : {}}>
-          {breadcrumb && <span className={styles.breadcrumb}>{breadcrumb}</span>}
-          {showGreeting ? (
-            <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                <h1 style={{ fontSize: '2.2rem', fontWeight: '800', lineHeight: '1.2' }}>Hi {userName},</h1>
-                <p style={{ margin: 0, fontSize: '1.1rem', color: '#a0aec0', fontWeight: '500' }}>{currentDate}</p>
-              </div>
-              <p className={styles.subtitle} style={{ fontSize: '1.3rem', color: '#e2e8f0', marginTop: '0.8rem', lineHeight: '1.4' }}>
-                {greetingText}! Here’s an overview of today’s placement activities.
-              </p>
-            </>
-          ) : (
-            <>
-              {title && <h1>{title}</h1>}
-              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-            </>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', position: 'relative', zIndex: 10 }}>
+          {!showGreeting && (
+            <div style={{
+              width: '56px', height: '56px', backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.1)', flexShrink: 0
+            }}>
+              {getIcon()}
+            </div>
           )}
+          <div className={styles.headerLeft} style={showGreeting ? { width: '100%', gap: '0.4rem' } : { flex: 1, justifyContent: 'center' }}>
+            {breadcrumb && <span className={styles.breadcrumb}>{breadcrumb}</span>}
+            {showGreeting ? (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                  <h1 style={{ fontSize: '2.2rem', fontWeight: '800', lineHeight: '1.2' }}>Hi {userName},</h1>
+                  <p style={{ margin: 0, fontSize: '1.1rem', color: '#a0aec0', fontWeight: '500' }}>{currentDate}</p>
+                </div>
+                <p className={styles.subtitle} style={{ fontSize: '1.3rem', color: '#e2e8f0', marginTop: '0.8rem', lineHeight: '1.4' }}>
+                  {greetingText}! Here’s an overview of today’s placement activities.
+                </p>
+              </>
+            ) : (
+              <>
+                {title && <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white', margin: 0, lineHeight: 1.2 }}>{title}</h1>}
+                {subtitle && <p className={styles.subtitle} style={{ margin: 0, marginTop: '0.25rem' }}>{subtitle}</p>}
+              </>
+            )}
+          </div>
         </div>
       </div>
 
