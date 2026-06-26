@@ -427,7 +427,7 @@ export default function SkillLibraryModal({
               )}
           </div>
 
-          <div style={{ fontSize: "16px", color: "#25a3a6" }}>
+          <div style={{ fontSize: "16px", color: "#6BA8ED" }}>
             Total Selected: {modalSelectedQuestions?.length || 0}
           </div>
           {/* Action buttons */}

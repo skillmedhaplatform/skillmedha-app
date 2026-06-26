@@ -346,7 +346,7 @@ const StudentCard = ({
               }}
               onClick={() => {
                 router.push(
-                  `/student/${student?.globalId}__${
+                  `/company/student/${student?.globalId}__${
                     student?.sourceOrgId
                       ? student?.sourceOrgId
                       : student?.college?.orgId

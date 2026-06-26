@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
-import Home from "@/app/page";
 import allStudents from "./allstudents.module.scss";
 import Search from "antd/es/input/Search";
 import { Button, message, Table, Select } from "antd";
@@ -153,7 +152,7 @@ const PlacementDetails = () => {
     }) || [];
 
   return (
-    <Home>
+    <>
       <div className={allStudents.container}>
         <div style={{ display: "flex", gap: "1rem" }}>
           <p
@@ -227,7 +226,7 @@ const PlacementDetails = () => {
         loading={isLoading}
         onClose={handleCloseModal}
       />
-    </Home>
+    </>
   );
 };
 

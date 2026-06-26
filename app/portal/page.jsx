@@ -8,7 +8,7 @@ export default function UnifiedPortal() {
     const defaultViews = {
       student: "/student/dashboard",
       tpo: "/tpo/dashboard",
-      company: "/company/myjobs",
+      company: "/company/profile",
       admin: "/admin/dashboard",
       testportal_admin: "/testportal_admin/myTests",
     };

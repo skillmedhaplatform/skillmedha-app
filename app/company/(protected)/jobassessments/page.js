@@ -20,10 +20,16 @@ import {
 } from "@/redux/slices/company/skillMedhaData";
 import { useRouter } from "next/navigation";
 import { Tooltip } from "@mui/material";
+import PageHeader from "@/modules/tpo/components/PageHeader";
+import { 
+  HiOutlineSquares2X2, 
+  HiOutlineBriefcase, 
+  HiOutlineClock 
+} from "react-icons/hi2";
 
 // Constants
 const ASSESSMENT_CONFIG = {
-  DEFAULT_PAGE_SIZE: 20,
+  DEFAULT_PAGE_SIZE: 6,
   DEFAULT_PAGE_NO: 1,
 };
 
@@ -74,7 +80,7 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
               Expired
             </Button>
           ) : countdown === "No expiry set" ? (
-            <Button type="text" style={{ color: "#25a3a6" }}>
+            <Button type="default" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
               Active
             </Button>
           ) : countdown ? (
@@ -155,6 +161,7 @@ export default function AssessmentsPage() {
   const [pageSize, setPageSize] = useState(ASSESSMENT_CONFIG.DEFAULT_PAGE_SIZE);
   const [loading, setLoading] = useState(false);
   const [countdowns, setCountdowns] = useState({});
+  const [filterType, setFilterType] = useState("All");
 
   // ===== REDUX & ROUTING =====
   const dispatch = useDispatch();
@@ -225,13 +232,6 @@ export default function AssessmentsPage() {
   }, [jobData]);
 
   // ===== EFFECTS =====
-  // Update page size when API returns different size
-  useEffect(() => {
-    if (apiPageSize && apiPageSize !== pageSize) {
-      setPageSize(apiPageSize);
-    }
-  }, [apiPageSize, pageSize]);
-
   // Fetch assessments data
   useEffect(() => {
     let isMounted = true;
@@ -242,8 +242,8 @@ export default function AssessmentsPage() {
         setLoading(true);
         await dispatch(
           getAllAssessments({
-            page: pageNo,
-            limit: pageSize,
+            page: 1,
+            limit: 1000,
           })
         );
       } finally {
@@ -256,7 +256,37 @@ export default function AssessmentsPage() {
     return () => {
       isMounted = false;
     };
-  }, [dispatch, pageNo, pageSize]);
+  }, [dispatch]);
+
+  // ===== CLIENT-SIDE FILTERING & PAGINATION =====
+  const filteredJobs = React.useMemo(() => {
+    return jobData.map((job, idx) => ({ job, originalIdx: idx })).filter(({ originalIdx }) => {
+      const status = countdowns[originalIdx];
+      if (filterType === "Active") {
+        return status && status !== "Expired";
+      } else if (filterType === "Expired") {
+        return status === "Expired";
+      }
+      return true;
+    });
+  }, [jobData, countdowns, filterType]);
+
+  const activeCount = React.useMemo(() => {
+    return jobData.filter((_, idx) => countdowns[idx] && countdowns[idx] !== "Expired").length;
+  }, [jobData, countdowns]);
+
+  const expiredCount = React.useMemo(() => {
+    return jobData.filter((_, idx) => countdowns[idx] === "Expired").length;
+  }, [jobData, countdowns]);
+
+  const allCount = jobData.length;
+
+  const currentJobs = React.useMemo(() => {
+    const startIndex = (pageNo - 1) * pageSize;
+    return filteredJobs.slice(startIndex, startIndex + pageSize);
+  }, [filteredJobs, pageNo, pageSize]);
+
+  const totalFiltered = filteredJobs.length;
 
   // ===== EVENT HANDLERS =====
   const handleSearch = (e) => {
@@ -264,9 +294,14 @@ export default function AssessmentsPage() {
     console.log("Search:", e.target.value);
   };
 
+  const handleFilterClick = (type) => {
+    setFilterType(type);
+    setPageNo(1);
+  };
+
   const handleInsightClick = (jobId) => {
     dispatch(resetAllAppliedStudents([]));
-    router.push(`/jobassessments/${jobId}`);
+    router.push(`/company/jobassessments/${jobId}`);
   };
 
   const handlePageChange = (page) => {
@@ -275,13 +310,16 @@ export default function AssessmentsPage() {
 
   // ===== RENDER FUNCTIONS =====
   const renderHeader = () => (
-    <div className={JaStyles.headStyles}>
-      <div>Created Assessments</div>
-      <Input
-        prefix={<SearchOutlined />}
-        placeholder="Search A Job here"
-        onChange={handleSearch}
-      />
+    <div style={{ padding: "0 0 1rem 0" }}>
+      <PageHeader title="Job Assessments" subtitle="Manage created assessments and view insights" />
+      <div style={{ padding: "1.5rem 1.5rem 0", display: "flex", justifyContent: "flex-end" }}>
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="Search A Job here"
+          onChange={handleSearch}
+          style={{ width: "300px", height: "40px" }}
+        />
+      </div>
     </div>
   );
 
@@ -297,13 +335,54 @@ export default function AssessmentsPage() {
     </div>
   );
 
+  const renderSummaryBoxes = () => (
+    <div className={JaStyles.summaryGrid} style={{ padding: '0 1.5rem' }}>
+      <div 
+        className={`${JaStyles.summaryBox} ${filterType === "All" ? JaStyles.activeBox : ""}`}
+        onClick={() => handleFilterClick("All")}
+      >
+        <div className={`${JaStyles.iconWrapper} ${JaStyles.blue}`}>
+          <HiOutlineSquares2X2 />
+        </div>
+        <div className={JaStyles.textWrapper}>
+          <span className={JaStyles.count}>{allCount}</span>
+          <span className={JaStyles.label}>All Assessments</span>
+        </div>
+      </div>
+      <div 
+        className={`${JaStyles.summaryBox} ${filterType === "Active" ? JaStyles.activeBox : ""}`}
+        onClick={() => handleFilterClick("Active")}
+      >
+        <div className={`${JaStyles.iconWrapper} ${JaStyles.green}`}>
+          <HiOutlineBriefcase />
+        </div>
+        <div className={JaStyles.textWrapper}>
+          <span className={JaStyles.count}>{activeCount}</span>
+          <span className={JaStyles.label}>Active Jobs</span>
+        </div>
+      </div>
+      <div 
+        className={`${JaStyles.summaryBox} ${filterType === "Expired" ? JaStyles.activeBox : ""}`}
+        onClick={() => handleFilterClick("Expired")}
+      >
+        <div className={`${JaStyles.iconWrapper} ${JaStyles.red}`}>
+          <HiOutlineClock />
+        </div>
+        <div className={JaStyles.textWrapper}>
+          <span className={JaStyles.count}>{expiredCount}</span>
+          <span className={JaStyles.label}>Expired Jobs</span>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderAssessmentCards = () =>
-    jobData.map((job, idx) => (
+    currentJobs.map(({ job, originalIdx }) => (
       <AssessmentCard
-        key={job?._id || idx}
+        key={job?._id || originalIdx}
         job={job}
         onInsightClick={handleInsightClick}
-        countdown={countdowns[idx]}
+        countdown={countdowns[originalIdx]}
       />
     ));
 
@@ -312,7 +391,7 @@ export default function AssessmentsPage() {
       return renderLoadingState();
     }
 
-    if (jobData.length === 0) {
+    if (currentJobs.length === 0) {
       return renderEmptyState();
     }
 
@@ -323,7 +402,7 @@ export default function AssessmentsPage() {
     <div className={JaStyles.paginationContainer}>
       <Pagination
         current={pageNo}
-        total={total}
+        total={totalFiltered}
         pageSize={pageSize}
         showSizeChanger={false}
         onChange={handlePageChange}
@@ -335,7 +414,7 @@ export default function AssessmentsPage() {
   return (
     <div className={JaStyles.container}>
         {renderHeader()}
-
+        {renderSummaryBoxes()}
         <div className={JaStyles.bodyStyles}>{renderBodyContent()}</div>
 
         {renderPagination()}

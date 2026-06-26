@@ -31,6 +31,10 @@ export async function middleware(request) {
   const token = request.cookies.get("token")?.value;
 
   // ── 0. Portal Route Protection ───────────────────────────────────────────
+  if (pathname.endsWith(".xlsx") || pathname.endsWith(".csv")) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/portal")) {
     if (!token) {
       const loginUrl = new URL("/login", request.url);

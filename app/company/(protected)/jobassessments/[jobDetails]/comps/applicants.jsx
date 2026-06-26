@@ -124,7 +124,7 @@ import StudentCard from "@/app/company/(protected)/skillsets/components/candidat
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import applicantStyles from "./styles/applicants.module.scss";
-import { DatePicker, Input, Button, Checkbox, Empty } from "antd";
+import { DatePicker, Input, Button, Checkbox, Empty, Pagination } from "antd";
 import dayjs from "dayjs";
 import {
   getAllAppliedStudents,
@@ -241,10 +241,21 @@ const Applicants = () => {
     selectedStudentIds.length > 0 &&
     selectedStudentIds.length < appliedStudents?.length;
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(4);
+
+  const onPageChange = (page, newPageSize) => {
+    setCurrentPage(page);
+    setPageSize(newPageSize);
+  };
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentApplicants = appliedStudents?.slice(startIndex, endIndex) || [];
+
   return (
     <div className={applicantStyles.container}>
-      <div className={applicantStyles.headContainer}>
-        <div className={applicantStyles.title}>{oneJobData?.jobTitle}</div>
+      <div className={applicantStyles.headContainer} style={{ justifyContent: "flex-end" }}>
         <div className={applicantStyles.filterSec}>
           <Input
             style={{ width: "10rem" }}
@@ -326,7 +337,7 @@ const Applicants = () => {
       )}
       <div className={applicantStyles.bodyStyles}>
         {appliedStudents?.length > 0 ? (
-          appliedStudents.map((student, index) => {
+          currentApplicants.map((student, index) => {
             return (
               <StudentCard
                 student={student}
@@ -351,6 +362,19 @@ const Applicants = () => {
           </div>
         )}
       </div>
+
+      {appliedStudents?.length > 0 && (
+        <div style={{ marginTop: "2rem", display: "flex", justifyContent: "flex-end" }}>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={appliedStudents.length}
+            onChange={onPageChange}
+            showSizeChanger
+            pageSizeOptions={['4', '10', '20', '50']}
+          />
+        </div>
+      )}
     </div>
   );
 };

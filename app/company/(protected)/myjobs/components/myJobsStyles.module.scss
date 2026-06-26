@@ -20,8 +20,6 @@
       border: none;
       outline: none;
       font-size: 1rem;
-      // font-weight: 600;
-      // border-radius: .5rem;
       padding: 0.5rem 1.5rem;
       cursor: pointer;
     }
@@ -30,7 +28,6 @@
       border: none;
       outline: none;
       font-size: 1rem;
-      // font-weight: 600;
       padding: 0.5rem 1.5rem;
       cursor: pointer;
       color: $primaryColor;
@@ -41,13 +38,7 @@
 }
 
 .bodyCon {
-  height: 70vh;
-  margin-top: 1rem;
-  overflow-y: scroll;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  /* margin-top removed to reduce gap */
 }
 
 .btn2 {
@@ -59,4 +50,137 @@
   border: none;
   border-radius: 0.5rem;
   padding: 0.5rem 2rem;
+}
+
+/* ===== Summary Stats Grid ===== */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.statCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.25rem;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+  }
+}
+
+.statIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.statTextCont {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== Card List Styles ===== */
+.cardsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.jobCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    border-color: #cbd5e0;
+    transform: translateY(-1px);
+  }
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 85px;
+}
+
+.metaLabel {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.metaValue {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2d3748;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
 }

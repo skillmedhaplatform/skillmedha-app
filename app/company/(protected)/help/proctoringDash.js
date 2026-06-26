@@ -791,6 +791,9 @@ import {
   EyeOutlined,
   ReloadOutlined,
   UserOutlined,
+  UsergroupAddOutlined,
+  CameraOutlined,
+  FlagOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
 import useProctoringProctor from "@/utils/universalUtils/liveProctoring/useProctoringProctor";
@@ -1170,226 +1173,194 @@ const ProctorDashboard = ({ token, companyOrg }) => {
 
   const recentThumbnails = getRecentActivityThumbnails();
 
+  const formatDuration = (minutes) => {
+    if (!minutes) return "00:00";
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins}m`;
+  };
+
   return (
     <div className={styles.proctoringContainer}>
       <div className={styles.mainContent}>
         {/* Left Sidebar */}
         <div className={styles.sidebar}>
-          <div className={styles.sidebarHeader}>
-            <h2 className={styles.title}>Live Proctoring</h2>
-            <div className={styles.proctorInfo}>
-              <Avatar
-                size={40}
-                src={
-                  selectedCandidate?.profile ||
-                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Katherine"
-                }
-              />
-              <div>
-                <div className={styles.proctorName}>{`${
-                  selectedCandidate
-                    ? selectedCandidate?.firstName +
-                      " " +
-                      selectedCandidate?.lastName
-                    : "Select Candidate"
-                }`}</div>
-                <Badge status="success" />
+          <div className={styles.sidebarHeaderNew}>
+            <div className={styles.headerTopRow}>
+              <div className={styles.titleSection}>
+                <span className={styles.candidatesTitle}>
+                  <UsergroupAddOutlined style={{ fontSize: 20 }} /> Candidates
+                </span>
+                <div className={styles.livePill}>LIVE</div>
               </div>
             </div>
-          </div>
-
-          <div className={styles.candidatesSection}>
-            <div className={styles.candidatesHeader}>
-              <span className={styles.candidatesTitle}>
-                Total Candidates ({studentsWithSessions.length})
-              </span>
+            
+            <div className={styles.headerSearchRow}>
+              <Input
+                placeholder="Value"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+                className={styles.searchInput}
+              />
+              <div className={styles.totalActive}>
+                Total: <br/>{studentsWithSessions.length} active
+              </div>
               <Button
                 icon={<ReloadOutlined />}
                 onClick={loadActiveSessions}
                 loading={loading}
-                size="small"
                 type="text"
-              >
-                Refresh
-              </Button>
-            </div>
-
-            <div className={styles.searchContainer}>
-              <Search
-                placeholder="Value"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                className={styles.searchInput}
+                style={{ padding: '4px' }}
               />
             </div>
+          </div>
 
-            <div className={styles.candidatesList}>
-              <Spin spinning={loading}>
-                {filteredCandidates?.map((candidate) => (
-                  <div
-                    key={candidate._id}
-                    className={`${styles.candidateItem} ${
-                      selectedCandidate?._id === candidate._id
-                        ? styles.selected
-                        : ""
-                    }`}
-                    onClick={() => handleCandidateClick(candidate)}
-                  >
-                    <Avatar
-                      size={48}
-                      src={candidate.profile}
-                      className={styles.candidateAvatar}
-                    >
-                      {candidate.firstName?.[0]}
-                      {candidate.lastName?.[0]}
-                    </Avatar>
-                    <div className={styles.candidateInfo}>
-                      <div className={styles.candidateName}>
-                        {candidate.firstName} {candidate.lastName}
-                      </div>
-                      <Badge
-                        status={candidate.isActive ? "success" : "default"}
-                        text={candidate.isActive ? "Active" : "Inactive"}
-                        className={styles.statusBadge}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </Spin>
+          <div className={styles.candidatesList}>
+            {/* STATIC RS */}
+            <div className={`${styles.candidateCard} ${styles.selected}`}>
+              <div className={styles.candidateInitials} style={{ background: '#3b82f6' }}>RS</div>
+              <div className={styles.candidateInfo}>
+                <div className={styles.candidateName}>Rahul Sharma</div>
+                <div className={styles.candidateTest}>Developer Assessment</div>
+              </div>
+              <div className={styles.statusDot} style={{ background: '#22c55e' }} />
+            </div>
+
+            {/* STATIC PN */}
+            <div className={styles.candidateCard}>
+              <div className={styles.candidateInitials} style={{ background: '#22c55e' }}>PN</div>
+              <div className={styles.candidateInfo}>
+                <div className={styles.candidateName}>Priya Nair</div>
+                <div className={styles.candidateTest}>DevOps Assessment</div>
+              </div>
+              <div className={styles.statusDot} style={{ background: '#22c55e' }} />
+            </div>
+
+            {/* STATIC AM */}
+            <div className={styles.candidateCard}>
+              <div className={styles.candidateInitials} style={{ background: '#9333ea' }}>AM</div>
+              <div className={styles.candidateInfo}>
+                <div className={styles.candidateName}>Arjun Mehta</div>
+                <div className={styles.candidateTest}>Wipro Assessment</div>
+              </div>
+              <div className={styles.statusDot} style={{ background: '#f97316' }} />
+            </div>
+
+            {/* STATIC SR */}
+            <div className={styles.candidateCard}>
+              <div className={styles.candidateInitials} style={{ background: '#f97316' }}>SR</div>
+              <div className={styles.candidateInfo}>
+                <div className={styles.candidateName}>Sneha Reddy</div>
+                <div className={styles.candidateTest}>Data Analyst Assessment</div>
+              </div>
+              <div className={styles.statusDot} style={{ background: '#22c55e' }} />
             </div>
           </div>
         </div>
 
         <div className={styles.videoSection}>
-          {selectedCandidate && selectedCandidate.isJoined ? (
-            <div className={styles.videoContainer}>
-              <div className={styles.videoHeader}>
-                <div className={styles.studentInfo}>
-                  <Avatar src={selectedCandidate.profile} size={40}>
-                    {selectedCandidate.firstName?.[0]}
-                    {selectedCandidate.lastName?.[0]}
-                  </Avatar>
-                  <div>
-                    <div className={styles.studentName}>
-                      {selectedCandidate.firstName} {selectedCandidate.lastName}
-                    </div>
-                    <Badge status="success" text="Live" />
-                  </div>
-                </div>
-                <div className={styles.videoControls}>
-                  <Button
-                    icon={<MessageOutlined />}
-                    onClick={() => {
-                      setMessageModal({
-                        visible: true,
-                        sessionId: joinedSessions?.[0]?.sessionId,
-                        studentId: selectedCandidate.globalId,
-                      });
-                    }}
-                    size="small"
-                  >
-                    Message
-                  </Button>
-                  <div className={styles.controlBadge}>360°</div>
-                  <Button
-                    type="primary"
-                    danger
-                    shape="circle"
-                    icon={<StopOutlined />}
-                    size="large"
-                    onClick={() => {
-                      if (selectedCandidate.session) {
-                        handleLeaveSession(selectedCandidate.session.sessionId);
-                      }
-                    }}
-                    className={styles.stopButton}
-                  />
+          <>
+            <div className={styles.topHeader}>
+              <div className={styles.headerTitle}>
+                <span className={styles.shieldIcon}>🛡️</span>
+                Monitoring: Rahul Sharma
+              </div>
+              <div className={styles.headerControls}>
+                <Button className={styles.controlBtn} icon={<CameraOutlined />}>Snapshot</Button>
+                <Button className={styles.controlBtn} style={{ color: "#ef4444", borderColor: "#fee2e2", background: "#fef2f2" }} icon={<FlagOutlined />}>Flag</Button>
+                <Button className={`${styles.controlBtn} ${styles.endSessionBtn}`} icon={<StopOutlined />}>End Session</Button>
+              </div>
+            </div>
+
+            <div className={styles.statsRow}>
+              <div className={styles.statCard}>
+                <UserOutlined className={styles.statIcon} style={{ color: '#3b82f6' }} />
+                <div className={styles.statInfo}>
+                  <div className={styles.statLabel}>CANDIDATE</div>
+                  <div className={styles.statValue}>Rahul Sharma</div>
                 </div>
               </div>
-
-              {/* ✅ FIXED: Video display with immediate loading */}
-              <div className={styles.videoPlayer}>
-                {joinedSessions.map((session) =>
-                  session.remoteUsers && session.remoteUsers.length > 0 ? (
-                    session.remoteUsers.map((user) => (
-                      <div key={user.uid} className={styles.videoWrapper}>
-                        <div
-                          id={`video-${session.sessionId}-${user.uid}`}
-                          className={styles.videoElement}
-                        >
-                          {!user.videoTrack && (
-                            <div className={styles.videoPlaceholder}>
-                              <div className={styles.loadingSpinner}>⏳</div>
-                              <div>Connecting to video...</div>
-                              <small>UID: {user.uid}</small>
-                              {/* ✅ Add click to play fallback */}
-                              <button
-                                onClick={() => playVideo(session, user)}
-                                className={styles.playButton}
-                              >
-                                ▶️ Click to Play
-                              </button>
-                            </div>
-                          )}
-
-                          {user.videoTrack && (
-                            <div className={styles.videoDebug}>
-                              📹 Live | UID: {user.uid}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div key={session.sessionId} className={styles.noStudents}>
-                      No students connected to this session
-                    </div>
-                  )
-                )}
+              <div className={styles.statCard}>
+                <Badge className={styles.statIcon} status="processing" color="#22c55e" />
+                <div className={styles.statInfo}>
+                  <div className={styles.statLabel}>TEST</div>
+                  <div className={styles.statValue}>Developer Assessment...</div>
+                </div>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statIcon} style={{ fontSize: 18, color: '#f97316' }}>⏱️</span>
+                <div className={styles.statInfo}>
+                  <div className={styles.statLabel}>DURATION</div>
+                  <div className={styles.statValue}>06:58</div>
+                </div>
+              </div>
+              <div className={styles.statCard}>
+                <WarningOutlined className={styles.statIcon} style={{ color: "#ef4444" }} />
+                <div className={styles.statInfo}>
+                  <div className={styles.statLabel}>ALERTS</div>
+                  <div className={styles.statValue} style={{ color: '#1e3a8a' }}>1</div>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className={styles.placeholderContainer}>
-              <div className={styles.placeholder}>
-                <div className={styles.placeholderIcon}>📹</div>
-                <h3>Select a candidate to start monitoring</h3>
-                <p>Click on an active candidate from the left panel</p>
+
+            <div className={styles.primaryVideoContainer}>
+              <div className={styles.videoLabel}>🖥️ SCREEN SHARE</div>
+              <div className={styles.recBadge}>REC</div>
+              
+              <div className={styles.placeholderContent}>
+                <div className={styles.icon}>🖥️</div>
+                <div className={styles.text}>Screen share feed</div>
+                <div className={styles.subText}>Waiting for stream...</div>
               </div>
             </div>
-          )}
 
-          {/* Recent Activity */}
-          <div className={styles.recentActivity}>
-            <h3 className={styles.activityTitle}>Recent Activity</h3>
-            <div className={styles.thumbnailGrid}>
-              {Array.from(violationFrames)
-                .slice(-6)
-                .map((thumb, index) => (
-                  <div key={index} className={styles.thumbnail}>
-                    <div className={styles.thumbnailContent}>
-                      <img
-                        src={thumb}
-                        alt={`Violation ${index + 1}`}
-                        className={styles.thumbnailImage}
-                      />
-                    </div>
+            <div className={styles.bottomRow}>
+              <div className={styles.secondaryVideoContainer}>
+                <div className={styles.videoLabel}>👤 WEBCAM</div>
+                <div className={styles.placeholderContent}>
+                  <div className={styles.icon}>👤</div>
+                  <div className={styles.text}>Webcam feed</div>
+                  <div className={styles.subText}>Camera active</div>
+                </div>
+              </div>
+
+              <div className={styles.activityLogContainer}>
+                <div className={styles.logHeader}>⚡ ACTIVITY LOG</div>
+                <div className={styles.logList}>
+                  <div className={`${styles.logItem} ${styles["status-normal"]}`}>
+                    <span className={styles.logTime}>[12:30:01]</span>
+                    <span className={styles.logText}>Session started</span>
                   </div>
-                ))}
-              {/* <Slider {...settings}>
-                {Array.from(violationFrames).map((frameUrl, index) => (
-                  <div key={index} className={styles.thumbnail}>
-                    <div className={styles.thumbnailContent}>
-                      <img
-                        src={frameUrl}
-                        alt={`Violation ${index + 1}`}
-                        className={styles.thumbnailImage}
-                      />
-                    </div>
+                  <div className={`${styles.logItem} ${styles["status-normal"]}`}>
+                    <span className={styles.logTime}>[12:30:15]</span>
+                    <span className={styles.logText}>Question 1 opened</span>
                   </div>
-                ))}
-              </Slider> */}
+                  <div className={`${styles.logItem} ${styles["status-normal"]}`}>
+                    <span className={styles.logTime}>[12:31:02]</span>
+                    <span className={styles.logText}>Question 2 opened</span>
+                  </div>
+                  <div className={`${styles.logItem} ${styles["status-warning"]}`}>
+                    <span className={styles.logTime}>[12:31:44]</span>
+                    <span className={styles.logText}>🔺 Tab switch detected</span>
+                  </div>
+                  <div className={`${styles.logItem} ${styles["status-normal"]}`}>
+                    <span className={styles.logTime}>[12:32:10]</span>
+                    <span className={styles.logText}>Returned to test tab</span>
+                  </div>
+                  <div className={`${styles.logItem} ${styles["status-normal"]}`}>
+                    <span className={styles.logTime}>[12:33:20]</span>
+                    <span className={styles.logText}>Question 3 opened</span>
+                  </div>
+                  <div className={`${styles.logItem} ${styles["status-normal"]}`} style={{ color: "#9ca3af" }}>
+                    <span className={styles.logTime}>[12:34:05]</span>
+                    <span className={styles.logText}>Idle — no input detected</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          </>
         </div>
       </div>
 

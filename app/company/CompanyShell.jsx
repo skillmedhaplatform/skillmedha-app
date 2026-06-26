@@ -1,21 +1,23 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import PageStyles from "./page.module.scss";
+// removed duplicate
 import { useEffect, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { message } from "antd";
 import { ConfigProvider } from "antd";
-import Header from "@/modules/company/components/header";
 import SideBar from "@/modules/company/components/sideBar";
 import { getLstorage } from "@/utils/universalUtils/windowMW";
 import Image from "next/image";
 import { imgUrls } from "@/utils/universalUtils/images";
 import { setSearchTerm } from "@/redux/slices/searchFunctions";
+import PageStyles from "@/app/student/page.module.scss";
+import useResponsive from "@/hooks/useResponsive";
 
 export default function Home({ children }) {
   const nav = useRouter();
   const currPath = usePathname();
   const token = getLstorage("token");
+  const isMobile = useResponsive();
 
   const dispatch = useDispatch();
 
@@ -34,7 +36,7 @@ export default function Home({ children }) {
 
   useEffect(() => {
     if (currPath == "/") {
-      nav.replace("/myjobs");
+      nav.replace("/company/profile");
     }
   }, []);
   const handleInputChange = (e) => {
@@ -42,33 +44,16 @@ export default function Home({ children }) {
   };
 
   return (
-
-      <div className={PageStyles.pageContainer}>
-        <Suspense fallback={null}>
-          <Header />
-        </Suspense>
-        {/* {currPath === "/AssessmentLibrary" && (
-          <div className={PageStyles.header2}>
-            <div className={PageStyles.headerTitle}>Assessment Library</div>
-            <div className={PageStyles.inputContainer}>
-              <Image
-                src={imgUrls.SearchIcon}
-                alt="SearchIcon"
-                className={PageStyles.svgIcon}
-              />
-              <input
-                placeholder="Search by role or skill"
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-        )} */}
-        <div className={PageStyles.pageBody}>
-          <SideBar />
-
-          <div className={PageStyles.content}>{children}</div>
+    <div className={PageStyles.pageContainer} style={{ flexDirection: isMobile ? "column" : "row" }}>
+      {/* TODO: Add MobileSidebar later if needed, use SideBar for now */}
+      <SideBar isMobile={isMobile} />
+      <div className={PageStyles.rightColumn} style={{ height: isMobile ? "calc(100vh - 64px)" : "100%" }}>
+        <div className={PageStyles.content} style={{ padding: 0, backgroundColor: "#eef5fb" }}>
+          <Suspense fallback={null}>
+            {children}
+          </Suspense>
         </div>
       </div>
-
+    </div>
   );
 }
