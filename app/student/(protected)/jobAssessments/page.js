@@ -99,7 +99,7 @@ export default function JobAssessments() {
     sessionStorage.setItem("selectedTest", job?._id);
 
     return nav.replace(
-      "/jobAssessments/" +
+      "/student/jobAssessments/" +
         job?.jobTitle.split(" ").join("-") +
         "?testId=" +
         job?._id
@@ -167,7 +167,7 @@ export default function JobAssessments() {
   return (
     
       <div className="h-full overflow-hidden flex flex-col gap-2 p-4 bg-[#EFF5FB]">
-        <StudentPageHeader section="Assessment" title="Job Assessments" />
+        <StudentPageHeader title="Job Assessments" />
         <div className="w-full flex justify-between items-center">
           <h2 className="w-[80%] text-[1.2rem] font-bold text-[#24A058] m-0 mb-4">Job Assessments</h2>
         </div>

@@ -6,6 +6,8 @@ export default function PracticeFilters({
   categories = ["All", "English", "Quant", "Maths", "Reasoning"],
   activeCategory = "All",
   onCategoryChange,
+  activeSort = "Default",
+  onSortChange,
 }) {
   const [activeTab, setActiveTab] = useState("All topics");
   const categoryProgressData = useSelector((state) => state.practice.categoryProgress || {});
@@ -46,7 +48,8 @@ export default function PracticeFilters({
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-[13px] font-medium text-gray-500">Sort by</span>
             <Select
-              defaultValue="Default"
+              value={activeSort}
+              onChange={(value) => onSortChange && onSortChange(value)}
               bordered={false}
               style={{ width: 100, fontWeight: "bold" }}
               options={[
