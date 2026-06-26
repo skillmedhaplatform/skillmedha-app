@@ -87,8 +87,13 @@ export default function Quiz({
       0
     );
     try {
+      const studentId = studentCreds?._id || getLstorage("sId");
+      if (!studentId) {
+        throw new Error("Student ID is missing. Please log out and log in again.");
+      }
+      
       const { data } = await axios.post(
-        restUrl + "/addPsychometricTestResults/" + getLstorage("sId"),
+        restUrl + "/addPsychometricTestResults/" + studentId,
         {
           attemptedData: results,
           answeredCount,
@@ -101,7 +106,7 @@ export default function Quiz({
         }
       );
 
-      if (data?.msg) {
+      if (data?.success || data?.msg) {
         // Update the permissions cookie: psychometric done + email verified
         await fetch("/api/auth/session", {
           method: "PATCH",
@@ -113,7 +118,7 @@ export default function Quiz({
 
         // Refresh the router to clear any cached middleware redirects before navigating
         nav.refresh();
-        nav.replace("/dashboard");
+        nav.replace("/student/dashboard");
       }
     } catch (error) {
       message.error("Failed to update results");

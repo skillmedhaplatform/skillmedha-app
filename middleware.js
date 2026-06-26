@@ -45,8 +45,8 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // We run middleware logic on /student and /admin routes
-  if (!pathname.startsWith("/student") && !pathname.startsWith("/admin")) {
+  // We run middleware logic on /student, /admin, and /dashboard routes
+  if (!pathname.startsWith("/student") && !pathname.startsWith("/admin") && !pathname.startsWith("/dashboard")) {
     return NextResponse.next();
   }
 

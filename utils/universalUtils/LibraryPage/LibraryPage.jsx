@@ -196,7 +196,16 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   const allPaginationData = useSelector(allPaginationSelector || (() => null));
 
   // --- Wishlist (favorites) state ---
-  const wishlistItems = useSelector((state) => state.wishlist?.items ?? []);
+  const rawWishlistItems = useSelector((state) => state.wishlist?.items ?? []);
+  const wishlistItems = useMemo(() => {
+    return rawWishlistItems.filter(item => {
+      const type = item.courseId?.type?.toLowerCase() || '';
+      if (idPrefix === "course") return type === "course";
+      if (idPrefix === "internship") return type === "internship";
+      return true; // fallback
+    });
+  }, [rawWishlistItems, idPrefix]);
+  
   const wishlistLoading = useSelector((state) => state.wishlist?.loading ?? false);
   const wishlistPendingIds = useSelector((state) => state.wishlist?.pendingIds ?? []);
   const [wishlistOpen, setWishlistOpen] = useState(false);
@@ -231,7 +240,16 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   };
 
   // --- Cart / Buy Now state ---
-  const cartItems = useSelector((state) => state.cart?.items ?? []);
+  const rawCartItems = useSelector((state) => state.cart?.items ?? []);
+  const cartItems = useMemo(() => {
+    return rawCartItems.filter(item => {
+      const type = item.courseId?.type?.toLowerCase() || '';
+      if (idPrefix === "course") return type === "course";
+      if (idPrefix === "internship") return type === "internship";
+      return true; // fallback
+    });
+  }, [rawCartItems, idPrefix]);
+  
   const cartTotalAmount = useSelector((state) => state.cart?.totalAmount ?? 0);
   const cartLoading = useSelector((state) => state.cart?.loading ?? false);
   const cartPendingIds = useSelector((state) => state.cart?.pendingIds ?? []);
