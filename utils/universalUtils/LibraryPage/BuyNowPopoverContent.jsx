@@ -38,7 +38,7 @@ const BuyNowPopoverContent = ({
 
   return (
     <div style={{ width: 360, maxWidth: 360, boxSizing: "border-box", overflow: "hidden" }}>
-      <div style={{ padding: "4px 4px 10px", boxSizing: "border-box" }}>
+      <div style={{ padding: "16px 16px 12px", boxSizing: "border-box" }}>
         <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
           <span style={{ background: "linear-gradient(135deg, #FEF3C7, #FDE68A)", color: "#92400E", padding: "3px 9px", borderRadius: 999, fontSize: 10.5, fontWeight: 700, whiteSpace: "nowrap" }}>
             🔥 BESTSELLER
@@ -82,13 +82,13 @@ const BuyNowPopoverContent = ({
           {stripHtml(item?.description || "")}
         </div>
 
-        <div style={{ background: "#F8FAFC", borderRadius: 10, padding: "10px 12px", marginBottom: 10, boxSizing: "border-box" }}>
-          <div style={{ fontWeight: 700, marginBottom: 8, color: "#0F172A", fontSize: 12.5 }}>
+        <div style={{ background: "#F8FAFC", borderRadius: 10, padding: "14px 16px", marginBottom: 16, boxSizing: "border-box", border: "1px solid #E2E8F0" }}>
+          <div style={{ fontWeight: 700, marginBottom: 10, color: "#0F172A", fontSize: 13 }}>
             What You'll Learn
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, minWidth: 0 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, minWidth: 0 }}>
             {item?.learningPoints?.slice(0, 4)?.map((point, index) => (
-              <div key={index} style={{ display: "flex", gap: 5, fontSize: 12, color: "#374151", lineHeight: 1.35, minWidth: 0 }}>
+              <div key={index} style={{ display: "flex", gap: 6, fontSize: 12, color: "#374151", lineHeight: 1.4, minWidth: 0 }}>
                 <span style={{ color: "#22c55e", fontWeight: 700, flexShrink: 0 }}>✓</span>
                 <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{point}</span>
               </div>
@@ -123,10 +123,9 @@ const BuyNowPopoverContent = ({
       <div
         style={{
           background: "#F8FAFC",
-          padding: 12,
+          padding: "16px",
           borderTop: "1px solid #E2E8F0",
-          margin: "0 -4px -4px",
-          borderRadius: "0 0 8px 8px",
+          borderRadius: "0 0 16px 16px",
           boxSizing: "border-box",
         }}
       >

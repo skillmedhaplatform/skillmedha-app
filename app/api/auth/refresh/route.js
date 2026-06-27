@@ -41,7 +41,8 @@ export async function GET(request) {
   }
 
   try {
-    const res = await fetch(`${studentUrl}/getStudentCreds`, {
+    const fetchUrl = studentUrl.replace('localhost', '127.0.0.1');
+    const res = await fetch(`${fetchUrl}/getStudentCreds`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -59,15 +60,19 @@ export async function GET(request) {
 
     // Re-encrypt fresh permissions from real backend values
     const CUTOFF_DATE = new Date("2026-05-01T00:00:00Z").getTime();
-    const isNewUser = student?.createdAt && student.createdAt >= CUTOFF_DATE;
+    // If createdAt is missing, we assume they are a new user (due to a previous TPO single-student creation bug)
+    // because all old users from before May 1, 2026 have createdAt populated by the DB migration.
+    const isNewUser = !student?.createdAt || new Date(student.createdAt).getTime() >= CUTOFF_DATE;
+
+    const ptValue = (student?.psychometricTestResults && Object.keys(student.psychometricTestResults).length > 0) || !isNewUser;
+    
+    console.log("[DEBUG refresh/route.js] pt:", ptValue, "isNewUser:", isNewUser, "testResults:", student?.psychometricTestResults);
 
     const permissionsEncrypted = await encryptSession({
       // Login already requires verification, so if getStudentCreds succeeds, they are verified
       ev: true,
       special: student?.orgDetails?.orgId === SPECIAL_ORG_ID || student?.orgId === SPECIAL_ORG_ID,
-      pt:
-        (Array.isArray(student?.psychometricTestResults) &&
-          student.psychometricTestResults.length > 0) || !isNewUser,
+      pt: ptValue,
     });
 
     const isJson = searchParams.get("json") === "true";

@@ -10,6 +10,7 @@ import {
   fetchAllTestsByCategory,
   fetchTestData,
 } from "@/redux/slices/assessmentsSlice/testSlice";
+import AssessmentsBannerTabs from "@/modules/student/components/AssessmentsBannerTabs";
 
 import { Button, message, Modal, notification, Spin, Pagination } from "antd";
 import { getLstorage, getSstorage } from "@/universalUtils/windowMW";
@@ -198,14 +199,14 @@ export default function Tests() {
 
   return (
     <div className="relative flex flex-col bg-[#EFF5FB] h-screen overflow-hidden">
-      <StudentPageHeader title="Tests" rightSlot={bannerStats} />
+      <StudentPageHeader title="Tests" subtitleSlot={<AssessmentsBannerTabs />} rightSlot={bannerStats} />
 
       {/* Tabs Section */}
-      <div className="w-full bg-[#F1F5F9] flex items-center border-b border-gray-200 sticky top-0 z-[1]">
-        <div className="flex gap-8 px-6 pt-2">
+      <div className="w-full bg-white flex items-center border-b border-gray-200 sticky top-0 z-[1]">
+        <div className="flex gap-8 px-6 pt-4">
           <button
             onClick={() => setActiveTab("all")}
-            className={`pb-3 text-[14px] font-bold transition-all border-b-[3px] ${
+            className={`pb-4 text-[16px] font-bold transition-all border-b-[3px] ${
               activeTab === "all" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
             }`}
           >
@@ -213,7 +214,7 @@ export default function Tests() {
           </button>
           <button
             onClick={() => setActiveTab("active")}
-            className={`pb-3 text-[14px] font-bold transition-all border-b-[3px] ${
+            className={`pb-4 text-[16px] font-bold transition-all border-b-[3px] ${
               activeTab === "active" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
             }`}
           >
@@ -221,7 +222,7 @@ export default function Tests() {
           </button>
           <button
             onClick={() => setActiveTab("expired")}
-            className={`pb-3 text-[14px] font-bold transition-all border-b-[3px] ${
+            className={`pb-4 text-[16px] font-bold transition-all border-b-[3px] ${
               activeTab === "expired" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
             }`}
           >
@@ -230,7 +231,7 @@ export default function Tests() {
         </div>
       </div>
 
-      <section className="w-full flex-1 overflow-y-auto px-4 mt-4 pb-12 [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#e2e8f0] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent">
+      <section className="w-full flex-1 overflow-y-auto px-4 mt-8 pb-12 [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#e2e8f0] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-hidden">
           {loading ? (
             <>

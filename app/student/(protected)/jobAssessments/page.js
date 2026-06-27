@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
+import AssessmentsBannerTabs from "@/modules/student/components/AssessmentsBannerTabs";
 import { useDispatch, useSelector } from "react-redux";
 
 import { fetchAssignedAssessments } from "@/redux/slices/jobassessmentsSlice";
@@ -167,7 +168,7 @@ export default function JobAssessments() {
   return (
     
       <div className="h-full overflow-hidden flex flex-col gap-2 p-4 bg-[#EFF5FB]">
-        <StudentPageHeader title="Job Assessments" />
+        <StudentPageHeader section="Assessment" title="Job Assessments" subtitleSlot={<AssessmentsBannerTabs />} />
         <div className="w-full flex justify-between items-center">
           <h2 className="w-[80%] text-[1.2rem] font-bold text-[#24A058] m-0 mb-4">Job Assessments</h2>
         </div>

@@ -42,6 +42,8 @@ const InternshipLibraryPage = () => (
     searchPlaceholder="Search internships…"
     idPrefix="internship"
     renderMetaChips={renderInternshipMetaChips}
+    showBuyNow={true}
+    showWishlist={true}
   />
 );
 

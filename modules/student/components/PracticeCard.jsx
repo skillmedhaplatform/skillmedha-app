@@ -148,7 +148,7 @@ export default function PracticeCard({
             disabled={loading}
             className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white px-5 py-1.5 rounded text-[13px] font-bold border-none cursor-pointer transition-opacity"
           >
-            {loading ? "..." : "Resume"}
+            {loading ? "..." : "Re-attempt"}
           </button>
         )}
         {progress === 100 && (

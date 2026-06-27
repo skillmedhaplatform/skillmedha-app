@@ -344,8 +344,23 @@ export default function TestCard({
   return (
     <section className="bg-white shadow-md hover:shadow-lg transition-shadow flex flex-col cursor-pointer rounded-2xl border border-gray-200 h-full relative overflow-hidden">
       
+      {/* Thumbnail */}
+      <div className="w-full aspect-[16/9] bg-white flex items-center justify-center shrink-0 px-3 pt-3">
+        <div className="w-full h-full rounded-xl overflow-hidden">
+          {testData?.thumbnail ? (
+            <img src={testData.thumbnail} alt="thumbnail" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-r from-yellow-300 to-yellow-500 flex items-center justify-center">
+              <span className="text-4xl font-extrabold text-black/50">
+                {testData?.title?.substring(0, 2)?.toUpperCase() || "JS"}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Top Section: Title & Active Tag */}
-      <div className="flex items-center justify-between w-full px-5 pt-3 pb-2">
+      <div className="flex items-center justify-between w-full px-5 pt-1 pb-2">
         <h3 className="text-[18px] font-extrabold text-[#1a3b8b] leading-tight line-clamp-2 pr-2">
           {isAssessment ? testData?.jobTitle : testData?.title}
         </h3>
@@ -412,21 +427,8 @@ export default function TestCard({
         )}
       </div>
 
-      {/* Thumbnail */}
-      <div className="w-full aspect-[16/9] bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
-        {testData?.thumbnail ? (
-          <img src={testData.thumbnail} alt="thumbnail" className="w-full h-full object-contain" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-r from-yellow-300 to-yellow-500 flex items-center justify-center">
-            <span className="text-4xl font-extrabold text-black/50">
-              {testData?.title?.substring(0, 2)?.toUpperCase() || "JS"}
-            </span>
-          </div>
-        )}
-      </div>
-
       {/* Description */}
-      <div className="px-5 pt-3 pb-5 text-[14.5px] text-[#475467] leading-relaxed line-clamp-2">
+      <div className="px-5 pt-1 pb-7 text-[14.5px] text-[#475467] leading-relaxed line-clamp-2">
         {firstSentence}
       </div>
 

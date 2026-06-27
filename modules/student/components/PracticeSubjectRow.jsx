@@ -90,7 +90,10 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
     let progress = Math.round((correctCount / totalQuestions) * 100);
     if (progress > 100) progress = 100;
 
-    return { progress, attempts: sessions.length };
+    // Only count sessions that have been submitted (e.g. have correctQuestionIds or score)
+    const completedSessions = sessions.filter(s => s.correctQuestionIds !== undefined || s.score !== undefined);
+
+    return { progress, attempts: completedSessions.length };
   };
 
   useEffect(() => {
