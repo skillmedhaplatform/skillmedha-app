@@ -69,8 +69,9 @@ const InternshipSlice = createSlice({
       }
     });
     builder.addCase(getAllCoursesOnly.fulfilled, (state, { payload }) => {
-  state.allCoursesOnly = payload?.data || [];  // ← extract the array
-});
+      state.allCoursesOnly = payload?.data || [];
+      state.allCoursesOnlyPagination = payload?.pagination || null;
+    });
 builder.addCase(getAllInternshipsOnly.fulfilled, (state, { payload }) => {
   state.allInternshipsOnly = payload?.data || [];
 });

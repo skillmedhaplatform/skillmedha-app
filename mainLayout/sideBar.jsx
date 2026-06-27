@@ -175,27 +175,12 @@ const SideBar = ({ activeView, setView }) => {
         pointerEvents: locked ? "none" : "auto",
       };
 
-      let menuItem = null;
-
-      if (isMyAssessments) {
-        menuItem = {
-          key: "assessments",
-          icon: currentItem.icon,
-          label: currentItem.name,
-          style: itemStyle,
-          children: [
-            { key: "/student/jobAssessments", label: "Job Assessments", style: itemStyle },
-            { key: "/student/tests", label: "My Tests", style: itemStyle },
-          ],
-        };
-      } else {
-        menuItem = {
-          key: currentItem.path,
-          icon: currentItem.icon,
-          label: currentItem.name,
-          style: itemStyle,
-        };
-      }
+      const menuItem = {
+        key: currentItem.path,
+        icon: currentItem.icon,
+        label: currentItem.name,
+        style: itemStyle,
+      };
       
       if (title.slug === 'dashboard') {
         menuItem.className = sideBarStyles.dashboardActiveItem;
@@ -279,8 +264,9 @@ const SideBar = ({ activeView, setView }) => {
 
   const getSelectedKeys = () => {
     const pathToCheck = activeView || currPath;
-    if (pathToCheck.includes("/student/jobAssessments") || pathToCheck.includes("jobAssessments")) return ["/student/jobAssessments"];
-    if (pathToCheck.includes("/student/tests") || pathToCheck.includes("tests")) return ["/student/tests"];
+    if (pathToCheck.includes("/student/jobAssessments") || pathToCheck.includes("jobAssessments") || pathToCheck.includes("/student/tests") || pathToCheck.includes("tests")) {
+      return ["/student/tests"];
+    }
     if (pathToCheck.includes("/student/testResults") || pathToCheck.includes("testResults")) return ["/student/testResults"];
     if (pathToCheck.includes("practice-") || pathToCheck.includes("/student/practice-new")) {
       let subPathStr = getSstorage("subPath");
@@ -302,9 +288,6 @@ const SideBar = ({ activeView, setView }) => {
 
   useEffect(() => {
     if (!isCollapsed) {
-      if (currPath.includes("/student/jobAssessments") || currPath.includes("/student/tests")) {
-        setOpenMenuKeys((prev) => Array.from(new Set([...prev, "assessments"])));
-      }
       if (currPath.includes("/student/practice-new")) {
         setOpenMenuKeys((prev) => Array.from(new Set([...prev, "practice"])));
       }

@@ -18,13 +18,10 @@
 }
 
 .bottomLogout {
+  padding: 1rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  background: white;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  justify-content: center;
-  align-items: center;
-  padding-bottom: 5rem;
 }
 
 .name {
@@ -74,4 +71,86 @@
 }
 .jcStart {
   display: flex;
+}
+.profilePill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px 6px 6px;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+
+  &.collapsedPill {
+    padding: 6px;
+    justify-content: center;
+    border: none;
+  }
+
+  .avatar {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e2e8f0;
+    color: #1a202c;
+    font-weight: 600;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .profileInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+
+    .profileName {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1a202c;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profileEmail {
+      font-size: 0.75rem;
+      color: #a0aec0;
+      font-weight: 500;
+      line-height: 1.2;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .chevron {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #718096;
+  }
+}
+
+.profilePillSkeleton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px 6px 6px;
+  border-radius: 40px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  width: 100%;
 }

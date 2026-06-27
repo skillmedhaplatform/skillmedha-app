@@ -75,8 +75,17 @@ export default function TestPage() {
   }, 0) || 0;
 
   const handleTestCompletion = (isQuit = false) => {
-    setTestCompleted(true);
     const attemptedAll = userResponse.length === questions.length;
+    
+    if (!isQuit && !attemptedAll) {
+      Modal.warning({
+        title: 'Incomplete Test',
+        content: 'You must attempt all questions to submit this test and calculate progress. Please complete the remaining questions.',
+      });
+      return;
+    }
+
+    setTestCompleted(true);
     
     // Only save if not quitting prematurely, or if you want to save partial tests, 
     // the user requested to NOT count progress if they left without attempting all given questions.

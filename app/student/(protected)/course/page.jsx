@@ -7,6 +7,7 @@ import { getAllCourses, getAllCoursesOnly } from "@/redux/slices/internship";
 const selectCourses = (state) => state.internship.allCourses?.data;
 const selectPagination = (state) => state.internship.allCourses?.pagination;
 const selectAllCourses = (state) => state.internship.allCoursesOnly;
+const selectAllPagination = (state) => state.internship.allCoursesOnlyPagination;
 
 const getCourseUrl = (course) => {
   const title = course?.title?.split(" ")?.join("");
@@ -40,6 +41,7 @@ const CourseLibraryPage = () => (
     dataSelector={selectCourses}
     paginationSelector={selectPagination}
     allCoursesSelector={selectAllCourses}
+    allPaginationSelector={selectAllPagination}
     getItemUrl={getCourseUrl}
     viewLabel="View Course"
     searchPlaceholder="Search courses…"

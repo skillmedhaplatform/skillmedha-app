@@ -27,9 +27,11 @@ export default function StudentAuthGuard({ children, serverToken }) {
           if (!data) return;
           const isSpecialOrgPayload =
             data.orgDetails?.orgId === process.env.NEXT_PUBLIC_SPECIAL_ORG_ID;
+          const CUTOFF_DATE = new Date("2026-05-01T00:00:00Z").getTime();
+          const isNewUser = !data?.createdAt || new Date(data.createdAt).getTime() >= CUTOFF_DATE;
           const psychometricDone =
-            Array.isArray(data?.psychometricTestResults) &&
-            data.psychometricTestResults.length > 0;
+            (data?.psychometricTestResults &&
+            Object.keys(data.psychometricTestResults).length > 0) || !isNewUser;
           fetch("/api/auth/session", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
