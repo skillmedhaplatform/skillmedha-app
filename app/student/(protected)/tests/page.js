@@ -19,6 +19,22 @@ import { getStudent } from "@/redux/slices/student";
 
 const PAGE_LIMIT = 10;
 
+const isTestExpired = (test) => {
+  const status = test?.status?.toLowerCase();
+  if (status === "expired" || status === "completed") {
+    return true;
+  }
+  const expiryDate =
+    test?.time?.expiryDates?.accessClosingDate ||
+    test?.time?.expiryDates?.testExpirationData;
+  const hasExpiry = test?.time?.expiryDates?.expiry && expiryDate;
+  if (hasExpiry) {
+    const targetDate = new Date(expiryDate).getTime();
+    return targetDate - new Date().getTime() <= 0;
+  }
+  return false;
+};
+
 export default function Tests() {
   const allTests = useSelector((state) => state.tests?.allTests || []);
   const pageinfo = useSelector((state) => state.tests?.pageinfo || {});
@@ -156,15 +172,15 @@ export default function Tests() {
 
   // Filter tests based on tab
   const filteredTests = allTests?.filter((test) => {
-    const status = test?.status?.toLowerCase();
+    const expired = isTestExpired(test);
     if (activeTab === "all") return true;
-    if (activeTab === "active") return status === "active";
-    if (activeTab === "expired") return status === "expired" || status === "completed";
+    if (activeTab === "active") return !expired && test?.status?.toLowerCase() === "active";
+    if (activeTab === "expired") return expired;
     return true;
   });
 
-  const activeCount = allTests?.filter(t => t?.status?.toLowerCase() === "active").length || 0;
-  const expiredCount = allTests?.filter(t => t?.status?.toLowerCase() === "expired" || t?.status?.toLowerCase() === "completed").length || 0;
+  const activeCount = allTests?.filter(t => !isTestExpired(t) && t?.status?.toLowerCase() === "active").length || 0;
+  const expiredCount = allTests?.filter(isTestExpired).length || 0;
 
   const bannerStats = (
     <div className="flex items-center gap-8 pr-4">

@@ -4,7 +4,7 @@ import { MailOutlined, PhoneFilled } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
 
-const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeSection }) => {
+const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeSection, isGeneratingPdf }) => {
   const resumeRef = useRef(null);
   const [profileBase64, setProfileBase64] = useState(null);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -152,7 +152,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
 
   return (
     <div
-      className="max-w-[50rem] h-full mx-auto overflow-y-scroll p-12 bg-white shadow-xl font-['Inter',sans-serif] text-[#334155] [&_section]:mb-6 [&_section_h2]:text-[1.05rem] [&_section_h2]:font-bold [&_section_h2]:tracking-wider [&_section_h2]:uppercase [&_section_h2]:border-b-2 [&_section_h2]:border-solid [&_section_h2]:border-[#e2e8f0] [&_section_h2]:pb-2 [&_section_h2]:mb-4 [&_section_h2]:text-[#1E69DA] [&_section_p]:text-[0.95rem] [&_section_p]:leading-relaxed [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-white [&::-webkit-scrollbar-thumb]:rounded-[20px]"
+      className={`${(downloadImage || isGeneratingPdf) ? "w-[50rem] max-w-[50rem]" : "w-full max-w-full"} h-full mx-auto overflow-y-scroll p-12 bg-white shadow-xl font-['Inter',sans-serif] text-[#334155] [&_section]:mb-6 [&_section_h2]:text-[1.05rem] [&_section_h2]:font-bold [&_section_h2]:tracking-wider [&_section_h2]:uppercase [&_section_h2]:border-b-2 [&_section_h2]:border-solid [&_section_h2]:border-[#e2e8f0] [&_section_h2]:pb-2 [&_section_h2]:mb-4 [&_section_h2]:text-[#1E69DA] [&_section_p]:text-[0.95rem] [&_section_p]:leading-relaxed [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-white [&::-webkit-scrollbar-thumb]:rounded-[20px]`}
       ref={downloadImage ? resumeRef : resumeTemplateRef}
     >
       <div id="section-Basic-Details" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Basic Details" || activeSection === "Links" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
@@ -177,7 +177,13 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
                 {linkList.map((link, i) => (
                   <div key={i}>
                     <p className="text-[0.9rem] m-0 mb-2">
-                      {link?.title || ""} {link?.link ? `- ${link.link}` : ""}
+                      {link?.title || ""} {link?.link ? (
+                        <span>
+                          - <a href={link.link.startsWith('http') ? link.link : `https://${link.link}`} target="_blank" rel="noopener noreferrer" className="text-[#1E69DA] hover:underline" style={{ textDecoration: 'none' }}>
+                            {link.link}
+                          </a>
+                        </span>
+                      ) : ""}
                     </p>
                   </div>
                 ))}
