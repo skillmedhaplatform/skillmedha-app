@@ -17,7 +17,7 @@ const getAuthHeaders = () => ({
   Authorization: `Bearer ${getLstorage("token")}`,
 });
 
-export default function PracticeSubjectRow({ subject, pageSizeOverride }) {
+export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSort }) {
   const router = useRouter();
   const pathname = usePathname();
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,7 +113,21 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride }) {
   }
 
   const startIndex = (currentPage - 1) * pageSize;
-  const currentSubtopics = subtopics.slice(startIndex, startIndex + pageSize);
+  
+  const sortedSubtopics = [...subtopics];
+  if (activeSort === "Name") {
+    sortedSubtopics.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+  } else if (activeSort === "Recent") {
+    sortedSubtopics.sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (timeA !== timeB) return timeB - timeA;
+      if (a._id && b._id) return a._id > b._id ? -1 : 1;
+      return 0;
+    });
+  }
+
+  const currentSubtopics = sortedSubtopics.slice(startIndex, startIndex + pageSize);
 
   const handleStart = (subtopic) => {
     // Navigate to test page with subtopic ID

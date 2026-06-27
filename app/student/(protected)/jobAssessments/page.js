@@ -100,7 +100,7 @@ export default function JobAssessments() {
     sessionStorage.setItem("selectedTest", job?._id);
 
     return nav.replace(
-      "/jobAssessments/" +
+      "/student/jobAssessments/" +
         job?.jobTitle.split(" ").join("-") +
         "?testId=" +
         job?._id

@@ -2,9 +2,9 @@
 import React, { useEffect, useOptimistic, useState, useTransition, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, ConfigProvider, message, Result, Segmented, Select, Input, Tabs, Tooltip } from "antd";
-import { 
-  CloseCircleOutlined, 
-  SearchOutlined, 
+import {
+  CloseCircleOutlined,
+  SearchOutlined,
   SortAscendingOutlined,
   ArrowLeftOutlined,
   CheckCircleOutlined,
@@ -98,17 +98,7 @@ export default function MobileJobOpenings() {
     optimisticAppliedIds.includes(jobId) ||
     checkIfJobApplied(jobId, student?.appliedJobs);
 
-  // ── Auto-select first job on load ──
-  useEffect(() => {
-    if (!filteredJobs?.length) return;
-    const stillExists = filteredJobs.some((j) => j._id === selectedId);
-    if (!selectedId || !stillExists) setSelectedId(filteredJobs[0]?._id || "");
-  }, [filteredJobs]);
 
-  // ── Reset active tab when selected ID changes ─────────────
-  useEffect(() => {
-    setActiveTab("overview");
-  }, [selectedId]);
 
   // ── Filter helpers ─────────────────────────────────────────
   const createQueryString = useCallback(
@@ -137,7 +127,7 @@ export default function MobileJobOpenings() {
     .map((aj) => {
       const jobId = aj?.jobDetails?._id || aj?.id || aj?.jobId || aj?._id || (typeof aj === "string" ? aj : null);
       if (!jobId) return null;
-      const localDetails = JOBS.find((job) => String(job._id) === String(jobId));
+      const localDetails = JOBS.find((job) => String(job?._id) === String(jobId));
       const details = localDetails || aj?.jobDetails;
       if (!details) return null;
       return {
@@ -178,7 +168,19 @@ export default function MobileJobOpenings() {
 
   const filteredJobs = listFilter === "applied" ? appliedJobsList : JOBS.filter((j) => j?.status !== "pending");
 
-  const selectedJob = filteredJobs?.find((j) => j._id === selectedId) || null;
+  const selectedJob = filteredJobs?.find((j) => j?._id === selectedId) || null;
+
+  // ── Auto-select first job on load ──
+  useEffect(() => {
+    if (!filteredJobs?.length) return;
+    const stillExists = filteredJobs.some((j) => j?._id === selectedId);
+    if (!selectedId || !stillExists) setSelectedId(filteredJobs[0]?._id || "");
+  }, [filteredJobs]);
+
+  // ── Reset active tab when selected ID changes ─────────────
+  useEffect(() => {
+    setActiveTab("overview");
+  }, [selectedId]);
 
   const handleApply = () => {
     if (!selectedJob || !student) return;
@@ -340,13 +342,13 @@ export default function MobileJobOpenings() {
               />
             ) : (
               filteredJobs.map((job) => {
-                const applied = isJobApplied(job._id);
+                const applied = isJobApplied(job?._id);
                 return (
                   <div
-                    key={job._id}
-                    className={`${styles.jobTile} ${selectedId === job._id ? styles.selected : ""}`}
+                    key={job?._id}
+                    className={`${styles.jobTile} ${selectedId === job?._id ? styles.selected : ""}`}
                     onClick={() => {
-                      setSelectedId(job._id);
+                      setSelectedId(job?._id);
                       setViewMode("details");
                     }}
                   >
@@ -535,7 +537,7 @@ export default function MobileJobOpenings() {
                       key: "overview",
                       label: "Overview",
                       children: (
-                        <div 
+                        <div
                           className={styles.detailsSectionText}
                           style={{ whiteSpace: "pre-wrap" }}
                         >
@@ -547,7 +549,7 @@ export default function MobileJobOpenings() {
                       key: "hiring",
                       label: "Hiring Process",
                       children: (
-                        <div 
+                        <div
                           className={styles.detailsSectionText}
                           style={{ display: "flex", flexDirection: "column", gap: "10px" }}
                         >
@@ -570,7 +572,7 @@ export default function MobileJobOpenings() {
                       key: "eligibility",
                       label: "Eligibility",
                       children: (
-                        <div 
+                        <div
                           className={styles.detailsSectionText}
                           style={{ display: "flex", flexDirection: "column", gap: "10px" }}
                         >

@@ -25,6 +25,7 @@ export default function CodingPage() {
   const studentCreds = useSelector((state) => state.student.student?.data);
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [activeSort, setActiveSort] = useState("Default");
   const isMobile = useResponsive();
 
   const categoryTabs = [
@@ -122,9 +123,22 @@ export default function CodingPage() {
   );
 
   const dynamicCategories = ["All", ...(subjects?.map(s => s.title || s.key) || [])];
-  const filteredSubjects = activeCategory === "All" 
-    ? subjects 
-    : subjects?.filter(subject => (subject.title || subject.key) === activeCategory);
+  
+  let filteredSubjects = activeCategory === "All" 
+    ? [...(subjects || [])] 
+    : (subjects || []).filter(subject => (subject.title || subject.key) === activeCategory);
+
+  if (activeSort === "Name") {
+    filteredSubjects.sort((a, b) => (a.title || a.key || "").localeCompare(b.title || b.key || ""));
+  } else if (activeSort === "Recent") {
+    filteredSubjects.sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (timeA !== timeB) return timeB - timeA;
+      if (a._id && b._id) return a._id > b._id ? -1 : 1;
+      return 0;
+    });
+  }
 
   return (
       <div className="flex flex-col h-full overflow-hidden bg-[#EFF5FB]">
@@ -139,6 +153,8 @@ export default function CodingPage() {
             categories={dynamicCategories} 
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
+            activeSort={activeSort}
+            onSortChange={setActiveSort}
           />
         </div>
 
