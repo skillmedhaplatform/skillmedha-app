@@ -872,7 +872,7 @@ export default function DashboardPage() {
             width={1000}
           >
             <div style={{ height: "70vh", overflowY: "auto" }}>
-              <CardsList type="notifications" />
+              <CardsList type="notifications" isModal={true} />
             </div>
           </Modal>
         </div>

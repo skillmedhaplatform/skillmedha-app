@@ -108,8 +108,8 @@ export const store = configureStore({
     userForm: UserFormSlice,
     jobassessments: jobassessmentsSlice,
     practice: practiceSlice,
-      wishlist: wishlistReducer,
-        cart: cartReducer,
+    wishlist: wishlistReducer,
+    cart: cartReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
