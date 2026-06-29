@@ -20,6 +20,7 @@ export const SingleStudentGqlQuery = `
         response
         studentId
         testId
+        scoreData
       }
       token
       location

@@ -1,6 +1,6 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { decryptObject } from "../encryptionMiddleware";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Modal, Progress, Spin, ConfigProvider } from "antd";
@@ -51,11 +51,68 @@ export default function TestUI({
   const [currentQues, setCurrentQues] = useState(
     parseInt(getSstorage("currQues")) || 0,
   );
-  const testData = useSelector((state) => {
+  const rawTestData = useSelector((state) => {
     return state.Test.testData.value;
   });
   const testDataStatus = useSelector((state) => state.Test.testData.status);
   const studentCreds = useSelector((state) => state.Student.studentVals?.data);
+
+  const testData = useMemo(() => {
+    if (!rawTestData?.questions?.length) return rawTestData;
+    
+    // Create a deterministic seed based on student ID and test ID
+    const studentId = studentCreds?._id || "anonymous";
+    const testId = rawTestData._id || "test";
+    const seedStr = studentId + testId;
+    let seed = 0;
+    for (let i = 0; i < seedStr.length; i++) {
+      seed = (seed << 5) - seed + seedStr.charCodeAt(i);
+      seed |= 0;
+    }
+    
+    // Simple LCG random function
+    const random = () => {
+      const x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    };
+
+    const cloned = JSON.parse(JSON.stringify(rawTestData));
+    
+    // 1. Group questions by category
+    const byCategory = {};
+    cloned.questions.forEach(q => {
+      const cat = q.questionCategory?.[0]?.name || "Uncategorized";
+      if (!byCategory[cat]) byCategory[cat] = [];
+      byCategory[cat].push(q);
+    });
+    
+    // 2. Shuffle questions inside each category, AND shuffle their options
+    let shuffledQuestions = [];
+    for (const cat in byCategory) {
+      const catQues = byCategory[cat];
+      
+      for (let i = catQues.length - 1; i > 0; i--) {
+        const j = Math.floor(random() * (i + 1));
+        [catQues[i], catQues[j]] = [catQues[j], catQues[i]];
+      }
+      
+      // Shuffle options for each question
+      catQues.forEach(q => {
+        if (q.questionContent?.options?.length > 1) {
+          const opts = q.questionContent.options;
+          for (let i = opts.length - 1; i > 0; i--) {
+            const j = Math.floor(random() * (i + 1));
+            [opts[i], opts[j]] = [opts[j], opts[i]];
+          }
+        }
+      });
+      
+      shuffledQuestions.push(...catQues);
+    }
+    
+    cloned.questions = shuffledQuestions;
+    return cloned;
+  }, [rawTestData, studentCreds?._id]);
   let tabSwitchCount = parseInt(getSstorage("tabChangeCount"));
   let blockMsg = getSstorage("blockMsg");
   const [flagCheck, setFlagCheck] = useState([]);
@@ -591,7 +648,30 @@ export default function TestUI({
     }
     setOpen(false);
     setOpenTime(false);
-    if (typeof window !== "undefined") window.close();
+    
+    let redirected = false;
+    const handleRedirect = () => {
+      if (redirected) return;
+      redirected = true;
+      if (typeof window !== "undefined") {
+        if (window.opener) {
+          window.close();
+        } else {
+          const isJobAssessment = window.location.pathname.includes('/jobAssessments');
+          const source = isJobAssessment ? 'job' : 'test';
+          const studentSiteUrl = `/student/tests/${testData?.title}/result?testId=${testId}&from=${source}`;
+          window.location.href = studentSiteUrl;
+        }
+      }
+    };
+
+    if (socket) {
+      socket.once("testEndedtestportal", handleRedirect);
+      // Fallback in case socket event is missed
+      setTimeout(handleRedirect, 2500);
+    } else {
+      setTimeout(handleRedirect, 2500);
+    }
   };
   // ALL YOUR OTHER EXISTING STATE AND FUNCTIONS
   const [open, setOpen] = useState(false);
