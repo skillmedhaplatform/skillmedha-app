@@ -282,7 +282,7 @@ export const getStudent = createAsyncThunk("/getOne", async (args) => {
       assessment_gql_url,
       {
         query: SingleStudentGqlQuery,
-        variables: { id: getSstorage("studentId") },
+        variables: { id: args?.id || getSstorage("studentId") },
       },
       {
         headers: {

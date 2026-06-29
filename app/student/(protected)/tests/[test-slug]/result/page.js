@@ -12,7 +12,7 @@ import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOu
 import QuesComp from "./questComp";
 import DonutChart from "../../utils/donutChart";
 import { fetchTestData } from "@/redux/slices/assessmentsSlice/testSlice";
-import { saveTestResults } from "@/redux/slices/student";
+import { saveTestResults, getStudent } from "@/redux/slices/student";
 import ResultSkeleton from "../../reusable_comp/resultsskeleton";
 import { parseIfJson } from "../../reusable_comp/jsonparse";
 import { getLstorage, getSstorage, setSstorage } from "@/universalUtils/windowMW";
@@ -22,7 +22,7 @@ export default function Page() {
   const testData = useSelector((state) => state?.tests?.finishedTestData);
   const studentData = useSelector((state) => state?.student?.student?.data);
   const StudentData_New = useSelector(
-    (state) => state?.student?.testResults?.studentVals
+    (state) => state?.student?.studentVals
   );
   const finishedTestData = useSelector(
     (state) => state?.tests?.finishedTestData?.value?.test
@@ -169,16 +169,25 @@ export default function Page() {
     }
   }, [testRes?.value, testId]);
 
-  // Restore results from sessionStorage on mount/refresh
+  // Fetch required data on mount
   useEffect(() => {
-    const studentId = getLstorage("sId");
-    if (testId && !testRes?.value?.[testId] && studentData?._id) {
+    const studentIdStr = studentData?._id || getLstorage("sId");
+    if (studentIdStr && testId) {
+      dispatch(getStudent({ id: studentIdStr }));
+      dispatch(fetchTestData({ testId }));
+    }
+  }, [studentData?._id, testId, dispatch]);
+
+  // Restore results from StudentData_New or sessionStorage
+  useEffect(() => {
+    if (testId && !testRes?.value?.[testId]) {
       // First try to restore from sessionStorage
       const savedResult = getSstorage(`testResult_${testId}`);
       if (savedResult) {
         try {
           const parsed = JSON.parse(savedResult);
           dispatch(saveTestResults(parsed));
+          return;
         } catch (e) {
           console.error("Failed to parse saved result:", e);
         }
@@ -203,10 +212,8 @@ export default function Page() {
           );
         }
       }
-
-      dispatch(fetchTestData({ testId }));
     }
-  }, [studentData?._id, testId]);
+  }, [StudentData_New, testId, testRes?.value, dispatch]);
 
   // Determine loading state based on actual data readiness
   const isDataReady = useMemo(() => {
@@ -220,6 +227,15 @@ export default function Page() {
   }, [finishedTestData, ques, chartData, score, totalMarks]);
 
   const loading = testStatus === "evaluatingTest" || !isDataReady;
+
+  const fromParam = searchQuery.get("from");
+  const handleBack = () => {
+    if (fromParam === "job") {
+      nav.push("/student/jobAssessments");
+    } else {
+      nav.push("/student/tests");
+    }
+  };
 
   let questionNo = 1;
 
@@ -349,27 +365,36 @@ export default function Page() {
             <>
               {/* Result Banner */}
               <div className={`${resultStyles.resultBanner} ${score?.totalScore < PassScore ? resultStyles.fail : resultStyles.pass}`}>
-                <div className={resultStyles.resultBannerIcon}>
-                  {score?.totalScore < PassScore ? (
-                    <i className="ti ti-x" />
-                  ) : (
-                    <i className="ti ti-check" />
-                  )}
-                </div>
-                <div>
-                  <div className={resultStyles.resultBannerTitle}>
-                    {score?.totalScore < PassScore ? "Test Failed" : "Test Passed Successfully!"}
-                  </div>
-                  <div className={resultStyles.resultBannerSub}>
-                    {testValues?.message ? (
-                      <span dangerouslySetInnerHTML={{ __html: parseIfJson(testValues?.message) }}></span>
-                    ) : finishedTestData?.grading?.failIntervals?.TestFailMessage ? (
-                      <span dangerouslySetInnerHTML={{ __html: parseIfJson(finishedTestData?.grading?.failIntervals?.TestFailMessage) }}></span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}>
+                  <div className={resultStyles.resultBannerIcon}>
+                    {score?.totalScore < PassScore ? (
+                      <i className="ti ti-x" />
                     ) : (
-                      <span>Thank you for attempting {testData?.value?.test?.title}</span>
+                      <i className="ti ti-check" />
                     )}
                   </div>
+                  <div>
+                    <div className={resultStyles.resultBannerTitle}>
+                      {score?.totalScore < PassScore ? "Test Failed" : "Test Passed Successfully!"}
+                    </div>
+                    <div className={resultStyles.resultBannerSub}>
+                      {testValues?.message ? (
+                        <span dangerouslySetInnerHTML={{ __html: parseIfJson(testValues?.message) }}></span>
+                      ) : finishedTestData?.grading?.failIntervals?.TestFailMessage ? (
+                        <span dangerouslySetInnerHTML={{ __html: parseIfJson(finishedTestData?.grading?.failIntervals?.TestFailMessage) }}></span>
+                      ) : (
+                        <span>Thank you for attempting {testData?.value?.test?.title}</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
+                <button
+                  onClick={handleBack}
+                  className="px-4 py-2 bg-white text-gray-800 rounded-md font-medium shadow-sm hover:bg-gray-50 border border-gray-200 transition-colors flex items-center gap-2 cursor-pointer"
+                  style={{ marginLeft: 'auto', flexShrink: 0, outline: 'none' }}
+                >
+                  <i className="ti ti-arrow-left" /> Back to Tests
+                </button>
               </div>
 
               {/* Score Overview */}

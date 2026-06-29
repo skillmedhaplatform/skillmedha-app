@@ -352,13 +352,8 @@ export default function Page() {
     sessionStorage.removeItem("time");
     sessionStorage.removeItem("currQues");
     
-    const newWindow = window.open(url, "_blank");
-
-    if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
-      setPopupBlocked(true);
-    } else {
-      setLstorage("isStarted", testId);
-    }
+    window.location.href = url;
+    setLstorage("isStarted", testId);
   };
 
   // --- Handle Start Button Click ---
