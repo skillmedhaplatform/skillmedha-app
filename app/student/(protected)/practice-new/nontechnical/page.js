@@ -25,6 +25,7 @@ export default function NontechnicalPage() {
   const studentCreds = useSelector((state) => state.student.student?.data);
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [activeSort, setActiveSort] = useState("Default");
   const isMobile = useResponsive();
 
   const categoryTabs = [
@@ -117,9 +118,21 @@ export default function NontechnicalPage() {
 
   const dynamicCategories = ["All", ...(subjects?.map(s => s.title) || [])];
   
-  const filteredSubjects = activeCategory === "All" 
-    ? subjects 
-    : subjects.filter(subject => subject.title === activeCategory);
+  let filteredSubjects = activeCategory === "All" 
+    ? [...(subjects || [])] 
+    : (subjects || []).filter(subject => subject.title === activeCategory);
+
+  if (activeSort === "Name") {
+    filteredSubjects.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+  } else if (activeSort === "Recent") {
+    filteredSubjects.sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (timeA !== timeB) return timeB - timeA;
+      if (a._id && b._id) return a._id > b._id ? -1 : 1;
+      return 0;
+    });
+  }
 
   return (
       <div className="flex flex-col h-full overflow-hidden bg-[#EFF5FB]">
@@ -134,6 +147,8 @@ export default function NontechnicalPage() {
             categories={dynamicCategories} 
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
+            activeSort={activeSort}
+            onSortChange={setActiveSort}
           />
         </div>
 
@@ -153,6 +168,7 @@ export default function NontechnicalPage() {
                   key={subject._id || index} 
                   subject={subject} 
                   pageSizeOverride={activeCategory === "All" ? 4 : 8}
+                  activeSort={activeSort}
                 />
               ))}
             </motion.div>

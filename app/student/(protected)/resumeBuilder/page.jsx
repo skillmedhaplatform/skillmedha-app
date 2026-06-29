@@ -146,6 +146,7 @@ function Form() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [downloadImage, setDownloadImage] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // Handler updates for basic details
   const updateBasicDetail = (field, value) => {
@@ -623,9 +624,13 @@ function Form() {
     // your code here that uses self
   }, []);
   const uploadResume = async () => {
+    setIsGeneratingPdf(true);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     const html2pdf = (await import("html2pdf.js")).default;
     if (!resumeTemplateRef.current) {
       alert("Resume template is not ready. Please wait a moment.");
+      setIsGeneratingPdf(false);
       return;
     }
 
@@ -658,9 +663,11 @@ function Form() {
         },
       });
 
+      setIsGeneratingPdf(false);
       return data?.fileUrl;
     } catch (error) {
       console.error("Error uploading resume:", error);
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -762,6 +769,36 @@ function Form() {
     }
   };
 
+  const calculateProfileCompletion = () => {
+    let score = 0;
+    
+    // Basic Details (20%)
+    if (basicDetails?.firstName || basicDetails?.lastName || basicDetails?.email || basicDetails?.phone) score += 10;
+    if (basicDetails?.professionalSummary || basicDetails?.profile) score += 10;
+    
+    // Education (20%)
+    if (educationDetails?.length > 0 && (educationDetails[0].school || educationDetails[0].type || educationDetails[0].board)) score += 20;
+    
+    // Experience (15%)
+    if (experienceDetails?.length > 0 && (experienceDetails[0].company || experienceDetails[0].role)) score += 15;
+    
+    // Projects (15%)
+    if (projectDetails?.length > 0 && (projectDetails[0].project || projectDetails[0].company)) score += 15;
+    
+    // Skills (10%)
+    if (skills?.length > 0 && skills[0] !== "") score += 10;
+    
+    // Certifications, Internships, Volunteering, Languages (20% total, 5% each)
+    if (certificates?.length > 0 && (certificates[0].name || certificates[0].organization)) score += 5;
+    if (internships?.length > 0 && (internships[0].company || internships[0].role)) score += 5;
+    if (volunteerings?.length > 0 && (volunteerings[0].organization || volunteerings[0].volunteering)) score += 5;
+    if (languages?.length > 0 && languages[0] !== "") score += 5;
+    
+    return score;
+  };
+
+  const completionPercentage = calculateProfileCompletion();
+
   const isMobile = useResponsive();
 
   if (isMobile) {
@@ -858,7 +895,7 @@ function Form() {
                 Submit
               </Button>
             )}
-            <Button onClick={uploadResume} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
+            <Button onClick={() => setDownloadImage(true)} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
               Download Resume
             </Button>
           </div>
@@ -869,17 +906,17 @@ function Form() {
       <div className="flex-1 w-full flex overflow-hidden">
 
         {/* Left Sidebar */}
-        <div className="w-[280px] shrink-0 bg-white border-r border-[#e2e8f0] p-6 flex flex-col gap-6 overflow-y-auto hidden lg:flex">
+        <div className="w-[280px] shrink-0 bg-white border-r border-[#e2e8f0] p-6 flex flex-col gap-6 overflow-y-auto hidden lg:flex [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full">
           <div className="text-[12px] font-bold text-[#94a3b8] tracking-wider uppercase mb-[-10px]">Sections</div>
 
           {/* Profile Completion */}
           <div className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] p-4 flex flex-col gap-3">
             <div className="flex justify-between items-center">
               <span className="text-[#334155] text-[13px] font-medium">Profile complete</span>
-              <span className="text-[#1E69DA] font-bold text-[14px]">35%</span>
+              <span className="text-[#1E69DA] font-bold text-[14px]">{completionPercentage}%</span>
             </div>
             <div className="w-full bg-[#e2e8f0] h-[6px] rounded-full overflow-hidden">
-              <div className="bg-[#1E69DA] h-full" style={{ width: "35%" }}></div>
+              <div className="bg-[#1E69DA] h-full transition-all duration-500" style={{ width: `${completionPercentage}%` }}></div>
             </div>
             <p className="text-[10px] text-[#94a3b8] m-0 leading-tight mt-1">Add more sections to strengthen your resume</p>
           </div>
@@ -900,13 +937,13 @@ function Form() {
         </div>
 
         {/* Right Canvas (Scrolling Editor) */}
-        <div className="flex-1 h-full overflow-y-auto bg-[#f8fafc] p-6 lg:p-12 relative" onClick={(e) => {
+        <div className="flex-1 h-full overflow-y-auto bg-[#f8fafc] p-6 lg:p-12 relative [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full" onClick={(e) => {
           // Only clear active section if clicking outside the sidebar navigation
           if (!e.target.closest('.group.px-4.py-2\\.5')) {
             setActiveSection(null);
           }
         }}>
-          <div className="max-w-[800px] mx-auto flex flex-col gap-6">
+          <div className="w-full max-w-[1400px] mx-auto flex flex-col gap-6">
 
             {/* If not editing, show Template. If editing, show forms. */}
             {!isEditing ? (
@@ -916,6 +953,7 @@ function Form() {
                   setDownloadImage={setDownloadImage}
                   resumeTemplateRef={resumeTemplateRef}
                   activeSection={activeSection}
+                  isGeneratingPdf={isGeneratingPdf}
                 />
               </div>
             ) : (

@@ -37,9 +37,9 @@ export default function StudentPageHeader({ section, title, rightSlot, subtitle,
           <div className="w-[56px] h-[56px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
             {getIcon()}
           </div>
-          <div className="flex flex-col justify-center gap-1">
+          <div className="flex flex-col justify-center items-start gap-1.5">
             {(breadcrumb || section) && (
-              <p className="text-[#5694F0] text-[12px] font-bold tracking-wider uppercase mb-1">
+              <p className="text-[#5694F0] text-[12px] font-bold tracking-wider uppercase m-0">
                 {breadcrumb || section}
               </p>
             )}
@@ -47,9 +47,9 @@ export default function StudentPageHeader({ section, title, rightSlot, subtitle,
               {title}
             </h1>
             {subtitleSlot ? (
-              <div className="mt-1">{subtitleSlot}</div>
+              <div className="m-0">{subtitleSlot}</div>
             ) : (
-              <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight mt-1">
+              <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight">
                 {subtitle || "Explore and manage your learning journey."}
               </p>
             )}

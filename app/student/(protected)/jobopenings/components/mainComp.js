@@ -20,8 +20,8 @@ export default function MainComp() {
     (state) => state.jonOpenings.allJobOpenings?.value || { jobs: [], pagination: { totalDocs: 0, totalPages: 1, currentPage: 1, limit: 10 } }
   );
   const jobsStatus = useSelector((state) => state.jonOpenings.allJobOpenings?.status);
-  const student    = useSelector((state) => state.student.student?.data);
-  const dispatch   = useDispatch();
+  const student = useSelector((state) => state.student.student?.data);
+  const dispatch = useDispatch();
 
   const isFetching = jobsStatus === "pending";
 
@@ -45,11 +45,11 @@ export default function MainComp() {
   const [isPending, startTransition] = useTransition();
 
   // ── UI state ───────────────────────────────────────────────
-  const [selectedId,     setSelectedId]     = useState("");
-  const [activeTab,      setActiveTab]       = useState("overview");
-  const [listFilter,     setListFilter]      = useState("all");
-  const [appliedPage,    setAppliedPage]     = useState(1);
-  const [appliedLimit,   setAppliedLimit]    = useState(10);
+  const [selectedId, setSelectedId] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [listFilter, setListFilter] = useState("all");
+  const [appliedPage, setAppliedPage] = useState(1);
+  const [appliedLimit, setAppliedLimit] = useState(10);
 
   // ── Derived applied jobs list with local filters ───────────
   const searchParam = searchParams.get("search") || "";
@@ -69,7 +69,7 @@ export default function MainComp() {
     .map((aj) => {
       const jobId = aj?.jobDetails?._id || aj?.id || aj?.jobId || aj?._id || (typeof aj === "string" ? aj : null);
       if (!jobId) return null;
-      const localDetails = JOBS.find((job) => String(job._id) === String(jobId));
+      const localDetails = JOBS.find((job) => String(job?._id) === String(jobId));
       const details = localDetails || aj?.jobDetails;
       if (!details) return null;
       return {
@@ -117,12 +117,12 @@ export default function MainComp() {
 
   const filteredJobs = listFilter === "applied" ? paginatedAppliedJobs : JOBS.filter((j) => j?.status !== "pending");
 
-  const selectedJob = filteredJobs?.find((j) => j._id === selectedId) || null;
+  const selectedJob = filteredJobs?.find((j) => j?._id === selectedId) || null;
 
   // ── Auto-select first job on load ─────────────────────────
   useEffect(() => {
     if (!filteredJobs?.length) return;
-    const stillExists = filteredJobs.some((j) => j._id === selectedId);
+    const stillExists = filteredJobs.some((j) => j?._id === selectedId);
     if (!selectedId || !stillExists) setSelectedId(filteredJobs[0]?._id || "");
   }, [filteredJobs]);
 
@@ -164,11 +164,11 @@ export default function MainComp() {
             theme={{
               components: {
                 Segmented: {
-                  itemSelectedBg:    "linear-gradient(to bottom right, #1E69DA, #5694F0)",
+                  itemSelectedBg: "linear-gradient(to bottom right, #1E69DA, #5694F0)",
                   itemSelectedColor: "#ffffff",
-                  itemActiveBg:      "linear-gradient(to bottom right, #1E69DA, #5694F0)",
-                  trackBg:           "rgba(30,105,218,0.1)",
-                  fontSize:          15,
+                  itemActiveBg: "linear-gradient(to bottom right, #1E69DA, #5694F0)",
+                  trackBg: "rgba(30,105,218,0.1)",
+                  fontSize: 15,
                 },
               },
             }}
@@ -178,7 +178,7 @@ export default function MainComp() {
               value={listFilter}
               onChange={setListFilter}
               options={[
-                { label: "All Jobs",     value: "all"     },
+                { label: "All Jobs", value: "all" },
                 { label: "Applied Jobs", value: "applied" },
               ]}
               style={{ fontWeight: 600, padding: "3px" }}
@@ -198,11 +198,11 @@ export default function MainComp() {
           ) : (
             filteredJobs.map((job) => (
               <JobCard
-                key={job._id}
+                key={job?._id}
                 job={job}
-                isSelected={selectedId === job._id}
+                isSelected={selectedId === job?._id}
                 onSelect={setSelectedId}
-                isApplied={isJobApplied(job._id)}   // ← optimistic-aware
+                isApplied={isJobApplied(job?._id)}   // ← optimistic-aware
               />
             ))
           )}
@@ -314,7 +314,7 @@ export default function MainComp() {
 
               <Button
                 size="small"
-                disabled={listFilter === "all" 
+                disabled={listFilter === "all"
                   ? pagination.currentPage === pagination.totalPages || pagination.totalPages === 0
                   : appliedPage === appliedTotalPages || appliedTotalPages === 0}
                 onClick={() => {
