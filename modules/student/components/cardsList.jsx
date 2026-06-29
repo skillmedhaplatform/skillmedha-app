@@ -1,12 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import Slider from "react-slick";
-import { Collapse } from "antd";
+import { Collapse, ConfigProvider } from "antd";
 
 import { useSelector } from "react-redux";
 import { Image } from "antd";
 
-export default function CardsList({ type }) {
+export default function CardsList({ type, isModal = false }) {
   const allInternships = useSelector(
     (state) => state.internship.allInternships?.data
   );
@@ -121,15 +121,26 @@ export default function CardsList({ type }) {
   }
   if (type === "notifications") {
     return (
-      <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden max-h-[255px] pb-2 px-1">
+      <div className={`flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden pb-2 px-1 ${isModal ? 'h-full' : 'max-h-[255px]'}`}>
         {
         // data?.filter((d) => d?.status !== "pending")        
         data?.filter((d) => d?.status === "active")
           .map((e, i) => {
             return (
-              <Collapse
-                className={`bg-white border-0 border-l-[3px] border-l-[#24A058] rounded-none w-full ${activeKey == i ? "bg-white rounded-none" : ""
-                  }`}
+              <ConfigProvider
+                key={i}
+                theme={{
+                  components: {
+                    Collapse: {
+                      headerBg: '#e6f7ff',
+                      contentBg: '#ffffff',
+                    },
+                  },
+                }}
+              >
+                <Collapse
+                  className={`border-0 border-l-[3px] border-l-[#24A058] rounded-none w-full ${activeKey == i ? "rounded-none" : ""
+                    }`}
                 size="medium"
                 activeKey={activeKey}
                 onChange={handleChange}
@@ -207,6 +218,7 @@ export default function CardsList({ type }) {
                   },
                 ]}
               />
+              </ConfigProvider>
             );
           })}
       </div>

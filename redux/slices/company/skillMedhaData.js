@@ -162,7 +162,7 @@ export const fetchAllStudents = createAsyncThunk(
         pagination: responseData.pagination || {},
         hasMore: responseData.pagination
           ? responseData.pagination.currentPage <
-            responseData.pagination.totalPages
+          responseData.pagination.totalPages
           : false,
         currentPage: responseData.pagination?.currentPage || page,
         totalCount: responseData.pagination?.totalCount || 0,

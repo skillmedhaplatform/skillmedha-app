@@ -333,7 +333,7 @@ export default function MobileDashboard({
       >
         <div style={{ maxHeight: "70vh", overflowY: "auto", padding: "8px 0" }}>
           {activeNoticesCount > 0 ? (
-            <CardsList type="notifications" />
+            <CardsList type="notifications" isModal={true} />
           ) : (
             <div style={{ textAlign: "center", padding: "24px 0", color: "#64748b" }}>
               <GoMegaphone style={{ fontSize: "36px", marginBottom: "8px", color: "#cbd5e1" }} />
