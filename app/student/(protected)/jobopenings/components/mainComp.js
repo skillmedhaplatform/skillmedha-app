@@ -115,7 +115,7 @@ export default function MainComp() {
     appliedPage * appliedLimit
   );
 
-  const filteredJobs = listFilter === "applied" ? paginatedAppliedJobs : JOBS.filter((j) => j?.status !== "pending");
+  const filteredJobs = listFilter === "applied" ? paginatedAppliedJobs : JOBS;
 
   const selectedJob = filteredJobs?.find((j) => j?._id === selectedId) || null;
 
