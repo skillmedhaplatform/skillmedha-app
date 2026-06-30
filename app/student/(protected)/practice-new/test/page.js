@@ -172,7 +172,8 @@ export default function TestPage() {
   );
 
   const renderHtml = (text) => {
-    const newText = text.split("```html").join("");
+    if (!text) return null;
+    const newText = String(text).split("```html").join("");
     return (
       <div
         dangerouslySetInnerHTML={{ __html: newText }}

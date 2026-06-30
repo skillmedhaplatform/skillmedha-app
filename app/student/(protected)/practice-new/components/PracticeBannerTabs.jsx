@@ -14,7 +14,7 @@ export default function PracticeBannerTabs() {
   ];
 
   return (
-    <div className="flex gap-3 -mt-2">
+    <div className="flex gap-3 mt-1">
       {categoryTabs.map((tab) => {
         const isActive = currPath === tab.path;
         return (

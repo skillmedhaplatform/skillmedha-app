@@ -52,9 +52,16 @@ export default function JobCard({ job, isSelected, onSelect, isApplied }) {
       </div>
 
       <div className="flex items-center justify-between mt-4">
-        <p className="text-[12px] text-[#94a3b8] font-medium m-0">
-          {timeAgo(job.createdAt)}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-[12px] text-[#94a3b8] font-medium m-0">
+            {timeAgo(job.createdAt)}
+          </p>
+          {job?.isAssignedJob === false && (
+            <span className="px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 text-[10px] font-bold border border-purple-100 uppercase tracking-wider">
+              Created by TPO
+            </span>
+          )}
+        </div>
         <span className="px-2 py-0.5 rounded-full bg-[#f0f6ff] text-[#0ea5e9] text-[11px] font-semibold">
           {job?.workModel || "Remote"}
         </span>

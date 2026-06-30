@@ -7,10 +7,13 @@ import formStyles from "../../../../form.module.scss";
 const Page = () => {
   const studentDetails = useSelector((state) => state.student.student?.data);
 
-  const latestEduObj = studentDetails?.educationDetails?.length
-    ? studentDetails.educationDetails[
-        studentDetails.educationDetails.length - 1
-      ]
+  // Filter out any entries that don't have at least a school, board, or degree name
+  const validEducations = (studentDetails?.educationDetails || []).filter(
+    edu => edu?.school || edu?.board || edu?.degreeName
+  );
+
+  const latestEduObj = validEducations.length
+    ? validEducations[validEducations.length - 1]
     : {};
 
   return (
@@ -24,30 +27,37 @@ const Page = () => {
         </p>
       </div>
 
-      {latestEduObj?.degreeName ? (
+      {Object.keys(latestEduObj).length > 0 ? (
         <div className={formStyles.dynamicFormContainer} style={{ padding: 0 }}>
           <div className={formStyles.formField}>
             <label>Degree / Qualification</label>
             <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
-              {latestEduObj?.degreeName || "—"}
+              {latestEduObj?.degreeName || latestEduObj?.type || "—"}
+            </div>
+          </div>
+          <div className={formStyles.formField}>
+            <label>Institution / Board</label>
+            <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
+              {latestEduObj?.school || latestEduObj?.board || "—"}
             </div>
           </div>
           <div className={formStyles.formField}>
             <label>Department / Stream</label>
             <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
-              {latestEduObj?.department || "—"}
+              {latestEduObj?.department || latestEduObj?.stream || latestEduObj?.board || "—"}
             </div>
           </div>
           <div className={formStyles.formField}>
             <label>Grade / CGPA</label>
             <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#2563eb", fontWeight: "700", minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
-              {latestEduObj?.grade || 0} CGPA ({(latestEduObj?.grade * 9.5 || 0).toFixed(2)}%)
+              {latestEduObj?.grade || 0} {latestEduObj?.gradingSystem === 'percentage' ? '%' : 'CGPA'} 
+              {latestEduObj?.gradingSystem !== 'percentage' && ` (${(parseFloat(latestEduObj?.grade || 0) * 9.5).toFixed(2)}%)`}
             </div>
           </div>
           <div className={formStyles.formField}>
             <label>Duration & City</label>
             <div className={formStyles.inputField} style={{ background: "#eef5fb", color: "#334155", fontWeight: 500, minHeight: "42px", display: "flex", alignItems: "center", border: "none", opacity: 0.8 }}>
-              {latestEduObj?.startDate} - {latestEduObj?.endDate} | {latestEduObj?.city}
+              {latestEduObj?.startDate || "—"} - {latestEduObj?.endDate || "—"} | {latestEduObj?.city || "—"}
             </div>
           </div>
 

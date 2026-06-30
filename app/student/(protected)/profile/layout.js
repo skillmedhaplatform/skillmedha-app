@@ -6,6 +6,7 @@ import { profileSideNav } from "./(pages)/_utils/myprofileUtils";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import ProfilePicUploader from "./(pages)/_utils/profilePicUploader";
+import { calculateProfileCompletion } from "@/universalUtils/getprofilecompleteion";
 import useResponsive from "@/hooks/useResponsive";
 import MobileProfileLayout from "@/mobile_views/profile/MobileProfileLayout";
 import {
@@ -48,23 +49,7 @@ export default function ProfileLayout({ children }) {
   };
   const initials = getInitials(name);
 
-  // Profile completion calculation
-  const calculateCompletion = () => {
-    if (!studentCreds) return 65;
-    const fields = [
-      studentCreds.firstName,
-      studentCreds.lastName,
-      studentCreds.gender,
-      studentCreds.phone,
-      studentCreds.email,
-      studentCreds.collegeName,
-      studentCreds.professionalSummary
-    ];
-    const filled = fields.filter(f => f && f.toString().trim() !== "");
-    const calculated = Math.round((filled.length / fields.length) * 100);
-    return calculated > 0 ? calculated : 65;
-  };
-  const completionPercent = calculateCompletion();
+  const completionPercent = calculateProfileCompletion(studentCreds || {}).percentage;
 
   // Stats calculation
   const projectsCount = studentCreds?.projects?.length || 0;

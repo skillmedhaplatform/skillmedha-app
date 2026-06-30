@@ -102,21 +102,7 @@ const Page = () => {
             History of all attempted psychometric tests and their detailed results
           </p>
         </div>
-        <Tooltip title={isDisabled ? remainingTimeText : ""}>
-          <Button
-            type="primary"
-            disabled={isDisabled}
-            className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
-            style={{ fontWeight: "600", borderRadius: "8px", height: "auto", padding: "8px 20px" }}
-            onClick={() =>
-              nav.push(
-                `/testPortal?token=${getLstorage("token")}&sId=${studentDetails?._id}`
-              )
-            }
-          >
-            Re-Attempt Test
-          </Button>
-        </Tooltip>
+
       </div>
 
       <div style={{ width: "100%" }}>

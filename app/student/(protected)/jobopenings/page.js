@@ -4,7 +4,7 @@ import { HiOutlineBriefcase } from "react-icons/hi2";
 
 import JobHeader from "./components/filters";
 import MainComp from "./components/mainComp";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { GetAllJobs } from "@/redux/slices/jobopenings";
 import { useRouter, useSearchParams } from "next/navigation";
 import useResponsive from "@/hooks/useResponsive";
@@ -15,6 +15,15 @@ export default function JobOpenings() {
   const dispatch = useDispatch();
   const isMobile = useResponsive();
   const searchParams = useSearchParams();
+
+  // Metrics extraction
+  const student = useSelector((state) => state.student.student?.data);
+  const totalApplied = student?.appliedJobs?.length || 0;
+  
+  const { pagination } = useSelector(
+    (state) => state.jonOpenings?.allJobOpenings?.value || {}
+  );
+  const totalJobs = pagination?.totalDocs || 0;
 
   const page = searchParams.get("page") || "1";
   const limit = searchParams.get("limit") || "10";
@@ -68,6 +77,26 @@ export default function JobOpenings() {
               <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
                 Find your next big opportunity and start your career journey.
               </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6 lg:gap-10 lg:mr-10 relative z-10">
+            <div className="flex flex-col items-center justify-center min-w-[80px]">
+              <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">
+                {totalJobs}
+              </span>
+              <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center whitespace-nowrap">
+                Total Jobs
+              </span>
+            </div>
+            <div className="w-[1px] h-[40px] bg-white/20"></div>
+            <div className="flex flex-col items-center justify-center min-w-[80px]">
+              <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">
+                {totalApplied}
+              </span>
+              <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center whitespace-nowrap">
+                Applied
+              </span>
             </div>
           </div>
         </div>
