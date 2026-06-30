@@ -266,7 +266,7 @@ const Achievements = () => (
         <div className="flex items-center gap-3">
           <div className="text-[24px]">🔥</div>
           <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">7-Day Streak</span>
+            <span className="font-bold text-[#0f172a] text-[14px]">{localStorage.getItem("loginStreak") || 7} Day Streak</span>
             <span className="text-[#64748b] text-[12px]">+100 XP earned</span>
           </div>
         </div>

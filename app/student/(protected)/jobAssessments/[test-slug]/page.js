@@ -449,7 +449,7 @@ export default function Page() {
   // Fetch test and student if needed
   useEffect(() => {
     if (!testId) {
-      nav.replace("/jobAssessments");
+      nav.replace("student/jobAssessments");
       return;
     }
     if (testId !== testData?._id) {
@@ -688,17 +688,25 @@ export default function Page() {
         getLstorage("token") +
         "&testtype=jobtest";
 
-      const newWindow = window.open(url, "_blank");
-      if (
-        !newWindow ||
-        newWindow.closed ||
-        typeof newWindow.closed === "undefined"
-      ) {
-        setPopupBlocked(true);
-      } else {
-        setLstorage("isStarted", testId);
-        nav.replace("/jobAssessments");
-      }
+      // const newWindow = window.open(url, "_blank");
+      // if (
+      //   !newWindow ||
+      //   newWindow.closed ||
+      //   typeof newWindow.closed === "undefined"
+      // ) {
+      //   setPopupBlocked(true);
+      // } else {
+      //   setLstorage("isStarted", testId);
+      //   nav.replace("student/jobAssessments");
+      // }
+      sessionStorage.removeItem("testStarted");
+    sessionStorage.removeItem("value");
+    sessionStorage.removeItem("marked");
+    sessionStorage.removeItem("codingQuestions");
+    sessionStorage.removeItem("time");
+    sessionStorage.removeItem("currQues");
+      window.location.href = url;
+      setLstorage("isStarted", testId);
     } else {
       if (getLstorage("sId")) {
         window.location.reload();
@@ -761,7 +769,7 @@ export default function Page() {
       <div className="relative p-4">
         <SocketComp />
         <div className="mb-4">
-          <Button type="primary" onClick={() => nav.push("/jobAssessments")} className="mb-2">
+          <Button type="primary" onClick={() => nav.push("student/jobAssessments")} className="mb-2">
             back
           </Button>
           <h2 className="text-gray-800 font-bold text-2xl m-0">{testData?.jobTitle}</h2>
@@ -847,7 +855,7 @@ export default function Page() {
         formatTime={formatTime}
         videoRef={videoRef}
         canvasRef={canvasRef}
-        styles={testPageStyles}
+        // styles={testPageStyles}
         isCameraAvailable={isCameraAvailable}
         cameraError={cameraError}
       />
@@ -855,7 +863,7 @@ export default function Page() {
       <PopupBlockedModal
         open={popupBlocked}
         onOk={handlePopupOk}
-        styles={testPageStyles}
+      // styles={testPageStyles}
       />
     </>
   );
