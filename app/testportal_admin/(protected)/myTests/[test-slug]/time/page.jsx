@@ -509,12 +509,11 @@
 
 "use client";
 import React, { useEffect, useState } from "react";
-
 import timeStyles from "./styles/page.module.scss";
 import Switch from "../access/utils/switch/switch";
 import BTag from "../../utils/button";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import {
   createTests,
   getOneTests,
@@ -523,6 +522,15 @@ import {
 } from "@/redux/slices/testportal_admin/slice/test";
 import { updatingVals } from "@/redux/slices/testportal_admin/slice/stepform";
 import { Button, Skeleton, TimePicker, DatePicker, message } from "antd";
+import { 
+  ClockCircleOutlined, 
+  CalendarOutlined, 
+  BulbOutlined, 
+  UserOutlined, 
+  CheckCircleOutlined, 
+  InfoCircleOutlined,
+  HourglassOutlined 
+} from "@ant-design/icons";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 
@@ -536,6 +544,7 @@ const Page = () => {
   );
 
   const params = useParams();
+  const router = useRouter();
   const selectedId = params["test-slug"]?.split("_id-")[1];
 
   const timeVals = useSelector((state) => state.steps.updatingVals);
@@ -722,143 +731,219 @@ const Page = () => {
   return (
     <>
       {SingleTestStatus === "fulfilled" ? (
-        <div className={timeStyles.container}>
-          {/* Test Duration Section */}
-          <div className={timeStyles.respTitle}>Test Duration*</div>
+        <div className={timeStyles.gridContainer}>
+          {/* Left Column: Form Settings */}
+          <div className={timeStyles.mainForm}>
+            {/* Card 1: Test Duration */}
+            <div className={timeStyles.cardSection}>
+              <div className={timeStyles.sectionHeader}>
+                <ClockCircleOutlined className={timeStyles.sectionIcon} />
+                <h3>Test Duration</h3>
+              </div>
+              <div className={timeStyles.formGroup}>
+                <div className={timeStyles.labelRow}>
+                  <label>Time to complete the test (HH : MM)<span>*</span></label>
+                </div>
+                <div className={timeStyles.timeBoxRow}>
+                  <input
+                    type="text"
+                    maxLength={2}
+                    value={testTime.val1 !== undefined ? testTime.val1 : "00"}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      setTestTime({ ...testTime, val1: val });
+                    }}
+                    className={timeStyles.timeBoxInput}
+                    placeholder="00"
+                  />
+                  <span className={timeStyles.timeSeparator}>:</span>
+                  <input
+                    type="text"
+                    maxLength={2}
+                    value={testTime.val2 !== undefined ? testTime.val2 : "30"}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      setTestTime({ ...testTime, val2: val });
+                    }}
+                    className={timeStyles.timeBoxInput}
+                    placeholder="30"
+                  />
+                  <span className={timeStyles.timeLabel}>hours</span>
+                  <span className={timeStyles.timeLabel}>minutes</span>
+                </div>
+                <div className={timeStyles.hintRow}>
+                  <InfoCircleOutlined />
+                  <span>The timer will start once the candidate enters fullscreen mode.</span>
+                </div>
+              </div>
+            </div>
 
-          <div className={timeStyles.option}>
-            <label htmlFor="option1">
-              Time to complete the test (HH : MM) :{" "}
-            </label>
+            {/* Card 2: Test Activation Method */}
+            <div className={timeStyles.cardSection}>
+              <div className={timeStyles.sectionHeader}>
+                <CalendarOutlined className={timeStyles.sectionIcon} />
+                <h3>Test Activation Method</h3>
+              </div>
 
-            <TimePicker
-              format="HH:mm"
-              value={getTestTimeValue()}
-              onChange={handleTestTimeChange}
-              placeholder="Select time"
-              className={timeStyles.timeCons}
-              style={{ width: "20%" }}
-              showNow={false}
-              hideDisabledOptions
-              needConfirm={false}
-            />
+              {/* Option 1: No expiry */}
+              <div
+                className={`${timeStyles.optionCard} ${testActivationOption === "No expiry" ? timeStyles.activeOption : ""}`}
+                onClick={() => setTestActivationOption("No expiry")}
+              >
+                <div className={timeStyles.optionHeader}>
+                  <div className={timeStyles.optionRadioCircle}>
+                    <div className={timeStyles.innerDot} />
+                  </div>
+                  <span className={timeStyles.optionName}>No expiry</span>
+                </div>
+                <p className={timeStyles.optionDesc}>
+                  The test remains active indefinitely until manually disabled. Candidates can access it at any time.
+                </p>
+              </div>
+
+              {/* Option 2: Manual Test Expiration */}
+              <div
+                className={`${timeStyles.optionCard} ${testActivationOption === "Manual Test Activation" ? timeStyles.activeOption : ""}`}
+                onClick={() => setTestActivationOption("Manual Test Activation")}
+              >
+                <div className={timeStyles.optionHeader}>
+                  <div className={timeStyles.optionRadioCircle}>
+                    <div className={timeStyles.innerDot} />
+                  </div>
+                  <span className={timeStyles.optionName}>Manual Test Expiration</span>
+                </div>
+                <p className={timeStyles.optionDesc}>
+                  Manually enable or disable the test whenever you want. You have full control over when candidates can access it.
+                </p>
+                {testActivationOption === "Manual Test Activation" && (
+                  <div className={timeStyles.datePickersRow} onClick={(e) => e.stopPropagation()}>
+                    <div className={timeStyles.dateInputGroup}>
+                      <label>Select Expiry Date & Time</label>
+                      <DatePicker
+                        showTime
+                        format="YYYY-MM-DD HH:mm"
+                        value={getDateValue(manualExpiryDate)}
+                        onChange={handleManualExpiryDateChange}
+                        placeholder="Select date and time"
+                        needConfirm={false}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Option 3: Activation in a set time period */}
+              <div
+                className={`${timeStyles.optionCard} ${testActivationOption === "Activation in a set time period" ? timeStyles.activeOption : ""}`}
+                onClick={() => setTestActivationOption("Activation in a set time period")}
+              >
+                <div className={timeStyles.optionHeader}>
+                  <div className={timeStyles.optionRadioCircle}>
+                    <div className={timeStyles.innerDot} />
+                  </div>
+                  <span className={timeStyles.optionName}>Activation in a set time period</span>
+                </div>
+                <p className={timeStyles.optionDesc}>
+                  Set specific start and end date/time. The test will automatically activate and deactivate within this window.
+                </p>
+                {testActivationOption === "Activation in a set time period" && (
+                  <div className={timeStyles.datePickersRow} onClick={(e) => e.stopPropagation()}>
+                    <div className={timeStyles.dateInputGroup}>
+                      <label>Start Date & Time</label>
+                      <DatePicker
+                        showTime
+                        format="YYYY-MM-DD HH:mm"
+                        value={getDateValue(testActivationDate)}
+                        onChange={handleTestActivationDateChange}
+                        placeholder="Select start date and time"
+                        needConfirm={false}
+                      />
+                    </div>
+                    <div className={timeStyles.dateInputGroup}>
+                      <label>End Date & Time</label>
+                      <DatePicker
+                        showTime
+                        format="YYYY-MM-DD HH:mm"
+                        value={getDateValue(accessClosingDate)}
+                        onChange={handleAccessClosingDateChange}
+                        placeholder="Select end date and time"
+                        needConfirm={false}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Update & Discard Actions */}
+            <div className={timeStyles.formActions}>
+              <button className={timeStyles.saveBtn} onClick={handleUpdate}>
+                Update
+              </button>
+              <button className={timeStyles.discardBtn} onClick={() => router.push("/testportal_admin/myTests")}>
+                Discard
+              </button>
+            </div>
           </div>
 
-          {/* Test Activation Method Section */}
-          <div className={timeStyles.respTitle}>Test Activation Method</div>
-
-          <div className={timeStyles.expiryComp}>
-            {/* No Expiry Option */}
-            <div>
-              <input
-                type="radio"
-                id="now"
-                name="expiry"
-                value="No expiry"
-                checked={testActivationOption === "No expiry"}
-                onChange={() => {
-                  setTestActivationOption("No expiry");
-                }}
-              />
-              <label htmlFor="now">No expiry</label>
+          {/* Right Column: Time Summary & Tips Sidebar */}
+          <div className={timeStyles.sidebarCards}>
+            {/* Time Summary Card */}
+            <div className={timeStyles.summaryCard}>
+              <div className={timeStyles.summaryHeader}>
+                <h4>Time Summary</h4>
+              </div>
+              <div className={timeStyles.summaryList}>
+                <div className={timeStyles.summaryRow}>
+                  <span className={timeStyles.summaryLabel}>Test Duration</span>
+                  <span className={timeStyles.summaryVal}>
+                    {String(testTime.val1 || "00").padStart(2, "0")}H : {String(testTime.val2 || "00").padStart(2, "0")}M
+                  </span>
+                </div>
+                <div className={timeStyles.summaryRow}>
+                  <span className={timeStyles.summaryLabel}>Activation</span>
+                  <span className={timeStyles.summaryVal}>
+                    {testActivationOption === "No expiry" 
+                      ? "No Expiry" 
+                      : testActivationOption === "Manual Test Activation" 
+                      ? "Manual Expiration" 
+                      : "Scheduled"}
+                  </span>
+                </div>
+                <div className={timeStyles.summaryRow}>
+                  <span className={timeStyles.summaryLabel}>Attempts</span>
+                  <span className={timeStyles.summaryVal}>0</span>
+                </div>
+                <div className={timeStyles.summaryRow}>
+                  <span className={timeStyles.summaryLabel}>Status</span>
+                  <span className={SingleTest?.status === "active" ? timeStyles.activeStatus : timeStyles.draftStatus}>
+                    {SingleTest?.status === "active" ? "Active" : "Draft"}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            {/* Manual Test Activation Option */}
-            <div className={timeStyles.manualtest_div}>
-              <div>
-                <input
-                  type="radio"
-                  id="later"
-                  name="expiry"
-                  value="Manual Test Activation"
-                  checked={testActivationOption === "Manual Test Activation"}
-                  onChange={() => {
-                    setTestActivationOption("Manual Test Activation");
-                  }}
-                />
-                <label htmlFor="later">Manual Test Expiration</label>
+            {/* Tips Card */}
+            <div className={timeStyles.tipsCard}>
+              <div className={timeStyles.tipsHeader}>
+                <h4><BulbOutlined />Tips</h4>
               </div>
-
-              {testActivationOption === "Manual Test Activation" && (
-                <DatePicker
-                  showTime
-                  format="YYYY-MM-DD HH:mm"
-                  value={getDateValue(manualExpiryDate)}
-                  onChange={handleManualExpiryDateChange}
-                  className={timeStyles.inp}
-                  style={{ width: "30%" }}
-                  placeholder="Select date and time"
-                  needConfirm={false}
-                />
-              )}
+              <div className={timeStyles.tipsList}>
+                <div className={timeStyles.tipItem}>
+                  <BulbOutlined className={timeStyles.tipIcon} />
+                  <p>Set duration based on the number and complexity of questions. A good rule of thumb is 1.5–2 minutes per question.</p>
+                </div>
+                <div className={timeStyles.tipItem}>
+                  <BulbOutlined className={timeStyles.tipIcon} />
+                  <p>Use "Activation in a set time period" for scheduled assessments to ensure all candidates take the test in the same window.</p>
+                </div>
+                <div className={timeStyles.tipItem}>
+                  <BulbOutlined className={timeStyles.tipIcon} />
+                  <p>After all settings are configured, click "Publish Test" in the topbar to make it live for candidates.</p>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Activation in a Set Time Period Option */}
-          <label className={timeStyles.timePeriod}>
-            <input
-              type="radio"
-              id="TimePeriod"
-              name="expiry"
-              value="Activation in a set time period"
-              checked={
-                testActivationOption === "Activation in a set time period"
-              }
-              onChange={() => {
-                setTestActivationOption("Activation in a set time period");
-              }}
-            />
-            Activation in a set time period
-          </label>
-
-          {testActivationOption === "Activation in a set time period" && (
-            <div className={timeStyles.startEnd}>
-              <div
-                style={{
-                  width: "50%",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1rem",
-                }}
-              >
-                <div>Test activation date</div>
-                <DatePicker
-                  showTime
-                  format="YYYY-MM-DD HH:mm"
-                  value={getDateValue(testActivationDate)}
-                  onChange={handleTestActivationDateChange}
-                  style={{ width: "100%" }}
-                  placeholder="Select date and time"
-                  needConfirm={false}
-                />
-              </div>
-
-              <div
-                style={{
-                  width: "50%",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1rem",
-                }}
-              >
-                <div>Access closing date</div>
-                <DatePicker
-                  showTime
-                  format="YYYY-MM-DD HH:mm"
-                  value={getDateValue(accessClosingDate)}
-                  onChange={handleAccessClosingDateChange}
-                  style={{ width: "100%" }}
-                  placeholder="Select date and time"
-                  needConfirm={false}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Update/Save Button */}
-          <Button type="default" onClick={handleUpdate}>
-            {SingleTest?._id ? "Update" : "Save"}
-          </Button>
         </div>
       ) : (
         <div>

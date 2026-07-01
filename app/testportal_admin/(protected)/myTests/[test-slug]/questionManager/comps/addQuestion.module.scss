@@ -1,5 +1,39 @@
 @import "@/modules/testportal_admin/components/styles/colors.scss";
 
+// Breadcrumb Path Styles
+.breadcrumbPath {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+
+  .link {
+    color: #1e69da;
+    cursor: pointer;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: #1150b3;
+      text-decoration: underline;
+    }
+  }
+
+  .separator {
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .current {
+    color: #0f172a;
+    font-weight: 700;
+  }
+}
+
 .explanation {
   position: relative;
   padding-bottom: 2.5rem;
@@ -16,9 +50,9 @@
     padding: 0.5rem;
   }
 }
+
 .container {
   font-size: 1rem;
-  // font-weight: 600;
   width: 100%;
   .heading_span{
     font-size: 1rem;
@@ -26,7 +60,6 @@
   }
   .optionsContainer {
     width: 100%;
-    // border: 1px solid;
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
@@ -39,15 +72,12 @@
       .empty_div {
         width: 16.6%;
       }
-      // .btn {
-      // }
     }
     .option_div {
       width: 100%;
       display: flex;
       align-items: flex-start;
       justify-content: flex-start;
-      // border: 1px solid red;
     }
     .mcqRadioGroup {
       width: 100%;
@@ -61,6 +91,7 @@
     width: 100%;
   }
 }
+
 .score_radio_div {
   display: flex;
   align-items: center;
@@ -70,6 +101,7 @@
     font-size: 1rem;
   }
 }
+
 .radio_cont {
   width: 100%;
   .scoreSettings_cont {
@@ -98,15 +130,35 @@
     }
   }
 }
+
+// Redesigned Question Form Card Container
 .questionFormContainer {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
   flex-direction: column;
-  position: relative;
-  margin-top: 1rem;
-  padding: 0 2rem 2rem 2rem;
-  gap: 1rem;
+  gap: 1.75rem;
+  width: 100%;
+  box-sizing: border-box;
+
+  .divider {
+    height: 1px;
+    background-color: #f1f5f9;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  .sectionTitle {
+    font-size: 1.05rem;
+    font-weight: 750;
+    color: #0f172a;
+    margin: 0;
+    border-left: 3px solid #1e69da;
+    padding-left: 0.75rem;
+  }
 
   .bonus_div {
     width: 100%;
@@ -143,13 +195,41 @@
     }
   }
 }
+
 .save_btn {
-  border: 0;
-  padding: 0.5rem;
-  border-radius: 5px;
+  background: linear-gradient(135deg, #1e69da 0%, #1150b3 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  height: 40px;
+  padding: 0 2.5rem;
   font-weight: 700;
-  background-color: $iconBackground;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(30, 105, 218, 0.2);
+  transition: all 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(30, 105, 218, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 }
+
+.footer {
+  margin-top: 1.5rem;
+  width: 100%;
+
+  button {
+    height: 38px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+}
+
 .true_false_cont{
   margin-bottom: 0rem !important;
   .radio_inputs{
@@ -159,6 +239,7 @@
       }
   }
 }
+
 .score_settings_h3{
   color: $navbarColor;
 }

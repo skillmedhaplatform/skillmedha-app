@@ -1,94 +1,350 @@
 @import "@/modules/testportal_admin/components/styles/colors.scss";
 @import "@/modules/testportal_admin/components/styles/mixins.scss";
-$min-width1024: 1024px;
-$max-width1140: 1140px;
 
-.questionCardComp {
-  background-color: none !important;
+// Main Cards row container helper
+.questions_cont {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   width: 100%;
+  margin-bottom: 2rem;
 }
 
-.questionCard {
-  padding: 1rem;
-  background-color: $sidebargray;
-  border-radius: 0.5rem;
-  box-shadow: rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px;
+.cardRow {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   width: 100%;
+  margin-bottom: 0.75rem;
+
+  &.expanded {
+    border-color: #1e69da;
+    box-shadow: 0 10px 15px -3px rgba(30, 105, 218, 0.08);
+  }
 }
 
-.ansCard {
-  @include flexBox(row, flex-start, flex-start);
-  margin: 0.5rem;
-  .optionContent {
-    @include fontMixin();
-    p {
-      margin: 0;
-      margin-left: 0.5rem;
+.collapsedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  cursor: pointer;
+}
+
+.leftPart {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+
+  .toggleBtn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background-color: #f1f5f9;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background-color: #e2e8f0;
+      color: #0f172a;
+    }
+
+    svg {
+      transition: transform 0.15s ease;
+    }
+
+    &.active svg {
+      transform: rotate(90deg);
+    }
+  }
+
+  .checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  .numberBadge {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background-color: #eff6ff;
+    color: #1e69da;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .descriptionText {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+}
+
+.rightPart {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+
+  .tagsRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    .tagCategory {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background-color: #e6f4ea;
+      color: #137333;
+    }
+
+    .tagScore {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background-color: #eff6ff;
+      color: #1a73e8;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+
+      svg {
+        font-size: 11px;
+      }
+    }
+
+    .tagType {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background-color: #fce8e6;
+      color: #c5221f;
+    }
+
+    .tagDifficulty {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+
+      &.easy {
+        background-color: #e6f4ea;
+        color: #137333;
+      }
+      &.medium {
+        background-color: #fef7e0;
+        color: #b06000;
+      }
+      &.hard {
+        background-color: #fce8e6;
+        color: #c5221f;
+      }
+    }
+  }
+
+  .menuButtonWrapper {
+    position: relative;
+    z-index: 10;
+
+    .menuBtn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      background-color: #f8fafc;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+
+      &:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+      }
     }
   }
 }
 
-.header {
-  @include flexBox(row, center, space-between);
-  margin-bottom: 1rem;
-  & > :nth-child(1) {
-    @include flexBox(row, center, center, 1rem);
-    span {
-      @include fontMixin(_, 700);
-    }
-  }
-}
+.expandedContent {
+  border-top: 1px solid #f1f5f9;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 
-.checkbox {
-  margin-right: 0.5rem;
-  width: 15px;
-  height: 15px;
-  cursor: pointer;
-}
-
-.question {
-  cursor: pointer;
-  font-weight: 600;
-  & > :nth-child(1) {
-    margin-bottom: 0.8rem;
-    @include fontMixin();
+  .expandedTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
   }
+
   .video_div {
     width: 100%;
-    height: 100%;
+    max-width: 480px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+
+    video, audio {
+      width: 100%;
+      display: block;
+    }
+  }
+
+  .optionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .optionRow {
+      padding: 0.85rem 1.25rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background-color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: all 0.15s ease;
+
+      &.correct {
+        border-color: #22c55e;
+        background-color: #f0fdf4;
+      }
+
+      .optionLeft {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+
+        .letterBadge {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background-color: #eff6ff;
+          color: #1e69da;
+          font-size: 12px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+
+          &.correct {
+            background-color: #22c55e;
+            color: #ffffff;
+          }
+        }
+
+        .optionContentText {
+          font-size: 14px;
+          font-weight: 500;
+          color: #334155;
+        }
+      }
+
+      .checkIcon {
+        color: #22c55e;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .expandedMetadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 0.75rem;
+
+    .metaItem {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      svg {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .expandedActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 0.75rem;
+
+    button {
+      height: 36px;
+      padding: 0 1rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
   }
 }
 
-.buttons {
+// Draggable container helper
+.draggableQuestion {
+  width: 100%;
+}
+.dragging {
+  opacity: 0.5;
+}
+.No_Questions_container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  & > :nth-last-child(1) {
-    font-size: 1.3rem;
-    cursor: pointer;
-  }
-  & > :nth-last-child(2) {
-    background-color: $qmbtncolorpink;
-  }
-  button {
-    width: fit-content;
-    display: inline;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background-color: $graybackground;
-    border: none;
-    outline: none;
-    border-radius: 5px;
-    padding: 0.5rem 2rem;
-    cursor: pointer;
-  }
+  padding: 3rem;
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 1rem;
 }
-.comprehension_text {
-  p {
-    font-weight: 500;
-  }
+.activeIcon {
+  color: #1e69da;
 }
-.Comprehension_delete_btn{
-  color: $ComprehensionDeleteBtn;
+.inactive {
+  opacity: 0.5;
 }

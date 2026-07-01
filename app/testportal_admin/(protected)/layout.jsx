@@ -5,11 +5,19 @@ import Header from "@/mainLayout/header";
 import PageHeader from "@/modules/tpo/components/PageHeader";
 import PageStyles from "@/app/student/page.module.scss";
 import { getLstorage } from "@/utils/windowMW";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { GetOneUser } from "@/redux/slices/testportal_admin/slice/test";
-import { useRouter } from "@bprogress/next/app";
+import { useRouter } from "next/navigation";
 import { usePathname, useSearchParams } from "next/navigation";
 import useResponsive from "@/hooks/useResponsive";
+import { 
+  InfoCircleOutlined, 
+  QuestionCircleOutlined, 
+  LockOutlined, 
+  PlayCircleOutlined, 
+  HistoryOutlined, 
+  ClockCircleOutlined 
+} from "@ant-design/icons";
 
 const GroupLayout = ({ children }) => {
   const dispatch = useDispatch();
@@ -39,6 +47,10 @@ const GroupLayout = ({ children }) => {
     }
   }, [token, dispatch]);
 
+  const SingleTest = useSelector((state) => state.tests.test);
+
+  const isTestEditPage = currPath.includes("/testportal_admin/myTests/") && currPath.split("/").length >= 5;
+
   if (!mounted || !token) return null;
 
   const getPageInfo = (path) => {
@@ -56,7 +68,11 @@ const GroupLayout = ({ children }) => {
       <SideBar />
       <div className={PageStyles.rightColumn} style={{ height: isMobile ? "calc(100vh - 64px)" : "100%" }}>
         <Header isHeaderVisible={true} />
-        <PageHeader title={pageInfo.title} subtitle={pageInfo.subtitle} showGreeting={false} />
+        <PageHeader 
+          title={isTestEditPage ? (SingleTest?.title || "Test Details") : pageInfo.title} 
+          subtitle={isTestEditPage ? "Edit and configure test details" : pageInfo.subtitle} 
+          showGreeting={false} 
+        />
         <div className={PageStyles.content} style={{ padding: 0, backgroundColor: "#eef5fb" }}>
           {children}
         </div>

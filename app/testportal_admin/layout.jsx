@@ -17,9 +17,9 @@ export default function RootLayout({ children }) {
         theme={{
           token: {
             fontSize: 16,
-            colorPrimary: "#27ae60",
+            colorPrimary: "#1e69da",
             colorBorder: "#808080",
-            colorPrimaryHover: "#27ae60",
+            colorPrimaryHover: "#1150b3",
             controlHeight: 38,
           },
         }}

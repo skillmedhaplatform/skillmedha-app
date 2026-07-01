@@ -17,3 +17,108 @@
 .contentForm::-webkit-scrollbar {
   display: none;
 }
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 1.5rem;
+  background-color: transparent;
+  margin-bottom: 0.25rem;
+  font-size: 14px;
+  border-bottom: 1px solid #e2e8f0;
+
+  .leftPath {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  p {
+    font-weight: 550;
+    color: #1e69da;
+    cursor: pointer;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: #3b82f6;
+      text-decoration: underline;
+    }
+  }
+
+  .current {
+    color: #0f172a;
+    font-weight: 600;
+    cursor: default;
+
+    &:hover {
+      color: #0f172a;
+      text-decoration: none;
+    }
+  }
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 12px;
+  }
+}
+
+.tabsContainer {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+  width: 100%;
+  background-color: #ffffff;
+  padding: 0 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.tabItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.25rem;
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  white-space: nowrap;
+
+  svg {
+    font-size: 1rem;
+    color: inherit;
+  }
+
+  &:hover {
+    color: #0f172a;
+  }
+
+  &.activeTab {
+    color: #1e69da;
+
+    .activeIndicator {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: #1e69da;
+      border-radius: 3px 3px 0 0;
+    }
+  }
+}

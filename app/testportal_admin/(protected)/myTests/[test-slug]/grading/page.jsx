@@ -12,6 +12,16 @@ import {
   updateTest,
   updateTestValues,
 } from "@/redux/slices/testportal_admin/slice/test";
+import { 
+  MessageOutlined, 
+  EyeOutlined, 
+  StarOutlined, 
+  BarChartOutlined, 
+  CloseCircleOutlined, 
+  DeleteOutlined, 
+  PlusOutlined,
+  InfoCircleOutlined 
+} from "@ant-design/icons";
 import TextEditor from "@/modules/testportal_admin/components/reusable-comps/editor/editor";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -80,7 +90,7 @@ const Page = () => {
     }
   }, [SingleTest?._id, SingleTest?.questions?.length]);
 
-  const nav = useRouter();
+  const router = useRouter();
 
   const [intervals, setIntervals] = useState(
     SingleTest?.grading?.scoreRange || [
@@ -348,9 +358,18 @@ const Page = () => {
         <QuestionSkeleton />
       ) : (
         <div className={gradingStyles.container}>
-          <div className={gradingStyles.flexComp}>
-            <span className={gradingStyles.spans}>{"Test End Message"}</span>
-            <div className={gradingStyles.editorComp}>
+          {/* Card 1: Test End Message */}
+          <div className={gradingStyles.cardSection}>
+            <div className={gradingStyles.sectionHeader}>
+              <div className={gradingStyles.headerLeft}>
+                <MessageOutlined className={gradingStyles.sectionIcon} />
+                <h3>Test End Message</h3>
+              </div>
+            </div>
+            <p className={gradingStyles.description}>
+              This message is shown to candidates after they submit the test.
+            </p>
+            <div className={gradingStyles.editorWrapper}>
               <TextEditor
                 name="TestEndMessage"
                 editorFun={(val) => sendTestEndMessage(val, "TestEndMessage")}
@@ -358,315 +377,300 @@ const Page = () => {
                   {
                     TestEndMessage:
                       SingleTest?.grading?.TestEndMessage ||
-                      '"<p><strong style=\\"background-color: transparent;\\">Thank you for completing the exam.</strong></p><p><span style=\\"background-color: transparent;\\">We appreciate your effort and participation.</span></p>"',
+                      defaultTestEndMessage,
                   } || {}
                 }
               />
             </div>
           </div>
-          <div className={gradingStyles.flexComp2}>
-            <span className={gradingStyles.spans}>{"Display Results"}</span>
-            <div>
-              <Radio.Group
-                optionType="button"
-                buttonStyle="solid"
-                options={optionsResults}
-                value={handleResults}
-                onChange={handleResultsVal}
-              />
-            </div>
-          </div>
-          {handleResults == "Enable" && (
-            <>
-              <div className={gradingStyles.flexComp2}>
-                <span className={gradingStyles.spans}>
-                  {"Grading Criteria"}
-                </span>
-                <div className={gradingStyles.inpsCon}>
-                  <label>Full Score&nbsp;:</label>
-                  <input
-                    type="number"
-                    placeholder="Max Score"
-                    value={TotalTestMarks}
-                    onChange={(e) => {
-                      dispatch(
-                        updatingVals({
-                          ...updatesVal,
-                          grading: {
-                            ...updatesVal.grading,
-                            gradingCriteria: {
-                              ...updatesVal.grading?.gradingCriteria,
-                              maxScore: TotalTestMarks,
-                            },
-                          },
-                        })
-                      );
-                      dispatch(
-                        updateTestValues({
-                          grading: {
-                            ...SingleTest.grading,
-                            gradingCriteria: {
-                              ...SingleTest.grading?.gradingCriteria,
-                              maxScore: TotalTestMarks,
-                            },
-                          },
-                        })
-                      );
-                    }}
-                  />
-                  <label>Pass Score&nbsp;:</label>
-                  <input
-                    type="number"
-                    placeholder="Pass Score"
-                    defaultValue={
-                      SingleTest &&
-                      SingleTest.grading &&
-                      SingleTest.grading.gradingCriteria &&
-                      SingleTest.grading.gradingCriteria.passScore
-                    }
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value);
-                      const numericValue =
-                        value === "" ? "" : parseFloat(value);
 
-                      if (
-                        value === "" ||
-                        (numericValue >= 0 && numericValue <= TotalTestMarks)
-                      ) {
-                        dispatch(
-                          updatingVals({
-                            ...updatesVal,
-                            grading: {
-                              ...updatesVal.grading,
-                              gradingCriteria: {
-                                ...updatesVal.grading?.gradingCriteria,
-                                passScore: value,
-                              },
-                            },
-                          })
-                        );
-                        dispatch(
-                          updateTestValues({
-                            grading: {
-                              ...SingleTest.grading,
-                              gradingCriteria: {
-                                ...SingleTest.grading?.gradingCriteria,
-                                passScore: value,
-                              },
-                            },
-                          })
-                        );
-                      } else if (
-                        value !== "" &&
-                        numericValue > TotalTestMarks
-                      ) {
-                        e.target.value = "";
-                        message.info(
-                          "Pass Score cannot exceed Total Test Marks"
-                        );
-                        message.instance = true;
+          {/* Card 2: Display Results */}
+          <div className={gradingStyles.cardSection}>
+            <div className={gradingStyles.sectionHeader}>
+              <div className={gradingStyles.headerLeft}>
+                <EyeOutlined className={gradingStyles.sectionIcon} />
+                <h3>Display Results</h3>
+              </div>
+              <div className={gradingStyles.headerRight}>
+                <div className={gradingStyles.toggleGroup}>
+                  <button
+                    className={handleResults === "Disable" ? gradingStyles.active : ""}
+                    onClick={() => handleResultsVal({ target: { value: "Disable" } })}
+                  >
+                    Disable
+                  </button>
+                  <button
+                    className={handleResults === "Enable" ? gradingStyles.active : ""}
+                    onClick={() => handleResultsVal({ target: { value: "Enable" } })}
+                  >
+                    Enable
+                  </button>
+                </div>
+              </div>
+            </div>
+            <p className={gradingStyles.description}>
+              When enabled, candidates can see their score and correct answers immediately after submission.
+            </p>
+          </div>
+
+          {handleResults === "Enable" && (
+            <>
+              {/* Card 3: Grading Criteria */}
+              <div className={gradingStyles.cardSection}>
+                <div className={gradingStyles.sectionHeader}>
+                  <div className={gradingStyles.headerLeft}>
+                    <StarOutlined className={gradingStyles.sectionIcon} />
+                    <h3>Grading Criteria</h3>
+                  </div>
+                </div>
+                <div className={gradingStyles.criteriaRow}>
+                  <div className={gradingStyles.inputGroup}>
+                    <label>Full Score</label>
+                    <input
+                      type="number"
+                      placeholder="Max Score"
+                      value={TotalTestMarks}
+                      disabled
+                    />
+                  </div>
+                  <div className={gradingStyles.inputGroup}>
+                    <label>Pass Score</label>
+                    <input
+                      type="number"
+                      placeholder="Enter pass score..."
+                      defaultValue={
+                        SingleTest?.grading?.gradingCriteria?.passScore
                       }
-                    }}
-                  />
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        const numericValue = value === "" ? "" : parseFloat(value);
+
+                        if (
+                          value === "" ||
+                          (numericValue >= 0 && numericValue <= TotalTestMarks)
+                        ) {
+                          dispatch(
+                            updatingVals({
+                              ...updatesVal,
+                              grading: {
+                                ...updatesVal.grading,
+                                gradingCriteria: {
+                                  ...updatesVal.grading?.gradingCriteria,
+                                  passScore: value,
+                                },
+                              },
+                            })
+                          );
+                          dispatch(
+                            updateTestValues({
+                              grading: {
+                                ...SingleTest.grading,
+                                gradingCriteria: {
+                                  ...SingleTest.grading?.gradingCriteria,
+                                  passScore: value,
+                                },
+                              },
+                            })
+                          );
+                        } else if (value !== "" && numericValue > TotalTestMarks) {
+                          e.target.value = "";
+                          message.info("Pass Score cannot exceed Total Test Marks");
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className={gradingStyles.hintRow}>
+                  <InfoCircleOutlined />
+                  <span>Set the minimum score required to pass. Leave empty if no pass threshold applies.</span>
                 </div>
               </div>
 
-              <div className={gradingStyles.flexComp3}>
-                <span className={gradingStyles.spans}>{"Score Range"}</span>
-                <div className={gradingStyles.flexcomp_main}>
-                  {intervals.map((interval, index) => (
-                    <div key={index} className={gradingStyles.flexCon}>
-                      <div className={gradingStyles.inpsCon}>
-                        <h2>{index + 1}.</h2>
+              {/* Card 4: Score Range */}
+              <div className={gradingStyles.cardSection}>
+                <div className={gradingStyles.sectionHeader}>
+                  <div className={gradingStyles.headerLeft}>
+                    <BarChartOutlined className={gradingStyles.sectionIcon} />
+                    <h3>Score Range</h3>
+                  </div>
+                </div>
+
+                {intervals.map((interval, index) => (
+                  <div key={index} className={gradingStyles.intervalItem}>
+                    <div className={gradingStyles.intervalHeader}>
+                      <div className={gradingStyles.intervalInputs}>
+                        <div className={gradingStyles.badge}>{index + 1}</div>
                         <input
                           type="number"
-                          placeholder="Max Score"
+                          placeholder="Max"
                           value={interval.scoreFrom ?? ""}
                           onChange={(e) =>
-                            handleInputChange(
-                              index,
-                              "scoreFrom",
-                              e.target.value
-                            )
+                            handleInputChange(index, "scoreFrom", e.target.value)
                           }
                         />
-                        {"-"}
+                        <span className={gradingStyles.dash}>—</span>
                         <input
                           type="number"
-                          placeholder="Min Score"
+                          placeholder="Min"
                           value={interval.scoreTo ?? ""}
                           onChange={(e) =>
                             handleInputChange(index, "scoreTo", e.target.value)
                           }
                         />
-                        <img
-                          src="https://res.cloudinary.com/cliqtick/image/upload/a_hflip/c_crop,w_600,h_300/v1722338593/free-black-arrow-left-icon-11375-thumb_fc3aba.png"
-                          width="24px"
-                        />
+                        <span className={gradingStyles.dash}>→</span>
                         <input
                           type="text"
-                          placeholder="Grade"
+                          placeholder="Grade label (e.g. A, Excellent)"
                           value={interval.grade ?? ""}
+                          className={gradingStyles.gradeInput}
                           onChange={(e) =>
                             handleInputChange(index, "grade", e.target.value)
                           }
                         />
-                        <img
-                          className={gradingStyles.deleteButton}
-                          onClick={() => handleDeleteInterval(index)}
-                          src="https://res.cloudinary.com/cliqtick/image/upload/v1718799083/sysnper/f29853d87e22f70d1cc10a3fcd7959c4_phnqgw.png"
-                          alt="delete"
-                        />
                       </div>
-
-                      <div className={gradingStyles.inpsCon}>
-                        <h4>To be Included in the Message</h4>
-                        <button
-                          className={
-                            interval?.selectedValues?.includes("%")
-                              ? gradingStyles.selected
-                              : gradingStyles.notSelected
-                          }
-                          onClick={() => handleSelectValue(index, "%")}
-                        >
-                          %
-                        </button>
-                        <button
-                          className={
-                            interval?.selectedValues?.includes("Grade")
-                              ? gradingStyles.selected
-                              : gradingStyles.notSelected
-                          }
-                          onClick={() => handleSelectValue(index, "Grade")}
-                        >
-                          Grade
-                        </button>
-                        <button
-                          className={
-                            interval?.selectedValues?.includes("Score")
-                              ? gradingStyles.selected
-                              : gradingStyles.notSelected
-                          }
-                          onClick={() => handleSelectValue(index, "Score")}
-                        >
-                          Score
-                        </button>
-                      </div>
-                      <div className={gradingStyles.editorComp}>
-                        <TextEditor
-                          name={`ScoreRangeMessage-${index}`}
-                          editorFun={(val) =>
-                            sendEditorVals(val, "ScoreRangeMessage", index)
-                          }
-                          initialContent={
-                            {
-                              [`ScoreRangeMessage-${index}`]:
-                                SingleTest?.grading?.scoreRange?.[index]
-                                  ?.message,
-                            } || {}
-                          }
-                        />
-                      </div>
+                      <DeleteOutlined
+                        className={gradingStyles.deleteBtn}
+                        onClick={() => handleDeleteInterval(index)}
+                      />
                     </div>
-                  ))}
-                  <button
-                    className={gradingStyles.Add_more_intervals_btn}
-                    onClick={handleAddInterval}
-                  >
-                    + Add More Intervals
-                  </button>
-                </div>
-              </div>
 
-              <div className={gradingStyles.flexComp3}>
-                <span className={gradingStyles.spans}>
-                  {"Test Fail Message"}
-                </span>
-                <div className={gradingStyles.flexcomp_main}>
-                  <div className={gradingStyles.flexCon}>
-                    <div className={gradingStyles.inpsCon}>
+                    <div className={gradingStyles.includeOptions}>
+                      <span>Include in the Message:</span>
                       <button
-                        className={
-                          Failintervals?.selectedValues?.includes("%")
-                            ? gradingStyles.selected
-                            : gradingStyles.notSelected
-                        }
-                        onClick={() => handleFailSelectValue("%")}
+                        className={`${gradingStyles.pillBtn} ${interval?.selectedValues?.includes("%") ? gradingStyles.activePill : ""}`}
+                        onClick={() => handleSelectValue(index, "%")}
                       >
-                        %
+                        % Score
                       </button>
                       <button
-                        className={
-                          Failintervals?.selectedValues?.includes("Grade")
-                            ? gradingStyles.selected
-                            : gradingStyles.notSelected
-                        }
-                        onClick={() => handleFailSelectValue("Grade")}
+                        className={`${gradingStyles.pillBtn} ${interval?.selectedValues?.includes("Grade") ? gradingStyles.activePill : ""}`}
+                        onClick={() => handleSelectValue(index, "Grade")}
                       >
                         Grade
                       </button>
                       <button
-                        className={
-                          Failintervals?.selectedValues?.includes("Score")
-                            ? gradingStyles.selected
-                            : gradingStyles.notSelected
-                        }
-                        onClick={() => handleFailSelectValue("Score")}
+                        className={`${gradingStyles.pillBtn} ${interval?.selectedValues?.includes("Score") ? gradingStyles.activePill : ""}`}
+                        onClick={() => handleSelectValue(index, "Score")}
                       >
                         Score
                       </button>
                     </div>
-                    <div className={gradingStyles.editorComp}>
+
+                    <p className={gradingStyles.description} style={{ margin: "0.5rem 0 0 0" }}>
+                      Message shown for this score range:
+                    </p>
+                    <div className={gradingStyles.editorWrapper}>
                       <TextEditor
-                        name="TestFailMessage"
+                        name={`ScoreRangeMessage-${index}`}
                         editorFun={(val) =>
-                          sendFailEditorVals(val, "TestFailMessage")
+                          sendEditorVals(val, "ScoreRangeMessage", index)
                         }
                         initialContent={
                           {
-                            TestFailMessage:
-                              SingleTest?.grading?.failIntervals
-                                ?.TestFailMessage ||
-                              '"<p><strong style=\\"background-color: transparent;\\">Thank you for your effort. Unfortunately, you did not pass this exam.</strong></p><p><span style=\\"background-color: transparent;\\">Don’t be</span><strong style=\\"background-color: transparent;\\"> </strong><span style=\\"background-color: transparent;\\">discouraged—use this as an opportunity to learn and improve.</span></p>"',
+                            [`ScoreRangeMessage-${index}`]:
+                              SingleTest?.grading?.scoreRange?.[index]?.message,
                           } || {}
                         }
                       />
                     </div>
                   </div>
+                ))}
+
+                <button className={gradingStyles.addBtn} onClick={handleAddInterval}>
+                  <PlusOutlined /> Add More Intervals
+                </button>
+              </div>
+
+              {/* Card 5: Test Fail Message */}
+              <div className={gradingStyles.cardSection}>
+                <div className={gradingStyles.sectionHeader}>
+                  <div className={gradingStyles.headerLeft}>
+                    <CloseCircleOutlined className={gradingStyles.sectionIcon} style={{ color: "#ef4444" }} />
+                    <h3>Test Fail Message</h3>
+                  </div>
+                  <div className={gradingStyles.headerRight}>
+                    <div className={gradingStyles.includeOptions} style={{ margin: 0 }}>
+                      <button
+                        className={`${gradingStyles.pillBtn} ${Failintervals?.selectedValues?.includes("%") ? gradingStyles.activePill : ""}`}
+                        onClick={() => handleFailSelectValue("%")}
+                      >
+                        % Score
+                      </button>
+                      <button
+                        className={`${gradingStyles.pillBtn} ${Failintervals?.selectedValues?.includes("Grade") ? gradingStyles.activePill : ""}`}
+                        onClick={() => handleFailSelectValue("Grade")}
+                      >
+                        Grade
+                      </button>
+                      <button
+                        className={`${gradingStyles.pillBtn} ${Failintervals?.selectedValues?.includes("Score") ? gradingStyles.activePill : ""}`}
+                        onClick={() => handleFailSelectValue("Score")}
+                      >
+                        Score
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={gradingStyles.editorWrapper}>
+                  <TextEditor
+                    name="TestFailMessage"
+                    editorFun={(val) =>
+                      sendFailEditorVals(val, "TestFailMessage")
+                    }
+                    initialContent={
+                      {
+                        TestFailMessage:
+                          SingleTest?.grading?.failIntervals?.TestFailMessage ||
+                          '"<p><strong style=\\"background-color: transparent;\\">Thank you for your effort. Unfortunately, you did not pass this exam.</strong></p><p><span style=\\"background-color: transparent;\\">Don’t be</span><strong style=\\"background-color: transparent;\\"> </strong><span style=\\"background-color: transparent;\\">discouraged—use this as an opportunity to learn and improve.</span></p>"',
+                      } || {}
+                    }
+                  />
                 </div>
               </div>
             </>
           )}
-          <div
-            className={gradingStyles.save}
-            onClick={() => {
-              const updates = { ...SingleTest };
-              delete updates._id;
-              const updateVals = {
-                grading: {
-                  ...updates?.grading,
-                  gradingCriteria: {
-                    ...updates.grading?.gradingCriteria,
-                    maxScore:
-                      updates.grading?.gradingCriteria?.maxScore ??
-                      TotalTestMarks,
-                  },
-                  TestEndMessage:
-                    SingleTest?.grading?.TestEndMessage ||
-                    defaultTestEndMessage,
 
-                  failIntervals: {
-                    ...updates?.grading?.failIntervals,
-                    TestFailMessage:
-                      SingleTest?.grading?.failIntervals?.TestFailMessage ||
-                      '"<p><strong style=\\"background-color: transparent;\\">Thank you for your effort. Unfortunately, you did not pass this exam.</strong></p><p><span style=\\"background-color: transparent;\\">Don’t be</span><strong style=\\"background-color: transparent;\\"> </strong><span style=\\"background-color: transparent;\\">discouraged—use this as an opportunity to learn and improve.</span></p>"',
+          {/* Form Actions */}
+          <div className={gradingStyles.formActions}>
+            <button
+              className={gradingStyles.saveBtn}
+              onClick={() => {
+                const updates = { ...SingleTest };
+                delete updates._id;
+                const updateVals = {
+                  grading: {
+                    ...updates?.grading,
+                    gradingCriteria: {
+                      ...updates.grading?.gradingCriteria,
+                      maxScore:
+                        updates.grading?.gradingCriteria?.maxScore ??
+                        TotalTestMarks,
+                    },
+                    TestEndMessage:
+                      SingleTest?.grading?.TestEndMessage ||
+                      defaultTestEndMessage,
+
+                    failIntervals: {
+                      ...updates?.grading?.failIntervals,
+                      TestFailMessage:
+                        SingleTest?.grading?.failIntervals?.TestFailMessage ||
+                        '"<p><strong style=\\"background-color: transparent;\\">Thank you for your effort. Unfortunately, you did not pass this exam.</strong></p><p><span style=\\"background-color: transparent;\\">Don’t be</span><strong style=\\"background-color: transparent;\\"> </strong><span style=\\"background-color: transparent;\\">discouraged—use this as an opportunity to learn and improve.</span></p>"',
+                    },
                   },
-                },
-              };
-              dispatch(updateTest({ id: selectedId, updates: updateVals }));
-            }}
-          >
-            <BTag>{SingleTest?._id ? "Update" : "Save"}</BTag>
+                };
+                dispatch(updateTest({ id: selectedId, updates: updateVals })).then((res) => {
+                  if (res?.payload) {
+                    message.success("Grading settings updated successfully");
+                  }
+                });
+              }}
+            >
+              Update
+            </button>
+            <button className={gradingStyles.discardBtn} onClick={() => router.push("/testportal_admin/myTests")}>
+              Discard
+            </button>
           </div>
         </div>
       )}

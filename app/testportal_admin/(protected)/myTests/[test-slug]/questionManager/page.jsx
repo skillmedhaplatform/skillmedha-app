@@ -50,6 +50,10 @@ import {
   DeleteOutlined,
   UploadOutlined,
   CloseCircleOutlined,
+  DatabaseOutlined,
+  OrderedListOutlined,
+  CodeOutlined,
+  PlusOutlined
 } from "@ant-design/icons";
 import { HiDotsVertical, HiTrash, HiDuplicate, HiSearch, HiX } from "react-icons/hi";
 import QuestionSkeleton from "@/modules/testportal_admin/components/reusable-comps/skeleton/questionSkeleton";
@@ -98,7 +102,8 @@ const items = [
 ];
 const QuestionManager = () => {
   const currentComp = useSelector((state) => state.steps.questionManagerComp);
-  const selectedQuestions = useSelector((state) => state.questions.bulkEdit);
+  const selectedQuestions = useSelector((state) => state.questions.bulkEdit) || {};
+  const selectedCount = Object.values(selectedQuestions).filter(Boolean).length;
   const allQuestionsStatus = useSelector(
     (state) => state.questions.allQuestions?.status
   );
@@ -477,7 +482,6 @@ const QuestionManager = () => {
       singleTest.questions.length == 0
     ) {
       dispatch(setQuestionManagerComp("addquestion"));
-      // nav.replace(pathName + "/new-question");
     }
   }, [singleTest?._id]);
 
@@ -650,7 +654,6 @@ const QuestionManager = () => {
   const generatedQuestions = useSelector(
     (state) => state.ai.generatedQuestions?.questions
   );
-  console.log(generatedQuestions);
 
   const [isGenerated, setIsGenerated] = useState(false);
 
@@ -870,199 +873,203 @@ const QuestionManager = () => {
 
   return (
     <div className={QuestionStyles.container}>
-        <div>
-          <div className={QuestionStyles.optsCon}>
-            <div className={QuestionStyles.selectAllCon}>
-              <input
-                type="checkbox"
-                checked={(() => {
-                  let checkFlag = 0;
-                  Object.keys(selectedQuestions).forEach((e) => {
-                    if (selectedQuestions[e]) checkFlag++;
-                  });
-
-                  return checkFlag == questions?.length;
-                })()}
-                onChange={handleChange}
-              />
-              <span>Select All Questions</span>
-            </div>
-
-            <Button
-              // className={QuestionStyles.selectAllCon}
-              onClick={() => {
-                if (
-                  !Object.keys(selectedQuestions).filter(
-                    (e) => selectedQuestions[e]
-                  ).length
-                )
-                  return message.info("Please Select questions to delete");
-                setOpenDeleteModal(true);
-              }}
-              icon={
-                <HiTrash
-                  className={
-                    !Object.keys(selectedQuestions).filter(
-                      (e) => selectedQuestions[e]
-                    ).length
-                      ? QuestionStyles.inactive
-                      : QuestionStyles.activeIcon
-                  }
-                  style={{ fontSize: "15px" }}
-                />
+      {/* Title Row with Metric/Count Badge */}
+      <div className={QuestionStyles.header_div}>
+        <div className={QuestionStyles.headerLeft}>
+          <span className={QuestionStyles.titleIcon}>
+            <DatabaseOutlined />
+          </span>
+          <h2 className={QuestionStyles.heading}>
+            Question Manager
+            <span className={QuestionStyles.countBadge}>
+              {singleTest?.questions?.length || 0} Questions
+            </span>
+          </h2>
+        </div>
+        <Dropdown
+          menu={{
+            items,
+            onClick: (e) => {
+              dispatch(setQuestionManagerComp("addquestion"));
+              dispatch(resetQuestion());
+              if (e.key === "1") nav.replace(pathName + "/new-question");
+              if (e.key === "2") {
+                dispatch(allQues({ limit: 1000 }));
+                setQuestionBankModal(true);
               }
-              type="text"
-              disabled={!Object.values(selectedQuestions).filter(Boolean).length}
-            >
-              <span>Delete</span>
-            </Button>
-            {/* DELETE MODAL */}
-            <Modal
-              title="Delete/Remove Question"
-              open={openDeleteModal}
-              onOk={handleDelete}
-              confirmLoading={confirmDeleteLoading}
-              onCancel={() => setOpenDeleteModal(false)}
-            >
-              <Radio.Group
-                onChange={(e) => setDeleteSelect(e.target.value)}
-                value={deleteSelect}
-              >
-                <Radio value={1}>Remove Question From Current Test</Radio>
-                <Radio value={2}>
-                  Delete Question From Question Bank{" "}
-                  {`<The Question(s) will be permanentaly deleted>`}
-                </Radio>
-              </Radio.Group>
-            </Modal>
-            {/* DELETE MODAL */}
-            <Button
-              // className={QuestionStyles.selectAllCon}
-              onClick={() => {
-                if (
-                  !Object.keys(selectedQuestions).filter(
-                    (e) => selectedQuestions[e]
-                  ).length
-                )
-                  return message.info("Please Select questions to copy");
-                setOpenCopyModal(true);
-              }}
-              icon={
-                <HiDuplicate
-                  className={
-                    !Object.keys(selectedQuestions).filter(
-                      (e) => selectedQuestions[e]
-                    ).length
-                      ? QuestionStyles.inactive
-                      : QuestionStyles.activeIcon
-                  }
-                  style={{ fontSize: "20px" }}
-                />
+              if (e.key === "3") {
+                dispatch(clearGeneratedQuestions());
+                setGenerateQuestions(true);
               }
-              type="text"
-              disabled={!Object.values(selectedQuestions).filter(Boolean).length}
-            >
-              <span>Copy</span>
-            </Button>
+              if (e.key === "4") {
+                dispatch(getOneComprehensionQuestion({}));
+                nav.replace(pathName + "/new-comprehension-question");
+              }
+              if (e.key === "5") {
+                nav.push(pathName + "/new-coding-question");
+              }
+              if (e.key === "6") {
+                setBulkUploadModal(true);
+              }
+            },
+          }}
+          trigger={["click"]}
+          placement="bottomRight"
+        >
+          <button className={QuestionStyles.addBtn}>
+            <PlusOutlined /> Add Question
+          </button>
+        </Dropdown>
+      </div>
 
-            <div className={QuestionStyles.searchCon}>
-              <HiSearch size={20} />
-
-              <input
-                placeholder="Search Questions"
-                onChange={(e) => {
-                  if (e.target.value.length == 0) {
-                    dispatch(filteredQues(singleTest?.questions || []));
-                  }
-                  setSearchBarInputValue(e.target.value);
-                }}
-                onKeyDown={handleEnter}
-              />
-            </div>
-
-            <div className={QuestionStyles.filterings}>
-              <Select
-                // style={{ width: 200, textAlign: "center" }}
-                className={QuestionStyles.Select_tag}
-                placeholder="Filter by category"
-                value={selectedQCategoryFilter || "Filter by category"}
-                onChange={(value) => {
-                  setQCategoryFilter(value === "remove-filter" ? null : value);
-                }}
-                suffixIcon={null}
-              >
-                <Select.Option value="remove-filter">
-                  Remove Filter
-                </Select.Option>
-                {categories.map((categoryName, index) => (
-                  <Select.Option key={index} value={categoryName}>
-                    {categoryName}
-                  </Select.Option>
-                ))}
-              </Select>
-            </div>
-
-            <div className={QuestionStyles.filterings}>
-              <Select
-                className={QuestionStyles.Select_tag}
-                placeholder="Filter by questiontype"
-                value={selectedQtypeFilter || "Filter by questiontype"}
-                onChange={(value) => {
-                  setQtypeFilter(value === "remove-filter" ? null : value);
-                }}
-                suffixIcon={null}
-              >
-                <Select.Option value="remove-filter">
-                  Remove Filter
-                </Select.Option>
-                {uniqueQuestionTypes.map((eachQuestion, index) => (
-                  <Select.Option key={index} value={eachQuestion}>
-                    {eachQuestion}
-                  </Select.Option>
-                ))}
-              </Select>
-            </div>
-
-            <Dropdown
-              menu={{
-                items,
-                onClick: (e) => {
-                  dispatch(setQuestionManagerComp("addquestion"));
-                  dispatch(resetQuestion());
-                  if (e.key == "1") nav.replace(pathName + "/new-question");
-                  if (e.key == "2") {
-                    dispatch(allQues({ limit: 1000 }));
-                    setQuestionBankModal(true);
-                  }
-                  if (e.key == "3") {
-                    dispatch(clearGeneratedQuestions());
-                    setGenerateQuestions(true);
-                  }
-                  if (e.key == "4") {
-                    dispatch(getOneComprehensionQuestion({}));
-                    nav.replace(pathName + "/new-comprehension-question");
-                  }
-                  if (e.key == "5") {
-                    nav.push(pathName + "/new-coding-question");
-                  }
-                  if (e.key == "6") {
-                    setBulkUploadModal(true);
-                  }
-                },
-              }}
-            >
-              <button>Add Question</button>
-            </Dropdown>
+      {/* Metrics Grid */}
+      <div className={QuestionStyles.metricGrid}>
+        <div className={QuestionStyles.metricCard}>
+          <div className={`${QuestionStyles.iconWrapper} ${QuestionStyles.total}`}>
+            <DatabaseOutlined />
+          </div>
+          <div className={QuestionStyles.textWrapper}>
+            <span className={QuestionStyles.number}>
+              {singleTest?.questions?.length || 0}
+            </span>
+            <span className={QuestionStyles.label}>Total Questions</span>
           </div>
         </div>
-        <div className={QuestionStyles.Questions_container}>
-          <DraggableQuestionList
-            // allQuestions={filteredQuestions}
-            draggable={draggable}
-            testTitle={singleTest?.title}
-            testId={singleTest?._id}
+        <div className={QuestionStyles.metricCard}>
+          <div className={`${QuestionStyles.iconWrapper} ${QuestionStyles.single}`}>
+            <CheckCircleOutlined />
+          </div>
+          <div className={QuestionStyles.textWrapper}>
+            <span className={QuestionStyles.number}>
+              {singleTest?.questions?.filter((q) => q.questionType === "Single Choice").length || 0}
+            </span>
+            <span className={QuestionStyles.label}>Single Choice</span>
+          </div>
+        </div>
+        <div className={QuestionStyles.metricCard}>
+          <div className={`${QuestionStyles.iconWrapper} ${QuestionStyles.multiple}`}>
+            <OrderedListOutlined />
+          </div>
+          <div className={QuestionStyles.textWrapper}>
+            <span className={QuestionStyles.number}>
+              {singleTest?.questions?.filter((q) => q.questionType === "Multiple Choice").length || 0}
+            </span>
+            <span className={QuestionStyles.label}>Multiple Choice</span>
+          </div>
+        </div>
+        <div className={QuestionStyles.metricCard}>
+          <div className={`${QuestionStyles.iconWrapper} ${QuestionStyles.coding}`}>
+            <CodeOutlined />
+          </div>
+          <div className={QuestionStyles.textWrapper}>
+            <span className={QuestionStyles.number}>
+              {singleTest?.questions?.filter((q) => q.questionType === "Coding" || q.questionType?.toLowerCase()?.includes("code") || q.questionType?.toLowerCase()?.includes("coding")).length || 0}
+            </span>
+            <span className={QuestionStyles.label}>Coding</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Redesigned Filter/Options Row */}
+      <div className={QuestionStyles.optsCon}>
+        <div className={QuestionStyles.selectAllCon} onClick={handleChange}>
+          <input
+            type="checkbox"
+            checked={(() => {
+              let checkFlag = 0;
+              Object.keys(selectedQuestions).forEach((e) => {
+                if (selectedQuestions[e]) checkFlag++;
+              });
+              return checkFlag === questions?.length && questions?.length > 0;
+            })()}
+            onChange={handleChange}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <span>Select All</span>
+        </div>
+
+        {/* Bulk Action Buttons */}
+        <button
+          className={`${QuestionStyles.bulkActionBtn} ${QuestionStyles.delete} ${!selectedCount ? QuestionStyles.disabled : ""}`}
+          onClick={() => {
+            if (!selectedCount) return message.info("Please Select questions to delete");
+            setOpenDeleteModal(true);
+          }}
+        >
+          <HiTrash /> Delete {selectedCount > 0 ? `(${selectedCount})` : ""}
+        </button>
+
+        <button
+          className={`${QuestionStyles.bulkActionBtn} ${!selectedCount ? QuestionStyles.disabled : ""}`}
+          onClick={() => {
+            if (!selectedCount) return message.info("Please Select questions to copy");
+            setOpenCopyModal(true);
+          }}
+        >
+          <HiDuplicate /> Copy {selectedCount > 0 ? `(${selectedCount})` : ""}
+        </button>
+
+        <div className={QuestionStyles.searchCon}>
+          <HiSearch className={QuestionStyles.searchIcon} />
+          <input
+            placeholder="Search questions..."
+            value={searchBarInputValue}
+            onChange={(e) => {
+              if (e.target.value.length === 0) {
+                dispatch(filteredQues(singleTest?.questions || []));
+              }
+              setSearchBarInputValue(e.target.value);
+            }}
+            onKeyDown={handleEnter}
           />
         </div>
+
+        <div className={QuestionStyles.filterings}>
+          <Select
+            className={QuestionStyles.Select_tag}
+            placeholder="Filter by category"
+            value={selectedQCategoryFilter || undefined}
+            onChange={(value) => {
+              setQCategoryFilter(value === "remove-filter" ? null : value);
+            }}
+            allowClear
+          >
+            <Select.Option value="remove-filter">All Categories</Select.Option>
+            {categories.map((categoryName, idx) => (
+              <Select.Option key={idx} value={categoryName}>
+                {categoryName}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+
+        <div className={QuestionStyles.filterings}>
+          <Select
+            className={QuestionStyles.Select_tag}
+            placeholder="Filter by type"
+            value={selectedQtypeFilter || undefined}
+            onChange={(value) => {
+              setQtypeFilter(value === "remove-filter" ? null : value);
+            }}
+            allowClear
+          >
+            <Select.Option value="remove-filter">All Types</Select.Option>
+            {uniqueQuestionTypes.map((type, idx) => (
+              <Select.Option key={idx} value={type}>
+                {type}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+      </div>
+
+      <div className={QuestionStyles.Questions_container}>
+        <DraggableQuestionList
+          draggable={draggable}
+          testTitle={singleTest?.title}
+          testId={singleTest?._id}
+        />
+      </div>
 
         <Modal
           title="Select Tests to copy this question"
@@ -1526,11 +1533,6 @@ const QuestionManager = () => {
             </div>
           ) : (
             <div className={QuestionStyles.generateAiContainer}>
-              {/* <div className={QuestionStyles.headButtons}>
-                  <button>Paste Text</button>
-
-                  <button>Upload File</button>
-                </div> */}
 
               <p>Questions will be generated based on the text pasted below.</p>
 

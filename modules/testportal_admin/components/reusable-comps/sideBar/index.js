@@ -54,6 +54,11 @@ const SideBar = ({ activeView, setView }) => {
   };
 
   const handleMenuClick = ({ key }) => {
+    const matchedItem = sideBarTitles.find((item) => item.path === key);
+    if (matchedItem && matchedItem.isExternal) {
+      router.replace(matchedItem.path);
+      return;
+    }
     if (typeof setView === "function") {
       setView(key);
       return;

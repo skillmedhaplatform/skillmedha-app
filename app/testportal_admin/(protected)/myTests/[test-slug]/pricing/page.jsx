@@ -1,31 +1,32 @@
 "use client";
 import React, { useEffect, useState } from "react";
-
 import pricingStyles from "./style/page.module.scss";
 import { useDispatch, useSelector } from "react-redux";
-import { updatingVals } from "@/redux/slices/testportal_admin/slice/stepform";
-import BTag from "../../utils/button";
-import { useParams, usePathname } from "next/navigation";
-import { getOneTests, updateTest } from "@/redux/slices/testportal_admin/slice/test";
-import { getOneTest } from "@/modules/testportal_admin/graphql_quries/testSeries";
+import { useParams, useRouter } from "next/navigation";
+import { updateTest } from "@/redux/slices/testportal_admin/slice/test";
+import { DollarOutlined } from "@ant-design/icons";
+import { message } from "antd";
 
 const PricingPage = () => {
   const dispatch = useDispatch();
-  const currPath = usePathname();
-  const updatedata = useSelector((state) => state.tests.value);
   const SingleTest = useSelector((state) => state.tests.test);
-  const values = useSelector((state) => state.steps.value);
-
   const params = useParams();
   const selectedId = params["test-slug"]?.split("_id-")[1];
-
-  const priceVals = useSelector((state) => state.steps.updatingVals);
+  const router = useRouter();
 
   const [selectedOption, setSelectedOption] = useState("free");
   const [slashedPrice, setSlashedPrice] = useState("");
   const [originalPrice, setOriginalPrice] = useState(0);
 
-  const updateTestsPricing = (val) => {
+  useEffect(() => {
+    if (SingleTest?.pricing) {
+      setSelectedOption(SingleTest.pricing.type || "free");
+      setSlashedPrice(SingleTest.pricing.slashedPrice ?? "");
+      setOriginalPrice(SingleTest.pricing.originalPrice ?? 0);
+    }
+  }, [SingleTest]);
+
+  const updateTestsPricing = () => {
     if (SingleTest?._id) {
       const updatingBody = {
         pricing: {
@@ -34,83 +35,98 @@ const PricingPage = () => {
           originalPrice: originalPrice,
         },
       };
-      dispatch(updateTest({ id: selectedId, updates: updatingBody }));
+      dispatch(updateTest({ id: selectedId, updates: updatingBody })).then((res) => {
+        if (res?.payload) {
+          message.success("Pricing updated successfully");
+        }
+      });
     }
   };
 
   return (
     <div className={pricingStyles.container}>
-        <div className={pricingStyles.respTitle}>Price</div>
-        <div
-          className={pricingStyles.radioContainer}
-          onClick={() => setSelectedOption("free")}
-        >
-          <input
-            type="radio"
-            id="free"
-            name="price"
-            value="free"
-            checked={selectedOption === "free"}
-            className={pricingStyles.radioInput}
-          />
-          <label htmlFor="free" className={pricingStyles.radioLabel}>
-            Free
-          </label>
+      {/* Card: Pricing Settings */}
+      <div className={pricingStyles.cardSection}>
+        <div className={pricingStyles.sectionHeader}>
+          <div className={pricingStyles.headerLeft}>
+            <DollarOutlined className={pricingStyles.sectionIcon} />
+            <h3>Pricing Settings</h3>
+          </div>
         </div>
-        <div
-          className={pricingStyles.radioContainer}
-          onClick={() => setSelectedOption("paid")}
-        >
-          <input
-            type="radio"
-            id="paid"
-            name="price"
-            value="paid"
-            checked={selectedOption === "paid"}
-            className={pricingStyles.radioInput}
-          />
-          <label htmlFor="paid" className={pricingStyles.radioLabel}>
-            Paid
-          </label>
+        <p className={pricingStyles.description}>
+          Set whether this test is free or paid for candidates purchasing access.
+        </p>
+
+        <div className={pricingStyles.optionsGroup}>
+          <div
+            className={`${pricingStyles.optionCard} ${selectedOption === "free" ? pricingStyles.activeOption : ""}`}
+            onClick={() => setSelectedOption("free")}
+          >
+            <div className={pricingStyles.radioDot} />
+            <div className={pricingStyles.optionText}>
+              <span>Free Test</span>
+              <p>Candidates can start this test immediately without any payment.</p>
+            </div>
+          </div>
+
+          <div
+            className={`${pricingStyles.optionCard} ${selectedOption === "paid" ? pricingStyles.activeOption : ""}`}
+            onClick={() => setSelectedOption("paid")}
+          >
+            <div className={pricingStyles.radioDot} />
+            <div className={pricingStyles.optionText}>
+              <span>Paid Test</span>
+              <p>Candidates must purchase this test at the specified prices below.</p>
+            </div>
+          </div>
         </div>
+
         {selectedOption === "paid" && (
-          <div className={pricingStyles.inputContainer}>
-            <div htmlFor="slashed-price" className={pricingStyles.inputLabel}>
-              Slashed Price:
+          <div className={pricingStyles.inputsGrid}>
+            <div className={pricingStyles.inputGroup}>
+              <label htmlFor="slashed-price">Slashed Price</label>
+              <div className={pricingStyles.inputWrapper}>
+                <span className={pricingStyles.currency}>₹</span>
+                <input
+                  type="number"
+                  id="slashed-price"
+                  placeholder="e.g. 499"
+                  value={slashedPrice}
+                  onChange={(e) => setSlashedPrice(e.target.value)}
+                />
+              </div>
             </div>
 
-            <div className={pricingStyles.flexCon}>
-              ₹
-              <input
-                type="number"
-                id="slashed-price"
-                value={slashedPrice}
-                onChange={(e) => setSlashedPrice(e.target.value)}
-                className={pricingStyles.inputField}
-              />
-            </div>
-
-            <div htmlFor="original-price" className={pricingStyles.inputLabel}>
-              Original Price:
-            </div>
-
-            <div className={pricingStyles.flexCon}>
-              ₹
-              <input
-                type="number"
-                id="original-price"
-                value={originalPrice}
-                onChange={(e) => setOriginalPrice(e.target.value)}
-                className={pricingStyles.inputField}
-              />
+            <div className={pricingStyles.inputGroup}>
+              <label htmlFor="original-price">Original Price</label>
+              <div className={pricingStyles.inputWrapper}>
+                <span className={pricingStyles.currency}>₹</span>
+                <input
+                  type="number"
+                  id="original-price"
+                  placeholder="e.g. 999"
+                  value={originalPrice}
+                  onChange={(e) => setOriginalPrice(e.target.value)}
+                />
+              </div>
             </div>
           </div>
         )}
-
-        <div onClick={updateTestsPricing} className={pricingStyles.save}>
-          <BTag>{SingleTest?._id ? "Update Test" : "Save & Next"}</BTag>
-        </div>
       </div>
+
+      {/* Action Buttons */}
+      <div className={pricingStyles.formActions}>
+        <button className={pricingStyles.saveBtn} onClick={updateTestsPricing}>
+          Update
+        </button>
+        <button 
+          className={pricingStyles.discardBtn} 
+          onClick={() => router.push("/testportal_admin/myTests")}
+        >
+          Discard
+        </button>
+      </div>
+    </div>
   );
 };
 

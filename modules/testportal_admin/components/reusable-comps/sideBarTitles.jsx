@@ -7,9 +7,16 @@ import {
   HiOutlineQuestionMarkCircle,
   HiOutlineArrowLeftOnRectangle,
   HiOutlineArrowLeft,
+  HiOutlineHome,
 } from "react-icons/hi2";
 
 export const sideBarTitles = [
+  {
+    name: "TPO Dashboard",
+    path: "/tpo/dashboard",
+    icon: <HiOutlineHome size={22} />,
+    isExternal: true,
+  },
   {
     name: "My Tests",
     path: "myTests",

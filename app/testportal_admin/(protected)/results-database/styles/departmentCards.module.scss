@@ -222,7 +222,9 @@
 .imgCont {
   position: relative;
   aspect-ratio: 16/9;
-  width: 100%;
+  width: auto;
+  margin: 8px 8px 0 8px;
+  border-radius: 12px;
   overflow: hidden;
   background: #f1f5f9;
 
