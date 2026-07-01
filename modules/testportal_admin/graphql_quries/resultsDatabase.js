@@ -60,6 +60,7 @@ query Progresses($id: String) {
         lastName
         phone
         userName
+        department
       }
       studentData
       testDetails {

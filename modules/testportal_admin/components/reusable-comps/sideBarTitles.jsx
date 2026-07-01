@@ -1,23 +1,24 @@
 import { clearLstorageVals } from "@/utils/universalUtils/windowMW";
 import {
-  FaListAlt,
-  FaDatabase,
-  FaUserGraduate,
-  FaQuestionCircle,
-  FaSignOutAlt,
-  FaArrowLeft,
-} from "react-icons/fa";
+  HiOutlineDocumentText,
+  HiOutlineCube,
+  HiOutlineUsers,
+  HiOutlineChartBar,
+  HiOutlineQuestionMarkCircle,
+  HiOutlineArrowLeftOnRectangle,
+  HiOutlineArrowLeft,
+} from "react-icons/hi2";
 
 export const sideBarTitles = [
   {
     name: "My Tests",
     path: "myTests",
-    icon: <FaListAlt size={20} />,
+    icon: <HiOutlineDocumentText size={22} />,
   },
   {
     name: "Question Bank",
     path: "question-bank",
-    icon: <FaDatabase size={20} />,
+    icon: <HiOutlineCube size={22} />,
   },
   // {
   //   name: "Website & Branding",
@@ -32,12 +33,12 @@ export const sideBarTitles = [
   {
     name: "Results Database",
     path: "results-database",
-    icon: <FaDatabase size={20} />,
+    icon: <HiOutlineChartBar size={22} />,
   },
   {
     name: "Students",
     path: "users",
-    icon: <FaUserGraduate size={20} />,
+    icon: <HiOutlineUsers size={22} />,
   },
   // {
   //   name: "Manual Evaluation",
@@ -50,18 +51,18 @@ export const LoginRoutes = [
   {
     name: "Help ",
     path: "help",
-    image: <FaQuestionCircle size={20} />,
+    image: <HiOutlineQuestionMarkCircle size={22} />,
   },
   {
     name: "Singn out ",
     path: "signout",
     func: clearLstorageVals,
-    image: <FaSignOutAlt size={20} />,
+    image: <HiOutlineArrowLeftOnRectangle size={22} />,
   },
   {
     name: "Collapse ",
     path: "collapse",
-    image: <FaArrowLeft size={20} />,
+    image: <HiOutlineArrowLeft size={22} />,
   },
 ];
 

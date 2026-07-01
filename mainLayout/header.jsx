@@ -23,7 +23,7 @@ import useLogout from "@/helpers/useLogout";
 const Header = ({ isHeaderVisible }) => {
   const { isSpecialOrg, student: studentCreds } = useSpecialOrg();
   const [isVerifyExpanded, setIsVerifyExpanded] = useState(true);
-  const isCollapsed = useSelector((s) => s.sideBar.collapse);
+  const isCollapsed = useSelector((s) => s?.sideBar?.collapse);
 
   const path = usePathname();
   const params = useParams();

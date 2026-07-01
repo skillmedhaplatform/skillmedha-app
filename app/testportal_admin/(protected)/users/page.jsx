@@ -15,8 +15,6 @@ const page = () => {
   return (
     <Home>
       <div className={userStyles.container}>
-        <div className={userStyles.title}>Users</div>
-
         <div className={userStyles.usersParent}>
           <UsersComp />
         </div>

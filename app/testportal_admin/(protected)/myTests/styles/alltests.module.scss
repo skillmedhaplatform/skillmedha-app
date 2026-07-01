@@ -3,76 +3,256 @@
 
 .container {
   height: 100%;
-  border-radius: 0.5rem;
+  background-color: #EFF5FB;
   padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 
-  .headerTitle {
+  .headerRow {
     display: flex;
     justify-content: space-between;
-    font-size: 1.4rem;
-    font-weight: 700;
     align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    background: #ffffff;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 
-    .Tests {
-      color: $navbarColor;
+    .headerLeft {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .titleIcon {
+        color: #1e69da;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .titleText {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.025em;
+      }
     }
 
-    .TestsFlex {
-      @include flexBox(row, center, flex-end);
-      gap: 0.5rem;
+    .headerCenter {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex: 1;
+      justify-content: flex-start;
 
-      span {
-        font-weight: 600;
+      .searchWrapper {
+        position: relative;
+        width: 100%;
+        max-width: 280px;
+
+        .searchIcon {
+          position: absolute;
+          left: 0.85rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #1e69da;
+          font-size: 0.95rem;
+          pointer-events: none;
+        }
+
+        .searchInput {
+          width: 100%;
+          height: 40px;
+          padding: 0.5rem 1rem 0.5rem 2.25rem;
+          font-size: 0.875rem;
+          font-weight: 550;
+          color: #64748b;
+          background-color: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 20px;
+          outline: none;
+          transition: all 0.15s ease-in-out;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+          &::placeholder {
+            color: #94a3b8;
+          }
+
+          &:focus {
+            background-color: #ffffff;
+            border-color: #1e69da;
+            box-shadow: 0 0 0 3px rgba(30, 105, 218, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          }
+        }
       }
-      img {
-        position: absolute;
-        right: 0;
-        top: 0;
-        height: 100%;
-        width: fit-content;
-        margin-left: 1rem;
-        width: 30px;
-        border-radius: 0.5rem;
-        background-color: $iconBackground;
+
+      .filterTabs {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        background-color: transparent;
+        padding: 0;
+        border-radius: 0;
+
+        .tab {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem 0.25rem 1rem 0.25rem;
+          font-size: 15px;
+          font-weight: 700;
+          color: #64748b;
+          background: transparent;
+          border: none;
+          border-radius: 0;
+          cursor: pointer;
+          transition: all 0.2s ease-in-out;
+          height: auto;
+          position: relative;
+          white-space: nowrap;
+
+          svg {
+            font-size: 1rem;
+            color: inherit;
+          }
+
+          &:hover {
+            color: #334155;
+          }
+
+          .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 9999px;
+            background-color: #cbd5e1;
+            color: #475569;
+            transition: all 0.15s ease-in-out;
+            margin-left: 0.25rem;
+          }
+
+          &.active {
+            color: #1e69da;
+            background-color: transparent;
+            box-shadow: none;
+
+            &::after {
+              content: "";
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              height: 3px;
+              background-color: #1e69da;
+              border-radius: 3px 3px 0 0;
+            }
+
+            .badge {
+              background-color: #1e69da;
+              color: #ffffff;
+            }
+          }
+        }
+      }
+    }
+
+    .headerRight {
+      .addBtn {
+        background: linear-gradient(135deg, #1e69da 0%, #3b82f6 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        height: 40px;
+        border-radius: 10px;
+        padding: 0 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(30, 105, 218, 0.2);
+        transition: all 0.15s ease-in-out;
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px rgba(30, 105, 218, 0.25);
+          opacity: 0.95;
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
       }
     }
   }
+
   .TestCards {
     width: 100%;
-    height: calc(100vh - 180px);
-
-    .noTestsMessage {
-      width: 100%;
-      height: 50vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: 510;
-    }
+    flex: 1;
   }
-  .dropDownCon {
-    width: 100%;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px dashed #cbd5e1;
+  text-align: center;
+  max-width: 500px;
+  margin: 4rem auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  .emptyIcon {
+    font-size: 3.5rem;
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin: 1rem 0;
+    justify-content: center;
+  }
 
-    button {
-      background-color: transparent;
-      cursor: pointer;
-      border: 1px solid;
-      border-radius: 0.5rem;
-      width: 20%;
+  .emptyTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+  }
 
-      select {
-        border: none;
-        outline: none;
-        cursor: pointer;
-        background-color: transparent;
-        border-radius: 0.5rem;
-        width: 100%;
-        padding: 0.5rem 1rem;
-      }
+  .emptyDesc {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+  }
+
+  .emptyBtn {
+    background: linear-gradient(135deg, #1e69da 0%, #3b82f6 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    height: 38px;
+    border-radius: 8px;
+    padding: 0 1.25rem;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(30, 105, 218, 0.15);
+    transition: all 0.15s ease-in-out;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(30, 105, 218, 0.2);
     }
   }
 }
