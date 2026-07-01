@@ -1,20 +1,22 @@
 "use client";
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useRef, useState } from "react";
 import CourseStyles from "./testsCar.module.scss";
 import DownloadTestStyles from "./download.module.scss";
 import AllTestsStyles from "../styles/alltests.module.scss";
 import { useParams, useRouter } from "next/navigation";
 import { DeleteTest, getOneTests, getTests } from "@/redux/slices/testportal_admin/slice/test";
 import { setFormValues } from "@/redux/slices/testportal_admin/slice/stepform";
-import { Button, Checkbox, Collapse, message, Modal, Popconfirm, Tooltip } from "antd";
+import { Button, Checkbox, Collapse, message, Modal, Popconfirm, Tooltip, Pagination } from "antd";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { 
   QuestionCircleOutlined, 
   ClockCircleOutlined, 
   StarOutlined, 
-  FileTextOutlined
+  FileTextOutlined,
+  EyeOutlined,
+  SyncOutlined,
+  LineChartOutlined
 } from "@ant-design/icons";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -102,6 +104,40 @@ const AllTestsComp = (props) => {
   const containerRef = useRef(null);
   const nav = useRouter();
   const [countdowns, setCountdowns] = useState({});
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(4); // default 4
+
+  // Reset to page 1 on test list count changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [allTests?.length]);
+
+  const paginatedTests = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return allTests.slice(startIndex, startIndex + pageSize);
+  }, [allTests, currentPage, pageSize]);
+
+  // Helper to generate initials from test title
+  const getInitials = (title = "") => {
+    if (!title) return "T";
+    const words = title.trim().split(/\s+/);
+    if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+    return (words[0][0] + (words[1][0] || "")).toUpperCase();
+  };
+
+  // Helper to generate elegant gradient style for department/test fallback logo
+  const getGradientStyle = (title = "") => {
+    const hash = Array.from(title).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const gradients = [
+        "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", // Blue
+        "linear-gradient(135deg, #ea580c 0%, #f97316 100%)", // Orange/ST theme
+        "linear-gradient(135deg, #eab308 0%, #ca8a04 100%)", // Yellow/JS theme
+        "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)", // Teal
+        "linear-gradient(135deg, #312e81 0%, #6366f1 100%)", // Indigo
+    ];
+    return gradients[hash % gradients.length];
+  };
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -321,14 +357,16 @@ const AllTestsComp = (props) => {
             <LocalCardSkeleton />
             <LocalCardSkeleton />
           </>
-        ) : allTests?.length > 0 ? (
-          allTests.map((test, index) => {
+        ) : paginatedTests?.length > 0 ? (
+          paginatedTests.map((test, index) => {
+            const actualIndex = (currentPage - 1) * pageSize + index;
             let questionNo = 1;
             const testScore =
               totalTestMarks.find((mark) => mark.id === test._id)?.score || 0;
+            const hasThumbnail = test?.thumbnail && !test.thumbnail.includes("20190605163315-sale-19736");
 
             return (
-              <React.Fragment key={test?._id || index}>
+              <React.Fragment key={test?._id || actualIndex}>
                 <div
                   className={CourseStyles.card_cont}
                   onClick={() => onTestClick(test)}
@@ -336,11 +374,20 @@ const AllTestsComp = (props) => {
                   {/* Card Image */}
                   <div className={CourseStyles.imageWrapper}>
                     <div className={CourseStyles.imageInner}>
-                      <img
-                        src={test?.thumbnail || "https://res.cloudinary.com/queezyv1/image/upload/v1745218162/20190605163315-sale-19736-primary-image-wide_kcplb0.webp"}
-                        className={CourseStyles.cardImage}
-                        alt={test?.title}
-                      />
+                      {hasThumbnail ? (
+                        <img
+                          src={test?.thumbnail}
+                          className={CourseStyles.cardImage}
+                          alt={test?.title}
+                        />
+                      ) : (
+                        <div 
+                          className={CourseStyles.fallbackLogo}
+                          style={{ background: getGradientStyle(test?.title) }}
+                        >
+                          {getInitials(test?.title)}
+                        </div>
+                      )}
                       
                       {/* Checkbox */}
                       <div className={CourseStyles.checkboxWrapper} onClick={(e) => e.stopPropagation()}>
@@ -348,7 +395,7 @@ const AllTestsComp = (props) => {
                       </div>
 
                       {/* Status Badge */}
-                      {countdowns[index] === "Expired" ? (
+                      {countdowns[actualIndex] === "Expired" ? (
                         <div className={`${CourseStyles.statusBadge} ${CourseStyles.expired}`}>
                           <span className={CourseStyles.statusDot} /> Expired
                         </div>
@@ -388,16 +435,16 @@ const AllTestsComp = (props) => {
                         <div className={CourseStyles.menuButtonWrapper} onClick={(e) => e.stopPropagation()}>
                           <button
                             className={CourseStyles.menuBtn}
-                            onClick={(e) => { e.stopPropagation(); togglePopup(index); }}
+                            onClick={(e) => { e.stopPropagation(); togglePopup(actualIndex); }}
                           >
                             <PiDotsThreeOutlineVerticalFill size={16} />
                           </button>
                           
-                          {openPopupIndex === index && (
+                          {openPopupIndex === actualIndex && (
                             <div className={CourseStyles.popupBox}>
                               <button
                                 className={CourseStyles.popupBtn}
-                                onClick={(e) => { e.stopPropagation(); togglePopup(index); onTestClick(test); }}
+                                onClick={(e) => { e.stopPropagation(); togglePopup(actualIndex); onTestClick(test); }}
                               >
                                 Edit
                               </button>
@@ -487,23 +534,15 @@ const AllTestsComp = (props) => {
 
                     {/* Footer Row */}
                     <div className={CourseStyles.footerRow}>
-                      <span className={`${CourseStyles.statusText} ${countdowns[index] === "Expired" ? CourseStyles.expired : ""}`}>
-                        {countdowns[index] === "Expired" ? "Expired" : "Active"}
+                      <span className={`${CourseStyles.statusText} ${countdowns[actualIndex] === "Expired" ? CourseStyles.expired : ""}`}>
+                        {countdowns[actualIndex] === "Expired" ? "Expired" : "Active"}
                       </span>
-                      <button
-                        className={CourseStyles.viewBtn}
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          onTestClick(test);
-                        }}
-                      >
-                        View
-                      </button>
                     </div>
                   </div>
+                </div>
 
-                  {/* PDF Download Modal */}
-                  <Modal
+                {/* PDF Download Modal - placed outside card_cont to prevent click bubbling */}
+                <Modal
                     open={isModalOpen}
                     onCancel={handleCancel}
                     footer={null}
@@ -582,7 +621,6 @@ const AllTestsComp = (props) => {
                       </div>
                     )}
                   </Modal>
-                </div>
               </React.Fragment>
             );
           })
@@ -602,9 +640,21 @@ const AllTestsComp = (props) => {
         )}
       </div>
 
-      {showLoadmore && (
-        <div className={CourseStyles.loadmore_btn}>
-          <Button onClick={fetchMore}>Load More</Button>
+      {allTests.length > 0 && (
+        <div className={CourseStyles.paginationRow}>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={allTests.length}
+            onChange={(page, size) => {
+              setCurrentPage(page);
+              setPageSize(size);
+            }}
+            pageSizeOptions={["4", "8", "12", "20", "50"]}
+            showSizeChanger
+            showQuickJumper
+            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} tests`}
+          />
         </div>
       )}
     </div>
