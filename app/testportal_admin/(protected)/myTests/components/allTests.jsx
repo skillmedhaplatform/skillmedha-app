@@ -1,23 +1,32 @@
-
 "use client";
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useRef } from "react";
 import CourseStyles from "./testsCar.module.scss";
 import DownloadTestStyles from "./download.module.scss";
-import { useState } from "react";
+import AllTestsStyles from "../styles/alltests.module.scss";
 import { useParams, useRouter } from "next/navigation";
 import { DeleteTest, getOneTests, getTests } from "@/redux/slices/testportal_admin/slice/test";
 import { setFormValues } from "@/redux/slices/testportal_admin/slice/stepform";
-import { Button, Checkbox, Collapse, message, Modal, Popconfirm } from "antd";
+import { Button, Checkbox, Collapse, message, Modal, Popconfirm, Tooltip, Pagination } from "antd";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import CardSkeleton from "@/modules/testportal_admin/components/reusable-comps/skeleton/cardSkeleton";
+import { 
+  QuestionCircleOutlined, 
+  ClockCircleOutlined, 
+  StarOutlined, 
+  FileTextOutlined,
+  EyeOutlined,
+  SyncOutlined,
+  LineChartOutlined
+} from "@ant-design/icons";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 import { parseIfJson } from "@/utils/windowMW";
 import QuesComp from "@/app/testportal_admin/(protected)/results-database/components/quesComp";
 import DownloadTest from "./downloadtest";
+
+const stripHtml = (html) =>
+  typeof html === "string" ? html.replace(/<[^>]*>/g, "") : "";
 
 const items = [
   {
@@ -30,15 +39,35 @@ const items = [
   },
 ];
 
-const AllTestsComp = () => {
+const LocalCardSkeleton = () => (
+  <div className={CourseStyles.skeletonCard}>
+    <div className={CourseStyles.skeletonImage} />
+    <div className={CourseStyles.skeletonContent}>
+      <div className={CourseStyles.skeletonTitle} />
+      <div className={CourseStyles.skeletonTags}>
+        <div className={CourseStyles.skeletonTag} style={{ width: "60px" }} />
+        <div className={CourseStyles.skeletonTag} style={{ width: "80px" }} />
+      </div>
+      <div className={CourseStyles.skeletonStats}>
+        <div className={CourseStyles.skeletonStat} />
+        <div className={CourseStyles.skeletonStat} />
+        <div className={CourseStyles.skeletonStat} />
+      </div>
+      <div className={CourseStyles.skeletonDesc1} />
+      <div className={CourseStyles.skeletonDesc2} />
+    </div>
+  </div>
+);
+
+const AllTestsComp = (props) => {
   const SingleTest = useSelector((state) => state.tests.test);
   const [openPopupIndex, setOpenPopupIndex] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTest, setSelectedTest] = useState(null);
   const fullContentRef = useRef();
 
-  const showModal = () => {
-    setSelectedTest(test); 
+  const showModal = (test) => {
+    setSelectedTest(test);
     setIsModalOpen(true);
   };
 
@@ -46,12 +75,14 @@ const AllTestsComp = () => {
     setIsModalOpen(false);
     setSelectedTest(null);
   };
+
   const togglePopup = (index) => {
     setOpenPopupIndex(openPopupIndex === index ? null : index);
   };
-  const params = useParams();
 
+  const params = useParams();
   const selectedId = params["test-slug"]?.split("_id-")[1];
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (selectedId) {
@@ -60,29 +91,53 @@ const AllTestsComp = () => {
     }
   }, [!SingleTest?._id]);
 
-  const allTests = useSelector((state) => state.tests.value);
+  const reduxAllTests = useSelector((state) => state.tests.value) || [];
+  const allTests = props.displayTests !== undefined ? props.displayTests : reduxAllTests;
 
-  const allTestsSatus = useSelector(
+  const allTestsStatus = useSelector(
     (state) => state.tests.getAllTestStatus.status
   );
+  const loading = props.loading !== undefined ? props.loading : (allTestsStatus === "pending");
 
   const [cursor, setCursor] = useState(null);
-  const dispatch = useDispatch();
   const [showLoadmore, setShowLoadmore] = useState(false);
-
   const containerRef = useRef(null);
-
   const nav = useRouter();
-
-  const [daysRemaining, setDaysRemaining] = useState(null);
-
   const [countdowns, setCountdowns] = useState({});
-  const singleProgress = useSelector(
-    (state) => state.resultsDatabase?.singleProgress
-  );
 
-  // const testRes = singleProgress;
-  // const currentTestRes = testRes && testId && testRes?.response;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(4); // default 4
+
+  // Reset to page 1 on test list count changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [allTests?.length]);
+
+  const paginatedTests = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return allTests.slice(startIndex, startIndex + pageSize);
+  }, [allTests, currentPage, pageSize]);
+
+  // Helper to generate initials from test title
+  const getInitials = (title = "") => {
+    if (!title) return "T";
+    const words = title.trim().split(/\s+/);
+    if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+    return (words[0][0] + (words[1][0] || "")).toUpperCase();
+  };
+
+  // Helper to generate elegant gradient style for department/test fallback logo
+  const getGradientStyle = (title = "") => {
+    const hash = Array.from(title).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const gradients = [
+        "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", // Blue
+        "linear-gradient(135deg, #ea580c 0%, #f97316 100%)", // Orange/ST theme
+        "linear-gradient(135deg, #eab308 0%, #ca8a04 100%)", // Yellow/JS theme
+        "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)", // Teal
+        "linear-gradient(135deg, #312e81 0%, #6366f1 100%)", // Indigo
+    ];
+    return gradients[hash % gradients.length];
+  };
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -133,11 +188,6 @@ const AllTestsComp = () => {
 
     return () => clearInterval(intervalId);
   }, [allTests]);
-  const scroll = (direction) => {
-    const container = containerRef.current;
-    const scrollAmount = container.offsetWidth;
-    container.scrollLeft += direction * scrollAmount;
-  };
 
   const onTestClick = (test) => {
     dispatch(getOneTests(test)).then((resp) => {
@@ -153,14 +203,14 @@ const AllTestsComp = () => {
     const loadingMessage = message.loading({ content: 'Downloading test...', key: 'download', duration: 0 });
 
     const input = fullContentRef.current;
-      const questionSections = Array.from(input.querySelectorAll(".question-class"));
-  
+    const questionSections = Array.from(input.querySelectorAll(".question-class"));
+
     const pdf = new jsPDF("p", "mm", "a4");
-    const imgWidth = 190; 
-    const pageHeight = pdf.internal.pageSize.height; 
+    const imgWidth = 190;
+    const pageHeight = pdf.internal.pageSize.height;
     let currentPageHeight = 0;
-    const questionGap = 10; 
-  
+    const questionGap = 10;
+
     const canvasPromises = questionSections.map((question) => {
       return html2canvas(question, {
         scale: 2,
@@ -169,22 +219,22 @@ const AllTestsComp = () => {
         scrollY: 0,
       }).then((canvas) => {
         const imgData = canvas.toDataURL("image/png");
-        const imgHeight = (canvas.height * imgWidth) / canvas.width; 
-  
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
         return { imgData, imgHeight };
       });
     });
-  
+
     Promise.all(canvasPromises).then((canvases) => {
       canvases.forEach(({ imgData, imgHeight }, index) => {
         if (currentPageHeight + imgHeight + questionGap > pageHeight) {
-          pdf.addPage(); 
+          pdf.addPage();
           currentPageHeight = 10;
         }
-          pdf.addImage(imgData, "PNG", 10, currentPageHeight, imgWidth, imgHeight,'','FAST');
-        currentPageHeight += imgHeight + questionGap; 
+        pdf.addImage(imgData, "PNG", 10, currentPageHeight, imgWidth, imgHeight, '', 'FAST');
+        currentPageHeight += imgHeight + questionGap;
       });
-  
+
       pdf.save(`${selectedTest?.title}.pdf`);
       message.success({ content: 'Test downloaded successfully!', key: 'download', duration: 2 });
 
@@ -193,23 +243,22 @@ const AllTestsComp = () => {
       message.error({ content: 'Download failed!', key: 'download', duration: 2 });
     });
   };
-  
+
   const hasAudioOrVideoQuestions = () => {
     if (selectedTest && selectedTest.questions) {
       return selectedTest.questions.some((question) => {
         return (
-          question.resources?.url?.includes("video") || 
+          question.resources?.url?.includes("video") ||
           question.resources?.url?.includes("audio")
         );
       });
     }
     return false;
   };
-  
 
   const handleDownloadPDF = async (test) => {
     setIsModalOpen(true);
-     setSelectedTest(test);
+    setSelectedTest(test);
     setOpenPopupIndex(null);
   };
 
@@ -225,7 +274,6 @@ const AllTestsComp = () => {
       setShowLoadmore(false);
     });
   };
-
 
   useEffect(() => {
     containerRef.current?.addEventListener("scroll", handleScroll);
@@ -302,455 +350,315 @@ const AllTestsComp = () => {
   return (
     <div className={CourseStyles.con} ref={containerRef}>
       <div className={CourseStyles.cardsContainer}>
-        {allTests?.map((test, index) => {
-  let questionNo = 1;
+        {loading ? (
+          <>
+            <LocalCardSkeleton />
+            <LocalCardSkeleton />
+            <LocalCardSkeleton />
+            <LocalCardSkeleton />
+          </>
+        ) : paginatedTests?.length > 0 ? (
+          paginatedTests.map((test, index) => {
+            const actualIndex = (currentPage - 1) * pageSize + index;
+            let questionNo = 1;
+            const testScore =
+              totalTestMarks.find((mark) => mark.id === test._id)?.score || 0;
+            const hasThumbnail = test?.thumbnail && !test.thumbnail.includes("20190605163315-sale-19736");
 
-          const testScore =
-            totalTestMarks.find((mark) => mark.id === test._id)?.score || 0;
-          return (                      
-            <React.Fragment key={test?._id || index}>
-              {allTestsSatus === "pending" ? (
-                <CardSkeleton key={index} />
-              ) : (
-                <section key={index} className={CourseStyles.card_cont}>
-                  <div className={CourseStyles.content_div}>
-                    <div className={CourseStyles.check_div}>
-                      <Checkbox />
-                      <PiDotsThreeOutlineVerticalFill
-                        onClick={() => togglePopup(index)}
-                      />
-                      {openPopupIndex === index && (
-                        <div className={CourseStyles.popup_box}>
-                          <Popconfirm
-                            title="Delete the Test"
-                            description="Are you sure to delete this Test?"
-                            okText="Yes"
-                            cancelText="No"
-                            onConfirm={() => deleteTest(test)}
-                          >
-                            <button className={CourseStyles.popup_btn}>
-                              Delete
-                            </button>
-                          </Popconfirm>
-                          <button
-                            className={CourseStyles.popup_btn}
-                            onClick={() => handleDownloadPDF(test)}
-                          >
-                            Download
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      className={CourseStyles.title_div}
-                      onClick={() => onTestClick(test)}
-                    >
-                      <p className={CourseStyles.testName}>
-                        {test?.title?.length > 40
-                          ? test?.title?.substring(0, 42) + "..."
-                          : test.title}
-                      </p>
-                    </div>
-
-                    <div className={CourseStyles.statusss_div}>
-                      {test?.category && test.category.length > 0 ? (
-                        <div className={CourseStyles.cate}>
-                          <p>
-                            {test.category.length === 1
-                              ? `${test.category[0]?.name}`
-                              : `${test.category[0]?.name} +${
-                                  test.category.length - 1
-                                }`}
-                          </p>
-                        </div>
+            return (
+              <React.Fragment key={test?._id || actualIndex}>
+                <div
+                  className={CourseStyles.card_cont}
+                  onClick={() => onTestClick(test)}
+                >
+                  {/* Card Image */}
+                  <div className={CourseStyles.imageWrapper}>
+                    <div className={CourseStyles.imageInner}>
+                      {hasThumbnail ? (
+                        <img
+                          src={test?.thumbnail}
+                          className={CourseStyles.cardImage}
+                          alt={test?.title}
+                        />
                       ) : (
-                        <div className={CourseStyles.empty_cate}>empty</div>
-                      )}
-
-                      {test?.access?.type && (
-                        <div
-                          className={`${CourseStyles.status_cont} ${
-                            test?.access?.type === "private"
-                              ? CourseStyles.statusPrivate
-                              : test?.access?.type === "public"
-                              ? CourseStyles.statusPublic
-                              : CourseStyles.statusDefault
-                          }`}
+                        <div 
+                          className={CourseStyles.fallbackLogo}
+                          style={{ background: getGradientStyle(test?.title) }}
                         >
-                          <p>
-                            {test?.access?.type &&
-                              test?.access?.type.charAt(0).toUpperCase() +
-                                test?.access?.type.slice(1)}
-                          </p>
+                          {getInitials(test?.title)}
                         </div>
                       )}
-                    </div>
-                    <div
-                      className={CourseStyles.questions_div}
-                      onClick={() => onTestClick(test)}
-                    >
-                      <div>
-                        <p>Questions : </p>
-                        &nbsp;<strong>{test?.questions?.length}</strong>
+                      
+                      {/* Checkbox */}
+                      <div className={CourseStyles.checkboxWrapper} onClick={(e) => e.stopPropagation()}>
+                        <Checkbox className={CourseStyles.checkbox} />
                       </div>
-                      <div className={CourseStyles.line} />
-                      <div>
-                        <p>Dur: </p>
-                        &nbsp;
-                        <strong>
-                          {test?.time?.testDuration?.testDuration?.duration
-                            ?.val1 &&
-                          test?.time?.testDuration?.testDuration?.duration?.val2
-                            ? `${test.time.testDuration.testDuration.duration.val1}H : ${test.time.testDuration.testDuration.duration.val2}M`
-                            : "NA"}{" "}
-                        </strong>
-                      </div>
-                      {/* <div>
-                        <p>Attempts : </p>
-                        &nbsp;
-                        <strong>
-                          {test?.access?.attemptsPerRespondent === "unlimited"
-                            ? "UN"
-                            : test?.access?.attemptsPerRespondent ||
-                              test?.access?.maxBreach ||
-                              "NA"}
-                        </strong>
-                      </div> */}
-                      <div className={CourseStyles.line} />
-                      <div>
-                        <p>Marks : </p>
-                        &nbsp;
-                        <strong>{testScore}</strong>
-                      </div>
-                    </div>
-                    <div
-                      className={CourseStyles.thumbnail_div}
-                      onClick={() => onTestClick(test)}
-                    >
-                      <img
-                        src={test?.thumbnail}
-                        // onClick={() => navigateToTest(testData)}
-                      />
-                    </div>
-                    <div
-                      className={CourseStyles.desc_div}
-                      onClick={() => onTestClick(test)}
-                    >
-                      <span
-                        className={CourseStyles.desc}
-                        // dangerouslySetInnerHTML={{
-                        //   __html:
-                        //     JSON.parse(test?.shortDescription)?.substring(0, 260) +
-                        //     "...",
-                        // }}
-                        dangerouslySetInnerHTML={{
-                          __html: (() => {
-                            try {
-                              const shortDesc = JSON.parse(
-                                test?.shortDescription || ""
-                              );
-                              return shortDesc.length > 260
-                                ? shortDesc.substring(0, 260) + "..."
-                                : shortDesc;
-                            } catch (error) {
-                              return "";
-                            }
-                          })(),
-                        }}
-                      ></span>
-                    </div>
-                    <div
-                      className={CourseStyles.status_div}
-                      onClick={() => onTestClick(test)}
-                    >
-                      {countdowns[index] === "Expired" ? (
-                        <button className={CourseStyles.expired_btn}>
-                          Expired
-                        </button>
-                      ) : (
-                        <>
-                          {test?.time?.expiryDates?.expiry && (
-                            <button className={CourseStyles.countdown_btn}>
-                              {countdowns[index]}
-                            </button>
-                          )}
 
-                          <button
-                            className={`${
-                              test?.status?.toLowerCase() !== "active"
-                                ? CourseStyles.statusInactive
-                                : ""
-                            }`}
-                          >
-                            {test?.status?.charAt(0).toUpperCase() +
-                              test?.status?.slice(1)}
-                          </button>
-                        </>
+                      {/* Status Badge */}
+                      {countdowns[actualIndex] === "Expired" ? (
+                        <div className={`${CourseStyles.statusBadge} ${CourseStyles.expired}`}>
+                          <span className={CourseStyles.statusDot} /> Expired
+                        </div>
+                      ) : (
+                        <div className={`${CourseStyles.statusBadge} ${CourseStyles.active}`}>
+                          <span className={CourseStyles.statusDot} /> Active
+                        </div>
+                      )}
+
+                      {/* Category Pill */}
+                      {test?.category && test.category.length > 0 && (
+                        <div className={CourseStyles.categoryPill}>
+                          <span>{test.category[0]?.name}</span>
+                        </div>
+                      )}
+
+                      {/* Access Pill */}
+                      {test?.access?.type && (
+                        <div className={`${CourseStyles.accessPill} ${test?.access?.type === "private" ? CourseStyles.private : CourseStyles.public}`}>
+                          {test?.access?.type === "private" ? "Restricted" : "Public"}
+                        </div>
                       )}
                     </div>
                   </div>
-                  <Modal
 
-        open={isModalOpen}
-        onCancel={handleCancel}
-        footer={null}
-        width={1200}
+                  {/* Content Area */}
+                  <div className={CourseStyles.contentWrapper}>
+                    <div className={CourseStyles.topSection}>
+                      <div className={CourseStyles.titleRow}>
+                        <Tooltip title={test?.title} placement="topLeft" mouseEnterDelay={0.5}>
+                          <h3 className={CourseStyles.title}>
+                            {test?.title}
+                          </h3>
+                        </Tooltip>
+                        
+                        {/* Action Menu */}
+                        <div className={CourseStyles.menuButtonWrapper} onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className={CourseStyles.menuBtn}
+                            onClick={(e) => { e.stopPropagation(); togglePopup(actualIndex); }}
+                          >
+                            <PiDotsThreeOutlineVerticalFill size={16} />
+                          </button>
+                          
+                          {openPopupIndex === actualIndex && (
+                            <div className={CourseStyles.popupBox}>
+                              <button
+                                className={CourseStyles.popupBtn}
+                                onClick={(e) => { e.stopPropagation(); togglePopup(actualIndex); onTestClick(test); }}
+                              >
+                                Edit
+                              </button>
+                              <Popconfirm
+                                title="Delete the Test"
+                                description="Are you sure to delete this Test?"
+                                okText="Yes"
+                                cancelText="No"
+                                onConfirm={(e) => { e.stopPropagation(); deleteTest(test); }}
+                                onCancel={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  className={`${CourseStyles.popupBtn} ${CourseStyles.delete}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Delete
+                                </button>
+                              </Popconfirm>
+                              <button
+                                className={CourseStyles.popupBtn}
+                                onClick={(e) => { e.stopPropagation(); handleDownloadPDF(test); }}
+                              >
+                                Download
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
-        centered={true}
-        className={DownloadTestStyles.modal_container}
-      > 
-    <Button onClick={handleDownload} disabled={hasAudioOrVideoQuestions()} type="primary">
-        Download PDF
-    </Button>
+                      {/* Tags Row */}
+                      <div className={CourseStyles.tagsRow}>
+                        {test?.category && test.category.length > 0 && (
+                          <span className={CourseStyles.tag}>
+                            {test.category[0]?.name}
+                          </span>
+                        )}
+                        {test?.category && test.category.length > 1 && (
+                          <span className={CourseStyles.tag}>
+                            +{test.category.length - 1}
+                          </span>
+                        )}
+                        {test?.access?.type && (
+                          <span className={CourseStyles.tag}>
+                            {test?.access?.type === "private" ? "Restricted" : "All Levels"}
+                          </span>
+                        )}
+                      </div>
 
-      {selectedTest && (
-        <div  ref={fullContentRef} className={DownloadTestStyles.download_container}>
-                  <div className={`question-class ${DownloadTestStyles.header_container}`} >
+                      {/* Stats Row */}
+                      <div className={CourseStyles.statsRow}>
+                        <div className={CourseStyles.statItem}>
+                          <QuestionCircleOutlined />
+                          <span>{test?.questions?.length || 0} Q</span>
+                        </div>
+                        <span className={CourseStyles.divider}>•</span>
+                        <div className={CourseStyles.statItem}>
+                          <ClockCircleOutlined />
+                          <span>
+                            {test?.time?.testDuration?.testDuration?.duration?.val1 && test?.time?.testDuration?.testDuration?.duration?.val2
+                              ? `${String(test.time.testDuration.testDuration.duration.val1).padStart(2, '0')}H:${String(test.time.testDuration.testDuration.duration.val2).padStart(2, '0')}M`
+                              : "00H:30M"}
+                          </span>
+                        </div>
+                        <span className={CourseStyles.divider}>•</span>
+                        <div className={CourseStyles.statItem}>
+                          <StarOutlined />
+                          <span>{testScore} Marks</span>
+                        </div>
+                      </div>
 
-        <div className={DownloadTestStyles.logo}>
-          {selectedTest?.logo && (
-            <img src={selectedTest?.logo} alt="logo" style={{ maxWidth: '100px', marginBottom: '20px' }} />
-          )}
-        </div>
-        <div className={DownloadTestStyles.title}> {selectedTest?.title || 'N/A'}</div>
-        <div className={DownloadTestStyles.time_marks_cont}>
-        <div>
-  Time: {selectedTest?.time?.testDuration?.testDuration?.duration?.val1 && 
-  selectedTest?.time?.testDuration?.testDuration?.duration?.val2 
-  ? `${selectedTest?.time?.testDuration?.testDuration?.duration?.val1}H : ${selectedTest?.time?.testDuration?.testDuration?.duration?.val2}M`
-  : "00"}
-</div>          <div >Marks : {totalTestMarks.find((mark) => mark.id === selectedTest._id)?.score || 0}</div>
-        </div>
-        </div>
+                      {/* Description */}
+                      <div className={CourseStyles.description}>
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: (() => {
+                              try {
+                                const shortDesc = JSON.parse(test?.shortDescription || "");
+                                return stripHtml(shortDesc);
+                              } catch (error) {
+                                return stripHtml(test?.shortDescription || "");
+                              }
+                            })(),
+                          }}
+                        />
+                      </div>
+                    </div>
 
-          <div  className={DownloadTestStyles.full_content}>
+                    {/* Footer Row */}
+                    <div className={CourseStyles.footerRow}>
+                      <span className={`${CourseStyles.statusText} ${countdowns[actualIndex] === "Expired" ? CourseStyles.expired : ""}`}>
+                        {countdowns[actualIndex] === "Expired" ? "Expired" : "Active"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-      {selectedTest?.questions?.length > 0 &&
-  selectedTest?.questions?.map((e, i) => {
+                {/* PDF Download Modal - placed outside card_cont to prevent click bubbling */}
+                <Modal
+                    open={isModalOpen}
+                    onCancel={handleCancel}
+                    footer={null}
+                    width={1200}
+                    centered={true}
+                    className={DownloadTestStyles.modal_container}
+                  >
+                    <Button onClick={handleDownload} disabled={hasAudioOrVideoQuestions()} type="primary">
+                      Download PDF
+                    </Button>
 
-    if (e?.questionType?.includes("Comprehension")) {
-      
-      return (
-        <div  className={DownloadTestStyles.comprehension_main_cont} key={i}>
-          <div className={DownloadTestStyles.header}>
-             <div className={DownloadTestStyles.questiontype_title}>
-              {/* <span>question{i+1}</span> */}
-              <span>{e?.questionType}</span>
-            </div>                                                              
-          </div>  
-          {e?.questionType?.includes("Reading") ? (
-            <div 
-              dangerouslySetInnerHTML={{
-                __html: parseIfJson(e?.comprehensionText),
-              }}
-              className={DownloadTestStyles.comprehension_text}
-            ></div>
-          ) : ( 
-            e?.resources &&
-            e?.resources !== "" &&
-            (e?.questionType === "Video Comprehension" ? (
-              e?.resources?.url !== "" && <video src={e?.resources?.url} controls />
-            ) : (
-              e?.resources?.url !== "" && <audio src={e?.resources?.url} controls />
-            ))
-          )}
+                    {selectedTest && (
+                      <div ref={fullContentRef} className={DownloadTestStyles.download_container}>
+                        <div className={`question-class ${DownloadTestStyles.header_container}`} >
+                          <div className={DownloadTestStyles.logo}>
+                            {selectedTest?.logo && (
+                              <img src={selectedTest?.logo} alt="logo" style={{ maxWidth: '100px', marginBottom: '20px' }} />
+                            )}
+                          </div>
+                          <div className={DownloadTestStyles.title}> {selectedTest?.title || 'N/A'}</div>
+                          <div className={DownloadTestStyles.time_marks_cont}>
+                            <div>
+                              Time: {selectedTest?.time?.testDuration?.testDuration?.duration?.val1 &&
+                                selectedTest?.time?.testDuration?.testDuration?.duration?.val2
+                                ? `${selectedTest?.time?.testDuration?.testDuration?.duration?.val1}H : ${selectedTest?.time?.testDuration?.testDuration?.duration?.val2}M`
+                                : "00"}
+                            </div>
+                            <div>Marks : {totalTestMarks.find((mark) => mark.id === selectedTest._id)?.score || 0}</div>
+                          </div>
+                        </div>
 
+                        <div className={DownloadTestStyles.full_content}>
+                          {selectedTest?.questions?.length > 0 &&
+                            selectedTest?.questions?.map((e, i) => {
+                              if (e?.questionType?.includes("Comprehension")) {
+                                return (
+                                  <div className={DownloadTestStyles.comprehension_main_cont} key={i}>
+                                    <div className={DownloadTestStyles.header}>
+                                      <div className={DownloadTestStyles.questiontype_title}>
+                                        <span>{e?.questionType}</span>
+                                      </div>
+                                    </div>
+                                    {e?.questionType?.includes("Reading") ? (
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: parseIfJson(e?.comprehensionText),
+                                        }}
+                                        className={DownloadTestStyles.comprehension_text}
+                                      ></div>
+                                    ) : (
+                                      e?.resources &&
+                                      e?.resources !== "" &&
+                                      (e?.questionType === "Video Comprehension" ? (
+                                        e?.resources?.url !== "" && <video src={e?.resources?.url} controls />
+                                      ) : (
+                                        e?.resources?.url !== "" && <audio src={e?.resources?.url} controls />
+                                      ))
+                                    )}
 
-          {e?.questionContentArr?.map((ques, index) => (
-            <div className="question-class"  key={index}>
-              <DownloadTest e={ques} i={index} questionNo={questionNo++} />
-            </div>
-          ))}
-        </div>
-      );
-    } else {  
-      return (
-        <div className="question-class"  key={i}>
-          <DownloadTest e={e} i={i} questionNo={questionNo++} />
-        </div>
-      );
-    }
-  })}
-  </div>
-        </div>
-      )}
-      {/* <div className={DownloadTestStyles.answer_key_contianer}>
-        <h3>Answer key</h3>
-        {selectedTest && (
-  <div className={DownloadTestStyles.answer_key}>
-    {selectedTest?.questions?.length > 0 ? (
-      selectedTest?.questions?.map((question, index) => (
-        <div key={index} className={DownloadTestStyles.options_Container}>
-          <span className={DownloadTestStyles.question_index}>{index + 1})</span>
-          
-           
-          <div className={DownloadTestStyles.option_ans}>
-            {(() => {
-              let correctAnswers = [];
-
-              if (question?.questionType === "Single Choice") {
-                if (question?.answer?.singleChoice) {
-                  correctAnswers = Object.keys(question.answer.singleChoice)
-                    .filter(optionKey => question.answer.singleChoice[optionKey] === true);
-                }
-              }
-              else if (question?.questionType === "Reading Comprehension") {
-                if (question?.questionContentArr?.length > 0) {
-                  question?.questionContentArr.forEach(q => {
-                    if (q?.answer) {
-                      const singleChoiceAnswers = Object.entries(q.answer).flatMap(([key, value]) => {
-                        if (key === "singleChoice") {
-                          return Object.keys(value).filter(optionKey => value[optionKey] === true);
-                        }
-                        return [];
-                      });
-              
-                      const multipleChoiceAnswers = Object.entries(q.answer).flatMap(([key, value]) => {
-                        if (key === "multipleChoice") {
-                          return Object.keys(value).filter(optionKey => value[optionKey] === true);
-                        }
-                        return [];
-                      });
-              
-                      const trueFalseAnswers = Object.entries(q.answer).flatMap(([key, value]) => {
-                        if (key === "truefalse") {
-                          if (typeof value === "boolean") {
-                            return value ? ["True"] : ["False"];
-                          } else {
-                            return ["No Answer"];
-                          }
-                        }
-                        return [];
-                      });
-                                    correctAnswers.push(...singleChoiceAnswers, ...multipleChoiceAnswers, ...trueFalseAnswers);
-                    }
-                  });
-                }
-              }
-                
-              else if (question?.questionType === "Video Comprehension") {
-                if (question?.questionContentArr?.length > 0) {
-                  question?.questionContentArr.forEach(q => {
-                    if (q?.answer) {
-                      const singleChoiceAnswers = Object.entries(q.answer).flatMap(([key, value]) => {
-                        if (key === "singleChoice") {
-                          return Object.keys(value).filter(optionKey => value[optionKey] === true);
-                        }
-                        return [];
-                      });
-              
-                      const multipleChoiceAnswers = Object.entries(q.answer).flatMap(([key, value]) => {
-                        if (key === "multipleChoice") {
-                          return Object.keys(value).filter(optionKey => value[optionKey] === true);
-                        }
-                        return [];
-                      });
-              
-                      const trueFalseAnswers = Object.entries(q.answer).flatMap(([key, value]) => {
-                        if (key === "truefalse") {
-                          if (typeof value === "boolean") {
-                            return value ? ["True"] : ["False"];
-                          } else {
-                            return ["No Answer"];
-                          }
-                        }
-                        return [];
-                      });
-                                    correctAnswers.push(...singleChoiceAnswers, ...multipleChoiceAnswers, ...trueFalseAnswers);
-                    }
-                  });
-                }
-              }
-              else if (question?.questionType === "Audio Comprehension") {
-                if (question?.questionContentArr?.length > 0) {
-                  question?.questionContentArr.forEach(q => {
-                    if (q?.answer) {
-                      const singleChoiceAnswers = Object.entries(q.answer).flatMap(([key, value]) => {
-                        if (key === "singleChoice") {
-                          return Object.keys(value).filter(optionKey => value[optionKey] === true);
-                        }
-                        return [];
-                      });
-              
-                      const multipleChoiceAnswers = Object.entries(q.answer).flatMap(([key, value]) => {
-                        if (key === "multipleChoice") {
-                          return Object.keys(value).filter(optionKey => value[optionKey] === true);
-                        }
-                        return [];
-                      });
-                      const trueFalseAnswers = Object.entries(q.answer).flatMap(([key, value]) => {
-                        if (key === "truefalse") {
-                          if (typeof value === "boolean") {
-                            return value ? ["True"] : ["False"];
-                          } else {
-                            return ["No Answer"];
-                          }
-                        }
-                        return [];
-                      });
-
-                      correctAnswers.push(...singleChoiceAnswers, ...multipleChoiceAnswers, ...trueFalseAnswers);
-                    }
-                  });
-                }
-              }
-            
-
-              else if (question?.questionType === "True/False") {
-                if (question?.answer?.truefalse !== undefined) {
-                  correctAnswers = question.answer.truefalse ? ["True"] : ["False"];
-                }
-              }
-
-              else if (question?.questionType === "Multiple Choice") {
-                if (question?.answer?.multipleChoice) {
-                  correctAnswers = Object.keys(question.answer.multipleChoice)
-                    .filter(optionKey => question.answer.multipleChoice[optionKey] === true);
-                }
-              }
-
-              const optionLabels = ["A", "B", "C", "D", "E"];
-              const formattedAnswers = correctAnswers.map(optionKey => {
-                const optionIndex = parseInt(optionKey.split("option ")[1], 10) - 1;
-                return optionLabels[optionIndex]; 
-              });
-
-              if (correctAnswers.length === 0 && question?.answer?.truefalse !== undefined) {
-                return question.answer.truefalse ? "True" : "False";
-              }
-
-              return formattedAnswers.length > 0 ? 
-              
-                <div>{formattedAnswers.join(", ")}</div> : 
-                <div>0</div>;
-            })()}
+                                    {e?.questionContentArr?.map((ques, index) => (
+                                      <div className="question-class" key={index}>
+                                        <DownloadTest e={ques} i={index} questionNo={questionNo++} />
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              } else {
+                                return (
+                                  <div className="question-class" key={i}>
+                                    <DownloadTest e={e} i={i} questionNo={questionNo++} />
+                                  </div>
+                                );
+                              }
+                            })}
+                        </div>
+                      </div>
+                    )}
+                  </Modal>
+              </React.Fragment>
+            );
+          })
+        ) : (
+          <div className={AllTestsStyles.emptyState} style={{ gridColumn: "1 / -1" }}>
+            <span className={AllTestsStyles.emptyIcon}>
+              <FileTextOutlined />
+            </span>
+            <h3 className={AllTestsStyles.emptyTitle}>No Tests Added</h3>
+            <p className={AllTestsStyles.emptyDesc}>
+              Get started by creating your first test assessment.
+            </p>
+            <button className={AllTestsStyles.emptyBtn} onClick={props.onAddNewTest}>
+              Create New Test
+            </button>
           </div>
-        </div>
-      ))
-    ) : (
-      <div>No questions found.</div>
-    )}
-  </div>
-)}
-
-      </div> */}
-
-        </Modal>
-
-                </section>
-              )}
-            </React.Fragment>
-          );
-        })}
+        )}
       </div>
- 
-      {showLoadmore && (
-        <div className={CourseStyles.loadmore_btn}>
-          <Button onClick={fetchMore}>Load More</Button>
+
+      {allTests.length > 0 && (
+        <div className={CourseStyles.paginationRow}>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={allTests.length}
+            onChange={(page, size) => {
+              setCurrentPage(page);
+              setPageSize(size);
+            }}
+            pageSizeOptions={["4", "8", "12", "20", "50"]}
+            showSizeChanger
+            showQuickJumper
+            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} tests`}
+          />
         </div>
       )}
     </div>
   );
 };
- 
+
 export default AllTestsComp;

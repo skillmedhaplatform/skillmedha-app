@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 
 const useSpecialOrg = () => {
-  const rawStudent = useSelector((s) => s.student.student);
+  const rawStudent = useSelector((s) => s?.student?.student);
   const student = rawStudent?.data || rawStudent;
   const orgDetails = student?.orgDetails;
   

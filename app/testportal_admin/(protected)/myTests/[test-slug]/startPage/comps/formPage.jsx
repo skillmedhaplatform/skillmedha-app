@@ -1,11 +1,16 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { FaTrash } from "react-icons/fa";
 import formStyles from "../styles/formPage.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "next/navigation";
-import { getOneTests, updateTestValues } from "@/redux/slices/testportal_admin/slice/test";
-import { setFormValues } from "@/redux/slices/testportal_admin/slice/stepform";
+import { updateTestValues } from "@/redux/slices/testportal_admin/slice/test";
+import { 
+  UserOutlined, 
+  MailOutlined, 
+  PhoneOutlined, 
+  FileTextOutlined, 
+  DeleteOutlined 
+} from "@ant-design/icons";
 
 const AddMoreComponent = () => {
   const SingleTest = useSelector((state) => state.tests.test);
@@ -36,7 +41,14 @@ const AddMoreComponent = () => {
   useEffect(() => {
     if (SingleTest?.startPage?.formRequirements) {
       const { formRequirements } = SingleTest.startPage;
-      setAdditionalItems(formRequirements.slice(3));
+      // The first 3 are default items (Full Name, Email, Phone Number)
+      // but let's be safe and check if there are at least 3 items
+      if (formRequirements.length >= 3) {
+        setDefaultItems(formRequirements.slice(0, 3));
+        setAdditionalItems(formRequirements.slice(3));
+      } else {
+        setDefaultItems(formRequirements);
+      }
     }
   }, [SingleTest]);
 
@@ -51,7 +63,7 @@ const AddMoreComponent = () => {
       dispatch(
         updateTestValues({
           startPage: {
-            ...SingleTest.startPage,
+            ...SingleTest?.startPage,
             formRequirements: [...defaultItems, ...additionalItems],
           },
         })
@@ -66,7 +78,7 @@ const AddMoreComponent = () => {
     const newDefaultItems = defaultItems.map((item, i) =>
       i === index ? { ...item, label: event.target.value } : item
     );
-    setDefaultItems({ ...defaultItems, newDefaultItems });
+    setDefaultItems(newDefaultItems);
   };
 
   const handleAdditionalInputChange = (index, event) => {
@@ -74,14 +86,6 @@ const AddMoreComponent = () => {
       i === index ? { ...item, label: event.target.value } : item
     );
     setAdditionalItems(newAdditionalItems);
-  };
-
-  const handleAddMoreClick = (e) => {
-    e.preventDefault();
-    setAdditionalItems([
-      ...additionalItems,
-      { label: "New Field", value: "", requires: false },
-    ]);
   };
 
   const handleDeleteItem = (index, type) => {
@@ -100,20 +104,42 @@ const AddMoreComponent = () => {
     );
   };
 
+  const getDefaultIcon = (label) => {
+    const norm = label.toLowerCase();
+    if (norm.includes("name")) return <UserOutlined />;
+    if (norm.includes("email")) return <MailOutlined />;
+    if (norm.includes("phone") || norm.includes("tel") || norm.includes("number")) return <PhoneOutlined />;
+    return <UserOutlined />;
+  };
+
+  const getDefaultMeta = (label) => {
+    const norm = label.toLowerCase();
+    if (norm.includes("name")) return "Text field · Required";
+    if (norm.includes("email")) return "Email field · Required";
+    if (norm.includes("phone") || norm.includes("tel") || norm.includes("number")) return "Tel field · Required";
+    return "Text field · Required";
+  };
+
   const renderDefaultItems = () => {
     return defaultItems.map((item, index) => (
-      <div key={index} className={formStyles.itemContainer}>
-        <input
-          type="text"
-          value={item.label}
-          onChange={(e) => handleDefaultInputChange(index, e)}
-          placeholder={item.label}
-          readOnly
-          className={formStyles.defaultinputs}
-        />
-        <div className={formStyles.manCon} style={{ display: "none" }}>
-          <label>Mandatory: </label>
-          <input type="checkbox" checked={true} readOnly />
+      <div key={`default-${index}`} className={formStyles.itemContainer}>
+        <div className={formStyles.itemLeft}>
+          <div className={formStyles.iconWrapper}>
+            {getDefaultIcon(item.label)}
+          </div>
+          <div className={formStyles.infoWrapper}>
+            <p className={formStyles.fieldLabel}>{item.label}</p>
+            <span className={formStyles.fieldMeta}>{getDefaultMeta(item.label)}</span>
+          </div>
+        </div>
+        <div className={formStyles.itemRight}>
+          <button 
+            type="button" 
+            className={formStyles.trashBtn} 
+            onClick={() => handleDeleteItem(index, "default")}
+          >
+            <DeleteOutlined />
+          </button>
         </div>
       </div>
     ));
@@ -121,33 +147,38 @@ const AddMoreComponent = () => {
 
   const renderAdditionalItems = () =>
     additionalItems.map((item, index) => (
-      <div key={index} className={formStyles.itemContainer}>
-        <input
-          type="text"
-          value={
-            item.label ||
-            SingleTest?.startPage?.formRequirements[index + 3]?.label
-          }
-          onChange={(e) => handleAdditionalInputChange(index, e)}
-          placeholder={item.label}
-          className={formStyles.Addinputs}
-        />
-        <div className={formStyles.manCon}>
-          <input
-            type="checkbox"
-            checked={
-              item.requires ||
-              SingleTest?.startPage?.formRequirements[index + 3]?.requires
-            }
-            onChange={() => handleMandatoryToggle(index)}
-          />
-          <label htmlFor={`checkbox-${index}`}>Mandatory</label>
-          <FaTrash
-            size={16}
-            color="red"
-            style={{ cursor: "pointer" }}
+      <div key={`additional-${index}`} className={formStyles.itemContainer}>
+        <div className={formStyles.itemLeft}>
+          <div className={formStyles.iconWrapper}>
+            <FileTextOutlined />
+          </div>
+          <div className={formStyles.infoWrapper}>
+            <input
+              type="text"
+              value={item.label}
+              onChange={(e) => handleAdditionalInputChange(index, e)}
+              placeholder="Field Label"
+              className={formStyles.fieldLabelInput}
+            />
+          </div>
+        </div>
+        <div className={formStyles.itemRight}>
+          <div className={formStyles.mandatoryCheckbox}>
+            <input
+              id={`checkbox-${index}`}
+              type="checkbox"
+              checked={item.requires}
+              onChange={() => handleMandatoryToggle(index)}
+            />
+            <label htmlFor={`checkbox-${index}`}>Required</label>
+          </div>
+          <button 
+            type="button" 
+            className={formStyles.trashBtn} 
             onClick={() => handleDeleteItem(index, "additional")}
-          />
+          >
+            <DeleteOutlined />
+          </button>
         </div>
       </div>
     ));
@@ -156,7 +187,6 @@ const AddMoreComponent = () => {
     <div className={formStyles.addMoreContainer}>
       {renderDefaultItems()}
       {renderAdditionalItems()}
-      <button onClick={handleAddMoreClick}>Add More</button>
     </div>
   );
 };

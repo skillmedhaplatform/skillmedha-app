@@ -11,6 +11,7 @@ import {
 } from "@/redux/slices/testportal_admin/slice/test";
 import { setFormValues } from "@/redux/slices/testportal_admin/slice/stepform";
 import { Alert, message, Skeleton, Tooltip, Radio } from "antd";
+import { QuestionCircleOutlined, ClockCircleOutlined, StarOutlined } from "@ant-design/icons";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { getLstorage, setSstorage } from "@/utils/universalUtils/windowMW";
 import TextEditor from "@/modules/testportal_admin/components/reusable-comps/editor/editor";
@@ -290,42 +291,115 @@ const About = () => {
       // values.shortDescription = data?.msg
     }
   };
-  return (
-    <div className={AboutStyles.form}>
-        <div className={AboutStyles.TitleCon}>
-          <div className={AboutStyles.Title}>Test Title*</div>
+  // Helpers for Preview card
+  const stripHtml = (html = "") => {
+    return html.replace(/<[^>]*>/g, "");
+  };
 
-          <div className={AboutStyles.Title_div}>
+  const calculateTotalMarks = () => {
+    if (!SingleTest?.questions?.length) return 0;
+    return SingleTest.questions.reduce((total, question) => {
+      let score =
+        Number(question?.scoreSettings?.pointsForCorrectAns) ||
+        Number(question?.scoreSettings?.PointsForEachCorrectAnswer) ||
+        Number(question?.scoreSettings?.score) ||
+        0;
+
+      if (
+        question?.scoreSettings?.PointsForEachCorrectAnswer &&
+        question?.answer?.multipleChoice
+      ) {
+        const correctOptionsCount = Object.values(
+          question.answer.multipleChoice
+        ).filter((isCorrect) => isCorrect === true).length;
+
+        score =
+          correctOptionsCount *
+          question.scoreSettings.PointsForEachCorrectAnswer;
+      }
+
+      const bonus = question?.scoreSettings?.bonusPointsForAllCorrect
+        ? Number(question.scoreSettings.bonusPointsForAllCorrect)
+        : 0;
+
+      return total + score + bonus;
+    }, 0);
+  };
+
+  const getDurationText = () => {
+    const duration = SingleTest?.time?.testDuration?.testDuration?.duration;
+    if (duration?.val1 && duration?.val2) {
+      return `${String(duration.val1).padStart(2, "0")}H:${String(duration.val2).padStart(2, "0")}M`;
+    }
+    return "00H:30M";
+  };
+
+  // Helper to generate initials from test title
+  const getInitials = (title = "") => {
+    if (!title) return "T";
+    const words = title.trim().split(/\s+/);
+    if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+    return (words[0][0] + (words[1][0] || "")).toUpperCase();
+  };
+
+  // Helper to generate elegant gradient style for preview fallback logo
+  const getGradientStyle = (title = "") => {
+    const hash = Array.from(title).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const gradients = [
+        "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", // Blue
+        "linear-gradient(135deg, #ea580c 0%, #f97316 100%)", // Orange
+        "linear-gradient(135deg, #eab308 0%, #ca8a04 100%)", // Yellow
+        "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)", // Teal
+        "linear-gradient(135deg, #312e81 0%, #6366f1 100%)", // Indigo
+    ];
+    return gradients[hash % gradients.length];
+  };
+
+  const currentTitle = values?.title !== undefined ? values.title : SingleTest?.title || "";
+  const currentCategory = values?.category && values.category.length > 0 ? values.category[0]?.name : SingleTest?.category?.[0]?.name || "";
+  const currentShortDesc = values?.shortDescription ? stripHtml(values.shortDescription) : stripHtml(SingleTest?.shortDescription || "");
+  const hasThumbnail = (thumbnailUrl || SingleTest?.thumbnail) && !(thumbnailUrl || SingleTest?.thumbnail).includes("20190605163315-sale-19736");
+
+  return (
+    <div className={AboutStyles.gridContainer}>
+      {/* Left Column: Form Sections */}
+      <div className={AboutStyles.mainForm}>
+        {/* Card 1: Test Information */}
+        <div className={AboutStyles.cardSection}>
+          <div className={AboutStyles.sectionHeader}>
+            <BsInfoCircle className={AboutStyles.sectionIcon} />
+            <h3>Test Information</h3>
+          </div>
+
+          {/* Test Title */}
+          <div className={AboutStyles.formGroup}>
+            <div className={AboutStyles.labelRow}>
+              <label>Test Title<span>*</span></label>
+            </div>
             {singletestStatus === "pending" ? (
-              <Skeleton.Input active={true} style={{ width: "100%" }} />
+              <Skeleton.Input active={true} style={{ width: "100%", height: 40 }} />
             ) : (
               <input
                 type="text"
                 id="title"
-                value={values?.title !== undefined ? values.title : SingleTest?.title || ""}
+                value={currentTitle}
                 onChange={(e) => {
                   dispatch(setFormValues({ ...values, title: e.target.value }));
                   dispatch(updateTestValues({ title: e.target.value }));
                 }}
-                className={AboutStyles.form__field__input}
+                className={AboutStyles.inputField}
                 maxLength="42"
+                placeholder="Enter test title"
               />
             )}
-
-            <div>
-              <BsInfoCircle
-                size={15}
-                color="#555"
-                style={{ marginRight: "5px" }}
-              />
-              The Title of the test should not be more than 42 characters.
-            </div>
+            <span className={AboutStyles.infoText}>The Title of the test should not exceed 42 characters.</span>
           </div>
-        </div>
 
-        <div className={AboutStyles.categoryCon}>
-          <div className={AboutStyles.Title}>Category</div>
-          <div className={AboutStyles.categoryConRig}>
+          {/* Category */}
+          <div className={AboutStyles.formGroup}>
+            <div className={AboutStyles.labelRow}>
+              <label>Category</label>
+            </div>
             <ChipInput
               type="test"
               name="category"
@@ -334,239 +408,303 @@ const About = () => {
               initialValue={SingleTest?.category}
             />
           </div>
+
+          {/* Short Description */}
+          <div className={AboutStyles.formGroup}>
+            <div className={AboutStyles.labelRow}>
+              <label>Short Description<span>*</span></label>
+              <Tooltip title="Provide a concise summary between 250-300 characters for the banner.">
+                <span className={AboutStyles.infoTooltip}><BsInfoCircle /></span>
+              </Tooltip>
+            </div>
+            {singletestStatus === "pending" ? (
+              <Skeleton active paragraph={{ rows: 3 }} />
+            ) : (
+              <div className={AboutStyles.editorWrapper}>
+                <TextEditor
+                  name="shortDescription"
+                  editorFun={(val) => sendEditorVals(val, "shortDescription")}
+                  initialContent={{
+                    shortDescription: values?.shortDescription
+                      ? values?.shortDescription
+                      : SingleTest?.shortDescription,
+                  }}
+                />
+              </div>
+            )}
+            <button className={AboutStyles.aiButton} onClick={generateDesc}>
+              Generate description using AI
+            </button>
+          </div>
         </div>
 
-        <div className={AboutStyles.editorCon}>
-          <div className={AboutStyles.Title}>
-            Short Description*
-            <div>
-              <BsInfoCircle
-                size={15}
-                color="#555"
-                style={{ marginRight: "5px" }}
-              />
-              Please provide a concise description of the course for the webpage
-              banner. This description should be between 250-300 characters.
-            </div>
+        {/* Card 2: Media & Settings */}
+        <div className={AboutStyles.cardSection}>
+          <div className={AboutStyles.sectionHeader}>
+            <BsInfoCircle className={AboutStyles.sectionIcon} />
+            <h3>Media & Configuration</h3>
           </div>
 
-          <div className={AboutStyles.editorInp}>
-            {singletestStatus === "pending" ? (
-              <Skeleton
-                paragraph={{
-                  rows: 3,
-                }}
-                active={true}
-              />
-            ) : (
-              <TextEditor
-                name="shortDescription"
-                editorFun={(val) => sendEditorVals(val, "shortDescription")}
-                initialContent={{
-                  shortDescription: values?.shortDescription
-                    ? values?.shortDescription
-                    : SingleTest?.shortDescription,
-                }}
-              />
-            )}
+          {/* Thumbnail */}
+          <div className={AboutStyles.formGroup}>
+            <div className={AboutStyles.labelRow}>
+              <label>Thumbnail</label>
+            </div>
+            <div className={AboutStyles.uploadContainer}>
+              {showThumbnail ? (
+                <div className={AboutStyles.filePreviewRow}>
+                  <span className={AboutStyles.fileName}>
+                    {thumbnailUrl ? "new-thumbnail.png" : "aws-thumbnail.png"}
+                  </span>
+                  <div className={AboutStyles.actionBtns}>
+                    <span className={AboutStyles.changeLabel}>
+                      Change image
+                      <input type="file" onChange={(e) => onChangeThumbnail(e)} />
+                    </span>
+                    <BsTrash className={AboutStyles.deleteBtn} onClick={onDeleteThumbnail} />
+                  </div>
+                </div>
+              ) : (
+                <div className={AboutStyles.uploadBox}>
+                  <FaCloudUploadAlt className={AboutStyles.uploadIcon} />
+                  <p>Drag and drop image here or <span>Choose File</span></p>
+                  <input type="file" onChange={(e) => onChangeThumbnail(e)} className={AboutStyles.fileInput} />
+                </div>
+              )}
+
+              {isUploaded && (
+                <div className={AboutStyles.cropper_main_cont}>
+                  <Cropper
+                    className={AboutStyles.cropper_cont}
+                    src={thumbnailImages}
+                    aspectRatio={16 / 9}
+                    guides={false}
+                    ref={cropperThumbnailRefs}
+                    viewMode={1}
+                    background={false}
+                    zoomOnWheel={false}
+                    scalable={false}
+                    movable={false}
+                    initialAspectRatio={16 / 9}
+                    dragMode="none"
+                  />
+                  <div className={AboutStyles.cropActionRow}>
+                    <button onClick={(e) => cropThumbnailImage(e)}>Crop & Upload</button>
+                    <button onClick={onDeleteThumbnail} className={AboutStyles.cancelCrop}>Cancel</button>
+                  </div>
+                </div>
+              )}
+
+              {showThumbnail && (
+                <img
+                  className={AboutStyles.imagePreview}
+                  src={thumbnailUrl || SingleTest?.thumbnail}
+                  alt="thumbnail preview"
+                />
+              )}
+            </div>
+            <span className={AboutStyles.infoText}>Recommended 800x450px, max 2MB.</span>
           </div>
-          <button className={AboutStyles.aiButton} onClick={generateDesc}>
-            Generate description using AI
+
+          {/* Logo */}
+          <div className={AboutStyles.formGroup}>
+            <div className={AboutStyles.labelRow}>
+              <label>Logo</label>
+            </div>
+            <div className={AboutStyles.uploadContainer}>
+              {showLogo ? (
+                <div className={AboutStyles.filePreviewRow}>
+                  <span className={AboutStyles.fileName}>
+                    {logoUrl ? "new-logo.png" : "aws-logo.png"}
+                  </span>
+                  <div className={AboutStyles.actionBtns}>
+                    <span className={AboutStyles.changeLabel}>
+                      Change
+                      <input type="file" onChange={(e) => onChangeImage(e)} />
+                    </span>
+                    <BsTrash className={AboutStyles.deleteBtn} onClick={onDeleteLogo} />
+                  </div>
+                </div>
+              ) : (
+                <div className={AboutStyles.uploadBox}>
+                  <FaCloudUploadAlt className={AboutStyles.uploadIcon} />
+                  <p>Drag and drop image here or <span>Choose File</span></p>
+                  <input type="file" onChange={(e) => onChangeImage(e)} className={AboutStyles.fileInput} />
+                </div>
+              )}
+
+              {isUploadedLogo && (
+                <div className={AboutStyles.cropper_main_cont}>
+                  <Cropper
+                    className={AboutStyles.cropper_cont}
+                    src={images}
+                    aspectRatio={1}
+                    guides={false}
+                    ref={cropperRefs}
+                    viewMode={1}
+                    background={false}
+                    zoomOnWheel={false}
+                    scalable={false}
+                    movable={false}
+                    initialAspectRatio={1}
+                    dragMode="none"
+                  />
+                  <div className={AboutStyles.cropActionRow}>
+                    <button onClick={(e) => cropImage(e)}>Crop & Upload</button>
+                    <button onClick={onDeleteLogo} className={AboutStyles.cancelCrop}>Cancel</button>
+                  </div>
+                </div>
+              )}
+
+              {showLogo && (
+                <img
+                  className={AboutStyles.squareLogoPreview}
+                  src={logoUrl || SingleTest?.logo}
+                  alt="logo preview"
+                />
+              )}
+            </div>
+            <span className={AboutStyles.infoText}>Square logo, PNG with transparent background preferred.</span>
+          </div>
+
+          {/* Test Evaluation Type */}
+          <div className={AboutStyles.formGroup}>
+            <div className={AboutStyles.labelRow}>
+              <label>Test Evaluation Type</label>
+            </div>
+            <div className={AboutStyles.toggleGroup}>
+              <button
+                className={testEvaluationvalue === "Manual" ? AboutStyles.active : ""}
+                onClick={() => {
+                  setTestEvaluationvalue("Manual");
+                  dispatch(setFormValues({ ...values, testEvaluationType: "Manual" }));
+                  dispatch(updateTestValues({ testEvaluationType: "Manual" }));
+                }}
+              >
+                Manual
+              </button>
+              <button
+                className={testEvaluationvalue === "Automatic" ? AboutStyles.active : ""}
+                onClick={() => {
+                  setTestEvaluationvalue("Automatic");
+                  dispatch(setFormValues({ ...values, testEvaluationType: "Automatic" }));
+                  dispatch(updateTestValues({ testEvaluationType: "Automatic" }));
+                }}
+              >
+                Automatic
+              </button>
+            </div>
+            <span className={AboutStyles.infoText}>
+              Manual: Admin grades submissions. Automatic: Results calculated instantly.
+            </span>
+          </div>
+
+          {/* Difficulty Level Dropdown */}
+          <div className={AboutStyles.formGroup}>
+            <div className={AboutStyles.labelRow}>
+              <label>Difficulty Level</label>
+            </div>
+            <select
+              value={values?.difficulty !== undefined ? values.difficulty : SingleTest?.difficulty || "Intermediate"}
+              onChange={(e) => {
+                dispatch(setFormValues({ ...values, difficulty: e.target.value }));
+                dispatch(updateTestValues({ difficulty: e.target.value }));
+              }}
+              className={AboutStyles.difficultySelect}
+            >
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Expert">Expert</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Save & Discard Buttons */}
+        <div className={AboutStyles.formActions}>
+          <button className={AboutStyles.saveBtn} onClick={handleSaveDraft}>
+            {SingleTest?._id ? "Update" : "Save"}
+          </button>
+          <button className={AboutStyles.discardBtn} onClick={() => router.push("/testportal_admin/myTests")}>
+            Discard
           </button>
         </div>
-
-        <div className={AboutStyles.imageCon}>
-          <div className={AboutStyles.Title}>Thumbnail</div>
-
-          <div className={AboutStyles.flexTypes}>
-            {showThumbnail ? (
-              <div className={AboutStyles.image_div}>
-                <Tooltip placement="topLeft" title="Reselect File">
-                  <input
-                    type="file"
-                    onChange={(e) => onChangeThumbnail(e)}
-                    className={AboutStyles.reselect_thumbnailinput}
-                  />
-                </Tooltip>
-
-                <img
-                  className={AboutStyles.thumbnail}
-                  src={thumbnailUrl || SingleTest?.thumbnail}
-                  alt="thumbnail"
-                />
-              </div>
-            ) : (
-              <label htmlFor="">
-                <div className={AboutStyles.cropper_input_cont}>
-                  <div className={AboutStyles.fileInput_cont}>
-                    {/* <BsUpload className={AboutStyles.Uploadicon} /> */}
-
-                    <div className={AboutStyles.Uploadicon}>
-                      <FaCloudUploadAlt size={40} color="#ccc" />
-                      <p>
-                        Drag and drop image here or <span>Choose File</span>
-                      </p>
-                    </div>
-                    <Tooltip placement="topLeft" title="select File">
-                      <input
-                        type="file"
-                        onChange={(e) => onChangeThumbnail(e)}
-                        className={`${AboutStyles.fileInput} ${isUploaded ? AboutStyles.hidden : ""
-                          }`}
-                      />
-                    </Tooltip>
-                  </div>
-
-                  {isUploaded && (
-                    <div
-                      className={`${AboutStyles.cropper_main_cont} ${isUploaded ? AboutStyles.show : AboutStyles.hidden
-                        }`}
-                    >
-                      <Cropper
-                        className={AboutStyles.cropper_cont}
-                        src={thumbnailImages}
-                        aspectRatio={16 / 9}
-                        guides={false}
-                        ref={cropperThumbnailRefs}
-                        viewMode={1}
-                        background={false}
-                        zoomOnWheel={false}
-                        scalable={false}
-                        movable={false}
-                        initialAspectRatio={16 / 9}
-                        dragMode="none"
-                      />
-                    </div>
-                  )}
-                </div>
-              </label>
-            )}
-
-            {isUploadedLoaded && (
-              <div className={AboutStyles.uplaod_delete_btn}>
-                <button onClick={(e) => cropThumbnailImage(e)}>Upload</button>
-                <BsTrash
-                  className={AboutStyles.delete_btn}
-                  onClick={onDeleteThumbnail}
-                  size={20}
-                  color="red"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className={AboutStyles.imageCon}>
-          <div className={AboutStyles.Title}>Logo</div>
-
-          <div className={AboutStyles.flexTypes}>
-            {showLogo ? (
-              <div className={AboutStyles.logoimg_div}>
-                <Tooltip placement="topLeft" title="Reselect File">
-                  <input
-                    type="file"
-                    onChange={(e) => onChangeImage(e)}
-                    className={AboutStyles.reselect_input}
-                  />
-                </Tooltip>
-                <img
-                  src={logoUrl || SingleTest?.logo}
-                  alt="logo"
-                  className={AboutStyles.logo}
-                />
-              </div>
-            ) : (
-              <label htmlFor="">
-                <div className={AboutStyles.cropper_input_cont}>
-                  <div className={AboutStyles.fileInput_cont}>
-                    {/* <BsUpload className={AboutStyles.Uploadicon} /> */}
-                    <div className={AboutStyles.Uploadicon}>
-                      <FaCloudUploadAlt size={40} color="#ccc" />
-                      <p>
-                        Drag and drop your image here or{" "}
-                        <span>Choose File</span>
-                      </p>
-                    </div>
-                    <Tooltip placement="topLeft" title="select File">
-                      <input
-                        type="file"
-                        onChange={(e) => onChangeImage(e)}
-                        className={`${AboutStyles.fileInput} ${isUploadedLogo ? AboutStyles.hidden : ""
-                          }`}
-                      />
-                    </Tooltip>
-                  </div>
-                  {isUploadedLogo && (
-                    <div
-                      className={`${AboutStyles.cropper_main_cont} ${isUploadedLogo ? AboutStyles.show : AboutStyles.hidden
-                        }`}
-                    >
-                      <Cropper
-                        className={AboutStyles.cropper_cont}
-                        src={images}
-                        aspectRatio={1080 / 1080}
-                        guides={false}
-                        ref={cropperRefs}
-                        viewMode={1}
-                        background={false}
-                        zoomOnWheel={false}
-                        scalable={false}
-                        movable={false}
-                        initialAspectRatio={16 / 9}
-                        dragMode="none"
-                      />
-                    </div>
-                  )}
-                </div>
-              </label>
-            )}
-            {isUploadedLogoLoaded && (
-              <div className={AboutStyles.uplaod_delete_btn}>
-                <button onClick={(e) => cropImage(e)}>Upload</button>
-                <BsTrash
-                  className={AboutStyles.delete_btn}
-                  onClick={onDeleteLogo}
-                  size={20}
-                  color="red"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-        <div className={AboutStyles.TestEvaluationType}>
-          <div className={AboutStyles.Title}>Test Evaluation Type</div>
-
-          <div className={AboutStyles.Title_div}>
-            <Radio.Group
-              options={optionsTestEvaluationType}
-              onChange={(e) => {
-                setTestEvaluationvalue(e.target.value);
-                dispatch(
-                  setFormValues({
-                    ...values,
-                    testEvaluationType: e.target.value,
-                  }),
-                );
-                dispatch(
-                  updateTestValues({ testEvaluationType: e.target.value }),
-                );
-              }}
-              className={AboutStyles.radioGroup}
-              value={testEvaluationvalue}
-              optionType="button"
-              buttonStyle="solid"
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className={AboutStyles.submitButton}
-          onClick={handleSaveDraft}
-        >
-          {SingleTest?._id ? "Update" : "Save"}
-        </button>
       </div>
+
+      {/* Right Column: Live Preview & Details Sidebar */}
+      <div className={AboutStyles.sidebarCards}>
+        {/* Live Preview Card */}
+        <div className={AboutStyles.livePreviewCard}>
+          <div className={AboutStyles.previewHeader}>
+            <div className={AboutStyles.titleWrap}>
+              <BsInfoCircle />
+              <span>Live Preview</span>
+            </div>
+            <span className={AboutStyles.badge}>Candidate view</span>
+          </div>
+          <div className={AboutStyles.previewBody}>
+            <div className={AboutStyles.previewImgCont}>
+              {hasThumbnail ? (
+                <img src={thumbnailUrl || SingleTest?.thumbnail} alt="test thumbnail" />
+              ) : (
+                <div
+                  className={AboutStyles.fallbackLogo}
+                  style={{ background: getGradientStyle(currentTitle) }}
+                >
+                  {getInitials(currentTitle)}
+                </div>
+              )}
+            </div>
+            <h4 className={AboutStyles.previewTitle}>{currentTitle || "Test Title"}</h4>
+            <p className={AboutStyles.previewDesc}>{currentShortDesc || "No short description provided yet."}</p>
+            <div className={AboutStyles.previewBadges}>
+              <span className={AboutStyles.badgeItem}>
+                <QuestionCircleOutlined />
+                {SingleTest?.questions?.length || 0} Q
+              </span>
+              <span className={AboutStyles.badgeItem}>
+                <ClockCircleOutlined />
+                {getDurationText()}
+              </span>
+              <span className={AboutStyles.badgeItem}>
+                <StarOutlined />
+                {calculateTotalMarks()} Marks
+              </span>
+              <span className={`${AboutStyles.badgeItem} ${SingleTest?.status === "active" ? AboutStyles.activeBadge : AboutStyles.inactiveBadge}`}>
+                {SingleTest?.status === "active" ? "Active" : "Draft"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Test Details List Card */}
+        <div className={AboutStyles.testDetailsCard}>
+          <div className={AboutStyles.detailsHeader}>
+            <h4>Test Details</h4>
+          </div>
+          <div className={AboutStyles.detailsList}>
+            <div className={AboutStyles.detailRow}>
+              <span className={AboutStyles.detailLabel}>Questions</span>
+              <span className={AboutStyles.detailVal}>{SingleTest?.questions?.length || 0}</span>
+            </div>
+            <div className={AboutStyles.detailRow}>
+              <span className={AboutStyles.detailLabel}>Duration</span>
+              <span className={AboutStyles.detailVal}>{getDurationText()}</span>
+            </div>
+            <div className={AboutStyles.detailRow}>
+              <span className={AboutStyles.detailLabel}>Total Marks</span>
+              <span className={AboutStyles.detailVal}>{calculateTotalMarks()}</span>
+            </div>
+            <div className={AboutStyles.detailRow}>
+              <span className={AboutStyles.detailLabel}>Access</span>
+              <span className={AboutStyles.detailVal}>
+                {SingleTest?.access?.type === "private" ? "Restricted" : "Public"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

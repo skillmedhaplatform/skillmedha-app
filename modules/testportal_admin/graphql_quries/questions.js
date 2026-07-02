@@ -12,6 +12,7 @@ query Questions($category: String, $limit: Int, $questionType: String) {
       questionScore
       scoreSettings
       resources
+      answer
     }
   }
 `;

@@ -347,9 +347,11 @@ export default function AddQuestionForm() {
   };
   return (
     <div className={newQuestionFormStyles.questionFormContainer}>
+      <h3 className={newQuestionFormStyles.sectionTitle}>Question Specifications</h3>
+      
       <Row style={{ marginBottom: "1.5rem", width: "100%" }} align="top">
         <Col span={4}>
-          <span style={{ fontWeight: 500 }}>Question Tags</span>
+          <span style={{ fontWeight: 600, color: "#475569" }}>Question Tags</span>
         </Col>
         <Col span={20}>
           <ChipInput
@@ -365,23 +367,27 @@ export default function AddQuestionForm() {
           />
         </Col>
       </Row>
+      
       <Row style={{ marginBottom: "1.5rem", width: "100%" }} align="middle">
         <Col span={4}>
-          <span style={{ fontWeight: 500 }}>Question Type*</span>
+          <span style={{ fontWeight: 600, color: "#475569" }}>Question Type*</span>
         </Col>
         <Col span={20}>
           <Select
-            style={{ width: "20%" }}
+            style={{ width: "220px" }}
             value={selectedType}
             onChange={(value) => {
               setSelectedType(value);
               handleValueUpdate({ key: "questionType", value });
             }}
             options={options1}
-            suffixIcon={null}
           />
         </Col>
       </Row>
+
+      <div className={newQuestionFormStyles.divider} />
+
+      <h3 className={newQuestionFormStyles.sectionTitle}>Question Content & Options</h3>
 
       {selectedType == "readingComprehension" ||
         selectedType == "audioComprehension" ||

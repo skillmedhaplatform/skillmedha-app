@@ -1,27 +1,27 @@
 "use client";
-import React, { useEffect } from "react";
-import sideBarStyles from "./sidebar.module.scss";
+import React from "react";
+import sideBarStyles from "@/mainLayout/styles/sidebar.module.scss";
 import { usePathname } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
 import { useDispatch, useSelector } from "react-redux";
-import { sideBarTitles } from "../sideBarTitles";
+import { Menu, Dropdown, Skeleton } from "antd";
+import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { changeCollapse } from "@/redux/slices/testportal_admin/slice/sideBar";
-import { Dropdown, Skeleton } from "antd";
+import { sideBarTitles } from "../sideBarTitles";
 
 const SideBar = ({ activeView, setView }) => {
-  const isCollapsed = useSelector((state) => state.sideBar.collapse);
+  const router = useRouter();
+  const pathName = usePathname();
   const dispatch = useDispatch();
-
-  const currPath = usePathname() || "/";
-  const nav = useRouter();
-
   const basePath = "/testportal_admin";
+  
+  const isCollapsed = useSelector((s) => s.sideBar.collapse);
 
   const userDetailsVal = useSelector((state) => state.tests?.UserDetails?.value);
   const USER_DETAILS = userDetailsVal?.data || userDetailsVal;
   const isLoadingUser = useSelector((state) => state.tests?.UserDetails?.status === "pending");
 
-  const name = USER_DETAILS?.name || USER_DETAILS?.userName || "TPO User";
+  const name = USER_DETAILS?.name || USER_DETAILS?.userName || "Admin User";
   const email = USER_DETAILS?.email || "";
   const firstLetter = name ? name.charAt(0).toUpperCase() : "U";
 
@@ -30,6 +30,40 @@ const SideBar = ({ activeView, setView }) => {
     window.localStorage.removeItem("businessId");
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     window.location.href = "/login?portal=tpo";
+  };
+
+  const menuItems = [
+    {
+      type: 'group',
+      label: isCollapsed ? '' : <span style={{ fontWeight: '800', color: '#1e293b' }}>TEST PORTAL</span>,
+      children: sideBarTitles.map((item) => ({
+        key: item.path,
+        icon: item.icon,
+        label: item.name,
+      }))
+    }
+  ];
+
+  const getSelectedKeys = () => {
+    const pathToCheck = activeView || pathName;
+    const match = sideBarTitles.find(
+      (t) => t.path && pathToCheck.includes(t.path)
+    );
+    if (match) return [match.path];
+    return [];
+  };
+
+  const handleMenuClick = ({ key }) => {
+    const matchedItem = sideBarTitles.find((item) => item.path === key);
+    if (matchedItem && matchedItem.isExternal) {
+      router.replace(matchedItem.path);
+      return;
+    }
+    if (typeof setView === "function") {
+      setView(key);
+      return;
+    }
+    router.replace(`${basePath}/${key}`);
   };
 
   const userMenuItems = [
@@ -50,84 +84,54 @@ const SideBar = ({ activeView, setView }) => {
     },
     { type: "divider" },
     {
-      key: "profile",
-      label: "View More Info",
-      onClick: () => window.location.href = "/tpo/myprofile/personal"
-    },
-    {
       key: "logout",
-      label: <span style={{ color: "red" }}>Logout</span>,
+      label: <span style={{ color: "#ff4d4f" }}>Logout</span>,
       onClick: handleLogout
     }
   ];
 
-  useEffect(() => {
-    if (currPath === `${basePath}/website-and-branding`) {
-      dispatch(changeCollapse(true));
-    }
-  }, [currPath, dispatch, nav]);
-
-  const isActivePath = (p) => {
-    if (typeof setView === "function") {
-      return activeView === p;
-    }
-    return currPath === `${basePath}/${p}` || currPath.startsWith(`${basePath}/${p}/`);
-  };
-
-  const handleClick = (titles) => {
-    if (typeof setView === "function") {
-      setView(titles.path);
-      return;
-    }
-    nav.replace(`${basePath}/` + titles.path);
-  };
-
   return (
-    <div
-      className={sideBarStyles.container}
-      style={
-        isCollapsed
-          ? { width: "3%", transition: "1s" }
-          : { width: "15%", transition: "1s" }
-      }
+    <section
+      className={`${sideBarStyles.sideBarContainer} ${isCollapsed ? sideBarStyles.collapsedSidebar : sideBarStyles.expandedSidebar}`}
     >
-      <div className={sideBarStyles.topLinks}>
-        {sideBarTitles.map((titles, index) => {
-          const active = isActivePath(titles.path);
-          return (
-            <div
-              key={index}
-              className={`${sideBarStyles.currTitle} ${sideBarStyles.name} ${active ? sideBarStyles.active : ""
-                } ${isCollapsed ? sideBarStyles.jcCenter : sideBarStyles.jcStart
-                }`}
-              onClick={() => handleClick(titles)}
-              title={titles.name}
-            >
-              <div
-                style={
-                  isCollapsed
-                    ? { margin: "0rem 2rem", color: "#fff" }
-                    : { marginRight: ".5rem", color: "#fff" }
-                }
-              >
-                {titles.icon}
-              </div>
-              {/* <span
-                style={
-                  !isCollapsed
-                    ? { width: "100%", transition: "1s" }
-                    : { width: "0%", overflow: "hidden", transition: "1s" }
-                }
-              > */}
-              {titles.name}
-              {/* </span> */}
-            </div>
-          );
-        })}
+      <div className={sideBarStyles.logoContainer}>
+        <img
+          src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"
+          alt="Synsper Logo"
+          onClick={() => router.replace(`${basePath}/myTests`)}
+          style={{ cursor: "pointer" }}
+        />
+        {!isCollapsed && (
+          <div
+            className={sideBarStyles.logoText}
+            onClick={() => router.replace(`${basePath}/myTests`)}
+            style={{ flex: 1, paddingRight: '8px', cursor: "pointer" }}
+          >
+            S K I L L <span> M E D H A</span>
+          </div>
+        )}
+        <div
+          onClick={() => dispatch(changeCollapse(!isCollapsed))}
+          style={{ cursor: 'pointer', padding: '0 8px', display: 'flex', alignItems: 'center', flexShrink: 0, marginRight: isCollapsed ? '0' : '24px', marginLeft: isCollapsed ? '0' : 'auto' }}
+        >
+          {isCollapsed ? <MenuUnfoldOutlined style={{ fontSize: '30px' }} /> : <MenuFoldOutlined style={{ fontSize: '24px' }} />}
+        </div>
       </div>
 
-      <div className={sideBarStyles.bottomLogout}>
-        <div style={{ padding: isCollapsed ? "0" : "0 1rem", display: "flex", justifyContent: "center", width: "100%" }}>
+      <div className={sideBarStyles.scrolltabs}>
+        <Menu
+          mode="inline"
+          theme="light"
+          inlineCollapsed={isCollapsed}
+          className={sideBarStyles.styledAntMenu}
+          selectedKeys={getSelectedKeys()}
+          onClick={handleMenuClick}
+          items={menuItems}
+        />
+      </div>
+
+      <div className={sideBarStyles.bottom}>
+        <div style={{ padding: isCollapsed ? "0" : "0 1rem", display: "flex", justifyContent: "center" }}>
           {isLoadingUser ? (
             <div className={sideBarStyles.profilePillSkeleton}>
               <Skeleton.Avatar active size="large" shape="circle" />
@@ -149,21 +153,25 @@ const SideBar = ({ activeView, setView }) => {
                   )}
                 </div>
                 {!isCollapsed && (
-                  <div className={sideBarStyles.profileInfo}>
-                    <span className={sideBarStyles.profileName}>
-                      {name.length > 15 ? name.substring(0, 15) + "..." : name}
-                    </span>
-                    <span className={sideBarStyles.profileEmail}>
-                      {email}
-                    </span>
-                  </div>
+                  <>
+                    <div className={sideBarStyles.profileInfo}>
+                      <span className={sideBarStyles.name}>
+                        {name.length > 15
+                          ? name.substring(0, 15) + "..."
+                          : name}
+                      </span>
+                      <span className={sideBarStyles.email}>
+                        {email}
+                      </span>
+                    </div>
+                  </>
                 )}
               </div>
             </Dropdown>
           )}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

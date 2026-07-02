@@ -2,25 +2,31 @@
 
 .container {
   width: 100%;
-  height: 90vh; // Give it a max viewport height
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+  background-color: #eff5fb;
+  min-height: 85vh;
+  padding: 1.5rem 2rem; // Consistent padding for standard sides gap
 }
 
 // ── Header Section ──
 .headerSection {
-  margin-bottom: 0.5rem;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
   gap: 1rem;
 }
 
 // ── Left Side (Title + Info + Filters) ──
 .headerContent {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
   flex: 1;
 }
 
@@ -37,44 +43,56 @@
   gap: 8px;
 
   h2 {
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
-    color: $iconBackground;
-    font-weight: 700;
+    font-size: 1.25rem;
+    color: #0f172a;
+    font-weight: 750;
     margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .breadcrumbSeparator {
+    color: #cbd5e1;
+    font-size: 1.25rem;
+    font-weight: 400;
   }
 }
 
-// ── Info Bar (Inline) ──
+// ── Info Bar (Badges) ──
 .infoBar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0.35rem 0.75rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #eee;
+  gap: 0.5rem;
 }
 
 .infoItem {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #555;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid transparent;
 
-  strong {
-    color: #222;
-    font-size: 13px;
+  &.results {
+    background-color: #eff6ff;
+    border-color: #dbeafe;
+    color: #1e69da;
   }
-}
 
-// ── Filter Tags (Inline) ──
-.filterTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
+  &.avgScore {
+    background-color: #fef2f2;
+    border-color: #fee2e2;
+    color: #ef4444;
+  }
+
+  &.tests {
+    background-color: #f0fdf4;
+    border-color: #dcfce7;
+    color: #22c55e;
+  }
 }
 
 // ── Right Side (Action Buttons) ──
@@ -83,125 +101,368 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+
+  .refreshBtn {
+    height: 40px !important;
+    border-radius: 10px !important;
+    border-color: #cbd5e1 !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    font-size: 13px !important;
+
+    &:hover {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+    }
+  }
+
+  .downloadReportsBtn {
+    background-color: #1e69da !important; // TPO Blue button color
+    border-color: #1e69da !important;
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    box-shadow: 0 2px 4px rgba(30, 105, 218, 0.15) !important;
+
+    &:hover {
+      background-color: #1a5bbd !important;
+      border-color: #1a5bbd !important;
+    }
+  }
 }
 
-// ── Table Body ──
+// ── Table Card Styling ──
 .progressBody {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  padding-bottom: 2rem; // Extra padding for pagination
+  width: 100%;
 
-  &::-webkit-scrollbar {
-    width: 6px;
+  :global(.ant-card) {
+    border-radius: 14px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01) !important;
+    overflow: hidden;
   }
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.15);
-    border-radius: 10px;
-  }
-}
-
-// ── Misc (keep existing) ──
-.head1 {
-  display: flex;
-  padding: 0.2rem 1rem;
-  justify-content: space-between;
-
-  .searchContainer {
+  .tableHeaderRow {
     display: flex;
-    border: 1.5px solid rgba(0, 0, 0, 0.178);
-    border-radius: 0.3rem;
-    font-size: 1rem;
-    width: 20%;
-    padding: 0rem 0.5rem 0rem 0rem;
+    justify-content: space-between;
     align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 
-    span {
-      height: 100%;
+    .tableHeaderLeft {
       display: flex;
-      padding: 0rem 0.3rem;
-      background-color: $iconBackgroundLowOpacity;
-      cursor: pointer;
+      align-items: center;
+      gap: 0.5rem;
+      color: #1e69da;
+      font-size: 1rem;
+      font-weight: 700;
 
-      .searchIcon {
-        background-color: transparent;
+      span {
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
       }
     }
 
-    input {
-      padding-left: 0.5rem;
-      border: none;
-      outline: none;
+    .tableHeaderRight {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+
+      .searchCon {
+        display: flex;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 0 1rem;
+        height: 40px;
+        width: 220px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+        .searchIcon {
+          color: #94a3b8;
+          font-size: 0.95rem;
+          flex-shrink: 0;
+        }
+
+        input {
+          width: 100%;
+          border: none;
+          outline: none;
+          background: transparent;
+          margin-left: 0.5rem;
+          font-size: 0.875rem;
+          font-weight: 550;
+          color: #64748b;
+
+          &::placeholder {
+            color: #94a3b8;
+          }
+        }
+      }
+
+      .filterSelect {
+        :global(.ant-select) {
+          width: 140px !important;
+        }
+        :global(.ant-select-selector) {
+          border-radius: 10px !important;
+          border-color: #e2e8f0 !important;
+          height: 40px !important;
+          padding: 4px 12px !important;
+          font-weight: 600 !important;
+          color: #475569 !important;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+        }
+      }
     }
   }
 
-  button {
-    border: none;
-    outline: none;
-    cursor: pointer;
-    padding: 0.5rem 2rem;
-    background-color: $iconBackground;
-    border-radius: 0.5rem;
+  // Ant Design Table Customize
+  :global(.ant-table-wrapper) {
+    :global(.ant-table-thead > tr > th) {
+      background-color: #f8fafc !important;
+      color: #475569 !important;
+      font-weight: 700 !important;
+      font-size: 12px !important;
+      text-transform: uppercase;
+      border-bottom: 1px solid #e2e8f0 !important;
+    }
+
+    :global(.ant-table-tbody > tr > td) {
+      border-bottom: 1px solid #f1f5f9 !important;
+      padding: 12px 16px !important;
+      vertical-align: middle !important;
+    }
+
+    :global(.ant-table-tbody > tr:hover > td) {
+      background-color: #f8fafc !important;
+    }
+  }
+
+  // Columns contents custom styles
+  .testDetailsCell {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e69da;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .deptTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background-color: #eff6ff;
+    color: #1e69da;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #dbeafe;
+  }
+
+  .userCell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 750;
+      font-size: 12px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .userTextStack {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+
+      .nameText {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      .emailText, .phoneText {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 550;
+      }
+    }
+  }
+
+  .endCell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .dateText {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .timeDetailText {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 550;
+    }
+  }
+
+  .scoreText {
+    font-size: 15px;
+    font-weight: 800;
+
+    &.positive {
+      color: #1e69da;
+    }
+    &.negative {
+      color: #ef4444;
+    }
+  }
+
+  .timeTakenText {
+    font-size: 14px;
+    font-weight: 750;
+    color: #1e69da;
+  }
+
+  .imageCell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    :global(.ant-avatar) {
+      background-color: #e2e8f0 !important;
+      color: #64748b !important;
+    }
+  }
+
+  .hrtPill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid transparent;
+
+    &.flagged {
+      background-color: #fdf2f8;
+      border-color: #fbcfe8;
+      color: #db2777;
+    }
+
+    &.switched {
+      background-color: #fff7ed;
+      border-color: #ffedd5;
+      color: #d97706;
+    }
+
+    &.blocked {
+      background-color: #fef2f2;
+      border-color: #fee2e2;
+      color: #dc2626;
+    }
+
+    &.average {
+      background-color: #fffbeb;
+      border-color: #fef3c7;
+      color: #d97706;
+    }
+  }
+
+  .actionCell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    .viewBtn {
+      background-color: #1e69da !important; // TPO Blue button color
+      border-color: #1e69da !important;
+      color: white !important;
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+      height: 32px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+      font-size: 13px !important;
+      box-shadow: none !important;
+
+      &:hover {
+        background-color: #1a5bbd !important;
+        border-color: #1a5bbd !important;
+      }
+    }
+
+    .downloadIconBtn {
+      width: 32px !important;
+      height: 32px !important;
+      padding: 0 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 8px !important;
+      border-color: #cbd5e1 !important;
+      color: #64748b !important;
+
+      &:hover {
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
+        border-color: #94a3b8 !important;
+      }
+    }
   }
 }
 
-.viewButton {
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  background-color: $iconBackground;
-  border-radius: 0.5rem;
-}
-
-.image {
-  border: 1px solid;
-  width: 6rem;
-  height: 4rem;
-  background-color: rgba(102, 102, 102, 0.233);
-  border-radius: 0.4rem;
-}
-
-.info {
-  cursor: pointer;
-  font-size: 1rem;
-  margin-right: 0.5rem;
-}
-
 .studentActivity_btn {
-  color: black !important;
-  font-size: 0.7rem !important;
-  padding: 0.1rem 0.5rem !important;
+  color: #1e69da !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 2px 8px !important;
   height: fit-content !important;
-}
+  background-color: #eff6ff !important;
+  border: 1px solid #dbeafe !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  margin-top: 4px;
 
-.studentActivity_btn:hover {
-  background-color: white !important;
+  &:hover {
+    background-color: #dbeafe !important;
+    color: #1a5bbd !important;
+  }
 }
 
 .student_test_block {
-  color: $studentTestBlock;
-}
-
-.icon {
-  transition: transform 0.3s;
-  font-size: 1rem;
-}
-
-.iconActive {
-  transform: rotate(120deg);
-}
-
-.iconInactive {
-  transform: rotate(30deg);
-}
-
-.capture-root {
-  transform: none !important;
-  position: static !important;
+  color: #dc2626;
+  font-weight: 700;
 }

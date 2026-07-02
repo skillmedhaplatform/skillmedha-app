@@ -1,10 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AllTestsStyles from "./styles/alltests.module.scss";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-
 import AllTestsComp from "./components/allTests";
 import { useRouter } from "@bprogress/next/app";
 import {
@@ -15,65 +13,28 @@ import {
 import { setFormValues } from "@/redux/slices/testportal_admin/slice/stepform";
 import { clearSstorageVals, setSstorage } from "@/utils/universalUtils/windowMW";
 import { clearSelectQuestions } from "@/redux/slices/testportal_admin/slice/questions";
-import CardSkeleton from "@/modules/testportal_admin/components/reusable-comps/skeleton/cardSkeleton";
-import { Button } from "antd";
+import { 
+  CarryOutOutlined, 
+  SearchOutlined, 
+  CheckCircleOutlined, 
+  ClockCircleOutlined,
+  PlusOutlined
+} from "@ant-design/icons";
 
 const Page = () => {
-  const values = useSelector((state) => state.steps.value);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all"); // "all", "active", "expired"
 
-  const allTests = useSelector((state) => state.tests.value);
+  const allTests = useSelector((state) => state.tests.value) || [];
   const singleTest = useSelector((state) => state.tests.test);
-  const testCategories = useSelector(
-    (state) => state.tests.testCategories.value
-  );
-
-  const [allTestCates, setAllTestCates] = useState([]);
-
-  useEffect(() => {
-    const alltestsCategory = allTests?.map((test) => test?.category[0]);
-
-    if (!allTestCates?.length && alltestsCategory?.length) {
-      setAllTestCates(alltestsCategory);
-    }
-  }, [allTests?.length]);
-
-  const newTest = useSelector((state) => state.tests.newTest.value);
-
-  const [cursor, setCursor] = useState(null);
-
-  const nav = useRouter();
-
-  const [selectedOption1, setSelectedOption1] = useState("");
-
-  const handleChange1 = (event) => {
-    setSelectedOption1(event.target.value);
-    setLoading(true);
-    dispatch(getTests({ status: event.target.value, limit: 20 })).finally(
-      () => {
-        setLoading(false);
-      }
-    );
-  };
-
-  const [selectedOption2, setSelectedOption2] = useState("");
-
-  const handleChange2 = (event) => {
-    setSelectedOption2(event.target.value);
-    setLoading(true);
-
-    dispatch(getTests({ category: event.target.value, limit: 20 })).finally(
-      () => {
-        setLoading(false);
-      }
-    );
-  };
 
   const dispatch = useDispatch();
+  const nav = useRouter();
 
   useEffect(() => {
     setLoading(true);
-    dispatch(getTests({ cursor: null, limit: 20, nav })).finally(() => {
+    dispatch(getTests({ cursor: null, limit: 100, nav })).finally(() => {
       setLoading(false);
     });
     dispatch(getTestCategories());
@@ -82,14 +43,95 @@ const Page = () => {
 
   setSstorage("questionObj", null);
   setSstorage("quesId", null);
+
+  const isTestExpired = (test) => {
+    const expiryDate =
+      test?.time?.expiryDates?.accessClosingDate ||
+      test?.time?.expiryDates?.testExpirationData;
+    if (test?.time?.expiryDates?.expiry && expiryDate) {
+      return new Date(expiryDate) < new Date();
+    }
+    return false;
+  };
+
+  // Calculate dynamic tab counts based on allTests
+  const totalCount = allTests.length;
+  const activeCount = allTests.filter(
+    (t) => t.status?.toLowerCase() === "active" && !isTestExpired(t)
+  ).length;
+  const expiredCount = allTests.filter(
+    (t) => t.status?.toLowerCase() === "inactive" || isTestExpired(t)
+  ).length;
+
+  // Filter tests based on searchQuery and selectedStatus
+  const displayTests = allTests.filter((test) => {
+    const matchesSearch =
+      searchQuery === "" ||
+      test?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      test?.category?.some((cat) =>
+        cat?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+    const isExpired = isTestExpired(test);
+    const matchesStatus =
+      selectedStatus === "all" ||
+      (selectedStatus === "active" && test.status?.toLowerCase() === "active" && !isExpired) ||
+      (selectedStatus === "expired" && (test.status?.toLowerCase() === "inactive" || isExpired));
+
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <React.Fragment>
       <div className={AllTestsStyles.container}>
-        <div className={AllTestsStyles.headerTitle}>
-          <div className={AllTestsStyles.Tests}>Tests</div>
-          <div className={AllTestsStyles.TestsFlex}>
-            <Button
-              type="primary"
+        {/* Redesigned Header Row */}
+        <div className={AllTestsStyles.headerRow}>
+          <div className={AllTestsStyles.headerLeft}>
+            <span className={AllTestsStyles.titleIcon}>
+              <CarryOutOutlined />
+            </span>
+            <h1 className={AllTestsStyles.titleText}>Tests</h1>
+          </div>
+
+          <div className={AllTestsStyles.headerCenter}>
+            {/* Search Box */}
+            <div className={AllTestsStyles.searchWrapper}>
+              <SearchOutlined className={AllTestsStyles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search tests..."
+                className={AllTestsStyles.searchInput}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {/* Filter Tabs */}
+            <div className={AllTestsStyles.filterTabs}>
+              <button
+                className={`${AllTestsStyles.tab} ${selectedStatus === "all" ? AllTestsStyles.active : ""}`}
+                onClick={() => setSelectedStatus("all")}
+              >
+                All <span className={AllTestsStyles.badge}>{totalCount}</span>
+              </button>
+              <button
+                className={`${AllTestsStyles.tab} ${selectedStatus === "active" ? AllTestsStyles.active : ""}`}
+                onClick={() => setSelectedStatus("active")}
+              >
+                <CheckCircleOutlined /> Active <span className={AllTestsStyles.badge}>{activeCount}</span>
+              </button>
+              <button
+                className={`${AllTestsStyles.tab} ${selectedStatus === "expired" ? AllTestsStyles.active : ""}`}
+                onClick={() => setSelectedStatus("expired")}
+              >
+                <ClockCircleOutlined /> Expired <span className={AllTestsStyles.badge}>{expiredCount}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className={AllTestsStyles.headerRight}>
+            <button
+              className={AllTestsStyles.addBtn}
               onClick={() => {
                 clearSstorageVals();
                 dispatch(setFormValues({}));
@@ -97,50 +139,23 @@ const Page = () => {
                 if (!singleTest?._id) nav.replace("/testportal_admin/myTests/new-test");
               }}
             >
-              Add New Test
-            </Button>
+              <PlusOutlined /> Add New Test
+            </button>
           </div>
         </div>
 
-        {/* <div className={AllTestsStyles.dropDownCon}>
-          <button>
-            <select value={selectedOption1} onChange={handleChange1}>
-              <option value=""> Status </option>
-              <option value="active">Active</option>
-              <option value="inprogress">Inprogress</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </button>
-
-          <button>
-            <select value={selectedOption2} onChange={handleChange2}>
-              <option value=""> All Categories </option>
-              {allTestCates?.length &&
-                allTestCates?.map((e) => (
-                  <option value={e?.name} key={e?.name}>
-                    {e?.name}
-                  </option>
-                ))}
-            </select>
-          </button>
-        </div> */}
-
+        {/* Card Listing Container */}
         <div className={AllTestsStyles.TestCards}>
-          {loading ? (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-              <CardSkeleton />
-              <CardSkeleton />
-              <CardSkeleton />
-            </div>
-          ) : allTests?.length > 0 ? (
-            <AllTestsComp />
-          ) : (
-            <div className={AllTestsStyles.noTestsMessage}>
-              {allTests?.length <= 0 && !selectedOption2 && !selectedOption1
-                ? "No tests Added."
-                : "No tests with selected filter"}
-            </div>
-          )}
+          <AllTestsComp 
+            displayTests={displayTests} 
+            loading={loading} 
+            onAddNewTest={() => {
+              clearSstorageVals();
+              dispatch(setFormValues({}));
+              dispatch(clearTestVals());
+              if (!singleTest?._id) nav.replace("/testportal_admin/myTests/new-test");
+            }}
+          />
         </div>
       </div>
     </React.Fragment>
