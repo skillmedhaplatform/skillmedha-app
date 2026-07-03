@@ -18,8 +18,8 @@ import {
   Button,
   Modal,
   Form,
-  App,
   Tooltip,
+  message,
 } from "antd";
 import {
   UserOutlined,
@@ -35,7 +35,6 @@ const { Search } = Input;
 const { Option } = Select;
 
 function Page() {
-  const { message, notification } = App.useApp();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
@@ -53,6 +52,9 @@ function Page() {
   const [sortBy, setSortBy] = useState("name-asc");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteModalData, setDeleteModalData] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [form] = Form.useForm();
 
   const {
@@ -162,7 +164,7 @@ function Page() {
       message.success("TPO added successfully!");
       form.resetFields();
       setIsModalVisible(false);
-      dispatch(getAllTposInOrg({ orgId: ORG_ID }));
+      await dispatch(getAllTposInOrg({ orgId: ORG_ID }));
     } catch (error) {
       if (error.errorFields) {
         message.error("Please fill all required fields correctly");
@@ -244,7 +246,8 @@ function Page() {
         <Button
           style={{ width: "100%", marginTop: "16px" }}
           onClick={() => {
-            dispatch(DeleteTPO({ tpoId: tpo?.globalId, orgId: tpo?.orgId }));
+            setDeleteModalData(tpo);
+            setDeleteModal(true);
           }}
         >
           Delete TPO
@@ -482,6 +485,41 @@ function Page() {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title="Delete TPO"
+        open={deleteModal}
+        onOk={async () => {
+          setDeleteLoading(true);
+          try {
+            await dispatch(
+              DeleteTPO({
+                tpoId: deleteModalData?.globalId,
+                orgId: deleteModalData?.orgId,
+              })
+            ).unwrap();
+            setDeleteModal(false);
+            setDeleteModalData(null);
+            dispatch(getAllTposInOrg({ orgId: ORG_ID }));
+          } catch (e) {
+            // handle error if needed
+          } finally {
+            setDeleteLoading(false);
+          }
+        }}
+        onCancel={() => {
+          setDeleteModal(false);
+          setDeleteModalData(null);
+        }}
+        confirmLoading={deleteLoading}
+        mask={{ closable: false }}
+      >
+        <p>
+          Are you sure you want to delete{" "}
+          {deleteModalData ? getFullName(deleteModalData) || deleteModalData.userName : ""}
+          ?
+        </p>
       </Modal>
     </div>
   );

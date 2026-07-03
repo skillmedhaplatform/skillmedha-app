@@ -295,7 +295,7 @@ const StudentData = () => {
       );
 
       dispatch(getStudentsInDepartments({ id: params.departId }));
-      
+
       const { success, failed, errors } = response.data;
       if (failed > 0) {
         if (success > 0) {

@@ -1128,487 +1128,509 @@ const QuestionManager = () => {
           }
           footer={null}
         >
-          <section className={QuestionStyles.modal_maincont}>
-            <div className={QuestionStyles.modal_header}>
-              <div className={QuestionStyles.searchCon}>
-                <HiSearch size={20} />
+          {allTests?.map((test) => (
+            <Select.Option key={test._id} value={test._id}>
+              {test.title}
+            </Select.Option>
+          ))}
+        </Select>
+      </Modal>
 
-                <input
-                  placeholder="Search Questions"
-                  onClick={(e) => setSearchBarInputValueBank(e.target.value)}
-                />
-              </div>
-              <div className={QuestionStyles.filterings}>
-                <Select
-                  className={QuestionStyles.Select_tag}
-                  placeholder="Filter by category"
-                  value={selectedQCategoryFilterBank ?? null}
-                  onChange={(value) =>
-                    setQCategoryFilterBank(
-                      value === "remove-filter" ? null : value ?? null
-                    )
-                  }
-                  suffixIcon={null}
-                  allowClear
-                >
-                  <Select.Option value="remove-filter">
-                    Remove Filter
-                  </Select.Option>
-                  {bankCategories.map((categoryName, index) => (
-                    <Select.Option key={index} value={categoryName}>
-                      {categoryName}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </div>
+      <Modal
+        title="Question Bank"
+        open={questionBankModal}
+        onCancel={() => setQuestionBankModal(false)}
+        width={1000}
+        closeIcon={
+          <img
+            width={"20rem"}
+            src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
+            alt="close"
+          />
+        }
+        footer={null}
+      >
+        <section className={QuestionStyles.modal_maincont}>
+          <div className={QuestionStyles.modal_header}>
+            <div className={QuestionStyles.searchCon}>
+              <HiSearch size={20} />
 
-              <div className={QuestionStyles.filterings}>
-                <Select
-                  className={QuestionStyles.Select_tag}
-                  placeholder="by questiontype"
-                  value={selectedQtypeFilterBank ?? null}
-                  onChange={(value) =>
-                    setQtypeFilterBank(
-                      value === "remove-filter" ? null : value ?? null
-                    )
-                  }
-                  suffixIcon={null}
-                  allowClear
-                >
-                  <Select.Option value="remove-filter">
-                    Remove Filter
-                  </Select.Option>
-                  {bankUniqueQuestionTypes.map((eachQuestion, index) => (
-                    <Select.Option key={index} value={eachQuestion}>
-                      {eachQuestion}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </div>
-            </div>
-            {allQuestionsStatus === "pending" ? (
-              <div className={QuestionStyles.skeleton_bank}>
-                <QuestionSkeleton />
-                <br />
-                <QuestionSkeleton />
-                <br />
-                <QuestionSkeleton />
-              </div>
-            ) : (
-              <div className={QuestionStyles.questions_cont}>
-                <Collapse
-                  bordered={false}
-                  expandIcon={({ isActive }) => (
-                    <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                  )}
-                  style={{
-                    background: token.colorBgContainer,
-                  }}
-                  items={getItems(panelStyle)}
-                  accordion={false}
-                  onChange={(e) => setActivePanel(e)}
-                />
-              </div>
-            )}
-
-            <div className={QuestionStyles.btn_div}>
-              <Button
-                type="primary"
-                disabled={!Object.values(selectedQuestions).filter(Boolean).length}
-                onClick={() => {
-                  dispatch(
-                    addQuestionToTest({
-                      testId: singleTest?._id,
-                      selectedQuestions,
-                      dispatch,
-                    })
-                  );
-                  setQuestionBankModal(false);
-                  dispatch(clearSelectQuestions());
-                }}
-              >
-                Add
-              </Button>
-            </div>
-          </section>
-        </Modal>
-
-        <Modal
-          title="Bulk Upload Questions"
-          open={bulkuploadModal}
-          onCancel={() => {
-            if (!isUploading) {
-              setBulkUploadModal(false);
-              setFileList([]);
-            }
-          }}
-          width={500}
-          okText={isUploading ? "Uploading..." : "Upload"}
-          onOk={handleUpload}
-          okButtonProps={{
-            disabled: fileList.length === 0 || isUploading,
-            loading: isUploading,
-          }}
-          cancelButtonProps={{
-            disabled: isUploading,
-          }}
-          closable={!isUploading}
-          mask={{ closable: false }}
-        >
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-          >
-            <Alert
-              message="Upload Instructions"
-              description="First, download the sample file, modify it with your data, and then re-upload the updated file here."
-              type="info"
-              showIcon
-              style={{ fontSize: "13px" }}
-            />
-
-            <Upload {...uploadProps}>
-              <Button
-                icon={<UploadOutlined />}
-                disabled={isUploading}
-                style={{ width: "100%" }}
-              >
-                Select .xlsx or .csv File
-              </Button>
-            </Upload>
-
-            <a
-              href="/question_sample_schema.xlsx"
-              download
-              style={{ width: "100%" }}
-            >
-              <Button type="primary" block disabled={isUploading}>
-                📩 Download Sample File
-              </Button>
-            </a>
-          </div>
-        </Modal>
-
-        <Modal
-          title={
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              {uploadStatus === "uploading" && "⏳ Uploading Questions..."}
-              {uploadStatus === "success" && (
-                <>
-                  <CheckCircleOutlined style={{ color: "#52c41a" }} />
-                  Upload Complete
-                </>
-              )}
-              {uploadStatus === "error" && (
-                <>
-                  <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
-                  Upload Failed
-                </>
-              )}
-            </div>
-          }
-          open={progressModal}
-          onCancel={!isUploading ? handleCloseProgressModal : undefined}
-          footer={
-            !isUploading && [
-              <Button
-                key="close"
-                type="primary"
-                onClick={handleCloseProgressModal}
-              >
-                Close
-              </Button>,
-            ]
-          }
-          width={800}
-          closable={!isUploading}
-          mask={{ closable: false }}
-          destroyOnHidden
-        >
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-          >
-            {/* Progress Section */}
-            {uploadStatus === "uploading" && (
-              <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <Progress
-                  type="circle"
-                  percent={100}
-                  status="active"
-                  strokeColor={{
-                    "0%": "#108ee9",
-                    "100%": "#87d068",
-                  }}
-                />
-                <p
-                  style={{
-                    marginTop: "16px",
-                    fontSize: "14px",
-                    color: "#666",
-                  }}
-                >
-                  Processing your questions... Please don't close this window.
-                </p>
-              </div>
-            )}
-
-            {/* Success Summary */}
-            {uploadStatus === "success" && uploadResult && (
-              <>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: "16px",
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: "16px",
-                      background: "#f0f9ff",
-                      borderRadius: "8px",
-                      textAlign: "center",
-                      border: "1px solid #bae7ff",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "24px",
-                        fontWeight: "bold",
-                        color: "#1890ff",
-                      }}
-                    >
-                      {uploadResult.totalRows || 0}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        marginTop: "4px",
-                      }}
-                    >
-                      Total Rows
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      padding: "16px",
-                      background: "#f6ffed",
-                      borderRadius: "8px",
-                      textAlign: "center",
-                      border: "1px solid #b7eb8f",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "24px",
-                        fontWeight: "bold",
-                        color: "#52c41a",
-                      }}
-                    >
-                      {uploadResult.insertedCount || 0}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        marginTop: "4px",
-                      }}
-                    >
-                      Successfully Added
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      padding: "16px",
-                      background: "#fff1f0",
-                      borderRadius: "8px",
-                      textAlign: "center",
-                      border: "1px solid #ffccc7",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "24px",
-                        fontWeight: "bold",
-                        color: "#ff4d4f",
-                      }}
-                    >
-                      {uploadResult.skippedCount || 0}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#666",
-                        marginTop: "4px",
-                      }}
-                    >
-                      Failed/Skipped
-                    </div>
-                  </div>
-                </div>
-
-                {/* Success Message */}
-                {uploadResult.insertedCount > 0 && (
-                  <Alert
-                    message="Questions Added Successfully"
-                    description={`${uploadResult.insertedCount} question(s) have been added to the question bank.`}
-                    type="success"
-                    showIcon
-                  />
-                )}
-
-                {/* Failed Questions Table */}
-                {uploadResult.skippedCount > 0 &&
-                  uploadResult.skippedQuestions && (
-                    <div>
-                      <Alert
-                        message={`${uploadResult.skippedCount} Question(s) Failed`}
-                        description="The following questions could not be uploaded due to validation errors:"
-                        type="warning"
-                        showIcon
-                        style={{ marginBottom: "12px" }}
-                      />
-
-                      <Table
-                        columns={skippedColumns}
-                        dataSource={uploadResult.skippedQuestions}
-                        rowKey="row"
-                        pagination={{
-                          pageSize: 5,
-                          showSizeChanger: false,
-                          showTotal: (total) =>
-                            `Total ${total} failed questions`,
-                        }}
-                        scroll={{ x: 600 }}
-                        size="small"
-                      />
-                    </div>
-                  )}
-              </>
-            )}
-
-            {/* Error State */}
-            {uploadStatus === "error" && (
-              <Alert
-                message="Upload Failed"
-                description={
-                  uploadResult?.error ||
-                  "An unexpected error occurred during upload. Please try again."
-                }
-                type="error"
-                showIcon
+              <input
+                placeholder="Search Questions"
+                onClick={(e) => setSearchBarInputValueBank(e.target.value)}
               />
-            )}
-          </div>
-        </Modal>
+            </div>
+            <div className={QuestionStyles.filterings}>
+              <Select
+                className={QuestionStyles.Select_tag}
+                placeholder="Filter by category"
+                value={selectedQCategoryFilterBank ?? null}
+                onChange={(value) =>
+                  setQCategoryFilterBank(
+                    value === "remove-filter" ? null : value ?? null
+                  )
+                }
+                suffixIcon={null}
+                allowClear
+              >
+                <Select.Option value="remove-filter">
+                  Remove Filter
+                </Select.Option>
+                {bankCategories.map((categoryName, index) => (
+                  <Select.Option key={index} value={categoryName}>
+                    {categoryName}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
 
-        <Modal
-          open={generateAiQuestion}
-          onCancel={() => {
-            setGenerateQuestions(false);
-            setIsGenerated(true);
-          }}
-          width="70%"
-          centered={true}
-          mask={{ closable: modalProps.maskClosable }}
-          keyboard={modalProps.keyboard}
-          closable={modalProps.closable}
-          destroyOnHidden={true}
-          title="Generate using AI"
-          footer={null}
-          closeIcon={
-            <img
-              width={"20rem"}
-              src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
-              alt="close"
-            />
-          }
-        >
-          {generatedQuestions?.length > 0 && isGenerated ? (
-            <div className={QuestionStyles.generatedQuestions}>
-              <Collapse accordion items={questionItems} bordered={false} />
-              <div className={QuestionStyles.flexButtons}>
-                <Button onClick={uploadToTest}>Add To Question Manager</Button>
-                <div>
-                  <Button
-                    onClick={() => {
-                      handleSave();
-                      setEditQues(!editQues);
-                    }}
-                  >
-                    {editQues ? "Save" : "Edit"}{" "}
-                  </Button>
-                  {editQues ? (
-                    <Button onClick={handleCancel}> Cancel </Button>
-                  ) : null}
-                </div>
-              </div>
+            <div className={QuestionStyles.filterings}>
+              <Select
+                className={QuestionStyles.Select_tag}
+                placeholder="by questiontype"
+                value={selectedQtypeFilterBank ?? null}
+                onChange={(value) =>
+                  setQtypeFilterBank(
+                    value === "remove-filter" ? null : value ?? null
+                  )
+                }
+                suffixIcon={null}
+                allowClear
+              >
+                <Select.Option value="remove-filter">
+                  Remove Filter
+                </Select.Option>
+                {bankUniqueQuestionTypes.map((eachQuestion, index) => (
+                  <Select.Option key={index} value={eachQuestion}>
+                    {eachQuestion}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+          </div>
+          {allQuestionsStatus === "pending" ? (
+            <div className={QuestionStyles.skeleton_bank}>
+              <QuestionSkeleton />
+              <br />
+              <QuestionSkeleton />
+              <br />
+              <QuestionSkeleton />
             </div>
           ) : (
-            <div className={QuestionStyles.generateAiContainer}>
+            <div className={QuestionStyles.questions_cont}>
+              <Collapse
+                bordered={false}
+                expandIcon={({ isActive }) => (
+                  <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                )}
+                style={{
+                  background: token.colorBgContainer,
+                }}
+                items={getItems(panelStyle)}
+                accordion={false}
+                onChange={(e) => setActivePanel(e)}
+              />
+            </div>
+          )}
 
-              <p>Questions will be generated based on the text pasted below.</p>
+          <div className={QuestionStyles.btn_div}>
+            <Button
+              type="primary"
+              disabled={!Object.values(selectedQuestions).filter(Boolean).length}
+              onClick={() => {
+                dispatch(
+                  addQuestionToTest({
+                    testId: singleTest?._id,
+                    selectedQuestions,
+                    dispatch,
+                  })
+                );
+                setQuestionBankModal(false);
+                dispatch(clearSelectQuestions());
+              }}
+            >
+              Add
+            </Button>
+          </div>
+        </section>
+      </Modal>
 
-              <div className={QuestionStyles.editorStyles}>
-                <textarea
-                  ref={textparaRef}
-                  placeholder="Enter your text here to generate questions"
+      <Modal
+        title="Bulk Upload Questions"
+        open={bulkuploadModal}
+        onCancel={() => {
+          if (!isUploading) {
+            setBulkUploadModal(false);
+            setFileList([]);
+          }
+        }}
+        width={500}
+        okText={isUploading ? "Uploading..." : "Upload"}
+        onOk={handleUpload}
+        okButtonProps={{
+          disabled: fileList.length === 0 || isUploading,
+          loading: isUploading,
+        }}
+        cancelButtonProps={{
+          disabled: isUploading,
+        }}
+        closable={!isUploading}
+        mask={{ closable: false }}
+      >
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+        >
+          <Alert
+            message="Upload Instructions"
+            description="First, download the sample file, modify it with your data, and then re-upload the updated file here."
+            type="info"
+            showIcon
+            style={{ fontSize: "13px" }}
+          />
+
+          <Upload {...uploadProps}>
+            <Button
+              icon={<UploadOutlined />}
+              disabled={isUploading}
+              style={{ width: "100%" }}
+            >
+              Select .xlsx or .csv File
+            </Button>
+          </Upload>
+
+          <a
+            href="/question_sample_schema.xlsx"
+            download
+            style={{ width: "100%" }}
+          >
+            <Button type="primary" block disabled={isUploading}>
+              📩 Download Sample File
+            </Button>
+          </a>
+        </div>
+      </Modal>
+
+      <Modal
+        title={
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {uploadStatus === "uploading" && "⏳ Uploading Questions..."}
+            {uploadStatus === "success" && (
+              <>
+                <CheckCircleOutlined style={{ color: "#52c41a" }} />
+                Upload Complete
+              </>
+            )}
+            {uploadStatus === "error" && (
+              <>
+                <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
+                Upload Failed
+              </>
+            )}
+          </div>
+        }
+        open={progressModal}
+        onCancel={!isUploading ? handleCloseProgressModal : undefined}
+        footer={
+          !isUploading && [
+            <Button
+              key="close"
+              type="primary"
+              onClick={handleCloseProgressModal}
+            >
+              Close
+            </Button>,
+          ]
+        }
+        width={800}
+        closable={!isUploading}
+        mask={{ closable: false }}
+        destroyOnHidden
+      >
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+        >
+          {/* Progress Section */}
+          {uploadStatus === "uploading" && (
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <Progress
+                type="circle"
+                percent={100}
+                status="active"
+                strokeColor={{
+                  "0%": "#108ee9",
+                  "100%": "#87d068",
+                }}
+              />
+              <p
+                style={{
+                  marginTop: "16px",
+                  fontSize: "14px",
+                  color: "#666",
+                }}
+              >
+                Processing your questions... Please don't close this window.
+              </p>
+            </div>
+          )}
+
+          {/* Success Summary */}
+          {uploadStatus === "success" && uploadResult && (
+            <>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "16px",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "16px",
+                    background: "#f0f9ff",
+                    borderRadius: "8px",
+                    textAlign: "center",
+                    border: "1px solid #bae7ff",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: "bold",
+                      color: "#1890ff",
+                    }}
+                  >
+                    {uploadResult.totalRows || 0}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      marginTop: "4px",
+                    }}
+                  >
+                    Total Rows
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    padding: "16px",
+                    background: "#f6ffed",
+                    borderRadius: "8px",
+                    textAlign: "center",
+                    border: "1px solid #b7eb8f",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: "bold",
+                      color: "#52c41a",
+                    }}
+                  >
+                    {uploadResult.insertedCount || 0}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      marginTop: "4px",
+                    }}
+                  >
+                    Successfully Added
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    padding: "16px",
+                    background: "#fff1f0",
+                    borderRadius: "8px",
+                    textAlign: "center",
+                    border: "1px solid #ffccc7",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: "bold",
+                      color: "#ff4d4f",
+                    }}
+                  >
+                    {uploadResult.skippedCount || 0}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      marginTop: "4px",
+                    }}
+                  >
+                    Failed/Skipped
+                  </div>
+                </div>
+              </div>
+
+              {/* Success Message */}
+              {uploadResult.insertedCount > 0 && (
+                <Alert
+                  message="Questions Added Successfully"
+                  description={`${uploadResult.insertedCount} question(s) have been added to the question bank.`}
+                  type="success"
+                  showIcon
+                />
+              )}
+
+              {/* Failed Questions Table */}
+              {uploadResult.skippedCount > 0 &&
+                uploadResult.skippedQuestions && (
+                  <div>
+                    <Alert
+                      message={`${uploadResult.skippedCount} Question(s) Failed`}
+                      description="The following questions could not be uploaded due to validation errors:"
+                      type="warning"
+                      showIcon
+                      style={{ marginBottom: "12px" }}
+                    />
+
+                    <Table
+                      columns={skippedColumns}
+                      dataSource={uploadResult.skippedQuestions}
+                      rowKey="row"
+                      pagination={{
+                        pageSize: 5,
+                        showSizeChanger: false,
+                        showTotal: (total) =>
+                          `Total ${total} failed questions`,
+                      }}
+                      scroll={{ x: 600 }}
+                      size="small"
+                    />
+                  </div>
+                )}
+            </>
+          )}
+
+          {/* Error State */}
+          {uploadStatus === "error" && (
+            <Alert
+              message="Upload Failed"
+              description={
+                uploadResult?.error ||
+                "An unexpected error occurred during upload. Please try again."
+              }
+              type="error"
+              showIcon
+            />
+          )}
+        </div>
+      </Modal>
+
+      <Modal
+        open={generateAiQuestion}
+        onCancel={() => {
+          setGenerateQuestions(false);
+          setIsGenerated(true);
+        }}
+        width="70%"
+        centered={true}
+        mask={{ closable: modalProps.maskClosable }}
+        keyboard={modalProps.keyboard}
+        closable={modalProps.closable}
+        destroyOnHidden={true}
+        title="Generate using AI"
+        footer={null}
+        closeIcon={
+          <img
+            width={"20rem"}
+            src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
+            alt="close"
+          />
+        }
+      >
+        {generatedQuestions?.length > 0 && isGenerated ? (
+          <div className={QuestionStyles.generatedQuestions}>
+            <Collapse accordion items={questionItems} bordered={false} />
+            <div className={QuestionStyles.flexButtons}>
+              <Button onClick={uploadToTest}>Add To Question Manager</Button>
+              <div>
+                <Button
+                  onClick={() => {
+                    handleSave();
+                    setEditQues(!editQues);
+                  }}
+                >
+                  {editQues ? "Save" : "Edit"}{" "}
+                </Button>
+                {editQues ? (
+                  <Button onClick={handleCancel}> Cancel </Button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className={QuestionStyles.generateAiContainer}>
+
+            <p>Questions will be generated based on the text pasted below.</p>
+
+            <div className={QuestionStyles.editorStyles}>
+              <textarea
+                ref={textparaRef}
+                placeholder="Enter your text here to generate questions"
+              />
+            </div>
+
+            <div className={QuestionStyles.bottomFlex}>
+              <div className={QuestionStyles.bottomFlexLeft}>
+                <Select
+                  className={QuestionStyles.selectOption}
+                  suffixIcon={null}
+                  defaultValue={"Select an Option"}
+                  options={[
+                    {
+                      label: "Multiple Choice",
+                      value: "Multiple Choice",
+                    },
+
+                    {
+                      label: "Single Choice",
+                      value: "Single Choice",
+                    },
+                    {
+                      label: "True - False",
+                      value: "True - False",
+                    },
+                  ]}
+                  onChange={(e) =>
+                    setGenerateVals({ ...generateVals, questionType: e })
+                  }
+                />
+                <input
+                  type="number"
+                  placeholder="Number of questions"
+                  value={generateVals.noOfQuestion}
+                  onChange={(e) =>
+                    setGenerateVals({
+                      ...generateVals,
+                      noOfQuestion: e.target.value,
+                    })
+                  }
                 />
               </div>
 
-              <div className={QuestionStyles.bottomFlex}>
-                <div className={QuestionStyles.bottomFlexLeft}>
-                  <Select
-                    className={QuestionStyles.selectOption}
-                    suffixIcon={null}
-                    defaultValue={"Select an Option"}
-                    options={[
-                      {
-                        label: "Multiple Choice",
-                        value: "Multiple Choice",
-                      },
-
-                      {
-                        label: "Single Choice",
-                        value: "Single Choice",
-                      },
-                      {
-                        label: "True - False",
-                        value: "True - False",
-                      },
-                    ]}
-                    onChange={(e) =>
-                      setGenerateVals({ ...generateVals, questionType: e })
-                    }
-                  />
-                  <input
-                    type="number"
-                    placeholder="Number of questions"
-                    value={generateVals.noOfQuestion}
-                    onChange={(e) =>
-                      setGenerateVals({
-                        ...generateVals,
-                        noOfQuestion: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <button onClick={handleClear}>Clear Text</button>
-              </div>
-
-              <Button
-                className={QuestionStyles.generateButton}
-                onClick={generateQues}
-              >
-                Generate
-              </Button>
+              <button onClick={handleClear}>Clear Text</button>
             </div>
-          )}
-        </Modal>
-      </div>
+
+            <Button
+              className={QuestionStyles.generateButton}
+              onClick={generateQues}
+            >
+              Generate
+            </Button>
+          </div>
+        )}
+      </Modal>
+    </div>
   );
 };
 

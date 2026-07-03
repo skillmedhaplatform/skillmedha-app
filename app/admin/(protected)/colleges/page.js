@@ -13,6 +13,7 @@ import {
   Tag,
   Space,
   Badge,
+  message,
 } from "antd";
 import {
   SearchOutlined,
@@ -45,7 +46,6 @@ import { usePermissions, PERMISSION_VALUES } from "@/hooks/usepermission";
 const { Option } = Select;
 
 export default function College() {
-  const { message } = App.useApp();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
@@ -246,7 +246,7 @@ export default function College() {
       setEditingCollege(null);
       setSelectedState(undefined);
       setSelectedDistrict(undefined);
-      dispatch(getAllOrgs({ type: "college" }));
+      await dispatch(getAllOrgs({ type: "college" }));
     } catch (error) {
       if (error.errorFields) {
         message.error("Please fill all required fields correctly");
