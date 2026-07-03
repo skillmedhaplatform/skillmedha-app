@@ -1128,13 +1128,20 @@ const QuestionManager = () => {
           }
           footer={null}
         >
-          {allTests?.map((test) => (
-            <Select.Option key={test._id} value={test._id}>
-              {test.title}
-            </Select.Option>
-          ))}
-        </Select>
-      </Modal>
+          <Select
+            mode="multiple"
+            allowClear
+            style={{ width: "100%" }}
+            placeholder="Please select tests"
+            onChange={(value) => setSelectedTests(value)}
+          >
+            {allTests?.map((test) => (
+              <Select.Option key={test._id} value={test._id}>
+                {test.title}
+              </Select.Option>
+            ))}
+          </Select>
+        </Modal>
 
       <Modal
         title="Question Bank"
