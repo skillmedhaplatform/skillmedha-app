@@ -410,13 +410,6 @@ const UsersComp = () => {
             </Select>
           </div>
 
-          {/* Add Student Button Placeholder */}
-          <button 
-            className={userCompStyles.addBtn}
-            onClick={() => message.info("Add Student feature is a placeholder")}
-          >
-            <UserOutlined /> Add Student
-          </button>
         </div>
       </div>
 

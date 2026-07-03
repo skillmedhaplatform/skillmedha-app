@@ -1071,25 +1071,62 @@ const QuestionManager = () => {
         />
       </div>
 
-      <Modal
-        title="Select Tests to copy this question"
-        open={openCopyModal}
-        onCancel={() => setOpenCopyModal(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setOpenCopyModal(false)}>
-            Cancel
-          </Button>,
-          <Button key="submit" type="primary" onClick={handleCopy}>
-            Submit
-          </Button>,
-        ]}
-      >
-        <Select
-          mode="multiple"
-          allowClear
-          style={{ width: "100%" }}
-          placeholder="Please select tests"
-          onChange={(value) => setSelectedTests(value)}
+        <Modal
+          title="Delete/Remove Question"
+          open={openDeleteModal}
+          onOk={handleDelete}
+          confirmLoading={confirmDeleteLoading}
+          onCancel={() => setOpenDeleteModal(false)}
+        >
+          <Radio.Group onChange={(e) => setDeleteSelect(e.target.value)} value={deleteSelect}>
+            <Radio value={1}>Remove Question From Current Test</Radio>
+            <Radio value={2}>
+              Delete Question From Question Bank {`<The Question(s) will be permanentaly deleted>`}
+            </Radio>
+          </Radio.Group>
+        </Modal>
+
+        <Modal
+          title="Select Tests to copy this question"
+          open={openCopyModal}
+          onCancel={() => setOpenCopyModal(false)}
+          footer={[
+            <Button key="cancel" onClick={() => setOpenCopyModal(false)}>
+              Cancel
+            </Button>,
+            <Button key="submit" type="primary" onClick={handleCopy}>
+              Submit
+            </Button>,
+          ]}
+        >
+          <Select
+            mode="multiple"
+            allowClear
+            style={{ width: "100%" }}
+            placeholder="Please select tests"
+            onChange={(value) => setSelectedTests(value)}
+          >
+            {allTests?.map((test) => (
+              <Select.Option key={test._id} value={test._id}>
+                {test.title}
+              </Select.Option>
+            ))}
+          </Select>
+        </Modal>
+
+        <Modal
+          title="Question Bank"
+          open={questionBankModal}
+          onCancel={() => setQuestionBankModal(false)}
+          width={1000}
+          closeIcon={
+            <img
+              width={"20rem"}
+              src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
+              alt="close"
+            />
+          }
+          footer={null}
         >
           {allTests?.map((test) => (
             <Select.Option key={test._id} value={test._id}>

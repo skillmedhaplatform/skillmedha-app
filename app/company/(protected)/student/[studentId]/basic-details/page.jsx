@@ -66,7 +66,7 @@ const Basic = () => {
             </div>
             <div className={details.detailRow}>
               <p className={details.label}>Gender :</p>
-              <strong>{details?.gender || "N/A"}</strong>
+              <strong>{selectedStudent?.gender || "N/A"}</strong>
             </div>
             <div className={details.detailRow}>
               <p className={details.label}>Alternative Phone :</p>
@@ -102,7 +102,7 @@ const Basic = () => {
 
         <div className={details.collegeRow}>
           <p className={details.collegeLabel}>Current/Latest College :</p>
-          <strong>{details?.collegeName ?? "N/A"}</strong>
+          <strong>{selectedStudent?.collegeName ?? "N/A"}</strong>
         </div>
 
         <div className={details.regNumberRow}>
@@ -201,7 +201,7 @@ const Basic = () => {
             </div>
             <div className={details.detailRow}>
               <p className={details.label}>District :</p>
-              <strong>{details?.districtName || "N/A"}</strong>
+              <strong>{selectedStudent?.districtName || "N/A"}</strong>
             </div>
           </div>
 
@@ -254,7 +254,7 @@ const Basic = () => {
             </div>
             <div className={details.detailRow}>
               <p className={details.label}>District :</p>
-              <strong>{details?.districtName || "N/A"}</strong>
+              <strong>{selectedStudent?.districtName || "N/A"}</strong>
             </div>
           </div>
 
@@ -275,11 +275,11 @@ const Basic = () => {
             </div>
             <div className={details.detailRow}>
               <p className={details.label}>City :</p>
-              <strong>{details?.cityName || "N/A"}</strong>
+              <strong>{selectedStudent?.cityName || "N/A"}</strong>
             </div>
             <div className={details.detailRow}>
               <p className={details.label}>State :</p>
-              <strong>{details?.stateName || "N/A"}</strong>
+              <strong>{selectedStudent?.stateName || "N/A"}</strong>
             </div>
           </div>
         </div>
@@ -316,7 +316,7 @@ const Basic = () => {
         </div>
 
         <div className={details.aboutsidedata}>
-          {selectedStudent?.links?.length > 0 ? (
+          {Array.isArray(selectedStudent?.links) && selectedStudent?.links?.length > 0 ? (
             selectedStudent?.links?.map((item, index) => (
               <React.Fragment key={index}>
                 <div className={details.leftSection}>

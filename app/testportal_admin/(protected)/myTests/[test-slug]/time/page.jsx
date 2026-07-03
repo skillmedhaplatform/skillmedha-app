@@ -723,6 +723,8 @@ const Page = () => {
         if (resp?.payload) {
           // Show success message instead of redirecting
           message.success("Time settings updated successfully");
+          // Refresh the test data in Redux so layout constraints pass!
+          dispatch(getOneTests({ _id: selectedId }));
         }
       }
     );
