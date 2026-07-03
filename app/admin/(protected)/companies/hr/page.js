@@ -24,7 +24,7 @@ import {
   Tooltip,
   Modal,
   Form,
-  App,
+  message,
 } from "antd";
 import {
   SearchOutlined,
@@ -41,7 +41,6 @@ import { usePermissions, PERMISSION_VALUES } from "@/hooks/usepermission";
 const { Option } = Select;
 
 function Page() {
-  const { message, notification } = App.useApp();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -280,7 +279,7 @@ function Page() {
       setIsModalVisible(false);
 
       // Refresh users list
-      dispatch(
+      await dispatch(
         getUsersByOrg({
           orgId: ORG_ID,
           page: currentPage,

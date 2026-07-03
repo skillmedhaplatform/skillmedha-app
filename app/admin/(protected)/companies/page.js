@@ -12,6 +12,7 @@ import {
   Tooltip,
   Tag,
   Space,
+  message,
 } from "antd";
 import {
   SearchOutlined,
@@ -48,7 +49,6 @@ export default function Company() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const { replace, push } = useRouter();
-  const { message } = App.useApp();
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteModalData, setDeleteModalData] = useState(null);
   const { status, data } = useSelector((s) => s.adminOrg.deleteOrg);
@@ -244,7 +244,7 @@ export default function Company() {
       setEditingCompany(null);
       setSelectedState(undefined);
       setSelectedDistrict(undefined);
-      dispatch(getAllOrgs({ type: "company" }));
+      await dispatch(getAllOrgs({ type: "company" }));
     } catch (error) {
       if (error.errorFields) {
         message.error("Please fill all required fields correctly");

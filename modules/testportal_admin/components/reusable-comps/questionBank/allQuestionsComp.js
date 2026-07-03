@@ -141,15 +141,15 @@ const QuestionCard = ({ questions, index }) => {
   const filteredQuestions = (questions || []).filter((question) => {
     const matchesStatus = selectedQtypeFilter
       ? question?.questionType?.toLowerCase() ===
-        selectedQtypeFilter?.toLowerCase()
+      selectedQtypeFilter?.toLowerCase()
       : true;
 
     const matchesCategory = selectedQCategoryFilter
       ? question?.questionCategory?.some(
-          (category) =>
-            category.name?.toLowerCase() ===
-            selectedQCategoryFilter?.toLowerCase()
-        )
+        (category) =>
+          category.name?.toLowerCase() ===
+          selectedQCategoryFilter?.toLowerCase()
+      )
       : true;
 
     return matchesStatus && matchesCategory;
@@ -357,9 +357,9 @@ const QuestionCard = ({ questions, index }) => {
   const totalCount = questions.length;
   const singleChoiceCount = questions.filter(q => q.questionType === "Single Choice").length;
   const multipleChoiceCount = questions.filter(q => q.questionType === "Multiple Choice").length;
-  const codingCount = questions.filter(q => 
-    q.questionType === "Coding" || 
-    q.questionType?.toLowerCase()?.includes("code") || 
+  const codingCount = questions.filter(q =>
+    q.questionType === "Coding" ||
+    q.questionType?.toLowerCase()?.includes("code") ||
     q.questionType?.toLowerCase()?.includes("coding")
   ).length;
 
@@ -588,12 +588,12 @@ const QuestionCard = ({ questions, index }) => {
                 const isExpanded = activePanel.includes(question._id);
                 const score = parseInt(
                   question?.scoreSettings?.pointsForCorrectAns ||
-                  question?.scoreSettings?.PointsForEachCorrectAnswer || 
-                  question?.questionScore || 
+                  question?.scoreSettings?.PointsForEachCorrectAnswer ||
+                  question?.questionScore ||
                   0
                 );
                 const category = question?.questionCategory?.[0]?.name || "General";
-                
+
                 // Get options keys sorted
                 const optionKeys = Object.keys(question?.questionContent || {})
                   .filter((key) => key.includes("option"))
@@ -604,14 +604,14 @@ const QuestionCard = ({ questions, index }) => {
                   });
 
                 return (
-                  <div 
-                    key={question._id} 
+                  <div
+                    key={question._id}
                     className={`${qStyles.cardRow} ${isExpanded ? qStyles.expanded : ""}`}
                   >
                     {/* Collapsed Header (Image 2) */}
                     <div className={qStyles.collapsedHeader} onClick={() => togglePanel(question._id)}>
                       <div className={qStyles.leftPart}>
-                        <button 
+                        <button
                           className={`${qStyles.toggleBtn} ${isExpanded ? qStyles.active : ""}`}
                           onClick={(e) => { e.stopPropagation(); togglePanel(question._id); }}
                         >
@@ -682,7 +682,7 @@ const QuestionCard = ({ questions, index }) => {
                     {isExpanded && (
                       <div className={qStyles.expandedContent}>
                         {/* Question Text */}
-                        <div 
+                        <div
                           className={qStyles.expandedTitle}
                           dangerouslySetInnerHTML={{
                             __html: parseIfJson(question?.questionContent?.question),
@@ -707,8 +707,8 @@ const QuestionCard = ({ questions, index }) => {
                           {optionKeys.map((optionKey, optIndex) => {
                             const isCorrect = isCorrectAnswer(question, optionKey);
                             return (
-                              <div 
-                                key={optionKey} 
+                              <div
+                                key={optionKey}
                                 className={`${qStyles.optionRow} ${isCorrect ? qStyles.correct : ""}`}
                               >
                                 <div className={qStyles.optionLeft}>
@@ -750,25 +750,25 @@ const QuestionCard = ({ questions, index }) => {
 
                         {/* Expanded View Bottom Buttons */}
                         <div className={qStyles.expandedActions}>
-                          <button 
+                          <button
                             className={`${qStyles.actionBtn} ${qStyles.edit}`}
                             onClick={() => handleEditClick(question)}
                           >
                             <EditOutlined /> Edit
                           </button>
-                          <button 
+                          <button
                             className={`${qStyles.actionBtn} ${qStyles.duplicate}`}
                             onClick={() => handleDuplicateClick(question)}
                           >
                             <CopyOutlined /> Duplicate
                           </button>
-                          <button 
+                          <button
                             className={`${qStyles.actionBtn} ${qStyles.preview}`}
                             onClick={() => handlePreviewClick(question)}
                           >
                             <EyeOutlined /> Preview
                           </button>
-                          <button 
+                          <button
                             className={`${qStyles.actionBtn} ${qStyles.delete}`}
                             onClick={() => handleDeleteClick(question)}
                           >
@@ -1030,11 +1030,11 @@ const QuestionCard = ({ questions, index }) => {
       >
         {previewQuestion && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
-            <div 
+            <div
               style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a" }}
               dangerouslySetInnerHTML={{ __html: parseIfJson(previewQuestion?.questionContent?.question) }}
             />
-            
+
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {Object.keys(previewQuestion?.questionContent || {})
                 .filter((key) => key.includes("option"))
@@ -1046,8 +1046,8 @@ const QuestionCard = ({ questions, index }) => {
                 .map((optionKey, optIdx) => {
                   const isCorrect = isCorrectAnswer(previewQuestion, optionKey);
                   return (
-                    <div 
-                      key={optionKey} 
+                    <div
+                      key={optionKey}
                       style={{
                         padding: "10px 16px",
                         border: isCorrect ? "1px solid #22c55e" : "1px solid #e2e8f0",

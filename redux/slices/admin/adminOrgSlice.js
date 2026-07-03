@@ -294,7 +294,6 @@ export const registerOrg = createAsyncThunk(
       });
 
       if (data.msg) {
-        message.success(data.msg);
         return data;
       } else {
         throw new Error(
@@ -307,7 +306,6 @@ export const registerOrg = createAsyncThunk(
         error.response?.data?.message ||
         error.message ||
         "Failed to register organization";
-      message.error(errorMessage);
       return rejectWithValue(errorMessage);
     }
   }
