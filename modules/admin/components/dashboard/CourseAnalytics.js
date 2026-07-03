@@ -7,6 +7,13 @@ const CourseAnalytics = ({ data, loading }) => {
 
   const { totalEnrollments = 0, mostPopular = [], leastPopular = [] } = data;
 
+  const formatCourseName = (name) => {
+    if (!name) return "";
+    // Remove anything after a hyphen or en-dash
+    const parts = name.split(/[-–]/);
+    return parts[0].trim();
+  };
+
   return (
     <div className={styles.card}>
       <h3 className={styles.title}>Course Analytics</h3>
@@ -22,8 +29,8 @@ const CourseAnalytics = ({ data, loading }) => {
           <h4>Most Popular</h4>
           <ul>
             {mostPopular.map((course) => (
-              <li key={course._id}>
-                <span>{course.courseName}</span>
+              <li key={course._id} title={course.courseName}>
+                <span>{formatCourseName(course.courseName)}</span>
                 <span className={styles.count}>{course.enrollmentCount}</span>
               </li>
             )) || <p className={styles.empty}>No data</p>}
@@ -34,8 +41,8 @@ const CourseAnalytics = ({ data, loading }) => {
           <h4>Least Popular</h4>
           <ul>
             {leastPopular.map((course) => (
-              <li key={course._id}>
-                <span>{course.courseName}</span>
+              <li key={course._id} title={course.courseName}>
+                <span>{formatCourseName(course.courseName)}</span>
                 <span className={styles.count}>{course.enrollmentCount}</span>
               </li>
             )) || <p className={styles.empty}>No data</p>}

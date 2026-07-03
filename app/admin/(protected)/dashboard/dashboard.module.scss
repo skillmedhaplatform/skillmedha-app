@@ -2,9 +2,7 @@
 @use '@/modules/admin/styles/colors' as *;
 
 .dashboardContainer {
-  max-height: 90vh;
   background-color: $gray100;
-  overflow-y: scroll;
 }
 
 // ==================== UNAUTHORIZED ====================
@@ -65,13 +63,13 @@
 .mainContent {
   max-width: 1920px;
   margin: 0 auto;
-  padding: $spacing6;
+  padding: $spacing4 $spacing6;
 }
 
 .contentWrapper {
   display: flex;
   flex-direction: column;
-  gap: $spacing6;
+  gap: $spacing4;
 }
 
 // ==================== PAGE HEADER ====================
