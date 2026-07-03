@@ -317,7 +317,7 @@ export const getTests = createAsyncThunk("/getAllTests", async (args) => {
 
 export const createTests = createAsyncThunk(
   "/createTests",
-  async ({ values }) => {
+  async ({ values, nav, cuurPath }) => {
     try {
       const { data } = await axios.post(
         testsUrl + "/addTest",
@@ -331,10 +331,13 @@ export const createTests = createAsyncThunk(
       setSstorage("testTitle", "new test");
       if (data.msg) {
         message.success(data.msg);
-        if (window) {
+        if (nav && cuurPath) {
+          const rootPath = cuurPath.split("/myTests")[0];
+          nav.replace(`${rootPath}/myTests/${values.title}_id-${data.id}/questionManager`);
+        } else if (window) {
           window.location.href =
             window.location.origin +
-            "/myTests/" +
+            "/testportal_admin/myTests/" +
             values.title +
             "_id-" +
             data.id +
@@ -572,36 +575,41 @@ export const removeQuestionFromTest = createAsyncThunk(
       return { err: "Select Test Id" };
     }
 
-    const questionIds = Object.keys(args.selectedQuestions);
+    const questionIds = Object.keys(args.selectedQuestions).filter(
+      (e) => args.selectedQuestions[e]
+    );
+
     const deleteQuestionPromise = questionIds.map((e) => {
-      if (args.selectedQuestions[e]) {
-        return axios.post(
-          testsUrl + "/removeQuestionFromTest/" + args.testId,
-          {
-            questionId: e,
-          }
-        );
-      }
+      return axios.post(testsUrl + "/removeQuestionFromTest/" + args.testId, {
+        questionId: e,
+      });
     });
 
-    const data = await Promise.all(deleteQuestionPromise);
-    let ctr = true;
-    data.forEach((e) => {
-      if (e.data.data.err) {
-        ctr = false;
-      }
-    });
-    if (ctr) {
-      args.dispatch(getOneTests({ _id: args.testId }));
-      args.setConfirmDeleteLoading(false);
-      args.setOpenDeleteModal(false);
+    try {
+      const data = await Promise.all(deleteQuestionPromise);
+      let ctr = true;
+      data.forEach((e) => {
+        if (e?.data?.err) {
+          ctr = false;
+        }
+      });
+      
+      if (ctr) {
+        args.dispatch(getOneTests({ _id: args.testId }));
+        args.setConfirmDeleteLoading(false);
+        args.setOpenDeleteModal(false);
 
-      message.success("question deleted");
-      return { msg: "question deleted" };
-    } else {
+        // Don't show success message here as it's shown in the component
+        return { msg: "question deleted" };
+      } else {
+        args.setConfirmDeleteLoading(false);
+        args.setOpenDeleteModal(false);
+        return { err: "Something went wrong" };
+      }
+    } catch (error) {
       args.setConfirmDeleteLoading(false);
       args.setOpenDeleteModal(false);
-      return { err: "Something went worng" };
+      return { err: error.message };
     }
   }
 );

@@ -1072,6 +1072,21 @@ const QuestionManager = () => {
       </div>
 
         <Modal
+          title="Delete/Remove Question"
+          open={openDeleteModal}
+          onOk={handleDelete}
+          confirmLoading={confirmDeleteLoading}
+          onCancel={() => setOpenDeleteModal(false)}
+        >
+          <Radio.Group onChange={(e) => setDeleteSelect(e.target.value)} value={deleteSelect}>
+            <Radio value={1}>Remove Question From Current Test</Radio>
+            <Radio value={2}>
+              Delete Question From Question Bank {`<The Question(s) will be permanentaly deleted>`}
+            </Radio>
+          </Radio.Group>
+        </Modal>
+
+        <Modal
           title="Select Tests to copy this question"
           open={openCopyModal}
           onCancel={() => setOpenCopyModal(false)}

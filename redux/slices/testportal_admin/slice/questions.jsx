@@ -224,6 +224,7 @@ const QuestionSlice = createSlice({
     });
     builder.addCase(deleteQuestion.fulfilled, (state, action) => {
       message.info(action.payload.msg);
+      state.bulkEdit = {};
     });
     builder.addCase(deleteQuestion.rejected, (state, action) => {
       // message.error(action.error)
@@ -632,34 +633,38 @@ export const getOneQues = createAsyncThunk("/getOneQues", async (args) => {
 export const deleteQuestion = createAsyncThunk(
   "/question/deletequestion",
   async (args) => {
-    const { dispatch } = args;
-    const questionIds = Object.keys(args.selectedQuestions);
-    const deleteQuestionPromise = questionIds.map((e) => {
-      if (args.selectedQuestions[e]) {
-        return axios.post(restUrl + "/assessments/deleteQuestion/", {
-          questionId: e,
-        });
-      }
-    });
+    const { dispatch, setConfirmDeleteLoading, setOpenDeleteModal } = args;
+    const questionIds = Object.keys(args.selectedQuestions).filter(
+      (e) => args.selectedQuestions[e]
+    );
 
-    const data = await Promise.all(deleteQuestionPromise);
-    let ctr = true;
-    data.forEach((e) => {
-      if (e.data.err) {
-        ctr = false;
+    if (questionIds.length === 0) {
+      setConfirmDeleteLoading(false);
+      setOpenDeleteModal(false);
+      return { err: "No questions selected" };
+    }
+
+    try {
+      const response = await axios.post(restUrl + "/questions/deleteQuestion", {
+        questionIds,
+      });
+
+      if (response.data.err) {
+        setConfirmDeleteLoading(false);
+        setOpenDeleteModal(false);
+        return { err: response.data.err };
       }
-    });
-    if (ctr) {
-      // args.dispatch(getOneQues());
+
       dispatch(allQues({ limit: 1000 }));
-      args.setConfirmDeleteLoading(false);
-      args.setOpenDeleteModal(false);
+      setConfirmDeleteLoading(false);
+      setOpenDeleteModal(false);
 
-      return { msg: "question deleted" };
-    } else {
-      args.setConfirmDeleteLoading(false);
-      args.setOpenDeleteModal(false);
-      return { err: "Something went worng" };
+      return { msg: response.data.msg || "Questions deleted successfully" };
+    } catch (error) {
+      console.error("Delete questions error:", error);
+      setConfirmDeleteLoading(false);
+      setOpenDeleteModal(false);
+      return { err: "Something went wrong" };
     }
   }
 );
