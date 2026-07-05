@@ -38,6 +38,11 @@ import { awsUrl, proctoringUrl, studentSiteUrl } from "../urls";
 import { TimerColors } from "@/app/testportal/styles/colors";
 import { parseIfJson } from "./jsonparse";
 import useStudentProctoring from "../liveProctoring/proctoringClient";
+import { saveTestResults } from "@/app/testportal/redux/slices/studentSlice";
+import {
+  persistPortalResult,
+  getPersistedPortalResult,
+} from "../resultPersistence";
 
 export default function TestUI({
   socket,
@@ -602,6 +607,22 @@ export default function TestUI({
 
   const submitTest = () => {
     const finalResponses = mergeCodingIntoResponses(responses.value);
+    const submissionPayload = {
+      userId: getSstorage("userId"),
+      ...userData,
+      flagged: flagCheck,
+      response: finalResponses,
+      studentData: {
+        ...userData.studentData,
+        tabswitchCount: tabSwitchCount || 0,
+        blockMessage: blockMsg,
+      },
+      createdAt: new Date().toLocaleString(),
+      testId,
+      testTitle: testData?.title,
+      testStartedAt: +getSstorage("testStartedAt"),
+      testEndedAt: new Date().getTime(),
+    };
 
     if (proctoringActive) {
       console.log("🛑 Stopping proctoring before test submission");
@@ -609,50 +630,52 @@ export default function TestUI({
     }
     if (socket) {
       if (testType === "jobtest") {
-        socket.emit("jobAssessmentEnded", {
-          userId: getSstorage("userId"),
-          ...userData,
-          flagged: flagCheck,
+        const jobPayload = {
+          ...submissionPayload,
           response: {
             ...responses.value,
           },
-          studentData: {
-            ...userData.studentData,
-            tabswitchCount: tabSwitchCount || 0,
-            blockMessage: blockMsg,
-          },
           jobId: testData?.jobId,
           assessmentId: testData?._id,
-          testStartedAt: +getSstorage("testStartedAt"),
-          testEndedAt: new Date().getTime(),
-          createdAt: new Date().toLocaleString(),
           proctoringData: {
             sessionId: proctoringSessionData?.sessionId,
             connectionStatus: connectionStatus,
           },
-        });
+        };
+        socket.emit("jobAssessmentEnded", jobPayload);
       } else {
-        socket.emit("testEnded", {
-          userId: getSstorage("userId"),
-          ...userData,
-          flagged: flagCheck,
-          response: finalResponses,
-          studentData: {
-            ...userData.studentData,
-            tabswitchCount: tabSwitchCount || 0,
-            blockMessage: blockMsg,
-          },
-          createdAt: new Date().toLocaleString(),
-        });
+        socket.emit("testEnded", submissionPayload);
       }
     }
     setOpen(false);
     setOpenTime(false);
-    
+
+    const persistSubmissionResult = (payload = null) => {
+      const payloadToPersist = payload || submissionPayload;
+      const persistedResult = persistPortalResult({
+        ...payloadToPersist,
+        testId,
+        scoreData: payloadToPersist?.scoreData || null,
+      });
+      if (persistedResult) {
+        dispatch(
+          saveTestResults({
+            userId: persistedResult?.userId,
+            testId: persistedResult?.testId || testId,
+            response: persistedResult?.response || finalResponses,
+            studentData: persistedResult?.studentData,
+            flagged: persistedResult?.flagged,
+            scoreData: persistedResult?.scoreData,
+          }),
+        );
+      }
+    };
+
     let redirected = false;
-    const handleRedirect = () => {
+    const handleRedirect = (payload) => {
       if (redirected) return;
       redirected = true;
+      persistSubmissionResult(payload);
       if (typeof window !== "undefined") {
         if (window.opener) {
           window.close();
@@ -668,9 +691,10 @@ export default function TestUI({
     if (socket) {
       socket.once("testEndedtestportal", handleRedirect);
       // Fallback in case socket event is missed
-      setTimeout(handleRedirect, 2500);
+      setTimeout(() => handleRedirect(getPersistedPortalResult(testId)), 2500);
     } else {
-      setTimeout(handleRedirect, 2500);
+      persistSubmissionResult();
+      setTimeout(() => handleRedirect(), 2500);
     }
   };
   // ALL YOUR OTHER EXISTING STATE AND FUNCTIONS
