@@ -112,7 +112,6 @@ export default function JobPreviewPage() {
   return (
     <>
       <PageHeader
-        breadcrumb="Placement drive"
         title={JOBPROFILE?.jobTitle || "Job Details"}
         subtitle={`${JOBPROFILE?.companyName || "Company"} - ${JOBPROFILE?.city || "City not specified"}, ${JOBPROFILE?.country || "Country not specified"}`}
         actionText="Edit"

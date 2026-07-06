@@ -68,7 +68,7 @@ export default function ProfileLayout({ children, activeView, setView }) {
   const name = USER_DETAILS?.userName || "Sure Yalla";
   const email = USER_DETAILS?.email || "cstpo1@gmail.com";
   const phone = USER_DETAILS?.phone || USER_DETAILS?.mobile || "+91 987877xxxxx";
-  const employeeId = USER_DETAILS?.employeeId || "cstpo1";
+  const firstName = USER_DETAILS?.firstName || USER_DETAILS?.userName || "N/A";
   const designation = USER_DETAILS?.designation || "Placement Officer";
 
   const getInitials = (nameStr) => {
@@ -82,29 +82,42 @@ export default function ProfileLayout({ children, activeView, setView }) {
 
   // Profile completion calculation
   const calculateCompletion = () => {
-    if (!USER_DETAILS) return 68;
+    if (!USER_DETAILS) return 0;
     const fields = [
-      USER_DETAILS.firstName,
-      USER_DETAILS.lastName,
-      USER_DETAILS.gender,
-      USER_DETAILS.phone,
-      USER_DETAILS.email,
-      USER_DETAILS.designation,
-      USER_DETAILS.qualification,
-      USER_DETAILS.tpoLogo,
-      USER_DETAILS.institutionName,
-      USER_DETAILS.establishedYear,
-      USER_DETAILS.institutionType,
-      USER_DETAILS.address,
-      USER_DETAILS.contactNumber,
-      USER_DETAILS.principalName,
-      USER_DETAILS.principalContact,
-      USER_DETAILS.principalEmail,
-      USER_DETAILS.institutionLogo
+      // Personal Details
+      USER_DETAILS?.firstName,
+      USER_DETAILS?.lastName,
+      USER_DETAILS?.gender,
+      USER_DETAILS?.phone,
+      USER_DETAILS?.email,
+      USER_DETAILS?.designation,
+      USER_DETAILS?.qualification,
+      USER_DETAILS?.tpoLogo,
+      // Institutional Details
+      USER_DETAILS?.institutionDetails?.institutionName,
+      USER_DETAILS?.institutionDetails?.establishedYear,
+      USER_DETAILS?.institutionDetails?.institutionType,
+      USER_DETAILS?.institutionDetails?.address,
+      USER_DETAILS?.institutionDetails?.contactNumber,
+      USER_DETAILS?.institutionDetails?.principalName,
+      USER_DETAILS?.institutionDetails?.principalContact,
+      USER_DETAILS?.institutionDetails?.principalEmail,
+      USER_DETAILS?.institutionDetails?.institutionLogo,
+      // Accreditations and Ranking
+      USER_DETAILS?.accreditationDetails?.naacGradeCycle,
+      USER_DETAILS?.accreditationDetails?.nbaStatus,
+      USER_DETAILS?.accreditationDetails?.nirfRanking,
+      // TPO Support Team Details
+      USER_DETAILS?.tpoSupportTeamDetails?.placementOffice?.name,
+      USER_DETAILS?.tpoSupportTeamDetails?.placementOffice?.contact,
+      USER_DETAILS?.tpoSupportTeamDetails?.placementOffice?.email,
+      USER_DETAILS?.tpoSupportTeamDetails?.departments?.length ? "filled" : "",
+      // Placement Cell MOUs
+      USER_DETAILS?.placementCellMOUs?.mous?.length ? "filled" : ""
     ];
     const filled = fields.filter(f => f && f.toString().trim() !== "");
     const calculated = Math.round((filled.length / fields.length) * 100);
-    return calculated > 0 ? calculated : 68; // fallback to 68% as default/mockup value
+    return calculated || 0;
   };
   const completionPercent = calculateCompletion();
 
@@ -173,7 +186,7 @@ export default function ProfileLayout({ children, activeView, setView }) {
                 </span>
               </div>
               <div className={styles.metaRow}>
-                <span>Employee ID: {employeeId}</span>
+                <span>{firstName}</span>
                 <span className={styles.divider}>•</span>
                 <span>{email}</span>
                 <span className={styles.divider}>•</span>

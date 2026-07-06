@@ -195,7 +195,6 @@ const Page = () => {
   return (
     <>
       <PageHeader
-        breadcrumb="Notice Board"
         title="Notice Board"
         subtitle="Create and manage system announcements"
         actionText="+ Create Notice"

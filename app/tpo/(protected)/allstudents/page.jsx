@@ -206,7 +206,6 @@ export default function Page() {
     <div className={allStudents.container}>
       {/* Reusable Global Header Section */}
       <PageHeader
-        breadcrumb="All departments"
         title="All departments"
         subtitle="Manage departments, HODs, SPOCs and placement data"
         actionText="+ Add department"

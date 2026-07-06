@@ -99,6 +99,11 @@ const ProgressComp = ({ deptId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [globalSearchText, testFilter, scoreFilter]);
+
   // Re-fetch whenever user navigates to this page
   useEffect(() => {
     dispatch(getAllProgress({ limit: 500 }));
@@ -141,8 +146,8 @@ const ProgressComp = ({ deptId }) => {
       const matchesScore = scoreFilter === "all"
         ? true
         : scoreFilter === "positive"
-        ? score >= 0
-        : score < 0;
+          ? score >= 0
+          : score < 0;
 
       return matchesSearch && matchesTest && matchesScore;
     });
@@ -316,7 +321,7 @@ const ProgressComp = ({ deptId }) => {
               showSizeChanger: true,
               pageSizeOptions: ["10", "25", "50", "100"],
               showTotal: (filteredTotal, range) =>
-                `Showing ${range[0]}-${range[1]} of ${filteredTotal} loaded (${progressTotal} total in DB)`,
+                `Showing ${range[0]}-${range[1]} of ${filteredTotal}`,
               placement: ["bottomRight"],
             }}
             locale={{ emptyText: "No Results Added" }}
@@ -539,7 +544,7 @@ const ProgressComp = ({ deptId }) => {
               }}
             />
 
-            {/* Actions: View (blue) + download (flat square icon button next to it) */}
+            {/* Actions: Preview button */}
             <Column
               title="Actions"
               key="resultsActions"
@@ -553,13 +558,8 @@ const ProgressComp = ({ deptId }) => {
                     icon={<EyeOutlined />}
                     onClick={() => viewResults(record)}
                   >
-                    View
+                    Download Preview
                   </Button>
-                  <Button
-                    className={progressStyles.downloadIconBtn}
-                    icon={<DownloadOutlined />}
-                    onClick={() => nav.push(`/testportal_admin/results-database/student-result/${record._id}`)}
-                  />
                 </div>
               )}
             />

@@ -434,7 +434,6 @@ const Page = () => {
   return (
     <div className={styles.mainCont}>
       <PageHeader
-        breadcrumb="Dashboard"
         showGreeting={true}
         userName={mounted ? (USER_DETAILS?.firstName || "TPO") : "TPO"}
       />

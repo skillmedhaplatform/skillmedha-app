@@ -483,7 +483,6 @@ const StudentData = () => {
   return (
     <>
       <PageHeader
-        breadcrumb="All departments"
         title={getSstorage("departmentTitle") || "Department"}
         subtitle="Manage students registered in this department"
       />
