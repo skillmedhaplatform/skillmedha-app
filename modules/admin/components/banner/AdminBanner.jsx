@@ -59,6 +59,20 @@ const AdminBanner = () => {
 
   const { greeting, title } = getSectionContent();
 
+  const coursesData = useSelector((state) => state.adminInternship?.allCourses?.data);
+  const internshipsData = useSelector((state) => state.adminInternship?.allInternShips?.data);
+  const workshopsData = useSelector((state) => state.adminInternship?.allWorkshops?.data);
+
+  const getSectionStats = () => {
+    if (!pathname) return null;
+    if (pathname.includes("/course")) return { count: coursesData?.length || 0, label: "COURSES" };
+    if (pathname.includes("/internship")) return { count: internshipsData?.length || 0, label: "INTERNSHIPS" };
+    if (pathname.includes("/workshops")) return { count: workshopsData?.length || 0, label: "WORKSHOPS" };
+    return null;
+  };
+  
+  const stats = getSectionStats();
+
   return (
     <div className="w-full h-auto min-h-[140px] flex justify-between items-center p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
       {/* Decorative Icons */}
@@ -101,6 +115,16 @@ const AdminBanner = () => {
             <span className="text-[18px] lg:text-[28px] font-bold uppercase text-white tracking-[0.05em] m-0">
               {userDetails?.role || "ADMIN"}
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Right Column (Stats) */}
+      {stats && (
+        <div className="flex items-center text-white mr-2 lg:mr-8 relative z-[2]">
+          <div className="flex flex-col items-center">
+            <span className="text-[28px] lg:text-[32px] font-bold leading-none text-white">{stats.count}</span>
+            <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">TOTAL {stats.label}</span>
           </div>
         </div>
       )}

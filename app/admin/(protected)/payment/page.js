@@ -78,7 +78,8 @@ export default function RazorpaySettingsForm() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.pageWrapper}>
+      <div className={styles.container}>
       <div className={styles.header}>
         <h2 className={styles.title}>Razorpay Settings</h2>
         {isSaved && !isEditing && (
@@ -162,6 +163,7 @@ export default function RazorpaySettingsForm() {
           </div>
         )}
       </form>
+      </div>
     </div>
   );
 }

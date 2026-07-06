@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useState } from "react";
 // import Home from "../page";
 import "./page.css";
@@ -8,7 +8,9 @@ import dynamic from "next/dynamic";
 const ZoomClient = dynamic(() => import("./utils/join"), {
   ssr: false,
 });
-import { Input, Modal, Radio, Select, Space } from "antd";
+import { Input, Modal, Radio, Select, Space, ConfigProvider } from "antd";
+import { BsCameraVideo, BsJournalBookmark } from "react-icons/bs";
+import { MdWorkOutline } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllCourses,
@@ -141,35 +143,45 @@ const page = () => {
       <div className={zoomStyles.container}>
         {!joined && (
           <div className={zoomStyles.beforeJoinContainer}>
-            <div className={zoomStyles.headerContainer}>
-              <span>Zoom Meetings</span>
-              <button onClick={() => setCreateModal(true)}>
-                + Create Meeting
-              </button>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: "1.5rem",
-              }}
-            >
+            <div className={zoomStyles.titleContainer}>
               <Input.Search
-                placeholder="Search existing meetings"
-                style={{ maxWidth: "50%", width: "40%" }}
+                placeholder="Search existing meetings..."
+                style={{ maxWidth: "400px", minWidth: "250px" }}
                 onSearch={(value) => searchMeetingByTopicButton(value)}
+                allowClear
               />
 
-              <Space orientation="vertical" size="middle">
-                <Radio.Group
-                  options={options}
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  optionType="button"
-                  buttonStyle="solid"
-                />
-              </Space>
+              <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+                <ConfigProvider
+                  theme={{
+                    token: {
+                      colorPrimary: '#1677ff',
+                    },
+                  }}
+                >
+                  <Radio.Group
+                    options={options}
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    optionType="button"
+                    buttonStyle="solid"
+                  />
+                </ConfigProvider>
+                <button 
+                  onClick={() => setCreateModal(true)}
+                  style={{
+                    backgroundColor: "#1677ff",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    padding: "6px 16px",
+                    fontWeight: "600",
+                    cursor: "pointer"
+                  }}
+                >
+                  + Create Meeting
+                </button>
+              </div>
             </div>
 
             <div className={zoomStyles.zoomMeetingsBody}>
@@ -177,13 +189,36 @@ const page = () => {
                 {allMeetings?.map((eachMeeting, eachMeetingIndex) => {
                   return (
                     <div key={eachMeetingIndex} className={zoomStyles.card_cont}>
-                      <div>
-                        <strong>Title : {eachMeeting?.topic}</strong>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%", alignItems: "flex-start" }}>
+                        <div style={{ backgroundColor: "#EFF5FB", color: "#1677ff", padding: "4px 10px", borderRadius: "12px", fontSize: "12px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
+                          {type === "internship" ? <MdWorkOutline /> : <BsJournalBookmark />} 
+                          <span style={{ textTransform: "capitalize" }}>{type}</span>
+                        </div>
+                        <strong style={{ fontSize: "15px", lineHeight: "1.4", marginTop: "4px" }}>Title : {eachMeeting?.topic}</strong>
+                        <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                           {eachMeeting?.section?.title || "General Topic"} &bull; Zoom Session
+                        </div>
                       </div>
                       <button
                         disabled={eachMeeting?.isCompleted}
                         onClick={() => startClass(eachMeeting?._id)}
+                        style={{ 
+                          width: "100%", 
+                          marginTop: "16px",
+                          backgroundColor: eachMeeting?.isCompleted ? "#d9d9d9" : "#1677ff",
+                          color: eachMeeting?.isCompleted ? "#00000040" : "white",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "10px",
+                          fontWeight: "600",
+                          cursor: eachMeeting?.isCompleted ? "not-allowed" : "pointer",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          transition: "background-color 0.2s"
+                        }}
                       >
+                        <BsCameraVideo style={{ fontSize: "16px", marginRight: "8px" }} /> 
                         {eachMeeting?.isCompleted
                           ? "Meeting Ended"
                           : "Start Class"}
@@ -217,13 +252,21 @@ const page = () => {
           <div className={zoomStyles.itemTitleLabel}>Select Type</div>
 
           <Space orientation="vertical" size="middle">
-            <Radio.Group
-              options={options}
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              optionType="button"
-              buttonStyle="solid"
-            />
+            <ConfigProvider
+              theme={{
+                token: {
+                  colorPrimary: '#1677ff',
+                },
+              }}
+            >
+              <Radio.Group
+                options={options}
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                optionType="button"
+                buttonStyle="solid"
+              />
+            </ConfigProvider>
           </Space>
 
           {/* Internship Select */}

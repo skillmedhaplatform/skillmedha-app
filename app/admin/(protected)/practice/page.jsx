@@ -77,9 +77,7 @@ export default function PracticePage() {
   };
 
   return (
-    <div>
-      <h1 className={styles.pageTitle}>Practice</h1>
-
+    <div className={styles.pageWrapper}>
       <div className={styles.cardContainer}>
         {PracticeCategory.map((category) => (
           <PracticeCard

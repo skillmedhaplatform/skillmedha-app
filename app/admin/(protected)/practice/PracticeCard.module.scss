@@ -1,8 +1,8 @@
-// Color Palette based on primary #24A058 (teal)
-$primary-color: #24A058; // Main teal
-$primary-light: #4db6b9; // Lighter teal
-$primary-dark: #1a7b7e; // Darker teal
-$primary-lighter: #7dd3d6; // Very light teal
+// Color Palette based on primary #1677ff (blue)
+$primary-color: #1677ff; // Main blue
+$primary-light: #4096ff; // Lighter blue
+$primary-dark: #0958d9; // Darker blue
+$primary-lighter: #69b1ff; // Very light blue
 
 // Secondary colors (complementary and analogous)
 $secondary-coral: #a65225; // Complementary coral/orange
@@ -25,9 +25,20 @@ $gray-700: #334155;
 $gray-900: #0f172a;
 
 // Shadows and effects
-$shadow-sm: rgba(37, 163, 166, 0.1);
-$shadow-md: rgba(37, 163, 166, 0.15);
-$shadow-lg: rgba(37, 163, 166, 0.2);
+$shadow-sm: rgba(22, 119, 255, 0.1);
+$shadow-md: rgba(22, 119, 255, 0.15);
+$shadow-lg: rgba(22, 119, 255, 0.2);
+
+// Page wrapper for centering
+.pageWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  height: 100%;
+  width: 100%;
+  background-color: #EFF5FB;
+}
 
 // Card container
 .cardContainer {
@@ -35,6 +46,7 @@ $shadow-lg: rgba(37, 163, 166, 0.2);
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
@@ -169,11 +181,11 @@ $shadow-lg: rgba(37, 163, 166, 0.2);
   &.available {
     background: linear-gradient(
       135deg,
-      rgba(37, 163, 166, 0.1) 0%,
-      rgba(37, 163, 166, 0.15) 100%
+      rgba(22, 119, 255, 0.1) 0%,
+      rgba(22, 119, 255, 0.15) 100%
     );
     color: $primary-dark;
-    border: 1px solid rgba(37, 163, 166, 0.2);
+    border: 1px solid rgba(22, 119, 255, 0.2);
   }
 
   &.comingSoon {
