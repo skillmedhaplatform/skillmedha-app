@@ -236,6 +236,38 @@ export default function TestUI({
     return `${days} day${days !== 1 ? "s" : ""} ago`;
   };
 
+  // Disable Developer Tools during the test
+  useEffect(() => {
+    const disableDevTools = (e) => {
+      // Prevent F12
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+      }
+      // Prevent Ctrl+Shift+I / J / C and Ctrl+U
+      if (e.ctrlKey || e.metaKey) {
+        const key = e.key ? e.key.toLowerCase() : '';
+        if (e.shiftKey && (key === 'i' || key === 'j' || key === 'c' || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+          e.preventDefault();
+        }
+        if (key === 'u' || e.keyCode === 85) {
+          e.preventDefault();
+        }
+      }
+    };
+    const disableContextMenu = (e) => {
+      e.preventDefault();
+    };
+
+    if (testStarted) {
+      document.addEventListener('keydown', disableDevTools);
+      document.addEventListener('contextmenu', disableContextMenu);
+    }
+    return () => {
+      document.removeEventListener('keydown', disableDevTools);
+      document.removeEventListener('contextmenu', disableContextMenu);
+    };
+  }, [testStarted]);
+
   // Latest message display component
   const ProctorMessageDisplay = () => {
     if (!latestMessage) return null;
@@ -1327,26 +1359,6 @@ export default function TestUI({
                   {testData?.title || testData?.jobTitle}
                 </h2>
               </div>
-              <div className={testStyles.header2Btns} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <Button 
-                  type="default" 
-                  onClick={requestFullScreen}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f4f8fd', color: '#4a6fa5', border: '1.5px solid #c8ddf5', fontWeight: 600, fontSize: '13px', padding: '7px 16px', borderRadius: '8px', height: 'auto' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eef3fa'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f4f8fd'}
-                >
-                  {fullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />} 
-                  {fullScreen ? "Exit Full Screen" : "Enter Full Screen"}
-                </Button>
-                <Button 
-                  type="primary" 
-                  onClick={showModal}
-                  className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '13px', padding: '8px 18px', borderRadius: '8px', height: 'auto' }}
-                >
-                  <Send className="w-4 h-4" /> Submit
-                </Button>
-              </div>
             </div>
           )}
 
@@ -1512,9 +1524,6 @@ export default function TestUI({
                       {hours ? String(hours).padStart(2, "0") : "00"} : {minutes ? String(minutes).padStart(2, "0") : "00"} : {seconds ? String(seconds).padStart(2, "0") : "00"}
                     </div>
                   </div>
-                  <button className={testStyles.exitBtn} onClick={requestFullScreen}>
-                    <i className="ti ti-arrows-minimize" style={{fontSize:"13px"}}></i> Exit Full Screen
-                  </button>
                   <button className={testStyles.submitBtn} onClick={() => setOpen(true)}>
                     <i className="ti ti-send" style={{fontSize:"13px"}}></i> Submit
                   </button>

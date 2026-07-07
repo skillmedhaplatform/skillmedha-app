@@ -30,6 +30,7 @@ export default function TestCard({
   testData,
   navigateToTest,
   index,
+  isResultTab = false,
 }) {
   const testDuration = testData?.time?.testDuration?.testDuration?.duration;
 
@@ -214,6 +215,8 @@ export default function TestCard({
     attemptsPerRespondentValue !== null &&
     (Number(attemptsPerRespondentValue) - attemptsDone <= 0);
 
+  const isExpiredStatus = countdowns[index] === "Expired" || testData?.status?.toLowerCase() === "expired" || testData?.status?.toLowerCase() === "completed";
+
   let mainButtonText = "Start test";
   let mainButtonColor = undefined;
   let mainButtonTextColor = undefined;
@@ -241,7 +244,7 @@ export default function TestCard({
 
   const handleStartTestClick = () => {
     switch (true) {
-      case countdowns[index] === "Expired":
+      case isExpiredStatus:
         message.error(<strong>The test you are trying to access has expired.</strong>);
         break;
       case !isTestActivated:
@@ -291,11 +294,22 @@ export default function TestCard({
           </Popover>
         );
       default:
+        if (isResultTab) {
+          return (
+            <Button
+              type="primary"
+              disabled
+              className="font-semibold !bg-white !text-[#1E69DA] !border-[#1E69DA] opacity-80"
+            >
+              View result
+            </Button>
+          );
+        }
         return (
           <Button
             type="primary"
             onClick={handleStartTestClick}
-            disabled={!isTestActivated || countdowns[index] === "Expired"}
+            disabled={!isTestActivated || isExpiredStatus}
             style={!isGradient && mainButtonColor ? { backgroundColor: mainButtonColor, color: mainButtonTextColor } : {}}
             className={isGradient ? "!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white flex items-center gap-1 font-semibold rounded-lg px-4" : "font-semibold"}
           >
@@ -366,7 +380,7 @@ export default function TestCard({
         </h3>
         {!isAssessment && (
           <div className="shrink-0">
-            {countdowns[index] === "Expired" ? (
+            {isExpiredStatus ? (
               <span className="bg-red-50 text-red-600 text-[11px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
                 Expired
@@ -401,28 +415,28 @@ export default function TestCard({
 
       {/* Metrics Row */}
       <div className="flex items-center w-full px-5 pb-4">
-        <div className="flex flex-col w-1/3 border-r border-gray-100 shrink-0 pr-2">
-          <span className="text-[#8c94a3] text-[11px] uppercase font-bold flex items-center gap-1.5 whitespace-nowrap mb-1">
-            <HelpCircle className="w-3.5 h-3.5" /> QUESTIONS
+        <div className="flex flex-col flex-1 border-r border-gray-100 pr-2 min-w-0">
+          <span className="text-[#8c94a3] text-[10px] uppercase font-bold flex items-center gap-1 mb-1 truncate">
+            <HelpCircle className="w-3 h-3 shrink-0" /> QUESTIONS
           </span>
-          <strong className="text-[#1a3b8b] text-[16px] font-bold leading-tight truncate">{testData?.questions?.length || 0}</strong>
+          <strong className="text-[#1a3b8b] text-[15px] font-bold leading-tight truncate">{testData?.questions?.length || 0}</strong>
         </div>
-        <div className="flex flex-col w-1/3 px-3 border-r border-gray-100 shrink-0">
-          <span className="text-[#8c94a3] text-[11px] uppercase font-bold flex items-center gap-1.5 whitespace-nowrap mb-1">
-            <Clock className="w-3.5 h-3.5" /> DURATION
+        <div className={`flex flex-col flex-1 px-2 min-w-0 ${!isAssessment ? 'border-r border-gray-100' : ''}`}>
+          <span className="text-[#8c94a3] text-[10px] uppercase font-bold flex items-center gap-1 mb-1 truncate">
+            <Clock className="w-3 h-3 shrink-0" /> DURATION
           </span>
-          <strong className="text-[#1a3b8b] text-[16px] font-bold leading-tight uppercase whitespace-nowrap">
+          <strong className="text-[#1a3b8b] text-[15px] font-bold leading-tight uppercase truncate">
             {isAssessment 
               ? (testData?.testDurationDisplay?.hours || testData?.testDurationDisplay?.minutes ? `${testData?.testDurationDisplay?.hours || 0}H : ${testData?.testDurationDisplay?.minutes || 0}M` : "NA")
               : (testDuration?.val1 || testDuration?.val2 ? `${testDuration?.val1 || 0}H : ${testDuration?.val2 || 0}M` : "NA")}
           </strong>
         </div>
         {!isAssessment && (
-          <div className="flex flex-col w-1/3 px-3 shrink-0">
-            <span className="text-[#8c94a3] text-[11px] uppercase font-bold flex items-center gap-1.5 whitespace-nowrap mb-1">
-              <Star className="w-3.5 h-3.5" /> MARKS
+          <div className="flex flex-col flex-1 pl-2 min-w-0">
+            <span className="text-[#8c94a3] text-[10px] uppercase font-bold flex items-center gap-1 mb-1 truncate">
+              <Star className="w-3 h-3 shrink-0" /> MARKS
             </span>
-            <strong className="text-[#1a3b8b] text-[16px] font-bold leading-tight truncate">{totalMarks}</strong>
+            <strong className="text-[#1a3b8b] text-[15px] font-bold leading-tight truncate">{totalMarks}</strong>
           </div>
         )}
       </div>
@@ -434,15 +448,12 @@ export default function TestCard({
 
       {/* Footer / Actions */}
       <div className="mt-auto flex items-center justify-between px-5 py-4 w-full border-t border-gray-100">
-        <div className="flex flex-col w-[120px]">
-          <div className="text-[#8c94a3] text-[11px] font-bold uppercase mb-1.5 tracking-wider">
-            COMPLETION • {percentage !== undefined ? percentage : 0}%
+        <div className="flex flex-col">
+          <div className="text-[#8c94a3] text-[11px] font-bold uppercase tracking-wider">
+            ATTEMPTS
           </div>
-          <div className="w-full bg-[#f1f5f9] rounded-full h-1.5">
-            <div 
-              className="h-1.5 rounded-full bg-[#1E69DA]" 
-              style={{ width: `${Math.min(100, Math.max(0, percentage || 0))}%` }}
-            ></div>
+          <div className="text-[#1a3b8b] text-[16px] font-bold leading-tight mt-0.5">
+            {attemptsDone || 0}
           </div>
         </div>
         {renderMainButton()}
