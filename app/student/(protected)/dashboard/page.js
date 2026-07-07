@@ -139,7 +139,7 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, o
             </div>
 
             {total > 0 && (
-              <div className="flex justify-center items-center gap-3 mt-2 h-[24px]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-center items-center gap-3 mt-2" onClick={(e) => e.stopPropagation()}>
               {total > 1 && (
                 <button
                   className="text-[#9ca3af] hover:text-[#1E69DA] transition-colors p-1"
@@ -200,7 +200,6 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, o
   );
 };
 
-
 const ProfileSection = ({ profileValues, router, studentCreds }) => (
   <div className="w-full flex flex-col items-start pb-2">
     <h3 className="m-0 font-extrabold text-[#0f172a] text-[16px] xl:text-[18px] mb-3 shrink-0">Overall Performance</h3>
@@ -227,7 +226,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
 
     <div className="w-full shrink-0">
       <Button
-        className="w-full h-[38px] flex items-center justify-between px-2 transition-all hover:opacity-90 !text-white !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
+        className="w-full h-[38px] flex items-center justify-between px-2 transition-all hover:opacity-90 !text-white !bg-[#3b82f6] !border-none"
         style={{ borderRadius: '8px' }}
         onClick={() => router.push("/student/profile/basic-details")}
       >
@@ -248,53 +247,67 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
   </div>
 );
 
-const Achievements = () => (
-  <div className="w-full flex flex-col">
-    <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 sticky top-0 bg-white z-10 pt-1 shrink-0">Achievements</h3>
-    <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden max-h-[250px] pb-2">
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
-        <div className="flex items-center gap-3">
-          <div className="text-[24px]">⭐</div>
-          <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">First Enroll</span>
-            <span className="text-[#64748b] text-[12px]">+50 XP earned</span>
+const Achievements = ({ progressById, combinedLearningData }) => {
+  const [streak, setStreak] = React.useState(1);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setStreak(parseInt(localStorage.getItem("loginStreak") || "1", 10));
+    }
+  }, []);
+
+  let streakCoins = 5;
+  if (streak === 1) streakCoins = 10;
+  else if (streak > 0 && streak % 10 === 0) streakCoins = streak;
+
+  const achievementsList = [
+    { emoji: "⭐", title: "First Enroll", desc: "+50 XP earned", status: "Earned" },
+    { emoji: "🔥", title: `${streak} Day Streak`, desc: `+${streakCoins} coins earned`, status: "Earned" },
+    { emoji: "🎉", title: "Certified Dev", desc: "+500 XP earned", status: "Earned" }
+  ];
+
+  if (streak >= 30) {
+    achievementsList.push({ emoji: "🏆", title: "1 Month Streak", desc: "Maintained badge", status: "Earned" });
+  }
+
+  if (progressById && combinedLearningData) {
+    Object.keys(progressById).forEach(id => {
+      if (progressById[id]?.totalProgress === 100) {
+        const course = combinedLearningData.find((c) => c._id === id);
+        if (course) {
+          const categoryText = course.category ? course.category : (course.type || "Course");
+          const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
+          achievementsList.push({
+            emoji: "🥇",
+            title: `${shortCategoryText} Complete`,
+            desc: "+50 coins earned",
+            status: "Earned"
+          });
+        }
+      }
+    });
+  }
+
+  return (
+    <div className="w-full flex flex-col">
+      <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 sticky top-0 bg-white z-10 pt-1 shrink-0">Achievements</h3>
+      <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden max-h-[250px] pb-2">
+        {achievementsList.map((item, idx) => (
+          <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
+            <div className="flex items-center gap-3">
+              <div className="text-[24px]">{item.emoji}</div>
+              <div className="flex flex-col">
+                <span className="font-bold text-[#0f172a] text-[14px]">{item.title}</span>
+                <span className="text-[#64748b] text-[12px]">{item.desc}</span>
+              </div>
+            </div>
+            <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">{item.status}</span>
           </div>
-        </div>
-        <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
-      </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
-        <div className="flex items-center gap-3">
-          <div className="text-[24px]">🔥</div>
-          <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">{localStorage.getItem("loginStreak") || 7} Day Streak</span>
-            <span className="text-[#64748b] text-[12px]">+100 XP earned</span>
-          </div>
-        </div>
-        <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
-      </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
-        <div className="flex items-center gap-3">
-          <div className="text-[24px]">🎓</div>
-          <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">Course Complete</span>
-            <span className="text-[#64748b] text-[12px]">+200 XP earned</span>
-          </div>
-        </div>
-        <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
-      </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
-        <div className="flex items-center gap-3">
-          <div className="text-[24px]">🎉</div>
-          <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">Certified Dev</span>
-            <span className="text-[#64748b] text-[12px]">+500 XP earned</span>
-          </div>
-        </div>
-        <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
+        ))}
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Resolve current user id: prefer studentCreds._id, fall back to sessionStorage
 // (studentCreds may not be hydrated yet on first paint).
@@ -427,6 +440,39 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchAllData();
   }, [fetchAllData]);
+
+  // Streak management
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const today = new Date().toDateString();
+      const lastLogin = localStorage.getItem("lastLoginDate");
+      let currentStreak = parseInt(localStorage.getItem("loginStreak") || "0", 10);
+      
+      if (lastLogin) {
+        if (lastLogin !== today) {
+          const lastLoginDate = new Date(lastLogin);
+          const todayDate = new Date(today);
+          const diffTime = todayDate - lastLoginDate;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            currentStreak += 1;
+            localStorage.removeItem("streakBrokenNotify");
+          } else if (diffDays > 1) {
+            currentStreak = 0;
+            localStorage.setItem("streakBrokenNotify", "true");
+          }
+          
+          localStorage.setItem("lastLoginDate", today);
+          localStorage.setItem("loginStreak", currentStreak.toString());
+        }
+      } else {
+        localStorage.setItem("lastLoginDate", today);
+        localStorage.setItem("loginStreak", "1");
+        localStorage.removeItem("streakBrokenNotify");
+      }
+    }
+  }, []);
 
   // Memoized profile values
   const profileValues = useMemo(() => {
@@ -576,7 +622,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <section className="w-full h-full flex flex-col items-stretch lg:pt-0 bg-[#EFF5FB]">
+    <section className="w-full h-full flex flex-col items-stretch lg:pt-0 bg-[#FAFAFA]">
       {/* Welcome Section - Top Full Width */}
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         {/* Decorative Icons matching TPO Portal */}
@@ -852,14 +898,14 @@ export default function DashboardPage() {
                   onClick={() => setIsNoticeModalOpen(true)}
                 />
               </div>
-              <div className="w-full shrink-0 flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pb-1">
-                <CardsList type="notifications" />
+              <div className="w-full overflow-y-auto [&::-webkit-scrollbar]:hidden flex-1 pb-2">
+                <CardsList type="notifications" progressById={progressById} combinedLearningData={combinedLearningData} />
               </div>
             </div>
             
             {/* Section 3: Achievements */}
             <div className="w-full relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
-              <Achievements />
+              <Achievements progressById={progressById} combinedLearningData={combinedLearningData} />
             </div>
           </div>
         </div>
@@ -871,9 +917,9 @@ export default function DashboardPage() {
             footer={null}
             width={1000}
           >
-            <div style={{ height: "70vh", overflowY: "auto" }}>
-              <CardsList type="notifications" isModal={true} />
-            </div>
+          <div style={{ height: "70vh", overflowY: "auto" }}>
+            <CardsList type="notifications" isModal={true} progressById={progressById} combinedLearningData={combinedLearningData} />
+          </div>
           </Modal>
         </div>
     </section>
