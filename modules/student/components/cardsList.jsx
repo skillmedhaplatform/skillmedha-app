@@ -1,16 +1,14 @@
 "use client";
 import React, { useState } from "react";
 import Slider from "react-slick";
-import { Collapse, ConfigProvider } from "antd";
-
+import { Collapse, ConfigProvider, Button, Image } from "antd";
+import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
-import { Image } from "antd";
 
-export default function CardsList({ type, isModal = false }) {
-  const allInternships = useSelector(
-    (state) => state.internship.allInternships?.data
-  );
+export default function CardsList({ type, isModal = false, progressById, combinedLearningData }) {
+  const allInternships = useSelector((state) => state.internship.allInternships?.data);
   const allCourses = useSelector((state) => state.internship.allCourses?.data);
+  const router = useRouter();
   const {
     value: AllNotifications,
     stats,
@@ -90,22 +88,122 @@ export default function CardsList({ type, isModal = false }) {
   let data = [];
   switch (type) {
     case "courses":
-      // data = [
-      //   {
-      //     title: "JavaScript",
-      //     img: "https://res.cloudinary.com/queezyv1/image/upload/v1745218162/20190605163315-sale-19736-primary-image-wide_kcplb0.webp",
-      //     instructorName: "Prasanna Kumar",
-      //     topicsLeft: 20,
-      //     completed: "80%",
-      //   },
-      // ];
       data = allCourses;
       break;
     case "internships":
       data = allInternships;
       break;
     case "notifications":
-      data = AllNotifications;
+      const completedCoursesNotices = [];
+      if (progressById && combinedLearningData) {
+        Object.keys(progressById).forEach((id) => {
+          if (progressById[id]?.totalProgress === 100) {
+            const course = combinedLearningData.find((c) => c._id === id);
+            if (course) {
+              const storageKey = `courseCompletionDate_${id}`;
+              let completionTimestamp = localStorage.getItem(storageKey);
+              if (!completionTimestamp) {
+                completionTimestamp = Date.now().toString();
+                localStorage.setItem(storageKey, completionTimestamp);
+              }
+              
+              const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
+              const isExpired = (Date.now() - parseInt(completionTimestamp, 10)) > threeDaysInMs;
+              
+              if (!isExpired) {
+                const categoryText = course.category ? course.category : (course.type || "Course");
+                const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
+                
+                completedCoursesNotices.push({
+                  title: isModal ? `🎉 You completed ${course.title}!` : `🎉 ${shortCategoryText} Completed`,
+                  startDate: new Date(parseInt(completionTimestamp, 10)).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                  status: "active",
+                  source: "system",
+                  message: `Congratulations! You have completed the ${course.type || "course"} "<b>${course.title}</b>" and you earned a gold badge and 50 coins! Check it out in the achievements section.`,
+                });
+              }
+            }
+          }
+        });
+      }
+      
+      const mockNewCourse = {
+        title: isModal ? "🚀 New Course Released: Advanced React Patterns!" : "🚀 New Web Dev Course Released",
+        startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        status: "active",
+        message: `
+          <div style="margin-bottom: 8px;">
+            <b>Category:</b> Web Development<br/>
+            <b>Duration:</b> 4 Weeks<br/>
+            <b>What you'll learn:</b> Dive deep into advanced React patterns, custom hooks, performance optimization, and scalable architectures.
+          </div>
+        `,
+        actionUrl: "/student/course", 
+        actionText: "Explore Courses"
+      };
+      
+      const newReleasesNotices = [];
+      const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
+      
+      if (allCourses && Array.isArray(allCourses)) {
+        allCourses.forEach(course => {
+           if (course.createdAt && (Date.now() - new Date(course.createdAt).getTime() <= threeDaysInMs)) {
+             const categoryText = course.category ? course.category : "Course";
+             newReleasesNotices.push({
+               title: isModal ? `🚀 New Course Released: ${course.title}!` : `🚀 New ${categoryText} Released`,
+               startDate: new Date(course.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+               status: "active",
+               source: "system",
+               message: `
+                 <div style="margin-bottom: 8px;">
+                   <b>Category:</b> ${categoryText}<br/>
+                   <b>Duration:</b> ${course.duration || 'Flexible'}<br/>
+                   <b>About:</b> ${course.description || `Dive deep into this exciting new ${categoryText.toLowerCase()} and upgrade your skills.`}
+                 </div>
+               `,
+               actionUrl: "/student/course",
+               actionText: "Explore Courses"
+             });
+           }
+        });
+      }
+
+      if (allInternships && Array.isArray(allInternships)) {
+        allInternships.forEach(intern => {
+           if (intern.createdAt && (Date.now() - new Date(intern.createdAt).getTime() <= threeDaysInMs)) {
+             const categoryText = intern.category ? intern.category : "Internship";
+             newReleasesNotices.push({
+               title: isModal ? `🚀 New Internship Released: ${intern.title}!` : `🚀 New ${categoryText} Released`,
+               startDate: new Date(intern.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+               status: "active",
+               source: "system",
+               message: `
+                 <div style="margin-bottom: 8px;">
+                   <b>Category:</b> ${categoryText}<br/>
+                   <b>Duration:</b> ${intern.duration || 'Flexible'}<br/>
+                   <b>About:</b> ${intern.description || `Gain practical experience with this newly released internship.`}
+                 </div>
+               `,
+               actionUrl: "/student/internshipLibrary",
+               actionText: "Explore Internships"
+             });
+           }
+        });
+      }
+      
+      const streakBrokenNotices = [];
+      if (typeof window !== "undefined" && localStorage.getItem("streakBrokenNotify") === "true") {
+        streakBrokenNotices.push({
+          title: "💔 Login Streak Broken!",
+          startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          status: "active",
+          source: "system",
+          message: "Oh no! Your login streak was reset to 0 because you missed a day. Make sure to log in every day to keep your streak alive and earn more coins!",
+          actionUrl: null
+        });
+      }
+
+      data = [...streakBrokenNotices, ...newReleasesNotices, ...completedCoursesNotices, ...(AllNotifications || [])];
       break;
     case "certificates":
       data = [
@@ -121,7 +219,7 @@ export default function CardsList({ type, isModal = false }) {
   }
   if (type === "notifications") {
     return (
-      <div className={`flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden pb-2 px-1 ${isModal ? 'h-full' : 'max-h-[255px]'}`}>
+      <div className={`flex flex-col gap-3 [&::-webkit-scrollbar]:hidden pb-2 px-1 ${isModal ? 'h-full overflow-y-auto' : 'w-full'}`}>
         {
         // data?.filter((d) => d?.status !== "pending")        
         data?.filter((d) => d?.status === "active")
@@ -132,7 +230,7 @@ export default function CardsList({ type, isModal = false }) {
                 theme={{
                   components: {
                     Collapse: {
-                      headerBg: '#e6f7ff',
+                      headerBg: '#FAFAFA',
                       contentBg: '#ffffff',
                     },
                   },
@@ -150,25 +248,28 @@ export default function CardsList({ type, isModal = false }) {
                   {
                     key: i,
                     label: (
-                      <div className="flex flex-row items-start justify-between">
-                        <div>
-                          <p className="text-[16px] font-bold w-[95%] overflow-hidden text-ellipsis whitespace-nowrap m-0">{e?.title}</p>
-                          <div className="flex flex-row items-center justify-between gap-[0.3rem] text-[12px]">
-                            <p>{e?.startDate}</p>
+                      <div className="flex flex-row items-start justify-between gap-2 w-full">
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-[15px] font-bold m-0 leading-snug ${isModal ? 'break-words whitespace-normal' : 'truncate'}`}>{e?.title}</p>
+                          <div className="flex flex-row items-center justify-start gap-[0.3rem] text-[12px] mt-1">
+                            <p className="m-0 text-gray-500">{e?.startDate}</p>
                           </div>
                         </div>
-                        <p
-                          style={{
-                            color:
-                              e?.status === "active"
-                                ? "green"
-                                : e?.status === "expired"
-                                  ? "red"
-                                  : "inherit",
-                          }}
-                        >
-                          {e?.status}
-                        </p>
+                        {(!isModal && e?.source === "system") ? null : (
+                          <p
+                            className="m-0 shrink-0"
+                            style={{
+                              color:
+                                e?.status === "active"
+                                  ? "green"
+                                  : e?.status === "expired"
+                                    ? "red"
+                                    : "inherit",
+                            }}
+                          >
+                            {e?.status}
+                          </p>
+                        )}
                       </div>
                     ),
                     children: (
@@ -183,6 +284,17 @@ export default function CardsList({ type, isModal = false }) {
                           }}
                           style={{ marginBottom: "16px" }}
                         />
+                        {e?.actionUrl && isModal && (
+                          <div style={{ marginBottom: "16px" }}>
+                            <Button 
+                              type="primary" 
+                              onClick={() => router.push(e.actionUrl)}
+                              className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                            >
+                              {e.actionText || 'View Details'}
+                            </Button>
+                          </div>
+                        )}
 
                         {/* Attachments Section */}
                         {e?.attachments && e.attachments.length > 0 && (

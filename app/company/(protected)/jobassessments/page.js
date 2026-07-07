@@ -154,13 +154,14 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
     </div>
   );
 };
-
-export default function AssessmentsPage() {
   // ===== STATE MANAGEMENT =====
   const [pageNo, setPageNo] = useState(ASSESSMENT_CONFIG.DEFAULT_PAGE_NO);
   const [pageSize, setPageSize] = useState(ASSESSMENT_CONFIG.DEFAULT_PAGE_SIZE);
   const [loading, setLoading] = useState(false);
   const [countdowns, setCountdowns] = useState({});
+  const [filterType, setFilterType] = useState("All");
+
+  // ===== REDUX & ROUTING =====
   const [filterType, setFilterType] = useState("All");
 
   // ===== REDUX & ROUTING =====
@@ -396,8 +397,6 @@ export default function AssessmentsPage() {
     }
 
     return renderAssessmentCards();
-  };
-
   const renderPagination = () => (
     <div className={JaStyles.paginationContainer}>
       <Pagination
@@ -414,6 +413,8 @@ export default function AssessmentsPage() {
   return (
     <div className={JaStyles.container}>
         {renderHeader()}
+        {renderSummaryBoxes()}
+        <div className={JaStyles.bodyStyles}>{renderBodyContent()}</div>
         {renderSummaryBoxes()}
         <div className={JaStyles.bodyStyles}>{renderBodyContent()}</div>
 
