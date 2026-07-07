@@ -200,8 +200,14 @@ export default function TestCard({
   };
 
   const progressForTest = studentCreds?.progress?.filter((e) => e?.testId == testData?._id) || [];
-  const attemptsDone = progressForTest.length;
-  const latestAttempt = progressForTest[attemptsDone - 1];
+  const backendAttemptsDone = progressForTest.length;
+  
+  const localAttempts = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("localAttempts") || "{}") : {};
+  const localAttemptCount = localAttempts[testData?._id] || 0;
+  
+  const attemptsDone = Math.max(backendAttemptsDone, localAttemptCount);
+  
+  const latestAttempt = progressForTest[backendAttemptsDone - 1];
   const score = latestAttempt?.scoreData?.finalScore !== undefined ? latestAttempt.scoreData.finalScore : latestAttempt?.score;
   const percentage = totalMarks > 0 && score !== undefined ? Math.round((Number(score) / totalMarks) * 100) : undefined;
   const hasAttempted = attemptsDone > 0;

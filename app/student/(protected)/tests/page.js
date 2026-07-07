@@ -171,17 +171,23 @@ export default function Tests() {
     );
   };
 
+  const attemptedTestIds = [...new Set((studentCreds?.progress || []).map(p => p.testId))];
+
   // Filter tests based on tab
   const filteredTests = allTests?.filter((test) => {
     const expired = isTestExpired(test);
+    const isAttempted = attemptedTestIds.includes(test?._id);
+
     if (activeTab === "all") return true;
     if (activeTab === "active") return !expired && test?.status?.toLowerCase() === "active";
     if (activeTab === "expired") return expired;
+    if (activeTab === "results") return isAttempted;
     return true;
   });
 
   const activeCount = allTests?.filter(t => !isTestExpired(t) && t?.status?.toLowerCase() === "active").length || 0;
   const expiredCount = allTests?.filter(isTestExpired).length || 0;
+  const resultsCount = allTests?.filter(t => attemptedTestIds.includes(t?._id)).length || 0;
 
   const bannerStats = (
     <div className="flex items-center gap-8 pr-4">
@@ -189,11 +195,36 @@ export default function Tests() {
         <span className="text-[32px] font-extrabold leading-none text-white">{allTests?.length || 0}</span>
         <span className="text-[14px] text-white/70 font-semibold tracking-wide">Total tests</span>
       </div>
-      <div className="w-[1px] h-12 bg-white/20"></div>
-      <div className="flex flex-col items-center">
-        <span className="text-[32px] font-extrabold leading-none text-white">{activeCount}</span>
-        <span className="text-[14px] text-white/70 font-semibold tracking-wide">Active</span>
-      </div>
+
+      {(activeTab === "all" || activeTab === "active") && (
+        <>
+          <div className="w-[1px] h-12 bg-white/20"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[32px] font-extrabold leading-none text-white">{activeCount}</span>
+            <span className="text-[14px] text-white/70 font-semibold tracking-wide">Active</span>
+          </div>
+        </>
+      )}
+
+      {(activeTab === "all" || activeTab === "expired") && (
+        <>
+          <div className="w-[1px] h-12 bg-white/20"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[32px] font-extrabold leading-none text-white">{expiredCount}</span>
+            <span className="text-[14px] text-white/70 font-semibold tracking-wide">Expired</span>
+          </div>
+        </>
+      )}
+
+      {activeTab === "results" && (
+        <>
+          <div className="w-[1px] h-12 bg-white/20"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[32px] font-extrabold leading-none text-white">{resultsCount}</span>
+            <span className="text-[14px] text-white/70 font-semibold tracking-wide">Attempted</span>
+          </div>
+        </>
+      )}
     </div>
   );
 
@@ -228,6 +259,14 @@ export default function Tests() {
           >
             Expired {expiredCount}
           </button>
+          <button
+            onClick={() => setActiveTab("results")}
+            className={`pb-4 text-[16px] font-bold transition-all border-b-[3px] ${
+              activeTab === "results" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
+            }`}
+          >
+            Results {resultsCount}
+          </button>
         </div>
       </div>
 
@@ -239,9 +278,31 @@ export default function Tests() {
               <CardSkeleton />
               <CardSkeleton />
             </>
-          ) : allTests?.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "60px 0", width: "100%", color: "#888" }}>
-              <p style={{ fontSize: "16px" }}>No tests available in this category right now.</p>
+          ) : filteredTests?.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center min-h-[50vh] px-4 text-center">
+              <div className="text-[16px] text-[#475467] font-semibold flex items-center gap-2">
+                {activeTab === "results" ? (
+                  <span className="flex flex-col items-center gap-3">
+                    <span className="text-5xl mb-2">📊</span>
+                    <span className="max-w-[400px]">There are no tests to see results for. Try attempting a test to check out your results!</span>
+                  </span>
+                ) : activeTab === "expired" ? (
+                  <span className="flex flex-col items-center gap-3">
+                    <span className="text-5xl mb-2">⏳</span>
+                    <span className="max-w-[400px]">No expired tests at the moment. You're all caught up!</span>
+                  </span>
+                ) : activeTab === "active" ? (
+                  <span className="flex flex-col items-center gap-3">
+                    <span className="text-5xl mb-2">🚀</span>
+                    <span className="max-w-[400px]">No active tests right now. Check back later for new ones!</span>
+                  </span>
+                ) : (
+                  <span className="flex flex-col items-center gap-3">
+                    <span className="text-5xl mb-2">📭</span>
+                    <span className="max-w-[400px]">No tests available right now. Check back soon!</span>
+                  </span>
+                )}
+              </div>
             </div>
           ) : (
             filteredTests?.map((e, index) => {
@@ -258,6 +319,7 @@ export default function Tests() {
                     navigateToTest={navigateToTest}
                     questionLength={e?.questions?.length}
                     index={index}
+                    isResultTab={activeTab === 'results'}
                   />
                 </div>
               );
