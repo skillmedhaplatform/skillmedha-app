@@ -32,17 +32,15 @@ export const studentProfileSchema = [
   {
     label: "Phone",
     name: "phone",
-    type: "text",
+    type: "phone",
     placeholder: "+91xxxxxxxxxx",
     required: true,
-    maxLength: 13,
   },
   {
     label: "Alternate Phone",
     name: "alternatePhone",
-    type: "text",
+    type: "phone",
     placeholder: "+91xxxxxxxxxx",
-    maxLength: 13,
   },
   {
     label: "Email",

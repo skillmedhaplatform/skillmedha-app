@@ -2,12 +2,28 @@
 import React from "react";
 
 export default function MobileAchievements() {
+  const [streak, setStreak] = React.useState(1);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setStreak(parseInt(localStorage.getItem("loginStreak") || "1", 10));
+    }
+  }, []);
+
+  let streakCoins = 5;
+  if (streak === 1) streakCoins = 10;
+  else if (streak > 0 && streak % 10 === 0) streakCoins = streak;
+
   const achievementsList = [
     { emoji: "⭐", title: "First Enroll", desc: "+50 XP earned", status: "Earned" },
-    { emoji: "🔥", title: "7-Day Streak", desc: "+100 XP earned", status: "Earned" },
+    { emoji: "🔥", title: `${streak} Day Streak`, desc: `+${streakCoins} coins earned`, status: "Earned" },
     { emoji: "🎓", title: "Course Complete", desc: "+200 XP earned", status: "Earned" },
     { emoji: "🎉", title: "Certified Dev", desc: "+500 XP earned", status: "Earned" }
   ];
+
+  if (streak >= 30) {
+    achievementsList.push({ emoji: "🏆", title: "1 Month Streak", desc: "Maintained badge", status: "Earned" });
+  }
 
   return (
     <div className="w-full flex flex-col gap-3 py-2 px-1">

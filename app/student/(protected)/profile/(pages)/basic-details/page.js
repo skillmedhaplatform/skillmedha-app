@@ -14,6 +14,8 @@ import { MdDelete } from "react-icons/md";
 import { updateStudent } from "@/redux/slices/student";
 import TextEditor from "@/universalUtils/editor";
 import { getLstorage } from "@/universalUtils/windowMW";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 const { Option } = Select;
 
@@ -429,6 +431,32 @@ export default function StudentProfileForm() {
             >
               Rephrase using AI
             </Button>
+          )}
+        </div>
+      );
+    }
+
+    if (field.type === "phone") {
+      return (
+        <div key={field.name} className={formStyles.formField}>
+          <label>{field.label}</label>
+          <PhoneInput
+            country={'in'}
+            value={formData?.[field.name] ?? ""}
+            onChange={(phone) => handleChange({ target: { name: field.name, value: phone } })}
+            disabled={!isEditing || field.disable}
+            inputProps={{
+              name: field.name,
+              required: field.required,
+            }}
+            containerStyle={{ width: '100%' }}
+            inputStyle={{ width: '100%', height: '42px', borderRadius: '5px', border: '1px solid #d1d5db', fontSize: '15px', color: '#1e293b' }}
+            buttonStyle={{ border: '1px solid #d1d5db', borderRadius: '5px 0 0 5px', backgroundColor: '#f8fafc' }}
+          />
+          {field.name === "phone" && phoneError && (
+            <span style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+              {phoneError}
+            </span>
           )}
         </div>
       );

@@ -205,7 +205,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
   <div className="w-full flex flex-col items-start pb-2">
     <h3 className="m-0 font-extrabold text-[#0f172a] text-[16px] xl:text-[18px] mb-3 shrink-0">Overall Performance</h3>
 
-    <div className="w-full bg-[#FAFAFA] rounded-[16px] py-2 px-3 flex items-center gap-3 border border-[#e2e8f0] shrink-0 mb-3">
+    <div className="w-full bg-white rounded-[16px] py-2 px-3 flex items-center gap-3 border border-[#e2e8f0] shrink-0 mb-3">
       <div className="shrink-0 relative">
         <Progress
           type="circle"
