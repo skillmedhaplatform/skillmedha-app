@@ -20,10 +20,16 @@ export default function JobOpenings() {
   const student = useSelector((state) => state.student.student?.data);
   const totalApplied = student?.appliedJobs?.length || 0;
   
-  const { pagination } = useSelector(
+  const { pagination, jobs } = useSelector(
     (state) => state.jonOpenings?.allJobOpenings?.value || {}
   );
   const totalJobs = pagination?.totalDocs || 0;
+  
+  const todayCount = (jobs || []).filter(job => {
+    if (!job?.createdAt) return false;
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    return new Date().getTime() - new Date(job.createdAt).getTime() < ONE_DAY;
+  }).length;
 
   const page = searchParams.get("page") || "1";
   const limit = searchParams.get("limit") || "10";
@@ -87,6 +93,15 @@ export default function JobOpenings() {
               </span>
               <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center whitespace-nowrap">
                 Total Jobs
+              </span>
+            </div>
+            <div className="w-[1px] h-[40px] bg-white/20"></div>
+            <div className="flex flex-col items-center justify-center min-w-[80px]">
+              <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">
+                {todayCount}
+              </span>
+              <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center whitespace-nowrap">
+                New Today
               </span>
             </div>
             <div className="w-[1px] h-[40px] bg-white/20"></div>

@@ -179,14 +179,14 @@ export default function ProfileLayout({ children, activeView, setView }) {
             
             <div className={styles.identityDetails}>
               <div className={styles.nameRow}>
-                <h1 className={styles.coordName}>{name}</h1>
+                <h1 className={styles.coordName}>{firstName}</h1>
                 <span className={styles.designationBadge}>
                   <FaCheckCircle style={{ marginRight: '4px', fontSize: '0.85em' }} />
                   {designation}
                 </span>
               </div>
               <div className={styles.metaRow}>
-                <span>{firstName}</span>
+                <span>{name}</span>
                 <span className={styles.divider}>•</span>
                 <span>{email}</span>
                 <span className={styles.divider}>•</span>
