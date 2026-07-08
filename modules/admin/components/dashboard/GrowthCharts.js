@@ -79,7 +79,7 @@ export default function GrowthCharts({ data, loading, onPeriodChange }) {
                   key={type.id}
                   className={`${styles.typeButton} ${
                     activeChart === type.id ? styles.active : ""
-                  }`}
+                  } ${styles[type.id] || ""}`}
                   onClick={() => setActiveChart(type.id)}
                 >
                   <Icon size={16} />

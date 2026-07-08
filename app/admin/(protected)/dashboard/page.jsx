@@ -87,9 +87,6 @@ export default function DashboardPage() {
           <div className={styles.pageHeader}>
             <div className={styles.headerLeft}>
               <h2 className={styles.pageTitle}>Dashboard Overview</h2>
-              <p className={styles.pageSubtitle}>
-                Welcome back, <span>{user?.email || "Admin"}</span>
-              </p>
             </div>
             <div className={styles.headerRight}>
               <button
@@ -118,8 +115,6 @@ export default function DashboardPage() {
           <section className={styles.kpiSection}>
             <KPICards stats={stats} loading={loading.stats} />
           </section>
-        </div>
-      </main>
       <section className={styles.section}>
         <AIUsageChart
           data={aiUsageGrowth}
@@ -155,6 +150,8 @@ export default function DashboardPage() {
             />
          </div>
       </section>
+        </div>
+      </main>
     </div>
   );
 }

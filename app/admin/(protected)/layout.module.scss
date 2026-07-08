@@ -1,34 +1,67 @@
-@use "@/modules/admin/styles/mixins" as *;
-@use "@/modules/admin/styles/colors" as *;
-
-.mainCont {
+@use "../../../utils/universalUtils/colors.module.scss" as *;
+@use "../../../utils/universalUtils/mixins.scss" as *;
+.pageContainer {
+  width: 100vw;
   height: 100vh;
-  width: 100%;
-  @include flexBox(column, center, flex-start);
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  padding: 0;
+  background-color: #ffffff;
+}
 
-  .header {
-    height: 7%;
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+
+  .content {
+    background-color: #ffffff;
+    position: relative;
     width: 100%;
-  }
-
-  .bottom {
     flex: 1;
-    max-height: 93%;
-    width: 100%;
-    @include flexBox(row, flex-start, flex-start);
+    padding: 0;
+    overflow-y: auto;
+    border-radius: 0;
+    border: none;
+    
+    @include custom-scrollbar(#bfbfbf, #f1f1f1);
+  }
+}
 
-    .sidebar {
-      padding-top: 0.5rem;
-      height: 100%;
-      width: 15%;
-      border-right: 1px solid $borderColor;
-      min-width: 12rem;
-    }
+.header2 {
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-    .content {
-      padding: 0.5rem;
-      height: 100%;
-      flex: 1;
+  .headerTitle {
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
+  .inputContainer {
+    width: 80%;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid $borderColor;
+    display: flex;
+    gap: 0.5rem;
+
+    input {
+      font-size: 1rem;
+      width: 100%;
+      border: none;
+      outline: none;
     }
   }
+}
+
+.toggleBtn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1000;
 }

@@ -267,7 +267,7 @@ export default function AIUsageChart({ data, loading, onPeriodChange }) {
 
       {/* Chart */}
       <div className={styles.chartWrapper}>
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={300}>
           {renderChart()}
         </ResponsiveContainer>
       </div>

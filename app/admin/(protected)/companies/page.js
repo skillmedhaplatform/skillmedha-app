@@ -26,6 +26,7 @@ import {
   ClearOutlined,
   // BriefcaseOutlined,
   TeamOutlined,
+  PoweroffOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
@@ -422,32 +423,7 @@ export default function Company() {
   return (
     <div className={styles.collegePage}>
       <div className={styles.header}>
-        <div className={styles.titleRow}>
-          <h1 className={styles.title}>All Companies</h1>
-          <Tooltip
-            title={
-              !canCreate ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""
-            }
-          >
-            <span>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                size="middle"
-                onClick={() => {
-                  setEditingCompany(null);
-                  form.resetFields();
-                  setSelectedState(undefined);
-                  setSelectedDistrict(undefined);
-                  setIsModalVisible(true);
-                }}
-                disabled={!canCreate}
-              >
-                Add Company
-              </Button>
-            </span>
-          </Tooltip>
-        </div>
+
         <div className={styles.controls}>
           <Input
             placeholder="Search companies... (min 3 characters)"
@@ -478,6 +454,31 @@ export default function Company() {
               </Button>
             </Dropdown>
           </div>
+          <span style={{ marginLeft: "auto", marginRight: "12px" }}>
+            <Tooltip
+              title={
+                !canCreate ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""
+              }
+            >
+              <span>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  size="middle"
+                  onClick={() => {
+                    setEditingCompany(null);
+                    form.resetFields();
+                    setSelectedState(undefined);
+                    setSelectedDistrict(undefined);
+                    setIsModalVisible(true);
+                  }}
+                  disabled={!canCreate}
+                >
+                  Add Company
+                </Button>
+              </span>
+            </Tooltip>
+          </span>
         </div>
       </div>
 
@@ -592,7 +593,7 @@ export default function Company() {
                     <Button
                       type="text"
                       size="large"
-                      icon={<DeleteOutlined />}
+                      icon={<PoweroffOutlined />}
                       className={styles.cardOptions}
                       onClick={() => {
                         if (!canEdit) {
@@ -614,7 +615,7 @@ export default function Company() {
                   title={company.orgName}
                   trigger="hover"
                   placement="bottomRight"
-                  color="#24A058"
+                  color="#1677ff"
                 >
                   <h3
                     className={styles.collegeName}
@@ -627,7 +628,6 @@ export default function Company() {
                     {company.orgName}
                   </h3>
                 </Tooltip>
-                <div className={styles.collegeId}>ID: {company.orgId}</div>
 
                 {/* Stats Badges for Company */}
                 <div className={styles.statsContainer}>
@@ -832,7 +832,7 @@ export default function Company() {
         </Form>
       </Modal>
       <Modal
-        title={"Delete Company"}
+        title={"Inactivate Company"}
         open={deleteModal}
         onOk={() => {
           dispatch(
@@ -849,11 +849,11 @@ export default function Company() {
         mask={{ closable: false }}
         // keyboard={!submitting}
         // closable={!submitting}
-        okText={"Delete Company"}
+        okText={"Inactivate"}
         cancelText="Cancel"
         width={500}
       >
-        <h4>Are you sure you want to delete this company</h4>
+        <h4>Are you sure you want to inactivate this company?</h4>
       </Modal>
     </div>
   );

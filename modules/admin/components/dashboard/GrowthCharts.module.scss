@@ -1,6 +1,11 @@
 @use '@/modules/admin/styles/colors' as *;
 
 .chartsSection {
+  background: $white;
+  border: 1px solid $borderColor;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: $shadowSm;
   margin-top: $spacing6;
 }
 
@@ -97,14 +102,26 @@
     }
 
     &:hover {
-      background: rgba($primaryColor, 0.1);
-      color: $primaryColor;
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
     }
 
     &.active {
       background: $white;
-      color: $primaryColor;
       box-shadow: $shadowSm;
+      
+      &.all {
+        color: #3b82f6;
+      }
+      &.students {
+        color: #24A058;
+      }
+      &.jobs {
+        color: #ec4899;
+      }
+      &.courses {
+        color: #14b8a6;
+      }
     }
   }
 }
@@ -115,12 +132,6 @@
 }
 
 .chartCard {
-  background: $white;
-  border: 1px solid $borderColor;
-  border-radius: $borderRadius;
-  padding: $spacing6;
-  box-shadow: $shadowSm;
-
   h3 {
     font-size: $fontSizeLg;
     font-weight: $fontWeightSemibold;

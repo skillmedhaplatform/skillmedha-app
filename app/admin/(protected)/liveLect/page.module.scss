@@ -1,8 +1,9 @@
 @import '@/modules/admin/styles/colors.scss';
 
 .container {
-  height: 95%;
+  height: 100%;
   width: 100%;
+  background-color: #EFF5FB;
 
   .headerContainer {
     display: flex;
@@ -13,15 +14,31 @@
 
     button {
       font-size: 1rem;
-      font-weight: 700;
-      background-color: $primaryColor;
+      font-weight: 600;
+      background-color: #1677ff;
       color: #fff;
       border: none;
       outline: none;
-      border-radius: 0.3rem;
-      padding: 0.3rem 1rem;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+  }
+
+  .titleContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 16px 24px;
+    border-bottom: 1px solid #E2E8F0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
 }
 
@@ -60,14 +77,13 @@
   }
 
   .card_cont {
-    background-color: #ffffffdd;
+    background-color: #ffffff;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem 1rem 1rem;
-    cursor: pointer;
+    justify-content: space-between;
+    padding: 16px;
     border-radius: 10px;
-    box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2509803922);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(128, 128, 128, 0.2);
   }
 }

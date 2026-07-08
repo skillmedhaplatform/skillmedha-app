@@ -86,6 +86,17 @@ const Page = () => {
     searchParams.get("sort") || "recent"
   );
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  // Extract unique categories from data
+  const uniqueCategories = React.useMemo(() => {
+    const cats = new Set();
+    (data || []).forEach(item => {
+      const cat = item?.category || item?.type;
+      if (cat) cats.add(cat);
+    });
+    return Array.from(cats);
+  }, [data]);
 
   const showModal = (cardData) => {
     setSelectedCard(cardData);
@@ -183,15 +194,20 @@ const Page = () => {
   };
 
   // Apply filters and search
-  const getFilteredAndSortedData = () => {
-    let filtered = [...data];
+  const filteredAndSortedData = React.useMemo(() => {
+    let result = [...(data || [])];
+
+    // Filter by category
+    if (activeCategory !== "All") {
+      result = result.filter(item => (item?.category || item?.type) === activeCategory);
+    }
 
     // Search filter
     if (searchText.length >= 3) {
-      filtered = filtered.filter(
+      result = result.filter(
         (course) =>
-          course.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          stripHtml(course.description)
+          course.title?.toLowerCase().includes(searchText.toLowerCase()) ||
+          stripHtml(course.description || "")
             .toLowerCase()
             .includes(searchText.toLowerCase())
       );
@@ -199,7 +215,7 @@ const Page = () => {
 
     // Difficulty filter
     if (filterDifficulty) {
-      filtered = filtered.filter(
+      result = result.filter(
         (course) =>
           course.difficulty?.toLowerCase() === filterDifficulty.toLowerCase()
       );
@@ -207,7 +223,7 @@ const Page = () => {
 
     // Modules filter
     if (filterModules) {
-      filtered = filtered.filter((course) => {
+      result = result.filter((course) => {
         const moduleCount = course.sections?.length || 0;
         switch (filterModules) {
           case "1-5":
@@ -223,10 +239,8 @@ const Page = () => {
     }
 
     // Sort
-    return sortCourses(filtered, sortParam);
-  };
-
-  const filteredAndSortedData = getFilteredAndSortedData();
+    return sortCourses(result, sortParam);
+  }, [data, activeCategory, searchText, filterDifficulty, filterModules, sortParam]);
 
   // Handle sort change
   const handleSortChange = (key) => {
@@ -719,42 +733,24 @@ const Page = () => {
             gap: "12px",
             alignItems: "center",
             flexWrap: "wrap",
-            marginBottom: "20px",
+            marginBottom: "10px",
             justifyContent: "space-between",
             width: "100%",
           }}
         >
-          <div className={internshipLibStyles.title}>Course Library</div>
-          <Tooltip
-            title={
-              !canAccess(PERMISSION_VALUES.CREATE)
-                ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-                : ""
-            }
-          >
-            <>
-              <Button
-                type="primary"
-                onClick={() => nav.push("/admin/course/newCourse")}
-                disabled={!canAccess(PERMISSION_VALUES.CREATE)}
-              >
-                + Create Course
-              </Button>
-            </>
-          </Tooltip>
           <div
             style={{
               display: "flex",
               gap: "12px",
               alignItems: "center",
               flexWrap: "wrap",
-              width: "100%",
+              flex: 1,
             }}
           >
             <Input
               placeholder="Search courses... (min 3 characters)"
               prefix={<SearchOutlined />}
-              style={{ maxWidth: "400px", flex: 1 }}
+              style={{ maxWidth: "400px", minWidth: "200px" }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               allowClear
@@ -778,10 +774,51 @@ const Page = () => {
               </Button>
             </Dropdown>
           </div>
+
+          <Tooltip
+            title={
+              !canAccess(PERMISSION_VALUES.CREATE)
+                ? getPermissionMessage(PERMISSION_VALUES.CREATE)
+                : ""
+            }
+          >
+            <>
+              <Button
+                type="primary"
+                onClick={() => nav.push("/admin/course/newCourse")}
+                disabled={!canAccess(PERMISSION_VALUES.CREATE)}
+              >
+                + Create Course
+              </Button>
+            </>
+          </Tooltip>
         </div>
 
         {/* Search and Filter Controls */}
       </div>
+
+      {/* Category Selection */}
+      {uniqueCategories.length > 0 && (
+        <div style={{ marginBottom: "16px", display: "flex", gap: "10px", overflowX: "auto", paddingLeft: "16px", paddingTop: "16px" }}>
+          <Button 
+            type={activeCategory === "All" ? "primary" : "default"} 
+            onClick={() => setActiveCategory("All")}
+            style={{ borderRadius: "20px", fontWeight: activeCategory === "All" ? "600" : "400" }}
+          >
+            All Categories
+          </Button>
+          {uniqueCategories.map(cat => (
+            <Button 
+              key={cat} 
+              type={activeCategory === cat ? "primary" : "default"} 
+              onClick={() => setActiveCategory(cat)}
+              style={{ borderRadius: "20px", fontWeight: activeCategory === cat ? "600" : "400", textTransform: "capitalize" }}
+            >
+              {cat}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Active Filters Display */}
       {activeFilterCount > 0 && (
@@ -929,7 +966,7 @@ const Page = () => {
                   <div style={{ marginBottom: "8px" }}>
                     {eachData?.pricing?.currentPrice || eachData?.price ? (
                       <Space size="small">
-                        <span style={{ fontSize: "16px", fontWeight: "600", color: "#24A058" }}>
+                        <span style={{ fontSize: "16px", fontWeight: "600", color: "#1677ff" }}>
                           {formatINR(eachData?.pricing?.currentPrice || eachData?.price)}
                         </span>
                         {eachData?.pricing?.originalPrice && (
@@ -938,7 +975,7 @@ const Page = () => {
                           </span>
                         )}
                         {eachData?.pricing?.couponDiscount > 0 && (
-                          <Tag color="green" style={{ margin: 0 }}>
+                          <Tag color="blue" style={{ margin: 0 }}>
                             -{formatINR(eachData?.pricing?.couponDiscount)} Off
                           </Tag>
                         )}
