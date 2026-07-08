@@ -136,7 +136,6 @@ const PlacementDetails = () => {
   return (
     <>
       <PageHeader
-        breadcrumb="Placement drive"
         title={getName(id) || "Company Details"}
         subtitle="Manage jobs and job description postings for this company"
         actionText="+ Add New Job"

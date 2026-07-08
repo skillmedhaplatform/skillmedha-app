@@ -53,7 +53,6 @@ const StudentLayout = ({ children }) => {
     return (
         <>
             <PageHeader
-                breadcrumb="All departments"
                 title={studentName}
                 subtitle={`Class of ${selectedStudent?.data?.yearOfPassing || "N/A"} - ${selectedStudent?.data?.email || ""}`}
             />

@@ -115,7 +115,19 @@ export default function MainComp() {
     appliedPage * appliedLimit
   );
 
-  const filteredJobs = listFilter === "applied" ? paginatedAppliedJobs : JOBS;
+  const isPostedToday = (job) => {
+    if (!job?.createdAt) return false;
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    return new Date().getTime() - new Date(job.createdAt).getTime() < ONE_DAY;
+  };
+
+  const todayJobs = JOBS.filter(isPostedToday);
+
+  const filteredJobs = listFilter === "applied" 
+    ? paginatedAppliedJobs 
+    : listFilter === "today" 
+    ? todayJobs 
+    : JOBS;
 
   const selectedJob = filteredJobs?.find((j) => j?._id === selectedId) || null;
 
@@ -180,6 +192,7 @@ export default function MainComp() {
               options={[
                 { label: "All Jobs", value: "all" },
                 { label: "Applied Jobs", value: "applied" },
+                { label: "New Jobs", value: "today" },
               ]}
               style={{ fontWeight: 600, padding: "3px" }}
             />

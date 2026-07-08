@@ -76,7 +76,7 @@ const PageHeader = ({
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                   <h1 style={{ fontSize: '2.2rem', fontWeight: '800', lineHeight: '1.2' }}>Hi {userName},</h1>
-                  <p style={{ margin: 0, fontSize: '1.1rem', color: '#a0aec0', fontWeight: '500' }}>{currentDate}</p>
+                  <p className="m-0 text-[11px] lg:text-[13px] font-bold tracking-[0.5px] uppercase text-[#cbd5e1]">{currentDate}</p>
                 </div>
                 <p className={styles.subtitle} style={{ fontSize: '1.3rem', color: '#e2e8f0', marginTop: '0.8rem', lineHeight: '1.4' }}>
                   {greetingText}! Here’s an overview of today’s placement activities.
