@@ -130,6 +130,12 @@ const Dictaphone = () => {
   }, [triggerReplay, isReplaying, uploadResults]);
 
   const token = getLstorage("token");
+  const isMediaReady = Boolean(stream && !isLoading && !error);
+  const startButtonLabel = !isMediaReady
+    ? error
+      ? "Camera blocked"
+      : "Waiting for camera..."
+    : "Start Recording";
 
   const uploadBlobToS3 = async (blob, isAudioOnly) => {
     try {
@@ -141,8 +147,8 @@ const Dictaphone = () => {
       formData.append("file", blob, isAudioOnly ? "audio.webm" : "video.webm");
       //console.log("File size:", blob.size / 1024 / 1024, "MB");
       const uploadUrl = isAudioOnly
-        ? `${resturl}/uploadtos3?bucketName=skillmedha-speech&task=transcribe`
-        : `${resturl}/uploadtos3?bucketName=skillmedha-speech`;
+        ? `${resturl}/uploadToS3?bucketName=skillmedha-speech&task=transcribe`
+        : `${resturl}/uploadToS3?bucketName=skillmedha-speech`;
 
       const response = await axios.post(uploadUrl, formData, {
         headers: {
@@ -196,6 +202,11 @@ const Dictaphone = () => {
     setUploadResults({ video: null, audio: null });
     setVideoBlob(null);
     setAudioBlob(null);
+
+    if (!isMediaReady) {
+      console.warn("Cannot start recording: camera/microphone not ready.");
+      return;
+    }
 
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
@@ -330,6 +341,9 @@ const Dictaphone = () => {
     return (
       <MobileTalkToAi
         isLoading={isLoading}
+        isMediaReady={isMediaReady}
+        startButtonLabel={startButtonLabel}
+        error={error}
         isReplaying={isReplaying}
         currentTime={currentTime}
         listening={listening}
@@ -421,6 +435,19 @@ const Dictaphone = () => {
                     <VideoCameraOutlined className="text-5xl opacity-70" />
                     <p className="m-0 text-[1.1rem]">Initializing Camera...</p>
                   </div>
+                ) : !isMediaReady ? (
+                  <div className="flex flex-col items-center gap-4 text-white px-6 text-center">
+                    <VideoCameraOutlined className="text-5xl opacity-70" />
+                    <p className="m-0 text-[1.1rem]">
+                      {error ? "Camera / microphone blocked" : "Waiting for camera..."}
+                    </p>
+                    <p className="text-sm text-white/80 max-w-[290px]">
+                      {error
+                        ? error.message ||
+                          "Please allow camera and microphone access in your browser settings."
+                        : "Please allow camera and microphone access so recording can begin."}
+                    </p>
+                  </div>
                 ) : isReplaying ? (
                   <video
                     ref={videoReplayRef}
@@ -466,11 +493,11 @@ const Dictaphone = () => {
                   type="primary"
                   icon={<PlayCircleOutlined />}
                   onClick={handleStartRec}
-                  disabled={listening || isProcessingAudio}
+                  disabled={!isMediaReady || listening || isProcessingAudio}
                   size="large"
                   className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
                 >
-                  Start Recording
+                  {startButtonLabel}
                 </Button>
 
                 <Button
