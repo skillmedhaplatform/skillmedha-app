@@ -14,6 +14,15 @@ export const loginPromoService = {
    *   stats: Array<{ id: number, value: string, label: string, growth: string }>
    * }>}
    */
+  getFallbackPromoData() {
+    return this._buildUiData({
+      studentCount: 50000,
+      activeStudentsStr: "50K+",
+      partnerCollegesStr: "500+",
+      placementRateStr: "94%"
+    });
+  },
+
   async getPromoData() {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_REST_URL || 'http://localhost:5000';
@@ -47,13 +56,7 @@ export const loginPromoService = {
       throw new Error("Invalid response format");
     } catch (error) {
       console.warn("LoginPromoService: Failed to fetch live stats, using fallback data. Error:", error.message);
-      // Return Fallback Data
-      return this._buildUiData({
-        studentCount: 50000,
-        activeStudentsStr: "50K+",
-        partnerCollegesStr: "500+",
-        placementRateStr: "94%"
-      });
+      return this.getFallbackPromoData();
     }
   },
 

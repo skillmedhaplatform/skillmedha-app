@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { loginPromoService } from '@/services/loginPromoService';
 
 import PromoBadge from './PromoBadge';
@@ -9,8 +8,7 @@ import PromoSlider from './PromoSlider';
 import PromoStats from './PromoStats';
 
 export default function LoginPromoSection() {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState(() => loginPromoService.getFallbackPromoData());
 
     useEffect(() => {
         let isMounted = true;
@@ -18,13 +16,11 @@ export default function LoginPromoSection() {
         const fetchData = async () => {
             try {
                 const promoData = await loginPromoService.getPromoData();
-                if (isMounted) {
+                if (isMounted && promoData) {
                     setData(promoData);
-                    setLoading(false);
                 }
             } catch (error) {
                 console.error("Error loading promo data:", error);
-                if (isMounted) setLoading(false);
             }
         };
 
@@ -34,15 +30,6 @@ export default function LoginPromoSection() {
             isMounted = false;
         };
     }, []);
-
-    if (loading || !data) {
-        return (
-            <div className="hidden lg:flex w-[55%] relative overflow-hidden bg-[#0A1128] flex-col items-center justify-center">
-                {/* Simple loader */}
-                <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin" />
-            </div>
-        );
-    }
 
     return (
         <div className="hidden lg:flex w-[55%] h-screen relative overflow-hidden bg-[#0A1128] flex-col items-center py-6">
