@@ -16,6 +16,7 @@ import { saveTestResults, getStudent } from "@/redux/slices/student";
 import ResultSkeleton from "../../reusable_comp/resultsskeleton";
 import { parseIfJson } from "../../reusable_comp/jsonparse";
 import { getLstorage, getSstorage, setSstorage } from "@/universalUtils/windowMW";
+import { deriveResultSummary } from "@/app/testportal/utils/resultPersistence";
 
 export default function Page() {
   const testRes = useSelector((state) => state.student.testResults);
@@ -135,6 +136,11 @@ export default function Page() {
       return;
     }
     if (testData?.value && testRes?.value && testRes?.value?.[testId]) {
+      const derivedScoreData = deriveResultSummary({
+        response: testRes?.value?.[testId]?.response || {},
+        questions: finishedTestData?.questions || [],
+        scoreData: testRes?.value?.[testId]?.scoreData || {},
+      });
       const {
         correctQues = "",
         unattemptedQues,
@@ -143,7 +149,7 @@ export default function Page() {
         totalTimeTaken,
         averageTimeTaken,
         notAnswered,
-      } = testRes?.value?.[testId]?.scoreData || {};
+      } = derivedScoreData;
       setScore({ totalScore, totalTimeTaken, averageTimeTaken });
 
       setChartData({
@@ -157,7 +163,7 @@ export default function Page() {
         colors: ["#87CC85", "#E43E5F", "#869DF0", "#4e4eff"],
       });
     }
-  }, [testData?.value, testRes?.value]);
+  }, [testData?.value, testRes?.value, testId, finishedTestData?.questions]);
 
   const extraStats = useMemo(() => {
     if (!ques?.length) return { flagged: 0, marked: 0, answeredMarked: 0 };
@@ -215,27 +221,47 @@ export default function Page() {
       }
 
       // Also try to get from student progress
-      const completedResult = StudentData_New?.progress?.filter(
-        (e) => e?.testId == testId
-      );
-      if (completedResult?.length > 0) {
-        const lastResult = completedResult.slice(-1)[0];
-        if (lastResult) {
-          dispatch(
-            saveTestResults({
-              userId: lastResult?.userId,
-              testId: lastResult?.testId,
-              response: lastResult?.response,
-              studentData: lastResult?.studentData,
-              flagged: lastResult?.flagged,
-              marked: lastResult?.marked,
-              scoreData: lastResult?.scoreData,
-            })
-          );
-        }
+      const completedResults = (StudentData_New?.progress || [])
+        .filter((entry) => entry?.testId === testId)
+        .filter((entry) => entry?.response || entry?.scoreData);
+
+      const bestCompletedResult = completedResults.sort((a, b) => {
+        const aHasScoreData = Boolean(a?.scoreData && Object.keys(a.scoreData).length);
+        const bHasScoreData = Boolean(b?.scoreData && Object.keys(b.scoreData).length);
+        if (aHasScoreData !== bHasScoreData) return aHasScoreData ? -1 : 1;
+
+        const aResponseCount = Object.keys(a?.response || {}).length;
+        const bResponseCount = Object.keys(b?.response || {}).length;
+        if (aResponseCount !== bResponseCount) return bResponseCount - aResponseCount;
+
+        const aScore = Number(a?.scoreData?.finalScore || 0);
+        const bScore = Number(b?.scoreData?.finalScore || 0);
+        if (aScore !== bScore) return bScore - aScore;
+
+        return 0;
+      })[0];
+
+      if (bestCompletedResult) {
+        const derivedScoreData = deriveResultSummary({
+          response: bestCompletedResult?.response || {},
+          questions: finishedTestData?.questions || [],
+          scoreData: bestCompletedResult?.scoreData || {},
+        });
+
+        dispatch(
+          saveTestResults({
+            userId: bestCompletedResult?.userId || studentData?._id,
+            testId: bestCompletedResult?.testId || testId,
+            response: bestCompletedResult?.response,
+            studentData: bestCompletedResult?.studentData || studentData,
+            flagged: bestCompletedResult?.flagged,
+            marked: bestCompletedResult?.marked,
+            scoreData: derivedScoreData,
+          })
+        );
       }
     }
-  }, [StudentData_New, testId, testRes?.value, dispatch]);
+  }, [StudentData_New, testId, testRes?.value, dispatch, finishedTestData?.questions, studentData?._id]);
 
   // Determine loading state based on actual data readiness
   const isDataReady = useMemo(() => {

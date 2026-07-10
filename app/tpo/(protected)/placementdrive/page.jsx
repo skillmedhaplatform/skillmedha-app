@@ -402,7 +402,6 @@ export default function DriveDetails() {
   return (
     <>
       <PageHeader
-        breadcrumb="Placement drive"
         title="All companies"
         subtitle="Manage recruiting companies, contacts and placement drives"
         actionText="+ Create Company"

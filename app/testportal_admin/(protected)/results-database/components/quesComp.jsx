@@ -156,7 +156,7 @@ export default function QuesComp({
           &nbsp;&nbsp;
           {bonusScore ? (
             <span className={resultStyles.bonusScore}>
-              Bonus Points: {+bonusScore}
+              Bonus Points: {bonusScore > 0 ? `+${+bonusScore}` : +bonusScore}
             </span>
           ) : (
             ""
@@ -480,7 +480,7 @@ export default function QuesComp({
                       </span>
                       {testRes?.response[e?._id]?.bonusScore > 0 && (
                         <span className={resultStyles.bonusScore}>
-                          Bonus Score: {testRes?.response[e?._id]?.bonusScore}
+                          Bonus Score: {testRes?.response[e?._id]?.bonusScore > 0 ? `+${testRes?.response[e?._id]?.bonusScore}` : testRes?.response[e?._id]?.bonusScore}
                         </span>
                       )}
                     </>

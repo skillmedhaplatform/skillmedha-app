@@ -63,7 +63,6 @@ export default function KPICards({ stats, loading }) {
       value: stats.totalJobs,
       icon: Briefcase,
       color: "pink",
-      subtitle: `${stats.totalAssignedJobs} assigned`,
     },
     {
       title: "Courses",
@@ -83,7 +82,6 @@ export default function KPICards({ stats, loading }) {
       value: formatNumber(stats.aiUsage?.totalTokens || 0),
       icon: Brain,
       color: "purple",
-      subtitle: `${(stats.aiUsage?.totalTokens || 0).toLocaleString()} tokens`,
       isFormatted: true, // Flag to prevent double formatting
     },
     {
@@ -91,9 +89,6 @@ export default function KPICards({ stats, loading }) {
       value: formatNumber(stats.aiUsage?.totalRequests || 0),
       icon: Zap,
       color: "blue",
-      subtitle: `${(
-        stats.aiUsage?.totalRequests || 0
-      ).toLocaleString()} requests`,
       isFormatted: true, // Flag to prevent double formatting
     },
   ];
@@ -123,7 +118,6 @@ export default function KPICards({ stats, loading }) {
               <Icon size={24} />
             </div>
             <div className={styles.content}>
-              <h3 className={styles.title}>{card.title}</h3>
               <p className={styles.value}>
                 {card.isFormatted
                   ? card.value
@@ -131,6 +125,7 @@ export default function KPICards({ stats, loading }) {
                   ? card.value.toLocaleString()
                   : card.value}
               </p>
+              <h3 className={styles.title}>{card.title}</h3>
               {card.subtitle && (
                 <p className={styles.subtitle}>{card.subtitle}</p>
               )}

@@ -108,10 +108,10 @@ const AllTestsComp = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(4); // default 4
 
-  // Reset to page 1 on test list count changes
+  // Reset to page 1 on test list changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [allTests?.length]);
+  }, [allTests]);
 
   const paginatedTests = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -395,7 +395,11 @@ const AllTestsComp = (props) => {
                       </div>
 
                       {/* Status Badge */}
-                      {countdowns[actualIndex] === "Expired" ? (
+                      {test?.status?.toLowerCase() !== "active" ? (
+                        <div className={`${CourseStyles.statusBadge} ${CourseStyles.pending}`}>
+                          <span className={CourseStyles.statusDot} /> In Progress
+                        </div>
+                      ) : countdowns[actualIndex] === "Expired" ? (
                         <div className={`${CourseStyles.statusBadge} ${CourseStyles.expired}`}>
                           <span className={CourseStyles.statusDot} /> Expired
                         </div>
@@ -629,13 +633,21 @@ const AllTestsComp = (props) => {
             <span className={AllTestsStyles.emptyIcon}>
               <FileTextOutlined />
             </span>
-            <h3 className={AllTestsStyles.emptyTitle}>No Tests Added</h3>
+            <h3 className={AllTestsStyles.emptyTitle}>
+              {props.selectedStatus === "expired" ? "No Expired Tests" : props.selectedStatus === "pending" ? "No Tests In Progress" : "No Tests Added"}
+            </h3>
             <p className={AllTestsStyles.emptyDesc}>
-              Get started by creating your first test assessment.
+              {props.selectedStatus === "expired" 
+                ? "You do not have any expired tests at the moment."
+                : props.selectedStatus === "pending"
+                  ? "There are no tests currently in progress."
+                  : "Get started by creating your first test assessment."}
             </p>
-            <button className={AllTestsStyles.emptyBtn} onClick={props.onAddNewTest}>
-              Create New Test
-            </button>
+            {props.selectedStatus !== "expired" && props.selectedStatus !== "pending" && (
+              <button className={AllTestsStyles.emptyBtn} onClick={props.onAddNewTest}>
+                Create New Test
+              </button>
+            )}
           </div>
         )}
       </div>

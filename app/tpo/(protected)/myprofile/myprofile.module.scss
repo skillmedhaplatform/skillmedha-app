@@ -18,8 +18,9 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
-  z-index: 2;
-  position: relative;
+  z-index: 50;
+  position: sticky;
+  top: 0;
   overflow: hidden;
   height: 140px;
 }
@@ -264,7 +265,9 @@
   width: 100%;
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  z-index: 1;
+  z-index: 49;
+  position: sticky;
+  top: 140px;
 }
 
 .tabsRow {

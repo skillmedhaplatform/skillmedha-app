@@ -9,10 +9,12 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
-  z-index: 2;
-  position: relative;
-  overflow: hidden;
-  height: 140px;
+  z-index: 50;
+  position: sticky;
+  top: 0;
+  overflow: visible;
+  height: auto;
+  min-height: 140px;
 
   .bgIcons {
     position: absolute;

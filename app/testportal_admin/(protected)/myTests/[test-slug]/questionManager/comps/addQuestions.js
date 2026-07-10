@@ -906,6 +906,9 @@ export default function AddQuestions({
                       );
                     }}
                     step={0.01}
+                    formatter={(value) =>
+                      value && value !== 0 ? `+${Math.abs(value)}` : value
+                    }
                     parser={(value) => value.replace(/[^\d.]/g, "")}
                   />
                 </div>

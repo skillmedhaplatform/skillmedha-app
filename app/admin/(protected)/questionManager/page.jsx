@@ -11,12 +11,14 @@ import {
   message,
   Popconfirm,
   Tooltip,
+  Input,
 } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { getAllAssessments } from "@/redux/slices/admin/cms/test";
 import { usePermissions, PERMISSION_VALUES } from "@/hooks/usepermission";
 import { MdDelete, MdSchool } from "react-icons/md";
+import { SearchOutlined } from "@ant-design/icons";
 import { deleteSkill, fetchSkills } from "@/redux/slices/admin/cms/skillsSlice";
 import { parseIfJson } from "@/utils/windowMW";
 
@@ -27,6 +29,8 @@ const Page = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteModalData, setDeleteModalData] = useState(null);
   const { canAccess, getPermissionMessage } = usePermissions();
+
+  const [searchText, setSearchText] = useState("");
 
   const SKILLS = useSelector((state) => state.skill?.skills?.value);
 
@@ -65,9 +69,22 @@ const Page = () => {
     [canAccess, getPermissionMessage]
   );
 
+  const skillsArray = Array.isArray(SKILLS) ? SKILLS : [];
+  const filteredSkills = skillsArray.filter((skill) =>
+    (skill?.title || "").toLowerCase().includes(searchText.toLowerCase())
+  );
+
   return (
     <div className={styles.mainContainer}>
-      <div className={styles.createButton}>
+      <div className={styles.titleContainer}>
+        <Input
+          placeholder="Search skill..."
+          prefix={<SearchOutlined />}
+          style={{ maxWidth: "400px", minWidth: "250px", height: "40px", borderRadius: "8px" }}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          allowClear
+        />
         <Tooltip
           title={
             !canAccess(PERMISSION_VALUES.CREATE)
@@ -88,9 +105,9 @@ const Page = () => {
       </div>
 
       <div className={styles.cardsList}>
-        {SKILLS?.length > 0 ? (
+        {filteredSkills?.length > 0 ? (
           <div className={styles.cards}>
-            {SKILLS?.map((skill, ind) => {
+            {filteredSkills?.map((skill, ind) => {
               return (
                 <div
                   className={styles.card}
@@ -120,7 +137,9 @@ const Page = () => {
                         </Button>
                       </Popconfirm> */}
                   </div>
-                  <p className={styles.desc}>{skill?.description}</p>
+                  <div style={{ color: "#94a3b8", fontSize: "13px", marginTop: "4px" }}>
+                    1 skill &middot; {skill?.questionsCount || skill?.questions?.length || 0} questions
+                  </div>
                   {/* <div className={styles.skillsStyles}>
                       <div className={styles.skillTab}>{skill?.category}</div>
                       <div className={styles.skillTab}>

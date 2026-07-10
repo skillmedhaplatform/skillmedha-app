@@ -14,6 +14,10 @@ import ResultSkeleton from "./resultsskeleton";
 import QuesComp from "./quesComp";
 import { TbTriangleInvertedFilled } from "react-icons/tb";
 import { parseIfJson } from "../utils/testUI/jsonparse";
+import {
+  deriveResultSummary,
+  getPersistedPortalResult,
+} from "../utils/resultPersistence";
 
 export default function ResultsComp() {
   const searchParams = useSearchParams();
@@ -119,29 +123,65 @@ export default function ResultsComp() {
 
   useEffect(() => {
     dispatch(getPublicStudent({ id: studentId }));
-    if (!testRes[testId] && studentData?.data?._id) {
-      const completedResult = studentData?.data?.progress?.filter(
-        (e) => e?.testId == testId
-      );
+  }, [studentId]);
 
-      if (!studentData) return;
-      dispatch(
-        saveTestResults({
-          userId: completedResult.slice(-1)[0]?.userId,
-          testId: completedResult.slice(-1)[0]?.testId,
-          response: completedResult.slice(-1)[0]?.response,
-          studentData: completedResult.slice(-1)[0]?.studentData,
-          flagged: completedResult.slice(-1)[0]?.flagged,
-          marked: completedResult.slice(-1)[0]?.marked,
-          scoreData: completedResult.slice(-1)[0]?.scoreData,
-        })
-      );
-    }
-  }, [studentData?.data?._id]);
+  useEffect(() => {
+    const persistedResult = getPersistedPortalResult(testId);
+    const completedResults = (studentData?.progress || [])
+      .filter((entry) => entry?.testId === testId)
+      .filter((entry) => entry?.response || entry?.scoreData);
+
+    const bestCompletedResult = completedResults.sort((a, b) => {
+      const aHasScoreData = Boolean(a?.scoreData && Object.keys(a.scoreData).length);
+      const bHasScoreData = Boolean(b?.scoreData && Object.keys(b.scoreData).length);
+      if (aHasScoreData !== bHasScoreData) return aHasScoreData ? -1 : 1;
+
+      const aResponseCount = Object.keys(a?.response || {}).length;
+      const bResponseCount = Object.keys(b?.response || {}).length;
+      if (aResponseCount !== bResponseCount) return bResponseCount - aResponseCount;
+
+      const aScore = Number(a?.scoreData?.finalScore || 0);
+      const bScore = Number(b?.scoreData?.finalScore || 0);
+      if (aScore !== bScore) return bScore - aScore;
+
+      return 0;
+    })[0];
+
+    const shouldUsePersistedResult =
+      persistedResult?.scoreData &&
+      (!bestCompletedResult || !bestCompletedResult?.scoreData);
+
+    const resultToSave = bestCompletedResult || (shouldUsePersistedResult ? persistedResult : null);
+
+    if (!resultToSave) return;
+
+    const derivedScoreData = deriveResultSummary({
+      response: resultToSave?.response || {},
+      questions: testData?.questions || [],
+      scoreData: resultToSave?.scoreData || {},
+    });
+
+    dispatch(
+      saveTestResults({
+        userId: resultToSave?.userId || studentData?._id,
+        testId: resultToSave?.testId || testId,
+        response: resultToSave?.response,
+        studentData: resultToSave?.studentData || studentData,
+        flagged: resultToSave?.flagged,
+        marked: resultToSave?.marked,
+        scoreData: derivedScoreData,
+      })
+    );
+  }, [studentData?._id, studentData?.progress, testId, testRes]);
 
   useEffect(() => {
     if (!testData || !testRes) return;
     if (testData?._id && testRes && testRes[testId]) {
+      const derivedScoreData = deriveResultSummary({
+        response: testRes[testId]?.response || {},
+        questions: testData?.questions || [],
+        scoreData: testRes[testId]?.scoreData || {},
+      });
       const {
         correctQues,
         unattemptedQues,
@@ -150,7 +190,7 @@ export default function ResultsComp() {
         totalTimeTaken,
         averageTimeTaken,
         notAnswered,
-      } = testRes[testId]?.scoreData;
+      } = derivedScoreData;
       setScore({ totalScore, totalTimeTaken, averageTimeTaken });
 
       setChartData({
@@ -164,7 +204,7 @@ export default function ResultsComp() {
         colors: ["#87CC85", "#E43E5F", "#869DF0", "#4e4eff"],
       });
     }
-  }, [testData, testRes]);
+  }, [testData, testRes, testId]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

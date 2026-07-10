@@ -2,9 +2,22 @@
 
 .kpiGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: $spacing4;
   margin-bottom: $spacing6;
+  
+  @media (max-width: 1400px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .kpiCard {
@@ -36,10 +49,11 @@
     flex: 1;
 
     .title {
-      font-size: 14px;
+      font-size: 13px;
       color: $gray600;
-      margin: 0 0 $spacing2 0;
+      margin: 2px 0 0 0;
       font-weight: 500;
+      line-height: 1.1;
     }
 
     .value {
@@ -52,9 +66,10 @@
 
     .subtitle {
       display: block;
-      font-size: 12px;
+      font-size: 11px;
       color: $gray500;
-      margin-top: $spacing2;
+      margin-top: 2px;
+      line-height: 1.1;
     }
   }
 

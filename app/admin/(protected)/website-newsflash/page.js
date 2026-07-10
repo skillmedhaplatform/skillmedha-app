@@ -22,6 +22,7 @@ import {
   LinkOutlined,
   EditOutlined,
   InfoCircleOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import styles from "./newsflash.module.scss";
@@ -41,6 +42,7 @@ export default function NewsFlashPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [searchText, setSearchText] = useState("");
 
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
@@ -164,6 +166,11 @@ export default function NewsFlashPage() {
       message.error("Failed to update form status");
     }
   };
+
+  const filteredNotices = (notices || []).filter((notice) =>
+    (notice.title || "").toLowerCase().includes(searchText.toLowerCase()) ||
+    (notice.description || "").toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const columns = [
     {
@@ -289,21 +296,37 @@ export default function NewsFlashPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1>Website NewsFlash</h1>
-        <Space align="center" size="large">
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "#fffbe6", padding: "8px 16px", border: "1px solid #ffe58f", borderRadius: "8px" }}>
+      <div className={styles.titleContainer}>
+        <Input
+          placeholder="Search newsflash..."
+          prefix={<SearchOutlined />}
+          style={{ maxWidth: "400px", minWidth: "250px", height: "40px", borderRadius: "8px" }}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          allowClear
+        />
+        <Space align="center" size="middle">
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ fontSize: "14px", fontWeight: "600", color: "#d48806" }}>Global Visibility</span>
-              <Tooltip title="Turn off to hide the entire FlashNews component from the public website, regardless of individual active statuses.">
-                <InfoCircleOutlined style={{ color: "#d48806", cursor: "pointer" }} />
-              </Tooltip>
+              <InfoCircleOutlined style={{ color: "#64748B" }} />
+              <span style={{ fontSize: "14px", fontWeight: "600", color: "#475569" }}>Global Visibility</span>
             </div>
+            {globalEnabled && (
+              <span style={{ 
+                background: "#E6F4EA", 
+                color: "#137333", 
+                padding: "4px 12px", 
+                borderRadius: "16px", 
+                fontSize: "12px", 
+                fontWeight: "600" 
+              }}>
+                Enabled
+              </span>
+            )}
             <Switch
               checked={globalEnabled}
               onChange={handleGlobalToggle}
-              checkedChildren="Enabled"
-              unCheckedChildren="Disabled"
+              style={{ background: globalEnabled ? "#22C55E" : undefined }}
             />
           </div>
           <Button
@@ -313,20 +336,22 @@ export default function NewsFlashPage() {
               closeModal(); // Ensure reset
               setIsModalOpen(true);
             }}
-            style={{ height: "100%", padding: "12px 16px" }}
+            style={{ height: "40px", padding: "0 24px", borderRadius: "8px", fontWeight: "500", background: "#1677ff" }}
           >
             Create NewsFlash
           </Button>
         </Space>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={notices}
-        rowKey="_id"
-        loading={loading}
-        pagination={{ pageSize: 10 }}
-      />
+      <div className={styles.tableWrapper}>
+        <Table
+          columns={columns}
+          dataSource={filteredNotices}
+          rowKey="_id"
+          loading={loading}
+          pagination={{ pageSize: 10, position: ["bottomRight"] }}
+        />
+      </div>
 
       <Modal
         title={editMode ? "Edit NewsFlash" : "Create New NewsFlash"}

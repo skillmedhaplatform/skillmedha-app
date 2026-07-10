@@ -18,6 +18,7 @@ import {
   SearchOutlined, 
   CheckCircleOutlined, 
   ClockCircleOutlined,
+  SyncOutlined,
   PlusOutlined
 } from "@ant-design/icons";
 
@@ -59,8 +60,11 @@ const Page = () => {
   const activeCount = allTests.filter(
     (t) => t.status?.toLowerCase() === "active" && !isTestExpired(t)
   ).length;
+  const pendingCount = allTests.filter(
+    (t) => t.status?.toLowerCase() !== "active"
+  ).length;
   const expiredCount = allTests.filter(
-    (t) => t.status?.toLowerCase() === "inactive" || isTestExpired(t)
+    (t) => t.status?.toLowerCase() === "active" && isTestExpired(t)
   ).length;
 
   // Filter tests based on searchQuery and selectedStatus
@@ -76,7 +80,8 @@ const Page = () => {
     const matchesStatus =
       selectedStatus === "all" ||
       (selectedStatus === "active" && test.status?.toLowerCase() === "active" && !isExpired) ||
-      (selectedStatus === "expired" && (test.status?.toLowerCase() === "inactive" || isExpired));
+      (selectedStatus === "pending" && test.status?.toLowerCase() !== "active") ||
+      (selectedStatus === "expired" && test.status?.toLowerCase() === "active" && isExpired);
 
     return matchesSearch && matchesStatus;
   });
@@ -121,6 +126,12 @@ const Page = () => {
                 <CheckCircleOutlined /> Active <span className={AllTestsStyles.badge}>{activeCount}</span>
               </button>
               <button
+                className={`${AllTestsStyles.tab} ${selectedStatus === "pending" ? AllTestsStyles.active : ""}`}
+                onClick={() => setSelectedStatus("pending")}
+              >
+                <SyncOutlined /> In Progress <span className={AllTestsStyles.badge}>{pendingCount}</span>
+              </button>
+              <button
                 className={`${AllTestsStyles.tab} ${selectedStatus === "expired" ? AllTestsStyles.active : ""}`}
                 onClick={() => setSelectedStatus("expired")}
               >
@@ -144,11 +155,11 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Card Listing Container */}
         <div className={AllTestsStyles.TestCards}>
           <AllTestsComp 
             displayTests={displayTests} 
             loading={loading} 
+            selectedStatus={selectedStatus}
             onAddNewTest={() => {
               clearSstorageVals();
               dispatch(setFormValues({}));

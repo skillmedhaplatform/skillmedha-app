@@ -138,6 +138,10 @@ const QuestionCard = ({ questions, index }) => {
     }
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedQtypeFilter, selectedQCategoryFilter, filteredQuestionsRedux]);
+
   const filteredQuestions = (questions || []).filter((question) => {
     const matchesStatus = selectedQtypeFilter
       ? question?.questionType?.toLowerCase() ===

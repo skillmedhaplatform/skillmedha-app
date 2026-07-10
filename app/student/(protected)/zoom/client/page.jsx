@@ -176,7 +176,7 @@ export default function ZoomClient({ meetingId, orgId, currentTopic }) {
         <div className="absolute inset-0 flex flex-col justify-center items-center">
           {!meetingId && (
             <div className="text-[1.2rem] font-bold text-white">
-              Meeting Not Started Yet
+              Live meeting coming soon
             </div>
           )}
           {!joined && meetingId && (
@@ -193,26 +193,34 @@ export default function ZoomClient({ meetingId, orgId, currentTopic }) {
                 <div className="text-white text-xl font-bold tracking-tight">
                   {currentTopic?.title || "Live Lecture"}
                 </div>
-                <div className="text-slate-400 text-sm font-semibold tracking-wider uppercase flex items-center justify-center gap-2">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
-                  Live Session
-                </div>
+                {currentMeetingDetails?.liveStatus === "started" ? (
+                  <div className="text-slate-400 text-sm font-semibold tracking-wider uppercase flex items-center justify-center gap-2">
+                    <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+                    Live Session
+                  </div>
+                ) : (
+                  <div className="text-[1.2rem] font-bold text-white mt-2">
+                    Live meeting coming soon
+                  </div>
+                )}
               </div>
 
               {/* Join Meeting Button */}
-              <button
-                onClick={() => {
-                  if (currentMeetingDetails?._id) {
-                    getSignature();
-                  } else {
-                    message.warning("Please wait while fetching meeting details");
-                  }
-                }}
-                disabled={!ready}
-                className="join-meeting-btn"
-              >
-                {ready ? "Join Meeting" : "Loading Zoom…"}
-              </button>
+              {currentMeetingDetails?.liveStatus === "started" && (
+                <button
+                  onClick={() => {
+                    if (currentMeetingDetails?._id) {
+                      getSignature();
+                    } else {
+                      message.warning("Please wait while fetching meeting details");
+                    }
+                  }}
+                  disabled={!ready}
+                  className="join-meeting-btn"
+                >
+                  {ready ? "Join Meeting" : "Loading Zoom…"}
+                </button>
+              )}
             </div>
           )}
         </div>

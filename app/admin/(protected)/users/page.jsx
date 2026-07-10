@@ -128,6 +128,7 @@ export default function User() {
 
   const [collegeSearch, setCollegeSearch] = useState("");
   const [companySearch, setCompanySearch] = useState("");
+  const [globalSearch, setGlobalSearch] = useState("");
 
   // derive table data from USERS
   const userData = useMemo(
@@ -473,6 +474,15 @@ export default function User() {
     let data = [...userData];
     const { filters, sorter } = tableParams;
 
+    if (globalSearch) {
+      const val = globalSearch.toLowerCase();
+      data = data.filter((item) => 
+        item.name?.toLowerCase().includes(val) ||
+        item.username?.toLowerCase().includes(val) ||
+        item.email?.toLowerCase().includes(val)
+      );
+    }
+
     if (filters.role && filters.role.length > 0) {
       data = data.filter((item) => filters.role.includes(item.role));
     }
@@ -518,7 +528,7 @@ export default function User() {
 
   const processedData = useMemo(
     () => getProcessedData(),
-    [userData, tableParams]
+    [userData, tableParams, globalSearch]
   );
 
   const stats = [
@@ -1328,7 +1338,14 @@ export default function User() {
   return (
     <div className={styles.userManagement}>
       <div className={styles.header}>
-        <h1 className={styles.title}>User Management</h1>
+        <Input
+          placeholder="Search by name, username, or email..."
+          prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+          value={globalSearch}
+          onChange={(e) => setGlobalSearch(e.target.value)}
+          className={styles.mainSearchInput}
+          allowClear
+        />
         <div className={styles.headerActions}>
           {activeFilterChips.length > 0 && (
             <div className={styles.activeFilters}>

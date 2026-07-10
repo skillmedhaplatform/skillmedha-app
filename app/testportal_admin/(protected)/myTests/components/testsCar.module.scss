@@ -131,6 +131,10 @@
             background-color: #dc2626; // expired red
           }
 
+          &.pending {
+            background-color: #f59e0b; // pending orange/amber
+          }
+
           .statusDot {
             width: 5px;
             height: 5px;

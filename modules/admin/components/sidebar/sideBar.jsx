@@ -1,54 +1,59 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./sidebar.module.scss";
 import { usePathname, useRouter } from "next/navigation";
-import { Button, Menu, App, Tooltip, Spin, Modal } from "antd";
+import { Button, Menu, App, Tooltip, Skeleton, Modal, Dropdown } from "antd";
 import {
   LogoutOutlined,
   ExclamationCircleOutlined,
   LockOutlined,
   LoadingOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import {
   clearLstorageVals,
   clearSstorageVals,
   sideBarTitles,
 } from "@/utils/windowMW";
-import Cookies from "js-cookie";
 import { logoutUser } from "@/redux/slices/admin/adminAuthSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { FaShieldAlt, FaStar, FaEye } from "react-icons/fa";
 import { FaCrown } from "react-icons/fa6";
 import Image from "next/image";
 import lockicon from "@/public/assets/lockicon.png";
+import { changeCollapse } from "@/redux/slices/sidebar"; 
 
 const SideBar = ({ activeView, setView }) => {
   const pathName = usePathname();
   const nav = useRouter();
   const dispatch = useDispatch();
-  const { modal, message } = App.useApp();
+  const { message } = App.useApp();
+  
+  const isCollapsed = useSelector((s) => s.sideBar?.collapse);
+  
   const [openKeys, setOpenKeys] = useState([]);
-  const [loadingPath, setLoadingPath] = useState(null); // Track which button is loading
+  const [loadingPath, setLoadingPath] = useState(null);
+  
   const { value, loading } = useSelector((s) => s.adminAuth?.user || {});
   const userDetails = value?.user;
   const userPermissions = userDetails?.permissions || {};
 
   const roleConfig = {
     admin: {
-      icon: <FaCrown style={{ fontSize: "2rem" }} color="gold" />,
+      icon: <FaCrown style={{ fontSize: "1.2rem" }} color="gold" />,
       color: "gold",
     },
     moderator: {
-      icon: <FaShieldAlt style={{ fontSize: "2rem", color: "green" }} />,
+      icon: <FaShieldAlt style={{ fontSize: "1.2rem", color: "green" }} />,
       color: "green",
     },
     viewer: {
-      icon: <FaEye style={{ fontSize: "2rem" }} color="gray" />,
+      icon: <FaEye style={{ fontSize: "1.2rem" }} color="gray" />,
       color: "gray",
     },
   };
 
-  // Map sidebar paths to permission keys
   const pathToPermissionMap = {
     "/admin/course": "course",
     "/admin/internship": "internship",
@@ -57,62 +62,16 @@ const SideBar = ({ activeView, setView }) => {
     "/admin/workshops": "workshops",
   };
 
-  // Check if user has permission for a path
   const hasPermission = (path) => {
     const permissionKey = pathToPermissionMap[path];
-    if (!permissionKey) {
-      return true;
-    }
+    if (!permissionKey) return true;
     return userPermissions[permissionKey] === true;
   };
 
-  // useEffect(() => {
-  //   const parentPath = sideBarTitles.find((item) =>
-  //     item.children?.some((child) => pathName.startsWith(child.path))
-  //   );
-  //   if (parentPath) {
-  //     setOpenKeys([parentPath.path]);
-  //   } else {
-  //     const onParentRoute = sideBarTitles.find(
-  //       (item) => item.children && pathName.startsWith(item.path)
-  //     );
-  //     if (onParentRoute) {
-  //       setOpenKeys([onParentRoute.path]);
-  //     } else {
-  //       setOpenKeys([]);
-  //     }
-  //   }
-
-  //   // Clear loading when path changes
-  //   setLoadingPath(null);
-  // }, [pathName]);
-
-  const handleClick = (item) => {
-    // Check permission before navigation
-    if (!hasPermission(item.path)) {
-      message.warning("You don't have permission to access this section");
-      return;
-    }
-
-    if (typeof setView === "function") {
-      setView(item.path);
-      return;
-    }
-
-    // Set loading state for this specific button
-    setLoadingPath(item.path);
-
-    // Navigate
-    nav.replace(item?.path);
-  };
-
   const handleMenuClick = ({ key }) => {
-    // Find the item to check permission
     const item =
       sideBarTitles.find((i) => i.path === key) ||
-      sideBarTitles
-        .flatMap((i) => i.children || [])
-        .find((c) => c.path === key);
+      sideBarTitles.flatMap((i) => i.children || []).find((c) => c.path === key);
 
     if (item && !hasPermission(item.path)) {
       message.warning("You don't have permission to access this section");
@@ -123,32 +82,12 @@ const SideBar = ({ activeView, setView }) => {
       setView(key);
       return;
     }
-
-    // Set loading state
-    // setLoadingPath(key);
-
-    nav.replace(key);
+    
+    nav.push(key);
   };
 
   const handleOpenChange = (keys) => {
     setOpenKeys(keys);
-  };
-
-  const handleTitleClick = ({ key }) => {
-    if (!hasPermission(key)) {
-      message.warning("You don't have permission to access this section");
-      return;
-    }
-
-    if (typeof setView === "function") {
-      setView(key);
-      setOpenKeys([key]);
-      return;
-    }
-
-    setLoadingPath(key);
-    nav.replace(key);
-    setOpenKeys([key]);
   };
 
   const getSelectedKey = () => {
@@ -156,14 +95,10 @@ const SideBar = ({ activeView, setView }) => {
     for (const item of sideBarTitles) {
       if (item.children) {
         for (const child of item.children) {
-          if (pathToCheck.startsWith(child.path)) {
-            return child.path;
-          }
+          if (pathToCheck.startsWith(child.path)) return child.path;
         }
       }
-      if (pathToCheck.startsWith(item.path)) {
-        return item.path;
-      }
+      if (pathToCheck.startsWith(item.path)) return item.path;
     }
     return "";
   };
@@ -178,7 +113,6 @@ const SideBar = ({ activeView, setView }) => {
       cancelText: "Cancel",
       centered: true,
       onOk: async () => {
-        setLoadingPath("logout");
         clearLstorageVals();
         clearSstorageVals();
         const result = await dispatch(logoutUser());
@@ -186,163 +120,148 @@ const SideBar = ({ activeView, setView }) => {
           dispatch({ type: "RESET_ALL" });
           window.location.href = "/admin/login";
         }
-        // setLoadingPath(null);
       },
-      onCancel() {
-        console.log("Logout cancelled");
-      },
+      onCancel() {},
     });
   };
 
+  const userMenuItems = [
+    {
+      key: "user-info",
+      disabled: true,
+      style: { cursor: "default", backgroundColor: "transparent" },
+      label: (
+        <div style={{ padding: "4px 0", color: "#333" }}>
+          <strong style={{ display: "block", fontSize: "14px", lineHeight: "1.2" }}>
+            {userDetails?.fullname || userDetails?.username || "Admin"}
+          </strong>
+          <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
+            {userDetails?.role || "ADMIN"} • {userDetails?.email || ""}
+          </span>
+        </div>
+      )
+    },
+    { type: "divider" },
+    {
+      key: "logout",
+      label: <span style={{ color: "#ff4d4f" }}>Logout</span>,
+      icon: <LogoutOutlined style={{ color: "#ff4d4f" }} />,
+      onClick: showLogoutConfirm
+    }
+  ];
+
+  const menuItems = sideBarTitles.map((item) => {
+    const isDisabled = !hasPermission(item.path);
+    
+    const menuItem = {
+      key: item.path,
+      icon: item.icon,
+      label: (
+        <Tooltip title={isDisabled ? "No permission to access" : item.name} placement="right">
+          <span>
+            {item.name}
+            {isDisabled && <LockOutlined style={{ marginLeft: 8, fontSize: 14 }} />}
+          </span>
+        </Tooltip>
+      ),
+      disabled: isDisabled,
+    };
+    
+    if (item.children) {
+      menuItem.children = item.children.map((child) => {
+        const childDisabled = !hasPermission(child.path);
+        return {
+          key: child.path,
+          icon: child.icon,
+          label: (
+            <Tooltip title={childDisabled ? "No permission to access" : child.name} placement="right">
+              <span>
+                {child.name}
+                {childDisabled && <LockOutlined style={{ marginLeft: 8, fontSize: 12 }} />}
+              </span>
+            </Tooltip>
+          ),
+          disabled: childDisabled,
+        };
+      });
+    }
+
+    return menuItem;
+  });
+
   return (
-    <div className={styles.sidebarContainer}>
-      {/* Fixed Header - User Card */}
-      <div className={styles.header}>
-        <div className={styles.userCard}>
-          {roleConfig?.[userDetails?.role?.toLowerCase()]?.icon}
-          <div className={styles.userInfoBlock}>
-            <h1 className={styles.role}>{userDetails?.role}</h1>
-            <h4 className={styles.fullname}>{userDetails?.fullname}</h4>
+    <section className={`${styles.sideBarContainer} ${isCollapsed ? styles.collapsedSidebar : styles.expandedSidebar}`}>
+      <div className={styles.logoContainer}>
+        <img
+          src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"
+          alt="Synsper Logo"
+          onClick={() => nav.replace("/admin/dashboard")}
+        />
+        {!isCollapsed && (
+          <div
+            className={styles.logoText}
+            onClick={() => nav.replace("/admin/dashboard")}
+            style={{ flex: 1, paddingRight: '8px' }}
+          >
+            S K I L L <span> M E D H A</span>
           </div>
+        )}
+        <div
+          onClick={() => dispatch(changeCollapse(!isCollapsed))}
+          style={{ cursor: 'pointer', padding: '0 8px', display: 'flex', alignItems: 'center', flexShrink: 0, marginRight: isCollapsed ? '0' : '24px', marginLeft: isCollapsed ? '0' : 'auto' }}
+        >
+          {isCollapsed ? <MenuUnfoldOutlined style={{ fontSize: '30px', color: '#08334C' }} /> : <MenuFoldOutlined style={{ fontSize: '24px', color: '#08334C' }} />}
         </div>
       </div>
 
-      {/* Scrollable Middle - Navigation Links */}
-      <div className={styles.topLinksCont}>
-        {sideBarTitles.map((item, index) => {
-          const isDisabled = !hasPermission(item.path);
-          const isLoading = loadingPath === item.path;
+      <div className={styles.scrolltabs}>
+        <Menu
+          mode="inline"
+          theme="light"
+          inlineCollapsed={isCollapsed}
+          className={styles.styledAntMenu}
+          openKeys={openKeys}
+          onOpenChange={handleOpenChange}
+          selectedKeys={[getSelectedKey()]}
+          onClick={handleMenuClick}
+          items={menuItems}
+        />
+      </div>
 
-          if (item.children) {
-            const menuItems = [
-              {
-                key: item.path,
-                label: (
-                  <Tooltip
-                    title={isDisabled ? "No permission to access" : item.name}
-                    placement="right"
-                  >
-                    <span>
-                      {isLoading && (
-                        <LoadingOutlined style={{ marginRight: 8 }} />
-                      )}
-                      {item.name}
-                      {isDisabled && (
-                        <LockOutlined style={{ marginLeft: 8, fontSize: 18 }} />
-                      )}
+      <div className={styles.bottom}>
+        <div style={{ padding: isCollapsed ? "0" : "0 1rem", display: "flex", justifyContent: "center" }}>
+          {loading ? (
+            <div className={styles.profilePillSkeleton}>
+              <Skeleton.Avatar active size="large" shape="circle" />
+              {!isCollapsed && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <Skeleton.Button active size="small" style={{ width: 100, height: 14 }} />
+                  <Skeleton.Button active size="small" style={{ width: 140, height: 10 }} />
+                </div>
+              )}
+            </div>
+          ) : (
+            <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="topLeft">
+              <div className={`${styles.profilePill} ${isCollapsed ? styles.collapsedPill : ''}`}>
+                <div className={styles.avatar}>
+                  {roleConfig?.[userDetails?.role?.toLowerCase()]?.icon || "A"}
+                </div>
+                {!isCollapsed && (
+                  <div className={styles.profileInfo}>
+                    <span className={styles.name}>
+                      {userDetails?.fullname || userDetails?.username || "Admin"}
                     </span>
-                  </Tooltip>
-                ),
-                disabled: isDisabled || isLoading,
-                onTitleClick: handleTitleClick,
-                children: item.children.map((child) => {
-                  const childDisabled = !hasPermission(child.path);
-                  const childLoading = loadingPath === child.path;
-                  return {
-                    key: child.path,
-                    label: (
-                      <Tooltip
-                        title={
-                          childDisabled ? "No permission to access" : child.name
-                        }
-                        placement="right"
-                      >
-                        <span>
-                          {childLoading && (
-                            <LoadingOutlined style={{ marginRight: 8 }} />
-                          )}
-                          {child.name}
-                          {childDisabled && (
-                            <LockOutlined
-                              style={{ marginLeft: 8, fontSize: 12 }}
-                            />
-                          )}
-                        </span>
-                      </Tooltip>
-                    ),
-                    disabled: childDisabled || childLoading,
-                  };
-                }),
-              },
-            ];
-
-            return (
-              <div key={index} style={{ width: "100%" }}>
-                <Menu
-                  mode="inline"
-                  selectedKeys={[getSelectedKey()]}
-                  openKeys={openKeys}
-                  onOpenChange={handleOpenChange}
-                  onClick={handleMenuClick}
-                  items={menuItems}
-                  className={styles.menuContainer}
-                  style={{ border: "none", background: "transparent" }}
-                />
+                    <span className={styles.email}>
+                      {userDetails?.role || "ADMIN"}
+                    </span>
+                  </div>
+                )}
               </div>
-            );
-          }
-
-          const isActive = (activeView || pathName).startsWith(item.path);
-          return (
-            <Tooltip
-              key={index}
-              title={
-                isDisabled
-                  ? "You don't have permission to access this section"
-                  : item.name
-              }
-              placement="right"
-            >
-              <Button
-                className={`${styles.sidebarButton}`}
-                type={isActive ? "primary" : "default"}
-                style={{
-                  width: "100%",
-                  textAlign: "left",
-                  display: "flex",
-                  justifyContent: "flex-start",
-                  alignItems: "center",
-                  border: isActive ? "none" : "1px solid #d9d9d9",
-                  padding: "20px 16px",
-                }}
-                size="middle"
-                onClick={() => handleClick(item)}
-                disabled={isDisabled}
-                onMouseEnter={() => { }}
-                // loading={isLoading}
-                icon={
-                  !isLoading &&
-                  isDisabled && (
-                    <Image
-                      src={lockicon}
-                      alt="locked icon"
-                      width={26}
-                      height={26}
-                    />
-                  )
-                }
-              >
-                {item.name}
-              </Button>
-            </Tooltip>
-          );
-        })}
+            </Dropdown>
+          )}
+        </div>
       </div>
-
-      {/* Fixed Footer - Logout Button */}
-      <div className={styles.footer}>
-        <Button
-          className={styles.logoutBtn}
-          type="dashed"
-          danger
-          icon={<LogoutOutlined />}
-          onClick={showLogoutConfirm}
-          loading={loadingPath === "logout"}
-        >
-          Logout
-        </Button>
-      </div>
-    </div>
+    </section>
   );
 };
 

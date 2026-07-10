@@ -63,7 +63,6 @@ export default function FormLayout({ children }) {
   return (
     <>
       <PageHeader
-        breadcrumb="Placement Drive"
         title={ONEJOB?.data?.jobTitle ? `Configure ${ONEJOB?.data?.jobTitle}` : "Create Job"}
         subtitle="Manage basic information, profile details and interview rounds"
       />

@@ -27,6 +27,7 @@ import {
   ClearOutlined,
   TeamOutlined,
   BankOutlined,
+  PoweroffOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
@@ -424,32 +425,6 @@ export default function College() {
   return (
     <div className={styles.collegePage}>
       <div className={styles.header}>
-        <div className={styles.titleRow}>
-          <h1 className={styles.title}>All Colleges</h1>
-          <Tooltip
-            title={
-              !canCreate ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""
-            }
-          >
-            <span>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                size="middle"
-                onClick={() => {
-                  setEditingCollege(null);
-                  form.resetFields();
-                  setSelectedState(undefined);
-                  setSelectedDistrict(undefined);
-                  setIsModalVisible(true);
-                }}
-                disabled={!canCreate}
-              >
-                Add Colleges
-              </Button>
-            </span>
-          </Tooltip>
-        </div>
         <div className={styles.controls}>
           <Input
             placeholder="Search colleges... (min 3 characters)"
@@ -480,6 +455,31 @@ export default function College() {
               </Button>
             </Dropdown>
           </div>
+          <span style={{ marginLeft: "auto", marginRight: "12px" }}>
+            <Tooltip
+              title={
+                !canCreate ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""
+              }
+            >
+              <span>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  size="middle"
+                  onClick={() => {
+                    setEditingCollege(null);
+                    form.resetFields();
+                    setSelectedState(undefined);
+                    setSelectedDistrict(undefined);
+                    setIsModalVisible(true);
+                  }}
+                  disabled={!canCreate}
+                >
+                  Add Colleges
+                </Button>
+              </span>
+            </Tooltip>
+          </span>
         </div>
       </div>
 
@@ -595,7 +595,7 @@ export default function College() {
                     <Button
                       type="text"
                       size="large"
-                      icon={<DeleteOutlined />}
+                      icon={<PoweroffOutlined />}
                       className={styles.cardOptions}
                       onClick={() => {
                         if (!canEdit) {
@@ -617,7 +617,7 @@ export default function College() {
                   title={college.orgName}
                   trigger="hover"
                   placement="bottomRight"
-                  color="#24A058"
+                  color="#1677ff"
                 >
                   <h3
                     className={styles.collegeName}
@@ -628,7 +628,6 @@ export default function College() {
                     {college.orgName}
                   </h3>
                 </Tooltip>
-                <div className={styles.collegeId}>ID: {college.orgId}</div>
 
                 {/* Stats Badges */}
                 <div className={styles.statsContainer}>
@@ -843,7 +842,7 @@ export default function College() {
         </Form>
       </Modal>
       <Modal
-        title={"Delete College"}
+        title={"Inactivate College"}
         open={deleteModal}
         onOk={() => {
           dispatch(
@@ -860,11 +859,11 @@ export default function College() {
         mask={{ closable: false }}
         // keyboard={!submitting}
         // closable={!submitting}
-        okText={"Delete College"}
+        okText={"Inactivate"}
         cancelText="Cancel"
         width={500}
       >
-        <h4>Are you sure you want to delete this college</h4>
+        <h4>Are you sure you want to inactivate this college?</h4>
       </Modal>
     </div>
   );
