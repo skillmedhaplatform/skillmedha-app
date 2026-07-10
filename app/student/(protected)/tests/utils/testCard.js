@@ -134,7 +134,7 @@ export default function TestCard({
 
   useEffect(() => {
     const updatedQues = testData?.questions?.reduce((acc, Currques) => {
-      if (Currques.questionType?.includes("Comprehension")) {
+      if (Currques?.questionType?.includes("Comprehension")) {
         return [...acc, ...(Currques?.questionContentArr || [])];
       }
       return [...acc, Currques];

@@ -198,13 +198,16 @@ export default function MobileLibraryPage({
   handleSearchChange,
   urlCategory,
   urlDifficulty,
+  urlSort,
   categoryOptions,
   difficultyOptions,
+  sortOptions,
   activeFilters,
   hasActiveFilters,
   // Filter handlers
   handleCategoryChange,
   handleDifficultyChange,
+  handleSortChange,
   handleClearAll,
   removeFilter,
   pushParams,
@@ -455,6 +458,20 @@ export default function MobileLibraryPage({
               onChange={handleDifficultyChange}
               allowClear
               options={difficultyOptions}
+              style={{ width: "100%" }}
+              popupMatchSelectWidth={false}
+            />
+          </div>
+
+          <div className={styles.drawerField}>
+            <label>Sort By</label>
+            <Select
+              id={`${idPrefix}-mobile-sort`}
+              placeholder="Sort By"
+              value={urlSort === "default" ? undefined : urlSort}
+              onChange={handleSortChange}
+              allowClear
+              options={sortOptions}
               style={{ width: "100%" }}
               popupMatchSelectWidth={false}
             />

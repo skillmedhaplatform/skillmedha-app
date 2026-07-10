@@ -3,9 +3,11 @@ import React, { useState } from "react";
 import Slider from "react-slick";
 import { Collapse, ConfigProvider, Button, Image } from "antd";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { updateStudent } from "@/redux/slices/student";
+import { calculateProfileCompletion } from "@/universalUtils/getprofilecompleteion";
 
-export default function CardsList({ type, isModal = false, progressById, combinedLearningData }) {
+export default function CardsList({ type, isModal = false, progressById, combinedLearningData, activeNoticeIndex }) {
   const allInternships = useSelector((state) => state.internship.allInternships?.data);
   const allCourses = useSelector((state) => state.internship.allCourses?.data);
   const router = useRouter();
@@ -14,6 +16,55 @@ export default function CardsList({ type, isModal = false, progressById, combine
     stats,
     error,
   } = useSelector((state) => state.jonOpenings.allNotices);
+  
+  const studentData = useSelector((state) => state.student.student?.data);
+  const allTests = useSelector((state) => state.tests?.allTests || []);
+  const allJobAssessments = useSelector((state) => state.jobassessments?.assessments?.value?.data || []);
+
+  const [claimedAchievements, setClaimedAchievements] = useState([]);
+  
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loadClaimed = () => {
+        let stored = studentData?.claimedAchievements || [];
+        if (!stored.length) {
+          stored = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+        }
+        setClaimedAchievements(stored);
+      };
+      
+      loadClaimed();
+      window.addEventListener("achievementClaimed", loadClaimed);
+      return () => window.removeEventListener("achievementClaimed", loadClaimed);
+    }
+  }, [studentData?.claimedAchievements]);
+
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    if (activeNoticeIndex !== undefined && activeNoticeIndex !== null) {
+      setActiveKey(activeNoticeIndex);
+    }
+  }, [activeNoticeIndex]);
+
+  const handleEarnAchievement = (e, achievementId) => {
+    e.stopPropagation();
+    const newClaimed = [...claimedAchievements, achievementId];
+    setClaimedAchievements(newClaimed);
+    localStorage.setItem("claimedAchievements", JSON.stringify(newClaimed));
+    
+    if (studentData) {
+      dispatch(updateStudent({
+        aboutDetails: {
+          _id: studentData._id,
+          email: studentData.email,
+          claimedAchievements: newClaimed
+        },
+        dispatch
+      }));
+    }
+    window.dispatchEvent(new Event("achievementClaimed"));
+  };
 
   const settings = {
     infinite: false,
@@ -94,34 +145,75 @@ export default function CardsList({ type, isModal = false, progressById, combine
       data = allInternships;
       break;
     case "notifications":
-      const completedCoursesNotices = [];
+      const achievementNotices = [];
+      
+      // Welcome Aboard
+      const isWelcomeClaimed = claimedAchievements.includes("welcome_aboard");
+      const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+      // If we don't have createdAt, assume new user for safety. Otherwise check if within 7 days.
+      const isNewUser = studentData?.createdAt ? (Date.now() - new Date(studentData.createdAt).getTime() <= sevenDaysInMs) : true;
+      
+      if (isNewUser || isWelcomeClaimed) {
+        achievementNotices.push({
+          title: "🚀 Welcome Aboard!",
+          startDate: studentData?.createdAt ? new Date(studentData.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          status: "active",
+          source: "system",
+          message: "You've successfully joined the platform. Claim your first badge now!",
+          isAchievement: true,
+          achievementId: "welcome_aboard",
+          isClaimed: isWelcomeClaimed
+        });
+      }
+      
+      // Profile Complete
+      const completionPercent = calculateProfileCompletion(studentData || {}).percentage;
+      if (completionPercent === 100) {
+        achievementNotices.push({
+          title: "👤 Profile Complete",
+          startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          status: "active",
+          source: "system",
+          message: "You've successfully filled out your basic details. Claim your profile badge!",
+          isAchievement: true,
+          achievementId: "profile_complete",
+          isClaimed: claimedAchievements.includes("profile_complete")
+        });
+      }
+      
+      // Perfect Scorer
+      if (typeof window !== "undefined" && localStorage.getItem("showLevelUpPopup") === "true") {
+        achievementNotices.push({
+          title: "🎯 Perfect Scorer!",
+          startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          status: "active",
+          source: "system",
+          message: "You scored 100% on a practice test! Claim your Perfect Scorer badge.",
+          isAchievement: true,
+          achievementId: "perfect_scorer",
+          isClaimed: claimedAchievements.includes("perfect_scorer")
+        });
+      }
+
       if (progressById && combinedLearningData) {
         Object.keys(progressById).forEach((id) => {
           if (progressById[id]?.totalProgress === 100) {
             const course = combinedLearningData.find((c) => c._id === id);
             if (course) {
-              const storageKey = `courseCompletionDate_${id}`;
-              let completionTimestamp = localStorage.getItem(storageKey);
-              if (!completionTimestamp) {
-                completionTimestamp = Date.now().toString();
-                localStorage.setItem(storageKey, completionTimestamp);
-              }
+              const achievementId = `complete_${id}`;
+              const categoryText = course.category ? course.category : (course.type || "Course");
+              const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
               
-              const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
-              const isExpired = (Date.now() - parseInt(completionTimestamp, 10)) > threeDaysInMs;
-              
-              if (!isExpired) {
-                const categoryText = course.category ? course.category : (course.type || "Course");
-                const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
-                
-                completedCoursesNotices.push({
-                  title: isModal ? `🎉 You completed ${course.title}!` : `🎉 ${shortCategoryText} Completed`,
-                  startDate: new Date(parseInt(completionTimestamp, 10)).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-                  status: "active",
-                  source: "system",
-                  message: `Congratulations! You have completed the ${course.type || "course"} "<b>${course.title}</b>" and you earned a gold badge and 50 coins! Check it out in the achievements section.`,
-                });
-              }
+              achievementNotices.push({
+                title: isModal ? `🎉 You completed ${course.title}!` : `🎉 ${shortCategoryText} Completed`,
+                startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                status: "active",
+                source: "system",
+                message: `Congratulations! You have completed the ${course.type || "course"} "<b>${course.title}</b>". Claim your gold badge and 50 coins!`,
+                isAchievement: true,
+                achievementId: achievementId,
+                isClaimed: claimedAchievements.includes(achievementId)
+              });
             }
           }
         });
@@ -143,11 +235,11 @@ export default function CardsList({ type, isModal = false, progressById, combine
       };
       
       const newReleasesNotices = [];
-      const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
+      const sevenDaysInMsForNotices = 7 * 24 * 60 * 60 * 1000;
       
       if (allCourses && Array.isArray(allCourses)) {
         allCourses.forEach(course => {
-           if (course.createdAt && (Date.now() - new Date(course.createdAt).getTime() <= threeDaysInMs)) {
+           if (course.createdAt && (Date.now() - new Date(course.createdAt).getTime() <= sevenDaysInMsForNotices)) {
              const categoryText = course.category ? course.category : "Course";
              newReleasesNotices.push({
                title: isModal ? `🚀 New Course Released: ${course.title}!` : `🚀 New ${categoryText} Released`,
@@ -170,7 +262,7 @@ export default function CardsList({ type, isModal = false, progressById, combine
 
       if (allInternships && Array.isArray(allInternships)) {
         allInternships.forEach(intern => {
-           if (intern.createdAt && (Date.now() - new Date(intern.createdAt).getTime() <= threeDaysInMs)) {
+           if (intern.createdAt && (Date.now() - new Date(intern.createdAt).getTime() <= sevenDaysInMsForNotices)) {
              const categoryText = intern.category ? intern.category : "Internship";
              newReleasesNotices.push({
                title: isModal ? `🚀 New Internship Released: ${intern.title}!` : `🚀 New ${categoryText} Released`,
@@ -203,7 +295,71 @@ export default function CardsList({ type, isModal = false, progressById, combine
         });
       }
 
-      data = [...streakBrokenNotices, ...newReleasesNotices, ...completedCoursesNotices, ...(AllNotifications || [])];
+      const testNotices = [];
+      
+      if (Array.isArray(allTests)) {
+        allTests.forEach(test => {
+          const expiryDate = test?.time?.expiryDates?.accessClosingDate || test?.time?.expiryDates?.testExpirationData;
+          const isExpired = (test?.time?.expiryDates?.expiry && expiryDate) ? (new Date(expiryDate).getTime() - Date.now() <= 0) : false;
+
+          if (!isExpired && test?.createdAt && (Date.now() - new Date(test.createdAt).getTime() <= sevenDaysInMsForNotices)) {
+            const marks = test?.totalMarks || test?.testDuration?.totalMarks || test?.scoreSettings?.totalScore || 100;
+            const duration = test?.time?.testDuration?.testDuration?.duration || test?.duration || 60;
+            testNotices.push({
+              title: `📝 New Test Available: ${test.title || 'Assessment'}`,
+              startDate: new Date(test.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+              status: "active",
+              source: "system",
+              message: `
+                <div style="margin-bottom: 8px;">
+                  <b>Total Marks:</b> ${marks}<br/>
+                  <b>Duration:</b> ${duration} mins<br/>
+                  <b>About:</b> A new test has been assigned to you. Complete it before the deadline to earn points!
+                </div>
+              `,
+              actionUrl: "/student/tests",
+              actionText: "Go to Tests"
+            });
+          }
+        });
+      }
+
+      const jobAssessmentNotices = [];
+      if (Array.isArray(allJobAssessments)) {
+        allJobAssessments.forEach(assessment => {
+          const expiryDate = assessment?.time?.expiryDates?.accessClosingDate || assessment?.time?.expiryDates?.testExpirationData;
+          const isExpired = (assessment?.time?.expiryDates?.expiry && expiryDate) ? (new Date(expiryDate).getTime() - Date.now() <= 0) : false;
+
+          if (!isExpired && assessment?.createdAt && (Date.now() - new Date(assessment.createdAt).getTime() <= sevenDaysInMsForNotices)) {
+            const marks = assessment?.totalMarks || 100;
+            const duration = assessment?.duration || 60;
+            jobAssessmentNotices.push({
+              title: `💼 New Job Assessment: ${assessment.title || 'Role'}`,
+              startDate: new Date(assessment.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+              status: "active",
+              source: "system",
+              message: `
+                <div style="margin-bottom: 8px;">
+                  <b>Total Marks:</b> ${marks}<br/>
+                  <b>Duration:</b> ${duration} mins<br/>
+                  <b>About:</b> You have a new Job Assessment available. Good luck!
+                </div>
+              `,
+              actionUrl: "/student/jobAssessments",
+              actionText: "Start Assessment"
+            });
+          }
+        });
+      }
+
+      data = [...testNotices, ...jobAssessmentNotices, ...newReleasesNotices, ...streakBrokenNotices, ...achievementNotices, ...(AllNotifications || [])];
+      
+      // Sort so claimed achievements are at the bottom
+      data.sort((a, b) => {
+        if (a.isClaimed && !b.isClaimed) return 1;
+        if (!a.isClaimed && b.isClaimed) return -1;
+        return 0;
+      });
       break;
     case "certificates":
       data = [
@@ -248,28 +404,46 @@ export default function CardsList({ type, isModal = false, progressById, combine
                   {
                     key: i,
                     label: (
-                      <div className="flex flex-row items-start justify-between gap-2 w-full">
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-[15px] font-bold m-0 leading-snug ${isModal ? 'break-words whitespace-normal' : 'truncate'}`}>{e?.title}</p>
-                          <div className="flex flex-row items-center justify-start gap-[0.3rem] text-[12px] mt-1">
-                            <p className="m-0 text-gray-500">{e?.startDate}</p>
-                          </div>
+                      <div className="flex flex-col flex-1 min-w-0 w-full gap-1">
+                        {/* Top Row: Title and Status */}
+                        <div className="flex flex-row items-start justify-between gap-2 w-full">
+                          <p className="text-[15px] font-bold m-0 leading-snug break-words whitespace-normal">{e?.title}</p>
+                          {(!isModal && e?.source === "system") ? null : (
+                            <p
+                              className="m-0 shrink-0 text-[14px] capitalize pt-[2px]"
+                              style={{
+                                color:
+                                  e?.status === "active"
+                                    ? "green"
+                                    : e?.status === "expired"
+                                      ? "red"
+                                      : "inherit",
+                              }}
+                            >
+                              {e?.status}
+                            </p>
+                          )}
                         </div>
-                        {(!isModal && e?.source === "system") ? null : (
-                          <p
-                            className="m-0 shrink-0"
-                            style={{
-                              color:
-                                e?.status === "active"
-                                  ? "green"
-                                  : e?.status === "expired"
-                                    ? "red"
-                                    : "inherit",
-                            }}
-                          >
-                            {e?.status}
+                        
+                        {/* Bottom Row: Date and Checkout */}
+                        <div className="flex flex-row items-center justify-between gap-2 text-[12px] w-full mt-1">
+                          <p className="m-0 text-gray-500 whitespace-nowrap">
+                            {(e?.startDate || e?.createdAt) && !isNaN(new Date(e.startDate || e.createdAt).getTime()) 
+                              ? new Date(e.startDate || e.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) 
+                              : (e?.startDate || e?.createdAt || "")}
                           </p>
-                        )}
+                          {!isModal && (
+                            <span 
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                window.dispatchEvent(new CustomEvent("openNoticeBoard", { detail: { index: i } }));
+                              }}
+                              className="text-[#1890ff] cursor-pointer hover:underline flex items-center gap-1 font-medium whitespace-nowrap text-[12px]"
+                            >
+                              Checkout ➔
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ),
                     children: (
@@ -284,15 +458,31 @@ export default function CardsList({ type, isModal = false, progressById, combine
                           }}
                           style={{ marginBottom: "16px" }}
                         />
-                        {e?.actionUrl && isModal && (
+                        {(e.actionUrl || e.isAchievement) && (
                           <div style={{ marginBottom: "16px" }}>
-                            <Button 
-                              type="primary" 
-                              onClick={() => router.push(e.actionUrl)}
-                              className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
-                            >
-                              {e.actionText || 'View Details'}
-                            </Button>
+                            {e.actionUrl ? (
+                              <Button 
+                                type="primary"
+                                onClick={(ev) => {
+                                  ev.stopPropagation();
+                                  router.push(e.actionUrl);
+                                }}
+                                className="!bg-[#1E69DA] !border-none !text-white font-bold h-8 px-4 rounded-md mt-1 w-fit"
+                              >
+                                {e.actionText || "Explore"}
+                              </Button>
+                            ) : e.isAchievement ? (
+                              <Button 
+                                type="primary"
+                                disabled={e.isClaimed}
+                                onClick={(ev) => {
+                                  if (!e.isClaimed) handleEarnAchievement(ev, e.achievementId);
+                                }}
+                                className={`!border-none !text-white font-bold h-8 px-4 rounded-md mt-1 w-fit ${e.isClaimed ? '!bg-gray-400' : '!bg-[#F59E0B] hover:!bg-[#D97706]'}`}
+                              >
+                                {e.isClaimed ? "Earned" : "Earn Badge"}
+                              </Button>
+                            ) : null}
                           </div>
                         )}
 

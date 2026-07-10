@@ -80,7 +80,7 @@ export default function Tests() {
       ({ payload }) => {
         const SingleTest = payload.test;
         const studentAttemptedLength = studentCreds?.progress?.filter(
-          (progress) => progress.testId == SingleTest._id,
+          (progress) => progress?.testId == SingleTest?._id,
         )?.length;
 
         const totalAttemps = SingleTest?.access?.attemptsPerRespondent;
@@ -141,7 +141,7 @@ export default function Tests() {
               if (SingleTest?.status?.toLowerCase() == "active") {
                 if (
                   studentCreds?.progress?.find(
-                    (progress) => progress.testId == SingleTest?._id,
+                    (progress) => progress?.testId == SingleTest?._id,
                   )
                 ) {
                   setShowPopup(true);
@@ -171,7 +171,7 @@ export default function Tests() {
     );
   };
 
-  const attemptedTestIds = [...new Set((studentCreds?.progress || []).map(p => p.testId))];
+  const attemptedTestIds = [...new Set((studentCreds?.progress || []).map(p => p?.testId))];
 
   // Filter tests based on tab
   const filteredTests = allTests?.filter((test) => {
@@ -308,7 +308,7 @@ export default function Tests() {
             filteredTests?.map((e, index) => {
               return (
                 <div
-                  key={e._id}
+                  key={e?._id}
                   className="w-full h-full"
                   onClick={() => {
                     sessionStorage.setItem("selectedTest", e?._id);

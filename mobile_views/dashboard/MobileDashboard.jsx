@@ -367,7 +367,7 @@ export default function MobileDashboard({
         width="100%"
         className={styles.responsiveModal}
       >
-        <MobileAchievements />
+        <MobileAchievements progressById={progressById} combinedLearningData={combinedLearningData} />
       </Modal>
     </div>
   );

@@ -14,6 +14,7 @@ export default function QuesComp({
   testRes,
   questionNo,
   flagged,
+  marked,
 }) {
   const searchParams = useSearchParams();
 
@@ -83,7 +84,7 @@ export default function QuesComp({
     if (e?.scoreSettings?.pointsForEachIncorrectAns)
       negativeScore = e?.scoreSettings?.pointsForEachIncorrectAns;
   }
-  const singleQuestion = testRes[testId]?.response[e?._id];
+  const singleQuestion = testRes?.[testId]?.response?.[e?._id];
 
   return (
     <>
@@ -137,6 +138,24 @@ export default function QuesComp({
             )}
           </div>
         </div>
+        {e?.compText && (
+          <div
+            className={resultStyles.questionText}
+            style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '8px' }}
+            dangerouslySetInnerHTML={{
+              __html: parseIfJson(e?.compText),
+            }}
+          ></div>
+        )}
+        {e?.resource?.url && (
+          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+            {e?.qType === "Video Comprehension" ? (
+              <video src={e?.resource?.url} controls style={{ maxWidth: '100%', borderRadius: '8px' }} />
+            ) : (
+              <audio src={e?.resource?.url} controls />
+            )}
+          </div>
+        )}
         <div
           className={resultStyles.questionText}
           dangerouslySetInnerHTML={{
@@ -256,7 +275,7 @@ export default function QuesComp({
               );
             })}
 
-          {e?.questionType == "Short Paragraph" && (
+          {(e?.questionType == "Short Paragraph" || e?.questionType == "Text" || e?.questionType == "Fill in the Blanks" || e?.questionType == "Coding Question") && (
             <div className={resultStyles.paraanswers_div}>
               <h3
                 className={`${resultStyles.shortParaAnsLabel} ${
@@ -289,16 +308,28 @@ export default function QuesComp({
                     : ""
                 }`}
               >
-                {currentTestRes[e?._id]?.answers}
+                {e?.questionType === "Coding Question" ? (
+                  <pre style={{ whiteSpace: "pre-wrap", background: "#f5f5f5", padding: "10px", borderRadius: "5px" }}>
+                    {currentTestRes[e?._id]?.answers?.[0]?.code || currentTestRes[e?._id]?.answers?.[0] || "No code submitted."}
+                  </pre>
+                ) : (
+                  currentTestRes[e?._id]?.answers
+                )}
               </div>
-              <h3>Actual Answer</h3>
-              {e?.answer?.shortpara && (
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: parseIfJson(e?.answer?.shortpara),
-                  }}
-                  ref={(elem) => (shortAns.current[e?._id] = elem)}
-                ></span>
+              <h3>Expected Output / Correct Logic</h3>
+              {e?.questionType === "Coding Question" ? (
+                <pre style={{ whiteSpace: "pre-wrap", background: "#f5f5f5", padding: "10px", borderRadius: "5px" }}>
+                  {e?.answer?.coding || e?.answer?.codingLogic || "Not provided in expected answers."}
+                </pre>
+              ) : (
+                (e?.answer?.shortpara || e?.answer?.text || e?.answer?.fillInTheBlanks) && (
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: parseIfJson(e?.answer?.shortpara || e?.answer?.text || e?.answer?.fillInTheBlanks),
+                    }}
+                    ref={(elem) => (shortAns.current[e?._id] = elem)}
+                  ></span>
+                )
               )}
             </div>
           )}
@@ -364,6 +395,24 @@ export default function QuesComp({
               __html: e?.answer?.explanation,
             }}
           ></div>
+          
+          {/* Display Flagged or Marked Message */}
+          {(flagged || marked) && (
+            <div className="mt-4 p-4 rounded-md bg-amber-50 border border-amber-200">
+              <div className="flex items-start gap-2">
+                <i className={`ti ${flagged ? 'ti-flag' : 'ti-bookmark'} text-amber-600 text-lg mt-0.5`}></i>
+                <div>
+                  <h4 className="font-bold text-amber-800 text-[14px] mb-1">
+                    {flagged ? "This question is flagged" : "This question is marked for review"}
+                  </h4>
+                  <p className="text-amber-700 text-[13px] leading-relaxed m-0">
+                    The reviewer will check it and update you later.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </>

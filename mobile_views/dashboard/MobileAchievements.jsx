@@ -1,12 +1,22 @@
 "use client";
 import React from "react";
 
-export default function MobileAchievements() {
+export default function MobileAchievements({ progressById, combinedLearningData }) {
   const [streak, setStreak] = React.useState(1);
+  const [claimedAchievements, setClaimedAchievements] = React.useState([]);
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       setStreak(parseInt(localStorage.getItem("loginStreak") || "1", 10));
+      
+      const loadClaimed = () => {
+        const stored = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+        setClaimedAchievements(stored);
+      };
+      
+      loadClaimed();
+      window.addEventListener("achievementClaimed", loadClaimed);
+      return () => window.removeEventListener("achievementClaimed", loadClaimed);
     }
   }, []);
 
@@ -15,14 +25,42 @@ export default function MobileAchievements() {
   else if (streak > 0 && streak % 10 === 0) streakCoins = streak;
 
   const achievementsList = [
-    { emoji: "⭐", title: "First Enroll", desc: "+50 XP earned", status: "Earned" },
-    { emoji: "🔥", title: `${streak} Day Streak`, desc: `+${streakCoins} coins earned`, status: "Earned" },
-    { emoji: "🎓", title: "Course Complete", desc: "+200 XP earned", status: "Earned" },
-    { emoji: "🎉", title: "Certified Dev", desc: "+500 XP earned", status: "Earned" }
+    { emoji: "🔥", title: `${streak} Day Streak`, desc: `+${streakCoins} coins earned`, status: "Earned" }
   ];
 
   if (streak >= 30) {
     achievementsList.push({ emoji: "🏆", title: "1 Month Streak", desc: "Maintained badge", status: "Earned" });
+  }
+
+  if (claimedAchievements.includes("welcome_aboard")) {
+    achievementsList.push({ emoji: "🚀", title: "Welcome Aboard", desc: "Joined the platform", status: "Earned" });
+  }
+  
+  if (claimedAchievements.includes("profile_complete")) {
+    achievementsList.push({ emoji: "👤", title: "Profile Complete", desc: "Profile setup finished", status: "Earned" });
+  }
+  
+  if (claimedAchievements.includes("perfect_scorer")) {
+    achievementsList.push({ emoji: "🎯", title: "Perfect Scorer", desc: "100% on a practice test", status: "Earned" });
+  }
+
+  if (progressById && combinedLearningData) {
+    Object.keys(progressById).forEach(id => {
+      const achievementId = `complete_${id}`;
+      if (claimedAchievements.includes(achievementId)) {
+        const course = combinedLearningData.find((c) => c._id === id);
+        if (course) {
+          const categoryText = course.category ? course.category : (course.type || "Course");
+          const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
+          achievementsList.push({
+            emoji: "🥇",
+            title: `${shortCategoryText} Complete`,
+            desc: "+50 coins earned",
+            status: "Earned"
+          });
+        }
+      }
+    });
   }
 
   return (

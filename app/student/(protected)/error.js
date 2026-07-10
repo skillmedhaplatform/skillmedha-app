@@ -13,7 +13,7 @@ export default function Error({ error, reset }) {
     };
 
     return (
-        <div style={{ padding: "2rem", display: "flex", justifyContent: "center" }}>
+        <div style={{ padding: "2rem", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", backgroundColor: "#EFF5FB" }}>
             <Result
                 status="error"
                 title="Something Went Wrong"

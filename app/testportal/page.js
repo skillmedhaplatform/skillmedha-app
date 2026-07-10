@@ -26,7 +26,7 @@ export default function Home() {
   const [testData, setTestData] = useState({});
   const token = searchParams.get("st");
   const testType = searchParams.get("testtype");
-  const { testId } = decryptObject(testIdEnc, "studentTestIDValue");
+  const { testId } = decryptObject(testIdEnc, "studentTestIDValue") || {};
   // const [sessionData, setSessionData] = useState(null);
 
   const fetchTestData = async () => {

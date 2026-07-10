@@ -159,6 +159,27 @@ export default function Page() {
     }
   }, [testData?.value, testRes?.value]);
 
+  const extraStats = useMemo(() => {
+    if (!ques?.length) return { flagged: 0, marked: 0, answeredMarked: 0 };
+    
+    let flagged = 0;
+    let marked = 0;
+    let answeredMarked = 0;
+    
+    ques.forEach((q) => {
+      let isFlagged = testRes?.value?.[testId]?.flagged?.some((que) => que?.id == q?._id);
+      let isMarked = testRes?.value?.[testId]?.marked?.includes(q?._id);
+      let studentAnswers = currentTestRes?.[q?._id]?.answers;
+      let isAnswered = Array.isArray(studentAnswers) && studentAnswers.length > 0;
+      
+      if (isFlagged) flagged++;
+      if (isMarked && !isAnswered) marked++;
+      if (isMarked && isAnswered) answeredMarked++;
+    });
+    
+    return { flagged, marked, answeredMarked };
+  }, [ques, testRes, testId, currentTestRes]);
+
   const shortAns = useRef({});
   const dispatch = useDispatch();
 
@@ -207,6 +228,7 @@ export default function Page() {
               response: lastResult?.response,
               studentData: lastResult?.studentData,
               flagged: lastResult?.flagged,
+              marked: lastResult?.marked,
               scoreData: lastResult?.scoreData,
             })
           );
@@ -246,44 +268,26 @@ export default function Page() {
 
   // Search and filter state
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All");
   const [questionSearchQuery, setQuestionSearchQuery] = useState("");
 
-  // Group questions by category with search filter
-  const groupedQuestions = useMemo(() => {
+  // Calculate total scores per category (unfiltered)
+  const categoryScores = useMemo(() => {
     if (!finishedTestData?.questions?.length) return {};
     const groups = {};
-    const query = questionSearchQuery?.toLowerCase() || "";
 
     finishedTestData.questions.forEach((q) => {
-      // Search filter
-      let matchesSearch = true;
-      if (query.trim() !== "") {
-        const questionText = q?.questionContent?.question?.toLowerCase() || "";
-        const optionsText = Object.keys(q?.questionContent || {})
-          .filter((k) => k?.includes("option"))
-          .map((k) => q?.questionContent?.[k]?.toLowerCase() || "")
-          .join(" ");
-        matchesSearch =
-          questionText?.includes(query) || optionsText?.includes(query);
-      }
-      if (!matchesSearch) return;
-
-      // Category filter
       let cat = "Uncategorized";
       if (q?.questionCategory && q?.questionCategory?.length > 0) {
         cat = q?.questionCategory?.[0]?.name || "Uncategorized";
       }
 
-      if (selectedCategory !== "All" && cat !== selectedCategory) return;
-
       if (!groups[cat]) {
         groups[cat] = {
-          questions: [],
           totalExpectedScore: 0,
           totalEarnedScore: 0,
         };
       }
-      groups[cat].questions.push(q);
 
       // Calculate expected score
       let maxQScore = 0;
@@ -305,7 +309,7 @@ export default function Page() {
 
       // Calculate earned score
       const singleQuestion = currentTestRes?.[q?._id];
-      if (singleQuestion && singleQuestion?.status !== "notanswered") {
+      if (singleQuestion && singleQuestion?.status !== "notanswered" && singleQuestion?.status !== "unattempted") {
         if (singleQuestion?.status === "correct") {
           groups[cat].totalEarnedScore +=
             Number(singleQuestion?.correctScore || 0) +
@@ -318,7 +322,57 @@ export default function Page() {
       }
     });
     return groups;
-  }, [finishedTestData?.questions, currentTestRes, questionSearchQuery, selectedCategory]);
+  }, [finishedTestData?.questions, currentTestRes]);
+
+  // Filter questions based on search, category, and status (retaining original order)
+  const filteredQuestions = useMemo(() => {
+    if (!ques?.length) return [];
+    const query = questionSearchQuery?.toLowerCase() || "";
+
+    return ques.filter((q) => {
+      // Search filter
+      let matchesSearch = true;
+      if (query.trim() !== "") {
+        const questionText = q?.questionContent?.question?.toLowerCase() || "";
+        const optionsText = Object.keys(q?.questionContent || {})
+          .filter((k) => k?.includes("option"))
+          .map((k) => q?.questionContent?.[k]?.toLowerCase() || "")
+          .join(" ");
+        matchesSearch =
+          questionText?.includes(query) || optionsText?.includes(query);
+      }
+      if (!matchesSearch) return false;
+
+      // Category filter
+      let cat = "Uncategorized";
+      if (q?.questionCategory && q?.questionCategory?.length > 0) {
+        cat = q?.questionCategory?.[0]?.name || "Uncategorized";
+      } else if (q?.qType?.includes("Comprehension")) {
+        // Find parent category for comprehension questions
+        const parentQ = finishedTestData?.questions?.find(pq => 
+          pq?.questionContentArr?.some(sq => sq?._id === q?._id)
+        );
+        if (parentQ?.questionCategory?.length > 0) {
+          cat = parentQ?.questionCategory?.[0]?.name || "Uncategorized";
+        }
+      }
+      if (selectedCategory !== "All" && cat !== selectedCategory) return false;
+
+      // Status filter
+      if (selectedStatus !== "All") {
+        let isFlagged = testRes?.value?.[testId]?.flagged?.some((que) => que?.id == q?._id);
+        let isMarked = testRes?.value?.[testId]?.marked?.includes(q?._id);
+        let studentAnswers = currentTestRes?.[q?._id]?.answers;
+        let isAnswered = Array.isArray(studentAnswers) && studentAnswers.length > 0;
+
+        if (selectedStatus === "Flagged" && !isFlagged) return false;
+        if (selectedStatus === "Marked" && !(isMarked && !isAnswered)) return false;
+        if (selectedStatus === "AnsweredMarked" && !(isMarked && isAnswered)) return false;
+      }
+
+      return true;
+    });
+  }, [ques, questionSearchQuery, selectedCategory, selectedStatus, testRes, testId, currentTestRes, finishedTestData]);
 
   // Get all unique categories for filter dropdown
   const allCategories = useMemo(() => {
@@ -345,6 +399,18 @@ export default function Page() {
     );
   }
 
+  const rawPassScore = finishedTestData?.grading?.passScore !== undefined ? finishedTestData?.grading?.passScore : finishedTestData?.grading?.gradingCriteria?.passScore;
+  const hasPassMark = rawPassScore !== undefined && rawPassScore !== null && rawPassScore !== "";
+  const PassScoreNum = hasPassMark ? Number(rawPassScore) : 0;
+  const isFailGrade = testValues?.grade && testValues.grade.toLowerCase().includes("fail");
+  
+  let isPassed = null;
+  if (hasPassMark) {
+    isPassed = Number(score?.totalScore || 0) >= PassScoreNum;
+  } else if (isFailGrade) {
+    isPassed = false;
+  }
+
   return (
     <div style={{ height: "calc(100vh - 72px)", display: "flex", flexDirection: "column", overflow: "hidden", margin: "0", padding: "0" }}>
       <div className="z-50 shrink-0">
@@ -364,10 +430,10 @@ export default function Page() {
           ) : (
             <>
               {/* Result Banner */}
-              <div className={`${resultStyles.resultBanner} ${score?.totalScore < PassScore ? resultStyles.fail : resultStyles.pass}`}>
+              <div className={`${resultStyles.resultBanner} ${isPassed === false ? resultStyles.fail : resultStyles.pass}`}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}>
                   <div className={resultStyles.resultBannerIcon}>
-                    {score?.totalScore < PassScore ? (
+                    {isPassed === false ? (
                       <i className="ti ti-x" />
                     ) : (
                       <i className="ti ti-check" />
@@ -375,13 +441,17 @@ export default function Page() {
                   </div>
                   <div>
                     <div className={resultStyles.resultBannerTitle}>
-                      {score?.totalScore < PassScore ? "Test Failed" : "Test Passed Successfully!"}
+                      {isPassed === false ? "Test Failed" : isPassed === true ? "Test Passed Successfully!" : "Test Completed!"}
                     </div>
                     <div className={resultStyles.resultBannerSub}>
-                      {testValues?.message ? (
+                      {isPassed === false ? (
+                        <span>Try again to get a good score! <br/> {testValues?.message ? <span dangerouslySetInnerHTML={{ __html: parseIfJson(testValues?.message) }}></span> : ''}</span>
+                      ) : isPassed === true ? (
+                        <span>{testValues?.message ? <span dangerouslySetInnerHTML={{ __html: parseIfJson(testValues?.message) }}></span> : ''}</span>
+                      ) : testValues?.message ? (
                         <span dangerouslySetInnerHTML={{ __html: parseIfJson(testValues?.message) }}></span>
-                      ) : finishedTestData?.grading?.failIntervals?.TestFailMessage ? (
-                        <span dangerouslySetInnerHTML={{ __html: parseIfJson(finishedTestData?.grading?.failIntervals?.TestFailMessage) }}></span>
+                      ) : finishedTestData?.grading?.TestEndMessage ? (
+                        <span dangerouslySetInnerHTML={{ __html: parseIfJson(finishedTestData?.grading?.TestEndMessage) }}></span>
                       ) : (
                         <span>Thank you for attempting {testData?.value?.test?.title}</span>
                       )}
@@ -436,6 +506,34 @@ export default function Page() {
                     </div>
                   </div>
 
+                  {/* Extra Status Stats */}
+                  <div className={resultStyles.extraStatsWrap}>
+                    <div className={resultStyles.extraStatItem}>
+                      <div className={`${resultStyles.extraStatIcon} ${resultStyles.flagged}`}>
+                        {extraStats.flagged}
+                      </div>
+                      <div className={resultStyles.extraStatInfo}>
+                        <div className={resultStyles.extraStatLbl}>Flagged</div>
+                      </div>
+                    </div>
+                    <div className={resultStyles.extraStatItem}>
+                      <div className={`${resultStyles.extraStatIcon} ${resultStyles.marked}`}>
+                        {extraStats.marked}
+                      </div>
+                      <div className={resultStyles.extraStatInfo}>
+                        <div className={resultStyles.extraStatLbl}>Marked for Review</div>
+                      </div>
+                    </div>
+                    <div className={resultStyles.extraStatItem}>
+                      <div className={`${resultStyles.extraStatIcon} ${resultStyles.markedAnswered}`}>
+                        {extraStats.answeredMarked}
+                      </div>
+                      <div className={resultStyles.extraStatInfo}>
+                        <div className={resultStyles.extraStatLbl}>Answered & Marked</div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Donut Chart */}
                   <div className={resultStyles.donutWrap}>
                     <div className={resultStyles.donutSvg}>
@@ -469,32 +567,33 @@ export default function Page() {
               </div>
 
               {/* Category-wise Results */}
-              {Object.keys(groupedQuestions)?.length > 0 && (
+              {Object.keys(categoryScores)?.length > 0 && (
                 <div className={resultStyles.categoryCard}>
                   <div className={resultStyles.catHeader}>
                     <div className={resultStyles.catTitle}><i className="ti ti-category" /> Category-wise Progress</div>
                   </div>
-                  {Object.keys(groupedQuestions).map((catName) => {
-                    const catData = groupedQuestions[catName];
-                    const earned = catData?.totalEarnedScore || 0;
-                    const expected = catData?.totalExpectedScore || 1;
-                    const pct = Math.round((earned / expected) * 100);
-                    return (
-                      <div className={resultStyles.catRow} key={catName}>
-                        <div className={resultStyles.catName}>{catName}</div>
-                        <div className={resultStyles.catBarBg}>
-                          <div 
-                            className={resultStyles.catBarFill} 
-                            style={{ 
-                              width: `${Math.min(pct, 100)}%`, 
-                              background: pct >= 70 ? 'var(--green)' : pct >= 40 ? '#faad14' : 'var(--red)' 
-                            }} 
-                          />
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', padding: '1.5rem' }}>
+                    {Object.keys(categoryScores).map((catName) => {
+                      const catData = categoryScores[catName];
+                      const earned = catData?.totalEarnedScore || 0;
+                      const expected = catData?.totalExpectedScore || 1;
+                      return (
+                        <div key={catName} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                          <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '0.75rem', textAlign: 'center' }}>{catName}</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', width: '100%', padding: '0 0.5rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                              <span style={{ color: '#64748b', fontWeight: '500' }}>Obtained Marks:</span>
+                              <span style={{ fontWeight: '700', color: earned < 0 ? '#ef4444' : '#3b82f6' }}>{earned}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                              <span style={{ color: '#64748b', fontWeight: '500' }}>Total Marks:</span>
+                              <span style={{ fontWeight: '700', color: '#1e293b' }}>{expected}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className={resultStyles.catScoreText}>{earned} / {expected}</div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -522,78 +621,58 @@ export default function Page() {
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
+                    <select 
+                      className={resultStyles.akSelect}
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                    >
+                      <option value="All">All Statuses</option>
+                      <option value="Flagged">Flagged Questions</option>
+                      <option value="Marked">Marked for Review</option>
+                      <option value="AnsweredMarked">Answered & Marked</option>
+                    </select>
                   </div>
                 </div>
 
-                {Object.keys(groupedQuestions)?.length === 0 && (questionSearchQuery || selectedCategory !== "All") ? (
+                {filteredQuestions?.length === 0 && (questionSearchQuery || selectedCategory !== "All" || selectedStatus !== "All") ? (
                   <div style={{ textAlign: "center", padding: "2rem", color: "#999" }}>
                     <p>No questions found matching your filters.</p>
                   </div>
                 ) : (
                   <>
-                    {Object.keys(groupedQuestions)?.map((catName) => {
-                      const groupData = groupedQuestions[catName];
-                      return (
-                        <div key={catName}>
-                          <div className={resultStyles.catSectionHeader}>
-                            <div className={resultStyles.catSectionName}>{catName}</div>
-                            <div className={resultStyles.catSectionScore}>
-                              Score: {groupData?.totalEarnedScore || 0} / {groupData?.totalExpectedScore || 0}
-                            </div>
-                          </div>
-                          
-                          {groupData?.questions?.map((e, i) => {
-                            let flaggedQues = testRes?.value?.[testId]?.flagged?.find((que) => que?.id == e?._id);
+                    {filteredQuestions?.map((e, i) => {
+                      let flaggedQues = testRes?.value?.[testId]?.flagged?.find((que) => que?.id == e?._id);
 
-                            if (e?.questionType?.includes("Comprehension")) {
-                              return (
-                                <div className={resultStyles.qBlock} key={`comp-${i}`}>
-                                  <div className={resultStyles.qBlockHeader}>
-                                    <div className={resultStyles.qBlockNum}>
-                                      <i className="ti ti-blockquote" /> {e?.questionType}
-                                    </div>
-                                  </div>
-                                  <div className={resultStyles.qBlockText}>
-                                    {e?.questionType?.includes("Reading") ? (
-                                      <div dangerouslySetInnerHTML={{ __html: parseIfJson(e?.comprehensionText) }}></div>
-                                    ) : (
-                                      e?.resources != undefined && e?.resources != "" && (
-                                        e?.questionType !== "Reading Comprehension" && e?.questionType === "Video Comprehension"
-                                          ? e?.resources?.url !== "" && <video src={e?.resources?.url} controls style={{maxWidth: '100%'}} />
-                                          : e?.resources?.url !== "" && <audio src={e?.resources?.url} controls />
-                                      )
-                                    )}
-                                  </div>
-                                  
-                                  {e?.questionContentArr?.map((subQues, index) => {
-                                    flaggedQues = testRes?.value?.[testId]?.flagged?.find((que) => que?.id == subQues?._id);
-                                    const absIndex = ques?.findIndex((q) => q?._id === subQues?._id);
-                                    const qNo = absIndex !== -1 ? absIndex + 1 : questionNo++;
-                                    return (
-                                      <div ref={quesContainerRef?.current?.[qNo]} key={`sub-${index}`}>
-                                        <QuesComp
-                                          quesContainerRef={quesContainerRef}
-                                          e={subQues}
-                                          i={index}
-                                          currentTestRes={currentTestRes}
-                                          testRes={testRes}
-                                          questionNo={qNo}
-                                          flagged={flaggedQues}
-                                        />
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            } else {
-                              const absIndex = ques?.findIndex((q) => q?._id === e?._id);
+                      if (e?.questionType?.includes("Comprehension")) {
+                        return (
+                          <div className={resultStyles.qBlock} key={`comp-${i}`}>
+                            <div className={resultStyles.qBlockHeader}>
+                              <div className={resultStyles.qBlockNum}>
+                                <i className="ti ti-blockquote" /> {e?.questionType}
+                              </div>
+                            </div>
+                            <div className={resultStyles.qBlockText}>
+                              {e?.questionType?.includes("Reading") ? (
+                                <div dangerouslySetInnerHTML={{ __html: parseIfJson(e?.comprehensionText) }}></div>
+                              ) : (
+                                e?.resources != undefined && e?.resources != "" && (
+                                  e?.questionType !== "Reading Comprehension" && e?.questionType === "Video Comprehension"
+                                    ? e?.resources?.url !== "" && <video src={e?.resources?.url} controls style={{maxWidth: '100%'}} />
+                                    : e?.resources?.url !== "" && <audio src={e?.resources?.url} controls />
+                                )
+                              )}
+                            </div>
+                            
+                            {e?.questionContentArr?.map((subQues, index) => {
+                              flaggedQues = testRes?.value?.[testId]?.flagged?.find((que) => que?.id == subQues?._id);
+                              const absIndex = ques?.findIndex((q) => q?._id === subQues?._id);
                               const qNo = absIndex !== -1 ? absIndex + 1 : questionNo++;
                               return (
-                                <div ref={quesContainerRef?.current?.[qNo]} key={`q-${i}`}>
+                                <div ref={quesContainerRef?.current?.[qNo]} key={`sub-${index}`}>
                                   <QuesComp
                                     quesContainerRef={quesContainerRef}
-                                    e={e}
-                                    i={i}
+                                    e={subQues}
+                                    i={index}
                                     currentTestRes={currentTestRes}
                                     testRes={testRes}
                                     questionNo={qNo}
@@ -601,10 +680,26 @@ export default function Page() {
                                   />
                                 </div>
                               );
-                            }
-                          })}
-                        </div>
-                      );
+                            })}
+                          </div>
+                        );
+                      } else {
+                        const absIndex = ques?.findIndex((q) => q?._id === e?._id);
+                        const qNo = absIndex !== -1 ? absIndex + 1 : questionNo++;
+                        return (
+                          <div ref={quesContainerRef?.current?.[qNo]} key={`q-${i}`}>
+                            <QuesComp
+                              quesContainerRef={quesContainerRef}
+                              e={e}
+                              i={i}
+                              currentTestRes={currentTestRes}
+                              testRes={testRes}
+                              questionNo={qNo}
+                              flagged={flaggedQues}
+                            />
+                          </div>
+                        );
+                      }
                     })}
                   </>
                 )}

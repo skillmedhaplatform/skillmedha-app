@@ -82,6 +82,7 @@ export default function SocketComp() {
             response: data.response,
             studentData: data.studentData,
             flagged: data.flagged,
+            marked: data.marked,
             scoreData: data.scoreData,
           })
         );

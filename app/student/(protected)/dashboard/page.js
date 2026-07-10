@@ -9,6 +9,7 @@ import {
   getAllCoursesOnly,
   getAllInternshipsOnly,
 } from "@/redux/slices/internship";
+import { updateStudent } from "@/redux/slices/student";
 import { GetAllNotifiocations } from "@/redux/slices/jobopenings";
 import {
   Button,
@@ -247,37 +248,181 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
   </div>
 );
 
-const Achievements = ({ progressById, combinedLearningData }) => {
+const AchievementDetailsModal = ({ isOpen, onClose, achievement }) => {
+  if (!achievement) return null;
+
+  const renderContent = () => {
+    switch (achievement.type) {
+      case 'course':
+      case 'internship':
+        const course = achievement.courseData;
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">{achievement.type === 'course' ? 'Course Details' : 'Internship Details'}</h4>
+            <div className="flex items-center gap-2 mb-3 text-[13px] text-[#64748b]">
+              <span className="shrink-0">⏱️</span> 
+              <span>{course.duration ? `Duration: ${course.duration}` : "Completed"}</span>
+            </div>
+            
+            <h5 className="font-bold text-[#334155] text-[13px] mb-2">What you learned</h5>
+            <div className="flex flex-col gap-2">
+              {course.skillsToMaster?.length > 0 ? (
+                course.skillsToMaster.slice(0, 4).map((skill, i) => (
+                  <div key={i} className="flex items-center gap-2 text-[13px] text-[#475569]">
+                    <span className="text-[#10b981]">✅</span> <span>{skill}</span>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 text-[13px] text-[#475569]"><span className="text-[#10b981]">✅</span> <span>Core Fundamentals</span></div>
+                  <div className="flex items-center gap-2 text-[13px] text-[#475569]"><span className="text-[#10b981]">✅</span> <span>Advanced Techniques</span></div>
+                  <div className="flex items-center gap-2 text-[13px] text-[#475569]"><span className="text-[#10b981]">✅</span> <span>Best Practices</span></div>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      case 'practice':
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Test Performance</h4>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[#64748b] text-[13px]">Accuracy</span>
+              <span className="font-bold text-[#10b981] text-[14px]">100%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[#64748b] text-[13px]">Questions Answered</span>
+              <span className="font-bold text-[#1e293b] text-[14px]">All</span>
+            </div>
+          </div>
+        );
+      case 'streak':
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Consistency is Key!</h4>
+            <p className="text-[13px] text-[#64748b] leading-relaxed">
+              You've logged in for {achievement.streak || 30} consecutive days. Keep up the great work and continue building your skills every day!
+            </p>
+          </div>
+        );
+      default:
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Achievement Unlocked</h4>
+            <p className="text-[13px] text-[#64748b] leading-relaxed">
+              {achievement.desc}. Keep exploring the platform to earn more badges!
+            </p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <Modal
+      open={isOpen}
+      onCancel={onClose}
+      footer={null}
+      centered
+      width={400}
+      className="achievement-modal"
+      closeIcon={<span className="text-gray-400 hover:text-gray-600 text-lg">✕</span>}
+      bodyStyle={{ padding: 0 }}
+    >
+      <div className="flex flex-col items-center justify-center p-6 pt-10 relative overflow-hidden bg-white/60 backdrop-blur-md rounded-2xl border border-white/50">
+        <div className="absolute top-[-50px] w-[200px] h-[200px] bg-[#f59e0b] rounded-full blur-[80px] opacity-20"></div>
+        
+        <div className="text-[80px] leading-none mb-4 drop-shadow-xl relative z-10 animate-bounce-slight" style={{ filter: 'drop-shadow(0px 10px 15px rgba(245, 158, 11, 0.4))' }}>
+          {achievement.emoji}
+        </div>
+        
+        <h2 className="text-[24px] font-extrabold text-[#0f172a] text-center mb-1 relative z-10 w-full px-2" style={{ wordBreak: 'break-word', lineHeight: '1.2' }}>
+          {achievement.title}
+        </h2>
+        
+        <div className="flex items-center gap-2 text-[13px] text-[#64748b] font-medium mb-2 relative z-10">
+          <span>Earned Recently</span>
+          <span>•</span>
+          <span className="flex items-center gap-1 text-[#f59e0b] font-bold">
+            💰 {achievement.desc.includes('coins earned') ? achievement.desc : '+50 coins'}
+          </span>
+        </div>
+        
+        <div className="w-full relative z-10 flex flex-col items-center">
+          {renderContent()}
+        </div>
+        
+        <Button 
+          className="w-full mt-6 h-[44px] rounded-xl font-bold text-[15px] border-none text-white shadow-md shadow-[#3b82f6]/30 transition-all hover:opacity-90 hover:scale-[1.02]"
+          style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
+          onClick={onClose}
+        >
+          Awesome!
+        </Button>
+      </div>
+    </Modal>
+  );
+};
+
+const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
   const [streak, setStreak] = React.useState(1);
+  const [claimedAchievements, setClaimedAchievements] = React.useState([]);
+  const [selectedAchievement, setSelectedAchievement] = React.useState(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       setStreak(parseInt(localStorage.getItem("loginStreak") || "1", 10));
+      
+      const loadClaimed = () => {
+        let stored = studentCreds?.claimedAchievements || [];
+        if (!stored.length) {
+          stored = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+        }
+        setClaimedAchievements(stored);
+      };
+      
+      loadClaimed();
+      window.addEventListener("achievementClaimed", loadClaimed);
+      return () => window.removeEventListener("achievementClaimed", loadClaimed);
     }
-  }, []);
+  }, [studentCreds?.claimedAchievements]);
 
   let streakCoins = 5;
   if (streak === 1) streakCoins = 10;
   else if (streak > 0 && streak % 10 === 0) streakCoins = streak;
 
   const achievementsList = [
-    { emoji: "⭐", title: "First Enroll", desc: "+50 XP earned", status: "Earned" },
-    { emoji: "🔥", title: `${streak} Day Streak`, desc: `+${streakCoins} coins earned`, status: "Earned" },
-    { emoji: "🎉", title: "Certified Dev", desc: "+500 XP earned", status: "Earned" }
+    { type: 'streak', id: 'streak_current', emoji: "🔥", title: `${streak} Day Streak`, desc: `+${streakCoins} coins earned`, status: "Earned", streakCoins, streak }
   ];
 
   if (streak >= 30) {
-    achievementsList.push({ emoji: "🏆", title: "1 Month Streak", desc: "Maintained badge", status: "Earned" });
+    achievementsList.push({ type: 'streak', id: 'streak_month', emoji: "🏆", title: "1 Month Streak", desc: "Maintained badge", status: "Earned", streak: 30 });
+  }
+
+  if (claimedAchievements.includes("welcome_aboard")) {
+    achievementsList.push({ type: 'onboarding', id: 'welcome_aboard', emoji: "🚀", title: "Welcome Aboard", desc: "Joined the platform", status: "Earned" });
+  }
+  
+  if (claimedAchievements.includes("profile_complete")) {
+    achievementsList.push({ type: 'onboarding', id: 'profile_complete', emoji: "👤", title: "Profile Complete", desc: "Profile setup finished", status: "Earned" });
+  }
+  
+  if (claimedAchievements.includes("perfect_scorer")) {
+    achievementsList.push({ type: 'practice', id: 'perfect_scorer', emoji: "🎯", title: "Perfect Scorer", desc: "100% on a practice test", status: "Earned" });
   }
 
   if (progressById && combinedLearningData) {
     Object.keys(progressById).forEach(id => {
-      if (progressById[id]?.totalProgress === 100) {
+      const achievementId = `complete_${id}`;
+      if (claimedAchievements.includes(achievementId)) {
         const course = combinedLearningData.find((c) => c._id === id);
         if (course) {
           const categoryText = course.category ? course.category : (course.type || "Course");
           const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
           achievementsList.push({
+            type: course.type === 'internships' ? 'internship' : 'course',
+            id: achievementId,
+            courseData: course,
             emoji: "🥇",
             title: `${shortCategoryText} Complete`,
             desc: "+50 coins earned",
@@ -293,18 +438,30 @@ const Achievements = ({ progressById, combinedLearningData }) => {
       <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 sticky top-0 bg-white z-10 pt-1 shrink-0">Achievements</h3>
       <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden max-h-[250px] pb-2">
         {achievementsList.map((item, idx) => (
-          <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
-            <div className="flex items-center gap-3">
-              <div className="text-[24px]">{item.emoji}</div>
-              <div className="flex flex-col">
-                <span className="font-bold text-[#0f172a] text-[14px]">{item.title}</span>
-                <span className="text-[#64748b] text-[12px]">{item.desc}</span>
+          <div 
+            key={idx} 
+            className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group"
+            onClick={() => {
+              setSelectedAchievement(item);
+              setIsModalOpen(true);
+            }}
+          >
+            <div className="flex items-center gap-3 overflow-hidden mr-2">
+              <div className="text-[24px] shrink-0 group-hover:scale-110 transition-transform">{item.emoji}</div>
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-[#0f172a] text-[14px] truncate group-hover:text-[#3b82f6] transition-colors">{item.title}</span>
+                <span className="text-[#64748b] text-[12px] truncate">{item.desc}</span>
               </div>
             </div>
-            <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">{item.status}</span>
+            <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold shrink-0">{item.status}</span>
           </div>
         ))}
       </div>
+      <AchievementDetailsModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        achievement={selectedAchievement} 
+      />
     </div>
   );
 };
@@ -323,31 +480,23 @@ const resolveUserId = (studentCreds) => {
 
 export default function DashboardPage() {
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
+  const [activeNoticeIndex, setActiveNoticeIndex] = useState(null);
   const studentCreds = useSelector((state) => state.student.student?.data);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const handleOpenNoticeBoard = (e) => {
+      if (e.detail?.index !== undefined) {
+        setActiveNoticeIndex(e.detail.index);
+      }
+      setIsNoticeModalOpen(true);
+    };
+    window.addEventListener("openNoticeBoard", handleOpenNoticeBoard);
+    return () => window.removeEventListener("openNoticeBoard", handleOpenNoticeBoard);
   }, []);
 
   const isMobile = useResponsive(); // < 1024px → mobile layout
-
-  // Inject keyframes for the timer bar
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      @keyframes fillRightToLeft {
-        0% { width: 0%; right: 0; }
-        100% { width: 100%; right: 0; }
-      }
-      @keyframes fillLeftToRight {
-        0% { width: 0%; left: 0; }
-        100% { width: 100%; left: 0; }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
 
   // Inject keyframes for the timer bar
   useEffect(() => {
@@ -445,34 +594,56 @@ export default function DashboardPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const today = new Date().toDateString();
-      const lastLogin = localStorage.getItem("lastLoginDate");
-      let currentStreak = parseInt(localStorage.getItem("loginStreak") || "0", 10);
+      let lastLogin = studentCreds?.lastLoginDate || localStorage.getItem("lastLoginDate");
+      let currentStreak = studentCreds?.loginStreak || parseInt(localStorage.getItem("loginStreak") || "0", 10);
+      
+      if (isNaN(currentStreak)) currentStreak = 1;
+
+      let streakChanged = false;
       
       if (lastLogin) {
         if (lastLogin !== today) {
           const lastLoginDate = new Date(lastLogin);
           const todayDate = new Date(today);
-          const diffTime = todayDate - lastLoginDate;
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          const diffTime = todayDate.getTime() - lastLoginDate.getTime();
+          const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); // Use Math.round to handle DST shifts
           
           if (diffDays === 1) {
             currentStreak += 1;
             localStorage.removeItem("streakBrokenNotify");
           } else if (diffDays > 1) {
-            currentStreak = 0;
+            currentStreak = 1;
             localStorage.setItem("streakBrokenNotify", "true");
           }
-          
-          localStorage.setItem("lastLoginDate", today);
-          localStorage.setItem("loginStreak", currentStreak.toString());
+          streakChanged = true;
+        } else if (currentStreak === 0) {
+          currentStreak = 1;
+          streakChanged = true;
         }
       } else {
-        localStorage.setItem("lastLoginDate", today);
-        localStorage.setItem("loginStreak", "1");
+        currentStreak = 1;
+        streakChanged = true;
         localStorage.removeItem("streakBrokenNotify");
       }
+
+      if (streakChanged) {
+        localStorage.setItem("lastLoginDate", today);
+        localStorage.setItem("loginStreak", currentStreak.toString());
+        
+        if (studentCreds?._id) {
+          dispatch(updateStudent({
+            aboutDetails: {
+              _id: studentCreds._id,
+              email: studentCreds.email,
+              loginStreak: currentStreak,
+              lastLoginDate: today
+            },
+            dispatch
+          }));
+        }
+      }
     }
-  }, []);
+  }, [studentCreds, dispatch]);
 
   // Memoized profile values
   const profileValues = useMemo(() => {
@@ -905,7 +1076,7 @@ export default function DashboardPage() {
             
             {/* Section 3: Achievements */}
             <div className="w-full relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
-              <Achievements progressById={progressById} combinedLearningData={combinedLearningData} />
+              <Achievements progressById={progressById} combinedLearningData={combinedLearningData} studentCreds={studentCreds} />
             </div>
           </div>
         </div>
@@ -918,7 +1089,13 @@ export default function DashboardPage() {
             width={1000}
           >
           <div style={{ height: "70vh", overflowY: "auto" }}>
-            <CardsList type="notifications" isModal={true} progressById={progressById} combinedLearningData={combinedLearningData} />
+            <CardsList 
+              type="notifications" 
+              isModal={true} 
+              progressById={progressById} 
+              combinedLearningData={combinedLearningData}
+              activeNoticeIndex={activeNoticeIndex}
+            />
           </div>
           </Modal>
         </div>

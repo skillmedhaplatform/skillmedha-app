@@ -10,7 +10,7 @@
 // import { getSstorage } from "../storageMiddleware";
 // import { PauseCircleOutlined, PlayCircleOutlined } from "@ant-design/icons";
 // import { parseIfJson } from "./jsonparse";
-// import { Input } from "antd";
+// import { Input, message } from "antd";
 
 // export default function QuestionUI({
 //   questionData,
@@ -360,7 +360,7 @@ import _ from "lodash";
 import { getSstorage } from "../storageMiddleware";
 import { PauseCircleOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { parseIfJson } from "./jsonparse";
-import { Input } from "antd";
+import { Input, message } from "antd";
 import CodingQuestion from "../monaco_code_editor";
 import CodingPage from "../Playground/page";
 
@@ -374,6 +374,7 @@ export default function QuestionUI({
   totalInCategory,
   clearRespFun,
   flagCheck,
+  isFlagged,
 }) {
   const dispatch = useDispatch();
   const [edval, setEdval] = useState({});
@@ -403,6 +404,10 @@ export default function QuestionUI({
 
   // Handle Coding Question submission
   const handleCodingQuestionSubmit = (codingData) => {
+    if (isFlagged) {
+      message.warning("This question is flagged. Please clear the flag to answer.");
+      return;
+    }
     setAnswers([codingData]);
     dispatch(
       save_response({
@@ -448,6 +453,10 @@ export default function QuestionUI({
   };
 
   const selectAns = (e, value) => {
+    if (isFlagged) {
+      message.warning("This question is flagged. Please clear the flag to answer.");
+      return;
+    }
     if (!e) {
       if (questionData?.questionType !== "Multiple Choice") {
         setAnswers([value]);
@@ -496,6 +505,10 @@ export default function QuestionUI({
 
   // Handle fill in the blank input change
   const handleFillBlankChange = (e) => {
+    if (isFlagged) {
+      message.warning("This question is flagged. Please clear the flag to answer.");
+      return;
+    }
     const value = e.target.value;
     setFillBlankAnswer(value);
     setAnswers([value]);
@@ -512,6 +525,10 @@ export default function QuestionUI({
   const contentInnerRef = useRef();
 
   const sendEditorVals = (val) => {
+    if (isFlagged) {
+      message.warning("This question is flagged. Please clear the flag to answer.");
+      return;
+    }
     setEdval(val);
     selectAns("checked", val[questionData?._id]);
   };
@@ -531,12 +548,12 @@ export default function QuestionUI({
 
   // Initialize fill in the blank answer from current response
   useEffect(() => {
-    if (
-      questionData?.questionType === "Fill in the Blanks" &&
-      currResponse &&
-      currResponse[0]
-    ) {
-      setFillBlankAnswer(currResponse[0]);
+    if (questionData?.questionType === "Fill in the Blanks") {
+      if (currResponse && currResponse[0]) {
+        setFillBlankAnswer(currResponse[0]);
+      } else {
+        setFillBlankAnswer("");
+      }
     }
   }, [questionData, currResponse]);
 
@@ -553,15 +570,6 @@ export default function QuestionUI({
     }
   }, [questionData, currResponse]);
 
-  const isFlagged = Array.from(
-    new Set(
-      flaggedArr?.map((flagopt, i) => {
-        return flagCheck?.find(
-          (e) => e.id == questionData?._id && e.flag.includes(flagopt)
-        )?.id;
-      })
-    )
-  );
 
   // If it's a Coding Question, render the full CodingQuestion component
   if (questionData?.questionType === "Coding Question") {
@@ -608,7 +616,7 @@ export default function QuestionUI({
 
       {/* Flag icon (if any) */}
       <div className={queStyles.flagImg} style={{ position: 'absolute', top: 10, right: 10 }}>
-        {isFlagged.find((isPresent) => isPresent == questionData?._id) ? (
+        {isFlagged ? (
           <img
             src="https://res.cloudinary.com/cliqtick/image/upload/v1721625379/sysnper/a59ab59c0357c4d72adbea66b7496401_yzsdgy.png"
             width="10px"
@@ -659,13 +667,16 @@ export default function QuestionUI({
             currResponse?.find((e) => e == key)
           )
             cls = "selected";
+            
+          const isMultiSelect = questionData?.questionType === "Multiple Choice";
+            
           return (
             <div
               key={i}
               onClick={(e) => selectAns(cls == "selected", key)}
               className={`${testStyles.option} ${cls === "selected" ? testStyles.selected : ""}`}
             >
-              <div className={testStyles.optRadio}></div>
+              <div className={isMultiSelect ? testStyles.optCheckbox : testStyles.optRadio}></div>
               <div className={testStyles.optLetter}>{String.fromCharCode(65 + i)}</div>
               <div
                 dangerouslySetInnerHTML={{
