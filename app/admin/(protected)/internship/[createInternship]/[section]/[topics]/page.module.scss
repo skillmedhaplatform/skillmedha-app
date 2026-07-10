@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/colors.scss";
 @import "@/modules/admin/styles/mixins.scss";
 
@@ -32,7 +33,7 @@
 
 .topic {
   padding: 0rem 1rem;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -54,7 +55,7 @@
   border: 1px solid #0000005e;
   padding: 10px;
   width: 50%;
-  border-radius: 6px;
+  border-radius: $borderRadius;
 }
 
 .actions {
@@ -70,7 +71,7 @@
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   font-weight: bold;
   cursor: pointer;
   width: fit-content;
@@ -81,6 +82,6 @@
   color: white;
   padding: 0.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: $borderRadius;
   cursor: pointer;
 }

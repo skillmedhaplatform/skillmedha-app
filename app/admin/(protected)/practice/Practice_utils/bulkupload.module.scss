@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/mixins.scss";
 @import "@/modules/admin/styles/colors.scss";
 
@@ -5,13 +6,13 @@
   margin-top: 1rem;
   max-height: 400px;
   overflow-y: auto;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
+  border: 1px solid $borderColor;
+  border-radius: $borderRadius;
 }
 
 .uploadArea {
   border: 2px dashed #d9d9d9;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   padding: 40px;
   text-align: center;
   background-color: #fafafa;
@@ -28,7 +29,7 @@
   margin-bottom: 24px;
   padding: 16px;
   background-color: #f5f5f5;
-  border-radius: 8px;
+  border-radius: $borderRadius;
 }
 
 .errorText {
@@ -51,14 +52,14 @@
   th {
     background-color: #fafafa;
     padding: 8px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid $borderColor;
     text-align: left;
     font-weight: 600;
   }
 
   td {
     padding: 8px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid $borderColor;
   }
 
   tr:last-child td {
@@ -69,7 +70,7 @@
 .summaryCard {
   background-color: #f6ffed;
   border: 1px solid #b7eb8f;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   padding: 16px;
   margin-bottom: 16px;
 

@@ -1,15 +1,15 @@
 .breadcrumb-wrapper {
-  /* border: 1px solid rgba(128, 128, 128, 0.209); */
-  border-radius: 5px;
-  padding: 0.4rem 0.5rem;
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0.25rem 0;
   display: flex;
   align-items: center;
-  /* box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px; */
+  margin-bottom: 0.5rem;
 }
 
 .breadcrumb-wrapper .ant-breadcrumb {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 500;
   display: flex;
   align-items: center;
 }
@@ -30,26 +30,35 @@
 .breadcrumb-wrapper .ant-breadcrumb-link {
   display: inline-flex;
   align-items: center;
-  font-weight: bold;
-  /* background-color: rgba(0, 0, 0, 0.05) !important;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem; */
+  font-weight: 500;
 }
 
-/* Remove background from last breadcrumb item */
-.breadcrumb-wrapper .ant-breadcrumb li:last-child .ant-breadcrumb-link {
+.breadcrumb-wrapper .ant-breadcrumb-link a {
+  color: #1E69DA !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0;
+  font-weight: 500;
+  height: auto;
+  display: inline;
+}
+
+.breadcrumb-wrapper .ant-breadcrumb-link a:hover {
+  text-decoration: underline;
   background-color: transparent !important;
 }
 
-/* Customize hover effect */
-.breadcrumb-wrapper .ant-breadcrumb-link a {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  height: fit-content;
+/* Last breadcrumb item (current page) */
+.breadcrumb-wrapper .ant-breadcrumb li:last-child {
+  color: #0f172a !important;
 }
 
-/* Remove hover background from last item */
+.breadcrumb-wrapper .ant-breadcrumb li:last-child .ant-breadcrumb-link {
+  color: #0f172a !important;
+  font-weight: 600;
+  background-color: transparent !important;
+}
+
 .breadcrumb-wrapper .ant-breadcrumb li:last-child .ant-breadcrumb-link:hover {
   background-color: transparent !important;
 }

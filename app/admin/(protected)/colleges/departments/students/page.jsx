@@ -275,7 +275,7 @@ const Students = () => {
       width: 250,
       ellipsis: true,
       render: (email) => (
-        <a href={`mailto:${email}`} style={{ color: "#1890ff" }}>
+        <a href={`mailto:${email}`} style={{ color: "#1E69DA" }}>
           {email}
         </a>
       ),

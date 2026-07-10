@@ -74,7 +74,7 @@ const BreadcrumbComponent = ({ customLabels = {} }) => {
   return (
     <div className="breadcrumb-wrapper">
       <Breadcrumb
-        separator={<FaCaretRight style={{ fontSize: "22px", color: "gray" }} />}
+        separator={<FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />}
         items={breadcrumbItems}
       />
     </div>

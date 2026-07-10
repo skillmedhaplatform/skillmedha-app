@@ -127,10 +127,10 @@ const ProgressComp = ({ deptId }) => {
   const filteredResultsList = React.useMemo(() => {
     return (progressData || []).filter((record) => {
       // 1. Global search (userName, email, phone, testTitle)
-      const name = (record?.studentData?.["Full Name"] || "").toLowerCase();
-      const email = (record?.studentData?.Email || "").toLowerCase();
-      const phone = (record?.studentData?.["Phone Number"] || "").toLowerCase();
-      const testTitle = (record?.testDetails?.title || "").toLowerCase();
+      const name = String(record?.studentData?.["Full Name"] || "").toLowerCase();
+      const email = String(record?.studentData?.Email || "").toLowerCase();
+      const phone = String(record?.studentData?.["Phone Number"] || "").toLowerCase();
+      const testTitle = String(record?.testDetails?.title || "").toLowerCase();
       const query = globalSearchText.toLowerCase();
       const matchesSearch = globalSearchText
         ? name.includes(query) || email.includes(query) || phone.includes(query) || testTitle.includes(query)

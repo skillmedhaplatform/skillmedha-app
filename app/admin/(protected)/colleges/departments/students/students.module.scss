@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/mixins.scss";
 
 .studentsContainer {
@@ -11,7 +12,7 @@
 
 .header {
   @include flexBox(row, center, space-between);
-  border-radius: 8px;
+  border-radius: $borderRadius;
   padding-top: 1rem;
   position: sticky;
   top: 0;
@@ -31,7 +32,7 @@
     font-size: 14px;
 
     strong {
-      color: #1890ff;
+      color: #1E69DA;
       font-size: 16px;
     }
   }
@@ -41,16 +42,16 @@
   @include flexBox(column, center, center);
   min-height: 400px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: $borderRadius;
+  box-shadow: $shadowSm;
 }
 
 .errorContainer {
   @include flexBox(column, center, center);
   padding: 60px 40px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: $borderRadius;
+  box-shadow: $shadowSm;
 
   p {
     color: #ff4d4f;
@@ -60,17 +61,17 @@
 }
 
 .tableWrapper {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: $borderRadius;
+  box-shadow: $shadowSm;
   overflow: hidden;
-  @include custom-scrollbar(#1890ff, #f0f0f0, 10px);
+  @include custom-scrollbar(#1E69DA, $gray100, 10px);
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 
   @media (max-width: 768px) {
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    border-radius: $borderRadius;
+    box-shadow: $shadowSm;
   }
 }
 
@@ -154,13 +155,13 @@
     }
 
     &::-webkit-scrollbar-track {
-      background: #f0f0f0;
-      border-radius: 10px;
+      background: $gray100;
+      border-radius: $borderRadiusLarge;
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #1890ff;
-      border-radius: 10px;
+      background: #1E69DA;
+      border-radius: $borderRadiusLarge;
 
       &:hover {
         background: #096dd9;
@@ -189,14 +190,14 @@
   background: #fafafa;
 
   &:hover {
-    background: #f0f0f0 !important;
+    background: $gray100 !important;
   }
 }
 .activeFilters {
   margin-bottom: 16px;
   padding: 12px;
   background: #f5f5f5;
-  border-radius: 8px;
+  border-radius: $borderRadius;
 }
 
 .paginationContainer {

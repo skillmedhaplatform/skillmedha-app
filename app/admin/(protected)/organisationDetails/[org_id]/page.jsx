@@ -351,7 +351,7 @@ const FeatureManagement = ({
       key: "resumebuilder",
       label: "Resume Builder",
       icon: <IdcardOutlined />,
-      color: "#1890ff",
+      color: "#1E69DA",
       description: "AI-powered resume creation",
     },
     {
@@ -403,7 +403,7 @@ const FeatureManagement = ({
       key: "jobassessments",
       label: "Job Assessment",
       icon: <FileTextOutlined />,
-      color: "#1890ff",
+      color: "#1E69DA",
       description: "Enable assessment for job applicants",
     },
     // Add more company-specific features here as needed
@@ -534,7 +534,7 @@ const OrganizationDetails = ({ institutionDetails, accreditationDetails }) => {
           <span className={styles.label}>Type:</span>
           <span
             className={styles.tag}
-            style={{ backgroundColor: "#e6f7ff", color: "#1890ff" }}
+            style={{ backgroundColor: "#e6f7ff", color: "#1E69DA" }}
           >
             {institutionDetails?.institutionType || "N/A"}
           </span>
@@ -594,7 +594,7 @@ const CompanyDetails = ({ organization }) => {
           <span className={styles.label}>Type:</span>
           <span
             className={styles.tag}
-            style={{ backgroundColor: "#e6f7ff", color: "#1890ff" }}
+            style={{ backgroundColor: "#e6f7ff", color: "#1E69DA" }}
           >
             {organization?.type || "N/A"}
           </span>
@@ -766,7 +766,7 @@ const KeyMetrics = ({
               className={styles.progressFill}
               style={{
                 width: `${activeStudentRate}%`,
-                backgroundColor: "#1890ff",
+                backgroundColor: "#1E69DA",
               }}
             />
           </div>
@@ -824,7 +824,7 @@ const CompanyKeyMetrics = ({ statistics, counts }) => {
               className={styles.progressFill}
               style={{
                 width: `${assessmentCompletionRate}`,
-                backgroundColor: "#1890ff",
+                backgroundColor: "#1E69DA",
               }}
             />
           </div>
@@ -1157,7 +1157,7 @@ const ColumnChart = ({ departmentData, onDepartmentClick }) => {
     dataLabels: {
       enabled: true,
       offsetY: -20,
-      style: { fontSize: "12px", colors: ["#1890ff"] },
+      style: { fontSize: "12px", colors: ["#1E69DA"] },
     },
     xaxis: {
       categories: topDepartments.map((dept) => dept.department),
@@ -1168,7 +1168,7 @@ const ColumnChart = ({ departmentData, onDepartmentClick }) => {
       },
     },
     yaxis: { title: { text: "Number of Students" } },
-    colors: ["#1890ff"],
+    colors: ["#1E69DA"],
     fill: {
       type: "gradient",
       gradient: {
@@ -1453,7 +1453,7 @@ const JobStatusChart = ({ jobsByStatus }) => {
       animations: { enabled: true, speed: 800 },
     },
     labels: jobsByStatus.map((item) => item._id || "Unknown"),
-    colors: ["#faad14", "#52c41a", "#ff4d4f", "#1890ff"],
+    colors: ["#faad14", "#52c41a", "#ff4d4f", "#1E69DA"],
     legend: { position: "bottom", fontSize: "12px" },
     plotOptions: {
       pie: {
@@ -1519,7 +1519,7 @@ const ApplicationsTrendChart = ({ recentApplications }) => {
     yaxis: {
       title: { text: "Applications" },
     },
-    colors: ["#1890ff"],
+    colors: ["#1E69DA"],
     fill: {
       type: "gradient",
       gradient: {
@@ -1610,7 +1610,7 @@ function DashboardPage() {
           title: "Total Jobs",
           value: stats?.counts?.jobs || 0,
           icon: <FileTextOutlined />,
-          color: "#1890ff",
+          color: "#1E69DA",
           trend: `${stats?.monthlyChangeRate?.jobs?.changeValue || 0} %`,
         },
         {
@@ -1656,7 +1656,7 @@ function DashboardPage() {
           title: "Total Students",
           value: stats?.counts?.students || 0,
           icon: <UserOutlined />,
-          color: "#1890ff",
+          color: "#1E69DA",
           trend: (stats?.monthlyChangeRate?.students?.changeValue || 0) + "%",
         },
         {

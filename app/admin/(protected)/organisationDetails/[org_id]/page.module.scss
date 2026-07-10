@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/mixins.scss";
 
 // ==================== GRID MIXINS ====================
@@ -134,7 +135,7 @@
     z-index: 9;
     width: 100%;
     padding: 0.75rem 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: $shadowSm;
 
     .headerLeft {
       @include flexBox(column, flex-start, flex-start, 0.25rem);
@@ -163,7 +164,7 @@
   .divider {
     width: 100%;
     height: 1px;
-    background-color: #f0f0f0;
+    background-color: $gray100;
     margin: 1rem 0;
   }
 
@@ -181,7 +182,7 @@
       @include flexBox(row, center, flex-start, 0.5rem);
 
       svg {
-        color: #1890ff;
+        color: #1E69DA;
         font-size: clamp(1.125rem, 2vw, 1.5rem);
       }
     }
@@ -196,10 +197,10 @@
 
     .statsCard {
       background: white;
-      border-radius: 12px;
+      border-radius: $borderRadiusLarge;
       padding: 1.25rem;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      box-shadow: $shadowSm;
       border-left: 4px solid;
       min-height: 140px;
       @include flexBox(column, flex-start, space-between, 1rem);
@@ -226,7 +227,7 @@
 
         .trend {
           padding: 0.25rem 0.75rem;
-          border-radius: 6px;
+          border-radius: $borderRadius;
           font-size: clamp(0.688rem, 1.2vw, 0.813rem);
           font-weight: 500;
           @include flexBox(row, center, center, 0.25rem);
@@ -260,22 +261,22 @@
     gap: 1.5rem;
     .detailCard {
       background: white;
-      border-radius: 12px;
+      border-radius: $borderRadiusLarge;
       padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      transition: all 0.3s ease;
+      box-shadow: $shadowSm;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       min-height: 280px;
       border: 1px solid rgba(190, 190, 190, 0.3);
 
       &:hover {
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        box-shadow: $shadowMd;
       }
 
       .cardTitle {
         @include flexBox(row, center, space-between, 0.75rem);
         margin-bottom: 1.25rem;
         padding-bottom: 0.75rem;
-        border-bottom: 1px solid #f0f0f0;
+        border-bottom: 1px solid $borderColor;
 
         h3 {
           @include flexBox(row, center, flex-start, 0.5rem);
@@ -286,7 +287,7 @@
 
           .icon {
             font-size: clamp(1.125rem, 2vw, 1.375rem);
-            color: #1890ff;
+            color: #1E69DA;
           }
         }
       }
@@ -315,7 +316,7 @@
 
           .tag {
             padding: 0.25rem 0.625rem;
-            border-radius: 6px;
+            border-radius: $borderRadius;
             font-size: clamp(0.688rem, 1.2vw, 0.813rem);
             font-weight: 500;
           }
@@ -348,13 +349,13 @@
           .progressBar {
             width: 100%;
             height: 10px;
-            background-color: #f0f0f0;
-            border-radius: 6px;
+            background-color: $gray100;
+            border-radius: $borderRadius;
             overflow: hidden;
 
             .progressFill {
               height: 100%;
-              border-radius: 6px;
+              border-radius: $borderRadius;
               transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             }
           }
@@ -397,13 +398,13 @@
           @include flexBox(row, center, space-between, 0.75rem);
           padding: 0.75rem 0.875rem;
           background: #fafafa;
-          border-radius: 8px;
-          transition: all 0.3s ease;
+          border-radius: $borderRadius;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           border: 1px solid rgba(0, 0, 0, 0.04);
           width: 100%;
 
           &:hover {
-            background: #f0f0f0;
+            background: $gray100;
             transform: translateX(4px);
             border-color: rgba(0, 0, 0, 0.08);
           }
@@ -418,7 +419,7 @@
         .featureIcon {
           width: clamp(32px, 3.5vw, 36px);
           height: clamp(32px, 3.5vw, 36px);
-          border-radius: 8px;
+          border-radius: $borderRadius;
           @include flexBox(row, center, center, 0);
           font-size: clamp(0.938rem, 1.6vw, 1.063rem);
           flex-shrink: 0;
@@ -462,9 +463,9 @@
 
   .jobCard {
     background: white;
-    border-radius: 12px;
+    border-radius: $borderRadiusLarge;
     padding: 1.25rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: $shadowSm;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     border: 1px solid rgba(190, 190, 190, 0.3);
@@ -474,14 +475,14 @@
     &:hover {
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
       transform: translateY(-4px);
-      border-color: #1890ff;
+      border-color: #1E69DA;
     }
 
     .jobCardHeader {
       @include flexBox(row, flex-start, space-between, 0.75rem);
       width: 100%;
       padding-bottom: 0.75rem;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid $borderColor;
 
       .jobTitle {
         font-size: clamp(1rem, 1.8vw, 1.125rem);
@@ -530,7 +531,7 @@
 
     .tpoProfileCard {
       background: white;
-      border-radius: 12px;
+      border-radius: $borderRadiusLarge;
       overflow: hidden;
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -613,8 +614,8 @@
               @include flexBox(row, center, center, 0.25rem);
               padding: 0.188rem 0.5rem;
               background: #f0f5ff;
-              color: #1890ff;
-              border-radius: 8px;
+              color: #1E69DA;
+              border-radius: $borderRadius;
               font-size: clamp(0.625rem, 1vw, 0.688rem);
               font-weight: 500;
               margin-top: 0.25rem;
@@ -634,13 +635,13 @@
             @include flexBox(row, center, flex-start, 0.625rem);
             padding: 0.625rem 0.75rem;
             background: #fafafa;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            border-radius: $borderRadius;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(0, 0, 0, 0.04);
             width: 100%;
 
             &:hover {
-              background: #f0f0f0;
+              background: $gray100;
               transform: translateX(3px);
               border-color: rgba(0, 0, 0, 0.08);
             }
@@ -690,7 +691,7 @@
         .tpoAwards {
           padding: 0.75rem;
           background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-          border-radius: 8px;
+          border-radius: $borderRadius;
           margin-top: 0.5rem;
           border: 1px solid rgba(253, 203, 110, 0.5);
 
@@ -727,14 +728,14 @@
 
       .chartCard {
         background: white;
-        border-radius: 12px;
+        border-radius: $borderRadiusLarge;
         padding: 1.25rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        transition: all 0.3s ease;
+        box-shadow: $shadowSm;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 1px solid rgba(190, 190, 190, 0.2);
 
         &:hover {
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+          box-shadow: $shadowMd;
         }
 
         .chartTitle {

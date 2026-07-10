@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 .container {
   width: 100%;
   min-height: 100vh;
@@ -61,7 +62,7 @@
   }
 
   :global(.ant-breadcrumb-link) {
-    color: #24A058 !important;
+    color: #1E69DA !important;
     display: flex !important;
     align-items: center !important;
     overflow: hidden !important; // Add this
@@ -75,7 +76,7 @@
 }
 
 .breadcrumbLink {
-  color: #24A058 !important;
+  color: #1E69DA !important;
   cursor: pointer;
   transition: color 0.3s;
   font-size: 20px;
@@ -110,16 +111,16 @@
     padding: 8px 16px;
 
     &:hover {
-      color: #24A058;
+      color: #1E69DA;
     }
   }
 
   :global(.ant-tabs-tab-active) {
-    color: #24A058 !important;
+    color: #1E69DA !important;
   }
 
   :global(.ant-tabs-ink-bar) {
-    background-color: #24A058 !important;
+    background-color: #1E69DA !important;
   }
 
   :global(.ant-tabs-tab-disabled) {
@@ -131,8 +132,8 @@
 .overviewContainer {
   padding: 20px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: $borderRadius;
+  box-shadow: $shadowSm;
   max-width: 100%;
 }
 
@@ -169,17 +170,17 @@
   :global(.ant-picker) {
     min-width: 200px;
     height: 40px;
-    border-radius: 6px;
+    border-radius: $borderRadius;
 
     &:hover,
     &:focus {
-      border-color: #24A058;
+      border-color: #1E69DA;
       box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
     }
   }
 
   :global(.ant-picker-focused) {
-    border-color: #24A058;
+    border-color: #1E69DA;
     box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
   }
 }
@@ -187,15 +188,15 @@
 .overviewTextEditor {
   width: 90%;
   min-height: 200px;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   padding: 12px;
 
   &:hover {
-    border-color: #24A058;
+    border-color: #1E69DA;
   }
 
   &:focus-within {
-    border-color: #24A058;
+    border-color: #1E69DA;
     box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
   }
 }
@@ -210,12 +211,12 @@
   :global(.ant-upload-btn) {
     height: 120px;
     border: 2px dashed #d9d9d9;
-    border-radius: 6px;
+    border-radius: $borderRadius;
     background: #fafafa;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
-      border-color: #24A058;
+      border-color: #1E69DA;
       background: rgba(37, 163, 166, 0.02);
     }
   }
@@ -226,8 +227,8 @@
 
   :global(.ant-upload-list-item) {
     padding: 8px 12px;
-    border: 1px solid #f0f0f0;
-    border-radius: 4px;
+    border: 1px solid $borderColor;
+    border-radius: $borderRadius;
     margin-bottom: 8px;
 
     &:hover {
@@ -245,7 +246,7 @@
       color: #666;
 
       &:hover {
-        color: #24A058;
+        color: #1E69DA;
       }
     }
   }
@@ -253,23 +254,23 @@
 
 .overviewUploadButton {
   height: 40px;
-  border-radius: 6px;
-  border: 1px solid #24A058;
+  border-radius: $borderRadius;
+  border: 1px solid #1E69DA;
   background: #fff;
-  color: #24A058;
+  color: #1E69DA;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: #24A058;
+    background: #1E69DA;
     color: #fff;
-    border-color: #24A058;
+    border-color: #1E69DA;
   }
 
   &:focus {
-    background: #24A058;
+    background: #1E69DA;
     color: #fff;
-    border-color: #24A058;
+    border-color: #1E69DA;
     box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
   }
 
@@ -285,30 +286,30 @@
   gap: 16px;
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid $borderColor;
 }
 
 .overviewSaveButton {
   height: 44px;
   padding: 0 32px;
-  background: #24A058;
+  background: #1E69DA;
   border: none;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   color: #fff;
   font-weight: 600;
   font-size: 16px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(37, 163, 166, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: $shadowSm;
 
   &:hover {
     background: #1e8287;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(37, 163, 166, 0.3);
+    box-shadow: $shadowSm;
   }
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(37, 163, 166, 0.2);
+    box-shadow: $shadowSm;
   }
 
   &:focus {
@@ -338,14 +339,14 @@
   padding: 40px;
 
   .ant-spin {
-    color: #24A058;
+    color: #1E69DA;
   }
 }
 
 .overviewErrorMessage {
   background: #fff2f0;
   border: 1px solid #ffccc7;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   padding: 12px 16px;
   color: #ff4d4f;
   margin-bottom: 16px;
@@ -358,7 +359,7 @@
 .overviewSuccessMessage {
   background: #f6ffed;
   border: 1px solid #b7eb8f;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   padding: 12px 16px;
   color: #52c41a;
   margin-bottom: 16px;
@@ -423,14 +424,14 @@
 // Focus states for accessibility
 .overviewContainer {
   *:focus {
-    outline: 2px solid #24A058;
+    outline: 2px solid #1E69DA;
     outline-offset: 2px;
   }
 }
 
 // Animation for smooth transitions
 .overviewFormRow {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     transform: translateY(-1px);

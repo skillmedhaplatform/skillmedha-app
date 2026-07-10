@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -26,13 +27,13 @@
   color: #dc2626;
   background-color: #fee2e2;
   border: 1px solid #fecaca;
-  border-radius: 8px;
+  border-radius: $borderRadius;
 }
 
 .jobCard {
   background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: $borderRadiusLarge;
+  box-shadow: $shadowSm;
   padding: 2rem;
   margin-bottom: 2rem;
 }
@@ -136,7 +137,7 @@
   gap: 0.75rem;
   padding: 0.5rem;
   background-color: #f9fafb;
-  border-radius: 6px;
+  border-radius: $borderRadius;
 }
 
 .bulletPoint {
@@ -151,7 +152,7 @@
   color: #4b5563;
   background-color: #e5e7eb;
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  border-radius: $borderRadius;
 }
 
 .courseList,
@@ -165,7 +166,7 @@
 .eligibilityCard {
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   padding: 1rem;
 }
 
@@ -196,7 +197,7 @@
   gap: 0.75rem;
   background-color: #f9fafb;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: $borderRadius;
 }
 
 // Responsive Design

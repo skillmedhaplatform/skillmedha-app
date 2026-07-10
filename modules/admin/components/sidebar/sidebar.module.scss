@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 @use "../../../../utils/universalUtils/colors.module.scss" as *;
 
 .sideBarContainer {
@@ -83,10 +84,10 @@
   /* Group root elements (items and submenus) in a single border box each */
   :global(.ant-menu-item),
   :global(.ant-menu-submenu) {
-    border-radius: 8px !important;
+    border-radius: $borderRadius !important;
     margin: 4px 12px 8px 12px !important;
     width: calc(100% - 24px) !important;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: .8px solid transparent !important;
     overflow: hidden !important;
     font-size: 1rem !important;
@@ -100,7 +101,7 @@
     }
 
     :global(.ant-menu-title-content) {
-      border-radius: 8px !important;
+      border-radius: $borderRadius !important;
       padding: 6px 12px;
       margin-left: 8px;
       display: inline-flex;
@@ -120,7 +121,7 @@
       -webkit-background-clip: text !important;
       -webkit-text-fill-color: transparent !important;
       background-clip: text !important;
-      border-radius: 8px !important;
+      border-radius: $borderRadius !important;
       padding: 8px 12px !important;
       margin-left: 8px !important;
       display: inline-flex;
@@ -210,7 +211,7 @@
     :global(.ant-menu-title-content) {
       background-color: #1D69DA !important;
       color: #ffffff !important;
-      border-radius: 8px !important;
+      border-radius: $borderRadius !important;
       padding: 8px 12px !important;
       margin-left: 8px !important;
       display: inline-flex;
@@ -276,7 +277,7 @@
 
   &::-webkit-scrollbar-thumb {
     background-color: #1E69DA;
-    border-radius: 6px;
+    border-radius: $borderRadius;
   }
 
   scrollbar-width: thin;
