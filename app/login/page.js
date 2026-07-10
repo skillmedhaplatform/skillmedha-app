@@ -147,6 +147,7 @@ function LoginForm() {
                   id="email"
                   type="email"
                   value={email}
+                  autoComplete="one-time-code"
                   onChange={(e) => setEmail(e.target.value)}
                   className="peer w-full px-5 pt-7 pb-3 rounded-2xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition-all text-[15px] text-gray-900 placeholder-transparent font-medium"
                   placeholder="Enter your email"
@@ -161,6 +162,7 @@ function LoginForm() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
+                  autoComplete="one-time-code"
                   onChange={(e) => setPassword(e.target.value)}
                   className="peer w-full px-5 pt-7 pb-3 rounded-2xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition-all text-[15px] text-gray-900 placeholder-transparent font-medium pr-12"
                   placeholder="Password"
