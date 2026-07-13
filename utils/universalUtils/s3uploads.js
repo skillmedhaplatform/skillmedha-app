@@ -20,7 +20,7 @@ export const handleS3Upload = async ({
   try {
     const token = GetToken();
     const res = await axios.post(
-      `${restUrl}/uploadtos3?bucketName=${bucketName}`,
+      `${restUrl}/uploadToS3?bucketName=${bucketName}`,
       formData,
       {
         headers: {
