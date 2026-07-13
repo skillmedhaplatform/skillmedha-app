@@ -13,7 +13,9 @@ import {
   Tag,
   App,
   Alert,
+  Breadcrumb,
 } from "antd";
+import { FaCaretRight } from "react-icons/fa6";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
@@ -1249,10 +1251,61 @@ const CreateCourse = ({ type = "course" }) => {
     return null;
   };
 
+  const isCreate = params.createInternship?.startsWith("new");
+
+  const getLibraryLabel = () => {
+    switch (type) {
+      case "internship":
+        return "Internship Library";
+      case "course":
+        return "Course Library";
+      case "workshops":
+        return "Workshops";
+      default:
+        return `${capitalize(type)} Library`;
+    }
+  };
+
+  const getLibraryLink = () => {
+    return `/admin/${type}`;
+  };
+
+  const breadcrumbItems = [
+    {
+      title: (
+        <span
+          onClick={() => nav.push(getLibraryLink())}
+          className={internStyles.breadcrumbLink}
+        >
+          {getLibraryLabel()}
+        </span>
+      ),
+      key: "library",
+    },
+    {
+      title: (
+        <span className={internStyles.breadcrumbCurrent}>
+          {isCreate 
+            ? `Create ${typeCapitalized}` 
+            : courseBasic.title || `Edit ${typeCapitalized}`}
+        </span>
+      ),
+      key: "current",
+    },
+  ];
+
   return (
     <div className={internStyles.container}>
       <div className={internStyles.titleContainer}>
-        <div className={internStyles.title}>{typeCapitalized} Details</div>
+        <div className={internStyles.breadcrumbContainer}>
+          <Breadcrumb
+            items={breadcrumbItems}
+            separator={
+              <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />
+            }
+            className={internStyles.breadcrumb}
+          />
+        </div>
       </div>
 
       <div className={internStyles.body}>

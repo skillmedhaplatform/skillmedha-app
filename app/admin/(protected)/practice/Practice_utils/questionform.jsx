@@ -1,4 +1,4 @@
-﻿// QuestionEditorUI.jsx
+// QuestionEditorUI.jsx
 "use client";
 import React, { useEffect, useState } from "react";
 import { Button, InputNumber, message } from "antd";
@@ -11,6 +11,7 @@ import AudioUpload from "./audio";
 import VideoUpload from "./video";
 import { restUrl } from "@/config/urls";
 import { useParams, usePathname, useRouter } from "next/navigation";
+import PracticeBreadcrumbs from "@/app/admin/(protected)/practice/Practice_utils/practiceBreadcrumbs";
 import { useSelector, useDispatch } from "react-redux";
 import {
   createQuestion,
@@ -337,6 +338,9 @@ const QuestionEditorUI = () => {
 
   return (
     <div className={QuestionStyles.QuestionContainer}>
+      <div style={{ marginBottom: '16px' }}>
+        <PracticeBreadcrumbs />
+      </div>
       <div className={QuestionStyles.QuestionHeader}>
         <div>{!isNewQuestion ? "Update Question" : "Create New Question"}</div>
         <div style={{ display: "flex", gap: "12px" }}>
@@ -353,6 +357,7 @@ const QuestionEditorUI = () => {
         className={QuestionStyles.QuestionBody}
         style={{ paddingBottom: "5rem" }}
       >
+        <div className={QuestionStyles.sectionTitle}>Question Specifications</div>
         {/* Type */}
         <div className={QuestionStyles.QuestionBodyFlexHead}>
           <div
@@ -373,6 +378,9 @@ const QuestionEditorUI = () => {
             ))}
           </div>
         </div>
+
+        <div className={QuestionStyles.divider} />
+        <div className={QuestionStyles.sectionTitle}>Question Content & Options</div>
 
         {/* Audio */}
         {questionType === QUESTION_TYPES.AUDIO && (

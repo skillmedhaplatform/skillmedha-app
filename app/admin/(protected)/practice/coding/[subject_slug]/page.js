@@ -15,6 +15,7 @@ import {
   Row,
   Col,
   Tooltip,
+  Dropdown
 } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,17 +23,24 @@ import TextEditor from "@/modules/admin/utils/editor";
 import QuestionStyles from "../../Practice_utils/questionstyles.module.scss";
 import styles from "./page.module.scss";
 import {
+  CodeOutlined,
+  CloudUploadOutlined,
   EditOutlined,
   DeleteOutlined,
-  EyeOutlined,
+  PlusOutlined,
+  DatabaseOutlined,
   CaretRightOutlined,
-  CodeOutlined,
+  SettingOutlined,
+  TagOutlined,
   CheckCircleOutlined,
   InfoCircleOutlined,
-  CloudUploadOutlined,
+  CopyOutlined,
 } from "@ant-design/icons";
+import { HiDotsVertical } from "react-icons/hi";
+import qStyles from "@/modules/testportal_admin/components/reusable-comps/questionBank/questionCard.module.scss";
+import listStyles from "@/app/admin/(protected)/practice/Practice_utils/listStyles.module.scss";
+import PracticeBreadcrumbs from "@/app/admin/(protected)/practice/Practice_utils/practiceBreadcrumbs";
 import BulkUploadModal from "../../Practice_utils/BulkUploadModal";
-import PracticeBreadcrumbs from "../../Practice_utils/practiceBreadcrumbs";
 import {
   createQuestion,
   fetchQuestions,
@@ -51,6 +59,15 @@ export default function Coding() {
   const [open, setOpen] = useState(false);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activePanel, setActivePanel] = useState([]);
+
+  const togglePanel = (id) => {
+    if (activePanel.includes(id)) {
+      setActivePanel(activePanel.filter(x => x !== id));
+    } else {
+      setActivePanel([...activePanel, id]);
+    }
+  };
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [question, setQuestion] = useState("");
   const [explanation, setExplanation] = useState("");
@@ -59,7 +76,7 @@ export default function Coding() {
     { _id: Date.now(), input: "", expectedOutput: "", explanation: "" },
   ]);
 
-  const singleTopic = useSelector((s) => s.practice.questions);
+  const singleTopic = useSelector((s) => s.adminPractice.questions);
   const { subject_slug } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -190,7 +207,7 @@ export default function Coding() {
     } catch (error) {
       message.error(
         error?.message ||
-          `Failed to ${editingQuestion ? "update" : "save"} question`
+        `Failed to ${editingQuestion ? "update" : "save"} question`
       );
     } finally {
       setSaving(false);
@@ -216,228 +233,130 @@ export default function Coding() {
     );
   };
 
-  const generateCollapseItems = () =>
-    codingQuestions.map((questionData, index) => ({
-      key: questionData._id,
-      label: (
-        <div className={styles.collapseHeader}>
-          <div className={styles.collapseHeaderLeft}>
-            <CodeOutlined className={styles.iconBlue} />
-            <Text strong>Question {index + 1}</Text>
-            <Tag color="blue" className={styles.ml12}>
-              {questionData.scoreSettings?.pointsForCorrectAns || 0} pts
-            </Tag>
-            <Tag color="green" className={styles.ml8}>
-              {questionData.questionContent?.testCases?.length || 0} test cases
-            </Tag>
-          </div>
-          <Space size="small" onClick={(e) => e.stopPropagation()}>
-            <Tooltip
-              title={
-                !canAccess(PERMISSION_VALUES.EDIT)
-                  ? getPermissionMessage(PERMISSION_VALUES.EDIT)
-                  : ""
-              }
-            >
-              <>
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  size="small"
-                  className={styles.btnEdit}
-                  onClick={() => handleEdit(questionData)}
-                  disabled={!canAccess(PERMISSION_VALUES?.EDIT)}
-                >
-                  Edit
-                </Button>
-              </>
-            </Tooltip>
-            <Tooltip
-              title={
-                !canAccess(PERMISSION_VALUES.DELETE)
-                  ? getPermissionMessage(PERMISSION_VALUES.DELETE)
-                  : ""
-              }
-            >
-              <span>
-                <Popconfirm
-                  title="Delete Question"
-                  description="Are you sure you want to delete this question?"
-                  onConfirm={() => handleDelete(questionData._id)}
-                  okText="Yes"
-                  cancelText="No"
-                  okType="danger"
-                  disabled={!canAccess(PERMISSION_VALUES.DELETE)}
-                >
-                  <Button
-                    type="text"
-                    icon={<DeleteOutlined />}
-                    size="small"
-                    className={styles.btnDelete}
-                    disabled={!canAccess(PERMISSION_VALUES.DELETE)}
-                  >
-                    Delete
-                  </Button>
-                </Popconfirm>
+  const renderQuestions = () =>
+    codingQuestions.map((questionData, index) => {
+      const isExpanded = activePanel.includes(questionData._id);
+      const score = questionData.scoreSettings?.pointsForCorrectAns || 0;
+      return (
+        <div key={questionData._id}>
+          <div className={listStyles.questionRow}>
+            <div className={listStyles.rowLeft}>
+              <CaretRightOutlined 
+                className={`${listStyles.expandIcon} ${isExpanded ? listStyles.expanded : ""}`}
+                onClick={(e) => { e.stopPropagation(); togglePanel(questionData._id); }}
+              />
+              <span className={listStyles.qNumber}>{index + 1}</span>
+              <span className={listStyles.qText}>
+                {parseIfJson(questionData.questionContent?.question)?.replace(/<[^>]*>?/gm, '')?.substring(0, 50)}...
               </span>
-            </Tooltip>
-          </Space>
-        </div>
-      ),
-      children: (
-        <div className={styles.collapseContent}>
-          <Card size="small" title="Question" className={styles.mb16}>
-            <div
-              className={styles.contentBox}
-              dangerouslySetInnerHTML={{
-                __html:
-                  parseIfJson(questionData.questionContent?.question) ||
-                  "No question content",
-              }}
-            />
-          </Card>
+            </div>
+            
+            <div className={listStyles.rowRight}>
+              <div className={listStyles.badges}>
+                <span className={`${listStyles.badge} ${listStyles.pts}`}>{score} pts</span>
+                <span className={`${listStyles.badge} ${listStyles.type}`}>Coding</span>
+                <span className={`${listStyles.badge} ${listStyles.difficulty}`}>Medium</span>
+              </div>
+              
+              <div className={listStyles.actionIcons}>
+                <Tooltip title={!canAccess(PERMISSION_VALUES.EDIT) ? getPermissionMessage(PERMISSION_VALUES.EDIT) : ""}>
+                  <button className={listStyles.edit} disabled={!canAccess(PERMISSION_VALUES.EDIT)} onClick={() => handleEdit(questionData)}>
+                    <EditOutlined />
+                  </button>
+                </Tooltip>
+                <Tooltip title="Copy (Coming soon)">
+                  <button className={listStyles.copy}><CopyOutlined /></button>
+                </Tooltip>
+                <Tooltip title={!canAccess(PERMISSION_VALUES.DELETE) ? getPermissionMessage(PERMISSION_VALUES.DELETE) : ""}>
+                  <Popconfirm title="Delete?" onConfirm={() => handleDelete(questionData._id)} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
+                    <button className={listStyles.delete} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
+                      <DeleteOutlined />
+                    </button>
+                  </Popconfirm>
+                </Tooltip>
+              </div>
+            </div>
+          </div>
+          
+          {isExpanded && (
+            <div style={{ padding: '16px 40px', background: '#fff', border: '1px solid #E2E8F0', borderTop: 'none', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
+              <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionData.questionContent?.question) }} style={{ marginBottom: 16 }} />
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {questionData.questionContent?.testCases?.map((testCase, i) => (
+                  <div key={testCase._id} style={{ background: '#F8FAFC', padding: 12, borderRadius: 6, border: '1px solid #E2E8F0' }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8, color: '#475569' }}>Test Case {i + 1}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#334155' }}>
+                      <div style={{ marginBottom: 4 }}><strong>Input:</strong> {parseIfJson(testCase.input)}</div>
+                      <div><strong>Output:</strong> {parseIfJson(testCase.expectedOutput)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-          <Card size="small" title="Test Cases" className={styles.mb16}>
-            <Row gutter={[16, 16]}>
-              {(questionData.questionContent?.testCases || []).map(
-                (testCase, tcIndex) => (
-                  <Col xs={24} lg={12} key={testCase._id || tcIndex}>
-                    <Card
-                      size="small"
-                      title={`Test Case ${tcIndex + 1}`}
-                      className={styles.h100}
-                    >
-                      <div className={styles.mb12}>
-                        <Text strong className={styles.textBlue}>
-                          Input:
-                        </Text>
-                        <div
-                          className={styles.inputBox}
-                          dangerouslySetInnerHTML={{
-                            __html: parseIfJson(testCase.input) || "No input",
-                          }}
-                        />
-                      </div>
-
-                      <div className={styles.mb12}>
-                        <Text strong className={styles.textGreen}>
-                          Expected Output:
-                        </Text>
-                        <div
-                          className={styles.outputBox}
-                          dangerouslySetInnerHTML={{
-                            __html:
-                              parseIfJson(testCase.expectedOutput) ||
-                              "No expected output",
-                          }}
-                        />
-                      </div>
-
-                      {testCase.explanation && (
-                        <div>
-                          <Text strong className={styles.textYellow}>
-                            Explanation:
-                          </Text>
-                          <div
-                            className={styles.explanationBox}
-                            dangerouslySetInnerHTML={{
-                              __html:
-                                parseIfJson(testCase.explanation) ||
-                                "No explanation",
-                            }}
-                          />
-                        </div>
-                      )}
-                    </Card>
-                  </Col>
-                )
+              {questionData.answer?.explanation && (
+                <div style={{ marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '1rem' }}>
+                  <strong>Explanation:</strong>
+                  <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionData.answer?.explanation) }} />
+                </div>
               )}
-            </Row>
-          </Card>
-
-          <Card size="small" title="Answer Explanation" className={styles.mb16}>
-            <div
-              className={styles.answerBox}
-              dangerouslySetInnerHTML={{
-                __html:
-                  parseIfJson(questionData.answer?.explanation) ||
-                  "No explanation provided",
-              }}
-            />
-          </Card>
+            </div>
+          )}
         </div>
-      ),
-    }));
+      );
+    });
 
   return (
-    <div>
-      <div className={styles.headerBar}>
-        <PracticeBreadcrumbs />
-        <Tooltip
-          title={
-            !canAccess(PERMISSION_VALUES?.CREATE)
-              ? "You don't have permission to create"
-              : ""
-          }
-        >
-          <>
-            <Button
-              type="primary"
-              onClick={handleAdd}
-              style={{ width: "12rem" }}
-              disabled={!canAccess(PERMISSION_VALUES?.CREATE)}
+    <div className={listStyles.pageContainer} style={{ padding: '24px' }}>
+      <div className={listStyles.topActionRow}>
+        <div className={listStyles.actionsLeft}>
+          <PracticeBreadcrumbs />
+        </div>
+        <div className={listStyles.actionsRight}>
+          <Tooltip title={!canAccess(PERMISSION_VALUES.CREATE) ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""}>
+            <button
+              className={listStyles.btnPrimary}
+              onClick={() => {
+                if (canAccess(PERMISSION_VALUES?.CREATE)) handleAdd();
+                else message.error("You don't have permission to create");
+              }}
             >
-              + Add Coding Question
-            </Button>
-          </>
-        </Tooltip>
-        
-        <Tooltip
-          title={
-            !canAccess(PERMISSION_VALUES?.CREATE)
-              ? "You don't have permission to create"
-              : ""
-          }
-        >
-          <Button
-            type="default"
-            icon={<CloudUploadOutlined />}
-            onClick={() => setBulkModalOpen(true)}
-            style={{ marginLeft: "1rem" }}
-            disabled={!canAccess(PERMISSION_VALUES?.CREATE)}
-          >
-            Bulk Upload
-          </Button>
-        </Tooltip>
+              + Create Question
+            </button>
+          </Tooltip>
+
+          <Tooltip title={!canAccess(PERMISSION_VALUES.CREATE) ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""}>
+            <button
+              className={listStyles.btnSecondary}
+              onClick={() => {
+                if (canAccess(PERMISSION_VALUES?.CREATE)) setBulkModalOpen(true);
+                else message.error("You don't have permission to create");
+              }}
+            >
+              <CloudUploadOutlined /> Bulk Upload
+            </button>
+          </Tooltip>
+        </div>
       </div>
 
-      <BulkUploadModal 
+
+
+      <BulkUploadModal
         open={bulkModalOpen}
         onCancel={() => setBulkModalOpen(false)}
         subjectId={subject_slug}
         allowedType={CODING_TYPE}
       />
 
-      <Divider className={styles.divider} />
-      <div className={styles.scrollContainer}>
+      <div style={{ marginTop: "1rem" }}>
         {codingQuestions.length > 0 ? (
-          <Collapse
-            items={generateCollapseItems()}
-            expandIcon={({ isActive }) => (
-              <CaretRightOutlined rotate={isActive ? 90 : 0} />
-            )}
-            className={styles.collapseRoot}
-            expandIconPosition="start"
-          />
+          <div className={listStyles.questionList}>
+            {renderQuestions()}
+          </div>
         ) : (
-          <div className={styles.emptyBox}>
-            <CodeOutlined className={styles.emptyIcon} />
-            <div className={styles.emptyTitle}>
-              No coding questions added yet
-            </div>
-            <div className={styles.emptySubtitle}>
-              Click "Add Coding Question" to create your first question
-            </div>
+          <div style={{ textAlign: 'center', padding: '3rem', background: '#fff', borderRadius: 8, border: '1px solid #E2E8F0' }}>
+            <CodeOutlined style={{ fontSize: '2rem', marginBottom: '1rem', color: '#cbd5e1' }} />
+            <p style={{ color: '#64748B' }}>No coding questions added yet</p>
           </div>
         )}
       </div>
@@ -463,7 +382,11 @@ export default function Coding() {
         centered
       >
         <div className={QuestionStyles.QuestionContainer}>
+          <div style={{ marginBottom: '16px' }}>
+            <PracticeBreadcrumbs />
+          </div>
           <div className={`${QuestionStyles.QuestionBody} ${styles.pb5rem}`}>
+            <div className={QuestionStyles.sectionTitle}>Question Specifications</div>
             {/* Score */}
             <div className={QuestionStyles.QuestionBodyFlex}>
               <div className={QuestionStyles.title}>Score*</div>
@@ -478,6 +401,9 @@ export default function Coding() {
                 />
               </div>
             </div>
+
+            <div className={QuestionStyles.divider} />
+            <div className={QuestionStyles.sectionTitle}>Question Content & Options</div>
 
             {/* Question */}
             <div className={QuestionStyles.QuestionBodyFlex}>

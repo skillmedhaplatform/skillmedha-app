@@ -6,17 +6,18 @@ import {
   DeleteOutlined,
   EditOutlined,
   FolderOpenOutlined,
+  InboxOutlined,
 } from "@ant-design/icons";
 import { useRouter, useParams } from "next/navigation";
 import {
   Button,
-  Table,
   Input,
   Space,
   message,
   Popconfirm,
   Divider,
   Tooltip,
+  Select,
 } from "antd";
 import {
   fetchSubtopicsByTopic,
@@ -29,6 +30,28 @@ import {
 import PracticeBreadcrumbs from "@/app/admin/(protected)/practice/Practice_utils/practiceBreadcrumbs";
 import { usePermissions, PERMISSION_VALUES } from "@/hooks/usepermission";
 
+// Avatar color palette
+const AVATAR_COLORS = [
+  "#d946ef", "#0ea5e9", "#8b5cf6", "#25a667",
+  "#1E69DA", "#593cc1", "#c5782b", "#e53e3e",
+];
+
+const getAvatarColor = (name) => {
+  if (!name) return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+};
+
+const getInitials = (name) => {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+};
+
 const SubtopicManager = () => {
   const nav = useRouter();
   const params = useParams();
@@ -37,34 +60,38 @@ const SubtopicManager = () => {
   const { canAccess, getPermissionMessage } = usePermissions();
 
   // Redux state
-  const { subtopics, status, error } = useSelector((state) => state.adminPractice);
+  const { subtopics, topics, subjects, status, error } = useSelector((state) => state.adminPractice);
   const loading = status === "loading";
 
   // Local states
   const [editingId, setEditingId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [tempSubtopics, setTempSubtopics] = useState([]); // For new subtopics being added
-  const [editingValues, setEditingValues] = useState({}); // For editing existing subtopics
+  const [tempSubtopics, setTempSubtopics] = useState([]);
+  const [editingValues, setEditingValues] = useState({});
+
+  // Get current breadcrumb context
+  const currentSubject = subjects.find((s) => s._id === subject_slug);
+  const subjectTitle = currentSubject ? currentSubject.title : "Subjects";
+  const currentTopic = topics.find((t) => t._id === topic_slug);
+  const topicTitle = currentTopic ? currentTopic.title : "Topics";
 
   // Fetch subtopics for this topic on component mount
   useEffect(() => {
     if (topic_slug) {
-      const fetchData = async () => {
-        try {
-          await Promise.all([
-            dispatch(fetchSubtopicsByTopic(topic_slug)).unwrap(),
-            dispatch(fetchTopicsBySubject(subject_slug)).unwrap(),
-            dispatch(fetchSubjectsByType("nontechnical")).unwrap(),
-          ]);
-        } catch (error) {
-          console.error("Failed to fetch data:", error);
-        }
-      };
-
-      fetchData();
+      dispatch(fetchSubtopicsByTopic(topic_slug));
     }
-  }, [dispatch, topic_slug, subject_slug]);
+  }, [dispatch, topic_slug]);
+
+  // Ensure subjects and topics are loaded for breadcrumbs
+  useEffect(() => {
+    if (subjects.length === 0) {
+      dispatch(fetchSubjectsByType("nontechnical"));
+    }
+    if (topics.length === 0 && subject_slug) {
+      dispatch(fetchTopicsBySubject(subject_slug));
+    }
+  }, [dispatch, subjects.length, topics.length, subject_slug]);
 
   // Handle errors
   useEffect(() => {
@@ -83,15 +110,12 @@ const SubtopicManager = () => {
     const newSubtopic = {
       _id: tempId,
       title: "",
-      subjectId: subject_slug,
-      topicId: topic_slug,
+      topic: topic_slug,
     };
 
-    // Add to temporary subtopics array
     setTempSubtopics((prev) => [...prev, newSubtopic]);
     setEditingId(tempId);
 
-    // Navigate to last page to show the new subtopic
     const totalSubtopics = subtopics.length + tempSubtopics.length + 1;
     const totalPages = Math.ceil(totalSubtopics / pageSize);
     setCurrentPage(totalPages);
@@ -103,14 +127,20 @@ const SubtopicManager = () => {
       let subtopic;
       let titleValue;
 
+      if (isNewSubtopic && !canAccess(PERMISSION_VALUES.CREATE)) {
+        message.info(getPermissionMessage(PERMISSION_VALUES.CREATE));
+        return;
+      }
+      if (!isNewSubtopic && !canAccess(PERMISSION_VALUES.EDIT)) {
+        message.info(getPermissionMessage(PERMISSION_VALUES.EDIT));
+        return;
+      }
+
       if (isNewSubtopic) {
-        // Find subtopic in temporary subtopics
-        subtopic = tempSubtopics.find((st) => st._id === id);
+        subtopic = tempSubtopics.find((s) => s._id === id);
         titleValue = subtopic?.title;
       } else {
-        // For existing subtopics, get the edited value or original value
-        titleValue =
-          editingValues[id] || subtopics.find((st) => st._id === id)?.title;
+        titleValue = editingValues[id] || subtopics.find((s) => s._id === id)?.title;
       }
 
       if (!titleValue?.trim()) {
@@ -119,20 +149,16 @@ const SubtopicManager = () => {
       }
 
       if (isNewSubtopic) {
-        // Create new subtopic
         const subtopicData = {
           title: titleValue.trim(),
-          subjectId: subject_slug,
           topicId: topic_slug,
         };
 
         await dispatch(createSubtopic(subtopicData)).unwrap();
         message.success("Subtopic created successfully");
 
-        // Remove from temporary subtopics
-        setTempSubtopics((prev) => prev.filter((st) => st._id !== id));
+        setTempSubtopics((prev) => prev.filter((s) => s._id !== id));
       } else {
-        // Update existing subtopic
         const updateData = {
           title: titleValue.trim(),
         };
@@ -145,7 +171,6 @@ const SubtopicManager = () => {
         ).unwrap();
         message.success("Subtopic updated successfully");
 
-        // Clear editing value
         setEditingValues((prev) => {
           const newValues = { ...prev };
           delete newValues[id];
@@ -161,11 +186,14 @@ const SubtopicManager = () => {
   };
 
   const handleDelete = async (subtopic) => {
+    if (!canAccess(PERMISSION_VALUES.DELETE)) {
+      message.info(getPermissionMessage(PERMISSION_VALUES.DELETE));
+      return;
+    }
     try {
       await dispatch(deleteSubtopic(subtopic._id)).unwrap();
       message.success("Subtopic deleted successfully");
 
-      // Adjust pagination if needed
       const totalPages = Math.ceil((subtopics.length - 1) / pageSize);
       if (currentPage > totalPages && totalPages > 0) {
         setCurrentPage(totalPages);
@@ -182,22 +210,18 @@ const SubtopicManager = () => {
       return;
     }
 
-    // Don't allow opening temp subtopics
     if (subtopic._id.startsWith("temp-")) {
       message.warning("Please save the subtopic first");
       return;
     }
-    nav.push(
-      `/admin/practice/nontechnical/${subject_slug}/${topic_slug}/${subtopic._id}`
-    );
+
+    nav.push(`/admin/practice/nontechnical/${subject_slug}/${topic_slug}/${subtopic._id}`);
   };
 
   const isEditing = (record) => record._id === editingId;
 
   const edit = (record) => {
     setEditingId(record._id);
-
-    // For existing subtopics, initialize the editing value
     if (!record._id.startsWith("temp-")) {
       setEditingValues((prev) => ({
         ...prev,
@@ -207,11 +231,9 @@ const SubtopicManager = () => {
   };
 
   const cancel = () => {
-    // If it's a temporary subtopic being edited, remove it from temp subtopics
     if (editingId?.startsWith("temp-")) {
-      setTempSubtopics((prev) => prev.filter((st) => st._id !== editingId));
+      setTempSubtopics((prev) => prev.filter((s) => s._id !== editingId));
     } else {
-      // For existing subtopics, clear editing value
       setEditingValues((prev) => {
         const newValues = { ...prev };
         delete newValues[editingId];
@@ -225,12 +247,10 @@ const SubtopicManager = () => {
     const isTemp = id.startsWith("temp-");
 
     if (isTemp) {
-      // Update temporary subtopic
       setTempSubtopics((prev) =>
-        prev.map((st) => (st._id === id ? { ...st, [field]: value } : st))
+        prev.map((s) => (s._id === id ? { ...s, [field]: value } : s))
       );
     } else {
-      // Update editing values for existing subtopics
       setEditingValues((prev) => ({
         ...prev,
         [id]: value,
@@ -238,12 +258,6 @@ const SubtopicManager = () => {
     }
   };
 
-  const handleTableChange = (pagination) => {
-    setCurrentPage(pagination.current);
-    setPageSize(pagination.pageSize);
-  };
-
-  // Get the display value for a subtopic (either editing value or original value)
   const getDisplayValue = (record) => {
     if (record._id.startsWith("temp-")) {
       return record.title || "";
@@ -253,239 +267,16 @@ const SubtopicManager = () => {
       : record.title;
   };
 
-  // Combine subtopics from Redux and temporary subtopics
   const allSubtopics = [...subtopics, ...tempSubtopics];
   const displaySubtopics = allSubtopics.filter(
     (subtopic) => subtopic && subtopic._id && subtopic.title !== undefined
   );
 
-  const columns = [
-    {
-      title: "Subtopic #",
-      dataIndex: "index",
-      width: 120,
-      render: (_, __, index) => {
-        const subtopicNumber = (currentPage - 1) * pageSize + index + 1;
-        return `Subtopic ${subtopicNumber}`;
-      },
-    },
-    {
-      title: "Title",
-      dataIndex: "title",
-      render: (text, record) => {
-        const editing = isEditing(record);
-        const displayValue = getDisplayValue(record);
-
-        return editing ? (
-          <Input
-            value={displayValue}
-            onChange={(e) =>
-              handleFieldChange(record._id, "title", e.target.value)
-            }
-            onPressEnter={() => handleSave(record._id)}
-            placeholder="Enter subtopic title…"
-            autoFocus
-            disabled={loading}
-            style={{ width: "100%" }}
-          />
-        ) : (
-          <span>{displayValue || "Untitled Subtopic"}</span>
-        );
-      },
-    },
-    {
-      title: "Open Subtopic",
-      width: 160,
-      render: (_, record) => (
-        <Button
-          size="small"
-          type="primary"
-          onClick={() => handleOpenSubtopic(record)}
-          disabled={
-            !record.title?.trim() || loading || record._id.startsWith("temp-")
-          }
-          icon={<FolderOpenOutlined />}
-        >
-          Open Subtopic
-        </Button>
-      ),
-    },
-    {
-      title: "Quick Edit",
-      width: 160,
-      render: (_, record) => {
-        const editing = isEditing(record);
-        const displayValue = getDisplayValue(record);
-
-        return editing ? (
-          <Space>
-            <Tooltip
-              title={() => {
-                const isNew = record._id?.startsWith?.("temp-");
-                const canSave = isNew
-                  ? canAccess(PERMISSION_VALUES.CREATE)
-                  : canAccess(PERMISSION_VALUES.EDIT);
-                return !canSave
-                  ? getPermissionMessage(
-                      isNew ? PERMISSION_VALUES.CREATE : PERMISSION_VALUES.EDIT
-                    )
-                  : "";
-              }}
-            >
-              <span>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => {
-                    const isNew = record._id?.startsWith?.("temp-");
-                    const canSave = isNew
-                      ? canAccess(PERMISSION_VALUES.CREATE)
-                      : canAccess(PERMISSION_VALUES.EDIT);
-                    if (!canSave) {
-                      message.info(
-                        getPermissionMessage(
-                          isNew
-                            ? PERMISSION_VALUES.CREATE
-                            : PERMISSION_VALUES.EDIT
-                        )
-                      );
-                      return;
-                    }
-                    handleSave(record._id);
-                  }}
-                  loading={loading}
-                  disabled={!displayValue?.trim() || loading}
-                >
-                  Save
-                </Button>
-              </span>
-            </Tooltip>
-            <Button size="small" onClick={cancel} disabled={loading}>
-              Cancel
-            </Button>
-          </Space>
-        ) : (
-          <Tooltip
-            title={
-              !canAccess(PERMISSION_VALUES.EDIT)
-                ? getPermissionMessage(PERMISSION_VALUES.EDIT)
-                : ""
-            }
-          >
-            <span>
-              <Button
-                size="small"
-                onClick={() => {
-                  if (!canAccess(PERMISSION_VALUES.EDIT)) {
-                    message.info(getPermissionMessage(PERMISSION_VALUES.EDIT));
-                    return;
-                  }
-                  edit(record);
-                }}
-                icon={<EditOutlined />}
-                disabled={loading || !canAccess(PERMISSION_VALUES.EDIT)}
-              >
-                Edit
-              </Button>
-            </span>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      title: "Remove",
-      width: 100,
-      render: (_, record) => {
-        const isTemp = record._id.startsWith("temp-");
-
-        if (isTemp) {
-          // For temporary subtopics, just show a cancel button
-          return (
-            <Button
-              size="small"
-              onClick={() => {
-                setTempSubtopics((prev) =>
-                  prev.filter((st) => st._id !== record._id)
-                );
-                if (editingId === record._id) {
-                  setEditingId("");
-                }
-              }}
-              icon={<DeleteOutlined />}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-          );
-        }
-
-        // For existing subtopics, show confirm dialog with permission checks
-        const canDelete = canAccess(PERMISSION_VALUES.DELETE);
-
-        return (
-          <Tooltip
-            title={
-              !canDelete ? getPermissionMessage(PERMISSION_VALUES.DELETE) : ""
-            }
-          >
-            <span>
-              <Popconfirm
-                title={
-                  !canDelete
-                    ? getPermissionMessage(PERMISSION_VALUES.DELETE)
-                    : "Are you sure you want to delete this subtopic?"
-                }
-                description={canDelete ? "This action cannot be undone." : ""}
-                okText="Delete"
-                cancelText="Cancel"
-                okButtonProps={{ danger: true, loading: loading }}
-                onConfirm={() => {
-                  if (!canDelete) {
-                    message.info(
-                      getPermissionMessage(PERMISSION_VALUES.DELETE)
-                    );
-                    return;
-                  }
-                  handleDelete(record);
-                }}
-                disabled={loading || !canDelete}
-              >
-                <Button
-                  size="small"
-                  danger
-                  icon={<DeleteOutlined />}
-                  disabled={loading || !canDelete}
-                >
-                  Delete
-                </Button>
-              </Popconfirm>
-            </span>
-          </Tooltip>
-        );
-      },
-    },
-  ];
-
-  const paginationConfig = {
-    current: currentPage,
-    pageSize: pageSize,
-    total: displaySubtopics.length,
-    showSizeChanger: true,
-    showQuickJumper: true,
-    showTotal: (total, range) =>
-      `${range[0]}-${range[1]} of ${total} subtopics`,
-    pageSizeOptions: ["5", "10", "20", "50"],
-    onShowSizeChange: (current, size) => {
-      setPageSize(size);
-      setCurrentPage(1);
-    },
-    onChange: (page, size) => {
-      setCurrentPage(page);
-      setPageSize(size);
-    },
-    placement: ["bottomCenter"],
-    showLessItems: true,
-  };
+  const totalPages = Math.ceil(displaySubtopics.length / pageSize);
+  const paginatedSubtopics = displaySubtopics.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <div className={styles.container}>
@@ -502,7 +293,7 @@ const SubtopicManager = () => {
             <Button
               type="primary"
               onClick={handleAdd}
-              style={{ width: "12rem" }}
+              style={{ width: "10rem" }}
               disabled={loading || !canAccess(PERMISSION_VALUES.CREATE)}
             >
               + Create Subtopic
@@ -511,39 +302,273 @@ const SubtopicManager = () => {
         </Tooltip>
       </div>
 
-      <Divider style={{ margin: "1rem 0" }} />
+      <Divider style={{ margin: "0.75rem 0" }} />
 
-      <Table
-        columns={columns}
-        dataSource={displaySubtopics}
-        rowKey="_id"
-        pagination={paginationConfig}
-        size="middle"
-        bordered
-        className={styles.subtopicsTable}
-        scroll={{ x: 800 }}
-        onChange={handleTableChange}
-        loading={loading}
-        style={{ width: "100%" }}
-        locale={{
-          emptyText: (
-            <div style={{ textAlign: "center", padding: "20px" }}>
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
-                alt="no data"
-                style={{ width: 60, marginBottom: 10 }}
-              />
-              <h3>No Subtopics Found</h3>
-              <p style={{ color: "#888" }}>
-                Start by adding your first subtopic for this topic
-              </p>
-              <Button type="primary" onClick={handleAdd}>
+      {paginatedSubtopics.length > 0 ? (
+        <div className={styles.cardsList}>
+          {paginatedSubtopics.map((record, index) => {
+            const editing = isEditing(record);
+            const displayValue = getDisplayValue(record);
+            const isTemp = record._id.startsWith("temp-");
+            const subtopicNumber = (currentPage - 1) * pageSize + index + 1;
+
+            return (
+              <div
+                key={record._id}
+                className={`${styles.itemCard} ${editing ? styles.editing : ""}`}
+                onClick={() => !editing && handleOpenSubtopic(record)}
+              >
+                {/* Avatar */}
+                <div
+                  className={styles.itemAvatar}
+                  style={{ backgroundColor: getAvatarColor(displayValue) }}
+                >
+                  {getInitials(displayValue || `ST${subtopicNumber}`)}
+                </div>
+
+                {/* Info */}
+                <div className={styles.itemInfo}>
+                  {editing ? (
+                    <Input
+                      value={displayValue}
+                      onChange={(e) =>
+                        handleFieldChange(record._id, "title", e.target.value)
+                      }
+                      onPressEnter={() => handleSave(record._id)}
+                      placeholder="Enter subtopic title…"
+                      autoFocus
+                      disabled={loading}
+                      className={styles.inlineEditInput}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <>
+                      <span className={styles.itemTitle}>
+                        {displayValue || "Untitled Subtopic"}
+                      </span>
+                      <span className={styles.itemSubtitle}>
+                        Subtopic {subtopicNumber}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Meta */}
+                <div className={styles.itemMeta}>
+                  {!editing && (
+                    <span className={styles.statusBadgeCard}>
+                      <span className={styles.statusDotCard}></span>
+                      Active
+                    </span>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div
+                  className={styles.itemActions}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {editing ? (
+                    <Space>
+                      <Tooltip
+                        title={
+                          isTemp
+                            ? !canAccess(PERMISSION_VALUES.CREATE)
+                              ? getPermissionMessage(PERMISSION_VALUES.CREATE)
+                              : ""
+                            : !canAccess(PERMISSION_VALUES.EDIT)
+                            ? getPermissionMessage(PERMISSION_VALUES.EDIT)
+                            : ""
+                        }
+                      >
+                        <span>
+                          <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => handleSave(record._id)}
+                            loading={loading}
+                            disabled={
+                              !displayValue?.trim() ||
+                              loading ||
+                              (isTemp
+                                ? !canAccess(PERMISSION_VALUES.CREATE)
+                                : !canAccess(PERMISSION_VALUES.EDIT))
+                            }
+                          >
+                            Save
+                          </Button>
+                        </span>
+                      </Tooltip>
+                      <Button size="small" onClick={cancel} disabled={loading}>
+                        Cancel
+                      </Button>
+                    </Space>
+                  ) : (
+                    <Space>
+                      <Button
+                        size="small"
+                        type="primary"
+                        onClick={() => handleOpenSubtopic(record)}
+                        disabled={!record.title?.trim() || loading || isTemp}
+                        icon={<FolderOpenOutlined />}
+                      >
+                        Open
+                      </Button>
+                      <Tooltip
+                        title={
+                          !canAccess(PERMISSION_VALUES.EDIT)
+                            ? getPermissionMessage(PERMISSION_VALUES.EDIT)
+                            : ""
+                        }
+                      >
+                        <span>
+                          <Button
+                            size="small"
+                            onClick={() => edit(record)}
+                            icon={<EditOutlined />}
+                            disabled={loading || !canAccess(PERMISSION_VALUES.EDIT)}
+                          >
+                            Edit
+                          </Button>
+                        </span>
+                      </Tooltip>
+                      {isTemp ? (
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setTempSubtopics((prev) =>
+                              prev.filter((s) => s._id !== record._id)
+                            );
+                            if (editingId === record._id) {
+                              setEditingId("");
+                            }
+                          }}
+                          icon={<DeleteOutlined />}
+                          disabled={loading}
+                        >
+                          Cancel
+                        </Button>
+                      ) : (
+                        <Tooltip
+                          title={
+                            !canAccess(PERMISSION_VALUES.DELETE)
+                              ? getPermissionMessage(PERMISSION_VALUES.DELETE)
+                              : ""
+                          }
+                        >
+                          <span>
+                            <Popconfirm
+                              title="Are you sure you want to delete this subtopic?"
+                              description="This action cannot be undone."
+                              okText="Delete"
+                              cancelText="Cancel"
+                              okButtonProps={{ danger: true, loading: loading }}
+                              onConfirm={() => handleDelete(record)}
+                              disabled={loading || !canAccess(PERMISSION_VALUES.DELETE)}
+                            >
+                              <Button
+                                size="small"
+                                danger
+                                icon={<DeleteOutlined />}
+                                disabled={loading || !canAccess(PERMISSION_VALUES.DELETE)}
+                              >
+                                Delete
+                              </Button>
+                            </Popconfirm>
+                          </span>
+                        </Tooltip>
+                      )}
+                    </Space>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className={styles.cardEmptyState}>
+          <InboxOutlined className={styles.cardEmptyIcon} />
+          <span className={styles.cardEmptyText}>No Subtopics Found</span>
+          <span className={styles.cardEmptySub}>
+            Start by adding your first subtopic
+          </span>
+          <Tooltip
+            title={
+              !canAccess(PERMISSION_VALUES.CREATE)
+                ? getPermissionMessage(PERMISSION_VALUES.CREATE)
+                : ""
+            }
+          >
+            <span>
+              <Button
+                type="primary"
+                onClick={handleAdd}
+                disabled={!canAccess(PERMISSION_VALUES.CREATE)}
+              >
                 + Add Subtopic
               </Button>
-            </div>
-          ),
-        }}
-      />
+            </span>
+          </Tooltip>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {displaySubtopics.length > 0 && (
+        <div className={styles.paginationRow}>
+          <div className={styles.paginationLeft}>
+            <span className={styles.pageSizeLabel}>Items per page</span>
+            <Select
+              value={pageSize}
+              onChange={(value) => {
+                setPageSize(value);
+                setCurrentPage(1);
+              }}
+              options={[
+                { value: 5, label: "5" },
+                { value: 10, label: "10" },
+                { value: 20, label: "20" },
+                { value: 50, label: "50" },
+              ]}
+              size="small"
+              style={{ minWidth: 70 }}
+            />
+            <span className={styles.showingText}>
+              {Math.min((currentPage - 1) * pageSize + 1, displaySubtopics.length)}-
+              {Math.min(currentPage * pageSize, displaySubtopics.length)} of{" "}
+              {displaySubtopics.length} subtopics
+            </span>
+          </div>
+          <div className={styles.paginationRight}>
+            <button
+              className={styles.pageBtn}
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            >
+              Prev
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                className={`${styles.pageBtn} ${
+                  currentPage === page ? styles.pageBtnActive : ""
+                }`}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              className={styles.pageBtn}
+              disabled={currentPage === totalPages || totalPages === 0}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

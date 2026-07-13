@@ -1,12 +1,29 @@
 @use "@/modules/admin/styles/colors" as *;
+@import "@/modules/admin/styles/mixins.scss";
+
 .container {
-  width: 100%;
-  min-height: 100vh;
+  height: calc(100% - 2rem);
+  min-height: 80vh;
+  width: auto;
+  margin: 1rem;
+  padding: 0 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow-y: auto;
+  @include custom-scrollbar();
+  position: relative;
 }
 
 .header {
-  background: #fff;
-  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 9;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .breadcrumb {
@@ -95,8 +112,20 @@
   }
 }
 
+.breadcrumbCurrent {
+  color: #0f172a !important;
+  font-weight: 600;
+  background-color: transparent !important;
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+  font-size: 20px;
+  line-height: 20px;
+  height: 20px;
+}
+
 .content {
-  padding: 0 24px;
+  padding: 1.5rem 0;
 }
 
 // Add navigation tabs styling

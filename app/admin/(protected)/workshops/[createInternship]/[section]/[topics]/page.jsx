@@ -7,9 +7,8 @@ import {
   EditOutlined,
   SettingOutlined,
   PlayCircleOutlined,
-  FilePdfOutlined,
-  ReadOutlined,
-  FormOutlined,
+  CheckOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,16 +22,17 @@ import {
 import { getOneMeeting } from "@/redux/slices/admin/cms/zoomSlice";
 import {
   Button,
-  Table,
   Input,
   Space,
   message,
-  Segmented,
   Tag,
   Select,
   Popconfirm,
   Tooltip,
+  Breadcrumb,
+  Pagination,
 } from "antd";
+import { FaCaretRight } from "react-icons/fa6";
 import { usePermissions } from "@/hooks/usepermission";
 
 export default function TopicManagerPage() {
@@ -388,35 +388,236 @@ export default function TopicManagerPage() {
     showLessItems: true,
   };
 
+  const breadcrumbItems = [
+    {
+      title: (
+        <span
+          onClick={() => nav.push("/admin/workshops")}
+          className={topicStyles.breadcrumbLink}
+        >
+          Workshops
+        </span>
+      ),
+      key: "library",
+    },
+    {
+      title: (
+        <span
+          onClick={() => nav.push(`/admin/workshops/${internshipId}`)}
+          className={topicStyles.breadcrumbLink}
+        >
+          {singleInternship?.title || "Edit Workshop"}
+        </span>
+      ),
+      key: "details",
+    },
+    {
+      title: (
+        <span
+          onClick={() => nav.push(`/admin/workshops/${internshipId}/${sectionId}`)}
+          className={topicStyles.breadcrumbLink}
+        >
+          {singleSection?.title || "Curriculum"}
+        </span>
+      ),
+      key: "sections",
+    },
+    {
+      title: (
+        <span className={topicStyles.breadcrumbCurrent}>
+          Topics
+        </span>
+      ),
+      key: "current",
+    },
+  ];
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedTopics = topics.slice(startIndex, startIndex + pageSize);
+
   return (
     <div className={topicStyles.container}>
-      <div className={topicStyles.header}>
-        <span onClick={() => nav.push(`/admin/workshops/${internshipId}`)}>
-          {singleInternship?.title || "..."}
-          <img
-            src="https://res.cloudinary.com/dug3awue8/image/upload/v1746083643/icon_sgq3vj.svg"
-            alt=">"
+      <div className={topicStyles.titleContainer}>
+        <div className={topicStyles.breadcrumbContainer}>
+          <Breadcrumb
+            items={breadcrumbItems}
+            separator={
+              <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />
+            }
+            className={topicStyles.breadcrumb}
           />
-        </span>
-        <strong
-          onClick={() => nav.push(`/admin/workshops/${internshipId}/${sectionId}`)}
-        >
-          {singleSection?.title || "..."}
-        </strong>
+        </div>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={topics}
-        pagination={paginationConfig}
-        size="middle"
-        bordered
-        className={topicStyles.topicsTable}
-        scroll={{ x: 800 }}
-        onChange={handleTableChange}
-      />
+      <div className={topicStyles.topicsTable}>
+        <div className={topicStyles.questionList}>
+          {paginatedTopics.map((record, index) => {
+            const editing = isEditing(record);
+            const absoluteIndex = startIndex + index + 1;
 
-      <div className={topicStyles.actions} style={{ marginTop: 16 }}>
+            const isLiveTopic = record.type === "topic";
+            const hasMeeting = record?.meetingId?._id;
+            const isCompleted = record?.meetingId?.isCompleted || false;
+
+            return (
+              <div key={record.key} className={topicStyles.questionRow}>
+                <div className={topicStyles.rowLeft}>
+                  <span className={topicStyles.qNumber}>Topic {absoluteIndex}</span>
+                  {editing ? (
+                    <>
+                      <Input
+                        value={record.title}
+                        onChange={(e) => handleTitleChange(record.key, e.target.value)}
+                        onPressEnter={() => handleSave(record.key)}
+                        placeholder="Enter title..."
+                        autoFocus
+                        className={topicStyles.editInput}
+                      />
+                      <Select
+                        value={record.type}
+                        onChange={(v) => handleTypeChange(record.key, v)}
+                        options={typeOptions}
+                        className={topicStyles.editSelect}
+                        placeholder="Select type"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Tag color={typeColor[record.type] || "default"} className={topicStyles.typeTag}>
+                        {(record.type || "topic").toUpperCase()}
+                      </Tag>
+                      <span className={topicStyles.qText}>
+                        {record.title || "Untitled Topic"}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                <div className={topicStyles.rowRight}>
+                  <div className={topicStyles.badges}>
+                    {isLiveTopic && (
+                      hasMeeting ? (
+                        isCompleted ? (
+                          <span className={`${topicStyles.badge} ${topicStyles.ended}`}>Class Ended</span>
+                        ) : (
+                          <span className={`${topicStyles.badge} ${topicStyles.ready}`}>Ready to Start</span>
+                        )
+                      ) : (
+                        <span className={`${topicStyles.badge} ${topicStyles.none}`}>Meeting Not Created</span>
+                      )
+                    )}
+                  </div>
+
+                  <div className={topicStyles.actionIcons}>
+                    {isLiveTopic && (
+                      <Tooltip title={hasMeeting ? (isCompleted ? "Class Ended" : "Start Live") : "No Meeting"}>
+                        <button
+                          className={topicStyles.liveBtn}
+                          disabled={!hasMeeting || isCompleted}
+                          onClick={() => startLiveButton(record)}
+                        >
+                          <PlayCircleOutlined />
+                        </button>
+                      </Tooltip>
+                    )}
+
+                    <Tooltip title="Manage Topic">
+                      <button
+                        className={topicStyles.manageBtn}
+                        disabled={!record._id}
+                        onClick={() =>
+                          nav.push(
+                            `/admin/workshops/${internshipId}/${sectionId}/${record?._id}/${
+                              record?.type || "topic"
+                            }`
+                          )
+                        }
+                      >
+                        <SettingOutlined />
+                      </button>
+                    </Tooltip>
+
+                    {editing ? (
+                      <>
+                        <Tooltip title="Save">
+                          <button
+                            className={topicStyles.save}
+                            onClick={() => handleSave(record.key)}
+                          >
+                            <CheckOutlined />
+                          </button>
+                        </Tooltip>
+                        <Tooltip title="Cancel">
+                          <button
+                            className={topicStyles.cancel}
+                            onClick={cancel}
+                          >
+                            <CloseOutlined />
+                          </button>
+                        </Tooltip>
+                      </>
+                    ) : (
+                      <Tooltip
+                        title={
+                          !canAccess("edit")
+                            ? "You don't have permission to edit this topic"
+                            : "Edit Title"
+                        }
+                      >
+                        <button
+                          className={topicStyles.edit}
+                          disabled={!canAccess("edit")}
+                          onClick={(e) => {
+                            if (!canAccess("edit")) {
+                              e.preventDefault();
+                              message.info("You don't have permission to edit this topic");
+                              return;
+                            }
+                            edit(record);
+                          }}
+                        >
+                          <EditOutlined />
+                        </button>
+                      </Tooltip>
+                    )}
+
+                    <Tooltip
+                      title={
+                        !canAccess("delete")
+                          ? "You don't have permission to delete this topic"
+                          : "Delete"
+                      }
+                    >
+                      <Popconfirm
+                        title="Are you sure you want to delete this topic?"
+                        description="This action cannot be undone."
+                        okText="Delete"
+                        cancelText="Cancel"
+                        okButtonProps={{ danger: true }}
+                        onConfirm={() => handleDelete(record)}
+                        disabled={!canAccess("delete")}
+                      >
+                        <button
+                          className={topicStyles.delete}
+                          disabled={!canAccess("delete")}
+                        >
+                          <DeleteOutlined />
+                        </button>
+                      </Popconfirm>
+                    </Tooltip>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className={topicStyles.paginationContainer}>
+        <Pagination {...paginationConfig} />
+      </div>
+
+      <div className={topicStyles.actions}>
         <Button type="primary" onClick={handleAdd}>
           + Add New Topic
         </Button>

@@ -6,7 +6,7 @@ import { decrypt } from "@/utils/windowMW";
 import { debounce } from "lodash";
 import BreadcrumbComponent from "@/modules/admin/components/breadcrumbs/breadcrumbs";
 import { getStudentsInDepartment } from "@/redux/slices/admin/adminOrgSlice";
-import { Table, Input, Button, Space, Tag, Spin, Divider, Tooltip } from "antd";
+import { Table, Input, Button, Space, Tag, Spin, Divider, Tooltip, Pagination } from "antd";
 import {
   SearchOutlined,
   ReloadOutlined,
@@ -387,11 +387,10 @@ const Students = () => {
 
   return (
     <div className={styles.studentsContainer}>
-      <BreadcrumbComponent />
-
       <div className={styles.header}>
         <div>
-          <h2>
+          <BreadcrumbComponent />
+          <h2 style={{ marginTop: "8px" }}>
             {ORG_Name} - {Dep_Name}
           </h2>
           <p className={styles.subtitle}>
@@ -446,8 +445,6 @@ const Students = () => {
         </div>
       )}
 
-      <Divider style={{ margin: "16px 0" }} />
-
       {loading ? (
         <div className={styles.loadingContainer}>
           <Spin size="large" tip="Loading students..." />
@@ -460,33 +457,70 @@ const Students = () => {
           </Button>
         </div>
       ) : (
-        <div className={styles.tableWrapper}>
-          <Table
-            columns={columns}
-            dataSource={students}
-            rowKey="_id"
-            pagination={{
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-              total: totalCount,
-              showSizeChanger: true,
-              showTotal: (total, range) =>
-                `${range[0]}-${range[1]} of ${total} students`,
-              pageSizeOptions: ["10", "20", "50", "100"],
-              placement: ["bottomCenter"],
-              showQuickJumper: true,
-              onChange: onTableChange,
-              onShowSizeChange: onTableChange,
-            }}
-            sticky={{ offsetHeader: 0 }}
-            bordered
-            size="middle"
-            className={styles.studentsTable}
-            rowClassName={(record, index) =>
-              index % 2 === 0 ? styles.evenRow : styles.oddRow
-            }
-          />
-        </div>
+        <>
+          <div className={styles.questionList}>
+            {students.map((student, index) => {
+              const sNo = (pagination.current - 1) * pagination.pageSize + index + 1;
+              const fullName = student.userName || `${student.firstName || ""} ${student.lastName || ""}`.trim() || "N/A";
+              const email = student.email || "N/A";
+              const enrollmentId = student.enrollementId || "N/A";
+              const totalTokens = student?.aiUsage?.totalTokens || 0;
+              const totalRequests = student?.aiUsage?.totalRequests || 0;
+              const yearOfPassing = student.yearOfPassing || "N/A";
+              const createdAt = student.createdAt ? new Date(student.createdAt).toLocaleDateString("en-IN") : "N/A";
+
+              return (
+                <div key={student._id || index} className={styles.questionRow}>
+                  <div className={styles.rowLeft}>
+                    <span className={styles.qNumber}>#{sNo}</span>
+                    <div className={styles.studentInfo}>
+                      <span className={styles.studentName}>{fullName}</span>
+                      <span className={styles.studentSubInfo}>
+                        ID: {enrollmentId} | <a href={`mailto:${email}`}>{email}</a>
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.rowRight}>
+                    <div className={styles.badges}>
+                      <Tooltip title="AI Tokens Used">
+                        <span className={`${styles.badge} ${styles.tokensBadge}`}>
+                          ⚡ {totalTokens.toLocaleString()}
+                        </span>
+                      </Tooltip>
+                      <Tooltip title="AI Requests Made">
+                        <span className={`${styles.badge} ${styles.requestsBadge}`}>
+                          🤖 {totalRequests.toLocaleString()}
+                        </span>
+                      </Tooltip>
+                      <span className={`${styles.badge} ${styles.yearBadge}`}>
+                        Passing: {yearOfPassing}
+                      </span>
+                      <span className={`${styles.badge} ${styles.dateBadge}`}>
+                        Created: {createdAt}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className={styles.paginationContainer}>
+            <Pagination
+              current={pagination.current}
+              pageSize={pagination.pageSize}
+              total={totalCount}
+              showSizeChanger={true}
+              showTotal={(total, range) =>
+                `${range[0]}-${range[1]} of ${total} students`
+              }
+              pageSizeOptions={["10", "20", "50", "100"]}
+              showQuickJumper={true}
+              onChange={onTableChange}
+              onShowSizeChange={onTableChange}
+            />
+          </div>
+        </>
       )}
     </div>
   );

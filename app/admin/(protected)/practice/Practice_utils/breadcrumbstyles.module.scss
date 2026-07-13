@@ -1,162 +1,44 @@
 .breadcrumbContainer {
-  background: #f8f9fa;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e8e8e8;
+  background-color: transparent;
+  padding: 0.5rem 0;
   display: flex;
   align-items: center;
+  margin-bottom: 0.5rem;
 }
 
 .breadcrumb {
-  font-size: 1.2rem;
+  font-size: 16px;
+  font-weight: 500;
   display: flex;
   align-items: center;
-
-  // Override Ant Design breadcrumb styles for proper alignment
-  :global(.ant-breadcrumb) {
-    display: flex;
-    align-items: center;
-    line-height: 1;
-  }
 
   :global(.ant-breadcrumb-separator) {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 8px;
-    height: 1.2rem; // Match the font-size for proper alignment
-  }
-
-  // Ensure breadcrumb items are aligned
-  :global(.ant-breadcrumb > span) {
-    display: flex;
-    align-items: center;
-  }
-}
-
-.separatorWrapper {
-  color: #1E69DA;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 1.2rem;
-  width: auto;
-  margin: 0;
-
-  // Ensure the icon is vertically centered
-  svg {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin: 0;
   }
 }
 
 .breadcrumbLink {
-  color: #1E69DA;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #1E69DA !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 1.2rem;
-  line-height: 1.2rem; // Consistent line height
-  height: 1.2rem; // Fixed height for alignment
+  cursor: pointer;
 
   &:hover {
-    color: #1e8b8e;
-    text-decoration: none;
-  }
-
-  &:active {
-    color: #177376;
-  }
-
-  // Ensure icons are properly aligned
-  svg {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
+    text-decoration: underline;
   }
 }
 
 .breadcrumbCurrent {
-  color: #1E69DA;
-  cursor: default;
+  color: #0f172a !important;
+  font-weight: 600;
+  background-color: transparent !important;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-weight: 500;
-  font-size: 1.2rem;
-  line-height: 1.2rem; // Consistent line height
-  height: 1.2rem; // Fixed height for alignment
-
-  // Ensure icons are properly aligned
-  svg {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-  }
-}
-
-// Responsive design
-@media (max-width: 768px) {
-  .breadcrumbContainer {
-    padding: 8px 16px;
-  }
-
-  .breadcrumb {
-    font-size: 1rem;
-
-    :global(.ant-breadcrumb-separator) {
-      margin: 0 4px;
-      height: 1rem;
-    }
-  }
-
-  .separatorWrapper {
-    font-size: 1rem;
-    height: 1rem;
-  }
-
-  .breadcrumbLink,
-  .breadcrumbCurrent {
-    gap: 2px;
-    font-size: 1rem;
-    line-height: 1rem;
-    height: 1rem;
-
-    svg {
-      font-size: 0.8rem;
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .breadcrumb {
-    font-size: 0.9rem;
-
-    :global(.ant-breadcrumb-separator) {
-      margin: 0 2px;
-      height: 0.9rem;
-    }
-  }
-
-  .separatorWrapper {
-    font-size: 0.9rem;
-    height: 0.9rem;
-  }
-
-  .breadcrumbLink,
-  .breadcrumbCurrent {
-    font-size: 0.9rem;
-    line-height: 0.9rem;
-    height: 0.9rem;
-    gap: 1px;
-
-    svg {
-      font-size: 0.7rem;
-    }
-  }
+  cursor: default;
 }

@@ -1,10 +1,12 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useState } from "react";
 import SecStyles from "./page.module.scss";
 import {
   DeleteOutlined,
   EditOutlined,
   FolderOpenOutlined,
+  CheckOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,7 +19,8 @@ import {
   getOneSection,
   DeleteSectionThunk,
 } from "@/redux/slices/admin/cms/internship";
-import { Button, Table, Input, Space, Popconfirm, App, Tooltip } from "antd";
+import { Button, Input, Space, Popconfirm, App, Tooltip, Breadcrumb, Pagination } from "antd";
+import { FaCaretRight } from "react-icons/fa6";
 import { usePermissions } from "@/hooks/usepermission";
 
 const SectionManager = () => {
@@ -297,24 +300,181 @@ const SectionManager = () => {
     showLessItems: true,
   };
 
+  const breadcrumbItems = [
+    {
+      title: (
+        <span
+          onClick={() => nav.push("/admin/workshops")}
+          className={SecStyles.breadcrumbLink}
+        >
+          Workshops
+        </span>
+      ),
+      key: "library",
+    },
+    {
+      title: (
+        <span
+          onClick={() => nav.push(`/admin/workshops/${internshipId}`)}
+          className={SecStyles.breadcrumbLink}
+        >
+          {singleInternship?.title || "Edit Workshop"}
+        </span>
+      ),
+      key: "details",
+    },
+    {
+      title: (
+        <span className={SecStyles.breadcrumbCurrent}>
+          Curriculum
+        </span>
+      ),
+      key: "current",
+    },
+  ];
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedSections = sections.slice(startIndex, startIndex + pageSize);
+
   return (
     <div className={SecStyles.container}>
-      <div className={SecStyles.header}>
-        <strong onClick={() => nav.push(`/admin/workshops/${internshipId}`)}>
-          {singleInternship?.title || "Workshop Management"}
-        </strong>
+      <div className={SecStyles.titleContainer}>
+        <div className={SecStyles.breadcrumbContainer}>
+          <Breadcrumb
+            items={breadcrumbItems}
+            separator={
+              <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />
+            }
+            className={SecStyles.breadcrumb}
+          />
+        </div>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={sections}
-        pagination={paginationConfig}
-        size="middle"
-        bordered
-        className={SecStyles.sectionsTable}
-        scroll={{ x: 700 }}
-        onChange={handleTableChange}
-      />
+      <div className={SecStyles.sectionsTable}>
+        <div className={SecStyles.questionList}>
+          {paginatedSections.map((record, index) => {
+            const editing = isEditing(record);
+            const absoluteIndex = startIndex + index + 1;
+
+            return (
+              <div key={record.key} className={SecStyles.questionRow}>
+                <div className={SecStyles.rowLeft}>
+                  <span className={SecStyles.qNumber}>Section {absoluteIndex}</span>
+                  {editing ? (
+                    <Input
+                      value={record.title}
+                      onChange={(e) => handleTitleChange(record.key, e.target.value)}
+                      onPressEnter={() => handleSave(record.key)}
+                      placeholder="Enter section title..."
+                      autoFocus
+                      className={SecStyles.editInput}
+                    />
+                  ) : (
+                    <span className={SecStyles.qText}>
+                      {record.title || "Untitled Section"}
+                    </span>
+                  )}
+                </div>
+
+                <div className={SecStyles.rowRight}>
+                  <div className={SecStyles.badges}>
+                    {record._id ? (
+                      <span className={`${SecStyles.badge} ${SecStyles.saved}`}>Saved</span>
+                    ) : (
+                      <span className={`${SecStyles.badge} ${SecStyles.draft}`}>Draft</span>
+                    )}
+                  </div>
+
+                  <div className={SecStyles.actionIcons}>
+                    <Tooltip title="Open Section">
+                      <button
+                        className={SecStyles.openSec}
+                        disabled={!record._id}
+                        onClick={() => handleOpenSection(record)}
+                      >
+                        <FolderOpenOutlined />
+                      </button>
+                    </Tooltip>
+
+                    {editing ? (
+                      <>
+                        <Tooltip title="Save">
+                          <button
+                            className={SecStyles.save}
+                            onClick={() => handleSave(record.key)}
+                          >
+                            <CheckOutlined />
+                          </button>
+                        </Tooltip>
+                        <Tooltip title="Cancel">
+                          <button
+                            className={SecStyles.cancel}
+                            onClick={cancel}
+                          >
+                            <CloseOutlined />
+                          </button>
+                        </Tooltip>
+                      </>
+                    ) : (
+                      <Tooltip
+                        title={
+                          !canAccess("edit")
+                            ? "You don't have permission to edit this section"
+                            : "Edit Title"
+                        }
+                      >
+                        <button
+                          className={SecStyles.edit}
+                          disabled={!canAccess("edit")}
+                          onClick={(e) => {
+                            if (!canAccess("edit")) {
+                              e.preventDefault();
+                              message.info("You don't have permission to edit this section");
+                              return;
+                            }
+                            edit(record);
+                          }}
+                        >
+                          <EditOutlined />
+                        </button>
+                      </Tooltip>
+                    )}
+
+                    <Tooltip
+                      title={
+                        !canAccess("delete")
+                          ? "You don't have permission to delete this section"
+                          : "Delete"
+                      }
+                    >
+                      <Popconfirm
+                        title="Are you sure you want to delete this section?"
+                        description="This action cannot be undone."
+                        okText="Delete"
+                        cancelText="Cancel"
+                        okButtonProps={{ danger: true }}
+                        onConfirm={() => handleDelete(record)}
+                        disabled={!canAccess("delete")}
+                      >
+                        <button
+                          className={SecStyles.delete}
+                          disabled={!canAccess("delete")}
+                        >
+                          <DeleteOutlined />
+                        </button>
+                      </Popconfirm>
+                    </Tooltip>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className={SecStyles.paginationContainer}>
+        <Pagination {...paginationConfig} />
+      </div>
 
       <div className={SecStyles.actions} style={{ marginTop: 16 }}>
         <Button type="primary" onClick={handleAdd} style={{ width: "10rem" }}>

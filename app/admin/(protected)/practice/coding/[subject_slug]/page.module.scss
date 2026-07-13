@@ -1,4 +1,9 @@
 @use "@/modules/admin/styles/colors" as *;
+
+.container {
+  padding: 1.5rem;
+}
+
 .scrollContainer {
   height: 80vh;
   overflow-y: scroll;
@@ -47,6 +52,7 @@
 .ml12 {
   margin-left: 12px;
 }
+
 .ml8 {
   margin-left: 8px;
 }
@@ -74,9 +80,11 @@
     rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
   border: 1px solid red;
 }
+
 .mb12 {
   margin-bottom: 12px;
 }
+
 .mb6 {
   margin-bottom: 6px;
 }
@@ -140,9 +148,11 @@
 .textBlue {
   color: #1E69DA;
 }
+
 .textGreen {
   color: #52c41a;
 }
+
 .textYellow {
   color: #fadb14;
 }
@@ -201,4 +211,49 @@
   background: transparent;
   color: #ff4d4f;
   cursor: pointer;
+}
+
+.questionItem {
+  border: 1px solid #1E69DA4d;
+  border-radius: $borderRadius;
+  background: white;
+  margin-bottom: 12px;
+
+  &:hover {
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+      rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  }
+}
+
+.questionItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.questionItemHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.questionItemHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.questionText {
+  font-weight: 600;
+  color: #1E69DA;
+}
+
+.tagLabel {
+  border: 1px solid #1E69DA;
+  padding: 0.2rem 0.5rem;
+  border-radius: $borderRadius;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: #1E69DA4d;
 }
