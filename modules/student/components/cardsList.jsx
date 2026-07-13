@@ -218,22 +218,52 @@ export default function CardsList({ type, isModal = false, progressById, combine
           }
         });
       }
+
+      if (typeof window !== "undefined") {
+        const pendingPracticeNoticesRaw = JSON.parse(localStorage.getItem("pendingPracticeNotices") || "[]");
+        
+        // Filter out notices older than 3 days (3 * 24 * 60 * 60 * 1000 ms)
+        const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+        const pendingPracticeNotices = pendingPracticeNoticesRaw.filter(notice => {
+          const timestamp = parseInt(notice.id.split('_').pop());
+          return !isNaN(timestamp) && (Date.now() - timestamp) <= threeDaysMs;
+        });
+        
+        if (pendingPracticeNotices.length !== pendingPracticeNoticesRaw.length) {
+          localStorage.setItem("pendingPracticeNotices", JSON.stringify(pendingPracticeNotices));
+        }
+        
+
+        
+        pendingPracticeNotices.forEach(notice => {
+          if (!claimedAchievements.includes(notice.id)) {
+            if (notice.type === 'badge') {
+              achievementNotices.push({
+                title: notice.title,
+                startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                status: "active",
+                source: "system",
+                message: notice.message,
+                isAchievement: true,
+                achievementId: notice.id,
+                isClaimed: false
+              });
+            } else if (notice.type === 'new_questions') {
+              achievementNotices.push({
+                title: notice.title,
+                startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                status: "active",
+                source: "system",
+                message: notice.message,
+                actionUrl: "/student/practice-new/technical",
+                actionText: "Practice Now"
+              });
+            }
+          }
+        });
+      }
       
-      const mockNewCourse = {
-        title: isModal ? "🚀 New Course Released: Advanced React Patterns!" : "🚀 New Web Dev Course Released",
-        startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-        status: "active",
-        message: `
-          <div style="margin-bottom: 8px;">
-            <b>Category:</b> Web Development<br/>
-            <b>Duration:</b> 4 Weeks<br/>
-            <b>What you'll learn:</b> Dive deep into advanced React patterns, custom hooks, performance optimization, and scalable architectures.
-          </div>
-        `,
-        actionUrl: "/student/course", 
-        actionText: "Explore Courses"
-      };
-      
+
       const newReleasesNotices = [];
       const sevenDaysInMsForNotices = 7 * 24 * 60 * 60 * 1000;
       
@@ -386,14 +416,14 @@ export default function CardsList({ type, isModal = false, progressById, combine
                 theme={{
                   components: {
                     Collapse: {
-                      headerBg: '#FAFAFA',
+                      headerBg: '#EFF5FB',
                       contentBg: '#ffffff',
                     },
                   },
                 }}
               >
                 <Collapse
-                  className={`border-0 border-l-[3px] border-l-[#24A058] rounded-none w-full ${activeKey == i ? "rounded-none" : ""
+                  className={`border border-[#e2e8f0] border-l-[4px] border-l-[#24A058] rounded-xl overflow-hidden w-full ${activeKey == i ? "" : ""
                     }`}
                 size="medium"
                 activeKey={activeKey}
@@ -465,7 +495,13 @@ export default function CardsList({ type, isModal = false, progressById, combine
                                 type="primary"
                                 onClick={(ev) => {
                                   ev.stopPropagation();
-                                  router.push(e.actionUrl);
+                                  if (e.actionUrl.startsWith("#")) {
+                                    window.location.hash = e.actionUrl;
+                                    // Trigger hashchange manually just in case
+                                    window.dispatchEvent(new Event("hashchange"));
+                                  } else {
+                                    router.push(e.actionUrl);
+                                  }
                                 }}
                                 className="!bg-[#1E69DA] !border-none !text-white font-bold h-8 px-4 rounded-md mt-1 w-fit"
                               >

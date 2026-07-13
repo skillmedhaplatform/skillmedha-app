@@ -368,6 +368,12 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
   const [claimedAchievements, setClaimedAchievements] = React.useState([]);
   const [selectedAchievement, setSelectedAchievement] = React.useState(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isPracticeModalOpen, setIsPracticeModalOpen] = React.useState(false);
+  const [practiceModalType, setPracticeModalType] = React.useState("Technical");
+  
+  // Notification states
+  const [unseenBadges, setUnseenBadges] = React.useState([]);
+  const [selectedBadgeDetail, setSelectedBadgeDetail] = React.useState(null);
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
@@ -378,14 +384,179 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
         if (!stored.length) {
           stored = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
         }
+        
+
         setClaimedAchievements(stored);
+        setUnseenBadges(JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]"));
+        
+        // Auto-open modal if redirected from test result page
+        const autoOpen = localStorage.getItem("autoOpenBadgeModal");
+        if (autoOpen) {
+          setTimeout(() => {
+            setPracticeModalType(autoOpen);
+            setIsPracticeModalOpen(true);
+            setSelectedBadgeDetail(null);
+            
+            // Auto clear unseen for this type
+            const remaining = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]").filter(id => !id.includes(autoOpen));
+            setUnseenBadges(remaining);
+            localStorage.setItem("unseenPracticeBadges", JSON.stringify(remaining));
+            localStorage.removeItem("autoOpenBadgeModal");
+          }, 300);
+        }
       };
       
       loadClaimed();
       window.addEventListener("achievementClaimed", loadClaimed);
-      return () => window.removeEventListener("achievementClaimed", loadClaimed);
+      
+      // Listen for notice board action URL hash clicks
+      const handleHashChange = () => {
+        if (window.location.hash.startsWith('#openBadges_')) {
+          const type = window.location.hash.split('_')[1];
+          if (type === 'Technical' || type === 'Non-Technical') {
+            setPracticeModalType(type);
+            setIsPracticeModalOpen(true);
+            setSelectedBadgeDetail(null);
+            
+            const remaining = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]").filter(id => !id.includes(type));
+            setUnseenBadges(remaining);
+            localStorage.setItem("unseenPracticeBadges", JSON.stringify(remaining));
+            
+            // Clean up hash without reloading
+            history.pushState("", document.title, window.location.pathname + window.location.search);
+          }
+        }
+      };
+      window.addEventListener("hashchange", handleHashChange);
+      // Check on initial load too
+      handleHashChange();
+
+      return () => {
+        window.removeEventListener("achievementClaimed", loadClaimed);
+        window.removeEventListener("hashchange", handleHashChange);
+      };
     }
   }, [studentCreds?.claimedAchievements]);
+
+  const practiceBadges = claimedAchievements
+    .filter(id => typeof id === 'string' && id.startsWith("practice_badge|"))
+    .map(id => {
+      const parts = id.split("|");
+      return {
+        id,
+        section: parts[1],
+        topic: parts[2],
+        subtopic: parts[3],
+        type: parts[4],
+        level: parts[5]
+      };
+    })
+    .reverse();
+
+  const technicalBadges = practiceBadges.filter(b => b.section === "Technical");
+  const nonTechnicalBadges = practiceBadges.filter(b => b.section === "Non-Technical");
+
+  const hasUnseenTech = technicalBadges.some(b => unseenBadges.includes(b.id));
+  const hasUnseenNonTech = nonTechnicalBadges.some(b => unseenBadges.includes(b.id));
+
+  const openPracticeModal = (type) => {
+    setPracticeModalType(type);
+    setIsPracticeModalOpen(true);
+    setSelectedBadgeDetail(null);
+    
+    // Clear unseen badges for this type
+    const remainingUnseen = unseenBadges.filter(id => {
+      const badge = practiceBadges.find(b => b.id === id);
+      return badge && badge.section !== type;
+    });
+    setUnseenBadges(remainingUnseen);
+    localStorage.setItem("unseenPracticeBadges", JSON.stringify(remainingUnseen));
+  };
+
+  const renderBadgeList = (badges) => {
+    // If a badge is selected, show the detailed drill-down view
+    if (selectedBadgeDetail) {
+      const b = selectedBadgeDetail;
+      return (
+        <div className="flex flex-col animate-[smoothFadeIn_0.3s_ease-out_forwards]">
+          <div className="flex justify-start mb-2">
+            <button 
+              onClick={() => setSelectedBadgeDetail(null)}
+              className="text-[#3b82f6] font-semibold flex items-center gap-2 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              Back to Badges
+            </button>
+          </div>
+          
+          <div className="bg-[#f0f9ff] p-6 rounded-2xl text-center border border-[#e2e8f0]">
+            <div className="inline-block relative mb-6">
+              <div className="bg-[#3b82f6] rounded-full w-[120px] h-[120px] flex items-center justify-center shadow-[0_10px_25px_-5px_rgba(59,130,246,0.5)]">
+                <span className="text-[60px] drop-shadow-md">{b.type === 'Flawless' ? '🏆' : '🏅'}</span>
+              </div>
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#2563eb] text-white px-4 py-1 rounded-full font-bold text-[12px] tracking-wide shadow-md whitespace-nowrap">
+                {b.type.toUpperCase()}
+              </div>
+            </div>
+            
+            <h2 className="text-[22px] font-extrabold text-[#1e293b] mb-2">{b.type} Master Lvl {b.level}</h2>
+            <p className="text-[#475569] text-[14px] leading-relaxed mb-6">
+              You've proven your expertise in <strong className="text-[#0f172a]">{b.topic} • {b.subtopic}</strong>!
+            </p>
+            
+              <div className="flex-1 border-t border-[#e2e8f0] pt-4 mt-2">
+                <strong className="block text-[#1e293b] text-[15px] mb-1">{b.type} Badge Unlocked</strong>
+                <span className="text-[#64748b] text-[14px] leading-relaxed block">
+                  {b.type === 'Flawless' 
+                    ? "Awarded for getting every question right in one attempt. Your flawless execution proves true mastery of this topic." 
+                    : "Awarded for scoring 100% on a topic 24 hours after mastering it. You've proven exceptional memory and recall."}
+                </span>
+              </div>
+              <div className="text-[28px] mt-4">
+                {b.type === 'Flawless' ? '🏆' : '🏅'}
+              </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (badges.length === 0) {
+      return <div className="text-center py-8 text-gray-500 font-medium">No badges earned yet. Keep practicing!</div>;
+    }
+    
+    return (
+      <div className="flex flex-col gap-4 animate-[smoothFadeIn_0.3s_ease-out_forwards]">
+        {badges.map((b, idx) => {
+          const isNew = unseenBadges.includes(b.id);
+          return (
+            <div 
+              key={idx} 
+              className={`flex items-center justify-between p-4 rounded-xl border ${isNew ? 'border-[#3b82f6] bg-[#eff6ff]' : 'border-[#e2e8f0] bg-white'} overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-[#cbd5e1] group`}
+              onClick={() => setSelectedBadgeDetail(b)}
+            >
+              <div className="flex items-center gap-4">
+                <div className="relative shrink-0">
+                  {isNew && <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white shadow-sm z-10 animate-pulse" />}
+                  <div className="text-[36px] drop-shadow-sm group-hover:scale-110 transition-transform">{b.type === 'Flawless' ? '🏆' : '🏅'}</div>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-bold text-[#0f172a] text-[15px]">{b.type} Master Lvl {b.level}</span>
+                  <span className="text-[#64748b] text-[13px]">{b.topic} • {b.subtopic}</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <span className="text-[#24A058] text-[13px] font-bold">Earned</span>
+                {isNew && <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider">New</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   let streakCoins = 5;
   if (streak === 1) streakCoins = 10;
@@ -419,12 +590,13 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
         if (course) {
           const categoryText = course.category ? course.category : (course.type || "Course");
           const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
+          const courseTitle = course.title || course.courseTitle || course.name || `${shortCategoryText} Course`;
           achievementsList.push({
             type: course.type === 'internships' ? 'internship' : 'course',
             id: achievementId,
             courseData: course,
             emoji: "🥇",
-            title: `${shortCategoryText} Complete`,
+            title: `${courseTitle} Complete`,
             desc: "+50 coins earned",
             status: "Earned"
           });
@@ -433,14 +605,66 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
     });
   }
 
+  // Determine tile order based on unseen badges
+  const renderTiles = () => {
+    const techTile = (
+      <div 
+        key="tech"
+        onClick={() => openPracticeModal("Technical")}
+        className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenTech ? 'border-[#3b82f6] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
+      >
+        {hasUnseenTech && <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[#3b82f6] rounded-full border-[1.5px] border-white shadow-sm z-10 animate-pulse" />}
+        <div className="flex items-center gap-3">
+          <div className="text-[32px] group-hover:scale-110 transition-transform">💻</div>
+          <div className="flex flex-col">
+            <span className="font-bold text-[#0f172a] text-[14px]">Tech Badges</span>
+            <span className="text-[#64748b] text-[12px]">View your technical practice badges</span>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-white bg-[#5694F0] px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">{technicalBadges.length} Earned</span>
+          {hasUnseenTech && <span className="text-[9px] font-bold text-[#3b82f6] uppercase tracking-wider">New</span>}
+        </div>
+      </div>
+    );
+
+    const nonTechTile = (
+      <div 
+        key="non-tech"
+        onClick={() => openPracticeModal("Non-Technical")}
+        className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenNonTech ? 'border-[#8b5cf6] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
+      >
+        {hasUnseenNonTech && <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[#8b5cf6] rounded-full border-[1.5px] border-white shadow-sm z-10 animate-pulse" />}
+        <div className="flex items-center gap-3">
+          <div className="text-[32px] group-hover:scale-110 transition-transform">🧠</div>
+          <div className="flex flex-col">
+            <span className="font-bold text-[#0f172a] text-[14px]">Non-Tech Badges</span>
+            <span className="text-[#64748b] text-[12px]">View your aptitude & reasoning badges</span>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-white bg-[#5694F0] px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">{nonTechnicalBadges.length} Earned</span>
+          {hasUnseenNonTech && <span className="text-[9px] font-bold text-[#8b5cf6] uppercase tracking-wider">New</span>}
+        </div>
+      </div>
+    );
+
+    if (hasUnseenNonTech && !hasUnseenTech) {
+      return [nonTechTile, techTile];
+    }
+    return [techTile, nonTechTile];
+  };
+
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full h-full flex flex-col min-h-0">
       <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 sticky top-0 bg-white z-10 pt-1 shrink-0">Achievements</h3>
-      <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden max-h-[250px] pb-2">
+
+      <div className="flex flex-col gap-3 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:hidden flex-1 pb-2 px-1.5 pt-1.5">
+        {renderTiles()}
         {achievementsList.map((item, idx) => (
           <div 
             key={idx} 
-            className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group"
+            className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group"
             onClick={() => {
               setSelectedAchievement(item);
               setIsModalOpen(true);
@@ -462,6 +686,19 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
         onClose={() => setIsModalOpen(false)} 
         achievement={selectedAchievement} 
       />
+      
+      <Modal
+        title={<span className="font-bold text-[18px] flex items-center gap-2">{practiceModalType === "Technical" ? '💻' : '🧠'} {practiceModalType} Practice Badges</span>}
+        open={isPracticeModalOpen}
+        onCancel={() => setIsPracticeModalOpen(false)}
+        footer={null}
+        width={600}
+        centered
+        bodyStyle={{ maxHeight: '70vh', overflowY: 'auto', padding: '24px 16px' }}
+        closeIcon={<span className="text-gray-400 hover:text-gray-600 text-xl">✕</span>}
+      >
+        {renderBadgeList(practiceModalType === "Technical" ? technicalBadges : nonTechnicalBadges)}
+      </Modal>
     </div>
   );
 };
@@ -793,7 +1030,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <section className="w-full h-full flex flex-col items-stretch lg:pt-0 bg-[#FAFAFA]">
+    <section className="w-full h-full flex flex-col items-stretch lg:pt-0 bg-[#EFF5FB]">
       {/* Welcome Section - Top Full Width */}
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         {/* Decorative Icons matching TPO Portal */}
@@ -1043,7 +1280,7 @@ export default function DashboardPage() {
 
         {/* Sidebar */}
         <div className="hidden lg:flex w-[280px] xl:w-[320px] h-full flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] px-4 pt-0 pb-2 shrink-0 z-10 shadow-sm relative">
-          <div className="w-full flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden flex-1 h-full">
+          <div className="w-full flex flex-col flex-1 h-full min-h-0">
             {/* Section 1: Overall Performance */}
             <div className="w-full shrink-0 pt-0 pb-3">
               <ProfileSection
@@ -1075,7 +1312,7 @@ export default function DashboardPage() {
             </div>
             
             {/* Section 3: Achievements */}
-            <div className="w-full relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
+            <div className="w-full flex flex-col relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
               <Achievements progressById={progressById} combinedLearningData={combinedLearningData} studentCreds={studentCreds} />
             </div>
           </div>

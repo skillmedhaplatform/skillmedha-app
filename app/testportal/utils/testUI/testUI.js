@@ -141,7 +141,7 @@ export default function TestUI({
       const { scrollLeft } = categoryScrollRef.current;
       setShowCatLeft(scrollLeft > 0);
       // Ensure right arrow remains visible by default as requested
-      setShowCatRight(true); 
+      setShowCatRight(true);
     }
   };
 
@@ -1010,7 +1010,7 @@ export default function TestUI({
               attempts[currentTestId] = (attempts[currentTestId] || 0) + 1;
               localStorage.setItem("localAttempts", JSON.stringify(attempts));
             }
-          } catch(e) { console.error("Error updating localAttempts", e); }
+          } catch (e) { console.error("Error updating localAttempts", e); }
         }
       }
     }
@@ -1634,16 +1634,16 @@ export default function TestUI({
 
                   return (
                     <div className="flex flex-1 items-center" style={{ marginLeft: '12px', minWidth: 0 }}>
-                      <button 
-                        onClick={() => handleCatScroll('left')} 
-                        className="flex-shrink-0 transition-opacity hover:opacity-70" 
-                        style={{ 
-                          marginRight: '8px', 
-                          width: '24px', 
+                      <button
+                        onClick={() => handleCatScroll('left')}
+                        className="flex-shrink-0 transition-opacity hover:opacity-70"
+                        style={{
+                          marginRight: '8px',
+                          width: '24px',
                           height: '24px',
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center', 
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           background: 'transparent',
                           border: 'none',
                           padding: 0,
@@ -1653,14 +1653,14 @@ export default function TestUI({
                         }}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#1E69DA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M15 18l-6-6 6-6"/>
+                          <path d="M15 18l-6-6 6-6" />
                         </svg>
                       </button>
-                      
-                      <div 
+
+                      <div
                         ref={categoryScrollRef}
                         onScroll={checkCatScroll}
-                        className="flex-1 flex items-center gap-3 overflow-x-auto hide-scrollbar py-1" 
+                        className="flex-1 flex items-center gap-3 overflow-x-auto hide-scrollbar py-1"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', scrollBehavior: 'smooth', minWidth: 0 }}
                       >
                         {allCategories.map((cat, idx) => (
@@ -1682,17 +1682,17 @@ export default function TestUI({
                       </div>
 
                       {showCatRight && (
-                        <button 
-                          onClick={() => handleCatScroll('right')} 
-                          className="flex-shrink-0 transition-opacity hover:opacity-70" 
-                          style={{ 
-                            marginLeft: '8px', 
+                        <button
+                          onClick={() => handleCatScroll('right')}
+                          className="flex-shrink-0 transition-opacity hover:opacity-70"
+                          style={{
+                            marginLeft: '8px',
                             marginRight: '4px',
-                            width: '24px', 
+                            width: '24px',
                             height: '24px',
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             background: 'transparent',
                             border: 'none',
                             padding: 0,
@@ -1700,7 +1700,7 @@ export default function TestUI({
                           }}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#1E69DA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 18l6-6-6-6"/>
+                            <path d="M9 18l6-6-6-6" />
                           </svg>
                         </button>
                       )}
@@ -1732,7 +1732,7 @@ export default function TestUI({
 
                     return (
                       <div className={testStyles.sectionHeader}>
-                        <div className={`${testStyles.sectionName} font-bold text-[22px]` }><i className="ti ti-folder"></i> {currentCatName}</div>
+                        <div className={`${testStyles.sectionName} font-bold text-[22px]`}><i className="ti ti-folder"></i> {currentCatName}</div>
                         <div className={`${testStyles.qCounter} font-bold`}>—&nbsp; Question <span>{currentQues + 1}</span> of {testData?.questions?.length}</div>
                         <div className={`${testStyles.qTypeBadge} font-bold border-[1.5px] border-[#cbd5e1] rounded-md px-2 py-0.5`}><i className="ti ti-list-check" style={{ fontSize: "12px" }}></i> {qType}</div>
                       </div>
@@ -1792,18 +1792,18 @@ export default function TestUI({
                       </button>
                     </div>
                     <div className={testStyles.actionRight}>
-                      <button className={`${testStyles.actBtn} ${testStyles.actBtnFlag}`} onClick={() => { 
+                      <button className={`${testStyles.actBtn} ${testStyles.actBtnFlag}`} onClick={() => {
                         const qid = testData?.questions[currentQues]?._id;
-                        
+
                         if (questionsAddedMark?.includes(qid)) {
                           message.warning("Please clear the mark for review first before flagging.");
                           return;
                         }
-                        
+
                         const existing = flagCheck?.find(e => e.id === qid);
                         setTempFlagSelection(existing ? [...existing.flag] : []);
-                        setIsFlaggedOn(true); 
-                        setOpenFlag(true); 
+                        setIsFlaggedOn(true);
+                        setOpenFlag(true);
                       }}>
                         <i className="ti ti-flag" style={{ fontSize: "14px" }}></i> Flag Question
                       </button>
@@ -2125,25 +2125,25 @@ export default function TestUI({
                             }}
                             className={`flex items-center gap-3 cursor-pointer transition-colors select-none ${isSelected ? 'text-[#7b1fa2] font-bold' : 'text-gray-600 hover:text-[#7b1fa2]'}`}
                           >
-                            <input 
-                              type="checkbox" 
-                              checked={isSelected} 
-                              readOnly 
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              readOnly
                               className="w-[18px] h-[18px] rounded-[4px] border-2 border-gray-300 accent-[#7b1fa2] cursor-pointer"
                             />
                             <span className="text-[15px]">{flagopt}</span>
                           </div>
                         );
                       })}
-                      
+
                       <div className="flex justify-end mt-4 pt-4 border-t border-gray-100">
-                        <button 
+                        <button
                           className="font-bold text-[14px] cursor-pointer transition-all border-[1.5px] select-none text-white bg-[#7b1fa2] hover:bg-[#6a1b9a] border-[#7b1fa2]"
                           style={{ padding: '8px 24px', borderRadius: '30px' }}
                           onClick={() => {
                             const qid = testData?.questions[currentQues]?._id;
                             let newFlags = [...flagCheck];
-                            
+
                             if (tempFlagSelection.length === 0) {
                               newFlags = newFlags.filter(e => e.id !== qid);
                             } else {
@@ -2154,10 +2154,10 @@ export default function TestUI({
                                 newFlags.push({ id: qid, flag: tempFlagSelection });
                               }
                             }
-                            
+
                             setFlagCheck(newFlags);
                             setSstorage("flagged", JSON.stringify(newFlags));
-                            
+
                             setIsFlaggedOn(false);
                             setOpenFlag(false);
                             message.success(<strong>Question flagged successfully</strong>);
