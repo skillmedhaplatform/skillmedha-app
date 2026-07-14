@@ -3,6 +3,8 @@ import {
   BookOpen, Calculator, Code, Database, Globe, 
   MessageSquare, BrainCircuit, Activity, CheckCircle, ChevronRight, Binary, Puzzle, FileText, Volume2
 } from "lucide-react";
+import { Tooltip } from "antd";
+import { InfoOutlined } from "@ant-design/icons";
 
 export default function PracticeCard({
   title,
@@ -12,8 +14,26 @@ export default function PracticeCard({
   progress = 0,
   onStart,
   loading = false,
-  subjectTitle = ""
+  subjectTitle = "",
+  actualTotalQuestions = 0,
+  id
 }) {
+  const [hasResumeState, setHasResumeState] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && id) {
+      const saved = localStorage.getItem(`practice_resume_${id}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.userResponse && parsed.userResponse.length > 0) {
+            setHasResumeState(true);
+          }
+        } catch (e) {}
+      }
+    }
+  }, [id]);
+
   // Determine color theme based on subject/title
   const getTheme = () => {
     const text = (subjectTitle + title).toLowerCase();
@@ -83,6 +103,23 @@ export default function PracticeCard({
         className="absolute top-0 bottom-0 left-0 w-[4px]" 
         style={{ backgroundColor: theme.border }}
       />
+
+      {/* Info Tooltip */}
+      <div className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors z-10" onClick={(e) => e.stopPropagation()}>
+        <Tooltip 
+          title={
+            <div className="text-[11px] leading-tight flex flex-col gap-1.5 p-1">
+              <div><strong className="text-[#38bdf8]">Progress:</strong> Retains your highest score in a single attempt.</div>
+              <div><strong className="text-[#38bdf8]">Badges:</strong> Score 100% to earn Master badges.</div>
+              <div><strong className="text-[#38bdf8]">Level Up:</strong> Score 100% on new questions for <em className="text-white">Flawless</em> badges, or on practiced questions for <em className="text-white">Recall</em> badges!</div>
+            </div>
+          }
+          color="#0f172a"
+          placement="topRight"
+        >
+          <InfoOutlined style={{ fontSize: '16px' }} />
+        </Tooltip>
+      </div>
       
       {/* Top Section */}
       <div className="p-4 xl:p-6 pb-4 flex items-center gap-3 xl:gap-4">
@@ -133,36 +170,40 @@ export default function PracticeCard({
           <span className="text-[11px] font-bold text-[#24A058]">Active</span>
         </div>
         
-        {progress === 0 && (
-          <button 
-            onClick={!loading ? onStart : undefined}
-            disabled={loading}
-            className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white px-5 py-1.5 rounded text-[13px] font-bold border-none cursor-pointer transition-opacity"
-          >
-            {loading ? "..." : "Start"}
-          </button>
-        )}
-        {progress > 0 && progress < 100 && (
-          <button 
-            onClick={!loading ? onStart : undefined}
-            disabled={loading}
-            className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white px-5 py-1.5 rounded text-[13px] font-bold border-none cursor-pointer transition-opacity"
-          >
-            {loading ? "..." : "Re-attempt"}
-          </button>
-        )}
-        {progress === 100 && (
-          <button 
-            onClick={!loading ? onStart : undefined}
-            disabled={loading}
-            className={totalQuestions <= 20 
-              ? "bg-transparent text-[#1E69DA] p-0 text-[13px] font-bold border-none cursor-pointer hover:underline"
-              : "bg-transparent text-[#24A058] p-0 text-[13px] font-bold border-none"
-            }
-            style={totalQuestions > 20 ? { cursor: 'default', textDecoration: 'none' } : {}}
-          >
-            {totalQuestions <= 20 ? (loading ? "..." : "Re-attempt") : "Completed"}
-          </button>
+        {actualTotalQuestions < 20 ? (
+          <Tooltip title="Insufficient questions for this test. We will notify you once the admin adds more.">
+            <button 
+              disabled
+              className="bg-gray-300 text-white px-5 py-1.5 rounded text-[13px] font-bold border-none cursor-not-allowed"
+            >
+              Start
+            </button>
+          </Tooltip>
+        ) : (
+          <>
+            {progress < 100 && (
+              <button 
+                onClick={!loading ? onStart : undefined}
+                disabled={loading}
+                className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white px-5 py-1.5 rounded text-[13px] font-bold border-none cursor-pointer transition-opacity"
+              >
+                {loading ? "..." : (hasResumeState ? "Resume" : "Start")}
+              </button>
+            )}
+            {progress === 100 && (
+              <button 
+                onClick={!loading ? onStart : undefined}
+                disabled={loading}
+                className={totalQuestions <= 20 
+                  ? "bg-transparent text-[#1E69DA] p-0 text-[13px] font-bold border-none cursor-pointer hover:underline"
+                  : "bg-transparent text-[#24A058] p-0 text-[13px] font-bold border-none"
+                }
+                style={totalQuestions > 20 ? { cursor: 'default', textDecoration: 'none' } : {}}
+              >
+                {totalQuestions <= 20 ? (loading ? "..." : "Re-attempt") : "Completed"}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

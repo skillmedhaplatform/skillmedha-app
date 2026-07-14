@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import pageStyles from "./testui.module.scss";
 import { Button, Divider, Spin, Input, Result, message, Modal } from "antd";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
@@ -30,7 +30,30 @@ export default function TestPage() {
   const pracQuestions = useSelector(
     (s) => s.practice.pracQuestions?.questionsData || []
   );
-  const questions = pracQuestions;
+  const questions = useMemo(() => {
+    if (pracQuestions.length === 0) return [];
+    
+    // Attempt to restore question order from a previous session
+    let finalQuestions = [...pracQuestions];
+    try {
+      if (typeof window !== 'undefined') {
+        const refId = new URLSearchParams(window.location.search).get('subT') || new URLSearchParams(window.location.search).get('sub');
+        if (refId) {
+          const savedState = localStorage.getItem(`practice_resume_${refId}`);
+          if (savedState) {
+            const parsed = JSON.parse(savedState);
+            if (parsed.questionOrder && parsed.questionOrder.length === finalQuestions.length) {
+              const orderMap = {};
+              parsed.questionOrder.forEach((id, idx) => orderMap[id] = idx);
+              finalQuestions.sort((a, b) => orderMap[a._id] - orderMap[b._id]);
+            }
+          }
+        }
+      }
+    } catch (e) {}
+    
+    return finalQuestions;
+  }, [pracQuestions]);
   const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -48,6 +71,7 @@ export default function TestPage() {
   const [showEndModal, setShowEndModal] = useState(false);
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [testCompleted, setTestCompleted] = useState(false);
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showSubmitBtn, setShowSubmitBtn] = useState(false);
@@ -77,33 +101,47 @@ export default function TestPage() {
   const handleTestCompletion = (isQuit = false) => {
     const attemptedAll = userResponse.length === questions.length;
     
-    if (!isQuit && !attemptedAll) {
-      Modal.warning({
-        title: 'Incomplete Test',
-        content: 'You must attempt all questions to submit this test and calculate progress. Please complete the remaining questions.',
-      });
-      return;
-    }
-
+    // Always show result page, even if quit or unfinished
     setTestCompleted(true);
+    setShowEndModal(false);
+    setShowFinishModal(false);
     
     // Only save if not quitting prematurely, or if you want to save partial tests, 
     // the user requested to NOT count progress if they left without attempting all given questions.
-    if (!isQuit && attemptedAll && pracId) {
-      const correctQuestionIds = userResponse
-        .filter(r => r.isCorrect)
-        .map(r => r.questionId);
-        
-      dispatch(savePracResults({
-        pracId,
-        payload: {
-          score: calculatedScore,
-          totalQuestions: questions.length,
-          correctQuestionIds,
-          attemptedAll,
-          completedAt: new Date().getTime()
-        }
-      }));
+    if (pracId) {
+      if (!isQuit && attemptedAll) {
+        const correctQuestionIds = userResponse
+          .filter(r => r.isCorrect)
+          .map(r => r.questionId);
+          
+        dispatch(savePracResults({
+          pracId,
+          payload: {
+            score: calculatedScore,
+            totalQuestions: questions.length,
+            correctQuestionIds,
+            attemptedAll,
+            completedAt: new Date().getTime()
+          }
+        })).then(() => {
+           localStorage.removeItem(`practice_test_${pracId}`);
+           const refId = subTopicId || subjectId;
+           localStorage.removeItem(`practice_resume_${refId}`);
+           if (correctQuestionIds.length === questions.length && questions.length > 0) {
+             localStorage.setItem("showLevelUpPopup", "true");
+           }
+        });
+      } else {
+        // Discard the unfinished session from DB since they explicitly submitted or quit early
+        dispatch(savePracResults({
+          pracId,
+          payload: { discard: true }
+        })).then(() => {
+           localStorage.removeItem(`practice_test_${pracId}`);
+           const refId = subTopicId || subjectId;
+           localStorage.removeItem(`practice_resume_${refId}`);
+        });
+      }
     }
   };
 
@@ -113,6 +151,9 @@ export default function TestPage() {
     
     if (refId) {
       dispatch(resetUserResponse()); // clear old answers
+      
+      // We don't restore here because questions aren't loaded yet.
+      
       dispatch(
         fetchPracQuestions({
           refId: refId,
@@ -122,6 +163,54 @@ export default function TestPage() {
       );
     }
   }, [subTopicId, subjectId, dispatch, studentCreds?._id]);
+
+  // RESTORE STATE
+  useEffect(() => {
+    if (questions.length > 0) {
+      const refId = subTopicId || subjectId;
+      const storageKey = `practice_resume_${refId}`;
+      const savedState = localStorage.getItem(storageKey);
+      
+      if (savedState) {
+        try {
+          const parsed = JSON.parse(savedState);
+          if (parsed && parsed.userResponse && parsed.userResponse.length > 0) {
+            // Restore Redux state
+            parsed.userResponse.forEach(ur => {
+              // Only dispatch if not already in state to avoid infinite loops
+              dispatch(saveUserResponse(ur));
+            });
+            
+            // Restore local component states
+            if (parsed.currentQuestionIndex !== undefined) setCurrentQuestionIndex(parsed.currentQuestionIndex);
+            if (parsed.selectedAnswers) setSelectedAnswers(parsed.selectedAnswers);
+            if (parsed.tempSelectedAnswers) setTempSelectedAnswers(parsed.tempSelectedAnswers);
+            if (parsed.textAnswers) setTextAnswers(parsed.textAnswers);
+            if (parsed.timeLeft) setTimeLeft(parsed.timeLeft);
+          }
+        } catch (e) {
+          console.error("Failed to parse resume state", e);
+        }
+      }
+    }
+  }, [questions.length, subTopicId, subjectId, dispatch]);
+
+  // SAVE STATE
+  useEffect(() => {
+    if (questions.length > 0 && userResponse.length > 0 && !testCompleted) {
+      const refId = subTopicId || subjectId;
+      const storageKey = `practice_resume_${refId}`;
+      localStorage.setItem(storageKey, JSON.stringify({
+        userResponse,
+        currentQuestionIndex,
+        selectedAnswers,
+        tempSelectedAnswers,
+        textAnswers,
+        timeLeft,
+        questionOrder: questions.map(q => q._id)
+      }));
+    }
+  }, [userResponse, currentQuestionIndex, selectedAnswers, tempSelectedAnswers, textAnswers, timeLeft, questions.length, testCompleted, subTopicId, subjectId]);
 
   useEffect(() => {
     if (testCompleted) return;
@@ -167,9 +256,14 @@ export default function TestPage() {
     return options;
   };
 
-  const currentQuestionOptions = getQuestionOptions(
-    currentQuestion?.questionContent
-  );
+  const currentQuestionOptions = useMemo(() => {
+    const options = getQuestionOptions(currentQuestion?.questionContent);
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+    return options;
+  }, [currentQuestion?._id, currentQuestion?.questionContent]);
 
   const renderHtml = (text) => {
     if (!text) return null;
@@ -368,15 +462,17 @@ export default function TestPage() {
       correctOptionText = selectedAnswer;
     }
     setLoading(true);
-    dispatch(
-      postQuesToAi({
-        explanation: currentQuestion?.answer.explanation,
-        question: currentQuestion?.questionContent.question,
-        answer: correctOptionText,
-      })
-    ).finally(() => {
-      setLoading(false);
-    });
+    // AI Suggestions temporarily disabled per request
+    // dispatch(
+    //   postQuesToAi({
+    //     explanation: currentQuestion?.answer.explanation,
+    //     question: currentQuestion?.questionContent.question,
+    //     answer: correctOptionText,
+    //   })
+    // ).finally(() => {
+    //   setLoading(false);
+    // });
+    setTimeout(() => setLoading(false), 300);
     setShowExplanation(true);
   };
 
@@ -576,17 +672,49 @@ export default function TestPage() {
   }
 
   if (testCompleted) {
+    const totalQ = questions.length;
+    const attempted = userResponse.length;
+    const unattempted = totalQ - attempted;
+    const totalPossibleScore = questions.reduce((acc, q) => acc + (q.scoreSettings?.pointsForCorrectAns || 1), 0);
+    const scorePercentage = totalPossibleScore > 0 ? (calculatedScore / totalPossibleScore) * 100 : 0;
+    const isPerfect = scorePercentage === 100;
+
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', width: '100%', backgroundColor: '#fff' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', width: '100%', backgroundColor: '#f1f5f9', padding: '20px' }}>
         <Result
           status="success"
-          title="Quiz Completed!"
-          subTitle={`Your Final Score: ${calculatedScore} / ${questions.reduce((acc, q) => acc + (q.scoreSettings?.pointsForCorrectAns || 1), 0)}`}
+          title={<span style={{ fontSize: '28px', fontWeight: 600, color: '#1f2937' }}>Quiz Completed!</span>}
+          subTitle={
+            <div style={{ marginTop: '12px', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+              <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#24A058', margin: 0 }}>
+                Your Final Score: {calculatedScore} / {totalPossibleScore}
+              </p>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', margin: '24px 0', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '16px 0' }}>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#3b82f6' }}>{totalQ}</div>
+                  <div style={{ fontSize: '13px', color: '#64748b', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total</div>
+                </div>
+                <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#24A058' }}>{attempted}</div>
+                  <div style={{ fontSize: '13px', color: '#64748b', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Answered</div>
+                </div>
+                <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#d9363e' }}>{unattempted}</div>
+                  <div style={{ fontSize: '13px', color: '#64748b', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Skipped</div>
+                </div>
+              </div>
+            </div>
+          }
           extra={[
             <Button
               type="primary"
-              onClick={() => router.replace("/student/practice-new/nontechnical")}
+              onClick={() => router.replace(`/student/practice-new/${subjectType === "Technical" ? "technical" : "nontechnical"}`)}
               key="restart"
+              size="large"
+              style={{ backgroundColor: '#24A058', borderColor: '#24A058', minWidth: '120px' }}
             >
               Practice
             </Button>,
@@ -594,11 +722,111 @@ export default function TestPage() {
               type="default"
               onClick={() => window.location.reload()}
               key="reattempt"
+              size="large"
+              style={{ minWidth: '120px' }}
             >
               Re-attempt
             </Button>,
+            isPerfect && (
+              <Button
+                type="primary"
+                onClick={() => setShowBadgeModal(true)}
+                key="collect"
+                size="large"
+                style={{ backgroundColor: '#eab308', borderColor: '#eab308', color: '#fff', minWidth: '120px' }}
+              >
+                <TbSparkles style={{ marginRight: '6px' }} /> Collect Badge
+              </Button>
+            )
           ]}
-        />
+        >
+          {!isPerfect && (
+            <div style={{ marginTop: '40px', maxWidth: '500px', margin: '40px auto 0', textAlign: 'left' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontSize: '14px', color: '#475569' }}>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <div style={{ color: '#2563eb', padding: '6px 0' }}>
+                    <TbTrophy size={26} />
+                  </div>
+                  <div>
+                    <strong style={{ display: 'block', color: '#1e293b', marginBottom: '4px', fontSize: '16px' }}>Flawless Badge</strong>
+                    <span style={{ lineHeight: 1.5, display: 'block' }}>Get every single question right in one attempt to earn this badge.</span>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <div style={{ color: '#db2777', padding: '6px 0' }}>
+                    <TbClock size={26} />
+                  </div>
+                  <div>
+                    <strong style={{ display: 'block', color: '#1e293b', marginBottom: '4px', fontSize: '16px' }}>Recall Badge</strong>
+                    <span style={{ lineHeight: 1.5, display: 'block' }}>Retake this topic after 24 hours and score 100% again to prove your memory.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </Result>
+
+        <Modal
+          open={showBadgeModal}
+          onCancel={() => setShowBadgeModal(false)}
+          footer={null}
+          closeIcon={<TbCircleX size={24} color="#9ca3af" />}
+          width={400}
+          centered
+          bodyStyle={{ padding: 0, borderRadius: '16px', overflow: 'hidden' }}
+        >
+          <div style={{ background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)', padding: '40px 24px 24px', textAlign: 'center' }}>
+            <div style={{ display: 'inline-block', position: 'relative', marginBottom: '24px' }}>
+              <div style={{ background: '#3b82f6', borderRadius: '50%', width: '120px', height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.5)' }}>
+                <TbTrophy size={64} color="#fef08a" />
+              </div>
+              <div style={{ position: 'absolute', bottom: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#2563eb', color: 'white', padding: '4px 16px', borderRadius: '20px', fontWeight: 'bold', fontSize: '12px', letterSpacing: '1px', boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.4)' }}>
+                FLAWLESS
+              </div>
+            </div>
+            
+            <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#1e293b', margin: '0 0 12px 0' }}>Congratulations! 🎉</h2>
+            <p style={{ color: '#475569', fontSize: '14px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
+              You've achieved a perfect score! Your dedication and focus have earned you the <strong>Flawless Badge</strong>.
+            </p>
+            
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', gap: '16px', textAlign: 'left', marginBottom: '24px' }}>
+              <div style={{ flex: 1 }}>
+                <strong style={{ display: 'block', color: '#1e293b', fontSize: '14px', marginBottom: '4px' }}>Flawless Badge Unlocked</strong>
+                <span style={{ color: '#64748b', fontSize: '12px', lineHeight: 1.4, display: 'block' }}>Awarded for getting every question right in one attempt.</span>
+              </div>
+              <div style={{ background: '#dbeafe', color: '#2563eb', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <TbTrophy size={24} />
+              </div>
+            </div>
+            
+            <Button 
+              type="primary" 
+              size="large" 
+              block 
+              style={{ height: '48px', fontSize: '16px', fontWeight: 600, backgroundColor: '#22c55e', borderColor: '#22c55e' }}
+              onClick={() => {
+                localStorage.setItem('autoOpenBadgeModal', subjectType === 'Technical' ? 'Technical' : 'Non-Technical');
+                
+                // Add a notice for the Notice Board
+                const notices = JSON.parse(localStorage.getItem('pendingPracticeNotices') || '[]');
+                notices.push({
+                  id: `badge_notice_${Date.now()}`,
+                  type: 'badge',
+                  title: '🏆 New Badge Earned!',
+                  message: `You unlocked a Flawless badge. Click to view!`,
+                  actionUrl: `#openBadges_${subjectType === 'Technical' ? 'Technical' : 'Non-Technical'}`
+                });
+                localStorage.setItem('pendingPracticeNotices', JSON.stringify(notices));
+
+                router.push("/student/dashboard");
+              }}
+            >
+              View in Achievements
+            </Button>
+          </div>
+        </Modal>
       </div>
     );
   }
@@ -614,8 +842,8 @@ export default function TestPage() {
           <div className={`${pageStyles.timerPill} ${timeLeft <= 300 ? pageStyles.danger : ""}`}>
             <TbClock /> <span>{formatTime(timeLeft)}</span>
           </div>
-          <button className={pageStyles.quitBtn} onClick={() => setShowEndModal(true)}>
-            <TbDoorExit /> Quit Test
+          <button className={pageStyles.quitBtn} onClick={() => userResponse.length === questions.length ? setShowFinishModal(true) : setShowEndModal(true)}>
+            <TbDoorExit /> {userResponse.length === questions.length ? "Submit Test" : "Quit Test"}
           </button>
         </div>
       </div>
@@ -635,7 +863,7 @@ export default function TestPage() {
               </div>
             </div>
             <div className={pageStyles.progNav}>
-              <div className={`${pageStyles.navArrow} ${isLastQuestion ? pageStyles.disabled : ""}`} onClick={() => isLastQuestion ? null : handleNext()}>
+              <div className={`${pageStyles.navArrow} ${isLastQuestionIndex ? pageStyles.disabled : ""}`} onClick={() => isLastQuestionIndex ? null : handleNext()}>
                 <TbArrowRight />
               </div>
             </div>
@@ -666,58 +894,56 @@ export default function TestPage() {
                   className={pageStyles.submitBtn} 
                   onClick={handleNext}
                 >
-                  <TbArrowRight /> {isLastQuestion ? "Finish Test" : "Next Question"}
+                  <TbArrowRight /> {isLastQuestionIndex ? "Finish Test" : "Next Question"}
                 </button>
               )}
             </div>
-          </div>
+            <div className={pageStyles.panelCard} style={{ marginTop: '32px', flex: 'none', border: '2px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
+                <div className={pageStyles.panelHeader}>
+                  <div className={pageStyles.panelTitle}>
+                    <TbBulb style={{ color: "#ffa726" }} /> Solution Explanation
+                  </div>
+                </div>
+                <div className={pageStyles.panelBody}>
+                  {showExplanation ? (
+                    <>
+                      <div className={pageStyles.expContent} dangerouslySetInnerHTML={{ __html: parseIfJson(currentQuestion.answer.explanation) }}></div>
+                      
+                      {currentQuestion.answer?.quickTip && (
+                        <div className={pageStyles.quickTipBox}>
+                          <div className={pageStyles.qtIcon}><TbBulb /></div>
+                          <div className={pageStyles.qtText}>
+                            <strong>Quick Tip</strong>
+                            <div>{currentQuestion.answer.quickTip}</div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {currentQuestion.answer?.whyIncorrect && (
+                        <div className={pageStyles.whyIncorrectBox}>
+                          <div className={pageStyles.wiIcon}><TbAlertTriangle /></div>
+                          <div className={pageStyles.wiText}>
+                            <strong>Why other options are incorrect?</strong>
+                            <div>{currentQuestion.answer.whyIncorrect}</div>
+                          </div>
+                        </div>
+                      )}
 
-          <div className={pageStyles.panelCard} style={{ marginTop: '16px', flex: 'none' }}>
-            <div className={pageStyles.panelHeader}>
-              <div className={pageStyles.panelTitle}>
-                <TbBulb style={{ color: "#ffa726" }} /> Solution Explanation
+                      <div className={`${pageStyles.resultBanner} ${checkAnswer(currentQuestion._id, selectedAnswers[currentQuestion._id]) ? pageStyles.correct : pageStyles.wrong}`}>
+                        {checkAnswer(currentQuestion._id, selectedAnswers[currentQuestion._id]) ? <TbCircleCheck /> : <TbCircleX />}
+                        {checkAnswer(currentQuestion._id, selectedAnswers[currentQuestion._id]) ? 'Correct! Well done.' : 'Incorrect — review the explanation above.'}
+                      </div>
+                    </>
+                  ) : (
+                    <div className={pageStyles.emptyState}>
+                      <div className={`${pageStyles.emptyIcon} ${pageStyles.yellow}`}><TbBulb /></div>
+                      <div className={pageStyles.emptyText}>Answer the question to see the explanation</div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            <div className={pageStyles.panelBody}>
-              {showExplanation ? (
-                <>
-                  <div className={pageStyles.expContent} dangerouslySetInnerHTML={{ __html: parseIfJson(currentQuestion.answer.explanation) }}></div>
-                  
-                  {currentQuestion.answer?.quickTip && (
-                    <div className={pageStyles.quickTipBox}>
-                      <div className={pageStyles.qtIcon}><TbBulb /></div>
-                      <div className={pageStyles.qtText}>
-                        <strong>Quick Tip</strong>
-                        <div>{currentQuestion.answer.quickTip}</div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {currentQuestion.answer?.whyIncorrect && (
-                    <div className={pageStyles.whyIncorrectBox}>
-                      <div className={pageStyles.wiIcon}><TbAlertTriangle /></div>
-                      <div className={pageStyles.wiText}>
-                        <strong>Why other options are incorrect?</strong>
-                        <div>{currentQuestion.answer.whyIncorrect}</div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className={`${pageStyles.resultBanner} ${checkAnswer(currentQuestion._id, selectedAnswers[currentQuestion._id]) ? pageStyles.correct : pageStyles.wrong}`}>
-                    {checkAnswer(currentQuestion._id, selectedAnswers[currentQuestion._id]) ? <TbCircleCheck /> : <TbCircleX />}
-                    {checkAnswer(currentQuestion._id, selectedAnswers[currentQuestion._id]) ? 'Correct! Well done.' : 'Incorrect — review the explanation above.'}
-                  </div>
-                </>
-              ) : (
-                <div className={pageStyles.emptyState}>
-                  <div className={`${pageStyles.emptyIcon} ${pageStyles.yellow}`}><TbBulb /></div>
-                  <div className={pageStyles.emptyText}>Answer the question to see the explanation</div>
-                </div>
-              )}
-            </div>
           </div>
-
-        </div>
 
         <div className={pageStyles.rightCol}>
           <div className={pageStyles.scoreRow}>
@@ -741,28 +967,19 @@ export default function TestPage() {
               <div className={pageStyles.panelTitle}>
                 <TbSparkles style={{ color: "#42a5f5" }} /> AI Suggestion
               </div>
-              <button className={pageStyles.panelIconBtn} onClick={() => dispatch(postQuesToAi({
-                explanation: currentQuestion?.answer.explanation,
-                question: currentQuestion?.questionContent.question,
-                answer: currentQuestion?.questionType === "True/False" ? currentQuestion?.answer.trueFalse.toString() : "Answer"
-              }))} disabled={loading || !showExplanation}>
+              <button className={pageStyles.panelIconBtn} onClick={() => {}} disabled={true}>
                 <TbRefresh />
               </button>
             </div>
             <div className={pageStyles.panelBody}>
               {loading ? (
                 <div style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
-                  <Spin spinning tip="Generating..." />
-                </div>
-              ) : showExplanation ? (
-                <div className={pageStyles.aiContent}>
-                  <TbSparkles style={{ color: "#42a5f5", marginRight: "5px" }} />
-                  {renderHtml(aiSuggestions)}
+                  <Spin spinning tip="Loading..." />
                 </div>
               ) : (
-                <div className={pageStyles.emptyState}>
+                <div className={pageStyles.emptyState} style={{ height: '100%', justifyContent: 'center' }}>
                   <div className={`${pageStyles.emptyIcon} ${pageStyles.blue}`}><TbRobot /></div>
-                  <div className={pageStyles.emptyText}>Select and submit your answer to see AI suggestions</div>
+                  <div className={pageStyles.emptyText} style={{ margin: '0 auto', fontSize: '14px', fontWeight: '500' }}>✨ This feature is available soon!</div>
                 </div>
               )}
             </div>
@@ -770,13 +987,13 @@ export default function TestPage() {
 
 
 
-          <div className={pageStyles.panelCard}>
+          <div className={pageStyles.panelCard} style={{ flex: 'none' }}>
             <div className={pageStyles.panelHeader}>
               <div className={pageStyles.panelTitle}>
                 <TbListCheck style={{ color: "#8e24aa" }} /> Question Navigator
               </div>
             </div>
-            <div className={pageStyles.panelBody} style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className={pageStyles.panelBody} style={{ display: 'flex', flexDirection: 'column', overflowY: 'visible' }}>
               <div className={pageStyles.dotsRow}>
                 {questions.map((_, idx) => {
                   let cls = pageStyles.dot;
@@ -858,9 +1075,8 @@ export default function TestPage() {
           </button>
           <button className={pageStyles.confirmBtn} onClick={() => {
             handleTestCompletion(true);
-            router.replace("/student/practice-new/nontechnical");
           }}>
-            <TbCircleCheck /> Yes, Quit Test
+            <TbCircleCheck /> Yes, End Test
           </button>
         </div>
       </Modal>

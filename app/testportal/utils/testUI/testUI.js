@@ -3,13 +3,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { decryptObject } from "../encryptionMiddleware";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Modal, Progress, Spin, ConfigProvider } from "antd";
+import { Button, Modal, Progress, Spin, ConfigProvider, Dropdown } from "antd";
 import { Maximize, Minimize, Send, Shield, Monitor } from 'lucide-react';
 import {
-  clear_response,
+  clear_all_responses,
   getSingleJobTest,
   getSingleTest,
   mark_for_review,
+  unmark_for_review,
+  clear_response,
   save_response,
   updateTimeTaken,
 } from "@/app/testportal/redux/slices/testSlice";
@@ -64,7 +66,7 @@ export default function TestUI({
 
   const testData = useMemo(() => {
     if (!rawTestData?.questions?.length) return rawTestData;
-    
+
     // Create a deterministic seed based on student ID and test ID
     const studentId = studentCreds?._id || "anonymous";
     const testId = rawTestData._id || "test";
@@ -74,7 +76,7 @@ export default function TestUI({
       seed = (seed << 5) - seed + seedStr.charCodeAt(i);
       seed |= 0;
     }
-    
+
     // Simple LCG random function
     const random = () => {
       const x = Math.sin(seed++) * 10000;
@@ -82,7 +84,7 @@ export default function TestUI({
     };
 
     const cloned = JSON.parse(JSON.stringify(rawTestData));
-    
+
     // 1. Group questions by category
     const byCategory = {};
     cloned.questions.forEach(q => {
@@ -90,17 +92,17 @@ export default function TestUI({
       if (!byCategory[cat]) byCategory[cat] = [];
       byCategory[cat].push(q);
     });
-    
+
     // 2. Shuffle questions inside each category, AND shuffle their options
     let shuffledQuestions = [];
     for (const cat in byCategory) {
       const catQues = byCategory[cat];
-      
+
       for (let i = catQues.length - 1; i > 0; i--) {
         const j = Math.floor(random() * (i + 1));
         [catQues[i], catQues[j]] = [catQues[j], catQues[i]];
       }
-      
+
       // Shuffle options for each question
       catQues.forEach(q => {
         if (q.questionContent?.options?.length > 1) {
@@ -111,16 +113,17 @@ export default function TestUI({
           }
         }
       });
-      
+
       shuffledQuestions.push(...catQues);
     }
-    
+
     cloned.questions = shuffledQuestions;
     return cloned;
   }, [rawTestData, studentCreds?._id]);
   let tabSwitchCount = parseInt(getSstorage("tabChangeCount"));
   let blockMsg = getSstorage("blockMsg");
   const [flagCheck, setFlagCheck] = useState([]);
+  const [tempFlagSelection, setTempFlagSelection] = useState([]);
   const [testStarted, setTestStarted] = useState(
     getSstorage("testStarted") === "true"
   );
@@ -129,12 +132,48 @@ export default function TestUI({
     getSstorage("activeCategory") || null
   );
   const categoryTabsRef = useRef({});
+  const categoryScrollRef = useRef(null);
+  const [showCatLeft, setShowCatLeft] = useState(false);
+  const [showCatRight, setShowCatRight] = useState(true);
 
+  const checkCatScroll = () => {
+    if (categoryScrollRef.current) {
+      const { scrollLeft } = categoryScrollRef.current;
+      setShowCatLeft(scrollLeft > 0);
+      // Ensure right arrow remains visible by default as requested
+      setShowCatRight(true);
+    }
+  };
+
+  const handleCatScroll = (dir) => {
+    if (categoryScrollRef.current) {
+      // Find the approximate width of a single card + gap
+      const firstChild = categoryScrollRef.current.children[0];
+      const scrollAmount = firstChild ? firstChild.offsetWidth + 12 : 250;
+      categoryScrollRef.current.scrollBy({ left: dir === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  useEffect(() => {
+    const timer = setInterval(checkCatScroll, 500); // Check repeatedly to catch any layout shifts
+    window.addEventListener('resize', checkCatScroll);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('resize', checkCatScroll);
+    };
+  }, [testData, currentQues]);
+
+  useEffect(() => {
+    if (testData?.questions?.length > 0 && currentQues >= testData.questions.length) {
+      setCurrentQues(0);
+      setSstorage("currQues", 0);
+    }
+  }, [testData, currentQues]);
 
   const timeoutRef = useRef(null);
   const testIdEnc = searchParams.get("st_d");
   const studentEnc = searchParams.get("st_t");
-  const { testId, attemptId } = decryptObject(testIdEnc, "studentTestIDValue");
+  const { testId, attemptId } = decryptObject(testIdEnc, "studentTestIDValue") || {};
   const token = searchParams.get("st");
   const testType = searchParams.get("testtype");
   const attemptIdFromSstorage = getSstorage("attemptId");
@@ -240,6 +279,38 @@ export default function TestUI({
     if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
     return `${days} day${days !== 1 ? "s" : ""} ago`;
   };
+
+  // Disable Developer Tools during the test
+  useEffect(() => {
+    const disableDevTools = (e) => {
+      // Prevent F12
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+      }
+      // Prevent Ctrl+Shift+I / J / C and Ctrl+U
+      if (e.ctrlKey || e.metaKey) {
+        const key = e.key ? e.key.toLowerCase() : '';
+        if (e.shiftKey && (key === 'i' || key === 'j' || key === 'c' || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+          e.preventDefault();
+        }
+        if (key === 'u' || e.keyCode === 85) {
+          e.preventDefault();
+        }
+      }
+    };
+    const disableContextMenu = (e) => {
+      e.preventDefault();
+    };
+
+    if (testStarted) {
+      document.addEventListener('keydown', disableDevTools);
+      document.addEventListener('contextmenu', disableContextMenu);
+    }
+    return () => {
+      document.removeEventListener('keydown', disableDevTools);
+      document.removeEventListener('contextmenu', disableContextMenu);
+    };
+  }, [testStarted]);
 
   // Latest message display component
   const ProctorMessageDisplay = () => {
@@ -383,13 +454,24 @@ export default function TestUI({
   }, []);
 
   // ALL YOUR EXISTING CODE FROM HERE
+  // Clear stale session storage if loading a new test attempt
   useEffect(() => {
-    if (!flagCheck?.length && getSstorage("flagged")) {
+    if (attemptId && attemptId !== getSstorage("lastAttemptId")) {
+      clearSstorageVals("flagged");
+      clearSstorageVals("marked");
+      clearSstorageVals("value");
+      clearSstorageVals("currQues");
+      clearSstorageVals("activeCategory");
+      setSstorage("lastAttemptId", attemptId);
+      setSstorage("activeTestId", testId);
+      setFlagCheck([]);
+      dispatch(clear_all_responses());
+    } else if (!flagCheck?.length && getSstorage("flagged")) {
       setFlagCheck(parseIfJson(getSstorage("flagged")));
     } else {
       setSstorage("flagged", JSON.stringify(flagCheck));
     }
-  }, []);
+  }, [attemptId, testId, dispatch]);
 
   useEffect(() => {
     if (token) {
@@ -611,6 +693,7 @@ export default function TestUI({
       userId: getSstorage("userId"),
       ...userData,
       flagged: flagCheck,
+      marked: questionsAddedMark,
       response: finalResponses,
       studentData: {
         ...userData.studentData,
@@ -665,6 +748,7 @@ export default function TestUI({
             response: persistedResult?.response || finalResponses,
             studentData: persistedResult?.studentData,
             flagged: persistedResult?.flagged,
+            marked: persistedResult?.marked,
             scoreData: persistedResult?.scoreData,
           }),
         );
@@ -735,13 +819,15 @@ export default function TestUI({
     }
   }, [activeCategory]);
 
-  // Set initial activeCategory on mount if not in storage
+  // Keep activeCategory synced with currentQues at all times
   useEffect(() => {
-    if (testData?.questions?.length > 0 && !activeCategory) {
-      const initialCat = testData.questions[currentQues]?.questionCategory?.[0]?.name || "Uncategorized";
-      setActiveCategory(initialCat);
+    if (testData?.questions?.length > 0) {
+      const currentCatName = testData.questions[currentQues]?.questionCategory?.[0]?.name || "Uncategorized";
+      if (activeCategory !== currentCatName) {
+        setActiveCategory(currentCatName);
+      }
     }
-  }, [testData, currentQues, activeCategory]);
+  }, [testData, currentQues]);
 
   // Keyboard shortcuts: ← → arrow keys for navigation + block reload keys
   useEffect(() => {
@@ -787,8 +873,8 @@ export default function TestUI({
     };
   }, [currentQues, testStarted, testData]);
 
-  const showModalTime = () => {
-    setOpenTime(true);
+  const showModalTime = (val) => {
+    setOpenTime(val);
   };
 
   useEffect(() => {
@@ -852,8 +938,6 @@ export default function TestUI({
   const handleSaveQuestion = () => {
     const totalTimeTaken = stopTimer();
 
-    if (event.target.innerText == "Finish") return setOpen(true);
-
     if (
       !Object.keys(responses?.value)?.includes(
         testData?.questions[currentQues]?._id,
@@ -871,7 +955,7 @@ export default function TestUI({
         save_response({
           questionId: testData?.questions[currentQues]._id,
           response:
-            responses?.value[testData?.questions[currentQues]?._id]?.answers,
+            responses?.value[testData?.questions[currentQues]?._id]?.answers || [],
           questionType: testData?.questions[currentQues]?.questionType,
         }),
       );
@@ -879,7 +963,8 @@ export default function TestUI({
 
     setAnswers(responses[testData?.questions[currentQues]?._id] || []);
     if (currentQues == testData.questions.length - 1) {
-      submitTest();
+      setOpen(true);
+      return;
     }
     const nextIndex = currentQues + 1;
     setCurrentQues(nextIndex);
@@ -917,6 +1002,15 @@ export default function TestUI({
         if (!testStartedRef.current) {
           setTestStarted(true);
           testStartedRef.current = true;
+
+          try {
+            const currentTestId = testData?.value?.test?._id || testId;
+            if (currentTestId) {
+              const attempts = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("localAttempts") || "{}") : {};
+              attempts[currentTestId] = (attempts[currentTestId] || 0) + 1;
+              localStorage.setItem("localAttempts", JSON.stringify(attempts));
+            }
+          } catch (e) { console.error("Error updating localAttempts", e); }
         }
       }
     }
@@ -974,10 +1068,11 @@ export default function TestUI({
   };
 
   const clearRespFun = () => {
+    const qid = testData?.questions[currentQues]?._id;
     if (testData?.questions[currentQues]?.questionType == "Short Paragraph") {
       dispatch(
         save_response({
-          questionId: testData?.questions[currentQues]._id,
+          questionId: qid,
           response: [""],
           questionType: testData?.questions[currentQues]?.questionType,
         }),
@@ -985,9 +1080,22 @@ export default function TestUI({
     }
     dispatch(
       clear_response({
-        questionId: testData?.questions[currentQues]._id,
+        questionId: qid,
       }),
     );
+    setAnswers([]);
+
+    // Clear Mark for Review
+    if (questionsAddedMark?.includes(qid)) {
+      dispatch(unmark_for_review({ questionId: qid }));
+    }
+
+    // Clear Flag
+    if (flagCheck?.some((f) => f.id === qid)) {
+      const newFlags = flagCheck.filter((f) => f.id !== qid);
+      setFlagCheck(newFlags);
+      setSstorage("flagged", JSON.stringify(newFlags));
+    }
   };
 
   const showModal = () => {
@@ -1351,31 +1459,11 @@ export default function TestUI({
                   {testData?.title || testData?.jobTitle}
                 </h2>
               </div>
-              <div className={testStyles.header2Btns} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <Button 
-                  type="default" 
-                  onClick={requestFullScreen}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f4f8fd', color: '#4a6fa5', border: '1.5px solid #c8ddf5', fontWeight: 600, fontSize: '13px', padding: '7px 16px', borderRadius: '8px', height: 'auto' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eef3fa'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f4f8fd'}
-                >
-                  {fullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />} 
-                  {fullScreen ? "Exit Full Screen" : "Enter Full Screen"}
-                </Button>
-                <Button 
-                  type="primary" 
-                  onClick={showModal}
-                  className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '13px', padding: '8px 18px', borderRadius: '8px', height: 'auto' }}
-                >
-                  <Send className="w-4 h-4" /> Submit
-                </Button>
-              </div>
             </div>
           )}
 
           {/* HEADER2 REMOVED - The new playerApp topbar now handles category tabs and test duration */}
-          
+
           {testData?.messageText && (
             <div
               style={{
@@ -1447,9 +1535,9 @@ export default function TestUI({
               {studentCreds && (
                 <div className={testStyles.userChip}>
                   {(studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture) ? (
-                    <img 
-                      src={studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture} 
-                      alt="User Profile" 
+                    <img
+                      src={studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture}
+                      alt="User Profile"
                       className={testStyles.userChipAv}
                       style={{ objectFit: 'cover', padding: 0 }}
                     />
@@ -1468,7 +1556,7 @@ export default function TestUI({
             // STATE 2: Test started but exited fullscreen — warning, timer keeps running
             <div className="flex-1 w-full flex flex-col items-center justify-center p-6">
               <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] max-w-[480px] w-full p-10 flex flex-col items-center text-center">
-                
+
                 {/* Icon */}
                 <div className="w-24 h-24 rounded-full border-[2px] border-dashed border-[#ff3939] flex items-center justify-center mb-6 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-tr from-[#fff1f1] to-white rounded-full"></div>
@@ -1480,7 +1568,7 @@ export default function TestUI({
                 <h2 className="text-[22px] font-extrabold text-[#ff3939] mb-4 leading-tight flex items-center gap-2 justify-center">
                   <span className="text-[#ffb800] text-2xl">⚠️</span> You Have Exited Fullscreen
                 </h2>
-                
+
                 <p className="text-[15px] text-[#64748b] leading-relaxed mb-8 px-4 font-medium">
                   The exam timer is still running. Please return to fullscreen mode immediately to continue your exam.
                 </p>
@@ -1501,46 +1589,132 @@ export default function TestUI({
             <div className={testStyles.playerApp}>
               {/* Top bar */}
               <div className={testStyles.topbar}>
-                <div className={testStyles.testLogo}>CS</div>
-                <div className={testStyles.testName}>{testData?.testName || "SkillMedha Test"}</div>
-                
+                {testData?.image || testData?.logo ? (
+                  <img
+                    src={testData?.image || testData?.logo}
+                    alt="Test Logo"
+                    className={testStyles.testLogo}
+                    style={{ objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div className={testStyles.testLogo}>
+                    {(testData?.testName || testData?.title || testData?.jobTitle || "ST").substring(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div className={testStyles.testName} style={{ fontSize: '24px', fontWeight: '800' }}>
+                  {testData?.testName || testData?.title || testData?.jobTitle || "SkillMedha Test"}
+                </div>
+
                 {/* Restored topbarMid */}
                 {testData?.questions?.length && (() => {
-                   const currentQuestion = testData?.questions[currentQues];
-                   const currentCatName = currentQuestion?.questionCategory?.[0]?.name || "Uncategorized";
-                   const sameCategory = testData?.questions?.filter(
-                     (q) => (q.questionCategory?.[0]?.name || "Uncategorized") === currentCatName
-                   );
-                   const categoryLocalIndex = sameCategory.findIndex((q) => q._id === currentQuestion?._id);
-                   const displayNumber = categoryLocalIndex + 1;
-                   const totalInCategory = sameCategory.length;
-                   const pct = (displayNumber / totalInCategory) * 100;
+                  const currentQuestion = testData?.questions[currentQues];
+                  const currentCatName = currentQuestion?.questionCategory?.[0]?.name || "Uncategorized";
 
-                   return (
-                      <div className={testStyles.topbarMid}>
-                        <div className={testStyles.catBadge}>
-                          <i className="ti ti-tag" style={{fontSize:"13px"}}></i> {currentCatName} &nbsp;·&nbsp; {displayNumber} / {totalInCategory}
-                        </div>
-                        <div className={testStyles.progressMini}>
-                          <div className={testStyles.progressMiniBar}>
-                            <div className={testStyles.progressMiniFill} style={{width: `${pct}%`}}></div>
+                  // Group all questions by category to count them
+                  const allCategories = [];
+                  const catMap = {};
+                  testData?.questions.forEach(q => {
+                    const cat = q.questionCategory?.[0]?.name || "Uncategorized";
+                    if (!catMap[cat]) {
+                      catMap[cat] = { name: cat, total: 0, questions: [], startIndex: -1 };
+                      allCategories.push(catMap[cat]);
+                    }
+                    if (catMap[cat].startIndex === -1) {
+                      catMap[cat].startIndex = testData.questions.indexOf(q);
+                    }
+                    catMap[cat].total++;
+                    catMap[cat].questions.push(q);
+                  });
+
+                  const sameCategory = catMap[currentCatName]?.questions || [];
+                  const categoryLocalIndex = sameCategory.findIndex((q) => q._id === currentQuestion?._id);
+                  const displayNumber = categoryLocalIndex + 1;
+                  const totalInCategory = sameCategory.length;
+                  const pct = (displayNumber / totalInCategory) * 100;
+
+                  return (
+                    <div className="flex flex-1 items-center" style={{ marginLeft: '12px', minWidth: 0 }}>
+                      <button
+                        onClick={() => handleCatScroll('left')}
+                        className="flex-shrink-0 transition-opacity hover:opacity-70"
+                        style={{
+                          marginRight: '8px',
+                          width: '24px',
+                          height: '24px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: 'transparent',
+                          border: 'none',
+                          padding: 0,
+                          zIndex: 50,
+                          opacity: showCatLeft ? 1 : 0,
+                          pointerEvents: showCatLeft ? 'auto' : 'none'
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#1E69DA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                      </button>
+
+                      <div
+                        ref={categoryScrollRef}
+                        onScroll={checkCatScroll}
+                        className="flex-1 flex items-center gap-3 overflow-x-auto hide-scrollbar py-1"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', scrollBehavior: 'smooth', minWidth: 0 }}
+                      >
+                        {allCategories.map((cat, idx) => (
+                          <div
+                            key={cat.startIndex}
+                            onClick={() => {
+                              setCurrentQues(cat.startIndex);
+                              setActiveCategory(cat.name);
+                            }}
+                            className={`flex items-center gap-2 font-bold text-[14px] cursor-pointer transition-all whitespace-nowrap border-[1.5px] select-none flex-shrink-0 ${currentCatName === cat.name ? 'bg-[#f0f5ff] text-[#1E69DA] border-[#1E69DA]' : 'bg-white text-gray-600 border-[#e2e8f0] hover:border-gray-300 hover:bg-gray-50'}`}
+                            style={{ padding: '8px 24px', borderRadius: '30px' }}
+                          >
+                            <span>{cat.name}</span>
+                            <span className={`text-[13px] opacity-80 ${currentCatName === cat.name ? 'text-[#1E69DA]' : 'text-gray-500'}`}>
+                              {cat.total} Qs
+                            </span>
                           </div>
-                          <div className={testStyles.progressMiniLbl}>Question {currentQues + 1} of {testData?.questions?.length}</div>
-                        </div>
+                        ))}
                       </div>
-                   )
-                })()}                <div className={testStyles.topbarRight}>
+
+                      {showCatRight && (
+                        <button
+                          onClick={() => handleCatScroll('right')}
+                          className="flex-shrink-0 transition-opacity hover:opacity-70"
+                          style={{
+                            marginLeft: '8px',
+                            marginRight: '4px',
+                            width: '24px',
+                            height: '24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: 'transparent',
+                            border: 'none',
+                            padding: 0,
+                            zIndex: 50
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#1E69DA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  )
+                })()}                <div className={testStyles.topbarRight} style={{ width: '234px', justifyContent: 'flex-end' }}>
                   <div className={testStyles.scoreInfo}>
                     <div className={testStyles.scoreLbl}>Duration</div>
                     <div className={testStyles.scoreVal}>
                       {hours ? String(hours).padStart(2, "0") : "00"} : {minutes ? String(minutes).padStart(2, "0") : "00"} : {seconds ? String(seconds).padStart(2, "0") : "00"}
                     </div>
                   </div>
-                  <button className={testStyles.exitBtn} onClick={requestFullScreen}>
-                    <i className="ti ti-arrows-minimize" style={{fontSize:"13px"}}></i> Exit Full Screen
-                  </button>
-                  <button className={testStyles.submitBtn} onClick={() => setOpen(true)}>
-                    <i className="ti ti-send" style={{fontSize:"13px"}}></i> Submit
+                  <button className={testStyles.submitBtn} style={{ marginLeft: '20px' }} onClick={() => setOpen(true)}>
+                    <i className="ti ti-send" style={{ fontSize: "13px" }}></i> Submit
                   </button>
                 </div>
               </div>
@@ -1551,25 +1725,24 @@ export default function TestUI({
                 <div className={testStyles.questionArea}>
                   {/* Category info */}
                   {testData?.questions?.length && (() => {
-                     const currentQuestion = testData?.questions[currentQues];
-                     const currentCatName = currentQuestion?.questionCategory?.[0]?.name || "Uncategorized";
-                     const qScore = testData?.questions[currentQues]?.marks || 0;
-                     const qType = testData?.questions[currentQues]?.questionType || "Objective";
+                    const currentQuestion = testData?.questions[currentQues];
+                    const currentCatName = currentQuestion?.questionCategory?.[0]?.name || "Uncategorized";
+                    const qScore = testData?.questions[currentQues]?.marks || 0;
+                    const qType = testData?.questions[currentQues]?.questionType || "Objective";
 
-                     return (
-                        <div className={testStyles.sectionHeader}>
-                          <div className={testStyles.sectionName}><i className="ti ti-folder"></i> {currentCatName}</div>
-                          <div className={testStyles.qCounter}>—&nbsp; Question <span>{currentQues + 1}</span> of {testData?.questions?.length}</div>
-                          <div className={testStyles.qTypeBadge}><i className="ti ti-list-check" style={{fontSize:"12px"}}></i> {qType}</div>
-                          <div className={testStyles.qScoreBadge}><i className="ti ti-star"></i> Score: {qScore}</div>
-                        </div>
-                     )
+                    return (
+                      <div className={testStyles.sectionHeader}>
+                        <div className={`${testStyles.sectionName} font-bold text-[22px]`}><i className="ti ti-folder"></i> {currentCatName}</div>
+                        <div className={`${testStyles.qCounter} font-bold`}>—&nbsp; Question <span>{currentQues + 1}</span> of {testData?.questions?.length}</div>
+                        <div className={`${testStyles.qTypeBadge} font-bold border-[1.5px] border-[#cbd5e1] rounded-md px-2 py-0.5`}><i className="ti ti-list-check" style={{ fontSize: "12px" }}></i> {qType}</div>
+                      </div>
+                    )
                   })()}
 
                   <div className={testStyles.qScroll}>
                     {/* The original QuestionUI goes here */}
                     {testData?.questions?.length && (() => {
-                      const currentQuestion = testData?.questions[currentQues];
+                      const currentQuestion = testData?.questions?.[currentQues];
                       const currentCatName = currentQuestion?.questionCategory?.[0]?.name || "Uncategorized";
                       const sameCategory = testData?.questions?.filter(
                         (q) => (q.questionCategory?.[0]?.name || "Uncategorized") === currentCatName
@@ -1581,14 +1754,15 @@ export default function TestUI({
                       return (
                         <QuestionUI
                           setAnswers={setAnswers}
-                          answers={responses[testData?.questions[currentQues]._id]}
-                          questionData={testData?.questions[currentQues]}
+                          answers={currentQuestion ? responses[currentQuestion._id] : undefined}
+                          questionData={currentQuestion}
                           currentIndex={currentQues}
                           displayNumber={displayNumber}
                           categoryName={currentCatName}
                           totalInCategory={totalInCategory}
                           clearRespFun={clearRespFun}
                           flagCheck={flagCheck}
+                          isFlagged={flagCheck?.some(f => f.id === currentQuestion?._id && f.flag?.length > 0)}
                         />
                       );
                     })()}
@@ -1597,18 +1771,43 @@ export default function TestUI({
                   {/* Action Bar */}
                   <div className={testStyles.actionBar}>
                     <div className={testStyles.actionLeft}>
-                      <button className={`${testStyles.actBtn} ${testStyles.actBtnReview}`} onClick={() => dispatch(mark_for_review({ questionId: testData?.questions[currentQues]?._id }))}>
-                        <i className="ti ti-bookmark" style={{fontSize:"14px"}}></i> Mark for Review
+                      <button className={`${testStyles.actBtn} ${testStyles.actBtnReview}`} onClick={() => {
+                        const qid = testData?.questions[currentQues]?._id;
+                        if (flagCheck?.some(f => f.id === qid && f.flag?.length > 0)) {
+                          message.warning("Please clear the flag first before marking for review.");
+                          return;
+                        }
+                        const isMarked = questionsAddedMark?.includes(qid);
+                        if (isMarked) {
+                          message.success("Mark for review removed.");
+                        } else {
+                          message.success("Question marked for review.");
+                        }
+                        dispatch(mark_for_review({ questionId: qid }));
+                      }}>
+                        <i className="ti ti-bookmark" style={{ fontSize: "14px" }}></i> Mark for Review
                       </button>
                       <button className={`${testStyles.actBtn} ${testStyles.actBtnClear}`} onClick={clearRespFun}>
-                        <i className="ti ti-eraser" style={{fontSize:"14px"}}></i> Clear Response
+                        <i className="ti ti-eraser" style={{ fontSize: "14px" }}></i> Clear Response
                       </button>
                     </div>
                     <div className={testStyles.actionRight}>
-                      <button className={`${testStyles.actBtn} ${testStyles.actBtnFlag}`} onClick={() => { setIsFlaggedOn(true); setOpenFlag(true); }}>
-                        <i className="ti ti-flag" style={{fontSize:"14px"}}></i> Flag Question
+                      <button className={`${testStyles.actBtn} ${testStyles.actBtnFlag}`} onClick={() => {
+                        const qid = testData?.questions[currentQues]?._id;
+
+                        if (questionsAddedMark?.includes(qid)) {
+                          message.warning("Please clear the mark for review first before flagging.");
+                          return;
+                        }
+
+                        const existing = flagCheck?.find(e => e.id === qid);
+                        setTempFlagSelection(existing ? [...existing.flag] : []);
+                        setIsFlaggedOn(true);
+                        setOpenFlag(true);
+                      }}>
+                        <i className="ti ti-flag" style={{ fontSize: "14px" }}></i> Flag Question
                       </button>
-                      
+
                       {currentQues > 0 ? (
                         <button className={`${testStyles.actBtn} ${testStyles.actBtnNav}`} onClick={() => {
                           const totalTimeTaken = stopTimer();
@@ -1634,13 +1833,24 @@ export default function TestUI({
                             setActiveCategory(prevCat);
                           }
                         }}>
-                          <i className="ti ti-chevron-left" style={{fontSize:"14px"}}></i> Previous
+                          <i className="ti ti-chevron-left" style={{ fontSize: "14px" }}></i> Previous
                         </button>
                       ) : null}
 
-                      <button className={`${testStyles.actBtn} ${testStyles.actBtnNext}`} onClick={handleSaveQuestion}>
-                        {currentQues === (testData?.questions?.length || 0) - 1 ? "Finish" : "Next"} <i className="ti ti-chevron-right" style={{fontSize:"14px"}}></i>
-                      </button>
+                      {(() => {
+                        const qId = testData?.questions[currentQues]?._id;
+                        const hasAnswer = (Object.keys(responses?.value || {}).includes(qId) && responses?.value[qId]?.answers?.length > 0) || testData?.questions[currentQues]?.status === "answered";
+                        const isLast = currentQues === (testData?.questions?.length || 0) - 1;
+                        const isLastInCategory = testData?.questions[currentQues]?.questionCategory?.[0]?.name !== testData?.questions[currentQues + 1]?.questionCategory?.[0]?.name;
+                        const isCurrentlyFlagged = flagCheck?.some(f => f.id === qId && f.flag?.length > 0);
+                        const isCurrentlyMarked = questionsAddedMark?.includes(qId);
+                        const btnLabel = isLast ? "Finish" : (hasAnswer || isLastInCategory || isCurrentlyFlagged || isCurrentlyMarked) ? "Next" : "Skip";
+                        return (
+                          <button className={`${testStyles.actBtn} ${testStyles.actBtnNext} ${!hasAnswer && !isLast ? testStyles.actBtnSkip : ''}`} onClick={handleSaveQuestion}>
+                            {btnLabel} <i className="ti ti-chevron-right" style={{ fontSize: "14px" }}></i>
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -1650,9 +1860,9 @@ export default function TestUI({
                   {/* User */}
                   <div className={`${testStyles.rpUser} ${testStyles.rpSection}`}>
                     {(studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture) ? (
-                      <img 
-                        src={studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture} 
-                        alt="User Profile" 
+                      <img
+                        src={studentCreds?.profile || studentCreds?.profilePic || studentCreds?.profilePicture}
+                        alt="User Profile"
                         className={testStyles.rpAv}
                         style={{ objectFit: 'cover' }}
                       />
@@ -1672,9 +1882,9 @@ export default function TestUI({
                     <div className={testStyles.timerRingOuter}>
                       <svg width="80" height="80" viewBox="0 0 80 80">
                         <circle className={testStyles.timerRingBg} cx="40" cy="40" r="36" />
-                        <circle 
-                          className={testStyles.timerRingFill} 
-                          cx="40" cy="40" r="36" 
+                        <circle
+                          className={testStyles.timerRingFill}
+                          cx="40" cy="40" r="36"
                           style={{
                             strokeDashoffset: 226 * (1 - ((hours * 3600 + minutes * 60 + seconds) / (testData?.timeLimit * 60 || 1))),
                             stroke: (hours * 3600 + minutes * 60 + seconds) < 300 ? '#e53935' : (hours * 3600 + minutes * 60 + seconds) < 600 ? '#ffa726' : '#1565c0'
@@ -1682,7 +1892,7 @@ export default function TestUI({
                         />
                       </svg>
                       <div className={testStyles.timerCenter}>
-                        <div className={testStyles.timerVal} style={{color: (hours * 3600 + minutes * 60 + seconds) < 300 ? '#c62828' : (hours * 3600 + minutes * 60 + seconds) < 600 ? '#e65100' : '#0d47a1'}}>
+                        <div className={testStyles.timerVal} style={{ color: (hours * 3600 + minutes * 60 + seconds) < 300 ? '#c62828' : (hours * 3600 + minutes * 60 + seconds) < 600 ? '#e65100' : '#0d47a1' }}>
                           {minutes ? String(minutes).padStart(2, "0") : "00"}:{seconds ? String(seconds).padStart(2, "0") : "00"}
                         </div>
                         <div className={testStyles.timerLbl}>Remaining</div>
@@ -1692,53 +1902,9 @@ export default function TestUI({
 
                   {/* Webcam */}
                   <div className={testStyles.webcamBox}>
-                    <video ref={videoFaceRef} autoPlay={true} muted={true} style={{width:'100%', height:'100%', objectFit:'cover', borderRadius:'10px', transform: 'scaleX(-1)'}} />
+                    <video ref={videoFaceRef} autoPlay={true} muted={true} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px', transform: 'scaleX(-1)' }} />
                     <div className={testStyles.recBadge}><div className={testStyles.recDot}></div> REC</div>
                   </div>
-
-                  {/* Status Legend */}
-                  {(() => {
-                    const questions = testData?.questions || [];
-                    const responseKeys = Object.keys(responses?.value || {});
-                    const markedIds = questionsAddedMark || [];
-
-                    let answeredCount = 0;
-                    let notAnsweredCount = 0;
-                    let markedCount = 0;
-                    let markedAndAnsweredCount = 0;
-                    let unattemptedCount = 0;
-
-                    questions.forEach((q) => {
-                      const hasResponse = responseKeys.includes(q._id) && responses?.value[q._id]?.answers?.length > 0;
-                      const isMarked = markedIds.includes(q._id);
-
-                      if (isMarked && hasResponse) markedAndAnsweredCount++;
-                      else if (isMarked) markedCount++;
-                      else if (q.status === "answered" || hasResponse) answeredCount++;
-                      else if (q.status === "not answered") notAnsweredCount++;
-                      else unattemptedCount++;
-                    });
-
-                    return (
-                      <div className={`${testStyles.statusLegend} ${testStyles.rpSection}`}>
-                        <div className={testStyles.legendTitle}>Question Status</div>
-                        <div className={testStyles.legendGrid}>
-                          <div className={testStyles.legendItem}>
-                            <div className={`${testStyles.legendDot} ${testStyles.answered}`}>{answeredCount}</div> Answered
-                          </div>
-                          <div className={testStyles.legendItem}>
-                            <div className={`${testStyles.legendDot} ${testStyles.notAnswered}`} style={{color:"var(--text2)"}}>{unattemptedCount + notAnsweredCount}</div> Not Answered
-                          </div>
-                          <div className={testStyles.legendItem}>
-                            <div className={`${testStyles.legendDot} ${testStyles.marked}`}>{markedCount}</div> Marked
-                          </div>
-                          <div className={testStyles.legendItem}>
-                            <div className={`${testStyles.legendDot} ${testStyles.markedAnswered}`}>{markedAndAnsweredCount}</div> Marked & Answered
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })()}
 
                   {/* Question grid */}
                   {(() => {
@@ -1753,20 +1919,40 @@ export default function TestUI({
 
                     return (
                       <div className={testStyles.qgridWrap}>
-                        <div className={testStyles.qgridLabel}>Jump to question</div>
+                        <div className={testStyles.qgridLabel}>Question Navigator</div>
                         <div className={testStyles.qgrid}>
                           {filteredQuestions?.map((e, localIndex) => {
                             const ind = e.globalIndex;
                             let cName = testStyles.qnumBtn;
-                            
-                            if (ind === currentQues) {
-                              cName += ` ${testStyles.current}`;
-                            } else if (questionsAddedMark?.includes(e._id) && (e.status === "answered" || (Object.keys(responses?.value || {}).includes(e._id) && responses?.value[e._id]?.answers?.length > 0))) {
-                              cName += ` ${testStyles.markedAnswered}`;
+
+                            let statusBase = "";
+                            const isAnswered = e.status === "answered" || (Object.keys(responses?.value || {}).includes(e._id) && responses?.value[e._id]?.answers?.length > 0);
+                            const isFlagged = flagCheck?.find((f) => f.id == e._id && f.flag.length > 0);
+
+                            const isSkipped = responses?.value?.[e._id]?.answers !== undefined && responses?.value?.[e._id]?.answers?.length === 0;
+
+                            if (isFlagged) {
+                              statusBase = "flagged";
+                            } else if (questionsAddedMark?.includes(e._id) && isAnswered) {
+                              statusBase = "markedAnswered";
                             } else if (questionsAddedMark?.includes(e._id)) {
-                              cName += ` ${testStyles.marked}`;
-                            } else if (e.status === "answered" || (Object.keys(responses?.value || {}).includes(e._id) && responses?.value[e._id]?.answers?.length > 0)) {
-                              cName += ` ${testStyles.answered}`;
+                              statusBase = "marked";
+                            } else if (isAnswered) {
+                              statusBase = "answered";
+                            } else if (isSkipped) {
+                              statusBase = "skipped";
+                            } else if (e.status === "not answered") {
+                              statusBase = "notAnswered";
+                            }
+
+                            if (statusBase) {
+                              if (ind === currentQues) {
+                                cName += ` ${testStyles[statusBase + '_current'] || testStyles.current}`;
+                              } else {
+                                cName += ` ${testStyles[statusBase]}`;
+                              }
+                            } else if (ind === currentQues) {
+                              cName += ` ${testStyles.current}`;
                             }
 
                             const displayNum = localIndex + 1;
@@ -1785,14 +1971,67 @@ export default function TestUI({
                     );
                   })()}
 
+                  {/* Status Legend */}
+                  {(() => {
+                    const questions = testData?.questions || [];
+                    const responseKeys = Object.keys(responses?.value || {});
+                    const markedIds = questionsAddedMark || [];
+
+                    let answeredCount = 0;
+                    let notAnsweredCount = 0;
+                    let markedCount = 0;
+                    let markedAndAnsweredCount = 0;
+                    let skippedCount = 0;
+                    let flaggedCount = 0;
+
+                    questions.forEach((q) => {
+                      const hasResponse = responseKeys.includes(q._id) && responses?.value[q._id]?.answers?.length > 0;
+                      const isMarked = markedIds.includes(q._id);
+                      const isFlagged = flagCheck?.some(f => f.id === q._id && f.flag?.length > 0);
+
+                      if (isFlagged) flaggedCount++;
+                      else if (isMarked && hasResponse) markedAndAnsweredCount++;
+                      else if (isMarked) markedCount++;
+                      else if (q.status === "answered" || hasResponse) answeredCount++;
+                      else if (q.status === "not answered") notAnsweredCount++;
+                      else skippedCount++;
+                    });
+
+                    return (
+                      <div className={`${testStyles.statusLegend} ${testStyles.rpSection}`}>
+                        <div className={testStyles.legendTitle}>Question Status</div>
+                        <div className={testStyles.legendGrid}>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.answered}`}>{answeredCount}</div> Answered
+                          </div>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.notAnswered}`}>{notAnsweredCount}</div> Not Answered
+                          </div>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.marked}`}>{markedCount}</div> Marked
+                          </div>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.markedAnswered}`}>{markedAndAnsweredCount}</div> Marked & Answered
+                          </div>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.skipped}`}>{skippedCount}</div> Skipped
+                          </div>
+                          <div className={testStyles.legendItem}>
+                            <div className={`${testStyles.legendDot} ${testStyles.flagged}`}>{flaggedCount}</div> Flagged
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+
                 </div>
               </div>
 
 
 
-                {/* ALL YOUR EXISTING MODALS */}
-                <>
-                {open && (() => {
+              {/* ALL YOUR EXISTING MODALS */}
+              <>
+                {(open || openTime) && (() => {
                   const questions = testData?.questions || [];
                   const responseKeys = Object.keys(responses?.value || {});
                   const markedIds = questionsAddedMark || [];
@@ -1817,111 +2056,121 @@ export default function TestUI({
                   return (
                     <div className={`${testStyles.modalOverlay} ${testStyles.show}`}>
                       <div className={testStyles.modalBox}>
-                        <div className={testStyles.modalIcon}><i className="ti ti-alert-triangle"></i></div>
-                        <div className={testStyles.modalTitle}>Are you sure you want to end this test?</div>
+                        <div className={testStyles.modalIcon}><i className={openTime ? "ti ti-clock" : "ti ti-alert-triangle"}></i></div>
+                        <div className={testStyles.modalTitle}>{openTime ? "Time is Up!" : "Are you sure you want to end this test?"}</div>
                         <div className={testStyles.modalSub}>
-                          You still have <strong>{testData?.questions?.length - Object.keys(responses?.value || {}).length}</strong> unanswered question(s). 
+                          You still have <strong>{testData?.questions?.length - Object.keys(responses?.value || {}).length}</strong> unanswered question(s).
                           Once submitted, you cannot change your answers. This action cannot be undone.
                         </div>
                         <div className={testStyles.modalStatsRow}>
-                          <div className={testStyles.modalStat} style={{background: 'var(--green-bg)', color: 'var(--green-txt)'}}>
+                          <div className={testStyles.modalStat} style={{ background: 'var(--green-bg)', color: 'var(--green-txt)' }}>
                             <div className={testStyles.statNum}>{answeredCount}</div>
                             <div className={testStyles.statLbl}>Answered</div>
                           </div>
-                          <div className={testStyles.modalStat} style={{background: 'var(--red-bg)', color: 'var(--red-txt)'}}>
+                          <div className={testStyles.modalStat} style={{ background: 'var(--red-bg)', color: 'var(--red-txt)' }}>
                             <div className={testStyles.statNum}>{notAnsweredCount + unattemptedCount}</div>
                             <div className={testStyles.statLbl}>Unanswered</div>
                           </div>
-                          <div className={testStyles.modalStat} style={{background: 'var(--orange-bg)', color: 'var(--orange)'}}>
+                          <div className={testStyles.modalStat} style={{ background: 'var(--orange-bg)', color: 'var(--orange)' }}>
                             <div className={testStyles.statNum}>{markedCount + markedAndAnsweredCount}</div>
                             <div className={testStyles.statLbl}>Marked</div>
                           </div>
                         </div>
                         <div className={testStyles.modalBtns}>
-                          <button type="button" className={testStyles.modalCancel} onClick={handleCancel}>
-                            <i className="ti ti-x" style={{fontSize: "13px", marginRight: "4px"}}></i> No, Go Back
-                          </button>
+                          {!openTime && (
+                            <button type="button" className={testStyles.modalCancel} onClick={handleCancel}>
+                              <i className="ti ti-x" style={{ fontSize: "13px", marginRight: "4px" }}></i> No, Go Back
+                            </button>
+                          )}
                           <button type="button" className={testStyles.modalConfirm} onClick={submitTest}>
-                            <i className="ti ti-check" style={{fontSize: "13px", marginRight: "4px"}}></i> Yes, End Test
+                            <i className="ti ti-check" style={{ fontSize: "13px", marginRight: "4px" }}></i> {openTime ? "Submit Answers" : "Yes, End Test"}
                           </button>
                         </div>
                       </div>
                     </div>
                   );
                 })()}
-                  <Modal
-                    title="Time is Up"
-                    open={openTime}
-                    onOk={submitTest}
-                    keyboard={false}
-                    maskClosable={false}
-                    footer={[
-                      <Button key="ok" type="primary" onClick={submitTest}>
-                        OK
-                      </Button>,
-                    ]}
-                    closable={false}
-                  ></Modal>
-                  <Modal
-                    title={
-                      <p className={testStyles.modal_title}>
-                        I am flagging to report this question as
-                      </p>
-                    }
-                    open={openFlag}
-                    onOk={() => {
-                      setIsFlaggedOn(false);
-                      setOpenFlag(false);
-                      message.success(
-                        <strong>You are flagged success Fully</strong>,
-                      );
-                    }}
-                    footer={null}
-                    onCancel={() => setOpenFlag(false)}
-                    okText="Submit"
-                    width={600}
-                  >
-                    {isFlaggedOn && (
-                      <div className={testStyles.popUpContainer}>
-                        <div className={testStyles.popUpTop}>
-                          <div className={testStyles.checkBoxCon}>
-                            {flaggedArr?.map((flagopt, i) => {
-                              let cls = "unchecnked";
-                              if (
-                                flagCheck?.find(
-                                  (e) =>
-                                    e.id ==
-                                    testData?.questions[currentQues]?._id &&
-                                    e.flag.includes(flagopt),
-                                )
-                              )
-                                cls = "checked";
-                              return (
-                                <label
-                                  key={i}
-                                  onClick={(e) =>
-                                    toggleFlagCheck(
-                                      testData?.questions[currentQues]?._id,
-                                      flagopt,
-                                    )
-                                  }
-                                  className={testStyles.optionLable}
-                                >
-                                  <span
-                                    className={`${testStyles.optionsInput} ${testStyles[cls]}`}
-                                  />
-
-                                  {flagopt}
-                                </label>
-                              );
-                            })}
+                <Modal
+                  title={
+                    <p className={testStyles.modal_title}>
+                      I am flagging to report this question as
+                    </p>
+                  }
+                  open={openFlag}
+                  onOk={() => {
+                    setIsFlaggedOn(false);
+                    setOpenFlag(false);
+                    message.success(
+                      <strong>You are flagged success Fully</strong>,
+                    );
+                  }}
+                  footer={null}
+                  onCancel={() => setOpenFlag(false)}
+                  okText="Submit"
+                  width={600}
+                >
+                  {isFlaggedOn && (
+                    <div className="flex flex-col gap-4 py-2 px-2">
+                      {flaggedArr?.map((flagopt, i) => {
+                        const isSelected = tempFlagSelection?.includes(flagopt);
+                        return (
+                          <div
+                            key={i}
+                            onClick={() => {
+                              if (isSelected) {
+                                setTempFlagSelection(tempFlagSelection.filter(f => f !== flagopt));
+                              } else {
+                                setTempFlagSelection([...tempFlagSelection, flagopt]);
+                              }
+                            }}
+                            className={`flex items-center gap-3 cursor-pointer transition-colors select-none ${isSelected ? 'text-[#7b1fa2] font-bold' : 'text-gray-600 hover:text-[#7b1fa2]'}`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              readOnly
+                              className="w-[18px] h-[18px] rounded-[4px] border-2 border-gray-300 accent-[#7b1fa2] cursor-pointer"
+                            />
+                            <span className="text-[15px]">{flagopt}</span>
                           </div>
-                        </div>
+                        );
+                      })}
+
+                      <div className="flex justify-end mt-4 pt-4 border-t border-gray-100">
+                        <button
+                          className="font-bold text-[14px] cursor-pointer transition-all border-[1.5px] select-none text-white bg-[#7b1fa2] hover:bg-[#6a1b9a] border-[#7b1fa2]"
+                          style={{ padding: '8px 24px', borderRadius: '30px' }}
+                          onClick={() => {
+                            const qid = testData?.questions[currentQues]?._id;
+                            let newFlags = [...flagCheck];
+
+                            if (tempFlagSelection.length === 0) {
+                              newFlags = newFlags.filter(e => e.id !== qid);
+                            } else {
+                              const index = newFlags.findIndex(e => e.id === qid);
+                              if (index !== -1) {
+                                newFlags[index].flag = tempFlagSelection;
+                              } else {
+                                newFlags.push({ id: qid, flag: tempFlagSelection });
+                              }
+                            }
+
+                            setFlagCheck(newFlags);
+                            setSstorage("flagged", JSON.stringify(newFlags));
+
+                            setIsFlaggedOn(false);
+                            setOpenFlag(false);
+                            message.success(<strong>Question flagged successfully</strong>);
+                          }}
+                        >
+                          Submit Flag
+                        </button>
                       </div>
-                    )}
-                  </Modal>
-                </>
-              </div>
+                    </div>
+                  )}
+                </Modal>
+              </>
+            </div>
           )}
         </div>
       )}

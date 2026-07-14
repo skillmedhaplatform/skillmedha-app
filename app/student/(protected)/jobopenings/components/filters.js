@@ -46,16 +46,7 @@ export default function JobHeader() {
   );
   const isLoading = jobsStatus === "pending";
 
-  const jobOptions = [
-    { value: "all", label: "All Jobs" },
-    ..._.uniqBy(
-      (jobs ?? []).map((e) => ({
-        value: e?.profileName,
-        label: e?.profileName,
-      })),
-      "value"
-    ).filter((e) => e.value),
-  ];
+
 
   const sortOptions = [
     { value: "createdAt", label: "Sort By Date" },
@@ -80,38 +71,8 @@ export default function JobHeader() {
   return (
     <ConfigProvider theme={{ token: { colorPrimary: "#1E69DA" } }}>
       <div className="flex items-center justify-between gap-2 flex-nowrap mb-4 bg-white/50 backdrop-blur-sm p-3 rounded-xl border border-[#e2e8f0]">
-        {/* ── Left: Selects ── */}
-        <div className="w-[60%] max-w-[60%] flex items-center justify-start gap-3">
-          <Select
-            id="job-selector"
-            style={{ width: "100%", maxWidth: 180 }}
-            value={filters.profileName}
-            options={jobOptions}
-            placeholder="Job Profile"
-            loading={isLoading}
-            onChange={(value) => {
-              setFilters((prev) => ({ ...prev, profileName: value }));
-              router.push(
-                pathname + "?" + createQueryString("profileName", value)
-              );
-            }}
-          />
-
-          <Select
-            id="sort-selector"
-            style={{ width: "100%", maxWidth: 180 }}
-            value={filters.sort}
-            options={sortOptions}
-            suffixIcon={<SortAscendingOutlined />}
-            onChange={(value) => {
-              setFilters((prev) => ({ ...prev, sort: value }));
-              router.push(pathname + "?" + createQueryString("sort", value));
-            }}
-          />
-        </div>
-
-        {/* ── Right: Search + Clear ── */}
-        <div className="w-[40%] max-w-[40%] flex items-center justify-end gap-2">
+        {/* ── Left: Search ── */}
+        <div className="flex-1 flex items-center justify-start gap-3">
           <Search
             id="job-search"
             placeholder="Search by job position, company..."
@@ -124,7 +85,8 @@ export default function JobHeader() {
                 Search
               </Button>
             }
-            className="max-w-full w-full text-[16px]"
+            style={{ maxWidth: "400px" }}
+            className="w-full text-[16px]"
             value={filters.search}
             loading={isLoading}
             onChange={(e) => {
@@ -138,6 +100,21 @@ export default function JobHeader() {
               } else {
                 handleClearFilter();
               }
+            }}
+          />
+        </div>
+
+        {/* ── Right: Sort + Clear ── */}
+        <div className="flex items-center justify-end gap-2 shrink-0">
+          <Select
+            id="sort-selector"
+            style={{ width: "100%", maxWidth: 180 }}
+            value={filters.sort}
+            options={sortOptions}
+            suffixIcon={<SortAscendingOutlined />}
+            onChange={(value) => {
+              setFilters((prev) => ({ ...prev, sort: value }));
+              router.push(pathname + "?" + createQueryString("sort", value));
             }}
           />
 

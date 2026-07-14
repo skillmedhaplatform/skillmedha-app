@@ -167,7 +167,11 @@ const testSlice = createSlice({
       setSstorage("value", JSON.stringify(state.responses.value));
     },
     clear_response: (state, action) => {
-      delete state.responses.value[action.payload.questionId];
+      if (state.responses && state.responses.value) {
+        if (state.responses.value[action.payload?.questionId]) {
+          state.responses.value[action.payload?.questionId].answers = [];
+        }
+      }
       let status = "not answered";
       state.testData.value.questions = state.testData.value.questions.map(
         (e) => {
@@ -175,6 +179,11 @@ const testSlice = createSlice({
           return e;
         }
       );
+      setSstorage("value", JSON.stringify(state.responses.value));
+    },
+    clear_all_responses: (state) => {
+      state.responses.value = {};
+      state.review.value = [];
     },
     mark_for_review: (state, action) => {
       state.review.value.push(action.payload.questionId);
@@ -187,6 +196,16 @@ const testSlice = createSlice({
         }
       );
 
+      setSstorage("marked", JSON.stringify(state.review.value));
+    },
+    unmark_for_review: (state, action) => {
+      state.review.value = state.review.value.filter(id => id !== action.payload.questionId);
+      state.testData.value.questions = state.testData.value.questions.map(
+        (e) => {
+          if (e._id == action.payload.questionId && e.status == "marked") e.status = "not answered";
+          return e;
+        }
+      );
       setSstorage("marked", JSON.stringify(state.review.value));
     },
 
@@ -269,9 +288,11 @@ export const getSingleJobTest = createAsyncThunk(
 );
 
 export const {
-  save_response,
   clear_response,
+  clear_all_responses,
+  save_response,
   mark_for_review,
+  unmark_for_review,
   flagQuestion,
   updateTimeTaken,
 } = testSlice.actions;

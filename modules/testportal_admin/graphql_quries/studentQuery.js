@@ -17,6 +17,7 @@ export const SingleStudentGqlQuery = `
       progress {
            _id
         flagged
+        marked
         response
         studentId
         testId
@@ -47,6 +48,7 @@ export const getRandomStudent = `query RandomStudent($id: String) {
       progress {
         _id
         flagged
+        marked
         response
         studentId
         testId

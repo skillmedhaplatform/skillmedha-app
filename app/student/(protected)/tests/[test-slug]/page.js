@@ -493,20 +493,20 @@ export default function Page() {
   }
 
   return (
-    <div className="bg-white h-screen overflow-hidden flex flex-col">
+    <div className="bg-[#EFF5FB] h-screen overflow-hidden flex flex-col">
       <StudentPageHeader title="Test" />
+      <div className="bg-white px-6 py-4 flex items-center justify-start gap-4 z-10 sticky top-0 shadow-sm border-b border-gray-100">
+        <Button
+          icon={<IoMdArrowRoundBack />}
+          type="text"
+          onClick={() => nav.push("/student/tests")}
+        />
+        <div className="text-gray-800 font-bold text-2xl m-0">{testData?.title}</div>
+      </div>
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#e2e8f0] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent">
         <div className="relative p-6 max-w-[1400px] mx-auto pb-12">
           <SocketComp />
-        <div className="flex items-center justify-start gap-4 mb-4">
-          <Button
-            icon={<IoMdArrowRoundBack />}
-            type="text"
-            onClick={() => nav.push("/student/tests")}
-          />
 
-          <div className="text-gray-800 font-bold text-2xl m-0">{testData?.title}</div>
-        </div>
         <div className="flex gap-6 flex-col lg:flex-row">
           {!hasTestDataLoaded ? (
             <Skeleton

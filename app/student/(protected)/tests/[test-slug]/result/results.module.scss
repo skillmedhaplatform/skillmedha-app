@@ -41,18 +41,18 @@
 .resultBannerIcon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
 .resultBanner.fail .resultBannerIcon { background: var(--red-bg); color: var(--red); }
 .resultBanner.pass .resultBannerIcon { background: var(--green-bg); color: var(--green); }
-.resultBannerTitle { font-size: 15px; font-weight: 700; }
+.resultBannerTitle { font-size: 18px; font-weight: 700; }
 .resultBanner.fail .resultBannerTitle { color: var(--red-txt); }
 .resultBanner.pass .resultBannerTitle { color: var(--green-txt); }
-.resultBannerSub { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
+.resultBannerSub { font-size: 14px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
 
 /* Score overview */
 .overviewCard { background: var(--bg); border-radius: var(--r-xl); border: 0.5px solid var(--border); padding: 20px 24px; margin-bottom: 18px; }
 .ocHeader { font-size: 14px; font-weight: 700; color: var(--blue2); margin-bottom: 16px; display: flex; align-items: center; gap: 7px; }
 .ocHeader i { font-size: 17px; color: var(--blue-xl); }
 .ocBody { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-.ocStats { display: flex; gap: 12px; flex: 1; flex-wrap: wrap; }
-.statBox { flex: 1; min-width: 100px; background: var(--bg2); border-radius: var(--r-lg); border: 0.5px solid var(--border); padding: 14px 16px; }
+.ocStats { display: flex; gap: 20px; flex: 1; flex-wrap: wrap; min-width: 300px; }
+.statBox { flex: 1; max-width: 220px; min-width: 130px; background: var(--bg2); border-radius: var(--r-lg); border: 0.5px solid var(--border); padding: 14px 16px; }
 .statBoxLbl { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
 .statBoxLbl i { font-size: 14px; }
 .statBoxVal { font-size: 22px; font-weight: 800; color: var(--text); }
@@ -63,10 +63,21 @@
 
 /* Donut chart */
 .donutWrap { flex-shrink: 0; display: flex; align-items: center; gap: 14px; }
-.donutSvg { width: 100px; height: 100px; }
+.donutSvg { width: 140px; height: 140px; }
 .donutLegend { display: flex; flex-direction: column; gap: 7px; }
 .donutLegendItem { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text2); font-weight: 600; }
 .donutDot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+/* Extra Stats (Middle space) */
+.extraStatsWrap { display: flex; flex-direction: column; gap: 12px; flex: 0 1 auto; min-width: 150px; padding: 0 20px; border-left: 1px dashed var(--border); border-right: 1px dashed var(--border); }
+.extraStatItem { display: flex; align-items: center; gap: 10px; }
+.extraStatIcon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.extraStatIcon.flagged { color: #7b1fa2; background-color: #f3e5f5; }
+.extraStatIcon.marked { color: var(--orange, #f57c00); background-color: var(--orange-bg, #fff3e0); }
+.extraStatIcon.markedAnswered { color: #3f51b5; background-color: #e8eaf6; }
+.extraStatInfo { display: flex; flex-direction: column; }
+.extraStatVal { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.extraStatLbl { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; margin-top: 2px; }
 
 /* Category bar */
 .categoryCard { background: var(--bg); border-radius: var(--r-xl); border: 0.5px solid var(--border); padding: 16px 20px; margin-bottom: 18px; }

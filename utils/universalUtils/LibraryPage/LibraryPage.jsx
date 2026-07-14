@@ -291,6 +291,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   const urlSearch = searchParams.get("search") || "";
   const urlCategory = searchParams.get("category") || "";
   const urlDifficulty = searchParams.get("difficulty") || "";
+  const urlSort = searchParams.get("sort") || "default";
 
   const [searchInput, setSearchInput] = useState(urlSearch);
   const debounceRef = useRef(null);
@@ -363,12 +364,14 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   };
 
   const handleDifficultyChange = (val) => pushParams({ difficulty: val });
+  const handleSortChange = (val) => pushParams({ sort: val || "default" });
 
   const handleClearAll = () => {
     const params = new URLSearchParams(searchParams);
     params.delete("search");
     params.delete("category");
     params.delete("difficulty");
+    params.delete("sort");
     params.set("page", "1");
     setSearchInput("");
     nav.push(`${pathname}?${params.toString()}`);
@@ -427,6 +430,25 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
     if (urlSearch) {
       const s = urlSearch.toLowerCase();
       pool = pool.filter((item) => item.title?.toLowerCase().includes(s) || item.subtitle?.toLowerCase().includes(s));
+    }
+    if (urlDifficulty) {
+      pool = pool.filter((item) => item.difficulty === urlDifficulty);
+    }
+
+    // Apply Sorting
+    if (urlSort !== "default") {
+      pool = [...pool].sort((a, b) => {
+        if (urlSort === "a-z") {
+          return (a.title || "").localeCompare(b.title || "");
+        }
+        if (urlSort === "price-low") {
+          return (a.price || 0) - (b.price || 0);
+        }
+        if (urlSort === "price-high") {
+          return (b.price || 0) - (a.price || 0);
+        }
+        return 0;
+      });
     }
 
     return pool;
@@ -506,10 +528,18 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
     { label: "Advanced", value: "Advanced" },
   ];
 
+  const sortOptions = [
+    { label: "Default", value: "default" },
+    { label: "A-Z", value: "a-z" },
+    { label: "Price: Low to High", value: "price-low" },
+    { label: "Price: High to Low", value: "price-high" },
+  ];
+
   const activeFilters = [
     urlSearch && { key: "search", label: `Search: "${urlSearch}"` },
     urlCategory && { key: "category", label: `Category: ${urlCategory}` },
     urlDifficulty && { key: "difficulty", label: `Difficulty: ${urlDifficulty}` },
+    (urlSort && urlSort !== "default") && { key: "sort", label: `Sort: ${sortOptions.find(o => o.value === urlSort)?.label || urlSort}` },
   ].filter(Boolean);
 
   const hasActiveFilters = activeFilters.length > 0;
@@ -551,12 +581,15 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
         handleSearchChange={handleSearchChange}
         urlCategory={urlCategory}
         urlDifficulty={urlDifficulty}
+        urlSort={urlSort}
         categoryOptions={categoryOptions}
         difficultyOptions={difficultyOptions}
+        sortOptions={sortOptions}
         activeFilters={activeFilters}
         hasActiveFilters={hasActiveFilters}
         handleCategoryChange={handleCategoryChange}
         handleDifficultyChange={handleDifficultyChange}
+        handleSortChange={handleSortChange}
         handleClearAll={handleClearAll}
         removeFilter={removeFilter}
         pushParams={pushParams}
@@ -703,6 +736,16 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
             allowClear
             options={difficultyOptions}
             className="w-[130px] shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
+            popupMatchSelectWidth={false}
+          />
+          <Select
+            id={`${idPrefix}-sort`}
+            placeholder="Sort By"
+            value={urlSort === "default" ? undefined : urlSort}
+            onChange={handleSortChange}
+            allowClear
+            options={sortOptions}
+            className="w-[150px] shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
             popupMatchSelectWidth={false}
           />
           {hasActiveFilters && (

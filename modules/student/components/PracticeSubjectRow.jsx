@@ -75,34 +75,129 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
     const sessions = studentPracResults.filter(
       (session) => session.refId === subtopic._id
     );
-    if (sessions.length === 0) return { progress: 0, attempts: 0 };
+    if (sessions.length === 0) return { progress: 0, attempts: 0, flawlessLevel: 0, recallLevel: 0, seenCount: 0, dbTotalQuestions: subtopic.totalQuestions || 0 };
 
-    const totalQuestions = Math.min(subtopic.totalQuestions || 20, 20);
-    const uniqueCorrectIds = new Set();
+    sessions.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+    const totalQuestionsLimit = Math.min(subtopic.totalQuestions || 20, 20);
+    const dbTotalQuestions = subtopic.totalQuestions || 0;
     
-    sessions.forEach((s) => {
-      if (Array.isArray(s.correctQuestionIds)) {
-        s.correctQuestionIds.forEach((id) => uniqueCorrectIds.add(id));
+    let maxCorrect = 0;
+    let globalSeen = new Set();
+    let flawlessLevel = 0;
+    let recallLevel = 0;
+    
+    const completedSessions = sessions.filter(s => s.correctQuestionIds !== undefined || s.score !== undefined);
+
+    completedSessions.forEach((s) => {
+      const correctCount = Array.isArray(s.correctQuestionIds) ? s.correctQuestionIds.length : (s.score || 0);
+      if (correctCount > maxCorrect) {
+        maxCorrect = correctCount;
+      }
+      
+      let containedNewQuestions = false;
+      if (Array.isArray(s.questionsData)) {
+        s.questionsData.forEach(q => {
+          if (q && q._id && !globalSeen.has(q._id.toString())) {
+            containedNewQuestions = true;
+            globalSeen.add(q._id.toString());
+          }
+        });
+      }
+      
+      const presentedCount = Array.isArray(s.questionsData) ? s.questionsData.length : totalQuestionsLimit;
+      if (presentedCount > 0 && correctCount === presentedCount) {
+        if (containedNewQuestions) {
+          flawlessLevel += 1;
+        } else {
+          recallLevel += 1;
+        }
       }
     });
 
-    const correctCount = uniqueCorrectIds.size;
-    let progress = Math.round((correctCount / totalQuestions) * 100);
+    let progress = Math.round((maxCorrect / totalQuestionsLimit) * 100);
     if (progress > 100) progress = 100;
 
-    // Only count sessions that have been submitted (e.g. have correctQuestionIds or score)
-    const completedSessions = sessions.filter(s => s.correctQuestionIds !== undefined || s.score !== undefined);
-
-    return { progress, attempts: completedSessions.length };
+    return { 
+      progress, 
+      attempts: completedSessions.length, 
+      flawlessLevel, 
+      recallLevel, 
+      seenCount: globalSeen.size, 
+      dbTotalQuestions 
+    };
   };
 
   useEffect(() => {
-    if (subtopics.length > 0) {
-      const totalProgress = subtopics.reduce((acc, st) => acc + getSubtopicStats(st).progress, 0);
+    if (typeof window !== "undefined" && subtopics.length > 0) {
+      const isTech = subject.type?.toLowerCase() === "technical" || window.location.pathname.includes('technical');
+      const sectionType = isTech ? "Technical" : "Non-Technical";
+
+      let pendingNotices = JSON.parse(localStorage.getItem("pendingPracticeNotices") || "[]");
+      let claimedBadges = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+      let hasUpdates = false;
+
+      const totalProgress = subtopics.reduce((acc, st) => {
+        const stats = getSubtopicStats(st);
+        
+        // 1. Check for New Questions Notice
+        if (stats.seenCount > 0 && stats.dbTotalQuestions > stats.seenCount) {
+          const noticeId = `new_questions_${st._id}_${stats.dbTotalQuestions}`;
+          const existingNotice = pendingNotices.find(n => n.id === noticeId);
+          if (!existingNotice && !claimedBadges.includes(noticeId)) {
+            pendingNotices.push({
+              id: noticeId,
+              type: 'new_questions',
+              title: `New Questions Added!`,
+              message: `New questions have been added to ${st.title}! Take a practice test to earn a Flawless Master badge.`,
+              isClaimed: false
+            });
+            hasUpdates = true;
+          }
+        }
+
+        // 2. Check for Master Badges
+        if (stats.flawlessLevel > 0 || stats.recallLevel > 0) {
+          for (let i = 1; i <= stats.flawlessLevel; i++) {
+            const badgeId = `practice_badge|${sectionType}|${st.topicTitle || subject.title}|${st.title}|Flawless|${i}`;
+            if (!claimedBadges.includes(badgeId) && !pendingNotices.find(n => n.id === badgeId)) {
+              pendingNotices.push({
+                id: badgeId,
+                type: 'badge',
+                title: `🏆 Flawless Master Lvl ${i}`,
+                message: `You scored 100% on new questions in ${st.title}! Claim your Flawless Master badge.`,
+                isClaimed: false
+              });
+              hasUpdates = true;
+            }
+          }
+          
+          for (let i = 1; i <= stats.recallLevel; i++) {
+            const badgeId = `practice_badge|${sectionType}|${st.topicTitle || subject.title}|${st.title}|Recall|${i}`;
+            if (!claimedBadges.includes(badgeId) && !pendingNotices.find(n => n.id === badgeId)) {
+              pendingNotices.push({
+                id: badgeId,
+                type: 'badge',
+                title: `🏅 Recall Master Lvl ${i}`,
+                message: `You scored 100% on practiced questions in ${st.title}! Claim your Recall Master badge.`,
+                isClaimed: false
+              });
+              hasUpdates = true;
+            }
+          }
+        }
+
+        return acc + stats.progress;
+      }, 0);
+      
+      if (hasUpdates) {
+        localStorage.setItem("pendingPracticeNotices", JSON.stringify(pendingNotices));
+      }
+
       const avgProgress = Math.round(totalProgress / subtopics.length);
       dispatch(setCategoryProgress({ category: subject.title, progress: avgProgress }));
     }
-  }, [subtopics, studentPracResults, subject.title, dispatch]);
+  }, [subtopics, studentPracResults, subject, dispatch]);
 
   if (loading) {
     return <div className="py-8 flex justify-center"><Spin /></div>;
@@ -200,9 +295,11 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
             return (
               <PracticeCard 
                 key={subtopic._id}
+                id={subtopic._id}
                 title={subtopic.title}
                 category={subtopic.topicTitle || subject.title}
                 totalQuestions={Math.min(subtopic.totalQuestions || 20, 20)}
+                actualTotalQuestions={subtopic.totalQuestions || 0}
                 attempts={stats.attempts}
                 progress={stats.progress}
                 onStart={() => handleStart(subtopic)}

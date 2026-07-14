@@ -9,6 +9,7 @@ import {
   getAllCoursesOnly,
   getAllInternshipsOnly,
 } from "@/redux/slices/internship";
+import { updateStudent } from "@/redux/slices/student";
 import { GetAllNotifiocations } from "@/redux/slices/jobopenings";
 import {
   Button,
@@ -139,7 +140,7 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, o
             </div>
 
             {total > 0 && (
-              <div className="flex justify-center items-center gap-3 mt-2 h-[24px]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-center items-center gap-3 mt-2" onClick={(e) => e.stopPropagation()}>
               {total > 1 && (
                 <button
                   className="text-[#9ca3af] hover:text-[#1E69DA] transition-colors p-1"
@@ -200,12 +201,11 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, o
   );
 };
 
-
 const ProfileSection = ({ profileValues, router, studentCreds }) => (
   <div className="w-full flex flex-col items-start pb-2">
     <h3 className="m-0 font-extrabold text-[#0f172a] text-[16px] xl:text-[18px] mb-3 shrink-0">Overall Performance</h3>
 
-    <div className="w-full bg-[#FAFAFA] rounded-[16px] py-2 px-3 flex items-center gap-3 border border-[#e2e8f0] shrink-0 mb-3">
+    <div className="w-full bg-white rounded-[16px] py-2 px-3 flex items-center gap-3 border border-[#e2e8f0] shrink-0 mb-3">
       <div className="shrink-0 relative">
         <Progress
           type="circle"
@@ -227,7 +227,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
 
     <div className="w-full shrink-0">
       <Button
-        className="w-full h-[38px] flex items-center justify-between px-2 transition-all hover:opacity-90 !text-white !bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none"
+        className="w-full h-[38px] flex items-center justify-between px-2 transition-all hover:opacity-90 !text-white !bg-[#3b82f6] !border-none"
         style={{ borderRadius: '8px' }}
         onClick={() => router.push("/student/profile/basic-details")}
       >
@@ -248,53 +248,460 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
   </div>
 );
 
-const Achievements = () => (
-  <div className="w-full flex flex-col">
-    <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 sticky top-0 bg-white z-10 pt-1 shrink-0">Achievements</h3>
-    <div className="flex flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden max-h-[250px] pb-2">
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
-        <div className="flex items-center gap-3">
-          <div className="text-[24px]">⭐</div>
-          <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">First Enroll</span>
-            <span className="text-[#64748b] text-[12px]">+50 XP earned</span>
+const AchievementDetailsModal = ({ isOpen, onClose, achievement }) => {
+  if (!achievement) return null;
+
+  const renderContent = () => {
+    switch (achievement.type) {
+      case 'course':
+      case 'internship':
+        const course = achievement.courseData;
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">{achievement.type === 'course' ? 'Course Details' : 'Internship Details'}</h4>
+            <div className="flex items-center gap-2 mb-3 text-[13px] text-[#64748b]">
+              <span className="shrink-0">⏱️</span> 
+              <span>{course.duration ? `Duration: ${course.duration}` : "Completed"}</span>
+            </div>
+            
+            <h5 className="font-bold text-[#334155] text-[13px] mb-2">What you learned</h5>
+            <div className="flex flex-col gap-2">
+              {course.skillsToMaster?.length > 0 ? (
+                course.skillsToMaster.slice(0, 4).map((skill, i) => (
+                  <div key={i} className="flex items-center gap-2 text-[13px] text-[#475569]">
+                    <span className="text-[#10b981]">✅</span> <span>{skill}</span>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 text-[13px] text-[#475569]"><span className="text-[#10b981]">✅</span> <span>Core Fundamentals</span></div>
+                  <div className="flex items-center gap-2 text-[13px] text-[#475569]"><span className="text-[#10b981]">✅</span> <span>Advanced Techniques</span></div>
+                  <div className="flex items-center gap-2 text-[13px] text-[#475569]"><span className="text-[#10b981]">✅</span> <span>Best Practices</span></div>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      case 'practice':
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Test Performance</h4>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[#64748b] text-[13px]">Accuracy</span>
+              <span className="font-bold text-[#10b981] text-[14px]">100%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[#64748b] text-[13px]">Questions Answered</span>
+              <span className="font-bold text-[#1e293b] text-[14px]">All</span>
+            </div>
+          </div>
+        );
+      case 'streak':
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Consistency is Key!</h4>
+            <p className="text-[13px] text-[#64748b] leading-relaxed">
+              You've logged in for {achievement.streak || 30} consecutive days. Keep up the great work and continue building your skills every day!
+            </p>
+          </div>
+        );
+      default:
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Achievement Unlocked</h4>
+            <p className="text-[13px] text-[#64748b] leading-relaxed">
+              {achievement.desc}. Keep exploring the platform to earn more badges!
+            </p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <Modal
+      open={isOpen}
+      onCancel={onClose}
+      footer={null}
+      centered
+      width={400}
+      className="achievement-modal"
+      closeIcon={<span className="text-gray-400 hover:text-gray-600 text-lg">✕</span>}
+      bodyStyle={{ padding: 0 }}
+    >
+      <div className="flex flex-col items-center justify-center p-6 pt-10 relative overflow-hidden bg-white/60 backdrop-blur-md rounded-2xl border border-white/50">
+        <div className="absolute top-[-50px] w-[200px] h-[200px] bg-[#f59e0b] rounded-full blur-[80px] opacity-20"></div>
+        
+        <div className="text-[80px] leading-none mb-4 drop-shadow-xl relative z-10 animate-bounce-slight" style={{ filter: 'drop-shadow(0px 10px 15px rgba(245, 158, 11, 0.4))' }}>
+          {achievement.emoji}
+        </div>
+        
+        <h2 className="text-[24px] font-extrabold text-[#0f172a] text-center mb-1 relative z-10 w-full px-2" style={{ wordBreak: 'break-word', lineHeight: '1.2' }}>
+          {achievement.title}
+        </h2>
+        
+        <div className="flex items-center gap-2 text-[13px] text-[#64748b] font-medium mb-2 relative z-10">
+          <span>Earned Recently</span>
+          <span>•</span>
+          <span className="flex items-center gap-1 text-[#f59e0b] font-bold">
+            💰 {achievement.desc.includes('coins earned') ? achievement.desc : '+50 coins'}
+          </span>
+        </div>
+        
+        <div className="w-full relative z-10 flex flex-col items-center">
+          {renderContent()}
+        </div>
+        
+        <Button 
+          className="w-full mt-6 h-[44px] rounded-xl font-bold text-[15px] border-none text-white shadow-md shadow-[#3b82f6]/30 transition-all hover:opacity-90 hover:scale-[1.02]"
+          style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
+          onClick={onClose}
+        >
+          Awesome!
+        </Button>
+      </div>
+    </Modal>
+  );
+};
+
+const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
+  const [streak, setStreak] = React.useState(1);
+  const [claimedAchievements, setClaimedAchievements] = React.useState([]);
+  const [selectedAchievement, setSelectedAchievement] = React.useState(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isPracticeModalOpen, setIsPracticeModalOpen] = React.useState(false);
+  const [practiceModalType, setPracticeModalType] = React.useState("Technical");
+  
+  // Notification states
+  const [unseenBadges, setUnseenBadges] = React.useState([]);
+  const [selectedBadgeDetail, setSelectedBadgeDetail] = React.useState(null);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setStreak(parseInt(localStorage.getItem("loginStreak") || "1", 10));
+      
+      const loadClaimed = () => {
+        let stored = studentCreds?.claimedAchievements || [];
+        if (!stored.length) {
+          stored = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+        }
+        
+
+        setClaimedAchievements(stored);
+        setUnseenBadges(JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]"));
+        
+        // Auto-open modal if redirected from test result page
+        const autoOpen = localStorage.getItem("autoOpenBadgeModal");
+        if (autoOpen) {
+          setTimeout(() => {
+            setPracticeModalType(autoOpen);
+            setIsPracticeModalOpen(true);
+            setSelectedBadgeDetail(null);
+            
+            // Auto clear unseen for this type
+            const remaining = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]").filter(id => !id.includes(autoOpen));
+            setUnseenBadges(remaining);
+            localStorage.setItem("unseenPracticeBadges", JSON.stringify(remaining));
+            localStorage.removeItem("autoOpenBadgeModal");
+          }, 300);
+        }
+      };
+      
+      loadClaimed();
+      window.addEventListener("achievementClaimed", loadClaimed);
+      
+      // Listen for notice board action URL hash clicks
+      const handleHashChange = () => {
+        if (window.location.hash.startsWith('#openBadges_')) {
+          const type = window.location.hash.split('_')[1];
+          if (type === 'Technical' || type === 'Non-Technical') {
+            setPracticeModalType(type);
+            setIsPracticeModalOpen(true);
+            setSelectedBadgeDetail(null);
+            
+            const remaining = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]").filter(id => !id.includes(type));
+            setUnseenBadges(remaining);
+            localStorage.setItem("unseenPracticeBadges", JSON.stringify(remaining));
+            
+            // Clean up hash without reloading
+            history.pushState("", document.title, window.location.pathname + window.location.search);
+          }
+        }
+      };
+      window.addEventListener("hashchange", handleHashChange);
+      // Check on initial load too
+      handleHashChange();
+
+      return () => {
+        window.removeEventListener("achievementClaimed", loadClaimed);
+        window.removeEventListener("hashchange", handleHashChange);
+      };
+    }
+  }, [studentCreds?.claimedAchievements]);
+
+  const practiceBadges = claimedAchievements
+    .filter(id => typeof id === 'string' && id.startsWith("practice_badge|"))
+    .map(id => {
+      const parts = id.split("|");
+      return {
+        id,
+        section: parts[1],
+        topic: parts[2],
+        subtopic: parts[3],
+        type: parts[4],
+        level: parts[5]
+      };
+    })
+    .reverse();
+
+  const technicalBadges = practiceBadges.filter(b => b.section === "Technical");
+  const nonTechnicalBadges = practiceBadges.filter(b => b.section === "Non-Technical");
+
+  const hasUnseenTech = technicalBadges.some(b => unseenBadges.includes(b.id));
+  const hasUnseenNonTech = nonTechnicalBadges.some(b => unseenBadges.includes(b.id));
+
+  const openPracticeModal = (type) => {
+    setPracticeModalType(type);
+    setIsPracticeModalOpen(true);
+    setSelectedBadgeDetail(null);
+    
+    // Clear unseen badges for this type
+    const remainingUnseen = unseenBadges.filter(id => {
+      const badge = practiceBadges.find(b => b.id === id);
+      return badge && badge.section !== type;
+    });
+    setUnseenBadges(remainingUnseen);
+    localStorage.setItem("unseenPracticeBadges", JSON.stringify(remainingUnseen));
+  };
+
+  const renderBadgeList = (badges) => {
+    // If a badge is selected, show the detailed drill-down view
+    if (selectedBadgeDetail) {
+      const b = selectedBadgeDetail;
+      return (
+        <div className="flex flex-col animate-[smoothFadeIn_0.3s_ease-out_forwards]">
+          <div className="flex justify-start mb-2">
+            <button 
+              onClick={() => setSelectedBadgeDetail(null)}
+              className="text-[#3b82f6] font-semibold flex items-center gap-2 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              Back to Badges
+            </button>
+          </div>
+          
+          <div className="bg-[#f0f9ff] p-6 rounded-2xl text-center border border-[#e2e8f0]">
+            <div className="inline-block relative mb-6">
+              <div className="bg-[#3b82f6] rounded-full w-[120px] h-[120px] flex items-center justify-center shadow-[0_10px_25px_-5px_rgba(59,130,246,0.5)]">
+                <span className="text-[60px] drop-shadow-md">{b.type === 'Flawless' ? '🏆' : '🏅'}</span>
+              </div>
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#2563eb] text-white px-4 py-1 rounded-full font-bold text-[12px] tracking-wide shadow-md whitespace-nowrap">
+                {b.type.toUpperCase()}
+              </div>
+            </div>
+            
+            <h2 className="text-[22px] font-extrabold text-[#1e293b] mb-2">{b.type} Master Lvl {b.level}</h2>
+            <p className="text-[#475569] text-[14px] leading-relaxed mb-6">
+              You've proven your expertise in <strong className="text-[#0f172a]">{b.topic} • {b.subtopic}</strong>!
+            </p>
+            
+              <div className="flex-1 border-t border-[#e2e8f0] pt-4 mt-2">
+                <strong className="block text-[#1e293b] text-[15px] mb-1">{b.type} Badge Unlocked</strong>
+                <span className="text-[#64748b] text-[14px] leading-relaxed block">
+                  {b.type === 'Flawless' 
+                    ? "Awarded for getting every question right in one attempt. Your flawless execution proves true mastery of this topic." 
+                    : "Awarded for scoring 100% on a topic 24 hours after mastering it. You've proven exceptional memory and recall."}
+                </span>
+              </div>
+              <div className="text-[28px] mt-4">
+                {b.type === 'Flawless' ? '🏆' : '🏅'}
+              </div>
           </div>
         </div>
-        <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
+      );
+    }
+
+    if (badges.length === 0) {
+      return <div className="text-center py-8 text-gray-500 font-medium">No badges earned yet. Keep practicing!</div>;
+    }
+    
+    return (
+      <div className="flex flex-col gap-4 animate-[smoothFadeIn_0.3s_ease-out_forwards]">
+        {badges.map((b, idx) => {
+          const isNew = unseenBadges.includes(b.id);
+          return (
+            <div 
+              key={idx} 
+              className={`flex items-center justify-between p-4 rounded-xl border ${isNew ? 'border-[#3b82f6] bg-[#eff6ff]' : 'border-[#e2e8f0] bg-white'} overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-[#cbd5e1] group`}
+              onClick={() => setSelectedBadgeDetail(b)}
+            >
+              <div className="flex items-center gap-4">
+                <div className="relative shrink-0">
+                  {isNew && <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white shadow-sm z-10 animate-pulse" />}
+                  <div className="text-[36px] drop-shadow-sm group-hover:scale-110 transition-transform">{b.type === 'Flawless' ? '🏆' : '🏅'}</div>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-bold text-[#0f172a] text-[15px]">{b.type} Master Lvl {b.level}</span>
+                  <span className="text-[#64748b] text-[13px]">{b.topic} • {b.subtopic}</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <span className="text-[#24A058] text-[13px] font-bold">Earned</span>
+                {isNew && <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider">New</span>}
+              </div>
+            </div>
+          );
+        })}
       </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
+    );
+  };
+
+  let streakCoins = 5;
+  if (streak === 1) streakCoins = 10;
+  else if (streak > 0 && streak % 10 === 0) streakCoins = streak;
+
+  const achievementsList = [
+    { type: 'streak', id: 'streak_current', emoji: "🔥", title: `${streak} Day Streak`, desc: `+${streakCoins} coins earned`, status: "Earned", streakCoins, streak }
+  ];
+
+  if (streak >= 30) {
+    achievementsList.push({ type: 'streak', id: 'streak_month', emoji: "🏆", title: "1 Month Streak", desc: "Maintained badge", status: "Earned", streak: 30 });
+  }
+
+  if (claimedAchievements.includes("welcome_aboard")) {
+    achievementsList.push({ type: 'onboarding', id: 'welcome_aboard', emoji: "🚀", title: "Welcome Aboard", desc: "Joined the platform", status: "Earned" });
+  }
+  
+  if (claimedAchievements.includes("profile_complete")) {
+    achievementsList.push({ type: 'onboarding', id: 'profile_complete', emoji: "👤", title: "Profile Complete", desc: "Profile setup finished", status: "Earned" });
+  }
+  
+  if (claimedAchievements.includes("perfect_scorer")) {
+    achievementsList.push({ type: 'practice', id: 'perfect_scorer', emoji: "🎯", title: "Perfect Scorer", desc: "100% on a practice test", status: "Earned" });
+  }
+
+  if (progressById && combinedLearningData) {
+    Object.keys(progressById).forEach(id => {
+      const achievementId = `complete_${id}`;
+      if (claimedAchievements.includes(achievementId)) {
+        const course = combinedLearningData.find((c) => c._id === id);
+        if (course) {
+          const categoryText = course.category ? course.category : (course.type || "Course");
+          const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
+          const courseTitle = course.title || course.courseTitle || course.name || `${shortCategoryText} Course`;
+          achievementsList.push({
+            type: course.type === 'internships' ? 'internship' : 'course',
+            id: achievementId,
+            courseData: course,
+            emoji: "🥇",
+            title: `${courseTitle} Complete`,
+            desc: "+50 coins earned",
+            status: "Earned"
+          });
+        }
+      }
+    });
+  }
+
+  // Determine tile order based on unseen badges
+  const renderTiles = () => {
+    const techTile = (
+      <div 
+        key="tech"
+        onClick={() => openPracticeModal("Technical")}
+        className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenTech ? 'border-[#3b82f6] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
+      >
+        {hasUnseenTech && <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[#3b82f6] rounded-full border-[1.5px] border-white shadow-sm z-10 animate-pulse" />}
         <div className="flex items-center gap-3">
-          <div className="text-[24px]">🔥</div>
+          <div className="text-[32px] group-hover:scale-110 transition-transform">💻</div>
           <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">{localStorage.getItem("loginStreak") || 7} Day Streak</span>
-            <span className="text-[#64748b] text-[12px]">+100 XP earned</span>
+            <span className="font-bold text-[#0f172a] text-[14px]">Tech Badges</span>
+            <span className="text-[#64748b] text-[12px]">View your technical practice badges</span>
           </div>
         </div>
-        <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-white bg-[#5694F0] px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">{technicalBadges.length} Earned</span>
+          {hasUnseenTech && <span className="text-[9px] font-bold text-[#3b82f6] uppercase tracking-wider">New</span>}
+        </div>
       </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
+    );
+
+    const nonTechTile = (
+      <div 
+        key="non-tech"
+        onClick={() => openPracticeModal("Non-Technical")}
+        className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenNonTech ? 'border-[#8b5cf6] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
+      >
+        {hasUnseenNonTech && <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[#8b5cf6] rounded-full border-[1.5px] border-white shadow-sm z-10 animate-pulse" />}
         <div className="flex items-center gap-3">
-          <div className="text-[24px]">🎓</div>
+          <div className="text-[32px] group-hover:scale-110 transition-transform">🧠</div>
           <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">Course Complete</span>
-            <span className="text-[#64748b] text-[12px]">+200 XP earned</span>
+            <span className="font-bold text-[#0f172a] text-[14px]">Non-Tech Badges</span>
+            <span className="text-[#64748b] text-[12px]">View your aptitude & reasoning badges</span>
           </div>
         </div>
-        <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
-      </div>
-      <div className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#FAFAFA]">
-        <div className="flex items-center gap-3">
-          <div className="text-[24px]">🎉</div>
-          <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">Certified Dev</span>
-            <span className="text-[#64748b] text-[12px]">+500 XP earned</span>
-          </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-white bg-[#5694F0] px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">{nonTechnicalBadges.length} Earned</span>
+          {hasUnseenNonTech && <span className="text-[9px] font-bold text-[#8b5cf6] uppercase tracking-wider">New</span>}
         </div>
-        <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold">Earned</span>
       </div>
+    );
+
+    if (hasUnseenNonTech && !hasUnseenTech) {
+      return [nonTechTile, techTile];
+    }
+    return [techTile, nonTechTile];
+  };
+
+  return (
+    <div className="w-full h-full flex flex-col min-h-0">
+      <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px] mb-2 sticky top-0 bg-white z-10 pt-1 shrink-0">Achievements</h3>
+
+      <div className="flex flex-col gap-3 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:hidden flex-1 pb-2 px-1.5 pt-1.5">
+        {renderTiles()}
+        {achievementsList.map((item, idx) => (
+          <div 
+            key={idx} 
+            className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group"
+            onClick={() => {
+              setSelectedAchievement(item);
+              setIsModalOpen(true);
+            }}
+          >
+            <div className="flex items-center gap-3 overflow-hidden mr-2">
+              <div className="text-[24px] shrink-0 group-hover:scale-110 transition-transform">{item.emoji}</div>
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-[#0f172a] text-[14px] truncate group-hover:text-[#3b82f6] transition-colors">{item.title}</span>
+                <span className="text-[#64748b] text-[12px] truncate">{item.desc}</span>
+              </div>
+            </div>
+            <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold shrink-0">{item.status}</span>
+          </div>
+        ))}
+      </div>
+      <AchievementDetailsModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        achievement={selectedAchievement} 
+      />
+      
+      <Modal
+        title={<span className="font-bold text-[18px] flex items-center gap-2">{practiceModalType === "Technical" ? '💻' : '🧠'} {practiceModalType} Practice Badges</span>}
+        open={isPracticeModalOpen}
+        onCancel={() => setIsPracticeModalOpen(false)}
+        footer={null}
+        width={600}
+        centered
+        bodyStyle={{ maxHeight: '70vh', overflowY: 'auto', padding: '24px 16px' }}
+        closeIcon={<span className="text-gray-400 hover:text-gray-600 text-xl">✕</span>}
+      >
+        {renderBadgeList(practiceModalType === "Technical" ? technicalBadges : nonTechnicalBadges)}
+      </Modal>
     </div>
-  </div>
-);
+  );
+};
 
 // Resolve current user id: prefer studentCreds._id, fall back to sessionStorage
 // (studentCreds may not be hydrated yet on first paint).
@@ -310,31 +717,23 @@ const resolveUserId = (studentCreds) => {
 
 export default function DashboardPage() {
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
+  const [activeNoticeIndex, setActiveNoticeIndex] = useState(null);
   const studentCreds = useSelector((state) => state.student.student?.data);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const handleOpenNoticeBoard = (e) => {
+      if (e.detail?.index !== undefined) {
+        setActiveNoticeIndex(e.detail.index);
+      }
+      setIsNoticeModalOpen(true);
+    };
+    window.addEventListener("openNoticeBoard", handleOpenNoticeBoard);
+    return () => window.removeEventListener("openNoticeBoard", handleOpenNoticeBoard);
   }, []);
 
   const isMobile = useResponsive(); // < 1024px → mobile layout
-
-  // Inject keyframes for the timer bar
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      @keyframes fillRightToLeft {
-        0% { width: 0%; right: 0; }
-        100% { width: 100%; right: 0; }
-      }
-      @keyframes fillLeftToRight {
-        0% { width: 0%; left: 0; }
-        100% { width: 100%; left: 0; }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
 
   // Inject keyframes for the timer bar
   useEffect(() => {
@@ -427,6 +826,61 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchAllData();
   }, [fetchAllData]);
+
+  // Streak management
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const today = new Date().toDateString();
+      let lastLogin = studentCreds?.lastLoginDate || localStorage.getItem("lastLoginDate");
+      let currentStreak = studentCreds?.loginStreak || parseInt(localStorage.getItem("loginStreak") || "0", 10);
+      
+      if (isNaN(currentStreak)) currentStreak = 1;
+
+      let streakChanged = false;
+      
+      if (lastLogin) {
+        if (lastLogin !== today) {
+          const lastLoginDate = new Date(lastLogin);
+          const todayDate = new Date(today);
+          const diffTime = todayDate.getTime() - lastLoginDate.getTime();
+          const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); // Use Math.round to handle DST shifts
+          
+          if (diffDays === 1) {
+            currentStreak += 1;
+            localStorage.removeItem("streakBrokenNotify");
+          } else if (diffDays > 1) {
+            currentStreak = 1;
+            localStorage.setItem("streakBrokenNotify", "true");
+          }
+          streakChanged = true;
+        } else if (currentStreak === 0) {
+          currentStreak = 1;
+          streakChanged = true;
+        }
+      } else {
+        currentStreak = 1;
+        streakChanged = true;
+        localStorage.removeItem("streakBrokenNotify");
+      }
+
+      if (streakChanged) {
+        localStorage.setItem("lastLoginDate", today);
+        localStorage.setItem("loginStreak", currentStreak.toString());
+        
+        if (studentCreds?._id) {
+          dispatch(updateStudent({
+            aboutDetails: {
+              _id: studentCreds._id,
+              email: studentCreds.email,
+              loginStreak: currentStreak,
+              lastLoginDate: today
+            },
+            dispatch
+          }));
+        }
+      }
+    }
+  }, [studentCreds, dispatch]);
 
   // Memoized profile values
   const profileValues = useMemo(() => {
@@ -826,7 +1280,7 @@ export default function DashboardPage() {
 
         {/* Sidebar */}
         <div className="hidden lg:flex w-[280px] xl:w-[320px] h-full flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] px-4 pt-0 pb-2 shrink-0 z-10 shadow-sm relative">
-          <div className="w-full flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden flex-1 h-full">
+          <div className="w-full flex flex-col flex-1 h-full min-h-0">
             {/* Section 1: Overall Performance */}
             <div className="w-full shrink-0 pt-0 pb-3">
               <ProfileSection
@@ -852,14 +1306,14 @@ export default function DashboardPage() {
                   onClick={() => setIsNoticeModalOpen(true)}
                 />
               </div>
-              <div className="w-full shrink-0 flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pb-1">
-                <CardsList type="notifications" />
+              <div className="w-full overflow-y-auto [&::-webkit-scrollbar]:hidden flex-1 pb-2">
+                <CardsList type="notifications" progressById={progressById} combinedLearningData={combinedLearningData} />
               </div>
             </div>
             
             {/* Section 3: Achievements */}
-            <div className="w-full relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
-              <Achievements />
+            <div className="w-full flex flex-col relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
+              <Achievements progressById={progressById} combinedLearningData={combinedLearningData} studentCreds={studentCreds} />
             </div>
           </div>
         </div>
@@ -871,9 +1325,15 @@ export default function DashboardPage() {
             footer={null}
             width={1000}
           >
-            <div style={{ height: "70vh", overflowY: "auto" }}>
-              <CardsList type="notifications" isModal={true} />
-            </div>
+          <div style={{ height: "70vh", overflowY: "auto" }}>
+            <CardsList 
+              type="notifications" 
+              isModal={true} 
+              progressById={progressById} 
+              combinedLearningData={combinedLearningData}
+              activeNoticeIndex={activeNoticeIndex}
+            />
+          </div>
           </Modal>
         </div>
     </section>

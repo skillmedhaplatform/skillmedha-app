@@ -26,6 +26,8 @@ import { getStudent } from "@/redux/slices/student";
 import { fetchOneAssessment } from "@/redux/slices/jobassessmentsSlice";
 import { encryptObject } from "../../tests/utils/encrytionMiddleware";
 import { parseIfJson } from "../reusable_comp/jsonparse";
+import { IoMdArrowRoundBack } from "react-icons/io";
+import { Wifi, Clock, Monitor, Battery, VolumeX, User, BookOpen, Eye, RefreshCw, ArrowRight, Calendar, CheckCircle, AlertTriangle, Phone, Check, Info, Home, PenTool, Star, ShieldAlert } from "lucide-react";
 
 // Presentational modal for camera capture + preview
 const CaptureModal = memo(function CaptureModal(props) {
@@ -763,108 +765,205 @@ export default function Page() {
     }
   }, []);
 
+  const instructionsHtml = testData?.startPage?.intructions
+    ? parseIfJson(testData?.startPage?.intructions)
+    : null;
+
+  const [parsedGuidelines, setParsedGuidelines] = useState([]);
+
+  useEffect(() => {
+    if (instructionsHtml && typeof document !== "undefined") {
+      const div = document.createElement("div");
+      div.innerHTML = instructionsHtml;
+      const sections = [];
+      let currentSection = null;
+
+      Array.from(div.children).forEach((node) => {
+        const text = node.textContent.trim();
+        if (/^\d+\./.test(text) || node.tagName.match(/^H[1-6]$/i)) {
+          if (currentSection) sections.push(currentSection);
+          const numMatch = text.match(/^(\d+)\.\s*/);
+          const num = numMatch ? numMatch[1] : "";
+          const titleText = text.replace(/^\d+\.\s*/, "").replace(/:$/, "");
+          currentSection = { number: num, title: titleText, content: [] };
+        } else {
+          if (!currentSection) currentSection = { number: "", title: "Instructions", content: [] };
+          const itemHtml = node.innerHTML.replace(/^-\s*/, "");
+          if (itemHtml.trim() !== "") {
+            currentSection.content.push(itemHtml);
+          }
+        }
+      });
+      if (currentSection) sections.push(currentSection);
+      setParsedGuidelines(sections);
+    }
+  }, [instructionsHtml]);
+
+  const getHeaderIcon = (title) => {
+    const t = title.toLowerCase();
+    if (t.includes("general")) return <Info className="w-[18px] h-[18px] text-gray-400" />;
+    if (t.includes("technical")) return <Monitor className="w-[18px] h-[18px] text-gray-400" />;
+    if (t.includes("environment")) return <Home className="w-[18px] h-[18px] text-gray-400" />;
+    if (t.includes("answering")) return <PenTool className="w-[18px] h-[18px] text-gray-400" />;
+    if (t.includes("scoring")) return <Star className="w-[18px] h-[18px] text-gray-400" />;
+    return <Info className="w-[18px] h-[18px] text-gray-400" />;
+  };
+
   return (
-    <>
-      <StudentPageHeader section="Assessment" title="Job Assessment" />
-      <div className="relative p-4">
-        <SocketComp />
-        <div className="mb-4">
-          <Button type="primary" onClick={() => nav.push("student/jobAssessments")} className="mb-2">
-            back
-          </Button>
-          <h2 className="text-gray-800 font-bold text-2xl m-0">{testData?.jobTitle}</h2>
-        </div>
+    <div className="bg-[#EFF5FB] h-screen overflow-hidden flex flex-col">
+      <StudentPageHeader title="Job Assessment" />
+      <div className="bg-white px-6 py-4 flex items-center justify-start gap-4 z-10 sticky top-0 shadow-sm border-b border-gray-100">
+        <Button
+          icon={<IoMdArrowRoundBack />}
+          type="text"
+          onClick={() => nav.push("/student/jobAssessments")}
+        />
+        <div className="text-gray-800 font-bold text-2xl m-0">{testData?.jobTitle || testData?.title}</div>
+      </div>
+      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#e2e8f0] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent">
+        <div className="relative p-6 max-w-[1400px] mx-auto pb-12">
+          <SocketComp />
 
-        <div className="flex gap-4 flex-col lg:flex-row">
-          {testData?.startPage?.intructions?.length && (
-            <div
-              dangerouslySetInnerHTML={{
-                __html: parseIfJson(testData?.startPage?.intructions),
-              }}
-              className="bg-[#f8fafc] p-6 rounded-[10px] shadow-[rgba(9,30,66,0.25)_0_4px_8px_-2px,rgba(9,30,66,0.08)_0_0_0_1px] [&_p]:text-[0.9rem] [&_p]:flex [&_p]:items-start [&_p]:justify-start [&_h3]:text-[1.2rem] [&_h3]:mt-4 [&_h4]:text-[1rem] [&_h4]:mt-4 [&_p]:ml-3 w-full lg:w-1/2"
-            />
-          )}
-
-          <div className="h-max rounded-lg w-full lg:w-1/2 flex flex-col justify-between gap-4">
-            <div className="bg-[#f8fafc] w-full p-6 rounded-lg shadow-[rgba(9,30,66,0.25)_0_4px_8px_-2px,rgba(9,30,66,0.08)_0_0_0_1px] [&_h3]:text-[1.2rem] [&_h3]:mt-4 [&_h4]:text-[1rem] [&_h4]:my-4 [&_p]:mb-3">
-              <h3>Honest Respondent Technology</h3>
-              <h4>Focus on your test only!</h4>
-              <p>
-                The test is secured with Honest Respondent Technology; tab focus
-                is monitored to prevent cheating.
-              </p>
-              <p>
-                Disable background programs, chats, and system notifications to
-                avoid unintended blocks.
-              </p>
-            </div>
-
-            {testData?.startPage?.formRequirements && (
-              <div className="bg-[#f8fafc] w-full p-6 rounded-lg shadow-[rgba(9,30,66,0.25)_0_4px_8px_-2px,rgba(9,30,66,0.08)_0_0_0_1px] [&_h3]:text-[1.2rem] [&_h3]:mt-4 [&_h4]:text-[1rem] [&_h4]:my-4 [&_p]:mb-3">
-                <h3>Test Start Form</h3>
-                <FormPage initialData={testData?.startPage?.formRequirements} />
+          <div className="flex gap-6 flex-col lg:flex-row">
+            {!testData ? (
+              <Skeleton avatar paragraph={{ rows: 10 }} />
+            ) : parsedGuidelines.length > 0 ? (
+              <div className="w-full lg:w-[55%] xl:w-[60%] flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-[#1a3b8b] font-bold text-lg mb-2">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                   Exam Guidelines
+                </div>
+                
+                {parsedGuidelines.map((section, idx) => (
+                  <div key={idx} className="border border-gray-200 rounded-lg bg-white overflow-hidden shadow-[0_2px_10px_rgb(0,0,0,0.03)] transition-all">
+                     <div className="bg-[#F9FAFC] px-3 py-2 flex items-center justify-between border-b border-gray-200">
+                        <div className="flex items-center gap-3">
+                           <div className="w-[26px] h-[26px] rounded-full bg-[#eff4ff] text-[#1E69DA] font-bold flex items-center justify-center text-[13px]">
+                              {section.number || (idx + 1)}
+                           </div>
+                           <h3 className="font-extrabold text-[#1a3b8b] text-[15px]">{section.title}</h3>
+                        </div>
+                        {getHeaderIcon(section.title)}
+                     </div>
+                     <div className="px-3 pt-1.5 pb-1 flex flex-col gap-1 bg-white">
+                        {section.content.map((item, i) => (
+                           <div key={i} className="flex items-start">
+                              <div 
+                                 className="text-[14px] text-gray-700 leading-relaxed"
+                                 dangerouslySetInnerHTML={{ __html: item }} 
+                              />
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+                ))}
               </div>
-            )}
+            ) : null}
 
-            {testData?.startPage?.consetForm && (
-              <div className="w-full shadow-[rgba(9,30,66,0.25)_0_4px_8px_-2px,rgba(9,30,66,0.08)_0_0_0_1px] rounded-lg p-2 flex items-start justify-start gap-2 bg-[#f8fafc] [&_.conset_check]:flex [&_.conset_check]:items-start [&_.conset_check]:justify-start">
-                <Checkbox
-                  checked={checkbox}
-                  onChange={() => setCheckBox(!checkbox)}
-                />
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      typeof testData?.startPage?.consetForm === "string"
-                        ? parseIfJson(testData?.startPage?.consetForm)
-                        : testData?.startPage?.consetForm,
-                  }}
-                  className="text-[0.9rem]"
-                />
+            <div className="h-max w-full lg:w-[45%] xl:w-[40%] flex flex-col gap-5 pt-[42px]">
+              <div className="bg-[#1e293b] w-full p-6 rounded-xl shadow-[0_4px_12px_rgb(0,0,0,0.08)] relative overflow-hidden">
+                <div className="inline-flex items-center gap-1.5 bg-red-500/10 text-red-400 px-3 py-1 rounded-full text-[12px] font-bold mb-4 border border-red-500/20">
+                   <ShieldAlert className="w-3.5 h-3.5" /> Secured Test
+                </div>
+                <p className="text-[1.2rem] font-extrabold text-white">Honest Respondent Technology</p>
+                <p className="text-[13px] font-medium mt-1 mb-5 text-gray-400">Focus on your test only!</p>
+                
+                <div className="flex flex-col gap-4">
+                   <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-4 h-4 text-[#5694F0] mt-1 flex-shrink-0" />
+                      <p className="text-[13.5px] text-gray-300 leading-relaxed">The test is secured with Honest Respondent Technology. Don&apos;t click outside the test tab area.</p>
+                   </div>
+                   <div className="flex items-start gap-3">
+                      <Monitor className="w-4 h-4 text-[#5694F0] mt-1 flex-shrink-0" />
+                      <p className="text-[13.5px] text-gray-300 leading-relaxed">Every browser tab movement is recorded and may flag your test session.</p>
+                   </div>
+                   <div className="flex items-start gap-3">
+                      <VolumeX className="w-4 h-4 text-[#5694F0] mt-1 flex-shrink-0" />
+                      <p className="text-[13.5px] text-gray-300 leading-relaxed">Disable background programs, chats, and system notifications before starting the test.</p>
+                   </div>
+                </div>
               </div>
-            )}
 
-            <div className="flex justify-end">
-              <Button type="primary" onClick={handleStartClick}>
-                Start the Test
-              </Button>
+              {testData?.startPage?.formRequirements && (
+                <div className="bg-white border border-gray-200 w-full p-6 rounded-xl shadow-[0_2px_10px_rgb(0,0,0,0.03)]">
+                  <div className="flex items-center gap-2 mb-6">
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E69DA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                     <p className="text-[1.1rem] font-bold text-[#1a3b8b]">Test Start Form</p>
+                  </div>
+                  <FormPage initialData={testData.startPage.formRequirements} />
+                </div>
+              )}
+
+              {testData?.startPage?.consetForm && (
+                <div className="bg-white border border-gray-200 w-full p-4 rounded-xl shadow-[0_2px_10px_rgb(0,0,0,0.03)] flex items-start justify-start gap-3 [&_.conset_check]:mt-1">
+                  <Checkbox
+                    checked={checkbox}
+                    onChange={() => setCheckBox(!checkbox)}
+                    className="mt-[2px]"
+                  />
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        typeof testData.startPage.consetForm === "string"
+                          ? parseIfJson(testData.startPage.consetForm)
+                          : testData.startPage.consetForm,
+                    }}
+                    className="text-[13px] text-gray-600 leading-relaxed"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end mt-2">
+                <Button
+                  loading={verifying}
+                  onClick={handleStartClick}
+                  type="primary"
+                  size="large"
+                  className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white font-bold px-10 h-11 w-full lg:w-auto shadow-md"
+                >
+                  Start the Test
+                </Button>
+              </div>
             </div>
           </div>
         </div>
+        
+        <CaptureModal
+          open={captureModal}
+          onCancel={() => {
+            stopCamera();
+            setCaptureModal(false);
+            setUploadedImageUrl(null);
+            setIsOpenCamera(false);
+            if (countdownRef.current) {
+              clearInterval(countdownRef.current);
+              countdownRef.current = null;
+            }
+          }}
+          onCapture={capturePhoto}
+          onContinue={showPreviewAndCountdown}
+          onRetake={retakePhoto}
+          verifying={verifying}
+          previewing={previewing}
+          uploadedImageUrl={uploadedImageUrl}
+          timer={timer}
+          formatTime={formatTime}
+          videoRef={videoRef}
+          canvasRef={canvasRef}
+          isCameraAvailable={isCameraAvailable}
+          cameraError={cameraError}
+        />
+
+        <PopupBlockedModal
+          popupBlocked={popupBlocked}
+          setPopupBlocked={setPopupBlocked}
+          setUploadedImageUrl={setUploadedImageUrl}
+          setIsOpenCamera={setIsOpenCamera}
+          stopCamera={stopCamera}
+          setVerifying={setVerifying}
+          setPreviewing={setPreviewing}
+        />
       </div>
-
-      <CaptureModal
-        open={captureModal}
-        onCancel={() => {
-          stopCamera();
-          setCaptureModal(false);
-          setUploadedImageUrl(null);
-          setIsOpenCamera(false);
-          if (countdownRef.current) {
-            clearInterval(countdownRef.current);
-            countdownRef.current = null;
-          }
-        }}
-        onCapture={capturePhoto}
-        onContinue={showPreviewAndCountdown}
-        onRetake={retakePhoto}
-        verifying={verifying}
-        previewing={previewing}
-        uploadedImageUrl={uploadedImageUrl}
-        timer={timer}
-        formatTime={formatTime}
-        videoRef={videoRef}
-        canvasRef={canvasRef}
-        // styles={testPageStyles}
-        isCameraAvailable={isCameraAvailable}
-        cameraError={cameraError}
-      />
-
-      <PopupBlockedModal
-        open={popupBlocked}
-        onOk={handlePopupOk}
-      // styles={testPageStyles}
-      />
-    </>
+    </div>
   );
 }

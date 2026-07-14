@@ -77,7 +77,7 @@ export default function QuesComp({
     if (e?.scoreSettings?.pointsForEachIncorrectAns)
       negativeScore = e?.scoreSettings?.pointsForEachIncorrectAns;
   }
-  const singleQuestion = testRes?.value[testId]?.response[e?._id];
+  const singleQuestion = testRes?.value?.[testId]?.response?.[e?._id];
 
   const getLanguageName = (languageId) => {
     const languageMap = {

@@ -70,14 +70,21 @@ export default function ResultsComp() {
     setTestBlocked(isBlocked);
   }, [testData?._id, testData]);
 
+  const shuffledTestData = React.useMemo(() => {
+    if (!testData?.questions) return testData;
+    return JSON.parse(JSON.stringify(testData));
+  }, [testData]);
+
   useEffect(() => {
-    if (testData?.questions?.length) {
-      const updatedQues = testData?.questions?.reduce((acc, question) => {
+    if (shuffledTestData?.questions?.length) {
+      const updatedQues = shuffledTestData?.questions?.reduce((acc, question) => {
         if (question?.questionType?.includes("Comprehension")) {
           const updatedContentArr = question?.questionContentArr?.map(
             (content) => ({
               ...content,
               qType: question?.questionType,
+              compText: question?.comprehensionText,
+              resource: question?.resources,
             })
           );
           return [...acc, ...(updatedContentArr || [])];
@@ -112,7 +119,7 @@ export default function ResultsComp() {
       const total = totalMarksEachTests.reduce((acc, curr) => acc + curr, 0);
       setTotalMarks(total);
     }
-  }, [testData?._id, testData?.questions?.length]);
+  }, [testData?._id, testData?.questions?.length, shuffledTestData]);
 
   useEffect(() => {
     dispatch(getPublicStudent({ id: studentId }));
@@ -161,6 +168,7 @@ export default function ResultsComp() {
         response: resultToSave?.response,
         studentData: resultToSave?.studentData || studentData,
         flagged: resultToSave?.flagged,
+        marked: resultToSave?.marked,
         scoreData: derivedScoreData,
       })
     );
@@ -218,7 +226,10 @@ export default function ResultsComp() {
     <>
       {" "}
       <div className={resultStyles.container}>
-        <div className={resultStyles.headerContainer}>
+        <div 
+          className={resultStyles.headerContainer}
+          style={PassScore && totalScore >= PassScore ? { backgroundColor: '#d4edda', padding: '1rem', borderRadius: '8px' } : {}}
+        >
           <h2 className={resultStyles.title}>
             {testValues?.message ? (
               <span
@@ -456,118 +467,24 @@ export default function ResultsComp() {
             <Skeleton />
           ) : (
             <div className={resultStyles.answers_scroll_cont}>
-              {testData?.questions?.length > 0 &&
-                testData?.questions?.map((e, i) => {
-                  let flaggedQues = testRes[testId]?.flagged?.find(
-                    (que, ind) => que?.id == e?._id
+              {ques?.length > 0 &&
+                ques?.map((e, i) => {
+                  const flaggedQues = testRes[testId]?.flagged?.find((que) => que?.id == e?._id);
+                  const markedQues = testRes[testId]?.marked?.includes(e?._id);
+                  return (
+                    <div ref={quesContainerRef.current[questionNo]} key={i}>
+                      <QuesComp
+                        quesContainerRef={quesContainerRef}
+                        e={e}
+                        i={i}
+                        currentTestRes={currentTestRes}
+                        testRes={testRes}
+                        questionNo={questionNo++}
+                        flagged={flaggedQues}
+                        marked={markedQues}
+                      />
+                    </div>
                   );
-
-                  if (e?.questionType?.includes("Comprehension"))
-                    return (
-                      <div key={i} className={resultStyles.collapse_div}>
-                        <Collapse
-                          collapsible="header"
-                          defaultActiveKey={["1"]}
-                          expandIconPosition="end"
-                          expandIcon={({ isActive }) => (
-                            <TbTriangleInvertedFilled
-                              style={{
-                                transform: isActive
-                                  ? "rotate(120deg)"
-                                  : "rotate(30deg)",
-                                transition: "transform 0.3s",
-                                fontSize: "1rem",
-                              }}
-                            />
-                          )}
-                          size="large"
-                          items={[
-                            {
-                              key: "1",
-                              label: (
-                                <div className={resultStyles.main_header_div}>
-                                  <div className={resultStyles.header}>
-                                    <div>
-                                      <span>{e?.questionType}</span>
-                                    </div>
-                                  </div>
-                                  {e?.questionType?.includes("Reading") ? (
-                                    <div
-                                      dangerouslySetInnerHTML={{
-                                        __html: parseIfJson(
-                                          e?.comprehensionText
-                                        ),
-                                      }}
-                                      className={
-                                        resultStyles.comprehension_text
-                                      }
-                                    ></div>
-                                  ) : (
-                                    e?.resources != undefined &&
-                                    e?.resources != "" &&
-                                    (e?.questionType !==
-                                      "Reading Comprehension" &&
-                                    e?.questionType === "Video Comprehension"
-                                      ? e?.resources?.url !== "" && (
-                                          <video
-                                            src={e?.resources?.url}
-                                            controls
-                                          />
-                                        )
-                                      : e?.resources?.url !== "" && (
-                                          <audio
-                                            src={e?.resources?.url}
-                                            controls
-                                          />
-                                        ))
-                                  )}
-                                </div>
-                              ),
-                              children: e?.questionContentArr?.map(
-                                (ques, index) => {
-                                  flaggedQues = testRes?.value[
-                                    testId
-                                  ]?.flagged?.find(
-                                    (que, ind) => que?.id == ques?._id
-                                  );
-                                  return (
-                                    <div
-                                      className={resultStyles.comp_div}
-                                      ref={quesContainerRef.current[questionNo]}
-                                      key={index}
-                                    >
-                                      <QuesComp
-                                        quesContainerRef={quesContainerRef}
-                                        e={ques}
-                                        i={index}
-                                        currentTestRes={currentTestRes}
-                                        testRes={testRes}
-                                        questionNo={questionNo++}
-                                        flagged={flaggedQues}
-                                      />
-                                    </div>
-                                  );
-                                }
-                              ),
-                            },
-                          ]}
-                        ></Collapse>
-                      </div>
-                    );
-                  else
-                    return (
-                      <div ref={quesContainerRef.current[questionNo]} key={i}>
-                        <QuesComp
-                          quesContainerRef={quesContainerRef}
-                          e={e}
-                          i={i}
-                          currentTestRes={currentTestRes}
-                          testRes={testRes}
-                          questionNo={questionNo++}
-                          flagged={flaggedQues}
-                        />
-                      </div>
-                    );
                 })}
             </div>
           )}

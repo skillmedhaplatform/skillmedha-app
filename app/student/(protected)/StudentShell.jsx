@@ -62,7 +62,7 @@ export default function StudentShell({ children }) {
               </div>
             </div>
           )}
-          <div className={PageStyles.content} style={(mounted ? isMobileState : false) ? { padding: 0, backgroundColor: "#f8fafc" } : {}}>
+          <div className={PageStyles.content} style={(mounted ? isMobileState : false) ? { padding: 0, backgroundColor: "#EFF5FB" } : {}}>
             {children}
           </div>
         </div>
