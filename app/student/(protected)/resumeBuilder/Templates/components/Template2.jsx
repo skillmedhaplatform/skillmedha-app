@@ -127,7 +127,15 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
         jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
       };
 
-      await html2pdf().set(opt).from(resumeRef.current).save();
+      const pdfBlob = await html2pdf().set(opt).from(resumeRef.current).output("blob");
+      const downloadUrl = URL.createObjectURL(pdfBlob);
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = "resume.pdf";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(downloadUrl);
     } catch (err) {
       console.error("PDF export failed:", err);
     } finally {
@@ -152,19 +160,19 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
 
   return (
     <div
-      className={`${(downloadImage || isGeneratingPdf) ? "w-[50rem] max-w-[50rem]" : "w-full max-w-full"} h-full mx-auto overflow-y-scroll p-12 bg-white shadow-xl font-['Inter',sans-serif] text-[#334155] [&_section]:mb-6 [&_section_h2]:text-[1.05rem] [&_section_h2]:font-bold [&_section_h2]:tracking-wider [&_section_h2]:uppercase [&_section_h2]:border-b-2 [&_section_h2]:border-solid [&_section_h2]:border-[#e2e8f0] [&_section_h2]:pb-2 [&_section_h2]:mb-4 [&_section_h2]:text-[#1E69DA] [&_section_p]:text-[0.95rem] [&_section_p]:leading-relaxed [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-white [&::-webkit-scrollbar-thumb]:rounded-[20px]`}
+      className={`${(downloadImage || isGeneratingPdf) ? "w-[794px] max-w-[794px] min-h-[1123px]" : "w-full max-w-full"} h-auto mx-auto overflow-visible bg-white p-12 font-['Inter',sans-serif] text-[#334155] [&_section]:mb-6 [&_section_h2]:mb-4 [&_section_h2]:border-b-2 [&_section_h2]:border-solid [&_section_h2]:border-[#e5e7eb] [&_section_h2]:pb-2 [&_section_h2]:text-[1.05rem] [&_section_h2]:font-bold [&_section_h2]:uppercase [&_section_h2]:tracking-wider [&_section_h2]:text-[#374151] [&_section_p]:text-[0.95rem] [&_section_p]:leading-relaxed [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-white [&::-webkit-scrollbar-thumb]:rounded-[20px]`}
       ref={downloadImage ? resumeRef : resumeTemplateRef}
     >
-      <div id="section-Basic-Details" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Basic Details" || activeSection === "Links" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
-        <header className="grid grid-cols-[1fr_10rem] mb-6 border-b-4 border-[#1E69DA] pb-6">
+      <div id="section-Basic-Details" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Basic Details" || activeSection === "Links" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
+        <header className="mb-6 grid grid-cols-[1fr_10rem] border-b-2 border-[#d1d5db] pb-6">
           <div className="flex flex-col justify-center items-start text-start [&_p]:text-[0.95rem] [&_p]:my-2">
-            <div className="mb-2 text-start [&_h1]:text-start [&_h1]:text-[2.6rem] [&_h1]:font-black [&_h1]:tracking-tight [&_h1]:text-[#0f172a] [&_h1]:m-0 [&_h2]:font-medium [&_h2]:text-[1.3rem] [&_h2]:text-[#1E69DA]">
+            <div className="mb-2 text-start [&_h1]:m-0 [&_h1]:text-start [&_h1]:text-[2.6rem] [&_h1]:font-black [&_h1]:tracking-tight [&_h1]:text-[#111827] [&_h2]:text-[1.3rem] [&_h2]:font-medium [&_h2]:text-[#4b5563]">
               <h1>
                 {basicDetails?.firstName} {basicDetails?.middleName}{" "}
                 {basicDetails?.lastName}
               </h1>
             </div>
-            <div className="flex flex-wrap mt-2 mb-0.5 [&_a]:text-[0.95rem] [&_a]:font-medium [&_a]:mr-6 [&_a]:mb-2 [&_a]:text-[#64748b] [&_a]:no-underline [&_a]:flex [&_a]:items-center [&_a]:gap-1.5 [&_a:hover]:text-[#1E69DA]">
+            <div className="mt-2 mb-0.5 flex flex-wrap [&_a]:mr-6 [&_a]:mb-2 [&_a]:flex [&_a]:items-center [&_a]:gap-1.5 [&_a]:text-[0.95rem] [&_a]:font-medium [&_a]:text-[#4b5563] [&_a]:no-underline [&_a:hover]:text-[#111827]">
               <a href={`mailto:${basicDetails?.email || ""}`}>
                 <MailOutlined /> {basicDetails?.email}
               </a>
@@ -179,7 +187,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
                     <p className="text-[0.9rem] m-0 mb-2">
                       {link?.title || ""} {link?.link ? (
                         <span>
-                          - <a href={link.link.startsWith('http') ? link.link : `https://${link.link}`} target="_blank" rel="noopener noreferrer" className="text-[#1E69DA] hover:underline" style={{ textDecoration: 'none' }}>
+                          - <a href={link.link.startsWith('http') ? link.link : `https://${link.link}`} target="_blank" rel="noopener noreferrer" className="text-[#374151] hover:underline" style={{ textDecoration: 'none' }}>
                             {link.link}
                           </a>
                         </span>
@@ -215,7 +223,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
       </div>
 
       {educationDetails?.length > 0 && (
-        <section id="section-Education" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Education" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
+        <section id="section-Education" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Education" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
           <h2>Education</h2>
           {educationDetails?.length > 0 &&
             educationDetails?.map((edu, i) => (
@@ -248,7 +256,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
       {experienceDetails
         ?.filter((e) => e?.type?.toLowerCase() == "work")
         ?.filter((e) => e?.company)?.length > 0 && (
-          <section id="section-Experience" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Experience" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
+          <section id="section-Experience" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Experience" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
             <h2>Experience</h2>
             {experienceDetails?.length > 0 &&
               experienceDetails
@@ -280,7 +288,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
       {experienceDetails
         ?.filter((e) => e?.type?.toLowerCase() !== "work")
         ?.filter((e) => e?.company)?.length > 0 && (
-          <section id="section-Internships" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Internships" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
+          <section id="section-Internships" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Internships" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
             <h2>Internships</h2>
             {experienceDetails?.length > 0 &&
               experienceDetails
@@ -311,7 +319,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
 
       {projectDetails?.length > 0 &&
         projectDetails?.filter((e) => e?.project)?.length > 0 && (
-          <section id="section-Projects" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Projects" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
+          <section id="section-Projects" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Projects" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
             <h2>Projects</h2>
             {projectDetails?.length > 0 &&
               projectDetails?.map((proj, i) => (
@@ -343,7 +351,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
 
       {certificatesList?.length > 0 &&
         certificatesList.some((cert) => cert?.name || cert?.organization) && (
-          <section id="section-Certifications" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Certifications" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
+          <section id="section-Certifications" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Certifications" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
             <h2>Certificates</h2>
             {certificatesList.map((cert, i) => (
               <div className="flex flex-col mb-3 justify-center" key={i}>
@@ -384,7 +392,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
 
       {volunteeringList?.length > 0 &&
         volunteeringList.some((v) => v?.organization || v?.volunteering) && (
-          <section id="section-Volunteering" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Volunteering" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
+          <section id="section-Volunteering" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Volunteering" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
             <h2>Volunteering</h2>
             {volunteeringList.map((v, i) => (
               <div className="flex flex-col mb-3 justify-center" key={i}>
@@ -415,7 +423,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
         )}
 
       {skillss?.length > 0 && (
-        <section id="section-Skills" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Skills" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
+        <section id="section-Skills" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Skills" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
           <h2>Skills</h2>
           <ul className="flex flex-wrap gap-16 box-border [&_li]:text-[0.9rem] [&_li]:list-square [&_li]:ml-4">
             {skillss?.length > 0 &&
@@ -425,7 +433,7 @@ const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
       )}
 
       {lang?.length > 0 && (
-        <section id="section-Languages" className={`transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Languages" ? "border-2 border-[#1E69DA] bg-[#f8fafc] shadow-sm" : "border-2 border-transparent"}`}>
+        <section id="section-Languages" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Languages" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
           <h2>Languages</h2>
           <p>{lang?.length > 0 ? lang.join(", ") : ""}</p>
         </section>

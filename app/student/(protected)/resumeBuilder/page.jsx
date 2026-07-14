@@ -30,9 +30,65 @@ import { Button } from "antd";
 import CertificateDetails from "./components/certificateDetails";
 import useResponsive from "@/hooks/useResponsive";
 import MobileResumeBuilder from "@/mobile_views/resumeBuilder/MobileResumeBuilder";
+const Template1 = dynamic(() => import("./Templates/components/Template3"), {
+  ssr: false,
+});
 const Template2 = dynamic(() => import("./Templates/components/Template2"), {
   ssr: false,
 });
+const Template3 = dynamic(() => import("./Templates/components/Template1"), {
+  ssr: false,
+});
+const Template4 = dynamic(() => import("./Templates/components/Template4"), {
+  ssr: false,
+});
+const Template5 = dynamic(() => import("./Templates/components/Template5"), {
+  ssr: false,
+});
+const Template6 = dynamic(() => import("./Templates/components/Template6"), {
+  ssr: false,
+});
+const Template7 = dynamic(() => import("./Templates/components/Template7"), {
+  ssr: false,
+});
+
+const TEMPLATE_OPTIONS = [
+  {
+    id: "template1",
+    label: "Template1",
+    // description: "Clean single-column layout for freshers, internships, and campus hiring.",
+  },
+  {
+    id: "template2",
+     label: "Template2",
+    // description: "Balanced layout for internships, placements, and early-career roles.",
+  },
+  {
+    id: "template3",
+     label: "Template3",
+    // description: "Refined sidebar layout for students and experienced professionals.",
+  },
+  {
+    id: "template4",
+    label: "Template4",
+    // description: "Compact recruiter-friendly format for job portals and screenings.",
+  },
+  {
+    id: "template5",
+    label: "Template5",
+    // description: "Polished two-column resume for experienced candidates and leadership roles.",
+  },
+  {
+    id: "template6",
+    label: "Template6",
+    // description: "Modern minimalist design with clean typography.",
+  },
+  {
+    id: "template7",
+    label: "Template7",
+    // description: "Creative accent layout with colorful section headers.",
+  },
+];
 // const html2pdf = dynamic(() => import("html2pdf.js"), {
 //   ssr: false,
 // });
@@ -615,6 +671,7 @@ function Form() {
   }, [personalDetailsResumeBuilder?.value?.profile]);
 
   const resumeTemplateRef = useRef(null);
+  const exportTemplateRef = useRef(null);
   const studentCreds = useSelector((state) => state.student.student);
 
   useEffect(() => {
@@ -623,50 +680,151 @@ function Form() {
 
     // your code here that uses self
   }, []);
+
+  const waitForImagesInNode = async (node) => {
+    if (!node) return;
+    const images = Array.from(node.querySelectorAll("img"));
+    if (!images.length) return;
+
+    await Promise.all(
+      images.map((img) => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise((resolve) => {
+          const done = () => resolve();
+          img.addEventListener("load", done, { once: true });
+          img.addEventListener("error", done, { once: true });
+        });
+      })
+    );
+  };
+
+  const createPrintableClone = async () => {
+    if (!exportTemplateRef.current) return null;
+
+    const source = exportTemplateRef.current;
+    const clone = source.cloneNode(true);
+
+    // Force a stable print layout so html2pdf does not capture zero-height content.
+    clone.style.width = "794px";
+    clone.style.maxWidth = "794px";
+    clone.style.minHeight = "1123px";
+    clone.style.height = "auto";
+    clone.style.overflow = "visible";
+    clone.style.background = "#ffffff";
+    clone.style.margin = "0";
+    clone.style.padding = "0";
+
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "fixed";
+    wrapper.style.left = "0";
+    wrapper.style.top = "0";
+    wrapper.style.width = "794px";
+    wrapper.style.height = "auto";
+    wrapper.style.background = "#ffffff";
+    wrapper.style.zIndex = "-9999";
+    wrapper.style.pointerEvents = "none";
+    wrapper.style.visibility = "hidden";
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    try {
+      await waitForImagesInNode(wrapper);
+    } catch (imgErr) {
+      console.warn("Image loading warning:", imgErr);
+      // Continue even if images fail to load - we'll use fallbacks
+    }
+
+    return {
+      node: wrapper,
+      dispose: () => {
+        if (wrapper.parentNode) {
+          wrapper.parentNode.removeChild(wrapper);
+        }
+      },
+    };
+  };
+
   const uploadResume = async () => {
     setIsGeneratingPdf(true);
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    const html2pdf = (await import("html2pdf.js")).default;
-    if (!resumeTemplateRef.current) {
-      alert("Resume template is not ready. Please wait a moment.");
-      setIsGeneratingPdf(false);
-      return;
-    }
-
-    // Configure html2pdf.js
-    const opt = {
-      margin: 0.5,
-      filename: "resume.pdf",
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-    };
-
-    // Generate PDF as a 'blob'
-    const pdfBlob = await html2pdf()
-      .set(opt)
-      .from(resumeTemplateRef.current)
-      .output("blob");
-
-    // Create FormData to send both file and JSON data
-    const formData = new FormData();
-    formData.append("resume", pdfBlob, studentCreds?.data?._id + ".pdf");
-    formData.append("bucketName", "skillmedha-student-docs");
-    formData.append("uniqueName", studentCreds?.data?._id);
-
     try {
-      const { data } = await axios.post(restUrl + "/upload-resume", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ` + getLstorage("token"),
-        },
-      });
+      const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).jsPDF;
 
-      setIsGeneratingPdf(false);
-      return data?.fileUrl;
+      if (!exportTemplateRef.current) {
+        alert("Resume template is not ready. Please wait a moment.");
+        return;
+      }
+
+      const printable = await createPrintableClone();
+      if (!printable?.node) {
+        alert("Resume template is not ready. Please wait a moment.");
+        return;
+      }
+
+      try {
+        // Use html2canvas to convert to canvas
+        let canvas;
+        try {
+          canvas = await html2canvas(printable.node, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            backgroundColor: "#ffffff",
+          });
+        } catch (canvasErr) {
+          console.error("html2canvas failed during upload:", canvasErr instanceof Error ? canvasErr.message : String(canvasErr));
+          throw new Error(`Canvas rendering failed: ${canvasErr instanceof Error ? canvasErr.message : String(canvasErr)}`);
+        }
+
+        if (!canvas) {
+          throw new Error("Canvas rendering returned null");
+        }
+
+        // Convert canvas to image and create PDF
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "in",
+          format: "a4",
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+
+        // Generate blob from PDF
+        const pdfBlob = pdf.output("blob");
+
+        if (!pdfBlob || !(pdfBlob instanceof Blob)) {
+          throw new Error("PDF generation returned invalid blob");
+        }
+
+        // Create FormData to send both file and JSON data
+        const formData = new FormData();
+        formData.append("resume", pdfBlob, studentCreds?.data?._id + ".pdf");
+        formData.append("bucketName", "skillmedha-student-docs");
+        formData.append("uniqueName", studentCreds?.data?._id);
+
+        const { data } = await axios.post(restUrl + "/upload-resume", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ` + getLstorage("token"),
+          },
+        });
+
+        return data?.fileUrl;
+      } finally {
+        printable.dispose();
+      }
     } catch (error) {
-      console.error("Error uploading resume:", error);
+      console.error("Error uploading resume:", error instanceof Error ? error.message : String(error));
+      throw error;
+    } finally {
       setIsGeneratingPdf(false);
     }
   };
@@ -740,6 +898,19 @@ function Form() {
 
   const sectionRefs = useRef({});
   const [activeSection, setActiveSection] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState("template1");
+  const templateComponents = {
+    template1: Template1,
+    template2: Template2,
+    template3: Template3,
+    template4: Template4,
+    template5: Template5,
+    template6: Template6,
+    template7: Template7,
+  };
+
+  const SelectedTemplateComponent =
+    templateComponents[selectedTemplate] || Template1;
 
   const availableSections = isEditing
     ? [
@@ -799,65 +970,170 @@ function Form() {
 
   const completionPercentage = calculateProfileCompletion();
 
+  const handleDownloadResume = async () => {
+    setIsGeneratingPdf(true);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).jsPDF;
+
+      if (!exportTemplateRef.current) {
+        alert("Resume template is not ready. Please wait a moment.");
+        return;
+      }
+
+      const printable = await createPrintableClone();
+      if (!printable?.node) {
+        alert("Resume template is not ready. Please wait a moment.");
+        return;
+      }
+
+      try {
+        // Use html2canvas first to debug rendering issues
+        let canvas;
+        try {
+          canvas = await html2canvas(printable.node, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            backgroundColor: "#ffffff",
+          });
+        } catch (canvasErr) {
+          console.error("html2canvas failed:", canvasErr instanceof Error ? canvasErr.message : String(canvasErr));
+          throw new Error(`Canvas rendering failed: ${canvasErr instanceof Error ? canvasErr.message : String(canvasErr)}`);
+        }
+
+        if (!canvas) {
+          throw new Error("Canvas rendering returned null");
+        }
+
+        // Convert canvas to image and create PDF
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "in",
+          format: "a4",
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+
+        // Generate blob from PDF
+        const pdfBlob = pdf.output("blob");
+
+        if (!pdfBlob || !(pdfBlob instanceof Blob)) {
+          throw new Error("PDF generation returned invalid blob");
+        }
+
+        try {
+          const downloadUrl = URL.createObjectURL(pdfBlob);
+          const anchor = document.createElement("a");
+          anchor.href = downloadUrl;
+          anchor.download = `${studentDetails?.firstName || "resume"}-resume.pdf`;
+          document.body.appendChild(anchor);
+          anchor.click();
+          anchor.remove();
+          URL.revokeObjectURL(downloadUrl);
+        } catch (downloadErr) {
+          console.error("Download failed:", downloadErr instanceof Error ? downloadErr.message : String(downloadErr));
+          throw new Error(`Download failed: ${downloadErr instanceof Error ? downloadErr.message : String(downloadErr)}`);
+        }
+      } finally {
+        printable.dispose();
+      }
+    } catch (error) {
+      console.error("Error downloading resume:", error instanceof Error ? error.message : String(error));
+      alert(`Failed to download resume: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   const isMobile = useResponsive();
+
+  const hiddenExportTemplate = (
+    <div className="pointer-events-none fixed left-[-10000px] top-0 z-[-1] opacity-0" aria-hidden="true">
+      <SelectedTemplateComponent
+        downloadImage={false}
+        setDownloadImage={() => {}}
+        resumeTemplateRef={exportTemplateRef}
+        activeSection={null}
+        isGeneratingPdf={true}
+      />
+    </div>
+  );
 
   if (isMobile) {
     return (
-      <MobileResumeBuilder
-        isEditing={isEditing}
-        setIsEditing={setIsEditing}
-        handleSubmit={handleSubmit}
-        downloadImage={downloadImage}
-        setDownloadImage={setDownloadImage}
-        resumeTemplateRef={resumeTemplateRef}
-        basicDetails={basicDetails}
-        updateBasicDetail={updateBasicDetail}
-        links={links}
-        updateLink={updateLink}
-        addLink={addLink}
-        removeLink={removeLink}
-        experienceDetails={experienceDetails}
-        updateExperience={updateExperience}
-        addExperience={addExperience}
-        removeExperience={removeExperience}
-        internships={internships}
-        updateInternship={updateInternship}
-        addInternship={addInternship}
-        removeInternship={removeInternship}
-        educationDetails={educationDetails}
-        updateEducationDetail={updateEducationDetail}
-        addEducation={addEducation}
-        removeEducation={removeEducation}
-        projectDetails={projectDetails}
-        updateProject={updateProject}
-        addProject={addProject}
-        removeProject={removeProject}
-        certificates={certificates}
-        updateCertificate={updateCertificate}
-        addCertificate={addCertificate}
-        removeCertificate={removeCertificate}
-        volunteerings={volunteerings}
-        updateVolunteering={updateVolunteering}
-        addVolunteering={addVolunteering}
-        removeVolunteering={removeVolunteering}
-        skills={skills}
-        updateSkill={updateSkill}
-        addSkill={addSkill}
-        removeSkill={removeSkill}
-        languages={languages}
-        updateLanguage={updateLanguage}
-        addLanguage={addLanguage}
-        removeLanguage={removeLanguage}
-        Template2={Template2}
-        activeSection={activeSection}
-      />
+      <>
+        <MobileResumeBuilder
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          handleSubmit={handleSubmit}
+          handleDownloadResume={handleDownloadResume}
+          resumeTemplateRef={resumeTemplateRef}
+          basicDetails={basicDetails}
+          updateBasicDetail={updateBasicDetail}
+          links={links}
+          updateLink={updateLink}
+          addLink={addLink}
+          removeLink={removeLink}
+          experienceDetails={experienceDetails}
+          updateExperience={updateExperience}
+          addExperience={addExperience}
+          removeExperience={removeExperience}
+          internships={internships}
+          updateInternship={updateInternship}
+          addInternship={addInternship}
+          removeInternship={removeInternship}
+          educationDetails={educationDetails}
+          updateEducationDetail={updateEducationDetail}
+          addEducation={addEducation}
+          removeEducation={removeEducation}
+          projectDetails={projectDetails}
+          updateProject={updateProject}
+          addProject={addProject}
+          removeProject={removeProject}
+          certificates={certificates}
+          updateCertificate={updateCertificate}
+          addCertificate={addCertificate}
+          removeCertificate={removeCertificate}
+          volunteerings={volunteerings}
+          updateVolunteering={updateVolunteering}
+          addVolunteering={addVolunteering}
+          removeVolunteering={removeVolunteering}
+          skills={skills}
+          updateSkill={updateSkill}
+          addSkill={addSkill}
+          removeSkill={removeSkill}
+          languages={languages}
+          updateLanguage={updateLanguage}
+          addLanguage={addLanguage}
+          removeLanguage={removeLanguage}
+          templateOptions={TEMPLATE_OPTIONS}
+          selectedTemplate={selectedTemplate}
+          setSelectedTemplate={setSelectedTemplate}
+          SelectedTemplate={SelectedTemplateComponent}
+          activeSection={activeSection}
+          isGeneratingPdf={isGeneratingPdf}
+        />
+        {hiddenExportTemplate}
+      </>
     );
   }
 
 
 
   return (
-    <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-screen overflow-hidden">
+    <>
+      <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-screen overflow-hidden">
       <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center p-4 lg:px-8 shadow-sm bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         {/* Decorative Icons */}
         <div className="absolute inset-0 pointer-events-none z-[1]">
@@ -895,7 +1171,7 @@ function Form() {
                 Submit
               </Button>
             )}
-            <Button onClick={() => setDownloadImage(true)} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
+            <Button onClick={handleDownloadResume} loading={isGeneratingPdf} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
               Download Resume
             </Button>
           </div>
@@ -908,6 +1184,26 @@ function Form() {
         {/* Left Sidebar */}
         <div className="w-[280px] shrink-0 bg-white border-r border-[#e2e8f0] p-6 flex flex-col gap-6 overflow-y-auto hidden lg:flex [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full">
           <div className="text-[12px] font-bold text-[#94a3b8] tracking-wider uppercase mb-[-10px]">Sections</div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] p-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[#334155] text-[13px] font-medium">Template</span>
+              <span className="text-[11px] uppercase tracking-wide text-[#94a3b8]">5 options</span>
+            </div>
+            <div className="flex flex-col gap-2">
+              {TEMPLATE_OPTIONS.map((template) => (
+                <button
+                  key={template.id}
+                  type="button"
+                  onClick={() => setSelectedTemplate(template.id)}
+                  className={`w-full text-left rounded-lg border px-3 py-3 transition-all ${selectedTemplate === template.id ? "border-[#1E69DA] bg-[#eff6ff] shadow-sm" : "border-[#e2e8f0] bg-white hover:border-[#1E69DA] hover:bg-[#f8fbff]"}`}
+                >
+                  <div className="text-[13px] font-semibold text-[#071631]">{template.label}</div>
+                  <div className="text-[11px] text-[#64748b] leading-4 mt-1">{template.description}</div>
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Profile Completion */}
           <div className="bg-white rounded-xl shadow-sm border border-[#e2e8f0] p-4 flex flex-col gap-3">
@@ -948,7 +1244,7 @@ function Form() {
             {/* If not editing, show Template. If editing, show forms. */}
             {!isEditing ? (
               <div className="bg-white shadow-md rounded-lg overflow-hidden border border-[#e2e8f0]">
-                <Template2
+                <SelectedTemplateComponent
                   downloadImage={downloadImage}
                   setDownloadImage={setDownloadImage}
                   resumeTemplateRef={resumeTemplateRef}
@@ -1014,7 +1310,9 @@ function Form() {
         </div>
 
       </div>
-    </div>
+      </div>
+      {hiddenExportTemplate}
+    </>
   );
 }
 

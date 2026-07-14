@@ -5,11 +5,11 @@ import { useSelector } from "react-redux";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
 
 /**
- * Template3 — "Executive Sidebar"
- * Dark navy left rail (photo, contact, skills, languages, links),
- * main content on the right (summary, experience, education, projects...).
+ * Template5 — "Bold Creative"
+ * Diagonal-accented color header band, pill-style skill tags, vivid accent
+ * (violet/orange) used for section markers and dates.
  */
-const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeSection, isGeneratingPdf }) => {
+const Template5 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeSection, isGeneratingPdf }) => {
   const resumeRef = useRef(null);
   const [profileBase64, setProfileBase64] = useState(null);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -123,117 +123,78 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
   }, [downloadImage, isImageLoaded]);
 
   const sectionCls = (name) =>
-    `transition-all duration-300 rounded-lg p-3 -m-3 mb-2 scroll-mt-8 ${
-      activeSection === name ? "border-2 border-[#0d9488] bg-[#f0fdfa] shadow-sm" : "border-2 border-transparent"
-    }`;
-
-  const sideSectionCls = (name) =>
-    `transition-all duration-300 rounded-lg p-2 -m-2 mb-2 scroll-mt-8 ${
-      activeSection === name ? "border-2 border-[#2dd4bf] bg-white/10 shadow-sm" : "border-2 border-transparent"
+    `transition-all duration-300 rounded-xl p-3 -m-3 mb-3 scroll-mt-8 ${
+      activeSection === name ? "border-2 border-[#7c3aed] bg-[#faf5ff] shadow-sm" : "border-2 border-transparent"
     }`;
 
   return (
     <div
-      className={`${(downloadImage || isGeneratingPdf) ? "w-[794px] max-w-[794px] min-h-[1123px]" : "w-full max-w-full"} h-auto mx-auto overflow-visible bg-white shadow-xl font-['Inter',sans-serif] text-[#334155] grid grid-cols-[16rem_1fr] [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-white`}
+      className={`${(downloadImage || isGeneratingPdf) ? "w-[794px] max-w-[794px] min-h-[1123px]" : "w-full max-w-full"} h-auto mx-auto overflow-visible bg-white shadow-xl font-['Inter',sans-serif] text-[#334155] [&_section]:mb-6 [&_section_h2]:text-[1rem] [&_section_h2]:font-bold [&_section_h2]:tracking-wide [&_section_h2]:uppercase [&_section_h2]:mb-4 [&_section_h2]:text-[#7c3aed] [&_section_h2]:flex [&_section_h2]:items-center [&_section_h2]:gap-2 [&_section_p]:text-[0.92rem] [&_section_p]:leading-relaxed [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-white`}
       ref={downloadImage ? resumeRef : resumeTemplateRef}
     >
-      {/* Sidebar */}
-      <div className="bg-[#0b1526] text-white p-6 flex flex-col gap-6">
-        <div id="section-Basic-Details" className={sideSectionCls("Basic Details")}>
-          <div className="flex justify-center mb-4">
+      <div id="section-Basic-Details" className={sectionCls("Basic Details")}>
+        <header
+          className="relative overflow-hidden px-10 py-9 mb-2 grid grid-cols-[1fr_8rem] items-center"
+          style={{ background: "linear-gradient(120deg, #7c3aed 0%, #a855f7 55%, #f97316 100%)" }}
+        >
+          <div className="relative z-[1]">
+            <h1 className="text-[2.4rem] font-black tracking-tight text-white m-0">
+              {basicDetails?.firstName} {basicDetails?.middleName} {basicDetails?.lastName}
+            </h1>
+            <div className="flex flex-wrap gap-x-5 gap-y-1 mt-3 text-[0.9rem]">
+              <a href={`mailto:${basicDetails?.email || ""}`} className="flex items-center gap-1.5 no-underline text-white/90">
+                <MailOutlined /> {basicDetails?.email}
+              </a>
+              <a href={`tel:${basicDetails?.phone || ""}`} className="flex items-center gap-1.5 no-underline text-white/90">
+                <PhoneFilled /> {basicDetails?.phone}
+              </a>
+            </div>
+            {linkList?.length > 0 && (
+              <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2">
+                {linkList.map((link, i) => (
+                  <a
+                    key={i}
+                    href={link?.link ? (link.link.startsWith("http") ? link.link : `https://${link.link}`) : "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[0.85rem] text-white/90 no-underline"
+                  >
+                    {link?.title || link.link}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="relative z-[1] flex justify-center items-center">
             {profileBase64 && (
               <img
-                width="120"
-                height="120"
+                width="100"
+                height="100"
                 src={profileBase64}
                 alt="profile"
-                className="rounded-full object-cover border-4 border-[#2dd4bf]"
+                className="rounded-full object-cover border-4 border-white/80"
               />
             )}
           </div>
-          <h1 className="text-[1.3rem] font-bold text-center text-white m-0 leading-tight">
-            {basicDetails?.firstName} {basicDetails?.middleName} {basicDetails?.lastName}
-          </h1>
+        </header>
 
-          <div className="flex flex-col gap-2 mt-4 text-[0.82rem] [&_a]:text-[#cbd5e1] [&_a]:no-underline [&_a]:flex [&_a]:items-start [&_a]:gap-2 [&_a]:break-all">
-            <a href={`mailto:${basicDetails?.email || ""}`}>
-              <MailOutlined className="mt-0.5 text-[#2dd4bf]" /> {basicDetails?.email}
-            </a>
-            <a href={`tel:${basicDetails?.phone || ""}`}>
-              <PhoneFilled className="mt-0.5 text-[#2dd4bf]" /> {basicDetails?.phone}
-            </a>
-          </div>
-        </div>
-
-        {linkList?.length > 0 && (
-          <div className={sideSectionCls("Links")}>
-            <h2 className="text-[0.78rem] font-bold tracking-[0.15em] uppercase text-[#2dd4bf] mb-2 border-b border-white/15 pb-1.5">Links</h2>
-            <div className="flex flex-col gap-1.5">
-              {linkList.map((link, i) => (
-                <a
-                  key={i}
-                  href={link?.link ? (link.link.startsWith("http") ? link.link : `https://${link.link}`) : "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[0.82rem] text-[#cbd5e1] no-underline break-all"
-                >
-                  {link?.title || link?.link}
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {skillss?.length > 0 && (
-          <div id="section-Skills" className={sideSectionCls("Skills")}>
-            <h2 className="text-[0.78rem] font-bold tracking-[0.15em] uppercase text-[#2dd4bf] mb-2 border-b border-white/15 pb-1.5">Skills</h2>
-            <ul className="flex flex-col gap-1.5">
-              {skillss.map((skill, i) => (
-                <li key={i} className="text-[0.85rem] text-[#e2e8f0] list-none">{skill}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {lang?.length > 0 && (
-          <div id="section-Languages" className={sideSectionCls("Languages")}>
-            <h2 className="text-[0.78rem] font-bold tracking-[0.15em] uppercase text-[#2dd4bf] mb-2 border-b border-white/15 pb-1.5">Languages</h2>
-            <p className="text-[0.85rem] text-[#e2e8f0] m-0">{lang.join(", ")}</p>
-          </div>
-        )}
-
-        {certificatesList?.some((c) => c?.name || c?.organization) && (
-          <div id="section-Certifications" className={sideSectionCls("Certifications")}>
-            <h2 className="text-[0.78rem] font-bold tracking-[0.15em] uppercase text-[#2dd4bf] mb-2 border-b border-white/15 pb-1.5">Certificates</h2>
-            <div className="flex flex-col gap-2">
-              {certificatesList.map((cert, i) => (
-                <div key={i}>
-                  <p className="text-[0.82rem] font-semibold text-white m-0">{cert?.name}</p>
-                  <p className="text-[0.78rem] text-[#94a3b8] m-0">{cert?.organization}{cert?.issueDate ? ` · ${cert.issueDate}` : ""}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Main content */}
-      <div className="p-8 [&_section]:mb-5 [&_section_h2]:text-[1rem] [&_section_h2]:font-bold [&_section_h2]:tracking-wide [&_section_h2]:uppercase [&_section_h2]:border-b-2 [&_section_h2]:border-solid [&_section_h2]:border-[#0d9488] [&_section_h2]:pb-2 [&_section_h2]:mb-3 [&_section_h2]:text-[#0b1526] [&_section_p]:text-[0.92rem] [&_section_p]:leading-relaxed">
-        <section id="section-Summary" className="!mb-5">
-          <h2>Summary</h2>
+        <section className="px-10 !mb-0">
+          <h2><span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />Summary</h2>
           <div className="text-[0.92rem] leading-relaxed">
             <div dangerouslySetInnerHTML={{ __html: filterQuotes(basicDetails?.professionalSummary) }} />
           </div>
         </section>
+      </div>
 
+      <div className="px-10">
         {experienceDetails?.filter((e) => e?.type?.toLowerCase() == "work")?.filter((e) => e?.company)?.length > 0 && (
           <section id="section-Experience" className={sectionCls("Experience")}>
-            <h2>Experience</h2>
+            <h2><span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />Experience</h2>
             {experienceDetails?.filter((e) => e?.type == "work").map((job, i) => (
-              <div className="mb-3" key={i}>
+              <div className="mb-4 pl-4 border-l-2 border-[#e9d5ff]" key={i}>
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-bold text-[0.95rem]">{job?.role}, {job?.company}</span>
-                  <span className="text-[0.82rem] italic text-[#64748b] whitespace-nowrap ml-4">
+                  <span className="font-bold text-[0.98rem] text-[#1e1b4b]">{job?.role}, {job?.company}</span>
+                  <span className="text-[0.8rem] font-medium text-[#f97316] whitespace-nowrap ml-4">
                     {job?.start || job?.startDate} – {job?.end || job?.endDate}
                   </span>
                 </div>
@@ -245,12 +206,12 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
 
         {experienceDetails?.filter((e) => e?.type?.toLowerCase() !== "work")?.filter((e) => e?.company)?.length > 0 && (
           <section id="section-Internships" className={sectionCls("Internships")}>
-            <h2>Internships</h2>
+            <h2><span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />Internships</h2>
             {experienceDetails?.filter((e) => e?.type !== "work").map((job, i) => (
-              <div className="mb-3" key={i}>
+              <div className="mb-4 pl-4 border-l-2 border-[#e9d5ff]" key={i}>
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-bold text-[0.95rem]">{job?.role}, {job?.company}</span>
-                  <span className="text-[0.82rem] italic text-[#64748b] whitespace-nowrap ml-4">
+                  <span className="font-bold text-[0.98rem] text-[#1e1b4b]">{job?.role}, {job?.company}</span>
+                  <span className="text-[0.8rem] font-medium text-[#f97316] whitespace-nowrap ml-4">
                     {job?.start || job?.startDate} – {job?.end || job?.endDate}
                   </span>
                 </div>
@@ -262,16 +223,14 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
 
         {educationDetails?.length > 0 && (
           <section id="section-Education" className={sectionCls("Education")}>
-            <h2>Education</h2>
+            <h2><span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />Education</h2>
             {educationDetails?.map((edu, i) => (
-              <div className="mb-3" key={i}>
+              <div className="mb-4 pl-4 border-l-2 border-[#e9d5ff]" key={i}>
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-bold text-[0.95rem]">
+                  <span className="font-bold text-[0.98rem] text-[#1e1b4b]">
                     {edu?.type} - {edu?.school} | {edu?.grade}{edu?.gradeType ? (edu?.gradeType == "percentage" ? "%" : "/10") : null}
                   </span>
-                  <span className="text-[0.82rem] italic text-[#64748b] whitespace-nowrap ml-4">
-                    {edu?.startDate} – {edu?.endDate}
-                  </span>
+                  <span className="text-[0.8rem] font-medium text-[#f97316] whitespace-nowrap ml-4">{edu?.startDate} – {edu?.endDate}</span>
                 </div>
                 <p className="text-[0.9rem] leading-relaxed m-0">{edu?.description}</p>
               </div>
@@ -281,16 +240,14 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
 
         {projectDetails?.filter((e) => e?.project)?.length > 0 && (
           <section id="section-Projects" className={sectionCls("Projects")}>
-            <h2>Projects</h2>
+            <h2><span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />Projects</h2>
             {projectDetails?.map((proj, i) => (
-              <div className="mb-3" key={i}>
+              <div className="mb-4 pl-4 border-l-2 border-[#e9d5ff]" key={i}>
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-bold text-[0.95rem]">
+                  <span className="font-bold text-[0.98rem] text-[#1e1b4b]">
                     {proj?.project} {proj?.company ? `(${proj.company})` : ""}
                   </span>
-                  <span className="text-[0.82rem] italic text-[#64748b] whitespace-nowrap ml-4">
-                    {proj?.startDate} – {proj?.endDate}
-                  </span>
+                  <span className="text-[0.8rem] font-medium text-[#f97316] whitespace-nowrap ml-4">{proj?.startDate} – {proj?.endDate}</span>
                 </div>
                 <div className="text-[0.9rem] leading-relaxed" dangerouslySetInnerHTML={{ __html: parseIfJson(proj?.description) }} />
               </div>
@@ -298,18 +255,63 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
           </section>
         )}
 
+        {certificatesList?.some((c) => c?.name || c?.organization) && (
+          <section id="section-Certifications" className={sectionCls("Certifications")}>
+            <h2><span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />Certificates</h2>
+            {certificatesList.map((cert, i) => (
+              <div className="mb-2.5 pl-4 border-l-2 border-[#e9d5ff]" key={i}>
+                <div className="flex justify-between items-baseline">
+                  <span className="font-bold text-[0.95rem] text-[#1e1b4b]">{cert?.name}{cert?.organization ? `, ${cert.organization}` : ""}</span>
+                  <span className="text-[0.8rem] font-medium text-[#f97316] whitespace-nowrap ml-4">
+                    {cert?.issueDate}{cert?.expiryDate ? ` – ${cert.expiryDate}` : ""}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
         {volunteeringList?.some((v) => v?.organization || v?.volunteering) && (
           <section id="section-Volunteering" className={sectionCls("Volunteering")}>
-            <h2>Volunteering</h2>
+            <h2><span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />Volunteering</h2>
             {volunteeringList.map((v, i) => (
-              <div className="mb-3" key={i}>
+              <div className="mb-4 pl-4 border-l-2 border-[#e9d5ff]" key={i}>
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-bold text-[0.95rem]">{v?.volunteering}{v?.organization ? `, ${v.organization}` : ""}</span>
-                  <span className="text-[0.82rem] italic text-[#64748b] whitespace-nowrap ml-4">{v?.start} – {v?.end}</span>
+                  <span className="font-bold text-[0.95rem] text-[#1e1b4b]">{v?.volunteering}{v?.organization ? `, ${v.organization}` : ""}</span>
+                  <span className="text-[0.8rem] font-medium text-[#f97316] whitespace-nowrap ml-4">{v?.start} – {v?.end}</span>
                 </div>
                 <div className="text-[0.9rem] leading-relaxed" dangerouslySetInnerHTML={{ __html: asHtml(v?.description) }} />
               </div>
             ))}
+          </section>
+        )}
+
+        {skillss?.length > 0 && (
+          <section id="section-Skills" className={sectionCls("Skills")}>
+            <h2><span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />Skills</h2>
+            <div className="flex flex-wrap gap-2">
+              {skillss.map((skill, i) => (
+                <span
+                  key={i}
+                  className="text-[0.82rem] font-medium px-3 py-1 rounded-full bg-[#f3e8ff] text-[#7c3aed]"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {lang?.length > 0 && (
+          <section id="section-Languages" className={sectionCls("Languages")}>
+            <h2><span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />Languages</h2>
+            <div className="flex flex-wrap gap-2">
+              {lang.map((l, i) => (
+                <span key={i} className="text-[0.82rem] font-medium px-3 py-1 rounded-full bg-[#fff7ed] text-[#f97316]">
+                  {l}
+                </span>
+              ))}
+            </div>
           </section>
         )}
       </div>
@@ -317,4 +319,4 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
   );
 };
 
-export default Template3;
+export default Template5;
