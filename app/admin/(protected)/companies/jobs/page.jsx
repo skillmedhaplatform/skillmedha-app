@@ -307,10 +307,9 @@ function Page() {
 
   return (
     <div className={styles.pageContainer}>
-      <BreadcrumbComponent />
-
       <div className={styles.headerSection}>
-        <h1 className={styles.pageTitle}>Job Opportunities at {ORG_NAME}</h1>
+        <BreadcrumbComponent />
+        <h1 className={styles.pageTitle} style={{ marginTop: "8px" }}>Job Opportunities at {ORG_NAME}</h1>
         <div className={styles.headerContent}>
           <p className={styles.positionsCount}>
             {pagination?.totalJobs ?? 0} position
@@ -438,8 +437,6 @@ function Page() {
           </Space>
         </div>
       )}
-
-      <Divider style={{ margin: "16px 0" }} />
 
       {loading ? (
         <div className={styles.loadingContainer}>

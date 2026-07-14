@@ -118,7 +118,7 @@ export default function GrowthCharts({ data, loading, onPeriodChange }) {
                 <Line
                   type="monotone"
                   dataKey="students"
-                  stroke="#24A058"
+                  stroke="#1E69DA"
                   strokeWidth={2}
                   name="Students"
                   dot={{ r: 4 }}
@@ -170,8 +170,8 @@ export default function GrowthCharts({ data, loading, onPeriodChange }) {
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="5%" stopColor="#24A058" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#24A058" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#1E69DA" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#1E69DA" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -192,7 +192,7 @@ export default function GrowthCharts({ data, loading, onPeriodChange }) {
                 <Area
                   type="monotone"
                   dataKey="students"
-                  stroke="#24A058"
+                  stroke="#1E69DA"
                   fillOpacity={1}
                   fill="url(#colorStudents)"
                   name="Students"

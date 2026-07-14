@@ -4,6 +4,7 @@ import { FaBook, FaCode, FaCog } from "react-icons/fa";
 import styles from "./PracticeCard.module.scss";
 import { PracticeCategory } from "./Practice_utils/paths";
 import { useRouter } from "next/navigation";
+import PracticeBreadcrumbs from "./Practice_utils/practiceBreadcrumbs";
 
 // Practice categories data with unique IDs
 
@@ -78,6 +79,9 @@ export default function PracticePage() {
 
   return (
     <div className={styles.pageWrapper}>
+      <div style={{ width: "100%", marginBottom: "1rem" }}>
+        <PracticeBreadcrumbs />
+      </div>
       <div className={styles.cardContainer}>
         {PracticeCategory.map((category) => (
           <PracticeCard

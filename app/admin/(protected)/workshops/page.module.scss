@@ -1,7 +1,8 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/colors.scss";
 @import "@/modules/admin/styles/mixins.scss";
-$iconBackground: #f0f0f0;
-$selfPaced: #24A05859;
+$iconbackground: $gray100;
+$selfPaced: #1E69DA59;
 $studentTestBlock: #ff7043;
 $statusDefault: #e0e0e0;
 $statusInactive: #9e9e9e;
@@ -56,7 +57,7 @@ $min-width1645: 1645px;
     background-color: transparent;
     padding: 0.5rem;
     border: none;
-    border-radius: 10px;
+    border-radius: $borderRadiusLarge;
 
     .eachcard {
       background-color: #ffffffdd;
@@ -66,7 +67,7 @@ $min-width1645: 1645px;
       flex-direction: column;
       padding: 0.5rem;
       cursor: pointer;
-      border-radius: 10px;
+      border-radius: $borderRadiusLarge;
       // box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2509803922);
       box-shadow: 0px 3px 7px 0px #00000080;
       // padding: 1rem;
@@ -265,7 +266,7 @@ $min-width1645: 1645px;
       align-items: center;
       padding: 6px 12px;
       background-color: #e9edf5;
-      border-radius: 16px;
+      border-radius: $borderRadiusLarge;
       color: #4a6fa5;
       font-size: 14px;
 
@@ -284,7 +285,7 @@ $min-width1645: 1645px;
     .skill {
       padding: 6px 12px;
       background-color: #e9edf5;
-      border-radius: 16px;
+      border-radius: $borderRadiusLarge;
       color: #4a6fa5;
       font-size: 12px;
       font-weight: 600;
@@ -302,10 +303,10 @@ $min-width1645: 1645px;
 
     button {
       padding: 10px 24px;
-      border-radius: 4px;
+      border-radius: $borderRadius;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .previewButton {
@@ -332,7 +333,6 @@ $min-width1645: 1645px;
   }
 }
 
-/* courseCard.module.scss */
 .card {
   display: grid;
   grid-template-rows: auto 1fr;
@@ -340,12 +340,12 @@ $min-width1645: 1645px;
   // width: 100%;
   background: white;
   color: black;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 14px;
+  border: 1px solid $borderColor;
+  border-radius: $borderRadiusLarge;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 180ms ease, box-shadow 180ms ease,
-    border-color 180ms ease;
+  box-shadow: $shadowSm;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0.5rem;
 }
 // .card:hover {
@@ -358,7 +358,7 @@ $min-width1645: 1645px;
   aspect-ratio: 16 / 9;
   background: white;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: $borderRadiusLarge;
 }
 .thumb {
   width: 100%;
@@ -369,15 +369,15 @@ $min-width1645: 1645px;
   transition: transform 220ms ease;
 }
 .card:hover {
-  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.25);
-  transform: translateY(-2px);
-  border-color: #1677ff;
+  box-shadow: $shadowMd;
+  transform: translateY(-4px);
+  border-color: #1E69DA;
 }
 
 .menu {
   z-index: 2;
   backdrop-filter: blur(6px);
-  border-radius: 4px;
+  border-radius: $borderRadius;
   border: 1px solid lightgray;
 }
 

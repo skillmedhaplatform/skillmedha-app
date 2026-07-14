@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 .container {
   background-color: #EFF5FB;
   height: 100%;
@@ -13,7 +14,7 @@
   background-color: white;
   padding: 16px 24px;
   border-bottom: 1px solid #E2E8F0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: $shadowSm;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -21,7 +22,7 @@
 
 .tableWrapper {
   background: white;
-  border-radius: 12px;
+  border-radius: $borderRadiusLarge;
   border: 1px solid #E2E8F0;
   overflow: auto;
   margin: 24px;
@@ -67,11 +68,11 @@
   width: 80px;
   height: 45px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: $borderRadius;
 }
 
 .actionBtn {
-  color: #1890ff;
+  color: #1E69DA;
   cursor: pointer;
   
   &:hover {

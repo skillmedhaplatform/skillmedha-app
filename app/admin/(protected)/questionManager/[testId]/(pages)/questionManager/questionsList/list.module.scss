@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 .container {
   width: 98%;
   height: 98%;
@@ -21,8 +22,8 @@
   }
 }
 .questionItem {
-  border: 1px solid #24A0584d;
-  border-radius: 8px;
+  border: 1px solid #1E69DA4d;
+  border-radius: $borderRadius;
   background: white;
 
   &:hover {
@@ -49,18 +50,18 @@
   align-items: center;
   gap: 16px;
   div {
-    border: 1px solid #24A058;
+    border: 1px solid #1E69DA;
     padding: 0.2rem 0.5rem;
-    border-radius: 5px;
+    border-radius: $borderRadius;
     font-size: 14px;
     font-weight: 600;
-    background-color: #24A0584d;
+    background-color: #1E69DA4d;
   }
 }
 
 .questionText {
   font-weight: 600;
-  color: #24A058;
+  color: #1E69DA;
 }
 
 .question {
@@ -80,7 +81,7 @@
   justify-content: flex-start;
   gap: 8px;
   margin-bottom: 8px;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   padding: 0 1rem;
   width: auto;
   border: 1px solid lightgray;

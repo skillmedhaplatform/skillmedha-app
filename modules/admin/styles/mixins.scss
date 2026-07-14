@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 @use "sass:color";
 
 @mixin flexBox($direction, $aligment, $justify, $gap: 0) {
@@ -9,7 +10,7 @@
 }
 // Custom Scrollbar Mixin
 @mixin custom-scrollbar(
-  $thumb-color: #24A058,
+  $thumb-color: #1E69DA,
   $track-color: #f1f1f1,
   $width: 8px
 ) {
@@ -22,12 +23,12 @@
 
   &::-webkit-scrollbar-track {
     background: $track-color;
-    border-radius: 8px;
+    border-radius: $borderRadius;
   }
 
   &::-webkit-scrollbar-thumb {
     background-color: $thumb-color;
-    border-radius: 8px;
+    border-radius: $borderRadius;
     border: 2px solid $track-color;
   }
 
@@ -41,10 +42,9 @@
   gap: $gap;
   grid-template-columns: repeat(auto-fill, minmax($minWidth, 1fr));
   align-items: start;
-  padding: 0.5rem 0;
   align-content: start;
-  background-color: rgba(220, 220, 220, 0.224);
+  background-color: transparent;
   padding: 0.5rem;
-  border: 0.5px solid rgba(0, 0, 0, 0.08);
-  border-radius: 10px;
+  border: none;
+  border-radius: 0;
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useMemo } from "react";
 import { Divider, Tabs, Tooltip } from "antd";
 import { useParams, useRouter, usePathname } from "next/navigation";
@@ -19,20 +19,29 @@ const BreadcrumbItem = ({ title, onClick, isLast }) => {
   return (
     <>
       <Tooltip title={title && title.length > 25 ? title : null}>
-        <span
-          onClick={onClick}
-          className={layoutStyles.breadcrumbLink}
-          style={{ maxWidth: "200px" }}
-        >
-          {truncatedTitle}
-        </span>
+        {isLast ? (
+          <span
+            className={layoutStyles.breadcrumbCurrent}
+            style={{ maxWidth: "200px" }}
+          >
+            {truncatedTitle}
+          </span>
+        ) : (
+          <span
+            onClick={onClick}
+            className={layoutStyles.breadcrumbLink}
+            style={{ maxWidth: "200px" }}
+          >
+            {truncatedTitle}
+          </span>
+        )}
       </Tooltip>
       {!isLast && (
         <IoCaretForwardOutline
           style={{
-            fontSize: "16px",
+            fontSize: "14px",
             margin: "0 8px",
-            color: "#8c8c8c",
+            color: "#64748b",
             flexShrink: 0,
           }}
         />
@@ -146,7 +155,11 @@ export default function TopicLayout({ children }) {
   // Create breadcrumb items array
   const breadcrumbItems = [
     {
-      title: singleInternship?.title || "Course",
+      title: "Internship Library",
+      onClick: () => nav.push("/admin/internship"),
+    },
+    {
+      title: singleInternship?.title || "Internship",
       onClick: () => nav.push(`/admin/internship/${internshipId}`),
     },
   ];
@@ -174,8 +187,8 @@ export default function TopicLayout({ children }) {
           style={{
             display: "flex",
             alignItems: "center",
-            fontSize: "16px",
-            marginBottom: "16px",
+            fontSize: "15px",
+            marginBottom: "0",
           }}
         >
           {breadcrumbItems.map((item, index) => (

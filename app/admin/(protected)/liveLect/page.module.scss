@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 @import '@/modules/admin/styles/colors.scss';
 
 .container {
@@ -15,11 +16,11 @@
     button {
       font-size: 1rem;
       font-weight: 600;
-      background-color: #1677ff;
+      background-color: #1E69DA;
       color: #fff;
       border: none;
       outline: none;
-      border-radius: 6px;
+      border-radius: $borderRadius;
       padding: 0.5rem 1rem;
       cursor: pointer;
       display: flex;
@@ -35,7 +36,7 @@
     background-color: white;
     padding: 16px 24px;
     border-bottom: 1px solid #E2E8F0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: $shadowSm;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -82,8 +83,8 @@
     flex-direction: column;
     justify-content: space-between;
     padding: 16px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: $borderRadiusLarge;
+    box-shadow: $shadowMd;
     border: 1px solid rgba(128, 128, 128, 0.2);
   }
 }

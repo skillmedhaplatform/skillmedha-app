@@ -1,5 +1,6 @@
-// Color Palette based on primary #1677ff (blue)
-$primary-color: #1677ff; // Main blue
+@use "@/modules/admin/styles/colors" as *;
+// Color Palette based on primary #1E69DA (blue)
+$primary-color: #1E69DA; // Main blue
 $primary-light: #4096ff; // Lighter blue
 $primary-dark: #0958d9; // Darker blue
 $primary-lighter: #69b1ff; // Very light blue
@@ -32,12 +33,14 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
 // Page wrapper for centering
 .pageWrapper {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 80vh;
+  justify-content: flex-start;
+  min-height: calc(100vh - 140px);
   height: 100%;
   width: 100%;
   background-color: #EFF5FB;
+  padding: 1.5rem 2rem;
 }
 
 // Card container
@@ -54,9 +57,9 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
 // Individual card styles
 .card {
   background: $white;
-  border-radius: 16px;
+  border-radius: $borderRadiusLarge;
   padding: 2rem;
-  box-shadow: 0 4px 6px -1px $shadow-sm, 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: $shadowSm;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   border: 2px solid transparent;
@@ -99,7 +102,7 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
 
     &:hover {
       transform: none;
-      box-shadow: 0 4px 6px -1px $shadow-sm, 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+      box-shadow: $shadowSm;
 
       &::before {
         opacity: 0;
@@ -118,7 +121,7 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
   justify-content: center;
   margin: 0 auto 1.5rem;
   position: relative;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: $shadowMd;
 
   &.nonTechnical {
     background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
@@ -250,6 +253,10 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
 
 // Responsive design
 @media (max-width: 768px) {
+  .pageWrapper {
+    padding: 1rem;
+  }
+
   .cardContainer {
     grid-template-columns: 1fr;
     gap: 1.25rem;
@@ -268,7 +275,7 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
   .iconContainer {
     width: 64px;
     height: 64px;
-    border-radius: 16px;
+    border-radius: $borderRadiusLarge;
   }
 
   .icon {

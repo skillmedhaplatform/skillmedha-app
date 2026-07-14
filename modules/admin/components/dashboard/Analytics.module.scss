@@ -1,11 +1,12 @@
+@use "@/modules/admin/styles/colors" as *;
 @use '@/modules/admin/styles/colors' as *;
 
 .card {
   background: white;
-  border-radius: 12px;
+  border-radius: $borderRadiusLarge;
   padding: 1.25rem;
   border: 1px solid $borderColor;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: $shadowSm;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -88,7 +89,7 @@
   color: #2563eb;
   background: #eff6ff;
   padding: 0.1rem 0.5rem;
-  border-radius: 12px;
+  border-radius: $borderRadiusLarge;
   font-size: 0.8rem;
 }
 
@@ -102,7 +103,7 @@
 .statBox {
   background: #EFF5FB;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -112,7 +113,7 @@
 .totalRevenue {
   background: #EFF5FB;
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -137,7 +138,7 @@
   display: flex;
   justify-content: space-between;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid $borderColor;
   font-size: 0.9rem;
 }
 

@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/colors.scss";
 @import "@/modules/admin/styles/mixins.scss";
 .mainContainer {
@@ -20,8 +21,8 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #24A058;
-    border-radius: 6px;
+    background-color: #1E69DA;
+    border-radius: $borderRadius;
   }
 
   &::-webkit-scrollbar-thumb:hover {
@@ -29,7 +30,7 @@
   }
 
   scrollbar-width: thin;
-  scrollbar-color: #24A058 transparent;
+  scrollbar-color: #1E69DA transparent;
 }
 
 .cards {
@@ -91,12 +92,12 @@
 .card {
   border: 1px solid rgba(128, 128, 128, 0.29);
   padding: 1rem;
-  border-radius: 10px;
+  border-radius: $borderRadiusLarge;
   background: #fff;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease-in-out;
+  box-shadow: $shadowMd;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   gap: 1rem;
 }
@@ -108,7 +109,7 @@
   background-color: white;
   padding: 16px 24px;
   border-bottom: 1px solid #E2E8F0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: $shadowSm;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -150,7 +151,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: $borderRadius;
     overflow: hidden;
     margin-bottom: 0.5rem;
     img {

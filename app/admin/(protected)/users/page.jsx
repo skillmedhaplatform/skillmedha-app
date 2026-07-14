@@ -1212,7 +1212,7 @@ export default function User() {
         </div>
       ),
       filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#24A058" : undefined }} />
+        <SearchOutlined style={{ color: filtered ? "#1E69DA" : undefined }} />
       ),
       onFilter: (value, record) =>
         record.email.toLowerCase().includes(String(value).toLowerCase()),

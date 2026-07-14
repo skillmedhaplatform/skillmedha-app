@@ -2,9 +2,52 @@
 
 import { useState, useEffect } from "react";
 import styles from "./JobDetailsDisplay.module.scss";
-import { getLstorage } from "@/utils/windowMW";
+import { getLstorage, decrypt } from "@/utils/windowMW";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { IoCaretForwardOutline } from "react-icons/io5";
+
+// Custom Breadcrumb Item Component
+const BreadcrumbItem = ({ title, onClick, isLast }) => {
+  const truncatedTitle =
+    title && title.length > 25 ? `${title.substring(0, 25)}...` : title;
+
+  return (
+    <>
+      {isLast ? (
+        <span
+          className={styles.breadcrumbCurrent}
+          style={{ maxWidth: "200px" }}
+        >
+          {truncatedTitle}
+        </span>
+      ) : (
+        <span
+          onClick={onClick}
+          className={styles.breadcrumbLink}
+          style={{ maxWidth: "200px" }}
+        >
+          {truncatedTitle}
+        </span>
+      )}
+      {!isLast && (
+        <IoCaretForwardOutline
+          style={{
+            fontSize: "14px",
+            margin: "0 8px",
+            color: "#64748b",
+            flexShrink: 0,
+          }}
+        />
+      )}
+    </>
+  );
+};
 
 export default function JobDetailsDisplay() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [jobData, setJobData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -69,9 +112,56 @@ export default function JobDetailsDisplay() {
     return <div className={styles.noData}>No job data available</div>;
   }
 
+  const orgNameParam = searchParams.get("orgName");
+  const orgName = orgNameParam ? decrypt(orgNameParam) : (jobData[0]?.companyName || "Company");
+
+  const breadcrumbItems = [
+    {
+      title: "Companies",
+      onClick: () => router.push("/admin/companies"),
+    },
+    {
+      title: orgName,
+      onClick: () =>
+        router.push(
+          `/admin/companies/jobs?orgId=${searchParams.get("orgId")}&orgName=${searchParams.get("orgName")}`
+        ),
+    },
+    {
+      title: "Jobs",
+      onClick: () =>
+        router.push(
+          `/admin/companies/jobs?orgId=${searchParams.get("orgId")}&orgName=${searchParams.get("orgName")}`
+        ),
+    },
+    {
+      title: jobData[0]?.jobTitle || "Job Details",
+      isLast: true,
+    },
+  ];
+
   return (
     <div className={styles.container}>
-      <h2 className={styles.pageTitle}>Job Details</h2>
+      <div className={styles.headerSection}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            fontSize: "15px",
+            marginBottom: "0",
+          }}
+        >
+          {breadcrumbItems.map((item, index) => (
+            <BreadcrumbItem
+              key={index}
+              title={item.title}
+              onClick={item.onClick}
+              isLast={index === breadcrumbItems.length - 1}
+            />
+          ))}
+        </div>
+        <h2 className={styles.pageTitle}>Job Details</h2>
+      </div>
 
       {jobData.map((job, index) => (
         <div key={job._id || index} className={styles.jobCard}>

@@ -10,6 +10,7 @@ import {
   AppstoreOutlined,
   CaretRightOutlined,
 } from "@ant-design/icons";
+import { FaCaretRight } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import styles from "./breadcrumbstyles.module.scss";
 
@@ -54,14 +55,15 @@ export default function PracticeBreadcrumbs() {
     const generateBreadcrumbs = () => {
       const items = [];
 
-      // Always add home/practice root
+      // Add admin and practice root
+
       items.push({
         title: (
           <span
             onClick={() => router.push("/admin/practice")}
             className={styles.breadcrumbLink}
           >
-            <HomeOutlined /> Practice
+            Practice
           </span>
         ),
         key: "practice",
@@ -71,10 +73,15 @@ export default function PracticeBreadcrumbs() {
       if (currPath.includes("/admin/practice")) {
         // Split pathname and extract segments
         const pathSegments = currPath.split("/").filter(Boolean);
-        // pathSegments = ["practice", "technical" or "nontechnical", "subject_slug", ...]
+        // pathSegments = ["admin", "practice", "technical" or "nontechnical", "subject_slug", ...]
 
-        // Extract category from second segment (index 1)
-        const category = pathSegments[1]; // "technical" or "nontechnical"
+        // Find the index of "practice"
+        const practiceIndex = pathSegments.indexOf("practice");
+        
+        // Extract category from the segment after "practice"
+        const category = practiceIndex !== -1 && pathSegments.length > practiceIndex + 1 
+          ? pathSegments[practiceIndex + 1] 
+          : null; // "technical" or "nontechnical"
 
         // Add category level if it exists
         if (
@@ -89,7 +96,7 @@ export default function PracticeBreadcrumbs() {
                 onClick={() => router.push(`/admin/practice/${category}`)}
                 className={styles.breadcrumbLink}
               >
-                <BookOutlined /> {formatCategoryName(category)} Subjects
+                {formatCategoryName(category)} Subjects
               </span>
             ),
             key: `category-${category}`,
@@ -107,7 +114,7 @@ export default function PracticeBreadcrumbs() {
                   }
                   className={styles.breadcrumbLink}
                 >
-                  <FileTextOutlined /> {subjectName}
+                  {subjectName}
                 </span>
               ),
               key: `subject-${params.subject_slug}`,
@@ -128,7 +135,7 @@ export default function PracticeBreadcrumbs() {
                   }
                   className={styles.breadcrumbLink}
                 >
-                  <AppstoreOutlined /> {topicName}
+                  {topicName}
                 </span>
               ),
               key: `topic-${params.topic_slug}`,
@@ -148,7 +155,7 @@ export default function PracticeBreadcrumbs() {
           }
 
           // Handle specific category pages without subject (end pages like /practice/technical)
-          if (pathSegments.length === 2 && !params.subject_slug) {
+          if (pathSegments.length === practiceIndex + 2 && !params.subject_slug) {
             // This means we're on /practice/technical or /practice/nontechnical page
             // The category item added above will be the current/last item
             // Mark it as current by updating the last item
@@ -157,7 +164,7 @@ export default function PracticeBreadcrumbs() {
               items[lastItemIndex] = {
                 title: (
                   <span className={styles.breadcrumbCurrent}>
-                    <BookOutlined /> {formatCategoryName(category)} Subjects
+                    {formatCategoryName(category)} Subjects
                   </span>
                 ),
                 key: `category-${category}`,
@@ -173,8 +180,8 @@ export default function PracticeBreadcrumbs() {
     setBreadcrumbItems(generateBreadcrumbs());
   }, [currPath, params, subjects, topics, subtopics, router]);
 
-  // Don't render if no items or only one item
-  if (breadcrumbItems.length <= 1) {
+  // Don't render if no items
+  if (breadcrumbItems.length <= 0) {
     return null;
   }
 
@@ -183,9 +190,7 @@ export default function PracticeBreadcrumbs() {
       <Breadcrumb
         items={breadcrumbItems}
         separator={
-          <span className={styles.separatorWrapper}>
-            <CaretRightOutlined style={{ fontSize: "1.2rem" }} />
-          </span>
+          <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />
         }
         className={styles.breadcrumb}
       />

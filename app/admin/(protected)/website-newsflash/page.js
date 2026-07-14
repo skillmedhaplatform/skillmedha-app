@@ -264,7 +264,7 @@ export default function NewsFlashPage() {
               type="text"
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
-              style={{ color: '#1890ff' }}
+              style={{ color: '#1E69DA' }}
             />
           </Tooltip>
           <Popconfirm
@@ -336,7 +336,7 @@ export default function NewsFlashPage() {
               closeModal(); // Ensure reset
               setIsModalOpen(true);
             }}
-            style={{ height: "40px", padding: "0 24px", borderRadius: "8px", fontWeight: "500", background: "#1677ff" }}
+            style={{ height: "40px", padding: "0 24px", borderRadius: "8px", fontWeight: "500", background: "#1E69DA" }}
           >
             Create NewsFlash
           </Button>

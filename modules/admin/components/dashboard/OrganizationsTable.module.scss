@@ -30,7 +30,7 @@
   border-collapse: collapse;
 
   thead {
-    background: $gray100;
+    background: #EFF5FB;
 
     tr {
       th {
@@ -38,7 +38,7 @@
         text-align: left;
         font-size: $fontSizeSm;
         font-weight: $fontWeightSemibold;
-        color: $gray700;
+        color: $primaryColor;
         white-space: nowrap;
         border-bottom: 2px solid $borderColor;
       }
@@ -51,7 +51,7 @@
       transition: background $transitionBase;
 
       &:hover {
-        background: $gray100;
+        background: #f8fafc;
       }
 
       td {

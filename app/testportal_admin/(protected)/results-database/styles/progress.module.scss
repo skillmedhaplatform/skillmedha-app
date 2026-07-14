@@ -215,6 +215,7 @@
         :global(.ant-select) {
           width: 140px !important;
         }
+
         :global(.ant-select-selector) {
           border-radius: 10px !important;
           border-color: #e2e8f0 !important;
@@ -302,7 +303,8 @@
         color: #1e293b;
       }
 
-      .emailText, .phoneText {
+      .emailText,
+      .phoneText {
         font-size: 12px;
         color: #64748b;
         font-weight: 550;
@@ -335,6 +337,7 @@
     &.positive {
       color: #1e69da;
     }
+
     &.negative {
       color: #ef4444;
     }

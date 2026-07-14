@@ -935,7 +935,7 @@ const Page = () => {
                         className={internshipLibStyles.chip}
                         style={{
                           backgroundColor: "#e6f7ff",
-                          color: "#1890ff",
+                          color: "#1E69DA",
                           borderColor: "#91d5ff",
                           textTransform: "capitalize",
                         }}
@@ -958,7 +958,7 @@ const Page = () => {
                   <div style={{ marginBottom: "8px" }}>
                     {eachData?.pricing?.currentPrice || eachData?.price ? (
                       <Space size="small">
-                        <span style={{ fontSize: "16px", fontWeight: "600", color: "#1677ff" }}>
+                        <span style={{ fontSize: "16px", fontWeight: "600", color: "#1E69DA" }}>
                           {formatINR(eachData?.pricing?.currentPrice || eachData?.price)}
                         </span>
                         {eachData?.pricing?.originalPrice && (
@@ -1052,7 +1052,7 @@ const Page = () => {
             style={{
               fontSize: "1.2rem",
               fontWeight: "600",
-              color: "#24A058",
+              color: "#1E69DA",
               marginBottom: "1rem",
             }}
           >

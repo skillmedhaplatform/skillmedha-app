@@ -1,12 +1,13 @@
+@use "@/modules/admin/styles/colors" as *;
 // src/components/dashboard/AIUsageChart.module.scss
 @use '@/modules/admin/styles/colors' as *;
 
 .chartContainer {
   background: white;
-  border-radius: 12px;
+  border-radius: $borderRadiusLarge;
   padding: 20px;
   border: 1px solid $borderColor;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: $shadowSm;
   margin-bottom: 20px;
 }
 
@@ -77,13 +78,13 @@
   gap: 4px;
   background: #EFF5FB;
   padding: 4px;
-  border-radius: 8px;
+  border-radius: $borderRadius;
 
   button {
     padding: 6px 16px;
     border: none;
     background: transparent;
-    border-radius: 6px;
+    border-radius: $borderRadius;
     cursor: pointer;
     font-size: 14px;
     color: #64748b;
@@ -97,7 +98,7 @@
       background: white;
       color: #8b5cf6;
       font-weight: 500;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      box-shadow: $shadowSm;
     }
   }
 }
@@ -108,7 +109,7 @@
   gap: 8px;
   padding: 8px 12px;
   background: #EFF5FB;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   color: #64748b;
 
   select {
@@ -135,12 +136,12 @@
   gap: 12px;
   padding: 16px;
   background: #f8fafc;
-  border-radius: 10px;
+  border-radius: $borderRadiusLarge;
   border-left: 4px solid #e2e8f0;
 
   &.positive {
     background: #f0fdf4;
-    border-left-color: #24A058;
+    border-left-color: #1E69DA;
 
     .statIcon {
       background: #dcfce7;
@@ -164,7 +165,7 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: $borderRadius;
     background: #e2e8f0;
     color: #64748b;
   }

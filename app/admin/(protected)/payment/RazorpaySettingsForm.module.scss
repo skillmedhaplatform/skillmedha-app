@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 .pageWrapper {
   display: flex;
   align-items: center;
@@ -15,8 +16,8 @@
   margin: 0 auto;
   padding: 2.5rem;
   background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: $borderRadiusLarge;
+  box-shadow: $shadowMd;
 }
 
 .header {
@@ -40,9 +41,9 @@
   color: #3b82f6;
   background-color: transparent;
   border: 1px solid #3b82f6;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
     background-color: #3b82f6;
@@ -79,8 +80,8 @@
   padding: 0.75rem 1rem;
   font-size: 1rem;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  border-radius: $borderRadius;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background-color: #ffffff;
   
   &:focus {
@@ -110,7 +111,7 @@
   padding: 0.75rem;
   background-color: #fee2e2;
   border: 1px solid #fecaca;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   color: #dc2626;
   font-size: 0.875rem;
 }
@@ -127,9 +128,9 @@
   font-size: 1rem;
   font-weight: 600;
   border: none;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .buttonPrimary {

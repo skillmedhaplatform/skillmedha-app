@@ -1,22 +1,33 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/mixins.scss";
 
 .studentsContainer {
-  width: 100%;
-  min-height: 60vh;
-  height: 100%;
+  height: calc(100% - 2rem);
+  min-height: 80vh;
+  width: auto;
+  margin: 1rem;
+  padding: 0 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   overflow-y: auto;
   @include custom-scrollbar();
   position: relative;
 }
 
 .header {
-  @include flexBox(row, center, space-between);
-  border-radius: 8px;
-  padding-top: 1rem;
   position: sticky;
   top: 0;
+  background-color: #fff;
   z-index: 9;
-  background-color: white;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 
   h2 {
     margin: 0;
@@ -26,12 +37,12 @@
   }
 
   .subtitle {
-    margin-top: 8px;
+    margin: 4px 0 0 0;
     color: #666;
     font-size: 14px;
 
     strong {
-      color: #1890ff;
+      color: #1E69DA;
       font-size: 16px;
     }
   }
@@ -39,18 +50,14 @@
 
 .loadingContainer {
   @include flexBox(column, center, center);
-  min-height: 400px;
+  min-height: 300px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .errorContainer {
   @include flexBox(column, center, center);
   padding: 60px 40px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
   p {
     color: #ff4d4f;
@@ -59,165 +66,121 @@
   }
 }
 
-.tableWrapper {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-  @include custom-scrollbar(#1890ff, #f0f0f0, 10px);
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-
-  @media (max-width: 768px) {
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  }
-}
-
-.studentsTable {
-  width: 100%;
-
-  // Use :global() function syntax instead of block syntax
-  :global(.ant-table) {
-    font-size: 14px;
-
-    @media (max-width: 768px) {
-      font-size: 12px;
-    }
-  }
-
-  :global(.ant-table-thead) > :global(tr) > :global(th) {
-    white-space: nowrap;
-    font-weight: 600;
-    background: #fafafa;
-
-    @media (max-width: 768px) {
-      padding: 8px;
-      font-size: 12px;
-    }
-  }
-
-  :global(.ant-table-tbody) > :global(tr) > :global(td) {
-    white-space: nowrap;
-
-    @media (max-width: 768px) {
-      padding: 8px;
-      font-size: 12px;
-    }
-  }
-
-  :global(.ant-pagination) {
-    margin: 16px 0;
-
-    @media (max-width: 768px) {
-      text-align: center;
-    }
-  }
-
-  :global(.ant-pagination-options) {
-    @media (max-width: 768px) {
-      display: block;
-      margin: 8px 0;
-    }
-  }
-
-  :global(.ant-pagination-item),
-  :global(.ant-pagination-prev),
-  :global(.ant-pagination-next),
-  :global(.ant-pagination-jump-prev),
-  :global(.ant-pagination-jump-next) {
-    @media (max-width: 768px) {
-      margin: 0 2px;
-      min-width: 28px;
-    }
-  }
-
-  :global(.ant-pagination-options-size-changer) {
-    @media (max-width: 480px) {
-      width: 100%;
-      margin: 8px 0;
-    }
-  }
-
-  :global(.ant-select-selector) {
-    @media (max-width: 480px) {
-      width: 100% !important;
-    }
-  }
-
-  :global(.ant-table-container) {
-    overflow-x: auto;
-    overflow-y: hidden;
-
-    &::-webkit-scrollbar {
-      height: 10px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: #f0f0f0;
-      border-radius: 10px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #1890ff;
-      border-radius: 10px;
-
-      &:hover {
-        background: #096dd9;
-      }
-    }
-  }
-
-  :global(.ant-table-cell-fix-left),
-  :global(.ant-table-cell-fix-right) {
-    @media (max-width: 768px) {
-      position: sticky !important;
-      z-index: 2;
-    }
-  }
-}
-
-.evenRow {
-  background: #ffffff;
-
-  &:hover {
-    background: #f5f5f5 !important;
-  }
-}
-
-.oddRow {
-  background: #fafafa;
-
-  &:hover {
-    background: #f0f0f0 !important;
-  }
-}
 .activeFilters {
   margin-bottom: 16px;
   padding: 12px;
   background: #f5f5f5;
-  border-radius: 8px;
+  border-radius: $borderRadius;
+}
+
+.questionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding-bottom: 2rem;
+
+  .questionRow {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      border-color: #CBD5E1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .rowLeft {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+
+      .qNumber {
+        color: #1677ff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        min-width: 60px;
+      }
+
+      .studentInfo {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .studentName {
+          color: #1e293b;
+          font-weight: 600;
+          font-size: 0.95rem;
+        }
+
+        .studentSubInfo {
+          color: #64748b;
+          font-size: 0.85rem;
+
+          a {
+            color: #1e69da;
+            text-decoration: none;
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+
+    .rowRight {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      .badges {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+
+        .badge {
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .tokensBadge {
+          background-color: #f3e8ff;
+          color: #7e22ce;
+        }
+
+        .requestsBadge {
+          background-color: #e0f7fa;
+          color: #00838f;
+        }
+
+        .yearBadge {
+          background-color: #e0f2fe;
+          color: #0369a1;
+        }
+
+        .dateBadge {
+          background-color: #f1f5f9;
+          color: #475569;
+        }
+      }
+    }
+  }
 }
 
 .paginationContainer {
   display: flex;
-  justify-content: center;
-  margin-top: 32px;
-  padding: 24px 0;
-}
-
-.aiUsageSummary {
-  margin-top: 8px;
-  padding: 8px 0;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-  
-  > div:first-child {
-    flex: 1;
-  }
+  justify-content: flex-start;
+  margin-top: 1.5rem;
+  padding-bottom: 2rem;
 }

@@ -1,38 +1,39 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/colors.scss";
 @import "@/modules/admin/styles/mixins.scss";
+
 .container {
-  height: 95%;
-  overflow: scroll;
+  height: calc(100% - 2rem);
+  min-height: 60vh;
+  width: auto;
+  margin: 1rem;
+  padding: 0 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow-y: auto;
+  @include custom-scrollbar();
+  position: relative;
 }
 
-.header {
-  font-size: 1rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  color: #333;
-  padding: 0.5rem;
-  margin-bottom: 2rem;
+.titleContainer {
   position: sticky;
-  left: 0;
   top: 0;
   background-color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.286);
-  border-radius: 0.5rem;
-  box-shadow: 1px 1px 5px 1px rgba(0, 0, 0, 0.08);
-  span {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
+  z-index: 9;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sectionsTable {
+  margin-top: 1.5rem;
 }
 
 .section {
   padding: 0rem 1rem;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -50,7 +51,7 @@
   border: 1px solid #0000005e;
   padding: 10px;
   width: 70%;
-  border-radius: 6px;
+  border-radius: $borderRadius;
 }
 
 .actions {
@@ -58,6 +59,7 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 20px;
+  padding-bottom: 2rem;
 }
 
 .button {
@@ -65,7 +67,7 @@
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   font-weight: bold;
   cursor: pointer;
   width: fit-content;
@@ -76,14 +78,181 @@
   color: white;
   padding: 0.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: $borderRadius;
   cursor: pointer;
 }
+
 .saveButton {
   background-color: $primaryColor;
   color: white;
   padding: 0.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: $borderRadius;
   cursor: pointer;
+}
+
+.breadcrumbContainer {
+  background-color: transparent;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.breadcrumb {
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+
+  :global(.ant-breadcrumb-separator) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+  }
+}
+
+.breadcrumbLink {
+  color: #1E69DA !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.breadcrumbCurrent {
+  color: #0f172a !important;
+  font-weight: 600;
+  background-color: transparent !important;
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+}
+
+.questionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+
+  .questionRow {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      border-color: #CBD5E1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .rowLeft {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+
+      .qNumber {
+        color: #1677ff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        min-width: 80px;
+      }
+
+      .qText {
+        color: #334155;
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .editInput {
+        width: 60%;
+        max-width: 400px;
+      }
+    }
+
+    .rowRight {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      .badges {
+        display: flex;
+        gap: 8px;
+
+        .badge {
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+
+        .saved { background: #DCFCE7; color: #166534; }
+        .draft { background: #FEF3C7; color: #92400E; }
+      }
+
+      .actionIcons {
+        display: flex;
+        gap: 8px;
+        border-left: 1px solid #E2E8F0;
+        padding-left: 16px;
+
+        button {
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          background: transparent;
+          transition: all 0.2s;
+          border: 1px solid transparent;
+
+          &.openSec {
+            color: #1677ff;
+            &:hover { background: #E0F2FE; border-color: #BAE6FD; }
+          }
+          &.edit {
+            color: #1677ff;
+            &:hover { background: #E0F2FE; border-color: #BAE6FD; }
+          }
+          &.save {
+            color: #52c41a;
+            &:hover { background: #F6FFED; border-color: #B7EB8F; }
+          }
+          &.cancel {
+            color: #94A3B8;
+            &:hover { background: #F1F5F9; border-color: #E2E8F0; }
+          }
+          &.delete {
+            color: #EF4444;
+            &:hover { background: #FEE2E2; border-color: #FECACA; }
+          }
+        }
+      }
+    }
+  }
+}
+
+.paginationContainer {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-start;
+  padding-bottom: 2rem;
 }

@@ -13,16 +13,15 @@ const BreadcrumbComponent = ({ customLabels = {} }) => {
   const breadcrumbItems = useMemo(() => {
     const pathSegments = pathname.split("/").filter(Boolean);
 
-    const items = [
-      {
-        title: <Link href="/">Home</Link>,
-      },
-    ];
-
+    const items = [];
     let accumulatedPath = "";
 
     pathSegments.forEach((segment, index) => {
       accumulatedPath += `/${segment}`;
+
+      if (segment === "admin") {
+        return;
+      }
 
       // Determine which query params to include based on the segment
       let fullPath = accumulatedPath;
@@ -55,7 +54,9 @@ const BreadcrumbComponent = ({ customLabels = {} }) => {
       const label =
         customLabels[segment] ||
         sideBarItem?.name ||
-        segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+        (segment === "tpo"
+          ? "TPO"
+          : segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " "));
 
       if (index === pathSegments.length - 1) {
         items.push({
@@ -74,7 +75,7 @@ const BreadcrumbComponent = ({ customLabels = {} }) => {
   return (
     <div className="breadcrumb-wrapper">
       <Breadcrumb
-        separator={<FaCaretRight style={{ fontSize: "22px", color: "gray" }} />}
+        separator={<FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />}
         items={breadcrumbItems}
       />
     </div>

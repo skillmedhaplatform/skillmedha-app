@@ -1,4 +1,5 @@
 @use "@/modules/admin/styles/mixins" as *;
+@use "@/modules/admin/styles/colors" as *;
 
 .userManagement {
   width: 100%;
@@ -24,7 +25,7 @@
     .mainSearchInput {
       max-width: 300px;
       height: 40px;
-      border-radius: 8px;
+      border-radius: $borderRadius;
       
       @media (max-width: 480px) {
         max-width: 100%;
@@ -72,9 +73,10 @@
 
     .statCard {
       background-color: white;
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
-      border: 1px solid #cccccc;
+      padding: $spacing4;
+      border-radius: $borderRadiusLarge;
+      border: 1px solid $borderColor;
+      box-shadow: $shadowSm;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
 
@@ -84,13 +86,13 @@
 
       @media (max-width: 480px) {
         padding: 0.75rem;
-        border-radius: 10px;
+        border-radius: $borderRadiusLarge;
       }
 
       &:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        border-color: #d1d5db;
+        box-shadow: $shadowMd;
+        border-color: #1E69DA;
 
         &::before {
           opacity: 1;
@@ -136,7 +138,7 @@
 
         .statIcon {
           font-size: 1.25rem;
-          color: #1677ff;
+          color: #1E69DA;
           transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           display: flex;
           align-items: center;
@@ -189,7 +191,7 @@
 
   .tableWrapper {
     background: white;
-    border-radius: 12px;
+    border-radius: $borderRadiusLarge;
     border: 1px solid #cccccc;
     overflow: auto;
     @include custom-scrollbar(#bfbfbf, #f1f1f1);
@@ -300,7 +302,7 @@
 // Modal Styles
 .userModal {
   :global(.ant-modal-header) {
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid $borderColor;
     // padding: 20px 24px;
   }
 
@@ -308,11 +310,11 @@
     padding: 0;
     max-height: 70vh;
     overflow-y: auto;
-    @include custom-scrollbar(#24A058, #f1f1f1);
+    @include custom-scrollbar(#1E69DA, #f1f1f1);
   }
 
   :global(.ant-modal-footer) {
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid $borderColor;
     // padding: 16px 24px;
   }
 
@@ -324,7 +326,7 @@
 
     .modalIcon {
       font-size: 1.5rem;
-      color: #24A058;
+      color: #1E69DA;
     }
   }
 
@@ -365,16 +367,16 @@
     }
 
     :global(.ant-tabs-ink-bar) {
-      background-color: #24A058;
+      background-color: #1E69DA;
     }
 
     :global(.ant-tabs-tab):hover {
-      color: #24A058;
+      color: #1E69DA;
     }
 
     :global(.ant-tabs-tab.ant-tabs-tab-active) {
       :global(.ant-tabs-tab-btn) {
-        color: #24A058;
+        color: #1E69DA;
       }
     }
   }
@@ -399,22 +401,22 @@
     :global(.ant-input),
     :global(.ant-input-password),
     :global(.ant-select-selector) {
-      border-radius: 6px;
+      border-radius: $borderRadius;
 
       &:focus,
       &:hover {
-        border-color: #24A058;
+        border-color: #1E69DA;
       }
     }
 
     :global(.ant-input-affix-wrapper):focus,
     :global(.ant-input-affix-wrapper-focused) {
-      border-color: #24A058;
+      border-color: #1E69DA;
       box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
     }
 
     :global(.ant-select-focused) :global(.ant-select-selector) {
-      border-color: #24A058 !important;
+      border-color: #1E69DA !important;
       box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1) !important;
     }
 
@@ -422,7 +424,7 @@
       @include flexBox(row, center, space-between, 1rem);
       //   padding: 16px;
       //   background-color: #f5f5f5;
-      border-radius: 8px;
+      border-radius: $borderRadius;
 
       .statusLabel {
         font-weight: 500;
@@ -430,7 +432,7 @@
       }
 
       :global(.ant-switch-checked) {
-        background-color: #24A058;
+        background-color: #1E69DA;
       }
     }
 
@@ -452,7 +454,7 @@
         :global(.ant-checkbox-wrapper) {
           width: 100%;
           padding: 12px;
-          border-radius: 6px;
+          border-radius: $borderRadius;
           transition: all 0.3s;
 
           &:hover {
@@ -461,12 +463,12 @@
         }
 
         :global(.ant-checkbox-checked) :global(.ant-checkbox-inner) {
-          background-color: #24A058;
-          border-color: #24A058;
+          background-color: #1E69DA;
+          border-color: #1E69DA;
         }
 
         :global(.ant-checkbox-wrapper):hover :global(.ant-checkbox-inner) {
-          border-color: #24A058;
+          border-color: #1E69DA;
         }
       }
 
@@ -490,7 +492,7 @@
 
   .orgCard {
     border: 1px solid #d9d9d9;
-    border-radius: 6px;
+    border-radius: $borderRadius;
     padding: 0.5rem 1rem;
     box-sizing: border-box;
     background-color: #fff;
@@ -509,7 +511,7 @@
     }
 
     &:hover {
-      border-color: #24A058;
+      border-color: #1E69DA;
       box-shadow: 0 0 0 2px rgba(37, 163, 166, 0.1);
     }
   }
@@ -571,7 +573,7 @@
 .orgTitle {
   flex: 0 0 40%;
   margin: 0;
-  color: #24A058;
+  color: #1E69DA;
 }
 
 .orgCardFaded {
