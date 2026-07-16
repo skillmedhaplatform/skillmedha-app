@@ -1,445 +1,395 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { MailOutlined, PhoneFilled } from "@ant-design/icons";
-import { useSelector } from "react-redux";
+
+import React, { useState } from "react";
+import {
+  GithubOutlined,
+  GlobalOutlined,
+  LinkedinFilled,
+  MailOutlined,
+  PhoneFilled,
+} from "@ant-design/icons";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
+import {
+  asHtmlString,
+  normalizeExternalLink,
+  useProfileImage,
+  useResumeTemplateData,
+} from "./resumeTemplateData";
 
-const Template2 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeSection, isGeneratingPdf }) => {
-  const resumeRef = useRef(null);
-  const [profileBase64, setProfileBase64] = useState(null);
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
+/**
+ * Template8 — "Modern Colour Block"
+ * Inspired by the "Modern" family on Resume-Now: a full-width
+ * coloured hero with photo, then a light-tint left sidebar for
+ * skills/languages/certifications/links and a white main column
+ * for summary/experience/education/projects.
+ *
+ * All visual rules are inline `style` objects, not Tailwind
+ * bracket-value classes — see the note at the top of Template7
+ * for why that matters for build-safety.
+ */
 
-  const basicDetails =
-    useSelector((state) => state.student.student?.data) || {};
-  const educationDetails =
-    useSelector((state) => state.student.student?.data?.educationDetails) || [];
-  const experienceDetails =
-    useSelector((state) => state.student.student?.data?.experiences) || [];
-  const projectDetails =
-    useSelector((state) => state.student.student?.data?.projects) || [];
-  const accDetails =
-    useSelector((state) => state.student.student?.data?.accomplishments) || [];
-  const skillss =
-    useSelector((state) => state.student.student?.data?.technical) || [];
-  const lang =
-    useSelector((state) => state.student.student?.data?.languages) || [];
-  const linkList =
-    useSelector((state) => state.student.student?.data?.links) || [];
-  const volunteeringList =
-    useSelector((state) => state.student.student?.data?.volunteerings) || [];
-  const certificatesList =
-    useSelector((state) => state.student.student?.data?.certificates) || [];
+const COLOR_OPTIONS = [
+  { name: "Balanced Blue", value: "#4585DD" },
+  { name: "Team Teal", value: "#00A4C1" },
+  { name: "Empathic Emerald", value: "#2C806E" },
+  { name: "Creative Marigold", value: "#F6911E" },
+  { name: "Ambitious Red", value: "#CB454E" },
+  { name: "Assertive Asphalt", value: "#34393E" },
+];
 
-  // Convert image to base64 using canvas method
-  const convertImageToBase64 = (url) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
+const tint = (hex, opacity) => {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
-      // Set crossOrigin before setting src
-      img.crossOrigin = "anonymous";
+const S = {
+  page: {
+    width: "100%",
+    maxWidth: "100%",
+    margin: "0 auto",
+    height: "100%",
+    overflowY: "auto",
+    backgroundColor: "#ffffff",
+    fontFamily: "'Inter', Arial, sans-serif",
+    color: "#2b2b2b",
+    boxSizing: "border-box",
+  },
+  swatchRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    borderBottom: "1px solid #eeeeee",
+    padding: "8px 32px",
+  },
+  swatchLabel: {
+    fontSize: "11px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    color: "#8a8a8a",
+  },
+  swatchBtn: (active, color) => ({
+    height: "18px",
+    width: "18px",
+    borderRadius: "50%",
+    backgroundColor: color,
+    border: "1px solid rgba(0,0,0,0.1)",
+    outline: active ? `2px solid ${color}` : "none",
+    outlineOffset: "2px",
+    cursor: "pointer",
+    padding: 0,
+  }),
+  hero: (accent) => ({
+    display: "flex",
+    alignItems: "center",
+    gap: "20px",
+    padding: "26px 32px",
+    backgroundColor: accent,
+    color: "#ffffff",
+  }),
+  photo: {
+    height: "96px",
+    width: "96px",
+    flexShrink: 0,
+    borderRadius: "50%",
+    border: "3px solid #ffffff",
+    objectFit: "cover",
+  },
+  name: { margin: 0, fontSize: "27px", fontWeight: 700, lineHeight: 1.2 },
+  headline: { margin: "6px 0 0", fontSize: "16px", fontWeight: 500, color: "rgba(255,255,255,0.9)" },
+  contactRow: {
+    marginTop: "10px",
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "8px 20px",
+    fontSize: "13px",
+    color: "rgba(255,255,255,0.85)",
+  },
+  contactLink: { display: "flex", alignItems: "center", gap: "6px", textDecoration: "none", color: "rgba(255,255,255,0.85)" },
+  columns: { display: "grid", gridTemplateColumns: "220px 1fr" },
+  sidebar: (accent) => ({ backgroundColor: tint(accent, 0.07), padding: "26px 22px", display: "flex", flexDirection: "column", gap: "22px" }),
+  main: { padding: "26px 32px" },
+  sideLabel: (accent) => ({ margin: "0 0 8px", fontSize: "11.5px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: accent }),
+  sideItem: { fontSize: "13.5px", color: "#333333" },
+  mainLabel: (accent) => ({
+    margin: "0 0 10px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    color: accent,
+  }),
+  labelBar: (accent) => ({ height: "14px", width: "4px", borderRadius: "2px", backgroundColor: accent, display: "inline-block" }),
+  section: { marginBottom: "24px" },
+  summaryText: { fontSize: "14.5px", lineHeight: 1.6, color: "#333333" },
+  entryHeadRow: { display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", columnGap: "16px" },
+  entryTitle: { margin: 0, fontSize: "15.5px", fontWeight: 700, color: "#1a1a1a" },
+  entrySub: { fontWeight: 400, color: "#555555" },
+  entryDate: (accent) => ({ whiteSpace: "nowrap", fontSize: "12.5px", fontWeight: 700, color: accent }),
+  entryDesc: { margin: "4px 0 0", fontSize: "14px", lineHeight: 1.55, color: "#333333" },
+};
 
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.naturalWidth || img.width;
-          canvas.height = img.naturalHeight || img.height;
+const Template8 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
+  const {
+    basicDetails,
+    educationDetails,
+    workExperience,
+    internshipDetails,
+    projectDetails,
+    accDetails,
+    certificates,
+    skills,
+    languages,
+    links,
+    volunteerings,
+  } = useResumeTemplateData();
+  const profileBase64 = useProfileImage(basicDetails?.profile);
+  const [accent, setAccent] = useState(COLOR_OPTIONS[0].value);
 
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
+  const profileLinks = links.filter((item) => item?.link);
+  const linkIcons = [<LinkedinFilled key="li" />, <GithubOutlined key="gh" />, <GlobalOutlined key="gl" />];
 
-          const base64String = canvas.toDataURL("image/jpeg", 0.95);
-          resolve(base64String);
-        } catch (error) {
-          console.error("Canvas conversion error:", error);
-          reject(error);
-        }
-      };
-
-      img.onerror = (error) => {
-        console.error("Image load error:", error);
-        // Fallback: try fetch method
-        fetch(url)
-          .then((response) => response.blob())
-          .then((blob) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          })
-          .catch(reject);
-      };
-
-      // Add timestamp to bypass cache
-      img.src =
-        url + (url.includes("?") ? "&" : "?") + "t=" + new Date().getTime();
-    });
-  };
-
-  // Load base64 image on component mount
-  useEffect(() => {
-    if (basicDetails?.profile) {
-      setIsImageLoaded(false);
-      convertImageToBase64(basicDetails.profile)
-        .then((base64) => {
-          if (base64) {
-            setProfileBase64(base64);
-            setIsImageLoaded(true);
-          }
-        })
-        .catch((error) => {
-          console.error("Failed to convert image:", error);
-          // Use original URL as fallback
-          setProfileBase64(basicDetails.profile);
-          setIsImageLoaded(true);
-        });
-    }
-  }, [basicDetails?.profile]);
-
-  const asHtml = (val) => {
-    if (!val) return "";
-    return typeof val === "string"
-      ? filterQuotes(val)
-      : filterQuotes(String(val));
-  };
-
-  const handleDownloadPdf = async () => {
-    if (!resumeRef.current) return;
-
-    try {
-      // Wait for image to be loaded and converted
-      if (!isImageLoaded) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-
-      const html2pdf = (await import("html2pdf.js")).default;
-
-      const opt = {
-        margin: 0,
-        filename: "resume.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          logging: false,
-          backgroundColor: "#ffffff",
-        },
-        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-      };
-
-      const pdfBlob = await html2pdf().set(opt).from(resumeRef.current).output("blob");
-      const downloadUrl = URL.createObjectURL(pdfBlob);
-      const anchor = document.createElement("a");
-      anchor.href = downloadUrl;
-      anchor.download = "resume.pdf";
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(downloadUrl);
-    } catch (err) {
-      console.error("PDF export failed:", err);
-    } finally {
-      setDownloadImage(false);
-    }
-  };
-
-  useEffect(() => {
-    if (downloadImage && isImageLoaded) {
-      handleDownloadPdf();
-    }
-  }, [downloadImage, isImageLoaded]);
-
-  const filterQuotes = (text) => {
-    try {
-      if (text[0] == '"') return text?.slice(1, -1);
-      return text;
-    } catch (error) {
-      return text;
-    }
-  };
+  const highlight = (name) =>
+    activeSection === name ? { outline: `2px solid ${accent}`, outlineOffset: "4px", borderRadius: "6px" } : {};
 
   return (
-    <div
-      className={`${(downloadImage || isGeneratingPdf) ? "w-[794px] max-w-[794px] min-h-[1123px]" : "w-full max-w-full"} h-auto mx-auto overflow-visible bg-white p-12 font-['Inter',sans-serif] text-[#334155] [&_section]:mb-6 [&_section_h2]:mb-4 [&_section_h2]:border-b-2 [&_section_h2]:border-solid [&_section_h2]:border-[#e5e7eb] [&_section_h2]:pb-2 [&_section_h2]:text-[1.05rem] [&_section_h2]:font-bold [&_section_h2]:uppercase [&_section_h2]:tracking-wider [&_section_h2]:text-[#374151] [&_section_p]:text-[0.95rem] [&_section_p]:leading-relaxed [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-white [&::-webkit-scrollbar-thumb]:rounded-[20px]`}
-      ref={downloadImage ? resumeRef : resumeTemplateRef}
-    >
-      <div id="section-Basic-Details" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Basic Details" || activeSection === "Links" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
-        <header className="mb-6 grid grid-cols-[1fr_10rem] border-b-2 border-[#d1d5db] pb-6">
-          <div className="flex flex-col justify-center items-start text-start [&_p]:text-[0.95rem] [&_p]:my-2">
-            <div className="mb-2 text-start [&_h1]:m-0 [&_h1]:text-start [&_h1]:text-[2.6rem] [&_h1]:font-black [&_h1]:tracking-tight [&_h1]:text-[#111827] [&_h2]:text-[1.3rem] [&_h2]:font-medium [&_h2]:text-[#4b5563]">
-              <h1>
-                {basicDetails?.firstName} {basicDetails?.middleName}{" "}
-                {basicDetails?.lastName}
-              </h1>
-            </div>
-            <div className="mt-2 mb-0.5 flex flex-wrap [&_a]:mr-6 [&_a]:mb-2 [&_a]:flex [&_a]:items-center [&_a]:gap-1.5 [&_a]:text-[0.95rem] [&_a]:font-medium [&_a]:text-[#4b5563] [&_a]:no-underline [&_a:hover]:text-[#111827]">
-              <a href={`mailto:${basicDetails?.email || ""}`}>
-                <MailOutlined /> {basicDetails?.email}
-              </a>
-              <a href={`tel:${basicDetails?.phone || ""}`}>
-                <PhoneFilled /> {basicDetails?.phone}
-              </a>
-            </div>
-            {linkList?.length > 0 && (
-              <div className="flex flex-col gap-2 [&_p]:text-[0.9rem] [&_p]:m-0 [&_p]:mb-2">
-                {linkList.map((link, i) => (
-                  <div key={i}>
-                    <p className="text-[0.9rem] m-0 mb-2">
-                      {link?.title || ""} {link?.link ? (
-                        <span>
-                          - <a href={link.link.startsWith('http') ? link.link : `https://${link.link}`} target="_blank" rel="noopener noreferrer" className="text-[#374151] hover:underline" style={{ textDecoration: 'none' }}>
-                            {link.link}
-                          </a>
-                        </span>
-                      ) : ""}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="flex justify-center items-center">
-            {profileBase64 && (
-              <img
-                width="70%"
-                src={profileBase64}
-                alt="profile"
-                style={{ display: "block" }}
-              />
-            )}
-          </div>
-        </header>
-
-        <section className="!mb-0">
-          <h2>Professional Summary</h2>
-          <div className="text-[0.9rem] tracking-[0.2rem] leading-[0.9rem]">
-            <div
-              dangerouslySetInnerHTML={{
-                __html: filterQuotes(basicDetails?.professionalSummary),
-              }}
-            />
-          </div>
-        </section>
-      </div>
-
-      {educationDetails?.length > 0 && (
-        <section id="section-Education" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Education" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
-          <h2>Education</h2>
-          {educationDetails?.length > 0 &&
-            educationDetails?.map((edu, i) => (
-              <div className="flex flex-col mb-3 justify-center" key={i}>
-                <div className="flex justify-between m-0 mb-1.5 [&_span]:font-bold [&_span]:text-[1rem]">
-                  <div>
-                    <span>
-                      {edu?.type} - {edu?.school} | {edu?.grade}{" "}
-                      {edu?.gradeType
-                        ? edu?.gradeType == "percentage"
-                          ? "%"
-                          : "/10"
-                        : null}
-                    </span>
-                  </div>
-                  <div className="min-w-[10rem] italic text-[0.9rem] font-medium">
-                    <p>
-                      {edu?.startDate} – {edu?.endDate}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex m-0 text-[0.9rem] tracking-[0.2rem] leading-[0.9rem] [&_p]:text-[0.9rem] [&_p]:m-0">
-                  <p>{edu?.description}</p>
-                </div>
-              </div>
-            ))}
-        </section>
+    <div ref={resumeTemplateRef} style={{ ...S.page, maxWidth: isGeneratingPdf ? "800px" : "100%" }}>
+      {!isGeneratingPdf && (
+        <div style={S.swatchRow} className="print:hidden">
+          <span style={S.swatchLabel}>Theme colour</span>
+          {COLOR_OPTIONS.map((c) => (
+            <button key={c.value} type="button" title={c.name} onClick={() => setAccent(c.value)} style={S.swatchBtn(accent === c.value, c.value)} />
+          ))}
+        </div>
       )}
 
-      {experienceDetails
-        ?.filter((e) => e?.type?.toLowerCase() == "work")
-        ?.filter((e) => e?.company)?.length > 0 && (
-          <section id="section-Experience" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Experience" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
-            <h2>Experience</h2>
-            {experienceDetails?.length > 0 &&
-              experienceDetails
-                ?.filter((e) => e?.type == "work")
-                .map((job, i) => (
-                  <div className="flex flex-col mb-3 justify-center" key={i}>
-                    <div className="flex justify-between m-0 mb-1.5 [&_span]:font-bold [&_span]:text-[1rem]">
-                      <div>
-                        <span>
-                          {job?.role}, {job?.company}
-                        </span>
-                        {" -"}
-                      </div>
-                      <div className="min-w-[10rem] italic text-[0.9rem] font-medium">
-                        <p>
-                          {job?.start || job?.startDate} –{" "}
-                          {job?.end || job?.endDate}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex m-0 text-[0.9rem] tracking-[0.2rem] leading-[0.9rem] [&_p]:text-[0.9rem] [&_p]:m-0">
-                      <p>{job?.description}</p>
-                    </div>
+      <header id="section-Basic-Details" style={highlight("Basic Details")}>
+        <div style={S.hero(accent)}>
+          {profileBase64 && <img src={profileBase64} alt="profile" style={S.photo} />}
+          <div style={{ minWidth: 0 }}>
+            <h1 style={S.name}>
+              {basicDetails?.firstName} {basicDetails?.middleName} {basicDetails?.lastName}
+            </h1>
+            {workExperience?.[0]?.role && <p style={S.headline}>{workExperience[0].role}</p>}
+            <div style={S.contactRow}>
+              {basicDetails?.email && (
+                <a href={`mailto:${basicDetails.email}`} style={S.contactLink}>
+                  <MailOutlined /> <span>{basicDetails.email}</span>
+                </a>
+              )}
+              {basicDetails?.phone && (
+                <a href={`tel:${basicDetails.phone}`} style={S.contactLink}>
+                  <PhoneFilled /> <span>{basicDetails.phone}</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div style={S.columns}>
+        <aside style={S.sidebar(accent)}>
+          {skills.filter(Boolean).length > 0 && (
+            <div id="section-Skills" style={highlight("Skills")}>
+              <h2 style={S.sideLabel(accent)}>Skills</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {skills.filter(Boolean).map((skill, i) => (
+                  <div key={i} style={S.sideItem}>{skill}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {languages.filter(Boolean).length > 0 && (
+            <div id="section-Languages" style={highlight("Languages")}>
+              <h2 style={S.sideLabel(accent)}>Languages</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {languages.filter(Boolean).map((lang, i) => (
+                  <div key={i} style={S.sideItem}>{lang}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {certificates.filter((c) => c?.name || c?.organization).length > 0 && (
+            <div id="section-Certifications" style={highlight("Certifications")}>
+              <h2 style={S.sideLabel(accent)}>Certifications</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {certificates.filter((c) => c?.name || c?.organization).map((item, i) => (
+                  <div key={i}>
+                    <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: "#1a1a1a" }}>{item?.name}</p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "#666666" }}>{item?.organization}</p>
                   </div>
                 ))}
-          </section>
-        )}
+              </div>
+            </div>
+          )}
 
-      {experienceDetails
-        ?.filter((e) => e?.type?.toLowerCase() !== "work")
-        ?.filter((e) => e?.company)?.length > 0 && (
-          <section id="section-Internships" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Internships" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
-            <h2>Internships</h2>
-            {experienceDetails?.length > 0 &&
-              experienceDetails
-                ?.filter((e) => e?.type !== "work")
-                ?.map((job, i) => (
-                  <div className="flex flex-col mb-3 justify-center" key={i}>
-                    <div className="flex justify-between m-0 mb-1.5 [&_span]:font-bold [&_span]:text-[1rem]">
-                      <div>
-                        <span>
-                          {job?.role}, {job?.company}
-                        </span>
-                        {" -"}
-                      </div>
-                      <div className="min-w-[10rem] italic text-[0.9rem] font-medium">
-                        <p>
-                          {job?.start || job?.startDate} –{" "}
-                          {job?.end || job?.endDate}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex m-0 text-[0.9rem] tracking-[0.2rem] leading-[0.9rem] [&_p]:text-[0.9rem] [&_p]:m-0">
-                      <p>{job?.description}</p>
-                    </div>
+          {volunteerings.filter((v) => v?.organization || v?.volunteering).length > 0 && (
+            <div id="section-Volunteering" style={highlight("Volunteering")}>
+              <h2 style={S.sideLabel(accent)}>Volunteering</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {volunteerings.filter((v) => v?.organization || v?.volunteering).map((item, i) => (
+                  <div key={i}>
+                    <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: "#1a1a1a" }}>{item?.volunteering}</p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "#666666" }}>{item?.organization}</p>
                   </div>
                 ))}
-          </section>
-        )}
+              </div>
+            </div>
+          )}
 
-      {projectDetails?.length > 0 &&
-        projectDetails?.filter((e) => e?.project)?.length > 0 && (
-          <section id="section-Projects" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Projects" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
-            <h2>Projects</h2>
-            {projectDetails?.length > 0 &&
-              projectDetails?.map((proj, i) => (
-                <div className="flex flex-col mb-3 justify-center" key={i}>
-                  <div className="flex justify-between m-0 mb-1.5 [&_span]:font-bold [&_span]:text-[1rem]">
-                    <div>
-                      <span>
-                        {proj?.project ? `${proj.project}` : ""}{" "}
-                        {proj?.company ? `(${proj.company})` : ""}
+          {profileLinks.length > 0 && (
+            <div id="section-Links" style={highlight("Links")}>
+              <h2 style={S.sideLabel(accent)}>Links</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {profileLinks.map((item, i) => (
+                  <a
+                    key={i}
+                    href={normalizeExternalLink(item.link)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#333333", textDecoration: "none", wordBreak: "break-all" }}
+                  >
+                    {linkIcons[i] || <GlobalOutlined />} <span>{item.title || item.link}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
+
+        <main style={S.main}>
+          {basicDetails?.professionalSummary && (
+            <section style={S.section}>
+              <h2 style={S.mainLabel(accent)}>
+                <span style={S.labelBar(accent)} /> Summary
+              </h2>
+              <div style={S.summaryText} dangerouslySetInnerHTML={{ __html: asHtmlString(basicDetails.professionalSummary) }} />
+            </section>
+          )}
+
+          {workExperience.length > 0 && (
+            <section id="section-Experience" style={{ ...S.section, ...highlight("Experience") }}>
+              <h2 style={S.mainLabel(accent)}>
+                <span style={S.labelBar(accent)} /> Experience
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {workExperience.map((item, i) => (
+                  <div key={i} style={{ position: "relative", borderLeft: `2px solid ${tint(accent, 0.3)}`, paddingLeft: "16px" }}>
+                    <span style={{ position: "absolute", left: "-5px", top: "4px", height: "8px", width: "8px", borderRadius: "50%", backgroundColor: accent }} />
+                    <div style={S.entryHeadRow}>
+                      <h3 style={S.entryTitle}>
+                        {item?.role}
+                        {item?.company && <span style={S.entrySub}>, {item.company}</span>}
+                      </h3>
+                      <span style={S.entryDate(accent)}>
+                        {item?.start || item?.startDate} – {item?.end || item?.endDate || "Present"}
                       </span>
                     </div>
-                    <div className="min-w-[10rem] italic text-[0.9rem] font-medium">
-                      <p>
-                        {proj?.startDate} – {proj?.endDate}
-                      </p>
+                    {item?.description && <p style={S.entryDesc}>{item.description}</p>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {internshipDetails.length > 0 && (
+            <section id="section-Internships" style={{ ...S.section, ...highlight("Internships") }}>
+              <h2 style={S.mainLabel(accent)}>
+                <span style={S.labelBar(accent)} /> Internships
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {internshipDetails.map((item, i) => (
+                  <div key={i} style={{ position: "relative", borderLeft: `2px solid ${tint(accent, 0.3)}`, paddingLeft: "16px" }}>
+                    <span style={{ position: "absolute", left: "-5px", top: "4px", height: "8px", width: "8px", borderRadius: "50%", backgroundColor: accent }} />
+                    <div style={S.entryHeadRow}>
+                      <h3 style={S.entryTitle}>
+                        {item?.role}
+                        {item?.company && <span style={S.entrySub}>, {item.company}</span>}
+                      </h3>
+                      <span style={S.entryDate(accent)}>
+                        {item?.start || item?.startDate} – {item?.end || item?.endDate}
+                      </span>
                     </div>
+                    {item?.description && <p style={S.entryDesc}>{item.description}</p>}
                   </div>
-                  <div className="flex m-0 text-[0.9rem] tracking-[0.2rem] leading-[0.9rem] [&_p]:text-[0.9rem] [&_p]:m-0">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: parseIfJson(proj?.description),
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-          </section>
-        )}
+                ))}
+              </div>
+            </section>
+          )}
 
-      {certificatesList?.length > 0 &&
-        certificatesList.some((cert) => cert?.name || cert?.organization) && (
-          <section id="section-Certifications" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Certifications" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
-            <h2>Certificates</h2>
-            {certificatesList.map((cert, i) => (
-              <div className="flex flex-col mb-3 justify-center" key={i}>
-                <div className="flex justify-between m-0 mb-1.5 [&_span]:font-bold [&_span]:text-[1rem]">
-                  <div>
-                    <span>
-                      {cert?.name}
-                      {cert?.organization ? `, ${cert.organization}` : ""}
+          {educationDetails.length > 0 && (
+            <section id="section-Education" style={{ ...S.section, ...highlight("Education") }}>
+              <h2 style={S.mainLabel(accent)}>
+                <span style={S.labelBar(accent)} /> Education
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {educationDetails.map((item, i) => (
+                  <div key={i} style={S.entryHeadRow}>
+                    <h3 style={{ ...S.entryTitle, fontSize: "14.5px" }}>
+                      {item?.type} {item?.school ? `— ${item.school}` : ""}
+                    </h3>
+                    <span style={S.entryDate(accent)}>
+                      {item?.startDate} – {item?.endDate}
                     </span>
                   </div>
-                  <div className="min-w-[10rem] italic text-[0.9rem] font-medium">
-                    <p>
-                      {cert?.issueDate}
-                      {cert?.expiryDate ? ` – ${cert.expiryDate}` : ""}
-                    </p>
-                  </div>
-                </div>
-                {(cert?.credentialId || cert?.credentialUrl) && (
-                  <div className="flex m-0 text-[0.9rem] tracking-[0.2rem] leading-[0.9rem] [&_p]:text-[0.9rem] [&_p]:m-0">
-                    {cert?.credentialId && <p>ID: {cert.credentialId}</p>}
-                    {cert?.credentialUrl && (
-                      <p>
-                        <a
-                          href={cert.credentialUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {cert.credentialUrl}
-                        </a>
-                      </p>
-                    )}
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
-          </section>
-        )}
+            </section>
+          )}
 
-      {volunteeringList?.length > 0 &&
-        volunteeringList.some((v) => v?.organization || v?.volunteering) && (
-          <section id="section-Volunteering" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Volunteering" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
-            <h2>Volunteering</h2>
-            {volunteeringList.map((v, i) => (
-              <div className="flex flex-col mb-3 justify-center" key={i}>
-                <div className="flex justify-between m-0 mb-1.5 [&_span]:font-bold [&_span]:text-[1rem]">
-                  <div>
-                    <span>
-                      {v?.volunteering}
-                      {v?.organization ? `, ${v.organization}` : ""}
-                    </span>
-                    {" -"}
+          {projectDetails.filter((p) => p?.project).length > 0 && (
+            <section id="section-Projects" style={{ ...S.section, ...highlight("Projects") }}>
+              <h2 style={S.mainLabel(accent)}>
+                <span style={S.labelBar(accent)} /> Projects
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {projectDetails.filter((p) => p?.project).map((item, i) => (
+                  <div key={i}>
+                    <div style={S.entryHeadRow}>
+                      <h3 style={S.entryTitle}>
+                        {item.project}
+                        {item?.company && <span style={S.entrySub}> — {item.company}</span>}
+                      </h3>
+                      <span style={S.entryDate(accent)}>
+                        {item?.startDate} {item?.endDate ? `– ${item.endDate}` : ""}
+                      </span>
+                    </div>
+                    <div style={S.entryDesc} dangerouslySetInnerHTML={{ __html: parseIfJson(item?.description) }} />
                   </div>
-                  <div className="min-w-[10rem] italic text-[0.9rem] font-medium">
-                    <p>
-                      {v?.start} – {v?.end}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex m-0 text-[0.9rem] tracking-[0.2rem] leading-[0.9rem] [&_p]:text-[0.9rem] [&_p]:m-0">
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: asHtml(v?.description),
-                    }}
-                  />
-                </div>
+                ))}
               </div>
-            ))}
-          </section>
-        )}
+            </section>
+          )}
 
-      {skillss?.length > 0 && (
-        <section id="section-Skills" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Skills" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
-          <h2>Skills</h2>
-          <ul className="flex flex-wrap gap-16 box-border [&_li]:text-[0.9rem] [&_li]:list-square [&_li]:ml-4">
-            {skillss?.length > 0 &&
-              skillss.map((skill, i) => <li key={i}>{skill}</li>)}
-          </ul>
-        </section>
-      )}
-
-      {lang?.length > 0 && (
-        <section id="section-Languages" className={`transition-all duration-300 rounded-lg p-3 -m-3 mb-3 scroll-mt-8 ${activeSection === "Languages" ? "border border-[#d1d5db] bg-[#f9fafb]" : "border border-transparent"}`}>
-          <h2>Languages</h2>
-          <p>{lang?.length > 0 ? lang.join(", ") : ""}</p>
-        </section>
-      )}
+          {accDetails.filter((a) => a?.accomplishment || a?.description).length > 0 && (
+            <section id="section-Accomplishments" style={{ marginBottom: "8px", ...highlight("Accomplishments") }}>
+              <h2 style={S.mainLabel(accent)}>
+                <span style={S.labelBar(accent)} /> Achievements
+              </h2>
+              <ul style={{ margin: 0, listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "6px" }}>
+                {accDetails.filter((a) => a?.accomplishment || a?.description).map((item, i) => (
+                  <li key={i} style={{ position: "relative", paddingLeft: "16px", fontSize: "14px", lineHeight: 1.55, color: "#333333" }}>
+                    <span style={{ position: "absolute", left: 0, top: "8px", height: "4px", width: "4px", borderRadius: "50%", backgroundColor: accent }} />
+                    <span style={{ fontWeight: 700, color: "#1a1a1a" }}>{item?.accomplishment}</span>
+                    {item?.description ? ` — ${item.description}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 };
 
-export default Template2;
+export default Template8;

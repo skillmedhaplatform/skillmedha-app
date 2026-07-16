@@ -55,7 +55,18 @@ export const useProfileImage = (profileUrl) => {
 
     let isMounted = true;
 
-    const convertImageToBase64 = (url) =>
+    // Student profile photos are typically served from a storage bucket
+    // that doesn't send CORS headers. A plain <img>/background-image
+    // renders such a URL fine, but reading it back out of a canvas (which
+    // is what both this conversion and html2canvas's PDF capture do) is
+    // blocked by the browser as a cross-origin taint. The direct
+    // `crossOrigin="anonymous"` attempt below still gets tried first
+    // (cheap, and works whenever the host does allow CORS), but if it
+    // fails we fall back to this app's own same-origin `/api/proxy-image`
+    // route instead of the broken source URL — fetching cross-origin
+    // bytes server-side has no CORS restriction, so it reliably succeeds
+    // where the browser-side attempt can't.
+    const toDataUrlViaCanvas = (url) =>
       new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -75,34 +86,38 @@ export const useProfileImage = (profileUrl) => {
           }
         };
 
-        img.onerror = () => {
-          fetch(url)
-            .then((response) => response.blob())
-            .then(
-              (blob) =>
-                new Promise((resolveBlob, rejectBlob) => {
-                  const reader = new FileReader();
-                  reader.onloadend = () => resolveBlob(reader.result);
-                  reader.onerror = rejectBlob;
-                  reader.readAsDataURL(blob);
-                })
-            )
-            .then(resolve)
-            .catch(reject);
-        };
-
+        img.onerror = () => reject(new Error("Image failed to load"));
         img.src = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
       });
+
+    const toDataUrlViaProxy = (url) =>
+      fetch(`/api/proxy-image?url=${encodeURIComponent(url)}`)
+        .then((response) => {
+          if (!response.ok) throw new Error("Proxy fetch failed");
+          return response.blob();
+        })
+        .then(
+          (blob) =>
+            new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            })
+        );
+
+    const convertImageToBase64 = (url) =>
+      toDataUrlViaCanvas(url).catch(() => toDataUrlViaProxy(url));
 
     convertImageToBase64(profileUrl)
       .then((value) => {
         if (isMounted) {
-          setProfileBase64(value || profileUrl);
+          setProfileBase64(value || null);
         }
       })
       .catch(() => {
         if (isMounted) {
-          setProfileBase64(profileUrl);
+          setProfileBase64(null);
         }
       });
 

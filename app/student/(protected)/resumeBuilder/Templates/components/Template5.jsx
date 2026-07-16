@@ -25,34 +25,49 @@ const Template1 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
   const certificatesList = useSelector((state) => state.student.student?.data?.certificates) || [];
 
   const convertImageToBase64 = (url) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.naturalWidth || img.width;
-          canvas.height = img.naturalHeight || img.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          resolve(canvas.toDataURL("image/jpeg", 0.95));
-        } catch (error) {
-          reject(error);
-        }
-      };
-      img.onerror = () => {
-        fetch(url)
-          .then((response) => response.blob())
-          .then((blob) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          })
-          .catch(reject);
-      };
-      img.src = url + (url.includes("?") ? "&" : "?") + "t=" + new Date().getTime();
-    });
+    const viaCanvas = () =>
+      new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL("image/jpeg", 0.95));
+          } catch (error) {
+            reject(error);
+          }
+        };
+        img.onerror = () => reject(new Error("Image failed to load"));
+        img.src = url + (url.includes("?") ? "&" : "?") + "t=" + new Date().getTime();
+      });
+
+    // The source URL is typically a storage bucket without CORS headers, so
+    // the direct canvas read above gets tainted and rejects. Fall back to
+    // this app's own same-origin proxy route instead of the raw URL —
+    // fetching the bytes server-side has no CORS restriction, so it
+    // reliably succeeds where the browser-side attempt can't (html2canvas
+    // hits this exact same restriction when generating the downloaded PDF).
+    const viaProxy = () =>
+      fetch(`/api/proxy-image?url=${encodeURIComponent(url)}`)
+        .then((response) => {
+          if (!response.ok) throw new Error("Proxy fetch failed");
+          return response.blob();
+        })
+        .then(
+          (blob) =>
+            new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            })
+        );
+
+    return viaCanvas().catch(() => viaProxy());
   };
 
   useEffect(() => {
@@ -60,13 +75,11 @@ const Template1 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
       setIsImageLoaded(false);
       convertImageToBase64(basicDetails.profile)
         .then((base64) => {
-          if (base64) {
-            setProfileBase64(base64);
-            setIsImageLoaded(true);
-          }
+          setProfileBase64(base64 || null);
+          setIsImageLoaded(true);
         })
         .catch(() => {
-          setProfileBase64(basicDetails.profile);
+          setProfileBase64(null);
           setIsImageLoaded(true);
         });
     }
@@ -139,10 +152,10 @@ const Template1 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
           </h1>
           <div className="flex justify-center flex-wrap gap-x-5 gap-y-1 mt-3 text-[0.9rem] text-[#475569]">
             <a href={`mailto:${basicDetails?.email || ""}`} className="flex items-center gap-1.5 no-underline text-[#475569]">
-              <MailOutlined /> {basicDetails?.email}
+              <MailOutlined /> <span>{basicDetails?.email}</span>
             </a>
             <a href={`tel:${basicDetails?.phone || ""}`} className="flex items-center gap-1.5 no-underline text-[#475569]">
-              <PhoneFilled /> {basicDetails?.phone}
+              <PhoneFilled /> <span>{basicDetails?.phone}</span>
             </a>
             {linkList?.map((link, i) => (
               link?.link ? (

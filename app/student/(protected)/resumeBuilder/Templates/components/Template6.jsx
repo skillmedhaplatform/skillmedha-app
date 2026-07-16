@@ -1,274 +1,270 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { MailOutlined, PhoneFilled, LinkOutlined } from "@ant-design/icons";
-import { useSelector } from "react-redux";
+
+import React from "react";
+import { MailOutlined, PhoneFilled, EnvironmentOutlined, GlobalOutlined, LinkedinFilled } from "@ant-design/icons";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
+import {
+  asHtmlString,
+  normalizeExternalLink,
+  useProfileImage,
+  useResumeTemplateData,
+} from "./resumeTemplateData";
 
 /**
  * Template6 — "Modern Minimalist"
- * Clean two-column layout with minimal styling, professional typography,
- * left sidebar for quick info, right main content area.
+ * Two-column layout: a quiet charcoal sidebar (photo, contact, links,
+ * skills, languages, certifications) beside a white main column carrying
+ * every chronological section (summary, experience, internships,
+ * education, projects, volunteering). Rebuilt on the shared
+ * `useResumeTemplateData`/`useProfileImage` hooks so it gets full field
+ * coverage and the same reliable photo handling as the rest of the set —
+ * the previous version read straight from `useSelector` and silently
+ * dropped internships, volunteering, and profile links.
  */
-const Template6 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeSection, isGeneratingPdf }) => {
-  const resumeRef = useRef(null);
-  const [profileBase64, setProfileBase64] = useState(null);
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-  const basicDetails = useSelector((state) => state.student.student?.data) || {};
-  const educationDetails = useSelector((state) => state.student.student?.data?.educationDetails) || [];
-  const experienceDetails = useSelector((state) => state.student.student?.data?.experiences) || [];
-  const projectDetails = useSelector((state) => state.student.student?.data?.projects) || [];
-  const skillss = useSelector((state) => state.student.student?.data?.technical) || [];
-  const lang = useSelector((state) => state.student.student?.data?.languages) || [];
-  const linkList = useSelector((state) => state.student.student?.data?.links) || [];
-  const volunteeringList = useSelector((state) => state.student.student?.data?.volunteerings) || [];
-  const certificatesList = useSelector((state) => state.student.student?.data?.certificates) || [];
+const ACCENT = "#0f766e";
+const INK = "#111827";
+const SUBTLE = "#6b7280";
 
-  const convertImageToBase64 = (url) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.naturalWidth || img.width;
-          canvas.height = img.naturalHeight || img.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          resolve(canvas.toDataURL("image/jpeg", 0.95));
-        } catch (error) {
-          reject(error);
-        }
-      };
-      img.onerror = () => {
-        fetch(url)
-          .then((response) => response.blob())
-          .then((blob) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          })
-          .catch(reject);
-      };
-      img.src = url + (url.includes("?") ? "&" : "?") + "t=" + new Date().getTime();
-    });
-  };
+const getInitials = (first, last) => `${first?.[0] || ""}${last?.[0] || ""}`.toUpperCase();
 
-  useEffect(() => {
-    if (basicDetails?.profile) {
-      setIsImageLoaded(false);
-      convertImageToBase64(basicDetails.profile)
-        .then((base64) => {
-          if (base64) {
-            setProfileBase64(base64);
-            setIsImageLoaded(true);
-          }
-        })
-        .catch(() => {
-          setProfileBase64(basicDetails.profile);
-          setIsImageLoaded(true);
-        });
-    }
-  }, [basicDetails?.profile]);
+const Template6 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
+  const {
+    basicDetails,
+    educationDetails,
+    workExperience,
+    internshipDetails,
+    projectDetails,
+    certificates,
+    skills,
+    languages,
+    links,
+    volunteerings,
+  } = useResumeTemplateData();
+  const profileBase64 = useProfileImage(basicDetails?.profile);
 
-  const filterQuotes = (text) => {
-    try {
-      if (text[0] == '"') return text?.slice(1, -1);
-      return text;
-    } catch (error) {
-      return text;
-    }
-  };
+  const profileLinks = links.filter((item) => item?.link);
+  const linkIcons = [<LinkedinFilled key="li" />, <GlobalOutlined key="gl" />];
 
-  const asHtml = (val) => {
-    if (!val) return "";
-    return typeof val === "string" ? filterQuotes(val) : filterQuotes(String(val));
-  };
+  const sectionState = (sectionName) =>
+    activeSection === sectionName ? "bg-[#f0fdfa] rounded-md" : "";
 
-  const handleDownloadPdf = async () => {
-    if (!resumeRef.current) return;
-    try {
-      if (!isImageLoaded) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-      const html2canvas = (await import("html2canvas")).default;
-      const jsPDF = (await import("jspdf")).jsPDF;
+  const SideTitle = ({ children }) => (
+    <h2 className="m-0 mb-2 text-[0.72rem] font-bold uppercase tracking-[0.16em] text-[#5eead4] border-b border-[rgba(255,255,255,0.15)] pb-1.5">
+      {children}
+    </h2>
+  );
 
-      let canvas;
-      try {
-        canvas = await html2canvas(resumeRef.current, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          logging: false,
-          backgroundColor: "#ffffff",
-        });
-      } catch (canvasErr) {
-        console.error("html2canvas failed:", canvasErr);
-        throw canvasErr;
-      }
+  const MainTitle = ({ children }) => (
+    <h2 className="m-0 mb-3 text-[0.92rem] font-bold uppercase tracking-[0.08em] text-[#111827] border-b-2 pb-1.5" style={{ borderColor: ACCENT }}>
+      {children}
+    </h2>
+  );
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "in",
-        format: "a4",
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
-      const pdfBlob = pdf.output("blob");
-
-      const downloadUrl = URL.createObjectURL(pdfBlob);
-      const anchor = document.createElement("a");
-      anchor.href = downloadUrl;
-      anchor.download = "resume.pdf";
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(downloadUrl);
-    } catch (err) {
-      console.error("PDF export failed:", err);
-    } finally {
-      setDownloadImage(false);
-    }
-  };
-
-  useEffect(() => {
-    if (downloadImage && isImageLoaded) {
-      handleDownloadPdf();
-    }
-  }, [downloadImage, isImageLoaded]);
-
-  const sectionCls = (name) =>
-    `transition-all duration-300 rounded-lg p-3 -m-3 mb-4 scroll-mt-8 ${
-      activeSection === name ? "border-l-4 border-[#1e40af] bg-[#f0f4ff]" : "border-l-4 border-transparent"
-    }`;
+  const dateRange = (item) =>
+    `${item?.start || item?.startDate || ""} – ${item?.end || item?.endDate || "Present"}`;
 
   return (
     <div
-      className={`${(downloadImage || isGeneratingPdf) ? "w-[794px] max-w-[794px] min-h-[1123px]" : "w-full max-w-full"} h-auto mx-auto overflow-visible bg-white shadow-xl font-['Segoe UI',sans-serif] text-[#2c3e50] grid grid-cols-[12rem_1fr] [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-[#e0e0e0]`}
-      ref={downloadImage ? resumeRef : resumeTemplateRef}
+      ref={resumeTemplateRef}
+      className={`${isGeneratingPdf ? "w-[50rem] max-w-[50rem]" : "w-full max-w-full"} mx-auto overflow-y-scroll bg-white font-['Inter',sans-serif] text-[#374151] grid grid-cols-1 md:grid-cols-[14rem_1fr] [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-thumb]:bg-transparent [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_li]:text-[0.85rem] [&_li]:leading-6`}
     >
-      {/* Left Sidebar */}
-      <div className="bg-[#f8f9fa] p-5 border-r border-[#e0e0e0] flex flex-col gap-5">
-        <div id="section-Basic-Details" className="text-center">
-          {profileBase64 && (
-            <img
-              width="100"
-              height="100"
-              src={profileBase64}
-              alt="profile"
-              className="w-24 h-24 rounded-lg object-cover mx-auto mb-3 border border-[#d0d0d0]"
-            />
-          )}
-          <h1 className="text-[1.1rem] font-bold text-[#1e3a8a] m-0 leading-tight">
-            {basicDetails?.firstName} {basicDetails?.lastName}
+      {/* Sidebar */}
+      <div className="bg-[#1f2937] p-6 flex flex-col gap-6">
+        <div id="section-Basic-Details" className={`p-2 -m-2 scroll-mt-8 flex flex-col items-center text-center gap-3 ${sectionState("Basic Details")}`}>
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-[rgba(255,255,255,0.1)] flex items-center justify-center text-xl font-bold text-white shrink-0 border-2 border-[rgba(255,255,255,0.15)]">
+            {profileBase64 ? (
+              <img src={profileBase64} alt="profile" className="w-full h-full object-cover" />
+            ) : (
+              getInitials(basicDetails?.firstName, basicDetails?.lastName)
+            )}
+          </div>
+          <h1 className="m-0 text-[1.1rem] font-bold text-white leading-tight">
+            {basicDetails?.firstName} {basicDetails?.middleName} {basicDetails?.lastName}
           </h1>
-          <p className="text-[0.75rem] text-[#666] m-0 mt-0.5">{basicDetails?.middleName}</p>
+          {workExperience?.[0]?.role && (
+            <p className="m-0 text-[0.75rem] font-medium text-[#5eead4]">{workExperience[0].role}</p>
+          )}
         </div>
 
-        <div className="border-t border-[#e0e0e0] pt-3">
-          <h3 className="text-[0.7rem] font-bold uppercase tracking-widest text-[#1e40af] mb-2">Contact</h3>
-          <div className="flex flex-col gap-1.5 text-[0.75rem]">
-            <a href={`mailto:${basicDetails?.email || ""}`} className="text-[#0066cc] no-underline break-all hover:underline">
-              {basicDetails?.email}
-            </a>
-            <a href={`tel:${basicDetails?.phone || ""}`} className="text-[#0066cc] no-underline break-all hover:underline">
-              {basicDetails?.phone}
-            </a>
+        <div>
+          <SideTitle>Contact</SideTitle>
+          <div className="flex flex-col gap-2.5">
+            {basicDetails?.email && (
+              <a href={`mailto:${basicDetails.email}`} className="flex items-center gap-2 no-underline text-[0.78rem] text-[#e5e7eb] break-all">
+                <MailOutlined className="text-[#5eead4]" /> <span>{basicDetails.email}</span>
+              </a>
+            )}
+            {basicDetails?.phone && (
+              <a href={`tel:${basicDetails.phone}`} className="flex items-center gap-2 no-underline text-[0.78rem] text-[#e5e7eb]">
+                <PhoneFilled className="text-[#5eead4]" /> <span>{basicDetails.phone}</span>
+              </a>
+            )}
+            {basicDetails?.city && (
+              <span className="flex items-center gap-2 text-[0.78rem] text-[#e5e7eb]">
+                <EnvironmentOutlined className="text-[#5eead4]" /> <span>{basicDetails.city}</span>
+              </span>
+            )}
+            {profileLinks.slice(0, 2).map((item, index) => (
+              <a
+                key={index}
+                href={normalizeExternalLink(item.link)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 no-underline text-[0.78rem] text-[#e5e7eb] break-all"
+              >
+                {linkIcons[index] || <GlobalOutlined className="text-[#5eead4]" />} <span>{item.title || item.link}</span>
+              </a>
+            ))}
           </div>
         </div>
 
-        {skillss?.length > 0 && (
-          <div id="section-Skills" className="border-t border-[#e0e0e0] pt-3">
-            <h3 className="text-[0.7rem] font-bold uppercase tracking-widest text-[#1e40af] mb-2">Skills</h3>
-            <ul className="flex flex-col gap-1 list-none p-0 m-0">
-              {skillss.map((skill, i) => (
-                <li key={i} className="text-[0.75rem] text-[#444]">• {skill}</li>
+        {skills.filter(Boolean).length > 0 && (
+          <div id="section-Skills" className={`p-2 -m-2 scroll-mt-8 ${sectionState("Skills")}`}>
+            <SideTitle>Skills</SideTitle>
+            <div className="flex flex-wrap gap-1.5">
+              {skills.filter(Boolean).map((skill, index) => (
+                <span key={index} className="text-[0.72rem] font-medium text-white bg-[rgba(255,255,255,0.1)] rounded-full px-2.5 py-1">
+                  {skill}
+                </span>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
-        {lang?.length > 0 && (
-          <div id="section-Languages" className="border-t border-[#e0e0e0] pt-3">
-            <h3 className="text-[0.7rem] font-bold uppercase tracking-widest text-[#1e40af] mb-2">Languages</h3>
-            <p className="text-[0.75rem] text-[#444] m-0">{lang.join(", ")}</p>
+        {languages.filter(Boolean).length > 0 && (
+          <div id="section-Languages" className={`p-2 -m-2 scroll-mt-8 ${sectionState("Languages")}`}>
+            <SideTitle>Languages</SideTitle>
+            <p className="m-0 text-[0.78rem] text-[#e5e7eb] leading-6">
+              {languages.filter(Boolean).map((l) => (typeof l === "object" && l !== null ? l.name : l)).join(", ")}
+            </p>
+          </div>
+        )}
+
+        {certificates.filter((c) => c?.name || c?.organization).length > 0 && (
+          <div id="section-Certifications" className={`p-2 -m-2 scroll-mt-8 ${sectionState("Certifications")}`}>
+            <SideTitle>Certifications</SideTitle>
+            <div className="flex flex-col gap-2">
+              {certificates.filter((c) => c?.name || c?.organization).map((item, index) => (
+                <div key={index}>
+                  <p className="m-0 text-[0.78rem] font-semibold text-white">{item?.name}</p>
+                  <p className="m-0 text-[0.72rem] text-[#9ca3af]">{item?.organization}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Main Content */}
-      <div className="p-6 [&_section]:mb-4 [&_section_h2]:text-[0.95rem] [&_section_h2]:font-bold [&_section_h2]:uppercase [&_section_h2]:tracking-widest [&_section_h2]:border-b-2 [&_section_h2]:border-[#1e40af] [&_section_h2]:pb-2 [&_section_h2]:mb-3 [&_section_h2]:text-[#1e3a8a] [&_section_p]:text-[0.85rem] [&_section_p]:leading-relaxed">
+      {/* Main column */}
+      <div className="p-8 space-y-6">
         {basicDetails?.professionalSummary && (
-          <section id="section-Summary" className={sectionCls("Summary")}>
-            <h2>Professional Summary</h2>
-            <div className="text-[0.85rem] leading-relaxed">
-              <div dangerouslySetInnerHTML={{ __html: filterQuotes(basicDetails?.professionalSummary) }} />
+          <section>
+            <MainTitle>Summary</MainTitle>
+            <div
+              className="text-[0.85rem] leading-6 text-[#374151]"
+              dangerouslySetInnerHTML={{ __html: asHtmlString(basicDetails.professionalSummary) }}
+            />
+          </section>
+        )}
+
+        {workExperience.length > 0 && (
+          <section id="section-Experience" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Experience")}`}>
+            <MainTitle>Experience</MainTitle>
+            <div className="space-y-4">
+              {workExperience.map((item, index) => (
+                <div key={index}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <h3 className="m-0 text-[0.92rem] font-bold" style={{ color: INK }}>
+                      {item?.role}
+                      {item?.company && <span className="font-normal" style={{ color: SUBTLE }}>, {item.company}</span>}
+                    </h3>
+                    <span className="text-[0.78rem] font-semibold whitespace-nowrap" style={{ color: ACCENT }}>{dateRange(item)}</span>
+                  </div>
+                  {item?.description && (
+                    <div className="mt-1 text-[0.83rem] leading-6" dangerouslySetInnerHTML={{ __html: asHtmlString(item.description) }} />
+                  )}
+                </div>
+              ))}
             </div>
           </section>
         )}
 
-        {experienceDetails?.filter((e) => e?.type?.toLowerCase() == "work")?.filter((e) => e?.company)?.length > 0 && (
-          <section id="section-Experience" className={sectionCls("Experience")}>
-            <h2>Work Experience</h2>
-            {experienceDetails?.filter((e) => e?.type == "work").map((job, i) => (
-              <div className="mb-3" key={i}>
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <span className="font-bold text-[0.9rem] text-[#1e3a8a]">{job?.role}</span>
-                  <span className="text-[0.75rem] text-[#666]">
-                    {job?.start || job?.startDate} – {job?.end || job?.endDate}
+        {internshipDetails.length > 0 && (
+          <section id="section-Internships" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Internships")}`}>
+            <MainTitle>Internships</MainTitle>
+            <div className="space-y-4">
+              {internshipDetails.map((item, index) => (
+                <div key={index}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <h3 className="m-0 text-[0.92rem] font-bold" style={{ color: INK }}>
+                      {item?.role}
+                      {item?.company && <span className="font-normal" style={{ color: SUBTLE }}>, {item.company}</span>}
+                    </h3>
+                    <span className="text-[0.78rem] font-semibold whitespace-nowrap" style={{ color: ACCENT }}>{dateRange(item)}</span>
+                  </div>
+                  {item?.description && (
+                    <div className="mt-1 text-[0.83rem] leading-6" dangerouslySetInnerHTML={{ __html: asHtmlString(item.description) }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {projectDetails.filter((p) => p?.project).length > 0 && (
+          <section id="section-Projects" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Projects")}`}>
+            <MainTitle>Projects</MainTitle>
+            <div className="space-y-4">
+              {projectDetails.filter((p) => p?.project).map((item, index) => (
+                <div key={index}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <h3 className="m-0 text-[0.92rem] font-bold" style={{ color: INK }}>
+                      {item.project}
+                      {item?.company && <span className="font-normal" style={{ color: SUBTLE }}> — {item.company}</span>}
+                    </h3>
+                    <span className="text-[0.78rem] font-semibold whitespace-nowrap" style={{ color: ACCENT }}>
+                      {item?.startDate} {item?.endDate ? `– ${item.endDate}` : ""}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-[0.83rem] leading-6" dangerouslySetInnerHTML={{ __html: parseIfJson(item?.description) }} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {educationDetails.length > 0 && (
+          <section id="section-Education" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Education")}`}>
+            <MainTitle>Education</MainTitle>
+            <div className="space-y-2">
+              {educationDetails.map((item, index) => (
+                <div key={index} className="flex flex-wrap items-baseline justify-between gap-x-3">
+                  <h3 className="m-0 text-[0.88rem] font-bold" style={{ color: INK }}>
+                    {item?.type}{item?.school ? `, ${item.school}` : ""}
+                  </h3>
+                  <span className="text-[0.78rem] font-semibold whitespace-nowrap" style={{ color: ACCENT }}>
+                    {item?.startDate} – {item?.endDate}
                   </span>
                 </div>
-                <p className="text-[0.8rem] text-[#555] m-0 italic">{job?.company}</p>
-                <p className="text-[0.8rem] leading-relaxed m-0 mt-0.5">{job?.description}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </section>
         )}
 
-        {educationDetails?.length > 0 && (
-          <section id="section-Education" className={sectionCls("Education")}>
-            <h2>Education</h2>
-            {educationDetails?.map((edu, i) => (
-              <div className="mb-2.5" key={i}>
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <span className="font-bold text-[0.9rem] text-[#1e3a8a]">{edu?.type}</span>
-                  <span className="text-[0.75rem] text-[#666]">{edu?.startDate} – {edu?.endDate}</span>
+        {volunteerings.filter((v) => v?.organization || v?.volunteering).length > 0 && (
+          <section id="section-Volunteering" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Volunteering")}`}>
+            <MainTitle>Volunteering</MainTitle>
+            <div className="space-y-3">
+              {volunteerings.filter((v) => v?.organization || v?.volunteering).map((item, index) => (
+                <div key={index}>
+                  <p className="m-0 text-[0.85rem] font-semibold" style={{ color: INK }}>
+                    {item?.volunteering}{item?.organization ? `, ${item.organization}` : ""}
+                  </p>
+                  <div className="mt-1 text-[0.82rem] leading-6" style={{ color: SUBTLE }} dangerouslySetInnerHTML={{ __html: asHtmlString(item?.description) }} />
                 </div>
-                <p className="text-[0.8rem] m-0">{edu?.school} | {edu?.grade}{edu?.gradeType ? (edu?.gradeType == "percentage" ? "%" : "/10") : ""}</p>
-              </div>
-            ))}
-          </section>
-        )}
-
-        {projectDetails?.filter((e) => e?.project)?.length > 0 && (
-          <section id="section-Projects" className={sectionCls("Projects")}>
-            <h2>Projects</h2>
-            {projectDetails?.map((proj, i) => (
-              <div className="mb-2.5" key={i}>
-                <span className="font-bold text-[0.9rem] text-[#1e3a8a]">{proj?.project}</span>
-                {proj?.company && <p className="text-[0.8rem] text-[#666] m-0 italic">{proj?.company}</p>}
-                <div className="text-[0.8rem] leading-relaxed mt-1" dangerouslySetInnerHTML={{ __html: parseIfJson(proj?.description) }} />
-              </div>
-            ))}
-          </section>
-        )}
-
-        {certificatesList?.some((c) => c?.name || c?.organization) && (
-          <section id="section-Certifications" className={sectionCls("Certifications")}>
-            <h2>Certifications</h2>
-            {certificatesList.map((cert, i) => (
-              <div key={i} className="mb-1.5">
-                <p className="text-[0.85rem] font-semibold text-[#1e3a8a] m-0">{cert?.name}</p>
-                <p className="text-[0.75rem] text-[#666] m-0">{cert?.organization}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </section>
         )}
       </div>

@@ -1,293 +1,219 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { MailOutlined, PhoneFilled } from "@ant-design/icons";
-import { useSelector } from "react-redux";
+
+import React from "react";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
+import {
+  asHtmlString,
+  normalizeExternalLink,
+  useResumeTemplateData,
+} from "./resumeTemplateData";
 
 /**
- * Template7 — "Creative Accent"
- * Modern layout with colored accent elements, clean typography,
- * colored section headers and skill badges.
+ * Template15 — "Classic Green Serif" (Richard Williams style)
+ * Centered bold serif name in a deep green, italic professional summary,
+ * green uppercase section headers with a thin rule, right-aligned
+ * company/location and role/dates rows.
+ *
+ * Font note: for the exact look, load "PT Serif" or "Merriweather" for
+ * the name/headings — falls back to Georgia otherwise.
  */
-const Template7 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeSection, isGeneratingPdf }) => {
-  const resumeRef = useRef(null);
-  const [profileBase64, setProfileBase64] = useState(null);
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
+const Template15 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
+  const {
+    basicDetails,
+    educationDetails,
+    workExperience,
+    internshipDetails,
+    projectDetails,
+    volunteerings,
+    skills,
+    languages,
+    links,
+  } = useResumeTemplateData();
 
-  const basicDetails = useSelector((state) => state.student.student?.data) || {};
-  const educationDetails = useSelector((state) => state.student.student?.data?.educationDetails) || [];
-  const experienceDetails = useSelector((state) => state.student.student?.data?.experiences) || [];
-  const projectDetails = useSelector((state) => state.student.student?.data?.projects) || [];
-  const skillss = useSelector((state) => state.student.student?.data?.technical) || [];
-  const lang = useSelector((state) => state.student.student?.data?.languages) || [];
-  const linkList = useSelector((state) => state.student.student?.data?.links) || [];
-  const volunteeringList = useSelector((state) => state.student.student?.data?.volunteerings) || [];
-  const certificatesList = useSelector((state) => state.student.student?.data?.certificates) || [];
+  const sectionState = (sectionName) =>
+    activeSection === sectionName ? "bg-[#f0fdf4] rounded-md" : "";
 
-  const convertImageToBase64 = (url) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.naturalWidth || img.width;
-          canvas.height = img.naturalHeight || img.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          resolve(canvas.toDataURL("image/jpeg", 0.95));
-        } catch (error) {
-          reject(error);
-        }
-      };
-      img.onerror = () => {
-        fetch(url)
-          .then((response) => response.blob())
-          .then((blob) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          })
-          .catch(reject);
-      };
-      img.src = url + (url.includes("?") ? "&" : "?") + "t=" + new Date().getTime();
-    });
-  };
-
-  useEffect(() => {
-    if (basicDetails?.profile) {
-      setIsImageLoaded(false);
-      convertImageToBase64(basicDetails.profile)
-        .then((base64) => {
-          if (base64) {
-            setProfileBase64(base64);
-            setIsImageLoaded(true);
-          }
-        })
-        .catch(() => {
-          setProfileBase64(basicDetails.profile);
-          setIsImageLoaded(true);
-        });
-    }
-  }, [basicDetails?.profile]);
-
-  const filterQuotes = (text) => {
-    try {
-      if (text[0] == '"') return text?.slice(1, -1);
-      return text;
-    } catch (error) {
-      return text;
-    }
-  };
-
-  const asHtml = (val) => {
-    if (!val) return "";
-    return typeof val === "string" ? filterQuotes(val) : filterQuotes(String(val));
-  };
-
-  const handleDownloadPdf = async () => {
-    if (!resumeRef.current) return;
-    try {
-      if (!isImageLoaded) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-      const html2canvas = (await import("html2canvas")).default;
-      const jsPDF = (await import("jspdf")).jsPDF;
-
-      let canvas;
-      try {
-        canvas = await html2canvas(resumeRef.current, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          logging: false,
-          backgroundColor: "#ffffff",
-        });
-      } catch (canvasErr) {
-        console.error("html2canvas failed:", canvasErr);
-        throw canvasErr;
-      }
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "in",
-        format: "a4",
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
-      const pdfBlob = pdf.output("blob");
-
-      const downloadUrl = URL.createObjectURL(pdfBlob);
-      const anchor = document.createElement("a");
-      anchor.href = downloadUrl;
-      anchor.download = "resume.pdf";
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(downloadUrl);
-    } catch (err) {
-      console.error("PDF export failed:", err);
-    } finally {
-      setDownloadImage(false);
-    }
-  };
-
-  useEffect(() => {
-    if (downloadImage && isImageLoaded) {
-      handleDownloadPdf();
-    }
-  }, [downloadImage, isImageLoaded]);
-
-  const sectionCls = (name) =>
-    `transition-all duration-300 rounded-lg p-3 -m-3 mb-4 scroll-mt-8 ${
-      activeSection === name ? "border-l-4 border-[#d97706] bg-[#fffbeb]" : "border-l-4 border-transparent"
-    }`;
+  const SectionTitle = ({ children }) => (
+    <div className="mb-3">
+      <h2 className="m-0 text-[0.92rem] font-bold uppercase tracking-[0.08em] text-[#166534]">{children}</h2>
+      <div className="mt-1 h-px w-full bg-[#166534]" />
+    </div>
+  );
 
   return (
     <div
-      className={`${(downloadImage || isGeneratingPdf) ? "w-[794px] max-w-[794px] min-h-[1123px]" : "w-full max-w-full"} h-auto mx-auto overflow-visible bg-white shadow-xl font-['Poppins',sans-serif] text-[#3a4a5c] [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-track]:bg-white [&::-webkit-scrollbar-thumb]:bg-[#e5e7eb]`}
-      ref={downloadImage ? resumeRef : resumeTemplateRef}
+      ref={resumeTemplateRef}
+      className={`${isGeneratingPdf ? "w-[50rem] max-w-[50rem]" : "w-full max-w-full"} mx-auto overflow-y-scroll bg-white px-12 py-10 font-['Georgia',serif] text-[#1c1917] [&::-webkit-scrollbar]:w-[1px] [&::-webkit-scrollbar-thumb]:bg-transparent [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_li]:font-['Inter',sans-serif] [&_li]:text-[0.87rem] [&_li]:leading-6`}
     >
-      {/* Header with gradient background */}
-      <div className="bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white p-8 mb-2">
-        <div className="flex items-start gap-6 mb-4">
-          {profileBase64 && (
-            <img
-              width="90"
-              height="90"
-              src={profileBase64}
-              alt="profile"
-              className="w-24 h-24 rounded-full object-cover border-4 border-white/30"
-            />
+      <header
+        id="section-Basic-Details"
+        className={`text-center pb-5 p-4 -m-4 scroll-mt-8 ${sectionState("Basic Details")}`}
+      >
+        <h1 className="m-0 text-[1.9rem] font-bold text-[#166534]">
+          {basicDetails?.firstName} {basicDetails?.middleName} {basicDetails?.lastName}
+        </h1>
+        <div className="mt-2 h-px w-full bg-[#166534]" />
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[0.85rem] font-['Inter',sans-serif] text-[#44403c]">
+          {basicDetails?.city && <span>{basicDetails.city}</span>}
+          {basicDetails?.phone && (
+            <>
+              <span>·</span>
+              <a href={`tel:${basicDetails.phone}`} className="no-underline text-[#44403c]">{basicDetails.phone}</a>
+            </>
           )}
-          <div id="section-Basic-Details" className="flex-1">
-            <h1 className="text-[2rem] font-bold m-0 leading-tight">
-              {basicDetails?.firstName} {basicDetails?.lastName}
-            </h1>
-            <p className="text-[0.95rem] text-white/80 m-0 mt-1">{basicDetails?.middleName}</p>
-            <div className="flex flex-wrap gap-4 mt-3">
-              <a href={`mailto:${basicDetails?.email || ""}`} className="flex items-center gap-1.5 text-white/90 no-underline text-[0.9rem]">
-                <MailOutlined /> {basicDetails?.email}
-              </a>
-              <a href={`tel:${basicDetails?.phone || ""}`} className="flex items-center gap-1.5 text-white/90 no-underline text-[0.9rem]">
-                <PhoneFilled /> {basicDetails?.phone}
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {linkList?.length > 0 && (
-          <div className="flex flex-wrap gap-4">
-            {linkList.map((link, i) => (
+          {basicDetails?.email && (
+            <>
+              <span>·</span>
+              <a href={`mailto:${basicDetails.email}`} className="no-underline text-[#44403c]">{basicDetails.email}</a>
+            </>
+          )}
+          {links.filter((item) => item?.link).slice(0, 2).map((item, index) => (
+            <React.Fragment key={index}>
+              <span>·</span>
               <a
-                key={i}
-                href={link?.link ? (link.link.startsWith("http") ? link.link : `https://${link.link}`) : "#"}
+                href={normalizeExternalLink(item.link)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/80 no-underline text-[0.85rem] hover:text-white"
+                className="no-underline text-[#44403c] break-all"
               >
-                {link?.title || link?.link}
+                {item.title || item.link}
               </a>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Main Content */}
-      <div className="px-8 pb-8">
+            </React.Fragment>
+          ))}
+        </div>
         {basicDetails?.professionalSummary && (
-          <section id="section-Summary" className={sectionCls("Summary")}>
-            <h2 className="text-[1.1rem] font-bold text-[#2563eb] uppercase tracking-wide border-b-2 border-[#dbeafe] pb-2 mb-3">Summary</h2>
-            <div className="text-[0.9rem] leading-relaxed text-[#555]">
-              <div dangerouslySetInnerHTML={{ __html: filterQuotes(basicDetails?.professionalSummary) }} />
-            </div>
-          </section>
+          <div
+            className="mt-3 text-[0.88rem] italic leading-6 font-['Inter',sans-serif] text-[#3f3f46]"
+            dangerouslySetInnerHTML={{ __html: asHtmlString(basicDetails.professionalSummary) }}
+          />
         )}
+      </header>
 
-        {experienceDetails?.filter((e) => e?.type?.toLowerCase() == "work")?.filter((e) => e?.company)?.length > 0 && (
-          <section id="section-Experience" className={sectionCls("Experience")}>
-            <h2 className="text-[1.1rem] font-bold text-[#d97706] uppercase tracking-wide border-b-2 border-[#fef3c7] pb-2 mb-3">Work Experience</h2>
-            {experienceDetails?.filter((e) => e?.type == "work").map((job, i) => (
-              <div className="mb-4" key={i}>
-                <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-bold text-[0.95rem] text-[#1f2937]">{job?.role}</span>
-                  <span className="text-[0.8rem] text-[#9ca3af] font-medium">
-                    {job?.start || job?.startDate} – {job?.end || job?.endDate}
-                  </span>
+      <div className="space-y-6">
+        {workExperience.length > 0 && (
+          <section id="section-Experience" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Experience")}`}>
+            <SectionTitle>Professional Experience</SectionTitle>
+            <div className="space-y-4">
+              {workExperience.map((item, index) => (
+                <div key={index}>
+                  <div className="flex flex-wrap justify-between gap-x-4">
+                    <h3 className="m-0 text-[0.95rem] font-bold uppercase text-[#1c1917]">{item?.company}</h3>
+                    {item?.city && <p className="m-0 text-[0.85rem] font-bold text-[#1c1917]">{item.city}</p>}
+                  </div>
+                  <div className="flex flex-wrap justify-between gap-x-4">
+                    <p className="m-0 text-[0.85rem] italic font-['Inter',sans-serif] text-[#57534e]">{item?.role}</p>
+                    <p className="m-0 text-[0.82rem] italic font-['Inter',sans-serif] text-[#57534e] whitespace-nowrap">
+                      {item?.start || item?.startDate} – {item?.end || item?.endDate || "Present"}
+                    </p>
+                  </div>
+                  {item?.description && (
+                    <div className="mt-1.5 font-['Inter',sans-serif]" dangerouslySetInnerHTML={{ __html: asHtmlString(item.description) }} />
+                  )}
                 </div>
-                <p className="text-[0.85rem] text-[#666] m-0 mb-1 italic">{job?.company}</p>
-                <p className="text-[0.9rem] leading-relaxed m-0 text-[#555]">{job?.description}</p>
-              </div>
-            ))}
-          </section>
-        )}
-
-        {educationDetails?.length > 0 && (
-          <section id="section-Education" className={sectionCls("Education")}>
-            <h2 className="text-[1.1rem] font-bold text-[#10b981] uppercase tracking-wide border-b-2 border-[#d1fae5] pb-2 mb-3">Education</h2>
-            {educationDetails?.map((edu, i) => (
-              <div className="mb-3" key={i}>
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <span className="font-bold text-[0.95rem] text-[#1f2937]">{edu?.type}</span>
-                  <span className="text-[0.8rem] text-[#9ca3af] font-medium">{edu?.startDate} – {edu?.endDate}</span>
-                </div>
-                <p className="text-[0.9rem] m-0 text-[#555]">{edu?.school} • {edu?.grade}{edu?.gradeType ? (edu?.gradeType == "percentage" ? "%" : "/10") : ""}</p>
-              </div>
-            ))}
-          </section>
-        )}
-
-        {skillss?.length > 0 && (
-          <section id="section-Skills" className={sectionCls("Skills")}>
-            <h2 className="text-[1.1rem] font-bold text-[#f59e0b] uppercase tracking-wide border-b-2 border-[#fef3c7] pb-2 mb-3">Skills</h2>
-            <div className="flex flex-wrap gap-2">
-              {skillss.map((skill, i) => (
-                <span
-                  key={i}
-                  className="text-[0.85rem] font-medium px-3 py-1.5 rounded-full bg-gradient-to-r from-[#dbeafe] to-[#ede9fe] text-[#1e40af]"
-                >
-                  {skill}
-                </span>
               ))}
             </div>
           </section>
         )}
 
-        {projectDetails?.filter((e) => e?.project)?.length > 0 && (
-          <section id="section-Projects" className={sectionCls("Projects")}>
-            <h2 className="text-[1.1rem] font-bold text-[#8b5cf6] uppercase tracking-wide border-b-2 border-[#ede9fe] pb-2 mb-3">Projects</h2>
-            {projectDetails?.map((proj, i) => (
-              <div className="mb-3" key={i}>
-                <span className="font-bold text-[0.95rem] text-[#1f2937]">{proj?.project}</span>
-                {proj?.company && <p className="text-[0.85rem] text-[#666] m-0 italic">{proj?.company}</p>}
-                <div className="text-[0.9rem] leading-relaxed mt-1 text-[#555]" dangerouslySetInnerHTML={{ __html: parseIfJson(proj?.description) }} />
-              </div>
-            ))}
+        {internshipDetails.length > 0 && (
+          <section id="section-Internships" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Internships")}`}>
+            <SectionTitle>Internships</SectionTitle>
+            <div className="space-y-4">
+              {internshipDetails.map((item, index) => (
+                <div key={index}>
+                  <div className="flex flex-wrap justify-between gap-x-4">
+                    <h3 className="m-0 text-[0.95rem] font-bold uppercase text-[#1c1917]">{item?.company}</h3>
+                    {item?.city && <p className="m-0 text-[0.85rem] font-bold text-[#1c1917]">{item.city}</p>}
+                  </div>
+                  <div className="flex flex-wrap justify-between gap-x-4">
+                    <p className="m-0 text-[0.85rem] italic font-['Inter',sans-serif] text-[#57534e]">{item?.role}</p>
+                    <p className="m-0 text-[0.82rem] italic font-['Inter',sans-serif] text-[#57534e] whitespace-nowrap">
+                      {item?.start || item?.startDate} – {item?.end || item?.endDate || "Present"}
+                    </p>
+                  </div>
+                  {item?.description && (
+                    <div className="mt-1.5 font-['Inter',sans-serif]" dangerouslySetInnerHTML={{ __html: asHtmlString(item.description) }} />
+                  )}
+                </div>
+              ))}
+            </div>
           </section>
         )}
 
-        {lang?.length > 0 && (
-          <section id="section-Languages" className={sectionCls("Languages")}>
-            <h2 className="text-[1.1rem] font-bold text-[#06b6d4] uppercase tracking-wide border-b-2 border-[#cffafe] pb-2 mb-3">Languages</h2>
-            <p className="text-[0.9rem] text-[#555] m-0">{lang.join(" • ")}</p>
+        {projectDetails.filter((item) => item?.project).length > 0 && (
+          <section id="section-Projects" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Projects")}`}>
+            <SectionTitle>Projects</SectionTitle>
+            <div className="space-y-4">
+              {projectDetails.filter((item) => item?.project).map((item, index) => (
+                <div key={index}>
+                  <div className="flex flex-wrap justify-between gap-x-4">
+                    <h3 className="m-0 text-[0.95rem] font-bold uppercase text-[#1c1917]">{item.project}</h3>
+                    <p className="m-0 text-[0.82rem] italic font-['Inter',sans-serif] text-[#57534e] whitespace-nowrap">
+                      {item?.startDate} {item?.endDate ? `– ${item.endDate}` : ""}
+                    </p>
+                  </div>
+                  {item?.company && <p className="m-0 text-[0.85rem] italic font-['Inter',sans-serif] text-[#57534e]">{item.company}</p>}
+                  <div className="mt-1.5 font-['Inter',sans-serif]" dangerouslySetInnerHTML={{ __html: parseIfJson(item?.description) }} />
+                </div>
+              ))}
+            </div>
           </section>
         )}
 
-        {certificatesList?.some((c) => c?.name || c?.organization) && (
-          <section id="section-Certifications" className={sectionCls("Certifications")}>
-            <h2 className="text-[1.1rem] font-bold text-[#ec4899] uppercase tracking-wide border-b-2 border-[#fce7f3] pb-2 mb-3">Certifications</h2>
-            {certificatesList.map((cert, i) => (
-              <div key={i} className="mb-2">
-                <p className="text-[0.95rem] font-semibold text-[#1f2937] m-0">{cert?.name}</p>
-                <p className="text-[0.85rem] text-[#666] m-0">{cert?.organization}</p>
-              </div>
-            ))}
+        {educationDetails.length > 0 && (
+          <section id="section-Education" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Education")}`}>
+            <SectionTitle>Education</SectionTitle>
+            <div className="space-y-3">
+              {educationDetails.map((item, index) => (
+                <div key={index}>
+                  <div className="flex flex-wrap justify-between gap-x-4">
+                    <h3 className="m-0 text-[0.95rem] font-bold uppercase text-[#1c1917]">{item?.school || item?.board}</h3>
+                    {item?.city && <p className="m-0 text-[0.85rem] font-bold text-[#1c1917]">{item.city}</p>}
+                  </div>
+                  <div className="flex flex-wrap justify-between gap-x-4">
+                    <p className="m-0 text-[0.85rem] italic font-['Inter',sans-serif] text-[#57534e]">{item?.type}</p>
+                    <p className="m-0 text-[0.82rem] italic font-['Inter',sans-serif] text-[#57534e] whitespace-nowrap">
+                      {item?.endDate || item?.startDate}
+                    </p>
+                  </div>
+                  {item?.description && <p className="mt-1.5 mb-0 text-[0.85rem] leading-6 font-['Inter',sans-serif] text-[#3f3f46]">{item.description}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {volunteerings.filter((item) => item?.organization || item?.volunteering).length > 0 && (
+          <section id="section-Volunteering" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Volunteering")}`}>
+            <SectionTitle>Volunteering</SectionTitle>
+            <div className="space-y-4">
+              {volunteerings.filter((item) => item?.organization || item?.volunteering).map((item, index) => (
+                <div key={index}>
+                  <h3 className="m-0 text-[0.9rem] font-bold uppercase text-[#1c1917]">
+                    {item?.volunteering}{item?.organization ? `, ${item.organization}` : ""}
+                  </h3>
+                  <div className="mt-1 font-['Inter',sans-serif]" dangerouslySetInnerHTML={{ __html: asHtmlString(item?.description) }} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {(skills.filter(Boolean).length > 0 || languages.filter(Boolean).length > 0) && (
+          <section id="section-Skills" className={`p-3 -m-3 scroll-mt-8 ${sectionState("Skills")}`}>
+            <SectionTitle>Additional Skills</SectionTitle>
+            <ul className="list-disc pl-5 space-y-1">
+              {skills.filter(Boolean).length > 0 && (
+                <li className="font-['Inter',sans-serif] text-[0.87rem] leading-6">
+                  Proficient in {skills.filter(Boolean).join(", ")}
+                </li>
+              )}
+              {languages.filter(Boolean).length > 0 && (
+                <li id="section-Languages" className="font-['Inter',sans-serif] text-[0.87rem] leading-6 scroll-mt-8">
+                  Fluent in {languages.filter(Boolean).map((l) => (typeof l === "object" && l !== null ? l.name : l)).join(", ")}
+                </li>
+              )}
+            </ul>
           </section>
         )}
       </div>
@@ -295,4 +221,4 @@ const Template7 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
   );
 };
 
-export default Template7;
+export default Template15;
