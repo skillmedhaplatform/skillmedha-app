@@ -1390,7 +1390,7 @@ function Form() {
                 </span>
                 <span className="text-[11px] uppercase tracking-wide text-[#94a3b8]">{TEMPLATE_OPTIONS.length} options</span>
               </div>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="flex flex-wrap gap-1.5 max-h-[190px] overflow-y-auto pr-1 -mr-1 [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1] [&::-webkit-scrollbar-thumb]:rounded-full">
                 {TEMPLATE_OPTIONS.map((template, index) => {
                   const isActive = selectedTemplate === template.id;
                   const swatch = swatchFor(index);
@@ -1400,21 +1400,10 @@ function Form() {
                       type="button"
                       onClick={() => setSelectedTemplate(template.id)}
                       title={template.label}
-                      className={`group text-left rounded-md border p-1 transition-all ${isActive ? "border-[#1E69DA] bg-[#eff6ff] shadow-sm" : "border-[#e2e8f0] bg-white hover:border-[#1E69DA] hover:bg-[#f8fbff]"}`}
+                      className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all ${isActive ? "border-[#1E69DA] bg-[#eff6ff] text-[#1E69DA] shadow-sm" : "border-[#e2e8f0] bg-white text-[#475569] hover:border-[#1E69DA] hover:bg-[#f8fbff] hover:text-[#1E69DA]"}`}
                     >
-                      <div className="w-full aspect-[3/4] rounded overflow-hidden border border-[#e2e8f0] bg-white flex flex-col mb-1">
-                        <div className="h-[26%] w-full shrink-0 flex items-center gap-1 px-1" style={{ backgroundColor: swatch }}>
-                          <span className="w-1.5 h-1.5 rounded-full bg-[rgba(255,255,255,0.7)]" />
-                        </div>
-                        <div className="flex-1 p-1 flex flex-col gap-[3px] justify-center">
-                          <span className="h-[2px] w-4/5 rounded-full bg-[#e2e8f0]" />
-                          <span className="h-[2px] w-full rounded-full bg-[#e2e8f0]" />
-                          <span className="h-[2px] w-3/5 rounded-full bg-[#e2e8f0]" />
-                        </div>
-                      </div>
-                      <span className={`block text-center text-[9.5px] font-semibold truncate leading-tight ${isActive ? "text-[#1E69DA]" : "text-[#475569] group-hover:text-[#1E69DA]"}`}>
-                        {template.label}
-                      </span>
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: swatch }} />
+                      {template.label}
                     </button>
                   );
                 })}
