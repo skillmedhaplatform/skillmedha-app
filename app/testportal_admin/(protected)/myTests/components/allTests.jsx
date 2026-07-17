@@ -107,11 +107,12 @@ const AllTestsComp = (props) => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(4); // default 4
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  // Reset to page 1 on test list changes
+  // Reset to page 1 on test list count changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [allTests]);
+  }, [allTests?.length]);
 
   const paginatedTests = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -199,49 +200,66 @@ const AllTestsComp = (props) => {
     });
   };
 
-  const handleDownload = () => {
-    const loadingMessage = message.loading({ content: 'Downloading test...', key: 'download', duration: 0 });
+  const handleDownload = async () => {
+    if (!fullContentRef.current || !selectedTest) return;
 
-    const input = fullContentRef.current;
-    const questionSections = Array.from(input.querySelectorAll(".question-class"));
+    setIsDownloading(true);
+    message.loading({ content: "Preparing download...", key: "download", duration: 0 });
 
-    const pdf = new jsPDF("p", "mm", "a4");
-    const imgWidth = 190;
-    const pageHeight = pdf.internal.pageSize.height;
-    let currentPageHeight = 0;
-    const questionGap = 10;
+    try {
+      const input = fullContentRef.current;
+      const questionSections = Array.from(input.querySelectorAll(".question-class"));
 
-    const canvasPromises = questionSections.map((question) => {
-      return html2canvas(question, {
-        scale: 2,
-        useCORS: true,
-        scrollX: 0,
-        scrollY: 0,
-      }).then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 190;
+      const pageHeight = pdf.internal.pageSize.height;
+      let currentPageHeight = 0;
+      const questionGap = 10;
 
-        return { imgData, imgHeight };
+      const canvasPromises = questionSections.map((question) => {
+        return html2canvas(question, {
+          scale: 2,
+          useCORS: true,
+          scrollX: 0,
+          scrollY: 0,
+        }).then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+          return { imgData, imgHeight };
+        });
       });
-    });
 
-    Promise.all(canvasPromises).then((canvases) => {
-      canvases.forEach(({ imgData, imgHeight }, index) => {
+      const canvases = await Promise.all(canvasPromises);
+
+      canvases.forEach(({ imgData, imgHeight }) => {
         if (currentPageHeight + imgHeight + questionGap > pageHeight) {
           pdf.addPage();
           currentPageHeight = 10;
         }
-        pdf.addImage(imgData, "PNG", 10, currentPageHeight, imgWidth, imgHeight, '', 'FAST');
+        pdf.addImage(imgData, "PNG", 10, currentPageHeight, imgWidth, imgHeight, "", "FAST");
         currentPageHeight += imgHeight + questionGap;
       });
 
-      pdf.save(`${selectedTest?.title}.pdf`);
-      message.success({ content: 'Test downloaded successfully!', key: 'download', duration: 2 });
+      const pdfBlob = pdf.output("blob");
+      const downloadUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `${selectedTest?.title || "test"}.pdf`;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-    }).catch((error) => {
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+      message.success({ content: "Test downloaded successfully!", key: "download", duration: 2 });
+    } catch (error) {
       console.error("Error generating PDF:", error);
-      message.error({ content: 'Download failed!', key: 'download', duration: 2 });
-    });
+      message.error({ content: "Download failed!", key: "download", duration: 2 });
+    } finally {
+      setIsDownloading(false);
+      message.destroy("download");
+    }
   };
 
   const hasAudioOrVideoQuestions = () => {
@@ -395,11 +413,7 @@ const AllTestsComp = (props) => {
                       </div>
 
                       {/* Status Badge */}
-                      {test?.status?.toLowerCase() !== "active" ? (
-                        <div className={`${CourseStyles.statusBadge} ${CourseStyles.pending}`}>
-                          <span className={CourseStyles.statusDot} /> In Progress
-                        </div>
-                      ) : countdowns[actualIndex] === "Expired" ? (
+                      {countdowns[actualIndex] === "Expired" ? (
                         <div className={`${CourseStyles.statusBadge} ${CourseStyles.expired}`}>
                           <span className={CourseStyles.statusDot} /> Expired
                         </div>
@@ -554,8 +568,12 @@ const AllTestsComp = (props) => {
                     centered={true}
                     className={DownloadTestStyles.modal_container}
                   >
-                    <Button onClick={handleDownload} disabled={hasAudioOrVideoQuestions()} type="primary">
-                      Download PDF
+                    <Button
+                      onClick={handleDownload}
+                      disabled={hasAudioOrVideoQuestions() || isDownloading}
+                      type="primary"
+                    >
+                      {isDownloading ? "Preparing download..." : "Download PDF"}
                     </Button>
 
                     {selectedTest && (
@@ -633,21 +651,13 @@ const AllTestsComp = (props) => {
             <span className={AllTestsStyles.emptyIcon}>
               <FileTextOutlined />
             </span>
-            <h3 className={AllTestsStyles.emptyTitle}>
-              {props.selectedStatus === "expired" ? "No Expired Tests" : props.selectedStatus === "pending" ? "No Tests In Progress" : "No Tests Added"}
-            </h3>
+            <h3 className={AllTestsStyles.emptyTitle}>No Tests Added</h3>
             <p className={AllTestsStyles.emptyDesc}>
-              {props.selectedStatus === "expired" 
-                ? "You do not have any expired tests at the moment."
-                : props.selectedStatus === "pending"
-                  ? "There are no tests currently in progress."
-                  : "Get started by creating your first test assessment."}
+              Get started by creating your first test assessment.
             </p>
-            {props.selectedStatus !== "expired" && props.selectedStatus !== "pending" && (
-              <button className={AllTestsStyles.emptyBtn} onClick={props.onAddNewTest}>
-                Create New Test
-              </button>
-            )}
+            <button className={AllTestsStyles.emptyBtn} onClick={props.onAddNewTest}>
+              Create New Test
+            </button>
           </div>
         )}
       </div>

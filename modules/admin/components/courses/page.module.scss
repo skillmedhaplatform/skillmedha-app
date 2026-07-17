@@ -1,11 +1,17 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/colors.scss";
 @import "@/modules/admin/styles/mixins.scss";
 
 .container {
-  height: 100%;
+  height: calc(100% - 2rem);
   min-height: 60vh;
-  width: 100%;
+  width: auto;
+  margin: 1rem;
   padding: 0 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   overflow-y: auto;
   @include custom-scrollbar();
   position: relative;
@@ -15,11 +21,15 @@
     top: 0;
     background-color: #fff;
     z-index: 9;
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
     .title {
       font-size: 1.75rem;
       font-weight: 700;
       color: $primaryColor;
-      margin-bottom: 1rem;
+      margin-bottom: 0;
       user-select: none;
     }
   }
@@ -66,7 +76,7 @@
         border-radius: 0.4rem;
         border: 1px solid rgba(0, 0, 0, 0.25);
         font-size: 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
         &:focus {
           border-color: $primaryColor;
@@ -116,7 +126,7 @@
         border-radius: 0.4rem;
         border: 1px solid rgba(0, 0, 0, 0.25);
         font-size: 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
         &:focus {
           border-color: $primaryColor;
@@ -296,6 +306,7 @@
     align-items: center;
     // margin-top: 2.5rem;
     padding-top: 1rem;
+    padding-bottom: 1.5rem;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     gap: 1rem;
     position: sticky;
@@ -336,11 +347,11 @@
 }
 
 .toolItem {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     border-color: #40a9ff !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: $shadowSm;
   }
 
   input {
@@ -356,7 +367,7 @@
   position: relative;
   width: 104px;
   height: 104px;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   overflow: hidden;
   border: 1px solid #d9d9d9;
   background: #fafafa;
@@ -393,7 +404,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: $shadowSm;
     transition: all 0.2s;
     color: #ff4d4f;
     font-size: 14px;
@@ -424,4 +435,49 @@
       opacity: 1;
     }
   }
+}
+
+.breadcrumbContainer {
+  background-color: transparent;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.breadcrumb {
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+
+  :global(.ant-breadcrumb-separator) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+  }
+}
+
+.breadcrumbLink {
+  color: #1E69DA !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.breadcrumbCurrent {
+  color: #0f172a !important;
+  font-weight: 600;
+  background-color: transparent !important;
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
 }

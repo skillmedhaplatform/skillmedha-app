@@ -1,21 +1,23 @@
+@use "@/modules/admin/styles/colors" as *;
+
 .cardCont {
-  border: 1px solid rgba(128, 128, 128, 0.29);
+  border: 1px solid $borderColor;
   padding: 0.6rem;
-  border-radius: 10px;
+  border-radius: $borderRadiusLarge;
   background: #fff;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease-in-out;
+  box-shadow: $shadowMd;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   &:hover {
-    border-color: #24A058;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: #1E69DA;
+    box-shadow: $shadowMd;
     // transform: translateY(-4px);
   }
   &:hover .branchImage {
     transform: scale(1.1);
-    transition: all 0.3s ease-in-out;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -25,7 +27,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: $borderRadiusLarge;
   overflow: hidden;
 }
 
@@ -33,7 +35,7 @@
   width: 100%;
   aspect-ratio: 16/9;
   object-fit: cover;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .titleCont {
   display: flex;

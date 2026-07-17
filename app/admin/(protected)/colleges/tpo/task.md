@@ -1,0 +1,3 @@
+- [x] Redesign Breadcrumbs component separator size and margin
+- [x] Redesign Breadcrumbs CSS styling (remove background box, reduce font size to 16px, clean up styles)
+- [x] Verify pages render correctly and breadcrumbs match TPO portal styling

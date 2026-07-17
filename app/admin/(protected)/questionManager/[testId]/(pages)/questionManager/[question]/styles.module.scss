@@ -1,3 +1,4 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/mixins.scss";
 @import "@/modules/admin/styles/colors.scss";
 
@@ -145,7 +146,7 @@
   color: white;
   background-color: $primaryColor;
   border: none;
-  border-radius: 5px;
+  border-radius: $borderRadius;
   cursor: pointer;
 }
 
@@ -172,14 +173,14 @@
   font-size: 1rem;
   font-weight: 500;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: $borderRadius;
   background-color: #fff;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
 
   &:hover {
-    background-color: #f0f0f0;
+    background-color: $gray100;
   }
 }
 

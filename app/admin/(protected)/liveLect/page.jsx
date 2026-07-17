@@ -155,7 +155,7 @@ const page = () => {
                 <ConfigProvider
                   theme={{
                     token: {
-                      colorPrimary: '#1677ff',
+                      colorPrimary: '#1E69DA',
                     },
                   }}
                 >
@@ -170,7 +170,7 @@ const page = () => {
                 <button 
                   onClick={() => setCreateModal(true)}
                   style={{
-                    backgroundColor: "#1677ff",
+                    backgroundColor: "#1E69DA",
                     color: "white",
                     border: "none",
                     borderRadius: "6px",
@@ -190,7 +190,7 @@ const page = () => {
                   return (
                     <div key={eachMeetingIndex} className={zoomStyles.card_cont}>
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%", alignItems: "flex-start" }}>
-                        <div style={{ backgroundColor: "#EFF5FB", color: "#1677ff", padding: "4px 10px", borderRadius: "12px", fontSize: "12px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ backgroundColor: "#EFF5FB", color: "#1E69DA", padding: "4px 10px", borderRadius: "12px", fontSize: "12px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
                           {type === "internship" ? <MdWorkOutline /> : <BsJournalBookmark />} 
                           <span style={{ textTransform: "capitalize" }}>{type}</span>
                         </div>
@@ -205,7 +205,7 @@ const page = () => {
                         style={{ 
                           width: "100%", 
                           marginTop: "16px",
-                          backgroundColor: eachMeeting?.isCompleted ? "#d9d9d9" : "#1677ff",
+                          backgroundColor: eachMeeting?.isCompleted ? "#d9d9d9" : "#1E69DA",
                           color: eachMeeting?.isCompleted ? "#00000040" : "white",
                           border: "none",
                           borderRadius: "8px",
@@ -255,7 +255,7 @@ const page = () => {
             <ConfigProvider
               theme={{
                 token: {
-                  colorPrimary: '#1677ff',
+                  colorPrimary: '#1E69DA',
                 },
               }}
             >

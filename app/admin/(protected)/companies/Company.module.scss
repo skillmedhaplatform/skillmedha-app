@@ -1,4 +1,5 @@
 @use "@/modules/admin/styles/mixins" as *;
+@use "@/modules/admin/styles/colors" as *;
 @use "sass:color";
 
 .collegePage {
@@ -64,23 +65,23 @@
     border-radius: 0;
     margin-top: 24px;
     align-items: normal;
-    @include custom-scrollbar(#1677ff);
+    @include custom-scrollbar(#1E69DA);
   }
 
   .collegeCard {
     background: #fff;
-    border-radius: 12px;
+    border-radius: $borderRadiusLarge;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 1rem;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid $borderColor;
+    box-shadow: $shadowSm;
     cursor: pointer;
 
     &:hover {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-      transform: translateY(-2px);
-      border-color: #1677ff;
+      box-shadow: $shadowMd;
+      transform: translateY(-4px);
+      border-color: #1E69DA;
     }
 
     .cardHeader {
@@ -92,15 +93,15 @@
       .collegeInitial {
         width: 40px;
         height: 40px;
-        border-radius: 6px;
-        background: linear-gradient(135deg, #1677ff 0%, #1677ff 100%);
+        border-radius: $borderRadius;
+        background: linear-gradient(135deg, #1E69DA 0%, #1E69DA 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 20px;
         font-weight: 700;
         color: white;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        box-shadow: $shadowMd;
       }
 
       .cardOptions {
@@ -109,8 +110,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 8px;
-        transition: all 0.2s ease;
+        border-radius: $borderRadius;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
         &:hover {
           background: #f5f5f5;
@@ -145,7 +146,7 @@
         margin-bottom: 12px;
         padding: 4px 8px;
         background: #EFF5FB;
-        border-radius: 4px;
+        border-radius: $borderRadius;
         display: inline-block;
         font-family: monospace;
       }
@@ -164,7 +165,7 @@
 
           :global(.anticon) {
             font-size: 16px;
-            color: #1677ff;
+            color: #1E69DA;
             min-width: 16px;
           }
 
@@ -250,8 +251,8 @@
   display: flex;
   gap: 12px;
   padding: 8px 0;
-  border-top: 1px solid #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
+  border-top: 1px solid $borderColor;
+  border-bottom: 1px solid $borderColor;
 }
 
 .statBadge {
@@ -260,9 +261,9 @@
   gap: 6px;
   padding: 6px 12px;
   background: #EFF5FB;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   flex: 1;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
 
   &:hover {
@@ -271,7 +272,7 @@
   }
 
   .statIcon {
-    color: #1677ff;
+    color: #1E69DA;
     font-size: 16px;
   }
 
@@ -296,7 +297,7 @@
   font-size: 13px;
 
   .locationIcon {
-    color: #1677ff;
+    color: #1E69DA;
     font-size: 14px;
     flex-shrink: 0;
   }
@@ -313,5 +314,5 @@
   margin-bottom: 16px;
   padding: 12px 16px;
   background: #f5f5f5;
-  border-radius: 8px;
+  border-radius: $borderRadius;
 }

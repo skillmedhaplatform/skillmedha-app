@@ -6,17 +6,18 @@ import {
   DeleteOutlined,
   EditOutlined,
   FolderOpenOutlined,
+  InboxOutlined,
 } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import {
   Button,
-  Table,
   Input,
   Space,
   message,
   Popconfirm,
   Divider,
   Tooltip,
+  Select,
 } from "antd";
 import {
   fetchSubjectsByType,
@@ -26,6 +27,28 @@ import {
 } from "@/redux/slices/admin/cms/practiceSlice";
 import PracticeBreadcrumbs from "../Practice_utils/practiceBreadcrumbs";
 import { usePermissions, PERMISSION_VALUES } from "@/hooks/usepermission";
+
+// Avatar color palette
+const AVATAR_COLORS = [
+  "#25a667", "#1E69DA", "#593cc1", "#c5782b",
+  "#e53e3e", "#0ea5e9", "#8b5cf6", "#d946ef",
+];
+
+const getAvatarColor = (name) => {
+  if (!name) return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+};
+
+const getInitials = (name) => {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+};
 
 const SubjectManager = () => {
   const nav = useRouter();
@@ -40,10 +63,10 @@ const SubjectManager = () => {
   const [editingId, setEditingId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [tempSubjects, setTempSubjects] = useState([]); // For new subjects being added
-  const [editingValues, setEditingValues] = useState({}); // For editing existing subjects
+  const [tempSubjects, setTempSubjects] = useState([]);
+  const [editingValues, setEditingValues] = useState({});
 
-  // Fetch non-technical subjects on component mount
+  // Fetch technical subjects on component mount
   useEffect(() => {
     dispatch(fetchSubjectsByType("technical"));
   }, [dispatch]);
@@ -67,18 +90,15 @@ const SubjectManager = () => {
       type: "technical",
     };
 
-    // Add to temporary subjects array
     setTempSubjects((prev) => [...prev, newSubject]);
     setEditingId(tempId);
 
-    // Navigate to last page to show the new subject
     const totalSubjects = subjects.length + tempSubjects.length + 1;
     const totalPages = Math.ceil(totalSubjects / pageSize);
     setCurrentPage(totalPages);
   };
 
   const handleSave = async (id) => {
-    // Permission guard: creating requires CREATE, updating requires EDIT
     const isNewSubject = id.startsWith("temp-");
     if (isNewSubject) {
       if (!canAccess(PERMISSION_VALUES.CREATE)) {
@@ -96,11 +116,9 @@ const SubjectManager = () => {
       let titleValue;
 
       if (isNewSubject) {
-        // Find subject in temporary subjects
         subject = tempSubjects.find((s) => s._id === id);
         titleValue = subject?.title;
       } else {
-        // For existing subjects, get the edited value or original value
         titleValue =
           editingValues[id] || subjects.find((s) => s._id === id)?.title;
       }
@@ -111,7 +129,6 @@ const SubjectManager = () => {
       }
 
       if (isNewSubject) {
-        // Create new subject
         const subjectData = {
           title: titleValue.trim(),
           type: "technical",
@@ -120,10 +137,8 @@ const SubjectManager = () => {
         await dispatch(createSubject(subjectData)).unwrap();
         message.success("Subject created successfully");
 
-        // Remove from temporary subjects
         setTempSubjects((prev) => prev.filter((s) => s._id !== id));
       } else {
-        // Update existing subject
         const updateData = {
           title: titleValue.trim(),
         };
@@ -136,7 +151,6 @@ const SubjectManager = () => {
         ).unwrap();
         message.success("Subject updated successfully");
 
-        // Clear editing value
         setEditingValues((prev) => {
           const newValues = { ...prev };
           delete newValues[id];
@@ -160,7 +174,6 @@ const SubjectManager = () => {
       await dispatch(deleteSubject(subject._id)).unwrap();
       message.success("Subject deleted successfully");
 
-      // Adjust pagination if needed
       const totalPages = Math.ceil((subjects.length - 1) / pageSize);
       if (currentPage > totalPages && totalPages > 0) {
         setCurrentPage(totalPages);
@@ -177,7 +190,6 @@ const SubjectManager = () => {
       return;
     }
 
-    // Don't allow opening temp subjects
     if (subject._id.startsWith("temp-")) {
       message.warning("Please save the subject first");
       return;
@@ -190,7 +202,6 @@ const SubjectManager = () => {
   const edit = (record) => {
     setEditingId(record._id);
 
-    // For existing subjects, initialize the editing value
     if (!record._id.startsWith("temp-")) {
       setEditingValues((prev) => ({
         ...prev,
@@ -200,11 +211,9 @@ const SubjectManager = () => {
   };
 
   const cancel = () => {
-    // If it's a temporary subject being edited, remove it from temp subjects
     if (editingId?.startsWith("temp-")) {
       setTempSubjects((prev) => prev.filter((s) => s._id !== editingId));
     } else {
-      // For existing subjects, clear editing value
       setEditingValues((prev) => {
         const newValues = { ...prev };
         delete newValues[editingId];
@@ -218,12 +227,10 @@ const SubjectManager = () => {
     const isTemp = id.startsWith("temp-");
 
     if (isTemp) {
-      // Update temporary subject
       setTempSubjects((prev) =>
         prev.map((s) => (s._id === id ? { ...s, [field]: value } : s))
       );
     } else {
-      // Update editing values for existing subjects
       setEditingValues((prev) => ({
         ...prev,
         [id]: value,
@@ -231,12 +238,6 @@ const SubjectManager = () => {
     }
   };
 
-  const handleTableChange = (pagination) => {
-    setCurrentPage(pagination.current);
-    setPageSize(pagination.pageSize);
-  };
-
-  // Get the display value for a subject (either editing value or original value)
   const getDisplayValue = (record) => {
     if (record._id.startsWith("temp-")) {
       return record.title || "";
@@ -252,203 +253,12 @@ const SubjectManager = () => {
     (subject) => subject && subject._id && subject.title !== undefined
   );
 
-  const columns = [
-    {
-      title: "Subject #",
-      dataIndex: "index",
-      width: 100,
-      render: (_, __, index) => {
-        const subjectNumber = (currentPage - 1) * pageSize + index + 1;
-        return `Subject ${subjectNumber}`;
-      },
-    },
-    {
-      title: "Title",
-      dataIndex: "title",
-      render: (text, record) => {
-        const editing = isEditing(record);
-        const displayValue = getDisplayValue(record);
-
-        return editing ? (
-          <Input
-            value={displayValue}
-            onChange={(e) =>
-              handleFieldChange(record._id, "title", e.target.value)
-            }
-            onPressEnter={() => handleSave(record._id)}
-            placeholder="Enter subject title…"
-            autoFocus
-            disabled={loading}
-            style={{ width: "100%" }}
-          />
-        ) : (
-          <span>{displayValue || "Untitled Subject"}</span>
-        );
-      },
-    },
-    {
-      title: "Open Subject",
-      width: 140,
-      render: (_, record) => (
-        <Button
-          size="small"
-          type="primary"
-          onClick={() => handleOpenSubject(record)}
-          disabled={
-            !record.title?.trim() || loading || record._id.startsWith("temp-")
-          }
-          icon={<FolderOpenOutlined />}
-        >
-          Open Subject
-        </Button>
-      ),
-    },
-    {
-      title: "Quick Edit",
-      width: 160,
-      render: (_, record) => {
-        const editing = isEditing(record);
-        const displayValue = getDisplayValue(record);
-        const isTemp = record._id.startsWith("temp-");
-
-        return editing ? (
-          <Space>
-            <Tooltip
-              title={
-                isTemp
-                  ? !canAccess(PERMISSION_VALUES.CREATE)
-                    ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-                    : ""
-                  : !canAccess(PERMISSION_VALUES.EDIT)
-                  ? getPermissionMessage(PERMISSION_VALUES.EDIT)
-                  : ""
-              }
-            >
-              <span>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={() => handleSave(record._id)}
-                  loading={loading}
-                  disabled={
-                    !displayValue?.trim() ||
-                    loading ||
-                    (isTemp
-                      ? !canAccess(PERMISSION_VALUES.CREATE)
-                      : !canAccess(PERMISSION_VALUES.EDIT))
-                  }
-                >
-                  Save
-                </Button>
-              </span>
-            </Tooltip>
-            <Button size="small" onClick={cancel} disabled={loading}>
-              Cancel
-            </Button>
-          </Space>
-        ) : (
-          <Tooltip
-            title={
-              !canAccess(PERMISSION_VALUES.EDIT)
-                ? getPermissionMessage(PERMISSION_VALUES.EDIT)
-                : ""
-            }
-          >
-            <span>
-              <Button
-                size="small"
-                onClick={() => edit(record)}
-                icon={<EditOutlined />}
-                disabled={loading || !canAccess(PERMISSION_VALUES.EDIT)}
-              >
-                Edit
-              </Button>
-            </span>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      title: "Remove",
-      width: 100,
-      render: (_, record) => {
-        const isTemp = record._id.startsWith("temp-");
-
-        if (isTemp) {
-          // For temporary subjects, just show a cancel button
-          return (
-            <Button
-              size="small"
-              onClick={() => {
-                setTempSubjects((prev) =>
-                  prev.filter((s) => s._id !== record._id)
-                );
-                if (editingId === record._id) {
-                  setEditingId("");
-                }
-              }}
-              icon={<DeleteOutlined />}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-          );
-        }
-
-        // For existing subjects, show confirm dialog wrapped with permission tooltip
-        return (
-          <Tooltip
-            title={
-              !canAccess(PERMISSION_VALUES.DELETE)
-                ? getPermissionMessage(PERMISSION_VALUES.DELETE)
-                : ""
-            }
-          >
-            <span>
-              <Popconfirm
-                title="Are you sure you want to delete this subject?"
-                description="This action cannot be undone."
-                okText="Delete"
-                cancelText="Cancel"
-                okButtonProps={{ danger: true, loading: loading }}
-                onConfirm={() => handleDelete(record)}
-                disabled={loading || !canAccess(PERMISSION_VALUES.DELETE)}
-              >
-                <Button
-                  size="small"
-                  danger
-                  icon={<DeleteOutlined />}
-                  disabled={loading || !canAccess(PERMISSION_VALUES.DELETE)}
-                >
-                  Delete
-                </Button>
-              </Popconfirm>
-            </span>
-          </Tooltip>
-        );
-      },
-    },
-  ];
-
-  const paginationConfig = {
-    current: currentPage,
-    pageSize: pageSize,
-    total: displaySubjects.length,
-    showSizeChanger: true,
-    showQuickJumper: true,
-    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} subjects`,
-    pageSizeOptions: ["5", "10", "20", "50"],
-    onShowSizeChange: (current, size) => {
-      setPageSize(size);
-      setCurrentPage(1);
-    },
-    onChange: (page, size) => {
-      setCurrentPage(page);
-      setPageSize(size);
-    },
-    placement: ["bottomCenter"],
-    showLessItems: true,
-  };
+  // Pagination
+  const totalPages = Math.ceil(displaySubjects.length / pageSize);
+  const paginatedSubjects = displaySubjects.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <div className={styles.container}>
@@ -473,52 +283,274 @@ const SubjectManager = () => {
           </span>
         </Tooltip>
       </div>
-      <Divider style={{ margin: "1rem 0" }} />
-      <Table
-        columns={columns}
-        dataSource={displaySubjects}
-        rowKey="_id"
-        pagination={paginationConfig}
-        size="middle"
-        bordered
-        className={styles.subjectsTable}
-        scroll={{ x: 800 }}
-        onChange={handleTableChange}
-        loading={loading}
-        style={{ width: "100%" }}
-        locale={{
-          emptyText: (
-            <div style={{ textAlign: "center", padding: "20px" }}>
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
-                alt="no data"
-                style={{ width: 60, marginBottom: 10 }}
-              />
-              <h3>No Subjects Found</h3>
-              <p style={{ color: "#888" }}>
-                Start by adding your first subject
-              </p>
-              <Tooltip
-                title={
-                  !canAccess(PERMISSION_VALUES.CREATE)
-                    ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-                    : ""
-                }
+      <Divider style={{ margin: "0.75rem 0" }} />
+
+      {/* Card List */}
+      {paginatedSubjects.length > 0 ? (
+        <div className={styles.cardsList}>
+          {paginatedSubjects.map((record, index) => {
+            const editing = isEditing(record);
+            const displayValue = getDisplayValue(record);
+            const isTemp = record._id.startsWith("temp-");
+            const subjectNumber = (currentPage - 1) * pageSize + index + 1;
+
+            return (
+              <div
+                key={record._id}
+                className={`${styles.itemCard} ${editing ? styles.editing : ""}`}
+                onClick={() => !editing && handleOpenSubject(record)}
               >
-                <span>
-                  <Button
-                    type="primary"
-                    onClick={handleAdd}
-                    disabled={!canAccess(PERMISSION_VALUES.CREATE)}
-                  >
-                    + Add Subject
-                  </Button>
-                </span>
-              </Tooltip>
-            </div>
-          ),
-        }}
-      />
+                {/* Avatar */}
+                <div
+                  className={styles.itemAvatar}
+                  style={{ backgroundColor: getAvatarColor(displayValue) }}
+                >
+                  {getInitials(displayValue || `S${subjectNumber}`)}
+                </div>
+
+                {/* Info */}
+                <div className={styles.itemInfo}>
+                  {editing ? (
+                    <Input
+                      value={displayValue}
+                      onChange={(e) =>
+                        handleFieldChange(record._id, "title", e.target.value)
+                      }
+                      onPressEnter={() => handleSave(record._id)}
+                      placeholder="Enter subject title…"
+                      autoFocus
+                      disabled={loading}
+                      className={styles.inlineEditInput}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <>
+                      <span className={styles.itemTitle}>
+                        {displayValue || "Untitled Subject"}
+                      </span>
+                      <span className={styles.itemSubtitle}>
+                        Subject {subjectNumber}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Meta */}
+                <div className={styles.itemMeta}>
+                  {!editing && (
+                    <span className={styles.statusBadgeCard}>
+                      <span className={styles.statusDotCard}></span>
+                      Active
+                    </span>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div
+                  className={styles.itemActions}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {editing ? (
+                    <Space>
+                      <Tooltip
+                        title={
+                          isTemp
+                            ? !canAccess(PERMISSION_VALUES.CREATE)
+                              ? getPermissionMessage(PERMISSION_VALUES.CREATE)
+                              : ""
+                            : !canAccess(PERMISSION_VALUES.EDIT)
+                            ? getPermissionMessage(PERMISSION_VALUES.EDIT)
+                            : ""
+                        }
+                      >
+                        <span>
+                          <Button
+                            type="primary"
+                            size="small"
+                            onClick={() => handleSave(record._id)}
+                            loading={loading}
+                            disabled={
+                              !displayValue?.trim() ||
+                              loading ||
+                              (isTemp
+                                ? !canAccess(PERMISSION_VALUES.CREATE)
+                                : !canAccess(PERMISSION_VALUES.EDIT))
+                            }
+                          >
+                            Save
+                          </Button>
+                        </span>
+                      </Tooltip>
+                      <Button size="small" onClick={cancel} disabled={loading}>
+                        Cancel
+                      </Button>
+                    </Space>
+                  ) : (
+                    <Space>
+                      <Button
+                        size="small"
+                        type="primary"
+                        onClick={() => handleOpenSubject(record)}
+                        disabled={!record.title?.trim() || loading || isTemp}
+                        icon={<FolderOpenOutlined />}
+                      >
+                        Open
+                      </Button>
+                      <Tooltip
+                        title={
+                          !canAccess(PERMISSION_VALUES.EDIT)
+                            ? getPermissionMessage(PERMISSION_VALUES.EDIT)
+                            : ""
+                        }
+                      >
+                        <span>
+                          <Button
+                            size="small"
+                            onClick={() => edit(record)}
+                            icon={<EditOutlined />}
+                            disabled={loading || !canAccess(PERMISSION_VALUES.EDIT)}
+                          >
+                            Edit
+                          </Button>
+                        </span>
+                      </Tooltip>
+                      {isTemp ? (
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setTempSubjects((prev) =>
+                              prev.filter((s) => s._id !== record._id)
+                            );
+                            if (editingId === record._id) {
+                              setEditingId("");
+                            }
+                          }}
+                          icon={<DeleteOutlined />}
+                          disabled={loading}
+                        >
+                          Cancel
+                        </Button>
+                      ) : (
+                        <Tooltip
+                          title={
+                            !canAccess(PERMISSION_VALUES.DELETE)
+                              ? getPermissionMessage(PERMISSION_VALUES.DELETE)
+                              : ""
+                          }
+                        >
+                          <span>
+                            <Popconfirm
+                              title="Are you sure you want to delete this subject?"
+                              description="This action cannot be undone."
+                              okText="Delete"
+                              cancelText="Cancel"
+                              okButtonProps={{ danger: true, loading: loading }}
+                              onConfirm={() => handleDelete(record)}
+                              disabled={loading || !canAccess(PERMISSION_VALUES.DELETE)}
+                            >
+                              <Button
+                                size="small"
+                                danger
+                                icon={<DeleteOutlined />}
+                                disabled={loading || !canAccess(PERMISSION_VALUES.DELETE)}
+                              >
+                                Delete
+                              </Button>
+                            </Popconfirm>
+                          </span>
+                        </Tooltip>
+                      )}
+                    </Space>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className={styles.cardEmptyState}>
+          <InboxOutlined className={styles.cardEmptyIcon} />
+          <span className={styles.cardEmptyText}>No Subjects Found</span>
+          <span className={styles.cardEmptySub}>
+            Start by adding your first subject
+          </span>
+          <Tooltip
+            title={
+              !canAccess(PERMISSION_VALUES.CREATE)
+                ? getPermissionMessage(PERMISSION_VALUES.CREATE)
+                : ""
+            }
+          >
+            <span>
+              <Button
+                type="primary"
+                onClick={handleAdd}
+                disabled={!canAccess(PERMISSION_VALUES.CREATE)}
+              >
+                + Add Subject
+              </Button>
+            </span>
+          </Tooltip>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {displaySubjects.length > 0 && (
+        <div className={styles.paginationRow}>
+          <div className={styles.paginationLeft}>
+            <span className={styles.pageSizeLabel}>Items per page</span>
+            <Select
+              value={pageSize}
+              onChange={(value) => {
+                setPageSize(value);
+                setCurrentPage(1);
+              }}
+              options={[
+                { value: 5, label: "5" },
+                { value: 10, label: "10" },
+                { value: 20, label: "20" },
+                { value: 50, label: "50" },
+              ]}
+              size="small"
+              style={{ minWidth: 70 }}
+            />
+            <span className={styles.showingText}>
+              {Math.min((currentPage - 1) * pageSize + 1, displaySubjects.length)}-
+              {Math.min(currentPage * pageSize, displaySubjects.length)} of{" "}
+              {displaySubjects.length} subjects
+            </span>
+          </div>
+          <div className={styles.paginationRight}>
+            <button
+              className={styles.pageBtn}
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            >
+              Prev
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                className={`${styles.pageBtn} ${
+                  currentPage === page ? styles.pageBtnActive : ""
+                }`}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              className={styles.pageBtn}
+              disabled={currentPage === totalPages || totalPages === 0}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

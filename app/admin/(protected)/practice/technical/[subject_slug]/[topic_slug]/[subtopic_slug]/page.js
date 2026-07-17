@@ -14,6 +14,8 @@ import {
   Popconfirm,
   Tooltip,
   message,
+  Input,
+  Select,
 } from "antd";
 import {
   EditOutlined,
@@ -24,9 +26,13 @@ import {
   VideoCameraOutlined,
   CheckCircleOutlined,
   CloudUploadOutlined,
+  CopyOutlined,
+  SearchOutlined,
+  CaretRightOutlined,
 } from "@ant-design/icons";
 import BulkUploadModal from "@/app/admin/(protected)/practice/Practice_utils/BulkUploadModal";
 import styles from "../../../../practiceStyles.module.scss";
+import listStyles from "@/app/admin/(protected)/practice/Practice_utils/listStyles.module.scss";
 import PracticeBreadcrumbs from "@/app/admin/(protected)/practice/Practice_utils/practiceBreadcrumbs";
 import {
   deleteQuestion,
@@ -76,11 +82,10 @@ const QuestionOptions = React.memo(
                     return (
                       <div
                         key={optionKey}
-                        className={`${styles.optionItem} ${
-                          isCorrect
+                        className={`${styles.optionItem} ${isCorrect
                             ? styles.correctOption
                             : styles.regularOption
-                        }`}
+                          }`}
                       >
                         <Radio
                           value={optionKey}
@@ -122,11 +127,10 @@ const QuestionOptions = React.memo(
                     return (
                       <div
                         key={optionKey}
-                        className={`${styles.optionItem} ${
-                          isCorrect
+                        className={`${styles.optionItem} ${isCorrect
                             ? styles.correctOption
                             : styles.regularOption
-                        }`}
+                          }`}
                       >
                         <Checkbox
                           checked={isCorrect}
@@ -180,181 +184,13 @@ const QuestionOptions = React.memo(
 
 QuestionOptions.displayName = "QuestionOptions";
 
-// Memoized QuestionList component to prevent unnecessary re-renders
 const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
   const { canAccess, getPermissionMessage } = usePermissions();
-  // Memoize collapse items to avoid recreation on each render
-  const collapseItems = useMemo(
-    () =>
-      questions.map((q, index) => {
-        const {
-          _id,
-          questionContent,
-          answer,
-          questionType,
-          scoreSettings,
-          resources,
-        } = q;
+  const [activePanels, setActivePanels] = React.useState([]);
 
-        return {
-          key: _id,
-          label: (
-            <div className={styles.questionHeader}>
-              <div className={styles.questionTitleSection}>
-                <span className={styles.questionNumber}>Q{index + 1}.</span>
-                <div className={styles.questionText}>
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: parseIfJson(questionContent?.question),
-                    }}
-                  />
-                </div>
-                {/* Resources */}
-                {questionType == "Audio" && (
-                  <div className={styles.resourceSection}>
-                    <div className={styles.sectionHeader}>
-                      <SoundOutlined className={styles.sectionIcon} />
-                      <Text className={styles.sectionTitle}>
-                        Audio Resource
-                      </Text>
-                    </div>
-                    <audio
-                      controls
-                      src={resources?.url}
-                      preload="none"
-                      className={styles.audioPlayer}
-                    />
-                  </div>
-                )}
-
-                {questionType == "Video" && (
-                  <div className={styles.resourceSection}>
-                    <div className={styles.sectionHeader}>
-                      <VideoCameraOutlined className={styles.sectionIcon} />
-                      <Text className={styles.sectionTitle}>
-                        Video Resource
-                      </Text>
-                    </div>
-                    <video
-                      controls
-                      src={resources?.url}
-                      preload="none"
-                      className={styles.videoPlayer}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className={styles.questionMeta}>
-                <div className={styles.metaTags}>
-                  <Tag className={styles.scoreTag} color="blue">
-                    {scoreSettings?.pointsForCorrectAns || 0} pts
-                  </Tag>
-                  <Tag className={styles.typeTag} color="green">
-                    {questionType}
-                  </Tag>
-                </div>
-                <Space className={styles.actionButtons} size="small">
-                  <Tooltip
-                    title={
-                      !canAccess(PERMISSION_VALUES.EDIT)
-                        ? getPermissionMessage(PERMISSION_VALUES.EDIT)
-                        : ""
-                    }
-                  >
-                    <span>
-                      <Button
-                        size="small"
-                        icon={<EditOutlined />}
-                        className={styles.editBtn}
-                        type="text"
-                        disabled={!canAccess(PERMISSION_VALUES.EDIT)}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!canAccess(PERMISSION_VALUES.EDIT)) {
-                            message.info(
-                              getPermissionMessage(PERMISSION_VALUES.EDIT)
-                            );
-                            return;
-                          }
-                          onEdit(_id);
-                        }}
-                      />
-                    </span>
-                  </Tooltip>
-
-                  <Tooltip
-                    title={
-                      !canAccess(PERMISSION_VALUES.DELETE)
-                        ? getPermissionMessage(PERMISSION_VALUES.DELETE)
-                        : ""
-                    }
-                  >
-                    <span>
-                      <Popconfirm
-                        title="Are you sure you want to delete this item?"
-                        okText="Yes"
-                        cancelText="No"
-                        onConfirm={(e) => {
-                          e?.stopPropagation();
-                          if (!canAccess(PERMISSION_VALUES.DELETE)) {
-                            message.info(
-                              getPermissionMessage(PERMISSION_VALUES.DELETE)
-                            );
-                            return;
-                          }
-                          onDelete(_id);
-                        }}
-                        onCancel={(e) => {
-                          e?.stopPropagation();
-                        }}
-                      >
-                        <Button
-                          size="small"
-                          icon={<DeleteOutlined />}
-                          className={styles.deleteBtn}
-                          type="text"
-                          danger
-                          disabled={!canAccess(PERMISSION_VALUES.DELETE)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </Popconfirm>
-                    </span>
-                  </Tooltip>
-                </Space>
-              </div>
-            </div>
-          ),
-          children: (
-            <div className={styles.questionBody}>
-              {/* Display Options */}
-              <QuestionOptions
-                questionContent={questionContent}
-                answer={answer}
-                questionType={questionType}
-              />
-
-              {/* Explanation */}
-              {answer?.explanation && (
-                <div className={styles.explanationSection}>
-                  <div className={styles.sectionHeader}>
-                    <FileTextOutlined className={styles.sectionIcon} />
-                    <Text className={styles.sectionTitle}>Explanation</Text>
-                  </div>
-                  <div className={styles.explanationContent}>
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: parseIfJson(answer.explanation),
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          ),
-        };
-      }),
-    [questions, onEdit, onDelete]
-  );
+  const togglePanel = (id) => {
+    setActivePanels(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+  };
 
   if (!questions.length) {
     return (
@@ -371,20 +207,62 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
   }
 
   return (
-    <div className={styles.questionsWrapper}>
-      <Collapse
-        accordion
-        className={styles.questionsCollapse}
-        items={collapseItems}
-        ghost={false}
-        expandIcon={({ isActive }) => (
-          <div
-            className={`${styles.expandIcon} ${isActive ? styles.active : ""}`}
-          >
-            ▼
+    <div className={listStyles.questionList}>
+      {questions.map((q, index) => {
+        const { _id, questionContent, answer, questionType, scoreSettings } = q;
+        const isExpanded = activePanels.includes(_id);
+        const score = scoreSettings?.pointsForCorrectAns || 0;
+
+        return (
+          <div key={_id}>
+            <div className={listStyles.questionRow}>
+              <div className={listStyles.rowLeft}>
+                <CaretRightOutlined 
+                  className={`${listStyles.expandIcon} ${isExpanded ? listStyles.expanded : ""}`}
+                  onClick={() => togglePanel(_id)}
+                />
+                <span className={listStyles.qNumber}>{index + 1}</span>
+                <span className={listStyles.qText}>
+                  {parseIfJson(questionContent?.question)?.replace(/<[^>]*>?/gm, '')?.substring(0, 50)}...
+                </span>
+              </div>
+              
+              <div className={listStyles.rowRight}>
+                <div className={listStyles.badges}>
+                  <span className={`${listStyles.badge} ${listStyles.pts}`}>{score} pts</span>
+                  <span className={`${listStyles.badge} ${listStyles.type}`}>{questionType}</span>
+                  <span className={`${listStyles.badge} ${listStyles.difficulty}`}>Easy</span>
+                </div>
+                
+                <div className={listStyles.actionIcons}>
+                  <Tooltip title={!canAccess(PERMISSION_VALUES.EDIT) ? getPermissionMessage(PERMISSION_VALUES.EDIT) : ""}>
+                    <button className={listStyles.edit} disabled={!canAccess(PERMISSION_VALUES.EDIT)} onClick={() => onEdit(_id)}>
+                      <EditOutlined />
+                    </button>
+                  </Tooltip>
+                  <Tooltip title="Copy (Coming soon)">
+                    <button className={listStyles.copy}><CopyOutlined /></button>
+                  </Tooltip>
+                  <Tooltip title={!canAccess(PERMISSION_VALUES.DELETE) ? getPermissionMessage(PERMISSION_VALUES.DELETE) : ""}>
+                    <Popconfirm title="Delete?" onConfirm={() => onDelete(_id)} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
+                      <button className={listStyles.delete} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
+                        <DeleteOutlined />
+                      </button>
+                    </Popconfirm>
+                  </Tooltip>
+                </div>
+              </div>
+            </div>
+            
+            {isExpanded && (
+              <div style={{ padding: '16px 40px', background: '#fff', border: '1px solid #E2E8F0', borderTop: 'none', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
+                <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionContent?.question) }} style={{ marginBottom: 16 }} />
+                <QuestionOptions questionContent={questionContent} answer={answer} questionType={questionType} />
+              </div>
+            )}
           </div>
-        )}
-      />
+        );
+      })}
     </div>
   );
 });
@@ -491,51 +369,37 @@ export default function QuestionsPage() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <PracticeBreadcrumbs />
-        <Tooltip
-          title={
-            !canAccess(PERMISSION_VALUES.CREATE)
-              ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-              : ""
-          }
-        >
-          <span>
-            <Button
-              type="primary"
+    <div className={listStyles.pageContainer} style={{ padding: '24px' }}>
+      <div className={listStyles.topActionRow}>
+        <div className={listStyles.actionsLeft}>
+          <PracticeBreadcrumbs />
+        </div>
+        <div className={listStyles.actionsRight}>
+          <Tooltip title={!canAccess(PERMISSION_VALUES.CREATE) ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""}>
+            <button
+              className={listStyles.btnPrimary}
               onClick={handleAdd}
-              className={styles.createButton}
               disabled={loading || !canAccess(PERMISSION_VALUES.CREATE)}
             >
               + Create Question
-            </Button>
-          </span>
-        </Tooltip>
-        
-        <Tooltip
-          title={
-            !canAccess(PERMISSION_VALUES.CREATE)
-              ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-              : ""
-          }
-        >
-          <span>
-            <Button
-              type="default"
-              icon={<CloudUploadOutlined />}
+            </button>
+          </Tooltip>
+
+          <Tooltip title={!canAccess(PERMISSION_VALUES.CREATE) ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""}>
+            <button
+              className={listStyles.btnSecondary}
               onClick={() => setBulkModalOpen(true)}
-              className={styles.createButton}
-              style={{ marginLeft: "1rem" }}
               disabled={loading || !canAccess(PERMISSION_VALUES.CREATE)}
             >
-              Bulk Upload
-            </Button>
-          </span>
-        </Tooltip>
+              <CloudUploadOutlined /> Bulk Upload
+            </button>
+          </Tooltip>
+        </div>
       </div>
-      
-      <BulkUploadModal 
+
+
+
+      <BulkUploadModal
         open={bulkModalOpen}
         onCancel={() => setBulkModalOpen(false)}
         subjectId={subject_slug}
@@ -544,8 +408,7 @@ export default function QuestionsPage() {
         excludedTypes={["Coding Question"]}
       />
 
-      <Divider style={{ margin: "1rem 0" }} />
-      <div style={{ height: "60vh", overflowY: "auto", width: "100%" }}>
+      <div style={{ marginTop: "1rem" }}>
         <QuestionList
           questions={questions || []}
           onEdit={handleEdit}

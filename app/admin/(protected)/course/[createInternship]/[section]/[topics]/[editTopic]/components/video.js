@@ -75,7 +75,7 @@ export default function Video() {
           gap: 12,
           alignItems: "center",
           padding: 8,
-          border: "1px solid #f0f0f0",
+          border: "1px solid #e2e8f0",
           borderRadius: 6,
         }}
       >

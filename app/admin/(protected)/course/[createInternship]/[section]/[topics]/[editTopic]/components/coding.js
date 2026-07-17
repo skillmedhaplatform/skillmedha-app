@@ -288,7 +288,7 @@ export default function Coding() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
-            <CodeOutlined style={{ marginRight: 8, color: "#1890ff" }} />
+            <CodeOutlined style={{ marginRight: 8, color: "#1E69DA" }} />
             <Text strong>Question {index + 1}</Text>
             <Tag color="blue" style={{ marginLeft: 12 }}>
               {questionData.scoreSettings?.pointsForCorrectAns || 0} pts
@@ -306,7 +306,7 @@ export default function Coding() {
                 handleEdit(questionData);
               }}
               size="small"
-              style={{ color: "#1890ff" }}
+              style={{ color: "#1E69DA" }}
             >
               Edit
             </Button>
@@ -338,7 +338,7 @@ export default function Coding() {
             size="small"
             title={
               <Space>
-                <InfoCircleOutlined style={{ color: "#1890ff" }} />
+                <InfoCircleOutlined style={{ color: "#1E69DA" }} />
                 <Text strong>Question</Text>
               </Space>
             }
@@ -355,7 +355,7 @@ export default function Coding() {
                 padding: "8px",
                 backgroundColor: "#fafafa",
                 borderRadius: "4px",
-                border: "1px solid #f0f0f0",
+                border: "1px solid #e2e8f0",
               }}
             />
           </Card>
@@ -384,7 +384,7 @@ export default function Coding() {
                       style={{ height: "100%" }}
                     >
                       <div style={{ marginBottom: 12 }}>
-                        <Text strong style={{ color: "#1890ff" }}>
+                        <Text strong style={{ color: "#1E69DA" }}>
                           Input:
                         </Text>
                         <div
@@ -542,7 +542,7 @@ export default function Coding() {
             )}
             style={{
               backgroundColor: "#fff",
-              border: "1px solid #f0f0f0",
+              border: "1px solid #e2e8f0",
             }}
             expandIconPosition="start"
           />

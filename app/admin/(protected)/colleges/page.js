@@ -617,7 +617,7 @@ export default function College() {
                   title={college.orgName}
                   trigger="hover"
                   placement="bottomRight"
-                  color="#1677ff"
+                  color="#1E69DA"
                 >
                   <h3
                     className={styles.collegeName}

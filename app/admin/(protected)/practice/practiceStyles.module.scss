@@ -1,21 +1,26 @@
+@use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/colors.scss";
 @import "@/modules/admin/styles/mixins.scss";
+
 .container {
-  @include flexBox(column, center, flex-end);
+  @include flexBox(column, flex-start, flex-start);
   width: 100%;
-  max-height: 80vh;
-  overflow-y: scroll;
+  min-height: calc(100vh - 140px);
+  padding: 1.5rem 2rem;
+  gap: 0;
+  background-color: transparent;
   .header {
     width: 100%;
     font-size: 18px;
     @include flexBox(row, center, space-between);
+    margin-bottom: 0.5rem;
   }
 }
 
 .createButton {
   width: 12rem;
   height: 40px;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   font-weight: 500;
 }
 
@@ -25,7 +30,233 @@
   color: #666;
 }
 
-// Questions Wrapper
+// ===== Card List Styles (TPO-style tiles) =====
+.cardsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.itemCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    border-color: #cbd5e0;
+    transform: translateY(-1px);
+  }
+
+  &.editing {
+    border-color: $primaryColor;
+    box-shadow: 0 0 0 2px rgba(30, 105, 218, 0.1);
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+.itemAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: white;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.itemTitle {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1a202c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemSubtitle {
+  font-size: 0.75rem;
+  color: #718096;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.itemMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.itemActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.statusBadgeCard {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background-color: #EFF6FF;
+  color: $primaryColor;
+}
+
+.statusDotCard {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: $primaryColor;
+}
+
+// Card list pagination
+.paginationRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+}
+
+.paginationLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.paginationRight {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pageSizeLabel {
+  font-size: 0.85rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.showingText {
+  font-size: 0.85rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.pageBtn {
+  min-width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0 0.5rem;
+
+  &:hover:not(:disabled) {
+    background-color: #f7fafc;
+    border-color: #cbd5e0;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.pageBtnActive {
+  background: linear-gradient(135deg, $primaryColor 0%, lighten($primaryColor, 20%) 100%) !important;
+  border: none !important;
+  color: white !important;
+
+  &:hover {
+    opacity: 0.9 !important;
+  }
+}
+
+// Inline edit input in card
+.inlineEditInput {
+  flex: 1;
+  min-width: 200px;
+}
+
+// Empty state for card lists
+.cardEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: #a0aec0;
+  gap: 0.75rem;
+  width: 100%;
+  border: 1px dashed #e2e8f0;
+  border-radius: 12px;
+  margin-top: 0.5rem;
+}
+
+.cardEmptyIcon {
+  font-size: 2.5rem;
+  opacity: 0.5;
+}
+
+.cardEmptyText {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #718096;
+}
+
+.cardEmptySub {
+  font-size: 0.8rem;
+  color: #a0aec0;
+}
+
+// ===== Questions Wrapper =====
 .questionsWrapper {
   display: flex;
   flex-direction: column;
@@ -34,19 +265,19 @@
 }
 
 .questionsCollapse {
-  border-radius: 12px;
+  border-radius: $borderRadiusLarge;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: $shadowSm;
 
   .ant-collapse-item {
     border: 1px solid #e8e8e8;
-    border-radius: 8px;
+    border-radius: $borderRadius;
     margin-bottom: 12px;
     background: #ffffff;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: $shadowMd;
       border-color: #d9d9d9;
     }
 
@@ -54,7 +285,7 @@
       padding: 16px 20px;
       background: #fafafa;
       border-radius: 8px 8px 0 0;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid $borderColor;
     }
 
     .ant-collapse-content {
@@ -96,7 +327,7 @@
 
 .questionNumber {
   font-weight: 600;
-  color: #1890ff;
+  color: #1E69DA;
   font-size: 16px;
   flex-shrink: 0;
 }
@@ -119,7 +350,7 @@
   code {
     background: #f5f5f5;
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: $borderRadius;
     font-family: "JetBrains Mono", monospace;
   }
 }
@@ -138,12 +369,12 @@
 
 .scoreTag {
   font-weight: 500;
-  border-radius: 4px;
+  border-radius: $borderRadius;
 }
 
 .typeTag {
   font-weight: 500;
-  border-radius: 4px;
+  border-radius: $borderRadius;
 }
 
 .actionButtons {
@@ -152,9 +383,9 @@
 }
 
 .editBtn {
-  color: #1890ff;
-  border-color: #1890ff;
-  transition: all 0.3s ease;
+  color: #1E69DA;
+  border-color: #1E69DA;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     background: #e6f7ff;
@@ -164,7 +395,7 @@
 }
 
 .deleteBtn {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     background: #fff2f0;
@@ -182,8 +413,8 @@
 .questionOptions {
   background: linear-gradient(135deg, #f6f9fc 0%, #f1f5f9 100%);
   padding: 20px;
-  border-radius: 8px;
-  border-left: 4px solid #1890ff;
+  border-radius: $borderRadius;
+  border-left: 4px solid #1E69DA;
   margin-bottom: 16px;
 }
 
@@ -195,7 +426,7 @@
 }
 
 .headerIcon {
-  color: #1890ff;
+  color: #1E69DA;
   font-size: 16px;
 }
 
@@ -219,14 +450,14 @@
 .optionItem {
   background: #ffffff;
   border: 2px solid #e8e8e8;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   padding: 6px 16px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   // width: 100%;
 
   &:hover {
     border-color: #d9d9d9;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: $shadowSm;
   }
 }
 
@@ -287,7 +518,7 @@
   code {
     background: #f5f5f5;
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: $borderRadius;
     font-family: "JetBrains Mono", monospace;
   }
 }
@@ -295,7 +526,7 @@
 .optionListItem {
   background: #ffffff;
   border: 1px solid #e8e8e8;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   padding: 12px 16px;
   margin-bottom: 8px;
   display: flex;
@@ -304,13 +535,13 @@
 
   &:hover {
     border-color: #d9d9d9;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: $shadowSm;
   }
 }
 
 .optionLabel {
   font-weight: 600;
-  color: #1890ff;
+  color: #1E69DA;
   flex-shrink: 0;
   min-width: 80px;
 }
@@ -319,7 +550,7 @@
 .explanationSection {
   background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
   padding: 16px 20px;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   border-left: 4px solid #faad14;
 }
 
@@ -356,7 +587,7 @@
   code {
     background: #f5f5f5;
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: $borderRadius;
     font-family: "JetBrains Mono", monospace;
   }
 }
@@ -365,7 +596,7 @@
 .resourceSection {
   // background: linear-gradient(135deg, #f3e5f5 0%, #e8d5ea 100%);
   padding: 16px 20px;
-  border-radius: 8px;
+  border-radius: $borderRadius;
   border-left: 4px solid #722ed1;
 
   .sectionIcon {
@@ -377,7 +608,7 @@
 .videoPlayer {
   width: 60%;
   max-width: 100%;
-  border-radius: 6px;
+  border-radius: $borderRadius;
   margin-top: 8px;
   aspect-ratio: 16/9;
 }
@@ -415,6 +646,10 @@
 
 // Responsive Design
 @media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
   .questionHeader {
     flex-direction: column;
     gap: 12px;
@@ -438,4 +673,71 @@
   .createButton {
     width: 100%;
   }
+
+  .itemCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .itemMeta {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .itemActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .paginationRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.questionItem {
+  border: 1px solid #1E69DA4d;
+  border-radius: $borderRadius;
+  background: white;
+  margin-bottom: 12px;
+
+  &:hover {
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+      rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  }
+}
+
+.questionItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.questionItemHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.questionItemHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.questionText {
+  font-weight: 600;
+  color: #1E69DA;
+}
+
+.tagLabel {
+  border: 1px solid #1E69DA;
+  padding: 0.2rem 0.5rem;
+  border-radius: $borderRadius;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: #1E69DA4d;
 }
