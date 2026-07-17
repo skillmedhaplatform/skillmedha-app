@@ -4,7 +4,7 @@ const apis = {
   mi: "0384295621msheb61f4751e1b41ap10acc0jsn96fa40b5dc6d",
 };
 
-const BASE_URL = "https://judge0-ce.p.rapidapi.com";
+const BASE_URL = "https://compiler.skillmedha.com";
 
 const encode = (str) => {
   if (!str) return "";
@@ -78,7 +78,7 @@ export const executeCode = async (language_id, code, stdin) => {
   const stderr = decode(res.stderr || "");
   const time = res.time || "0";
   const memory = res.memory || 0;
-  
+
   let output = "";
   if (statusId === 3) output = stdout || "(no output)";
   else if (statusId === 6) output = compileOut || "Compilation error";
