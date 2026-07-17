@@ -21,10 +21,10 @@ import {
 import { useRouter } from "next/navigation";
 import { Tooltip } from "@mui/material";
 import PageHeader from "@/modules/tpo/components/PageHeader";
-import { 
-  HiOutlineSquares2X2, 
-  HiOutlineBriefcase, 
-  HiOutlineClock 
+import {
+  HiOutlineSquares2X2,
+  HiOutlineBriefcase,
+  HiOutlineClock
 } from "react-icons/hi2";
 
 // Constants
@@ -154,6 +154,8 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
     </div>
   );
 };
+
+export default function JobAssessments() {
   // ===== STATE MANAGEMENT =====
   const [pageNo, setPageNo] = useState(ASSESSMENT_CONFIG.DEFAULT_PAGE_NO);
   const [pageSize, setPageSize] = useState(ASSESSMENT_CONFIG.DEFAULT_PAGE_SIZE);
@@ -177,14 +179,12 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
       const updatedCountdowns = {};
 
       jobData.forEach((job, index) => {
-        // Adjust these field names based on your job/assessment data structure
         const expiryDate =
           job?.time?.expiryDates?.accessClosingDate ||
           job?.time?.expiryDates?.testExpirationData ||
           job?.expiryDate ||
           job?.endDate;
 
-        // Adjust this condition based on your data structure
         const hasExpiry =
           job?.time?.expiryDates?.expiry || job?.hasExpiry || expiryDate;
 
@@ -209,9 +209,7 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
 
             if (days > 0) {
               days = String(days).padStart(2, "0");
-              updatedCountdowns[
-                index
-              ] = `${days}:${hours}:${minutes}:${seconds}`;
+              updatedCountdowns[index] = `${days}:${hours}:${minutes}:${seconds}`;
             } else {
               updatedCountdowns[index] = `${hours}:${minutes}:${seconds}`;
             }
@@ -230,7 +228,6 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
   }, [jobData]);
 
   // ===== EFFECTS =====
-  // Fetch assessments data
   useEffect(() => {
     let isMounted = true;
 
@@ -288,7 +285,6 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
 
   // ===== EVENT HANDLERS =====
   const handleSearch = (e) => {
-    // TODO: Implement search functionality
     console.log("Search:", e.target.value);
   };
 
@@ -335,7 +331,7 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
 
   const renderSummaryBoxes = () => (
     <div className={JaStyles.summaryGrid} style={{ padding: '0 1.5rem' }}>
-      <div 
+      <div
         className={`${JaStyles.summaryBox} ${filterType === "All" ? JaStyles.activeBox : ""}`}
         onClick={() => handleFilterClick("All")}
       >
@@ -347,7 +343,7 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
           <span className={JaStyles.label}>All Assessments</span>
         </div>
       </div>
-      <div 
+      <div
         className={`${JaStyles.summaryBox} ${filterType === "Active" ? JaStyles.activeBox : ""}`}
         onClick={() => handleFilterClick("Active")}
       >
@@ -359,7 +355,7 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
           <span className={JaStyles.label}>Active Jobs</span>
         </div>
       </div>
-      <div 
+      <div
         className={`${JaStyles.summaryBox} ${filterType === "Expired" ? JaStyles.activeBox : ""}`}
         onClick={() => handleFilterClick("Expired")}
       >
@@ -394,6 +390,8 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
     }
 
     return renderAssessmentCards();
+  };
+
   const renderPagination = () => (
     <div className={JaStyles.paginationContainer}>
       <Pagination
@@ -409,13 +407,10 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
   // ===== MAIN RENDER =====
   return (
     <div className={JaStyles.container}>
-        {renderHeader()}
-        {renderSummaryBoxes()}
-        <div className={JaStyles.bodyStyles}>{renderBodyContent()}</div>
-        {renderSummaryBoxes()}
-        <div className={JaStyles.bodyStyles}>{renderBodyContent()}</div>
-
-        {renderPagination()}
-      </div>
+      {renderHeader()}
+      {renderSummaryBoxes()}
+      <div className={JaStyles.bodyStyles}>{renderBodyContent()}</div>
+      {renderPagination()}
+    </div>
   );
 }
