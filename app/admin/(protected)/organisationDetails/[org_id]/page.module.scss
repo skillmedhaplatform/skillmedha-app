@@ -1,3 +1,4 @@
+// Force re-compilation
 @use "@/modules/admin/styles/colors" as *;
 @import "@/modules/admin/styles/mixins.scss";
 
@@ -108,16 +109,19 @@
 }
 
 .dashboardContainer {
-  min-height: 70vh;
-  height: 85vh;
+  height: calc(100% - 2rem);
+  min-height: 80vh;
+  width: auto;
+  margin: 1rem;
+  padding: 0 2rem 2rem 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   overflow-y: auto;
   overflow-x: hidden;
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-  padding: 0.5rem;
-  padding-top: 0;
   @include custom-scrollbar();
+  position: relative;
 
   * {
     max-width: 100%;
@@ -128,14 +132,14 @@
   .header {
     @include flexBox(row, center, space-between, 1rem);
     flex-wrap: wrap;
-    margin-bottom: 1rem;
     position: sticky;
     top: 0;
     background-color: white;
     z-index: 9;
     width: 100%;
-    padding: 0.75rem 1rem;
-    box-shadow: $shadowSm;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
 
     .headerLeft {
       @include flexBox(column, flex-start, flex-start, 0.25rem);
@@ -968,4 +972,29 @@
   margin-top: 8px;
   font-size: 12px;
   font-weight: 500;
+}
+
+.breadcrumbLink {
+  color: #1E69DA !important;
+  cursor: pointer;
+  transition: color 0.3s;
+  font-size: 15px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+
+  &:hover {
+    color: #1e8287 !important;
+    text-decoration: underline;
+  }
+}
+
+.breadcrumbCurrent {
+  color: #0f172a !important;
+  font-weight: 600;
+  background-color: transparent !important;
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+  font-size: 15px;
 }
