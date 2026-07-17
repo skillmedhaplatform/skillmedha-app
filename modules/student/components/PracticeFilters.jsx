@@ -8,6 +8,7 @@ export default function PracticeFilters({
   onCategoryChange,
   activeSort = "Default",
   onSortChange,
+  hideCategoryProgress = false,
 }) {
   const [activeTab, setActiveTab] = useState("All topics");
   const categoryProgressData = useSelector((state) => state.practice.categoryProgress || {});
@@ -80,35 +81,37 @@ export default function PracticeFilters({
       </div>
       */}
 
-      <div className="px-4 lg:px-8 py-3">
-        {/* Category Progress Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-5">
-          <span className="text-[13px] font-bold text-gray-800 whitespace-nowrap">
-            Category progress
-          </span>
-          <div className="flex items-center gap-2.5 lg:gap-3 flex-wrap flex-1 pb-1 lg:pb-0">
-            {categoryProgress.map((cat, i) => (
-              <div key={i} className="flex flex-col justify-center min-w-[110px] border border-[#e2e8f0] rounded-lg px-2.5 py-1.5 bg-white shadow-sm">
-                <span
-                  className="text-[11px] font-bold mb-1"
-                  style={{ color: cat.color }}
-                >
-                  {cat.name}
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${cat.progress}%`, backgroundColor: cat.color }}
-                    ></div>
+      {!hideCategoryProgress && (
+        <div className="px-4 lg:px-8 py-3">
+          {/* Category Progress Row */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-5">
+            <span className="text-[13px] font-bold text-gray-800 whitespace-nowrap">
+              Category progress
+            </span>
+            <div className="flex items-center gap-2.5 lg:gap-3 flex-wrap flex-1 pb-1 lg:pb-0">
+              {categoryProgress.map((cat, i) => (
+                <div key={i} className="flex flex-col justify-center min-w-[110px] border border-[#e2e8f0] rounded-lg px-2.5 py-1.5 bg-white shadow-sm">
+                  <span
+                    className="text-[11px] font-bold mb-1"
+                    style={{ color: cat.color }}
+                  >
+                    {cat.name}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${cat.progress}%`, backgroundColor: cat.color }}
+                      ></div>
+                    </div>
+                    <span className="text-[11px] font-bold text-gray-800">{cat.progress}%</span>
                   </div>
-                  <span className="text-[11px] font-bold text-gray-800">{cat.progress}%</span>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

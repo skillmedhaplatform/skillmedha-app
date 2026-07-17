@@ -130,8 +130,10 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
 
   useEffect(() => {
     if (typeof window !== "undefined" && subtopics.length > 0) {
-      const isTech = subject.type?.toLowerCase() === "technical" || window.location.pathname.includes('technical');
-      const sectionType = isTech ? "Technical" : "Non-Technical";
+      const path = window.location.pathname;
+      const isCoding = path.includes('/coding');
+      const isNonTech = path.includes('/nontechnical');
+      const sectionType = isCoding ? "Coding" : isNonTech ? "Non-Technical" : "Technical";
 
       let pendingNotices = JSON.parse(localStorage.getItem("pendingPracticeNotices") || "[]");
       let claimedBadges = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
@@ -160,29 +162,55 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
         if (stats.flawlessLevel > 0 || stats.recallLevel > 0) {
           for (let i = 1; i <= stats.flawlessLevel; i++) {
             const badgeId = `practice_badge|${sectionType}|${st.topicTitle || subject.title}|${st.title}|Flawless|${i}`;
-            if (!claimedBadges.includes(badgeId) && !pendingNotices.find(n => n.id === badgeId)) {
-              pendingNotices.push({
-                id: badgeId,
-                type: 'badge',
-                title: `🏆 Flawless Master Lvl ${i}`,
-                message: `You scored 100% on new questions in ${st.title}! Claim your Flawless Master badge.`,
-                isClaimed: false
-              });
-              hasUpdates = true;
+            if (!claimedBadges.includes(badgeId)) {
+              claimedBadges.push(badgeId);
+              localStorage.setItem("claimedAchievements", JSON.stringify(claimedBadges));
+              
+              const unseen = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]");
+              if (!unseen.includes(badgeId)) {
+                unseen.push(badgeId);
+                localStorage.setItem("unseenPracticeBadges", JSON.stringify(unseen));
+              }
+
+              if (!pendingNotices.find(n => n.id.includes(badgeId))) {
+                pendingNotices.push({
+                  id: `notice_${Date.now()}_${badgeId}`,
+                  type: 'badge',
+                  title: `🏆 Flawless Master: ${st.topicTitle || subject.title} - ${st.title}`,
+                  message: `You scored 100% on new questions in ${st.title}! Claim your Flawless Master badge.`,
+                  actionUrl: `#openBadges_${sectionType === 'Technical' ? 'Technical' : 'Non-Technical'}`,
+                  actionText: 'Checkout',
+                  isClaimed: false
+                });
+                hasUpdates = true;
+              }
             }
           }
           
           for (let i = 1; i <= stats.recallLevel; i++) {
             const badgeId = `practice_badge|${sectionType}|${st.topicTitle || subject.title}|${st.title}|Recall|${i}`;
-            if (!claimedBadges.includes(badgeId) && !pendingNotices.find(n => n.id === badgeId)) {
-              pendingNotices.push({
-                id: badgeId,
-                type: 'badge',
-                title: `🏅 Recall Master Lvl ${i}`,
-                message: `You scored 100% on practiced questions in ${st.title}! Claim your Recall Master badge.`,
-                isClaimed: false
-              });
-              hasUpdates = true;
+            if (!claimedBadges.includes(badgeId)) {
+              claimedBadges.push(badgeId);
+              localStorage.setItem("claimedAchievements", JSON.stringify(claimedBadges));
+              
+              const unseen = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]");
+              if (!unseen.includes(badgeId)) {
+                unseen.push(badgeId);
+                localStorage.setItem("unseenPracticeBadges", JSON.stringify(unseen));
+              }
+
+              if (!pendingNotices.find(n => n.id.includes(badgeId))) {
+                pendingNotices.push({
+                  id: `notice_${Date.now()}_${badgeId}`,
+                  type: 'badge',
+                  title: `🏅 Recall Master: ${st.topicTitle || subject.title} - ${st.title}`,
+                  message: `You scored 100% on practiced questions in ${st.title}! Claim your Recall Master badge.`,
+                  actionUrl: `#openBadges_${sectionType === 'Technical' ? 'Technical' : 'Non-Technical'}`,
+                  actionText: 'Checkout',
+                  isClaimed: false
+                });
+                hasUpdates = true;
+              }
             }
           }
         }
@@ -227,7 +255,7 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
   const handleStart = (subtopic) => {
     // Navigate to test page with subtopic ID
     const isCoding = pathname.includes("/coding");
-    const basePath = isCoding ? "/student/practice-new/coding/codingtest" : "/student/practice-new/test";
+    const basePath = isCoding ? "/student/practice-new/coding/problems" : "/student/practice-new/test";
     
     router.push(`${basePath}?subT=${subtopic._id}&t=${subtopic.topicId}&sub=${subject._id}&title=${encodeURIComponent(subtopic.title)}&subjectTitle=${encodeURIComponent(subject.title)}&type=${encodeURIComponent(subject.type || "Technical")}`);
   };
