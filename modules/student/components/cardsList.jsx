@@ -64,6 +64,7 @@ export default function CardsList({ type, isModal = false, progressById, combine
       }));
     }
     window.dispatchEvent(new Event("achievementClaimed"));
+    window.dispatchEvent(new Event("achievementClaimed"));
   };
 
   const settings = {
@@ -75,6 +76,7 @@ export default function CardsList({ type, isModal = false, progressById, combine
   };
 
   const [activeKey, setActiveKey] = useState(null);
+  const [activeFilter, setActiveFilter] = useState("All");
 
   const handleChange = (key) => {
     setActiveKey(key);
@@ -181,6 +183,7 @@ export default function CardsList({ type, isModal = false, progressById, combine
         });
       }
       
+      
       // Perfect Scorer
       if (typeof window !== "undefined" && localStorage.getItem("showLevelUpPopup") === "true") {
         achievementNotices.push({
@@ -200,20 +203,25 @@ export default function CardsList({ type, isModal = false, progressById, combine
           if (progressById[id]?.totalProgress === 100) {
             const course = combinedLearningData.find((c) => c._id === id);
             if (course) {
-              const achievementId = `complete_${id}`;
-              const categoryText = course.category ? course.category : (course.type || "Course");
-              const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
-              
-              achievementNotices.push({
-                title: isModal ? `🎉 You completed ${course.title}!` : `🎉 ${shortCategoryText} Completed`,
-                startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-                status: "active",
-                source: "system",
-                message: `Congratulations! You have completed the ${course.type || "course"} "<b>${course.title}</b>". Claim your gold badge and 50 coins!`,
-                isAchievement: true,
-                achievementId: achievementId,
-                isClaimed: claimedAchievements.includes(achievementId)
-              });
+              const updatedAt = progressById[id]?.updatedAt || Date.now();
+              const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+              // Expire course completion notices after 7 days
+              if (Date.now() - new Date(updatedAt).getTime() <= sevenDaysMs) {
+                const achievementId = `complete_${id}`;
+                const categoryText = course.category ? course.category : (course.type || "Course");
+                const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
+                
+                achievementNotices.push({
+                  title: isModal ? `🎉 You completed ${course.title}!` : `🎉 ${shortCategoryText} Completed`,
+                  startDate: new Date(updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                  status: "active",
+                  source: "system",
+                  message: `Congratulations! You have completed the ${course.type || "course"} "<b>${course.title}</b>". Claim your gold badge and 50 coins!`,
+                  isAchievement: true,
+                  achievementId: achievementId,
+                  isClaimed: claimedAchievements.includes(achievementId)
+                });
+              }
             }
           }
         });
@@ -222,12 +230,29 @@ export default function CardsList({ type, isModal = false, progressById, combine
       if (typeof window !== "undefined") {
         const pendingPracticeNoticesRaw = JSON.parse(localStorage.getItem("pendingPracticeNotices") || "[]");
         
-        // Filter out notices older than 3 days (3 * 24 * 60 * 60 * 1000 ms)
-        const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-        const pendingPracticeNotices = pendingPracticeNoticesRaw.filter(notice => {
-          const timestamp = parseInt(notice.id.split('_').pop());
-          return !isNaN(timestamp) && (Date.now() - timestamp) <= threeDaysMs;
-        });
+        // Filter out notices older than 7 days (7 * 24 * 60 * 60 * 1000 ms) and corrupted generic ones
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        const seenTitles = new Set();
+        const validNotices = [];
+        // Traverse backwards to keep the most recent if there are duplicates
+        for (let i = pendingPracticeNoticesRaw.length - 1; i >= 0; i--) {
+          const notice = pendingPracticeNoticesRaw[i];
+          if (notice.title === '🏆 New Badge Earned!') continue;
+          
+          let timestamp = parseInt(notice.id.split('_').pop());
+          if (notice.id.startsWith('notice_')) {
+             timestamp = parseInt(notice.id.split('_')[1]);
+          }
+          
+          if (!isNaN(timestamp) && (Date.now() - timestamp) <= sevenDaysMs) {
+            if (!seenTitles.has(notice.title)) {
+              seenTitles.add(notice.title);
+              notice.timestamp = timestamp;
+              validNotices.unshift(notice);
+            }
+          }
+        }
+        const pendingPracticeNotices = validNotices;
         
         if (pendingPracticeNotices.length !== pendingPracticeNoticesRaw.length) {
           localStorage.setItem("pendingPracticeNotices", JSON.stringify(pendingPracticeNotices));
@@ -238,12 +263,25 @@ export default function CardsList({ type, isModal = false, progressById, combine
         pendingPracticeNotices.forEach(notice => {
           if (!claimedAchievements.includes(notice.id)) {
             if (notice.type === 'badge') {
+              let displayTitle = notice.title;
+              if (displayTitle === '🏆 New Badge Earned!' || displayTitle === '🏆 You earned a Flawless badge!') {
+                const parts = notice.id.split('|');
+                if (parts.length >= 5) {
+                  const subject = parts[2];
+                  const topic = parts[3];
+                  const type = parts[4];
+                  displayTitle = `🏆 ${type} Badge: ${subject} - ${topic}`;
+                }
+              }
+
               achievementNotices.push({
-                title: notice.title,
-                startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                title: displayTitle,
+                startDate: notice.timestamp ? new Date(notice.timestamp).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
                 status: "active",
                 source: "system",
                 message: notice.message,
+                actionUrl: notice.actionUrl,
+                actionText: notice.actionText,
                 isAchievement: true,
                 achievementId: notice.id,
                 isClaimed: false
@@ -251,7 +289,7 @@ export default function CardsList({ type, isModal = false, progressById, combine
             } else if (notice.type === 'new_questions') {
               achievementNotices.push({
                 title: notice.title,
-                startDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                startDate: notice.timestamp ? new Date(notice.timestamp).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
                 status: "active",
                 source: "system",
                 message: notice.message,
@@ -404,12 +442,43 @@ export default function CardsList({ type, isModal = false, progressById, combine
       return null;
   }
   if (type === "notifications") {
+    const getCategory = (e) => {
+      const title = e?.title || "";
+      if (e?.isAchievement || e?.type === 'badge' || title.includes('Badge') || title.includes('🏆') || title.includes('🎉') || title.includes('🏅')) return "Achievements";
+      if (title.includes('Test') || title.includes('Assessment') || title.includes('Questions') || title.includes('Module') || e?.actionUrl === '/student/tests' || e?.type === 'new_questions') return "Learning";
+      if (title.includes('Internship') || title.includes('Job') || e?.actionUrl === '/student/jobAssessments') return "Company";
+      return "TPO Updates"; 
+    };
+
+    const filters = ["All", "Achievements", "Learning", "TPO Updates", "Company"];
+    const activeData = data?.filter((d) => d?.status === "active") || [];
+    const filteredData = activeFilter === "All" ? activeData : activeData.filter(d => getCategory(d) === activeFilter);
+
     return (
       <div className={`flex flex-col gap-3 [&::-webkit-scrollbar]:hidden pb-2 px-1 ${isModal ? 'h-full overflow-y-auto' : 'w-full'}`}>
-        {
-        // data?.filter((d) => d?.status !== "pending")        
-        data?.filter((d) => d?.status === "active")
-          .map((e, i) => {
+        {isModal && (
+          <div className="flex gap-2 mb-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden shrink-0">
+            {filters.map(f => (
+              <button
+                key={f}
+                onClick={() => {
+                  setActiveFilter(f);
+                  setActiveKey(null);
+                }}
+                className={`px-3 py-1.5 rounded-md text-[13px] font-bold whitespace-nowrap transition-colors ${activeFilter === f ? 'bg-[#3b82f6] text-white shadow-sm' : 'bg-[#e2e8f0] text-[#475569] hover:bg-[#cbd5e1]'}`}
+              >
+                {f === "Achievements" ? "🏆 " : f === "Learning" ? "📚 " : f === "TPO Updates" ? "📢 " : f === "Company" ? "🏢 " : ""}{f}
+              </button>
+            ))}
+          </div>
+        )}
+        {filteredData.length > 0 ? filteredData.map((e, i) => {
+            const category = getCategory(e);
+            let borderClass = 'border-l-[#24A058]'; // Default Learning Green
+            if (category === 'Achievements') borderClass = 'border-l-[#eab308]'; // Yellow/Gold
+            else if (category === 'Company') borderClass = 'border-l-[#3b82f6]'; // Blue
+            else if (category === 'TPO Updates') borderClass = 'border-l-[#ef4444]'; // Red
+
             return (
               <ConfigProvider
                 key={i}
@@ -423,8 +492,7 @@ export default function CardsList({ type, isModal = false, progressById, combine
                 }}
               >
                 <Collapse
-                  className={`border border-[#e2e8f0] border-l-[4px] border-l-[#24A058] rounded-xl overflow-hidden w-full ${activeKey == i ? "" : ""
-                    }`}
+                  className={`border border-[#e2e8f0] border-l-[4px] ${borderClass} rounded-xl overflow-hidden w-full`}
                 size="medium"
                 activeKey={activeKey}
                 onChange={handleChange}
@@ -437,7 +505,18 @@ export default function CardsList({ type, isModal = false, progressById, combine
                       <div className="flex flex-col flex-1 min-w-0 w-full gap-1">
                         {/* Top Row: Title and Status */}
                         <div className="flex flex-row items-start justify-between gap-2 w-full">
-                          <p className="text-[15px] font-bold m-0 leading-snug break-words whitespace-normal">{e?.title}</p>
+                          <p className={`text-[15px] font-bold m-0 leading-snug break-words ${isModal ? 'whitespace-normal' : 'truncate'}`}>
+                            {(() => {
+                              if (isModal || !e?.title) return e?.title;
+                              if (e.isAchievement && (e.title.includes('🏆') || e.title.includes('🏅')) && e.title.includes(' - ')) {
+                                const parts = e.title.split(' - ');
+                                const subtopic = parts[parts.length - 1];
+                                const emoji = e.title.includes('🏆') ? '🏆' : '🏅';
+                                return `${emoji} ${subtopic} Badge Earned`;
+                              }
+                              return e?.title;
+                            })()}
+                          </p>
                           {(!isModal && e?.source === "system") ? null : (
                             <p
                               className="m-0 shrink-0 text-[14px] capitalize pt-[2px]"
@@ -502,6 +581,9 @@ export default function CardsList({ type, isModal = false, progressById, combine
                                   } else {
                                     router.push(e.actionUrl);
                                   }
+                                  if (isModal) {
+                                    window.dispatchEvent(new Event("closeNoticeBoard"));
+                                  }
                                 }}
                                 className="!bg-[#1E69DA] !border-none !text-white font-bold h-8 px-4 rounded-md mt-1 w-fit"
                               >
@@ -558,7 +640,11 @@ export default function CardsList({ type, isModal = false, progressById, combine
               />
               </ConfigProvider>
             );
-          })}
+          }) : (
+            <div className="flex-1 flex flex-col items-center justify-center min-h-[300px] text-[#64748b] font-medium text-[15px]">
+              No updates found in this category.
+            </div>
+          )}
       </div>
     );
   }

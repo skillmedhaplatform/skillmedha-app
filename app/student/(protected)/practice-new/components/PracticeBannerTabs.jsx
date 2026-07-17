@@ -9,8 +9,8 @@ export default function PracticeBannerTabs() {
 
   const categoryTabs = [
     { name: "Non-Technical", path: "/student/practice-new/nontechnical" },
-    { name: "Coding", path: "/student/practice-new/coding" },
     { name: "Technical", path: "/student/practice-new/technical" },
+    { name: "Coding", path: "/student/practice-new/coding" },
   ];
 
   return (

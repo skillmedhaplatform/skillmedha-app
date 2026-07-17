@@ -75,6 +75,7 @@ export default function TestPage() {
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showSubmitBtn, setShowSubmitBtn] = useState(false);
+  const [activeRefId, setActiveRefId] = useState(null);
   const [tempSelectedAnswers, setTempSelectedAnswers] = useState({});
   const [textAnswers, setTextAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(30 * 60);
@@ -150,6 +151,7 @@ export default function TestPage() {
     const fetchType = subTopicId ? "subTopicId" : "subjectId";
     
     if (refId) {
+      setActiveRefId(null);
       dispatch(resetUserResponse()); // clear old answers
       
       // We don't restore here because questions aren't loaded yet.
@@ -160,15 +162,16 @@ export default function TestPage() {
           type: fetchType,
           userId: studentCreds?._id,
         })
-      );
+      ).then(() => {
+        setActiveRefId(refId);
+      });
     }
   }, [subTopicId, subjectId, dispatch, studentCreds?._id]);
 
   // RESTORE STATE
   useEffect(() => {
-    if (questions.length > 0) {
-      const refId = subTopicId || subjectId;
-      const storageKey = `practice_resume_${refId}`;
+    if (activeRefId && questions.length > 0) {
+      const storageKey = `practice_resume_${activeRefId}`;
       const savedState = localStorage.getItem(storageKey);
       
       if (savedState) {
@@ -193,13 +196,12 @@ export default function TestPage() {
         }
       }
     }
-  }, [questions.length, subTopicId, subjectId, dispatch]);
+  }, [questions.length, activeRefId, dispatch]);
 
   // SAVE STATE
   useEffect(() => {
-    if (questions.length > 0 && userResponse.length > 0 && !testCompleted) {
-      const refId = subTopicId || subjectId;
-      const storageKey = `practice_resume_${refId}`;
+    if (activeRefId && questions.length > 0 && userResponse.length > 0 && !testCompleted) {
+      const storageKey = `practice_resume_${activeRefId}`;
       localStorage.setItem(storageKey, JSON.stringify({
         userResponse,
         currentQuestionIndex,
@@ -210,7 +212,7 @@ export default function TestPage() {
         questionOrder: questions.map(q => q._id)
       }));
     }
-  }, [userResponse, currentQuestionIndex, selectedAnswers, tempSelectedAnswers, textAnswers, timeLeft, questions.length, testCompleted, subTopicId, subjectId]);
+  }, [userResponse, currentQuestionIndex, selectedAnswers, tempSelectedAnswers, textAnswers, timeLeft, questions.length, testCompleted, activeRefId]);
 
   useEffect(() => {
     if (testCompleted) return;
@@ -617,7 +619,7 @@ export default function TestPage() {
                 onClick={() => handleOptionClick(opt)}
                 style={{ cursor: showExplanation ? "default" : "pointer" }}
               >
-                <div className={pageStyles.optLetter}>
+                <div className={`${pageStyles.optLetter} ${currentQuestion?.questionType === "Single Choice" ? pageStyles.circleBtn : pageStyles.squareBtn}`}>
                   {String.fromCharCode(65 + optInd)}
                 </div>
                 <div
@@ -814,11 +816,26 @@ export default function TestPage() {
                 notices.push({
                   id: `badge_notice_${Date.now()}`,
                   type: 'badge',
-                  title: '🏆 New Badge Earned!',
-                  message: `You unlocked a Flawless badge. Click to view!`,
-                  actionUrl: `#openBadges_${subjectType === 'Technical' ? 'Technical' : 'Non-Technical'}`
+                  title: `🏆 Flawless Badge: ${subjectTitle || "General"} - ${testTitle || "Test"}`,
+                  message: `You earned this badge by scoring 100% on ${testTitle || "Test"}.`,
+                  actionUrl: `#openBadges_${subjectType === 'Technical' ? 'Technical' : 'Non-Technical'}`,
+                  actionText: 'Checkout'
                 });
                 localStorage.setItem('pendingPracticeNotices', JSON.stringify(notices));
+                // ACTUALLY AWARD THE BADGE
+                const badgeId = `practice_badge|${subjectType}|${subjectTitle || "General"}|${testTitle || "Test"}|Flawless|1`;
+                const claimed = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+                if (!claimed.includes(badgeId)) {
+                  claimed.push(badgeId);
+                  localStorage.setItem("claimedAchievements", JSON.stringify(claimed));
+                  
+                  // Mark as NEW
+                  const unseen = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]");
+                  if (!unseen.includes(badgeId)) {
+                    unseen.push(badgeId);
+                    localStorage.setItem("unseenPracticeBadges", JSON.stringify(unseen));
+                  }
+                }
 
                 router.push("/student/dashboard");
               }}

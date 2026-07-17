@@ -162,9 +162,6 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
   const [filterType, setFilterType] = useState("All");
 
   // ===== REDUX & ROUTING =====
-  const [filterType, setFilterType] = useState("All");
-
-  // ===== REDUX & ROUTING =====
   const dispatch = useDispatch();
   const router = useRouter();
 

@@ -300,7 +300,6 @@ $r-xl: 16px;
     .optLetter {
       width: 30px;
       height: 30px;
-      border-radius: $r-md;
       background: $bg;
       border: 1.5px solid $border-md;
       display: flex;
@@ -311,6 +310,13 @@ $r-xl: 16px;
       color: $blue;
       flex-shrink: 0;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+      &.circleBtn {
+        border-radius: 50%;
+      }
+      &.squareBtn {
+        border-radius: $r-md;
+      }
     }
 
     .optText {

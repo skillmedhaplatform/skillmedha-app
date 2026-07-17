@@ -29,8 +29,8 @@ export default function TechnicalPage() {
   const isMobile = useResponsive();
 
   const categoryTabs = [
-    { name: "Technical", path: "/student/practice-new/technical" },
     { name: "Non-Technical", path: "/student/practice-new/nontechnical" },
+    { name: "Technical", path: "/student/practice-new/technical" },
     { name: "Coding", path: "/student/practice-new/coding" },
   ];
 
@@ -151,7 +151,7 @@ export default function TechnicalPage() {
         </div>
 
         {filteredSubjects && filteredSubjects.length > 0 ? (
-        <div className={`bg-gray-50/30 px-4 lg:px-8 pt-0 pb-6 flex-1 ${activeCategory === "All" ? "overflow-y-auto" : "overflow-hidden"}`}>
+        <div className={`bg-[#EFF5FB] px-4 lg:px-8 pt-0 pb-6 flex-1 ${activeCategory === "All" ? "overflow-y-auto" : "overflow-hidden"}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeCategory}

@@ -76,6 +76,7 @@
     "react-phone-input-2": "^2.15.1",
     "react-quill-new": "^3.8.3",
     "react-redux": "^9.3.0",
+    "react-resizable-panels": "^4.12.2",
     "react-select": "^5.10.2",
     "react-slick": "^0.31.0",
     "recharts": "^3.8.1",
