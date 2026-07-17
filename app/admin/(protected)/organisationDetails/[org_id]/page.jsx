@@ -40,6 +40,44 @@ import {
 import dynamic from "next/dynamic";
 import styles from "./page.module.scss";
 import { encrypt, setLstorage } from "@/utils/windowMW";
+import { IoCaretForwardOutline } from "react-icons/io5";
+
+// Custom Breadcrumb Item Component
+const BreadcrumbItem = ({ title, onClick, isLast }) => {
+  const truncatedTitle =
+    title && title.length > 25 ? `${title.substring(0, 25)}...` : title;
+
+  return (
+    <>
+      {isLast ? (
+        <span
+          className={styles.breadcrumbCurrent}
+          style={{ maxWidth: "250px" }}
+        >
+          {truncatedTitle}
+        </span>
+      ) : (
+        <span
+          onClick={onClick}
+          className={styles.breadcrumbLink}
+          style={{ maxWidth: "250px" }}
+        >
+          {truncatedTitle}
+        </span>
+      )}
+      {!isLast && (
+        <IoCaretForwardOutline
+          style={{
+            fontSize: "14px",
+            margin: "0 8px",
+            color: "#64748b",
+            flexShrink: 0,
+          }}
+        />
+      )}
+    </>
+  );
+};
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -98,11 +136,30 @@ const DashboardSkeleton = () => {
 };
 
 // ==================== HEADER COMPONENT ====================
-const DashboardHeader = ({ orgName, orgType }) => {
+const DashboardHeader = ({ orgName, orgType, breadcrumbItems }) => {
   return (
     <div className={styles.header}>
       <div className={styles.headerLeft}>
-        <h2>{orgName || "Dashboard"}</h2>
+        {breadcrumbItems && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              fontSize: "15px",
+              marginBottom: "8px",
+            }}
+          >
+            {breadcrumbItems.map((item, index) => (
+              <BreadcrumbItem
+                key={index}
+                title={item.title}
+                onClick={item.onClick}
+                isLast={index === breadcrumbItems.length - 1}
+              />
+            ))}
+          </div>
+        )}
+        <h2 style={{ marginTop: "4px" }}>{orgName || "Dashboard"}</h2>
         <span className={styles.subtitle}>
           {orgType === "college" ? "Educational Institution" : "Company"}{" "}
           Dashboard
@@ -1712,15 +1769,36 @@ function DashboardPage() {
   const hrList = stats?.hrDetails || [];
   const jobList = stats?.jobDetails || [];
 
+  const breadcrumbItems = isCompany
+    ? [
+        {
+          title: "Companies",
+          onClick: () => router.push("/admin/companies"),
+        },
+        {
+          title: stats?.organization?.orgName || "Company",
+          isLast: true,
+        },
+      ]
+    : [
+        {
+          title: "Colleges & Students",
+          onClick: () => router.push("/admin/colleges"),
+        },
+        {
+          title: stats?.organization?.orgName || "College",
+          isLast: true,
+        },
+      ];
+
   return (
     <div className={styles.dashboardContainer}>
       {/* Header Section */}
       <DashboardHeader
         orgName={stats?.organization?.orgName}
         orgType={orgType}
+        breadcrumbItems={breadcrumbItems}
       />
-
-      <div className={styles.divider} />
 
       {/* Stats Cards */}
       <div className={styles.statsGrid}>

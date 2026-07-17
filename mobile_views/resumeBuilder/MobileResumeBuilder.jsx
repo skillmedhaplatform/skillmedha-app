@@ -18,10 +18,8 @@ export default function MobileResumeBuilder({
   isEditing,
   setIsEditing,
   handleSubmit,
-  downloadImage,
-  setDownloadImage,
+  handleDownloadResume,
   resumeTemplateRef,
-  // Form Data
   basicDetails,
   updateBasicDetail,
   links,
@@ -60,10 +58,17 @@ export default function MobileResumeBuilder({
   updateLanguage,
   addLanguage,
   removeLanguage,
-  // Dynamic Template Component
-  Template2,
+  templateOptions,
+  templateFilters,
+  selectedTemplate,
+  setSelectedTemplate,
+  SelectedTemplate,
+  builderStep,
+  setBuilderStep,
+  isGeneratingPdf,
 }) {
   const [activeSectionTab, setActiveSectionTab] = useState("edit");
+  const [templateFilter, setTemplateFilter] = useState("all");
   const [scale, setScale] = useState(1);
   const [previewHeight, setPreviewHeight] = useState(1130);
   const wrapperRef = useRef(null);
@@ -77,7 +82,7 @@ export default function MobileResumeBuilder({
         const targetWidth = 800;
         const factor = Math.min(1, containerWidth / targetWidth);
         setScale(factor);
-        
+
         if (scaledRef.current) {
           const firstChild = scaledRef.current.firstElementChild;
           if (firstChild) {
@@ -86,7 +91,7 @@ export default function MobileResumeBuilder({
         }
       }
     };
-    
+
     const timer = setTimeout(updateScale, 150);
     window.addEventListener("resize", updateScale);
     return () => {
@@ -103,42 +108,45 @@ export default function MobileResumeBuilder({
     volunteerings,
     skills,
     languages,
+    selectedTemplate,
   ]);
+
+  const filteredTemplateOptions =
+    templateFilter === "all"
+      ? templateOptions
+      : templateOptions.filter((template) => template.audience === templateFilter);
 
   return (
     <div className={styles.container}>
-      {/* 1. Header Sticky Action Bar */}
       <div className={styles.actionsBar}>
         <div className={styles.actionsLeft}>
           <Button
             type="default"
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() => {
+              if (builderStep === "choose") {
+                setBuilderStep("build");
+                setIsEditing(true);
+                return;
+              }
+              setIsEditing(!isEditing);
+            }}
             className={styles.actionsBtn}
           >
             {isEditing ? "Disable Editing" : "Edit Form"}
           </Button>
 
-          {isEditing && (
-            <Button
-              type="primary"
-              onClick={handleSubmit}
-              className={`${styles.actionsBtn} ${styles.submitBtn}`}
-            >
+          {isEditing && builderStep === "build" && (
+            <Button type="primary" onClick={handleSubmit} className={`${styles.actionsBtn} ${styles.submitBtn}`}>
               Submit Resume
             </Button>
           )}
         </div>
 
-        <Button
-          type="primary"
-          onClick={() => setDownloadImage(true)}
-          className={styles.actionsBtn}
-        >
+        <Button type="primary" onClick={handleDownloadResume} loading={isGeneratingPdf} className={styles.actionsBtn}>
           Download PDF
         </Button>
       </div>
 
-      {/* 2. Tabs Selector (Edit vs Preview) */}
       <div className={styles.tabsBar}>
         <ConfigProvider
           theme={{
@@ -158,26 +166,75 @@ export default function MobileResumeBuilder({
             value={activeSectionTab}
             onChange={setActiveSectionTab}
             options={[
-              { label: "✏️ Edit Resume", value: "edit" },
-              { label: "📄 Resume Preview", value: "preview" },
+              { label: "Edit Resume", value: "edit" },
+              { label: "Resume Preview", value: "preview" },
             ]}
             style={{ fontWeight: 600 }}
           />
         </ConfigProvider>
+
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          {(templateFilters || [{ id: "all", label: "All" }]).map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setTemplateFilter(item.id)}
+              className={`min-w-max rounded-full border px-3 py-1.5 text-[11px] font-semibold ${templateFilter === item.id ? "border-[#24A058] bg-[#24A058] text-white" : "border-[#d1d5db] bg-white text-[#4b5563]"}`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+          {filteredTemplateOptions.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              onClick={() => {
+                setSelectedTemplate(template.id);
+                setBuilderStep("build");
+                setIsEditing(true);
+              }}
+              className={`min-w-[200px] rounded-lg border p-3 text-left ${selectedTemplate === template.id ? "border-[#24A058] bg-[#f0fdf4]" : "border-[#e2e8f0] bg-white"}`}
+            >
+              <div className="text-[13px] font-semibold text-[#0f172a]">{template.label}</div>
+              <div className="mt-1 text-[11px] text-[#64748b]">{template.summary}</div>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* 3. Render Form or Preview */}
-      {activeSectionTab === "edit" ? (
+      {builderStep === "choose" ? (
+        <div className="p-4">
+          <div className="rounded-xl border border-[#e2e8f0] bg-white p-4">
+            <h3 className="m-0 text-[18px] font-bold text-[#0f172a]">Choose a Template</h3>
+            <p className="mt-2 mb-4 text-[13px] text-[#64748b]">Select one template to start filling your data.</p>
+            <div className="grid gap-3">
+              {filteredTemplateOptions.map((template) => (
+                <button
+                  key={template.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTemplate(template.id);
+                    setBuilderStep("build");
+                    setIsEditing(true);
+                  }}
+                  className={`rounded-lg border p-3 text-left ${selectedTemplate === template.id ? "border-[#24A058] bg-[#f0fdf4]" : "border-[#e2e8f0] bg-white"}`}
+                >
+                  <div className="text-[13px] font-semibold text-[#0f172a]">{template.label}</div>
+                  <div className="mt-1 text-[11px] text-[#64748b]">{template.summary}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : activeSectionTab === "edit" ? (
         <div className={styles.editorScrollCon}>
           {isEditing ? (
             <>
               <BasicDetails data={basicDetails} updateField={updateBasicDetail} />
-              <Links
-                links={links}
-                updateLink={updateLink}
-                addLink={addLink}
-                removeLink={removeLink}
-              />
+              <Links links={links} updateLink={updateLink} addLink={addLink} removeLink={removeLink} />
               <ExperienceDetails
                 experiences={experienceDetails}
                 updateExperience={updateExperience}
@@ -196,12 +253,7 @@ export default function MobileResumeBuilder({
                 addEducation={addEducation}
                 removeEducation={removeEducation}
               />
-              <ProjectDetails
-                projects={projectDetails}
-                updateProject={updateProject}
-                addProject={addProject}
-                removeProject={removeProject}
-              />
+              <ProjectDetails projects={projectDetails} updateProject={updateProject} addProject={addProject} removeProject={removeProject} />
               <CertificateDetails
                 certificates={certificates}
                 updateCertificate={updateCertificate}
@@ -214,28 +266,17 @@ export default function MobileResumeBuilder({
                 addVolunteering={addVolunteering}
                 removeVolunteering={removeVolunteering}
               />
-              <SkillDetails
-                skills={skills}
-                updateSkill={updateSkill}
-                addSkill={addSkill}
-                removeSkill={removeSkill}
-              />
-              <Language
-                languages={languages}
-                updateLanguage={updateLanguage}
-                addLanguage={addLanguage}
-                removeLanguage={removeLanguage}
-              />
+              <SkillDetails skills={skills} updateSkill={updateSkill} addSkill={addSkill} removeSkill={removeSkill} />
+              <Language languages={languages} updateLanguage={updateLanguage} addLanguage={addLanguage} removeLanguage={removeLanguage} />
             </>
           ) : (
             <div className={styles.emptyPreview}>
               <h3>Editing is Disabled</h3>
-              <p>Click the "Edit Form" button at the top to start building your resume.</p>
+              <p>Click Edit Form at the top to start building your resume.</p>
             </div>
           )}
         </div>
       ) : (
-        /* Preview Tab */
         <div className={styles.previewWrapper} ref={wrapperRef}>
           <div
             className={styles.scaledContainer}
@@ -245,10 +286,11 @@ export default function MobileResumeBuilder({
             }}
             ref={scaledRef}
           >
-            <Template2
-              downloadImage={downloadImage}
-              setDownloadImage={setDownloadImage}
+            <SelectedTemplate
+              downloadImage={false}
+              setDownloadImage={() => {}}
               resumeTemplateRef={resumeTemplateRef}
+              isGeneratingPdf={isGeneratingPdf}
             />
           </div>
         </div>
