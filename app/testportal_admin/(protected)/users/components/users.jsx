@@ -133,7 +133,7 @@ const UsersComp = () => {
     return (
       window.location.origin +
       skillmedhaTestPortal +
-      `?s_tk=${token}&s_tks=${Math.random()
+      `/kyc?s_tk=${token}&s_tks=${Math.random()
         .toString(32)
         .slice(3)}sGIR9HD${Math.random()
         .toString(32)
