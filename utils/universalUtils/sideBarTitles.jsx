@@ -39,6 +39,13 @@ export const sideBarTitles = [
     disable: false,
   },
   {
+    name: "ATS Resume Checker",
+    slug: "atsResumeChecker",
+    path: "/student/atsResumeChecker",
+    icon: <HiOutlineDocumentText size={22} />,
+    disable: false,
+  },
+  {
     name: "Job Openings",
     slug: "jobopenings",
     path: "/student/jobopenings",

@@ -190,7 +190,7 @@ const SideBar = ({ activeView, setView }) => {
         mainItems.push(menuItem);
       } else if (['practice', 'internshiplibrary', 'courseslibrary'].includes(title.slug)) {
         learnItems.push(menuItem);
-      } else if (['resumebuilder', 'jobopenings', 'myassessments', 'testresults'].includes(title.slug)) {
+      } else if (['resumebuilder', 'atsResumeChecker', 'jobopenings', 'myassessments', 'testresults'].includes(title.slug)) {
         careerItems.push(menuItem);
       } else if (title.slug === 'help') {
         supportItems.push(menuItem);

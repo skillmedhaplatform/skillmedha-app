@@ -366,18 +366,18 @@ const FeatureManagement = ({
   const [featureStates, setFeatureStates] = React.useState(
     orgType === "company"
       ? {
-          jobassessments: false,
-          // Add more company-specific features here
-        }
+        jobassessments: false,
+        // Add more company-specific features here
+      }
       : {
-          resumebuilder: false,
-          talktoai: false,
-          internshiplibrary: false,
-          courseslibrary: false,
-          practice: false,
-          jobopenings: false,
-          myassessments: false,
-        }
+        resumebuilder: false,
+        talktoai: false,
+        internshiplibrary: false,
+        courseslibrary: false,
+        practice: false,
+        jobopenings: false,
+        myassessments: false,
+      }
   );
 
   // Sync featureStates with props on mount and when features change
@@ -409,6 +409,13 @@ const FeatureManagement = ({
       label: "Resume Builder",
       icon: <IdcardOutlined />,
       color: "#1E69DA",
+      description: "AI-powered resume creation",
+    },
+    {
+      key: "atsResumeChecker",
+      label: "ATS Resume Checker",
+      icon: <IdcardOutlined />,
+      color: "#1890ff",
       description: "AI-powered resume creation",
     },
     {
@@ -498,9 +505,8 @@ const FeatureManagement = ({
 
       hide();
       message.success({
-        content: `${featureName} ${
-          checked ? "enabled" : "disabled"
-        } successfully!`,
+        content: `${featureName} ${checked ? "enabled" : "disabled"
+          } successfully!`,
         duration: 3,
       });
 
@@ -1118,7 +1124,7 @@ const JobCard = ({ job, onJobClick }) => {
       className={styles.jobCard}
       onClick={() => {
         setLstorage("jobDetails", JSON.stringify(job));
-        setTimeout(() => {}, 10);
+        setTimeout(() => { }, 10);
         push(`/admin/organisationDetails/${ORG_ID}/${job?._id}?type=company`);
       }}
       role="button"
@@ -1659,102 +1665,101 @@ function DashboardPage() {
   if (loading) {
     return <DashboardSkeleton />;
   }
-  
+
   // Prepare stats cards based on organization type
   const statsCards = isCompany
     ? [
-        {
-          title: "Total Jobs",
-          value: stats?.counts?.jobs || 0,
-          icon: <FileTextOutlined />,
-          color: "#1E69DA",
-          trend: `${stats?.monthlyChangeRate?.jobs?.changeValue || 0} %`,
-        },
-        {
-          title: "Total Applications",
-          value: stats?.counts?.applications || 0,
-          icon: <TeamOutlined />,
-          color: "#52c41a",
-          trend: `${
-            stats?.monthlyChangeRate?.applications?.changeValue || 0
+      {
+        title: "Total Jobs",
+        value: stats?.counts?.jobs || 0,
+        icon: <FileTextOutlined />,
+        color: "#1E69DA",
+        trend: `${stats?.monthlyChangeRate?.jobs?.changeValue || 0} %`,
+      },
+      {
+        title: "Total Applications",
+        value: stats?.counts?.applications || 0,
+        icon: <TeamOutlined />,
+        color: "#52c41a",
+        trend: `${stats?.monthlyChangeRate?.applications?.changeValue || 0
           } %`,
-        },
-        {
-          title: "Active Jobs",
-          value: stats?.counts?.activeJobs || 0,
-          icon: <CheckCircleOutlined />,
-          color: "#faad14",
-          trend: `${stats?.monthlyChangeRate?.activeJobs?.changeValue || 0} %`,
-        },
-        {
-          title: "Assessments",
-          value: stats?.counts?.assessments || 0,
-          icon: <AppstoreOutlined />,
-          color: "#eb2f96",
-          trend: `${stats?.monthlyChangeRate?.users?.changeValue || 0} %`,
-        },
-        {
-          title: "AI Requests",
-          value: stats?.aiUsage?.totalRequests || 0,
-          icon: <RobotOutlined />,
-          color: "#722ed1",
-          trend: `${stats?.monthlyChangeRate?.aiRequests?.changeValue || 0} %`,
-        },
-        {
-          title: "AI Tokens Used",
-          value: (stats?.aiUsage?.totalTokens || 0).toLocaleString(),
-          icon: <ThunderboltOutlined />,
-          color: "#13c2c2",
-          trend: `${stats?.monthlyChangeRate?.aiTokens?.changeValue || 0} %`,
-        },
-      ]
+      },
+      {
+        title: "Active Jobs",
+        value: stats?.counts?.activeJobs || 0,
+        icon: <CheckCircleOutlined />,
+        color: "#faad14",
+        trend: `${stats?.monthlyChangeRate?.activeJobs?.changeValue || 0} %`,
+      },
+      {
+        title: "Assessments",
+        value: stats?.counts?.assessments || 0,
+        icon: <AppstoreOutlined />,
+        color: "#eb2f96",
+        trend: `${stats?.monthlyChangeRate?.users?.changeValue || 0} %`,
+      },
+      {
+        title: "AI Requests",
+        value: stats?.aiUsage?.totalRequests || 0,
+        icon: <RobotOutlined />,
+        color: "#722ed1",
+        trend: `${stats?.monthlyChangeRate?.aiRequests?.changeValue || 0} %`,
+      },
+      {
+        title: "AI Tokens Used",
+        value: (stats?.aiUsage?.totalTokens || 0).toLocaleString(),
+        icon: <ThunderboltOutlined />,
+        color: "#13c2c2",
+        trend: `${stats?.monthlyChangeRate?.aiTokens?.changeValue || 0} %`,
+      },
+    ]
     : [
-        {
-          title: "Total Students",
-          value: stats?.counts?.students || 0,
-          icon: <UserOutlined />,
-          color: "#1E69DA",
-          trend: (stats?.monthlyChangeRate?.students?.changeValue || 0) + "%",
-        },
-        {
-          title: "Departments",
-          value: stats?.counts?.departments || 0,
-          icon: <ApartmentOutlined />,
-          color: "#52c41a",
-          trend:
-            (stats?.monthlyChangeRate?.departments?.changeValue || 0) + "%",
-        },
-        {
-          title: "Active Students",
-          value: stats?.counts?.activeStudents || 0,
-          icon: <TeamOutlined />,
-          color: "#faad14",
-          trend:
-            (stats?.monthlyChangeRate?.activeStudents?.changeValue || 0) + "%",
-        },
-        {
-          title: "Placed Students",
-          value: stats?.counts?.placedStudents || 0,
-          icon: <TrophyOutlined />,
-          color: "#eb2f96",
-          trend:
-            (stats?.monthlyChangeRate?.placedStudents?.changeValue || 0) + "%",
-        },
-        {
-          title: "AI Requests",
-          value: stats?.aiUsage?.totalRequests || 0,
-          icon: <RobotOutlined />, // Add this import
-          color: "#722ed1",
-          trend: `${stats?.monthlyChangeRate?.aiRequests?.changeValue || 0} %`,
-        },
-        {
-          title: "AI Tokens Used",
-          value: (stats?.aiUsage?.totalTokens || 0).toLocaleString(),
-          icon: <ThunderboltOutlined />, // Add this import
-          color: "#13c2c2",
-          trend: `${stats?.monthlyChangeRate?.aiTokens?.changeValue || 0} %`,
-        },
-      ];
+      {
+        title: "Total Students",
+        value: stats?.counts?.students || 0,
+        icon: <UserOutlined />,
+        color: "#1E69DA",
+        trend: (stats?.monthlyChangeRate?.students?.changeValue || 0) + "%",
+      },
+      {
+        title: "Departments",
+        value: stats?.counts?.departments || 0,
+        icon: <ApartmentOutlined />,
+        color: "#52c41a",
+        trend:
+          (stats?.monthlyChangeRate?.departments?.changeValue || 0) + "%",
+      },
+      {
+        title: "Active Students",
+        value: stats?.counts?.activeStudents || 0,
+        icon: <TeamOutlined />,
+        color: "#faad14",
+        trend:
+          (stats?.monthlyChangeRate?.activeStudents?.changeValue || 0) + "%",
+      },
+      {
+        title: "Placed Students",
+        value: stats?.counts?.placedStudents || 0,
+        icon: <TrophyOutlined />,
+        color: "#eb2f96",
+        trend:
+          (stats?.monthlyChangeRate?.placedStudents?.changeValue || 0) + "%",
+      },
+      {
+        title: "AI Requests",
+        value: stats?.aiUsage?.totalRequests || 0,
+        icon: <RobotOutlined />, // Add this import
+        color: "#722ed1",
+        trend: `${stats?.monthlyChangeRate?.aiRequests?.changeValue || 0} %`,
+      },
+      {
+        title: "AI Tokens Used",
+        value: (stats?.aiUsage?.totalTokens || 0).toLocaleString(),
+        icon: <ThunderboltOutlined />, // Add this import
+        color: "#13c2c2",
+        trend: `${stats?.monthlyChangeRate?.aiTokens?.changeValue || 0} %`,
+      },
+    ];
 
   // Transform data for charts
   const departmentData =
@@ -1771,25 +1776,25 @@ function DashboardPage() {
 
   const breadcrumbItems = isCompany
     ? [
-        {
-          title: "Companies",
-          onClick: () => router.push("/admin/companies"),
-        },
-        {
-          title: stats?.organization?.orgName || "Company",
-          isLast: true,
-        },
-      ]
+      {
+        title: "Companies",
+        onClick: () => router.push("/admin/companies"),
+      },
+      {
+        title: stats?.organization?.orgName || "Company",
+        isLast: true,
+      },
+    ]
     : [
-        {
-          title: "Colleges & Students",
-          onClick: () => router.push("/admin/colleges"),
-        },
-        {
-          title: stats?.organization?.orgName || "College",
-          isLast: true,
-        },
-      ];
+      {
+        title: "Colleges & Students",
+        onClick: () => router.push("/admin/colleges"),
+      },
+      {
+        title: stats?.organization?.orgName || "College",
+        isLast: true,
+      },
+    ];
 
   return (
     <div className={styles.dashboardContainer}>
