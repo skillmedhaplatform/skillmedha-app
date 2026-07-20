@@ -61,6 +61,7 @@ export default function Coding() {
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activePanel, setActivePanel] = useState([]);
+  const [filterDifficulty, setFilterDifficulty] = useState("All");
 
   const togglePanel = (id) => {
     if (activePanel.includes(id)) {
@@ -89,6 +90,9 @@ export default function Coding() {
   }, []);
 
   const codingQuestions = singleTopic || [];
+  const filteredCodingQuestions = codingQuestions.filter(q => 
+    filterDifficulty === "All" || q.difficulty === filterDifficulty
+  );
 
   const handleAdd = () => {
     setEditingQuestion(null);
@@ -236,7 +240,7 @@ export default function Coding() {
   };
 
   const renderQuestions = () =>
-    codingQuestions.map((questionData, index) => {
+    filteredCodingQuestions.map((questionData, index) => {
       const isExpanded = activePanel.includes(questionData._id);
       const score = questionData.scoreSettings?.pointsForCorrectAns || 0;
       return (
@@ -321,8 +325,19 @@ export default function Coding() {
   return (
     <div className={listStyles.pageContainer} style={{ padding: '24px' }}>
       <div className={listStyles.topActionRow}>
-        <div className={listStyles.actionsLeft}>
+        <div className={listStyles.actionsLeft} style={{ display: 'flex', alignItems: 'center' }}>
           <PracticeBreadcrumbs />
+          <Select
+            value={filterDifficulty}
+            onChange={(val) => setFilterDifficulty(val)}
+            style={{ width: 150, marginLeft: '1rem' }}
+            options={[
+              { value: 'All', label: 'All Difficulties' },
+              { value: 'Easy', label: 'Easy' },
+              { value: 'Medium', label: 'Medium' },
+              { value: 'Hard', label: 'Hard' },
+            ]}
+          />
         </div>
         <div className={listStyles.actionsRight}>
           <Tooltip title={!canAccess(PERMISSION_VALUES.CREATE) ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""}>
@@ -361,7 +376,7 @@ export default function Coding() {
       />
 
       <div style={{ marginTop: "1rem" }}>
-        {codingQuestions.length > 0 ? (
+        {filteredCodingQuestions.length > 0 ? (
           <div className={listStyles.questionList}>
             {renderQuestions()}
           </div>
