@@ -1,4 +1,4 @@
-﻿import { uploadUrl } from "@/config/urls";
+import { uploadUrl } from "@/config/urls";
 import React, { useEffect, useState } from "react";
 import { DatePicker, TimePicker, Upload, Button, message, Divider } from "antd";
 import { UploadOutlined } from "@ant-design/icons";

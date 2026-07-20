@@ -6,6 +6,7 @@ import {
   Modal,
   message,
   InputNumber,
+  Select,
   Space,
   Popconfirm,
   Collapse,
@@ -70,8 +71,9 @@ export default function Coding() {
   };
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [question, setQuestion] = useState("");
+  const [description, setDescription] = useState("");
   const [explanation, setExplanation] = useState("");
-  const [scorePoints, setScorePoints] = useState(1);
+  const [difficulty, setDifficulty] = useState("Easy");
   const [testCases, setTestCases] = useState([
     { _id: Date.now(), input: "", expectedOutput: "", explanation: "" },
   ]);
@@ -97,8 +99,9 @@ export default function Coding() {
   const handleEdit = (questionData) => {
     setEditingQuestion(questionData);
     setQuestion(questionData.questionContent?.question || "");
+    setDescription(questionData.questionContent?.description || "");
     setExplanation(questionData.answer?.explanation || "");
-    setScorePoints(questionData.scoreSettings?.pointsForCorrectAns || 1);
+    setDifficulty(questionData.difficulty || "Easy");
     setTestCases(
       questionData.questionContent?.testCases || [
         { _id: Date.now(), input: "", expectedOutput: "", explanation: "" },
@@ -119,8 +122,9 @@ export default function Coding() {
 
   const resetForm = () => {
     setQuestion("");
+    setDescription("");
     setExplanation("");
-    setScorePoints(1);
+    setDifficulty("Easy");
     setTestCases([
       { _id: Date.now(), input: "", expectedOutput: "", explanation: "" },
     ]);
@@ -137,8 +141,8 @@ export default function Coding() {
       return { ok: false, msg: "Please enter a question" };
     if (!String(explanation || "").trim())
       return { ok: false, msg: "Please enter an answer explanation" };
-    if (!scorePoints || scorePoints <= 0)
-      return { ok: false, msg: "Please enter a valid score (greater than 0)" };
+    if (!difficulty)
+      return { ok: false, msg: "Please select a difficulty level" };
     if (!testCases.length)
       return { ok: false, msg: "Please add at least one test case" };
 
@@ -159,6 +163,7 @@ export default function Coding() {
     return {
       questionContent: {
         question: String(question || "").trim(),
+        description: String(description || "").trim(),
         testCases: testCases.map((tc) => ({
           _id: tc._id,
           input: tc.input,
@@ -169,10 +174,7 @@ export default function Coding() {
       answer: { explanation: String(explanation || "").trim() },
       questionType: CODING_TYPE,
       resources: {},
-      scoreSettings: {
-        scoreType: "fullScore",
-        pointsForCorrectAns: scorePoints,
-      },
+      difficulty: difficulty,
       type: "practice",
       subjectId: subject_slug,
     };
@@ -247,15 +249,22 @@ export default function Coding() {
               />
               <span className={listStyles.qNumber}>{index + 1}</span>
               <span className={listStyles.qText}>
-                {parseIfJson(questionData.questionContent?.question)?.replace(/<[^>]*>?/gm, '')?.substring(0, 50)}...
+                {String(parseIfJson(parseIfJson(questionData.questionContent?.question)))
+                  ?.replace(/<[^>]*>?/gm, '')
+                  ?.replace(/&nbsp;/g, ' ')
+                  ?.replace(/&amp;/g, '&')
+                  ?.replace(/&lt;/g, '<')
+                  ?.replace(/&gt;/g, '>')
+                  ?.replace(/&quot;/g, '"')
+                  ?.replace(/&#39;/g, "'")
+                  ?.substring(0, 50)}...
               </span>
             </div>
             
             <div className={listStyles.rowRight}>
               <div className={listStyles.badges}>
-                <span className={`${listStyles.badge} ${listStyles.pts}`}>{score} pts</span>
                 <span className={`${listStyles.badge} ${listStyles.type}`}>Coding</span>
-                <span className={`${listStyles.badge} ${listStyles.difficulty}`}>Medium</span>
+                <span className={`${listStyles.badge} ${listStyles.difficulty}`}>{questionData.difficulty || "Medium"}</span>
               </div>
               
               <div className={listStyles.actionIcons}>
@@ -280,7 +289,10 @@ export default function Coding() {
           
           {isExpanded && (
             <div style={{ padding: '16px 40px', background: '#fff', border: '1px solid #E2E8F0', borderTop: 'none', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
-              <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionData.questionContent?.question) }} style={{ marginBottom: 16 }} />
+              <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionData.questionContent?.question) }} style={{ marginBottom: 16, fontWeight: 'bold' }} />
+              {questionData.questionContent?.description && (
+                <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionData.questionContent?.description) }} style={{ marginBottom: 16 }} />
+              )}
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {questionData.questionContent?.testCases?.map((testCase, i) => (
@@ -387,17 +399,19 @@ export default function Coding() {
           </div>
           <div className={`${QuestionStyles.QuestionBody} ${styles.pb5rem}`}>
             <div className={QuestionStyles.sectionTitle}>Question Specifications</div>
-            {/* Score */}
+            {/* Difficulty */}
             <div className={QuestionStyles.QuestionBodyFlex}>
-              <div className={QuestionStyles.title}>Score*</div>
+              <div className={QuestionStyles.title}>Difficulty*</div>
               <div className={QuestionStyles.rightBody}>
-                <InputNumber
-                  min={1}
-                  max={100}
-                  placeholder="Points for Correct (>0)"
-                  className={styles.inputScore}
-                  value={scorePoints}
-                  onChange={(v) => setScorePoints(Number(v || 1))}
+                <Select
+                  style={{ width: 120 }}
+                  value={difficulty}
+                  onChange={setDifficulty}
+                  options={[
+                    { value: "Easy", label: "Easy" },
+                    { value: "Medium", label: "Medium" },
+                    { value: "Hard", label: "Hard" },
+                  ]}
                 />
               </div>
             </div>
@@ -407,12 +421,24 @@ export default function Coding() {
 
             {/* Question */}
             <div className={QuestionStyles.QuestionBodyFlex}>
-              <div className={QuestionStyles.title}>Question*</div>
+              <div className={QuestionStyles.title}>Question Title*</div>
               <div className={QuestionStyles.rightBody}>
                 <TextEditor
                   name="question"
                   editorFun={(v) => setQuestion(v)}
                   initialContent={{ question }}
+                />
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className={QuestionStyles.QuestionBodyFlex}>
+              <div className={QuestionStyles.title}>Description</div>
+              <div className={QuestionStyles.rightBody}>
+                <TextEditor
+                  name="description"
+                  editorFun={(v) => setDescription(v)}
+                  initialContent={{ description }}
                 />
               </div>
             </div>

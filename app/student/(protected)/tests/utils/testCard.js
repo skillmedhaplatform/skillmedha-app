@@ -327,6 +327,21 @@ export default function TestCard({
   };
   const isResponsive = useResponsive(); // < 1024px → mobile layout
 
+  let rawDesc = parseIfJson(parseIfJson(testData?.shortDescription || "")) || "";
+  let cleanDesc = String(rawDesc)
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
+  let firstSentence = cleanDesc;
+  if (firstSentence.includes('.')) {
+    firstSentence = firstSentence.split('.')[0] + '.';
+  }
+
   if (isResponsive) {
     return (
       <ResponsiveAssessmentCard
@@ -336,7 +351,7 @@ export default function TestCard({
         accessType={testData?.access?.type}
         questionCount={ques?.length || 0}
         duration={isAssessment ? (testData?.testDurationDisplay?.hours ? `${testData.testDurationDisplay.hours}H : ${testData.testDurationDisplay.minutes}M` : "NA") : (testDuration?.val1 ? `${testDuration.val1}H : ${testDuration.val2}M` : "NA")}
-        shortDescription={testData?.shortDescription}
+        shortDescription={firstSentence}
         countdown={countdowns[index]}
         isExpired={countdowns[index] === "Expired"}
         isTestActivated={isTestActivated}
@@ -352,13 +367,6 @@ export default function TestCard({
         score={score}
       />
     );
-  }
-
-  let rawDesc = parseIfJson(testData?.shortDescription) || "";
-  let cleanDesc = rawDesc.replace(/<[^>]+>/g, '').trim();
-  let firstSentence = cleanDesc;
-  if (firstSentence.includes('.')) {
-    firstSentence = firstSentence.split('.')[0] + '.';
   }
 
   return (

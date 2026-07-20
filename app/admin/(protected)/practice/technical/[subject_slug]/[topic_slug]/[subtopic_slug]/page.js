@@ -223,7 +223,15 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
                 />
                 <span className={listStyles.qNumber}>{index + 1}</span>
                 <span className={listStyles.qText}>
-                  {parseIfJson(questionContent?.question)?.replace(/<[^>]*>?/gm, '')?.substring(0, 50)}...
+                  {String(parseIfJson(parseIfJson(questionContent?.question)))
+                    ?.replace(/<[^>]*>?/gm, '')
+                    ?.replace(/&nbsp;/g, ' ')
+                    ?.replace(/&amp;/g, '&')
+                    ?.replace(/&lt;/g, '<')
+                    ?.replace(/&gt;/g, '>')
+                    ?.replace(/&quot;/g, '"')
+                    ?.replace(/&#39;/g, "'")
+                    ?.substring(0, 50)}...
                 </span>
               </div>
               
@@ -231,7 +239,6 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
                 <div className={listStyles.badges}>
                   <span className={`${listStyles.badge} ${listStyles.pts}`}>{score} pts</span>
                   <span className={`${listStyles.badge} ${listStyles.type}`}>{questionType}</span>
-                  <span className={`${listStyles.badge} ${listStyles.difficulty}`}>Easy</span>
                 </div>
                 
                 <div className={listStyles.actionIcons}>

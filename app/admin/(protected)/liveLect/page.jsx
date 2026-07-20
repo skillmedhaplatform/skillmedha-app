@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 const ZoomClient = dynamic(() => import("./utils/join"), {
   ssr: false,
 });
-import { Input, Modal, Radio, Select, Space, ConfigProvider } from "antd";
+import { Input, Modal, Radio, Select, Space, ConfigProvider, Pagination } from "antd";
 import { BsCameraVideo, BsJournalBookmark } from "react-icons/bs";
 import { MdWorkOutline } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
@@ -47,6 +47,9 @@ const page = () => {
   const allSections = useSelector((s) => s.adminInternship.allSections) || [];
   const allTopics = useSelector((state) => state.adminInternship.allTopics) || [];
   const [type, setType] = useState("internship");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
 
   const [joined, isJoined] = useState(false);
   const [createModal, setCreateModal] = useState(false);
@@ -94,16 +97,18 @@ const page = () => {
       getAllMeetings({
         type,
         cursor: null,
-        limit: 20,
+        limit: 100,
       })
     );
+    setCurrentPage(1);
   }, [type]);
 
   const createMeetingButton = () => {
+    const meetingTitle = selectedTopicValue || selectedSectionValue || selectedInternShipValue || "Zoom Meeting";
     const payload = {
       hostName: userCreds?.userName,
       hostId: userCreds?._id,
-      topic: selectedTopicValue,
+      topic: meetingTitle,
       topicId: selectedTopicId,
       section: selectedSectionValue,
       internship: selectedInternShipValue,
@@ -115,7 +120,7 @@ const page = () => {
           getAllMeetings({
             type,
             cursor: null,
-            limit: 20,
+            limit: 100,
           })
         );
       }
@@ -130,13 +135,18 @@ const page = () => {
   const searchMeetingByTopicButton = (text) => {
     dispatch(
       searchMeetingByTopic({
-        limit: 20,
+        limit: 100,
         cursor: null,
         type,
         text,
       })
     );
+    setCurrentPage(1);
   };
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedMeetings = allMeetings?.slice(startIndex, endIndex);
 
   return (
     <>
@@ -186,7 +196,7 @@ const page = () => {
 
             <div className={zoomStyles.zoomMeetingsBody}>
               <div className={zoomStyles.zoomMeetingsCardsCon}>
-                {allMeetings?.map((eachMeeting, eachMeetingIndex) => {
+                {paginatedMeetings?.map((eachMeeting, eachMeetingIndex) => {
                   return (
                     <div key={eachMeetingIndex} className={zoomStyles.card_cont}>
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%", alignItems: "flex-start" }}>
@@ -194,9 +204,11 @@ const page = () => {
                           {type === "internship" ? <MdWorkOutline /> : <BsJournalBookmark />} 
                           <span style={{ textTransform: "capitalize" }}>{type}</span>
                         </div>
-                        <strong style={{ fontSize: "15px", lineHeight: "1.4", marginTop: "4px" }}>Title : {eachMeeting?.topic}</strong>
+                        <strong style={{ fontSize: "15px", lineHeight: "1.4", marginTop: "4px" }}>
+                          Title : {eachMeeting?.topic || eachMeeting?.meetingDetails?.topic || eachMeeting?.section || eachMeeting?.internship || "Untitled Meeting"}
+                        </strong>
                         <div style={{ fontSize: "12px", color: "#94a3b8" }}>
-                           {eachMeeting?.section?.title || "General Topic"} &bull; Zoom Session
+                           {eachMeeting?.section?.title || eachMeeting?.section || "General Topic"} &bull; Zoom Session
                         </div>
                       </div>
                       <button
@@ -228,6 +240,32 @@ const page = () => {
                 })}
               </div>
             </div>
+
+            {allMeetings?.length > 0 && (
+              <div className={zoomStyles.pagination}>
+                <Pagination
+                  current={currentPage}
+                  total={allMeetings.length}
+                  pageSize={pageSize}
+                  onChange={(page, newPageSize) => {
+                    setCurrentPage(page);
+                    if (newPageSize !== pageSize) {
+                      setPageSize(newPageSize);
+                      setCurrentPage(1);
+                    }
+                  }}
+                  showSizeChanger={true}
+                  onShowSizeChange={(current, size) => {
+                    setPageSize(size);
+                    setCurrentPage(1);
+                  }}
+                  pageSizeOptions={[8, 16, 24, 32, 48]}
+                  showTotal={(total, range) =>
+                    `${range[0]}-${range[1]} of ${total} meetings`
+                  }
+                />
+              </div>
+            )}
           </div>
         )}
 

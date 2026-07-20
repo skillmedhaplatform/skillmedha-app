@@ -65,8 +65,18 @@ import QuestionSkeleton from "../skeleton/questionSkeleton";
 import { parseIfJson } from "@/utils/windowMW";
 const { Option } = Select;
 
-const stripHtml = (html) =>
-  typeof html === "string" ? html.replace(/<[^>]*>/g, "") : "";
+const stripHtml = (html) => {
+  if (typeof html !== 'string') return '';
+  let text = html
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#34;/g, '"');
+  return text.replace(/<[^>]*>/g, '');
+};
 
 const items = [
   {

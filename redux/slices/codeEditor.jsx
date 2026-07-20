@@ -10,6 +10,8 @@ const CodeEditorSlice = createSlice({
     aiSuggestions: "",
     question: "",
     codeLang: languageOptions,
+    testCaseResults: [],
+    triggerRunTests: false,
   },
   reducers: {
     addOutput: (state, { payload }) => {
@@ -33,6 +35,18 @@ const CodeEditorSlice = createSlice({
     filterLanguage: (state, { payload }) => {
       state.codeLang = payload;
     },
+    setTestCaseResults: (state, { payload }) => {
+      state.testCaseResults = payload;
+    },
+    resetTestCaseResults: (state) => {
+      state.testCaseResults = [];
+    },
+    requestRunTests: (state) => {
+      state.triggerRunTests = true;
+    },
+    clearRunTestsRequest: (state) => {
+      state.triggerRunTests = false;
+    },
   },
 });
 
@@ -43,6 +57,10 @@ export const {
   setQuestion,
   resetOutput,
   resetAiSuggestions,
+  setTestCaseResults,
+  resetTestCaseResults,
+  requestRunTests,
+  clearRunTestsRequest,
 } = CodeEditorSlice.actions;
 
 export default CodeEditorSlice.reducer;

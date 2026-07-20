@@ -86,7 +86,19 @@ const CodingPage = ({ questionData }) => {
                       questionData?.questionContent?.question
                     ),
                   }}
+                  style={{ fontWeight: "bold", marginBottom: "12px" }}
                 />
+
+                {questionData?.questionContent?.description && (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: parseIfJson(
+                        questionData?.questionContent?.description
+                      ),
+                    }}
+                    style={{ marginBottom: "16px" }}
+                  />
+                )}
 
                 {/* Test Cases Section */}
                 {questionData?.questionContent?.testCases &&
