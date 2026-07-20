@@ -366,7 +366,7 @@ const UsersComp = () => {
             icon={<SendOutlined />}
             onClick={() => handleCaptureFaceData(record)}
           >
-            {isVerified ? "Resend" : "Send Link"}
+            {isVerified ? "Resend" : "Send Email"}
           </Button>
         );
       },

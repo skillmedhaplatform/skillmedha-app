@@ -32,7 +32,7 @@ import { restUrl } from "@/config/urls";
 // import html2pdf from "html2pdf.js";
 import { getLstorage } from "@/universalUtils/windowMW";
 import VolunteeringDetails from "./components/volunteringDetails";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import CertificateDetails from "./components/certificateDetails";
 import useResponsive from "@/hooks/useResponsive";
 import MobileResumeBuilder from "@/mobile_views/resumeBuilder/MobileResumeBuilder";
@@ -342,6 +342,7 @@ function Form() {
   const [isEditing, setIsEditing] = useState(false);
   const [downloadImage, setDownloadImage] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Handler updates for basic details
   const updateBasicDetail = (field, value) => {
@@ -902,7 +903,6 @@ function Form() {
   };
 
   const uploadResume = async () => {
-    setIsGeneratingPdf(true);
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
@@ -981,8 +981,6 @@ function Form() {
     } catch (error) {
       console.error("Error uploading resume:", error instanceof Error ? error.message : String(error));
       throw error;
-    } finally {
-      setIsGeneratingPdf(false);
     }
   };
 
@@ -1017,7 +1015,9 @@ function Form() {
   //   }
   // };
   const handleSubmit = async () => {
-    const combinedExperiences = [
+    setIsSubmitting(true);
+    try {
+      const combinedExperiences = [
       ...experienceDetails.map((item) => ({ ...item, type: "work" })),
       ...internships.map((item) => ({ ...item, type: "internship" })),
     ];
@@ -1046,10 +1046,14 @@ function Form() {
       certificates: certificatesPayload, // Add this line
     };
 
-    try {
-      dispatch(updateStudent({ aboutDetails: resumeData }));
+      await dispatch(updateStudent({ aboutDetails: resumeData })).unwrap();
+      message.success("Resume updated successfully!");
+      setIsEditing(false);
     } catch (error) {
       console.error("Error submitting resume:", error);
+      message.error("Failed to update resume.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1362,7 +1366,7 @@ function Form() {
                 {isEditing ? "Disable Editing" : "Edit Details"}
               </Button>
               {isEditing && (
-                <Button onClick={handleSubmit} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
+                <Button onClick={handleSubmit} loading={isSubmitting} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
                   Submit
                 </Button>
               )}
