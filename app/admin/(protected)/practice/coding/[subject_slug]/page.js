@@ -336,6 +336,7 @@ export default function Coding() {
               { value: 'Easy', label: 'Easy' },
               { value: 'Medium', label: 'Medium' },
               { value: 'Hard', label: 'Hard' },
+              { value: 'Expert', label: 'Expert' },
             ]}
           />
         </div>
@@ -426,6 +427,7 @@ export default function Coding() {
                     { value: "Easy", label: "Easy" },
                     { value: "Medium", label: "Medium" },
                     { value: "Hard", label: "Hard" },
+                    { value: "Expert", label: "Expert" },
                   ]}
                 />
               </div>
