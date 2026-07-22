@@ -19,9 +19,16 @@ import { parseIfJson } from "@/utils/windowMW";
 const { Text, Paragraph } = Typography;
 
 function stripHtml(html = "") {
-  return String(html || "")
-    .replace(/<[^>]+>/g, "")
-    .trim();
+  if (typeof html !== 'string') return '';
+  let text = String(html || "")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#34;/g, '"');
+  return text.replace(/<[^>]*>/g, '').trim();
 }
 
 export default function Quiz() {

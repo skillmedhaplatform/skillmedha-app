@@ -137,21 +137,29 @@ const modules = {
 export default function TextEditor({ editorFun, name, initialContent }) {
   // const quillRef = useRef();
 
-  const [content, setContent] = useState({});
+  const [content, setContent] = useState(() => {
+    if (initialContent && initialContent[name] !== undefined) {
+      return { [name]: parseIfJson(initialContent[name]) };
+    }
+    return {};
+  });
 
   const changeEdVal = (e) => {
-    if (e == initialContent[name]) return;
+    if (e === content[name] || e === parseIfJson(initialContent?.[name])) return;
     setContent({ [name]: e });
 
     editorFun(JSON.stringify(e));
   };
 
   useEffect(() => {
-    if (initialContent)
-      if (initialContent[name]) {
-        setContent({ [name]: parseIfJson(initialContent[name]) });
-      }
-  }, [initialContent[name], name]);
+    if (initialContent && initialContent[name] !== undefined) {
+      setContent((prev) => {
+        const parsed = parseIfJson(initialContent[name]);
+        if (prev[name] === parsed) return prev;
+        return { ...prev, [name]: parsed };
+      });
+    }
+  }, [initialContent?.[name], name]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

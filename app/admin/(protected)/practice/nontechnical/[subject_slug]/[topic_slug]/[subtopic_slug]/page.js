@@ -223,7 +223,15 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
                 />
                 <span className={listStyles.qNumber}>{index + 1}</span>
                 <span className={listStyles.qText}>
-                  {parseIfJson(questionContent?.question)?.replace(/<[^>]*>?/gm, '')?.substring(0, 50)}...
+                  {String(parseIfJson(parseIfJson(questionContent?.question)))
+                    ?.replace(/<[^>]*>?/gm, '')
+                    ?.replace(/&nbsp;/g, ' ')
+                    ?.replace(/&amp;/g, '&')
+                    ?.replace(/&lt;/g, '<')
+                    ?.replace(/&gt;/g, '>')
+                    ?.replace(/&quot;/g, '"')
+                    ?.replace(/&#39;/g, "'")
+                    ?.substring(0, 50)}...
                 </span>
               </div>
               
@@ -231,7 +239,6 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
                 <div className={listStyles.badges}>
                   <span className={`${listStyles.badge} ${listStyles.pts}`}>{score} pts</span>
                   <span className={`${listStyles.badge} ${listStyles.type}`}>{questionType}</span>
-                  <span className={`${listStyles.badge} ${listStyles.difficulty}`}>Easy</span>
                 </div>
                 
                 <div className={listStyles.actionIcons}>
@@ -276,6 +283,8 @@ export default function QuestionsPage() {
   const [bulkModalOpen, setBulkModalOpen] = React.useState(false);
   const params = useParams();
   const currentPath = usePathname();
+  const [filterType, setFilterType] = React.useState("All");
+  const [filterPoints, setFilterPoints] = React.useState("All");
 
   const { canAccess, getPermissionMessage } = usePermissions();
 
@@ -289,6 +298,22 @@ export default function QuestionsPage() {
   // Use selector with shallow equality check
   const questions = useSelector((state) => state.adminPractice.questions);
   const loading = useSelector((state) => state.adminPractice.loading);
+
+  const filteredQuestions = useMemo(() => {
+    let result = questions || [];
+    if (filterType !== "All") {
+      result = result.filter(q => q.questionType === filterType);
+    }
+    if (filterPoints !== "All") {
+      result = result.filter(q => (q.scoreSettings?.pointsForCorrectAns || 0) === Number(filterPoints));
+    }
+    return result;
+  }, [questions, filterType, filterPoints]);
+
+  const availablePoints = useMemo(() => {
+    const pointsSet = new Set((questions || []).map(q => q.scoreSettings?.pointsForCorrectAns || 0));
+    return Array.from(pointsSet).sort((a, b) => a - b);
+  }, [questions]);
 
   // Memoized callback functions to prevent unnecessary re-renders
   const handleEdit = useCallback(
@@ -372,8 +397,27 @@ export default function QuestionsPage() {
   return (
     <div className={listStyles.pageContainer} style={{ padding: '24px' }}>
       <div className={listStyles.topActionRow}>
-        <div className={listStyles.actionsLeft}>
+        <div className={listStyles.actionsLeft} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <PracticeBreadcrumbs />
+          <Select
+            value={filterType}
+            onChange={(val) => setFilterType(val)}
+            style={{ width: 160 }}
+            options={[
+              { value: 'All', label: 'All Types' },
+              { value: 'Single Choice', label: 'Single Choice' },
+              { value: 'Multiple Choice', label: 'Multiple Choice' },
+            ]}
+          />
+          <Select
+            value={filterPoints}
+            onChange={(val) => setFilterPoints(val)}
+            style={{ width: 160 }}
+            options={[
+              { value: 'All', label: 'All Points' },
+              ...availablePoints.map(p => ({ value: p, label: `${p} Point${p !== 1 ? 's' : ''}` }))
+            ]}
+          />
         </div>
         <div className={listStyles.actionsRight}>
           <Tooltip title={!canAccess(PERMISSION_VALUES.CREATE) ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""}>
@@ -411,7 +455,7 @@ export default function QuestionsPage() {
 
       <div style={{ marginTop: "1rem" }}>
         <QuestionList
-          questions={questions || []}
+          questions={filteredQuestions}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

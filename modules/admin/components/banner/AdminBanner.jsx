@@ -65,9 +65,13 @@ const AdminBanner = () => {
 
   const getSectionStats = () => {
     if (!pathname) return null;
-    if (pathname.includes("/course")) return { count: coursesData?.length || 0, label: "COURSES" };
-    if (pathname.includes("/internship")) return { count: internshipsData?.length || 0, label: "INTERNSHIPS" };
-    if (pathname.includes("/workshops")) return { count: workshopsData?.length || 0, label: "WORKSHOPS" };
+    
+    // Only show stats on the main list pages, not on internal pages
+    const cleanPath = pathname.replace(/\/$/, "");
+    if (cleanPath === "/admin/course") return { count: coursesData?.length || 0, label: "COURSES" };
+    if (cleanPath === "/admin/internship") return { count: internshipsData?.length || 0, label: "INTERNSHIPS" };
+    if (cleanPath === "/admin/workshops") return { count: workshopsData?.length || 0, label: "WORKSHOPS" };
+    
     return null;
   };
   

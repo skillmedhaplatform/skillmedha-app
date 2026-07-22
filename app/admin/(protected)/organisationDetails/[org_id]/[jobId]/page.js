@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./JobDetailsDisplay.module.scss";
-import { getLstorage, decrypt } from "@/utils/windowMW";
+import { getLstorage, decrypt, encrypt } from "@/utils/windowMW";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { IoCaretForwardOutline } from "react-icons/io5";
 
@@ -124,14 +124,14 @@ export default function JobDetailsDisplay() {
       title: orgName,
       onClick: () =>
         router.push(
-          `/admin/companies/jobs?orgId=${searchParams.get("orgId")}&orgName=${searchParams.get("orgName")}`
+          `/admin/companies/jobs?orgId=${encrypt(params.org_id)}&orgName=${encrypt(orgName)}`
         ),
     },
     {
       title: "Jobs",
       onClick: () =>
         router.push(
-          `/admin/companies/jobs?orgId=${searchParams.get("orgId")}&orgName=${searchParams.get("orgName")}`
+          `/admin/companies/jobs?orgId=${encrypt(params.org_id)}&orgName=${encrypt(orgName)}`
         ),
     },
     {

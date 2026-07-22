@@ -507,8 +507,17 @@ const Page = () => {
   };
 
   function stripHtml(html) {
-    return typeof html === "string" ? html.replace(/<[^>]*>/g, "") : "";
-  }
+  if (typeof html !== 'string') return '';
+  let text = html
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#34;/g, '"');
+  return text.replace(/<[^>]*>/g, '');
+}
 
   function formatINR(value) {
     if (value === undefined || value === null) return "";

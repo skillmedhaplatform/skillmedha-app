@@ -24,7 +24,8 @@ export default function MobileDashboard({
   profileValues,
   allCourses,
   allInternships,
-  router
+  router,
+  progressById
 }) {
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
   const [isPerformanceOpen, setIsPerformanceOpen] = useState(false);

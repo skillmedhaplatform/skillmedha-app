@@ -12,6 +12,9 @@ import { aiUrl } from "../urls";
 import {
   addOutput,
   aiSuggestions as AIsuggestion,
+  setTestCaseResults,
+  resetTestCaseResults,
+  clearRunTestsRequest,
 } from "@/redux/slices/codeEditor";
 import { getLstorage, getSstorage, setSstorage } from "../windowMW";
 
@@ -140,6 +143,21 @@ const Playground = ({ questionData, onTestResults }) => {
   const [testCaseResults, setTestCaseResults] = useState([]);
   const [isRunningTests, setIsRunningTests] = useState(false);
 
+  const triggerRunTests = useSelector((state) => state.codeEditor.triggerRunTests);
+
+  // Sync testCaseResults to Redux
+  useEffect(() => {
+    dispatch(setTestCaseResults(testCaseResults));
+  }, [testCaseResults, dispatch]);
+
+  // Run tests on trigger
+  useEffect(() => {
+    if (triggerRunTests) {
+      runTestCases();
+      dispatch(clearRunTestsRequest());
+    }
+  }, [triggerRunTests, dispatch]);
+
   const questionStr = JSON.stringify(questionData?.questionContent?.testCases);
 
   // ── AI suggestions ────────────────────────────────────────────────────────
@@ -250,6 +268,14 @@ const Playground = ({ questionData, onTestResults }) => {
       passed === tcs.length
         ? message.success(`All ${passed} test cases passed! 🎉`, 3)
         : message.warning(`${passed}/${tcs.length} test cases passed`, 3);
+
+      storeCodingQuestion({
+        questionId: questionData?._id,
+        language_id,
+        languageKey,
+        code: currentCode,
+        testCaseResults: finalResults,
+      });
     } finally {
       hide();
       setIsRunningTests(false);
@@ -264,14 +290,20 @@ const Playground = ({ questionData, onTestResults }) => {
       if (entry.code != null) setCurrentCode(entry.code);
       if (entry.languageKey) setLanguageKey(entry.languageKey);
       if (entry.aisuggestion) dispatch(AIsuggestion(entry.aisuggestion));
+      if (entry.testCaseResults) {
+        setTestCaseResults(entry.testCaseResults);
+      } else {
+        setTestCaseResults([]);
+      }
     } else {
       setCurrentCode(defaultLanguage?.defaultCode ?? "");
       setLanguageKey(defaultLanguage);
       dispatch(AIsuggestion([]));
+      setTestCaseResults([]);
     }
     setCurrentInput("");
     setCurrentOutput("");
-    setTestCaseResults([]);
+    dispatch(resetTestCaseResults());
   }, [questionData?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Sync output to Redux ──────────────────────────────────────────────────
@@ -283,6 +315,7 @@ const Playground = ({ questionData, onTestResults }) => {
     setCurrentCode(languageKey?.defaultCode ?? "");
     setCurrentOutput("");
     setTestCaseResults([]);
+    dispatch(resetTestCaseResults());
     dispatch(AIsuggestion([]));
   };
 

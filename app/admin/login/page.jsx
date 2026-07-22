@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { loginUser } from "@/redux/slices/admin/adminAuthSlice";
+import { loginUser, getCurrentUser } from "@/redux/slices/admin/adminAuthSlice";
 import styles from "./login.module.scss";
 import Cookies from "js-cookie";
 
@@ -21,15 +21,23 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { loading, error } = useSelector((state) => state.adminAuth.user);
+  const { loading, error, value: userValue } = useSelector((state) => state.adminAuth.user);
 
   useEffect(() => {
-    // If user is already logged in, redirect
+    // If user has a token, verify it's an admin token before redirecting
     const token = typeof window !== "undefined" ? (localStorage.getItem("token") || Cookies.get("token")) : null;
     if (token) {
-      router.replace("/admin/dashboard");
+      if (userValue) {
+        router.replace("/admin/dashboard");
+      } else {
+        dispatch(getCurrentUser()).then((res) => {
+          if (res.meta.requestStatus === "fulfilled") {
+            router.replace("/admin/dashboard");
+          }
+        });
+      }
     }
-  }, [router]);
+  }, [router, dispatch, userValue]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,6 +51,8 @@ export default function LoginPage() {
     const result = await dispatch(loginUser({ email, password }));
     if (result.type === "auth/loginUser/fulfilled") {
       router.replace("/admin/dashboard");
+    } else {
+      setLocalError(result.payload || "Login failed");
     }
   };
 
@@ -72,10 +82,10 @@ export default function LoginPage() {
         </div>
 
         {/* Error message */}
-        {(error || localError) && (
+        {localError && (
           <div className={styles.errorMsg}>
             <FiAlertCircle />
-            <span>{error || localError}</span>
+            <span>{localError}</span>
           </div>
         )}
 
@@ -88,7 +98,7 @@ export default function LoginPage() {
               <input 
                 type="email" 
                 id="email"
-                className={`${styles.formInput} ${(error || localError) && !email ? styles.error : ''}`} 
+                className={`${styles.formInput} ${localError && !email ? styles.error : ''}`} 
                 placeholder="admin@skillmedha.com" 
                 autoComplete="email"
                 value={email}
@@ -108,7 +118,7 @@ export default function LoginPage() {
               <input 
                 type={showPassword ? "text" : "password"} 
                 id="password"
-                className={`${styles.formInput} ${(error || localError) && !password ? styles.error : ''}`} 
+                className={`${styles.formInput} ${localError && !password ? styles.error : ''}`} 
                 placeholder="Enter your password" 
                 autoComplete="current-password"
                 value={password}

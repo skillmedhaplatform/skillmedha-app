@@ -6,6 +6,7 @@
   min-height: 60vh;
   height: 100%;
   overflow-y: auto;
+  padding: 1rem 1.5rem;
   @include custom-scrollbar(#1E69DA);
   position: relative;
 }
