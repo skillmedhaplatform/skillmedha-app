@@ -283,6 +283,28 @@ export default function Page() {
       return false;
     }
 
+    const attemptsPerRespondentValue = testData?.access?.attemptsPerRespondent;
+    const maxAttemptsNum = Number(attemptsPerRespondentValue);
+    if (
+      attemptsPerRespondentValue !== undefined &&
+      attemptsPerRespondentValue !== "" &&
+      attemptsPerRespondentValue !== null &&
+      maxAttemptsNum !== -1
+    ) {
+      const currentGen = testData?.attemptGeneration || 0;
+      const attemptsDone = (studentCreds?.progress || []).filter(
+        (e) => e?.testId == (testData?._id || testId) && (e?.attemptGeneration || 0) === currentGen
+      ).length;
+      if (maxAttemptsNum - attemptsDone <= 0) {
+        notification.error({
+          description: <strong>Maximum attempts reached for this test.</strong>,
+          showProgress: true,
+          placement: "top",
+        });
+        return false;
+      }
+    }
+
     return true;
   };
 

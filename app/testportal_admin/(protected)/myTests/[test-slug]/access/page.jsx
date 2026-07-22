@@ -38,6 +38,7 @@ const Accesspage = () => {
   const [honestRespondentvalue, sethonestRespondentvalue] = useState("Disable");
   const [Snapshotvalue, setSnapshotvalue] = useState("Disable");
   const [FaceRecValue, setFaceRecValue] = useState("Disable");
+  const [attemptsPerRespondent, setAttemptsPerRespondent] = useState(-1);
 
   const emailColumns = [
     {
@@ -77,6 +78,7 @@ const Accesspage = () => {
     let payload = {
       access: {
         type: accessType,
+        attemptsPerRespondent: attemptsPerRespondent,
       },
     };
 
@@ -107,6 +109,23 @@ const Accesspage = () => {
     });
   };
 
+  const handleReopenTest = () => {
+    if (window.confirm("Are you sure you want to reopen this test for all students? They will be able to take it again.")) {
+      // TODO: Future improvement: Update backend to use MongoDB `$inc: { attemptGeneration: 1 }` 
+      // instead of client-side increment to prevent race conditions.
+      dispatch(
+        updateTest({ 
+          id: selectedId, 
+          updates: { attemptGeneration: (SingleTest.attemptGeneration || 0) + 1 } 
+        })
+      ).then((res) => {
+        if (res?.payload) {
+          message.success("Test reopened successfully");
+        }
+      });
+    }
+  };
+
   useEffect(() => {
     if (SingleTest && SingleTest.access) {
       const access = SingleTest.access;
@@ -134,6 +153,12 @@ const Accesspage = () => {
         setSelectedRowKeys([access.students]);
       } else {
         setSelectedRowKeys([]);
+      }
+
+      if (access.attemptsPerRespondent) {
+        setAttemptsPerRespondent(access.attemptsPerRespondent);
+      } else {
+        setAttemptsPerRespondent(-1);
       }
     }
   }, [SingleTest?.access]);
@@ -390,6 +415,45 @@ const Accesspage = () => {
           </div>
         </div>
 
+        {/* Card 1.5: Attempt Restrictions */}
+        <div className={AccessStyles.cardSection}>
+          <div className={AccessStyles.sectionHeader}>
+            <div className={AccessStyles.headerLeft}>
+              <InfoCircleOutlined className={AccessStyles.sectionIcon} />
+              <h3>Attempt Restrictions</h3>
+            </div>
+          </div>
+          <p className={AccessStyles.description}>
+            Configure the maximum number of attempts each student is allowed for this test.
+          </p>
+
+          <div className={AccessStyles.infoContainer} style={{ marginTop: "1rem" }}>
+            <div className={AccessStyles.subInfoBlock}>
+              <div className={AccessStyles.exitsSelectContainer}>
+                <div className={AccessStyles.exitsLeft}>
+                  <h4>Maximum Attempts Allowed</h4>
+                </div>
+                <select
+                  value={attemptsPerRespondent}
+                  onChange={(e) => setAttemptsPerRespondent(Number(e.target.value))}
+                >
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                  <option value={4}>4</option>
+                  <option value={5}>5</option>
+                  <option value={6}>6</option>
+                  <option value={7}>7</option>
+                  <option value={8}>8</option>
+                  <option value={9}>9</option>
+                  <option value={10}>10</option>
+                  <option value={-1}>Unlimited</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Card 2: Honest Respondent Technology */}
         <div className={AccessStyles.cardSection}>
           <div className={AccessStyles.sectionHeader}>
@@ -562,6 +626,16 @@ const Accesspage = () => {
           <button className={AccessStyles.saveBtn} onClick={handleUpdate}>
             Update
           </button>
+          {SingleTest?._id && (
+            <button
+              type="button"
+              className={AccessStyles.saveBtn}
+              style={{ backgroundColor: '#FACE53', color: '#000', marginLeft: '10px' }}
+              onClick={handleReopenTest}
+            >
+              Reopen Test
+            </button>
+          )}
           <button 
             className={AccessStyles.discardBtn} 
             onClick={() => router.push("/testportal_admin/myTests")}

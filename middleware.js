@@ -105,11 +105,8 @@ export async function middleware(request) {
   }
 
   // ── 4b. Block normal users from /testResults ──────────────────────────────
-  if (pathname.startsWith("/student/testResults")) {
-    const url = new URL("/student/blocked", request.url);
-    url.searchParams.set("reason", "restricted-page");
-    return NextResponse.redirect(url);
-  }
+  // Removed block to allow access to the custom Test Results page
+
 
   // ── 5. Email Verification check ───────────────────────────────────────────
   if (!isUnverifiedAllowed(pathname)) {

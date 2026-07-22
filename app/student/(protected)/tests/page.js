@@ -16,7 +16,7 @@ import { Button, message, Modal, notification, Spin, Pagination } from "antd";
 import { getLstorage, getSstorage } from "@/universalUtils/windowMW";
 import { formVals } from "@/redux/slices/assessmentsSlice/userForm";
 import CardSkeleton from "./reusable_comp/cardSkeleton";
-import { getStudent } from "@/redux/slices/student";
+import { getStudent, getStudentCreds } from "@/redux/slices/student";
 
 const PAGE_LIMIT = 10;
 
@@ -59,6 +59,7 @@ export default function Tests() {
   useEffect(() => {
     if (!studentCreds?._id) return;
     setLoading(true);
+    dispatch(getStudentCreds());
     dispatch(fetchAllTests({ limit: limitFromUrl })).finally(() => {
       setLoading(false);
     });
@@ -80,7 +81,7 @@ export default function Tests() {
       ({ payload }) => {
         const SingleTest = payload.test;
         const studentAttemptedLength = studentCreds?.progress?.filter(
-          (progress) => progress?.testId == SingleTest?._id,
+          (progress) => progress?.testId == SingleTest?._id && (progress?.attemptGeneration || 0) === (SingleTest?.attemptGeneration || 0),
         )?.length;
 
         const totalAttemps = SingleTest?.access?.attemptsPerRespondent;

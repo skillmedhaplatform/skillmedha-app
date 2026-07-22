@@ -109,9 +109,9 @@ const TestsSlice = createSlice({
       if (state.test) {
         if (!state.test.access) {
           state.test.access = {};
-          state.test.access.attemptsPerRespondent = 1;
+          state.test.access.attemptsPerRespondent = -1;
         } else if (!state.test.access.attemptsPerRespondent)
-          state.test.access.attemptsPerRespondent = 1;
+          state.test.access.attemptsPerRespondent = -1;
         if (!state.test.startPage) {
           state.test.startPage = {};
           state.test.startPage.formRequirements = [

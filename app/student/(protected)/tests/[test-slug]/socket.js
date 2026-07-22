@@ -94,11 +94,14 @@ export default function SocketComp() {
         if (data.msgFlag) {
           deleteLstorageVal("isStarted");
           deleteSstorageVal("userIdInProgress");
+          const submittedProgressId = data?.progressId || data?.progData?.toString() || data?._id;
+          const progressQuery = submittedProgressId ? "&progressId=" + submittedProgressId : "";
           nav.replace(
             "/student/tests/" +
             params["test-slug"] +
             "/result?testId=" +
-            searchQuery.get("testId")
+            searchQuery.get("testId") +
+            progressQuery
           );
         } else {
           deleteLstorageVal("isStarted");

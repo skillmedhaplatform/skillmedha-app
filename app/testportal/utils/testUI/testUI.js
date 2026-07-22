@@ -766,7 +766,9 @@ export default function TestUI({
         } else {
           const isJobAssessment = window.location.pathname.includes('/jobAssessments');
           const source = isJobAssessment ? 'job' : 'test';
-          const studentSiteUrl = `/student/tests/${testData?.title}/result?testId=${testId}&from=${source}`;
+          const submittedProgressId = payload?.progressId || payload?.progData?.toString() || payload?._id;
+          const progressQuery = submittedProgressId ? `&progressId=${submittedProgressId}` : '';
+          const studentSiteUrl = `/student/tests/${testData?.title}/result?testId=${testId}&from=${source}${progressQuery}`;
           window.location.href = studentSiteUrl;
         }
       }
@@ -999,19 +1001,6 @@ export default function TestUI({
       if (requestMethod) {
         requestMethod.call(element);
         setFullScreen(true);
-        if (!testStartedRef.current) {
-          setTestStarted(true);
-          testStartedRef.current = true;
-
-          try {
-            const currentTestId = testData?.value?.test?._id || testId;
-            if (currentTestId) {
-              const attempts = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("localAttempts") || "{}") : {};
-              attempts[currentTestId] = (attempts[currentTestId] || 0) + 1;
-              localStorage.setItem("localAttempts", JSON.stringify(attempts));
-            }
-          } catch (e) { console.error("Error updating localAttempts", e); }
-        }
       }
     }
   }
@@ -1154,7 +1143,21 @@ export default function TestUI({
     );
   };
 
-  useEffect(() => {
+  const handleStartTest = () => {
+    requestFullScreen();
+    setTestStarted(true);
+    testStartedRef.current = true;
+    try {
+      const currentTestId = testData?._id || testId;
+      if (currentTestId) {
+        const generation = testData?.attemptGeneration || 0;
+        const attemptKey = `${currentTestId}_${generation}`;
+        const attempts = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("localAttempts") || "{}") : {};
+        attempts[attemptKey] = (attempts[attemptKey] || 0) + 1;
+        localStorage.setItem("localAttempts", JSON.stringify(attempts));
+      }
+    } catch (e) { console.error("Error updating localAttempts", e); }
+
     if (testType === "jobtest") {
       socket.emit("jobAssessmentStarted", {
         userId: stId,
@@ -1164,6 +1167,20 @@ export default function TestUI({
       socket.emit("testStarted", {
         userId: stId,
       });
+    }
+  };
+
+  useEffect(() => {
+    if (testStartedRef.current) {
+      if (testType === "jobtest") {
+        socket.emit("jobAssessmentStarted", {
+          userId: stId,
+        });
+      } else {
+        socket.emit("testStarted", {
+          userId: stId,
+        });
+      }
     }
   }, []);
 
@@ -1520,7 +1537,7 @@ export default function TestUI({
                   </div>
                 </div>
 
-                <button className={testStyles.gateBtn} onClick={requestFullScreen}>
+                <button className={testStyles.gateBtn} onClick={handleStartTest}>
                   <Monitor size={18} strokeWidth={2.5} />
                   Enter Full Screen &amp; Start Test
                 </button>
