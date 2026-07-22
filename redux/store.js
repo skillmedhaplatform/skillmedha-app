@@ -49,9 +49,13 @@ import UserFormSlice from "./slices/assessmentsSlice/userForm";
 import jobassessmentsSlice from "./slices/jobassessmentsSlice";
 import cartReducer from "./slices/cartSlice";
 import wishlistReducer from "./slices/wishlistSlice";
+import atsReducer from "./atsSlice";
+
 
 export const store = configureStore({
   reducer: {
+        ats: atsReducer,
+
     student: studentSlice,
     sideBar: SideBarSlice,
     steps: StepFormSlice,
