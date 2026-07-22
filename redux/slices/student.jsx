@@ -125,7 +125,7 @@ export const forgotPassword = createAsyncThunk(
   async (email, { rejectWithValue }) => {
     const hide = message.loading("verifying email");
     try {
-      const { data } = await axios.post(`${gqlUrl}/forgotStudentPassword`, {
+      const { data } = await axios.post(`${studentUrl}/forgotStudentPassword`, {
         ...email,
       });
       hide();

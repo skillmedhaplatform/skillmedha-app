@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import kycStyles from "./kyc.module.scss";
-import { Button, Image, message } from "antd";
+import { Button, Image, message, Modal, Result } from "antd";
 import axios from "axios";
 import { awsUrl, proctoringUrl, studentUrl } from "../utils/urls";
 import { decryptObject } from "../utils/encryptionMiddleware";
@@ -61,6 +61,8 @@ export default function KYC() {
   const [verifying, setVerifying] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [previewing, setPreviewing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraRef = useRef(null);
@@ -142,6 +144,7 @@ export default function KYC() {
   };
   const handleSave = async () => {
     stopCamera();
+    setSaving(true);
     try {
       //   if (!studentData?.studentId) {
       //     const studentId = getLstorage("sId");
@@ -160,20 +163,28 @@ export default function KYC() {
           },
         },
       );
-      if (data?.modifiedCount) {
-        message.success("Photo Uploaded Successfully");
-
-        if (typeof window !== "undefined") {
-          window.location.replace("https://student.skillmedha.com");
-          message.success("Open Student Portal");
-        }
+      if (data?.success == true) {
+        setShowSuccessModal(true);
+      } else {
+        message.error("Could not save your photo. Please try again.");
       }
-      stopCamera();
-      setPreviewing(false);
     } catch (error) {
       console.log(error);
-      stopCamera();
-      setPreviewing(false);
+      message.error("Something went wrong while saving your photo. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRetakeFromModal = () => {
+    setShowSuccessModal(false);
+    retakePhoto();
+  };
+
+  const handleCloseFromModal = () => {
+    setShowSuccessModal(false);
+    if (typeof window !== "undefined") {
+      window.location.replace("https://skillmedha-app.gentletree-181f5836.southindia.azurecontainerapps.io/login");
     }
   };
   return (
@@ -224,7 +235,7 @@ export default function KYC() {
             Verify Photo
           </Button>
           {uploadedImageUrl?.length ? (
-            <Button type="primary" onClick={handleSave}>
+            <Button type="primary" onClick={handleSave} loading={saving}>
               Save
             </Button>
           ) : (
@@ -235,6 +246,27 @@ export default function KYC() {
           </Button>
         </div>
       </div>
+      <Modal
+        open={showSuccessModal}
+        closable={false}
+        maskClosable={false}
+        footer={null}
+        centered
+      >
+        <Result
+          status="success"
+          title="KYC Verification Completed"
+          subTitle="Your photo has been saved successfully. You can close this page or retake the photo if you're not satisfied."
+          extra={[
+            <Button key="retake" onClick={handleRetakeFromModal}>
+              Retake
+            </Button>,
+            <Button key="close" type="primary" onClick={handleCloseFromModal}>
+              Close
+            </Button>,
+          ]}
+        />
+      </Modal>
     </div>
   );
 }
