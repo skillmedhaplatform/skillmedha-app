@@ -36,7 +36,7 @@ import {
   getStudent,
 } from "@/app/testportal/redux/slices/studentSlice";
 import axios from "axios";
-import { awsUrl, proctoringUrl, studentSiteUrl } from "../urls";
+import { awsUrl, proctoringUrl, studentSiteUrl, testUrl } from "../urls";
 import { TimerColors } from "@/app/testportal/styles/colors";
 import { parseIfJson } from "./jsonparse";
 import useStudentProctoring from "../liveProctoring/proctoringClient";
@@ -44,6 +44,7 @@ import { saveTestResults } from "@/app/testportal/redux/slices/studentSlice";
 import {
   persistPortalResult,
   getPersistedPortalResult,
+  clearPersistedPortalResult,
 } from "../resultPersistence";
 
 export default function TestUI({
@@ -688,9 +689,18 @@ export default function TestUI({
   };
 
   const submitTest = () => {
+    // Any result persisted under this testId belongs to a previous attempt —
+    // clear it now so the fallback redirect below can never reuse a stale
+    // progressId (or none at all) if the socket response is slow.
+    clearPersistedPortalResult(testId);
+
     const finalResponses = mergeCodingIntoResponses(responses.value);
     const submissionPayload = {
-      userId: getSstorage("userId"),
+      // `getSstorage("userId")` is never actually set anywhere in this app —
+      // it always resolved to undefined, which is why saveTestProgress kept
+      // logging "student not found". `stId` (the "sId" URL param) is the
+      // real student id and is already used this way elsewhere in this file.
+      userId: stId,
       ...userData,
       flagged: flagCheck,
       marked: questionsAddedMark,
@@ -774,13 +784,40 @@ export default function TestUI({
       }
     };
 
+    // Last-resort save: used whenever we're about to redirect without a
+    // progressId (socket never responded / timed out, or there's no socket
+    // at all). Without a progressId the results page can't fetch this
+    // attempt's config, and silently defaults to showing everything
+    // (attempts history, all fields) instead of the configured one-time view.
+    const saveViaRestAndRedirect = (fallbackPayload) => {
+      axios
+        .post(
+          `${testUrl}/saveTestProgress`,
+          { ...submissionPayload, studentId: submissionPayload.userId },
+          { headers: { Authorization: `Bearer ${getLstorage("token")}` } },
+        )
+        .then(({ data }) => {
+          handleRedirect({ ...submissionPayload, progressId: data?.progressId });
+        })
+        .catch((err) => {
+          console.error("Failed to save test progress over REST:", err);
+          handleRedirect(fallbackPayload);
+        });
+    };
+
     if (socket) {
       socket.once("testEndedtestportal", handleRedirect);
-      // Fallback in case socket event is missed
-      setTimeout(() => handleRedirect(getPersistedPortalResult(testId)), 2500);
+      // Fallback in case the socket event is missed or too slow. The server
+      // does a GraphQL fetch + scoring + DB insert before responding, which
+      // routinely takes longer than the old 2.5s — that made this fallback
+      // win the race and redirect with no (or a stale, previous-attempt)
+      // progressId. Save over REST instead of trusting stale local data.
+      setTimeout(() => {
+        if (redirected) return;
+        saveViaRestAndRedirect(getPersistedPortalResult(testId));
+      }, 8000);
     } else {
-      persistSubmissionResult();
-      setTimeout(() => handleRedirect(), 2500);
+      saveViaRestAndRedirect(submissionPayload);
     }
   };
   // ALL YOUR OTHER EXISTING STATE AND FUNCTIONS

@@ -5,6 +5,7 @@ import {
   studentUrl,
   aiUrl,
   restUrl as awsUrl,
+  testUrl,
 } from "@/config/urls";
 
-export { socketUrl, proctoringUrl, gqlUrl, studentUrl, aiUrl, awsUrl };
+export { socketUrl, proctoringUrl, gqlUrl, studentUrl, aiUrl, awsUrl, testUrl };

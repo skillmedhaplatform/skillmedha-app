@@ -2,10 +2,12 @@
 import React, { createRef, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import _ from "lodash";
+import axios from "axios";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { TbTriangleInvertedFilled } from "react-icons/tb";
 import resultStyles from "./results.module.scss";
+import { testUrl } from "@/config/urls";
 
 import { Collapse, Input, Select, Tag, message, Skeleton, Card, Row, Col, Statistic } from "antd";
 import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, ThunderboltOutlined, PercentageOutlined, TrophyOutlined, CaretRightOutlined } from "@ant-design/icons";
@@ -665,8 +667,10 @@ export default function Page() {
                 </div>
               )}
 
-              {/* Attempts History */}
-              {allCompletedResults?.length > 1 && (
+              {/* Attempts History — hidden during a One-Time result view; the
+                  student should only see the attempt they just completed,
+                  not the full history of past attempts. */}
+              {allCompletedResults?.length > 1 && resultConfig?.type !== 'ONE_TIME' && (
                 <div className={resultStyles.overviewCard} style={{ marginBottom: "20px" }}>
                   <div className={resultStyles.ocHeader}>
                     <i className="ti ti-history" /> Attempts History

@@ -51,6 +51,23 @@ function getPersistedPortalResult(testId) {
   }
 }
 
+function clearPersistedPortalResult(testId) {
+  if (!testId) return;
+
+  try {
+    const storage =
+      typeof window !== "undefined"
+        ? window.sessionStorage
+        : globalThis.sessionStorage;
+
+    if (storage) {
+      storage.removeItem(getResultStorageKey(testId));
+    }
+  } catch (error) {
+    console.error("Unable to clear persisted test result", error);
+  }
+}
+
 function getNumericValue(value, fallback = 0) {
   const parsedValue = Number(value);
   return Number.isFinite(parsedValue) ? parsedValue : fallback;
@@ -114,5 +131,6 @@ export {
   getResultStorageKey,
   persistPortalResult,
   getPersistedPortalResult,
+  clearPersistedPortalResult,
   deriveResultSummary,
 };
