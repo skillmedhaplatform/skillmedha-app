@@ -397,6 +397,10 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   // safeItems = my courses (enrolled)
   const safeItems = Array.isArray(items) ? items : [];
 
+  const myCoursesIds = useMemo(() => {
+    return new Set(safeItems.map((c) => c._id || c.courseId?._id));
+  }, [safeItems]);
+
   // safeAllItems = all courses from getAllCoursesOnly API: response is { data: [...], hasNext: bool }
   // allItems in redux is already payload.data (array) after slice handles it
   const safeAllItems = Array.isArray(allItems) ? allItems : [];
@@ -1010,6 +1014,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                       isInWishlist={inWishlist}
                       cartLoading={isCartLoading}
                       wishlistLoading={isWishlistLoading}
+                      isEnrolled={isEnrolled}
                     />
                   }
                 >
@@ -1064,6 +1069,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
           items={wishlistItems}
           loading={wishlistLoading}
           cartIds={cartIdSet}
+          enrolledIds={myCoursesIds}
         />
       )}
 

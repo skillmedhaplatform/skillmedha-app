@@ -1,7 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import { useSelector } from "react-redux";
+
+export const PreviewContext = createContext(false);
+export const ResumeEditorContext = createContext(null);
+
+const dummyStudentData = {
+  firstName: "Jane",
+  lastName: "Doe",
+  email: "jane.doe@example.com",
+  phone: "+1 (555) 123-4567",
+  city: "San Francisco, CA",
+  profile: "/sample_profile.png",
+  professionalSummary: "Results-driven Software Engineer with 4+ years of experience in developing scalable web applications. Adept in React, Node.js, and cloud technologies. Proven ability to deliver high-quality software on time and collaborate effectively in fast-paced environments.",
+  educationDetails: [
+    { type: "B.Tech in Computer Science", school: "University of Technology", board: "", startDate: "2018", endDate: "2022" }
+  ],
+  experiences: [
+    { type: "work", role: "Senior Frontend Engineer", company: "Tech Innovations Inc.", description: "Led a team of 4 engineers to rebuild the core customer portal. Increased page load speeds by 40% and improved user retention.", startDate: "2022", endDate: "Present" },
+    { type: "work", role: "Software Developer", company: "Creative Solutions", description: "Developed responsive web interfaces using React and Redux. Collaborated with designers to implement intuitive UI/UX.", startDate: "2020", endDate: "2022" }
+  ],
+  projects: [
+    { project: "AWS Certified Developer", company: "Amazon Web Services", description: "Professional certification." }
+  ],
+  accomplishments: [
+    { title: "Employee of the Month", description: "Awarded for exceptional performance during the Q3 product launch." }
+  ],
+  technical: ["JavaScript", "React", "Node.js", "TypeScript", "Tailwind CSS", "GraphQL"],
+  languages: ["English", "Spanish"],
+  links: [{ title: "LinkedIn", link: "linkedin.com/in/janedoe" }, { title: "GitHub", link: "github.com/janedoe" }]
+};
 
 export const normalizeExternalLink = (value) => {
   if (!value) return "";
@@ -22,7 +51,15 @@ export const asHtmlString = (value) => {
 };
 
 export const useResumeTemplateData = () => {
-  const studentData = useSelector((state) => state.student.student?.data) || {};
+  const isPreview = useContext(PreviewContext);
+  const editorData = useContext(ResumeEditorContext);
+  const reduxData = useSelector((state) => state.student.student?.data) || {};
+  
+  if (editorData) {
+    return editorData;
+  }
+
+  const studentData = isPreview ? dummyStudentData : reduxData;
   const experienceDetails = studentData?.experiences || [];
 
   return {
@@ -106,18 +143,23 @@ export const useProfileImage = (profileUrl) => {
             })
         );
 
+    if (profileUrl.startsWith("data:")) {
+      setProfileBase64(profileUrl);
+      return;
+    }
+
     const convertImageToBase64 = (url) =>
       toDataUrlViaCanvas(url).catch(() => toDataUrlViaProxy(url));
 
     convertImageToBase64(profileUrl)
       .then((value) => {
         if (isMounted) {
-          setProfileBase64(value || null);
+          setProfileBase64(value || profileUrl);
         }
       })
       .catch(() => {
         if (isMounted) {
-          setProfileBase64(null);
+          setProfileBase64(profileUrl);
         }
       });
 
