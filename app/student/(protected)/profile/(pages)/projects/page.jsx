@@ -373,6 +373,7 @@ export default function WorkAndProjectsPage() {
                         }}
                         onRemove={(file) => removeFile(idx, file, didx)}
                         showUploadList={false}
+                        accept=".pdf, image/*, .doc, .docx"
                       >
                         <Button
                           icon={<UploadOutlined />}

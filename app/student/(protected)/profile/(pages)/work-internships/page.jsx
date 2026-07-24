@@ -500,6 +500,7 @@ export default function WorkAndInternshipPage() {
                           }}
                           onRemove={(file) => removeFile(idx, "joining", file)}
                           showUploadList={false}
+                          accept=".pdf, image/*, .doc, .docx"
                         >
                           <Button
                             icon={<UploadOutlined />}
@@ -542,6 +543,7 @@ export default function WorkAndInternshipPage() {
                             removeFile(idx, "relieving", file)
                           }
                           showUploadList={false}
+                          accept=".pdf, image/*, .doc, .docx"
                         >
                           <Button
                             icon={<UploadOutlined />}
@@ -588,6 +590,7 @@ export default function WorkAndInternshipPage() {
                           removeFile(idx, "certificate", file)
                         }
                         showUploadList={false}
+                        accept=".pdf, image/*, .doc, .docx"
                       >
                         <Button
                           icon={<UploadOutlined />}
@@ -641,6 +644,7 @@ export default function WorkAndInternshipPage() {
                           removeFile(idx, "custom", file, didx)
                         }
                         showUploadList={false}
+                        accept=".pdf, image/*, .doc, .docx"
                       >
                         <Button
                           icon={<UploadOutlined />}
