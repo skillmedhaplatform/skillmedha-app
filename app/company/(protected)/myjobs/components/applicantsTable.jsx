@@ -241,7 +241,14 @@ export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
       title: "Name",
       dataIndex: "userName",
       key: "userName",
-      render: (_, record) => <strong  style={{cursor:"pointer"}}>{record?.userName}</strong>,
+      render: (_, record) => (
+        <strong style={{ cursor: "pointer" }}>
+          {record?.userName ||
+            `${record?.firstName || ""} ${record?.lastName || ""}`.trim() ||
+            record?.email ||
+            "Student"}
+        </strong>
+      ),
     },
     {
       title: "Skillmedha Id",
@@ -319,11 +326,6 @@ export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
           className={styles.searchInput}
         />
         <div className={styles.filterCont}>
-          <Select
-            className={styles.select}
-            suffixIcon={<FaCaretDown />}
-            size="middle"
-          />
           <Select
             className={styles.select}
             suffixIcon={<FaCaretDown />}

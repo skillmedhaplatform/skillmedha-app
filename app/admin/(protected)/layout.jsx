@@ -6,6 +6,11 @@ import UserDataLayer from "@/modules/admin/components/dal/UserDataLayer";
 import AdminBanner from "@/modules/admin/components/banner/AdminBanner";
 import AdminProgressProvider from "./AdminProgressProvider";
 
+export const metadata = {
+  title: "Admin Portal | SkillMedha",
+  description: "SkillMedha Admin Dashboard",
+};
+
 export default function layout({ children }) {
   return (
     <UserDataLayer>

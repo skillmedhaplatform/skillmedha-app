@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PageHeader from "@/modules/tpo/components/PageHeader";
 import {
   CreateOnePlacement,
+  UpdateJobProfile,
   deleteJobProfile,
   GetAllPlacements,
 } from "@/redux/slices/tpo/placementsSlice";
@@ -140,6 +141,7 @@ export default function DriveDetails() {
 
   // ─── State ────────────────────────────────────────────────
   const [isModal, setIsModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [fileList, setFileList] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -268,14 +270,10 @@ export default function DriveDetails() {
     };
   }, [allData, USER_DETAILS]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredData.length / pageSize);
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // Display all data on a single page
+  const paginatedData = filteredData;
 
-  // ─── Handlers (preserved) ─────────────────────────────────
+  // ─── Handlers ─────────────────────────────────────────────
   const onChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const handleS3Upload = async ({ file, onSuccess, onError }) => {
@@ -311,12 +309,8 @@ export default function DriveDetails() {
     router.push(`/tpo/placementdrive/${record._id}`);
   };
 
-  const handleSave = async () => {
-    if (!formData.companyName) {
-      alert("Please fill required fields");
-      return;
-    }
-    await dispatch(CreateOnePlacement({ payload: formData, dispatch }));
+  const handleOpenCreateModal = () => {
+    setEditingId(null);
     setFormData({
       companyName: "",
       companyLogo: "",
@@ -326,6 +320,56 @@ export default function DriveDetails() {
       phoneNumber: "",
     });
     setFileList([]);
+    setIsModal(true);
+  };
+
+  const handleOpenEditModal = (company) => {
+    setEditingId(company._id);
+    setFormData({
+      companyName: company.companyName || "",
+      companyLogo: company.companyLogo || "",
+      startDate: company.startDate || "",
+      endDate: company.endDate || "",
+      createdBy: company.createdBy || "",
+      phoneNumber: company.phoneNumber || "",
+    });
+    if (company.companyLogo) {
+      setFileList([
+        {
+          uid: "-1",
+          name: "companyLogo",
+          status: "done",
+          url: company.companyLogo,
+        },
+      ]);
+    } else {
+      setFileList([]);
+    }
+    setIsModal(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.companyName) {
+      alert("Please fill required fields");
+      return;
+    }
+    if (editingId) {
+      await dispatch(
+        UpdateJobProfile({ profileId: editingId, payload: formData, dispatch })
+      );
+    } else {
+      await dispatch(CreateOnePlacement({ payload: formData, dispatch }));
+    }
+    setFormData({
+      companyName: "",
+      companyLogo: "",
+      startDate: "",
+      endDate: "",
+      createdBy: "",
+      phoneNumber: "",
+    });
+    setFileList([]);
+    setEditingId(null);
     setIsModal(false);
   };
 
@@ -371,6 +415,7 @@ export default function DriveDetails() {
           menu={{
             items: [
               { key: "view", label: "View Details" },
+              { key: "edit", label: "Edit Details" },
               { key: "delete", label: "Delete", danger: true },
             ],
             onClick: (e) => {
@@ -379,6 +424,7 @@ export default function DriveDetails() {
                 e.domEvent.stopPropagation();
               }
               if (e.key === "delete") handleDelete(record);
+              if (e.key === "edit") handleOpenEditModal(record);
               if (e.key === "view") handleClick(record);
             },
           }}
@@ -405,7 +451,7 @@ export default function DriveDetails() {
         title="All companies"
         subtitle="Manage recruiting companies, contacts and placement drives"
         actionText="+ Create Company"
-        onActionClick={() => setIsModal(true)}
+        onActionClick={handleOpenCreateModal}
       />
 
       <div className={styles.container}>
@@ -499,7 +545,7 @@ export default function DriveDetails() {
               </div>
             ))}
           </div>
-          <Button type="primary" onClick={() => setIsModal(true)} style={{ marginBottom: "8px" }}>
+          <Button type="primary" onClick={handleOpenCreateModal} style={{ marginBottom: "8px" }}>
             + Create Company
           </Button>
         </div>
@@ -661,7 +707,7 @@ export default function DriveDetails() {
                                 e.domEvent.stopPropagation();
                               }
                               if (e.key === "delete") handleDelete(company);
-                              if (e.key === "edit") handleClick(company);
+                              if (e.key === "edit") handleOpenEditModal(company);
                             },
                           }}
                           trigger={["click"]}
@@ -701,79 +747,11 @@ export default function DriveDetails() {
             })}
           />
         )}
-
-        {/* ── Pagination ── */}
-        {filteredData.length > 0 && (
-          <div className={styles.paginationRow}>
-            <div className={styles.paginationLeft}>
-              <span className={styles.pageSizeLabel}>Items per page:</span>
-              <Select
-                className={styles.pageSizeSelect}
-                value={pageSize}
-                onChange={(val) => {
-                  setPageSize(val);
-                  setCurrentPage(1);
-                }}
-                options={PAGE_SIZES.map((s) => ({
-                  value: s,
-                  label: `${s}`,
-                }))}
-                size="middle"
-                style={{ width: 80 }}
-              />
-              <span className={styles.showingText}>
-                Showing {(currentPage - 1) * pageSize + 1}–
-                {Math.min(currentPage * pageSize, filteredData.length)} of{" "}
-                {filteredData.length} companies
-              </span>
-            </div>
-
-            <div className={styles.paginationRight}>
-              <button
-                className={styles.pageBtn}
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                ‹
-              </button>
-
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let page;
-                if (totalPages <= 5) {
-                  page = i + 1;
-                } else if (currentPage <= 3) {
-                  page = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  page = totalPages - 4 + i;
-                } else {
-                  page = currentPage - 2 + i;
-                }
-                return (
-                  <button
-                    key={page}
-                    className={`${styles.pageBtn} ${currentPage === page ? styles.pageBtnActive : ""}`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-
-              <button
-                className={styles.pageBtn}
-                disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                ›
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* ── Create Company Modal (preserved) ── */}
+      {/* ── Create / Edit Company Modal ── */}
       <Modal
-        title={<h2>Create Company</h2>}
+        title={<h2>{editingId ? "Edit Company" : "Create Company"}</h2>}
         centered
         open={isModal}
         onCancel={() => setIsModal(false)}

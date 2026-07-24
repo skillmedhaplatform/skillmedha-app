@@ -65,6 +65,9 @@
 
 .formField {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -158,6 +161,8 @@
 
 .arrayField {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   margin-top: 1rem;
 
   .arrayItem {
@@ -166,11 +171,19 @@
     margin: 0.5rem 0 1.5rem 0;
     padding: 1.5rem;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 1.5rem;
     row-gap: 1rem;
     background-color: #f8fafc;
+
+    > .formField {
+      min-width: 0;
+      max-width: 100%;
+    }
 
     .arrayItemActions {
       grid-column: 1 / -1;
@@ -180,6 +193,8 @@
       margin-top: 0.5rem;
       border-top: 1px solid #e2e8f0;
       padding-top: 1rem;
+      width: 100%;
+      box-sizing: border-box;
     }
   }
 }
@@ -200,6 +215,69 @@
   font-size: 1rem;
   font-weight: 700;
   color: #0f172a;
+}
+
+.uploadField {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  :global(.ant-upload-wrapper) {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: block;
+  }
+
+  :global(.ant-upload-list) {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  :global(.ant-upload-list-item-container) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  :global(.ant-upload-list-item) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+
+  :global(.ant-upload-list-item-info) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  :global(.ant-upload-span) {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  :global(.ant-upload-list-item-name) {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 24px) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+  }
 }
 
 .uploadfieldmain {

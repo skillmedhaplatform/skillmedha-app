@@ -184,21 +184,19 @@
       .searchCont {
         width: 100%;
         display: flex;
-        align-items: flex-start;
-        justify-content: center;
+        align-items: center;
+        justify-content: space-between;
         flex-direction: row;
-        gap: 0.5rem;
+        gap: 1rem;
+        margin-bottom: 1rem;
         .filterCont {
-          flex: 1;
           display: flex;
           align-items: center;
           justify-content: flex-end;
-          gap: 1%;
+          gap: 0.75rem;
           .select {
-            width: 50%;
-            height: 100%;
+            min-width: 200px;
             position: relative;
-            overflow: hidden;
             outline: 0;
           }
           .selectDropdown {
@@ -215,8 +213,9 @@
         }
 
         .searchInput {
-          font-size: 18px;
-          width: 30%;
+          font-size: 15px;
+          width: 320px;
+          max-width: 100%;
         }
       }
       .tableCont {
