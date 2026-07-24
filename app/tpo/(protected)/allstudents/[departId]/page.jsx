@@ -475,10 +475,8 @@ const StudentData = () => {
     return ((firstName?.[0] || "") + (lastName?.[0] || "")).toUpperCase();
   };
 
-  const paginatedData = (filteredData || []).slice(
-    (pagination.current - 1) * pagination.pageSize,
-    pagination.current * pagination.pageSize
-  );
+  // Display all students on a single page
+  const paginatedData = filteredData || [];
 
   return (
     <>
@@ -735,46 +733,6 @@ const StudentData = () => {
           </>
         )}
 
-        {/* Unified Pagination Row */}
-        {filteredData && filteredData.length > 0 && (
-          <div className={students.paginationRow}>
-            <div className={students.paginationLeft}>
-              <span className={students.pageSizeLabel}>Items per page</span>
-              <Select
-                value={pagination.pageSize}
-                onChange={(value) => {
-                  setPagination((prev) => ({
-                    ...prev,
-                    pageSize: value,
-                    current: 1,
-                  }));
-                }}
-                options={[
-                  { value: 8, label: "8" },
-                  { value: 10, label: "10" },
-                  { value: 25, label: "25" },
-                  { value: 50, label: "50" },
-                  { value: 100, label: "100" },
-                ]}
-                className={students.pageSizeSelect}
-                size="small"
-              />
-              <span className={students.showingText}>
-                Showing {paginatedData.length} students • Page {pagination.current} of {Math.ceil(filteredData.length / pagination.pageSize) || 1}
-              </span>
-            </div>
-            <div className={students.paginationRight}>
-              <Pagination
-                current={pagination.current}
-                pageSize={pagination.pageSize}
-                total={filteredData.length}
-                onChange={(page) => setPagination((prev) => ({ ...prev, current: page }))}
-                showSizeChanger={false}
-              />
-            </div>
-          </div>
-        )}
-
         {/* Single / Bulk Add Modal */}
         <Modal
           title={
@@ -928,7 +886,7 @@ const StudentData = () => {
                 <Table
                   dataSource={uploadResultData.errors}
                   rowKey={(record, index) => `${record.row}-${index}`}
-                  pagination={{ pageSize: 5 }}
+                  pagination={false}
                   columns={[
                     { title: "Row", dataIndex: "row", key: "row", width: 80 },
                     { title: "Email", dataIndex: "email", key: "email" },

@@ -161,5 +161,29 @@ export const ExpireNotice = createAsyncThunk("/ExpireNotice", async (args) => {
   }
 });
 
+export const DeleteNotice = createAsyncThunk("/DeleteNotice", async (args) => {
+  const { NoticeId, currentTab = "active", dispatch } = args;
+  try {
+    const { data } = await axios.get(
+      restUrl + `/deleteNoticeBoard/${NoticeId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${getLstorage("token") || token}`,
+        },
+      }
+    );
+    if (data?.msg) {
+      dispatch(GetNoticeByStatus({ status: currentTab, limit: 7, page: 1 }));
+      message.success("Notice deleted successfully!");
+    } else {
+      message.error("Failed to delete notice.");
+    }
+    return data;
+  } catch (error) {
+    console.log(error);
+    message.error("An error occurred while deleting the notice.");
+  }
+});
+
 export const {} = NoticeBoardSlice.actions;
 export default NoticeBoardSlice.reducer;

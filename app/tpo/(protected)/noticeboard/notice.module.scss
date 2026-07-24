@@ -1,10 +1,81 @@
-@use "@/utils/universalUtils/colors.module.scss" as *;
-.noticemainCont {
+.noticePageContainer {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabsWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 2.5rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  width: 100%;
+}
+
+.tabsRow {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.tabItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+
+  &:hover {
+    color: #1e293b;
+    background-color: #f1f5f9;
+  }
+}
+
+.activeTab {
+  color: #1d4ed8 !important;
+  font-weight: 600 !important;
+  background-color: #eff6ff !important;
+}
+
+.activeIndicator {
+  position: absolute;
+  bottom: -0.75rem;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #1d4ed8;
+  border-radius: 2px 2px 0 0;
+}
+
+.noticemainCont {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   .headerCont {
     width: 100%;
     padding: 0.5rem 1rem;
@@ -317,6 +388,17 @@
 
   &:hover {
     opacity: 0.9 !important;
+  }
+}
+
+.actionBtnDanger {
+  background-color: #fff1f2 !important;
+  border: 1px solid #fecdd3 !important;
+  color: #e11d48 !important;
+
+  &:hover {
+    background-color: #ffe4e6 !important;
+    border-color: #fda4af !important;
   }
 }
 

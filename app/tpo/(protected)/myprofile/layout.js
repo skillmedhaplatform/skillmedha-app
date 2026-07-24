@@ -32,11 +32,26 @@ export default function ProfileLayout({ children, activeView, setView }) {
   const { value: StudentsLength, status: studentsStatus } = useSelector(
     (state) => state.dashboard.AllStudents
   );
-  const studentsCount = Array.isArray(StudentsLength?.data)
-    ? StudentsLength.data.length
+  const studentsList = Array.isArray(StudentsLength?.data)
+    ? StudentsLength.data
     : Array.isArray(StudentsLength)
-    ? StudentsLength.length
-    : 0;
+    ? StudentsLength
+    : [];
+
+  const departmentsList = Array.isArray(departMent?.data)
+    ? departMent.data
+    : Array.isArray(departMent)
+    ? departMent
+    : [];
+
+  const deptIdSet = new Set(departmentsList.map((d) => d._id?.toString()).filter(Boolean));
+
+  // Students belonging to existing departments
+  const departmentStudentsList = studentsList.filter((s) => {
+    const sDeptId = typeof s.department === "object" ? s.department?._id?.toString() : s.department?.toString();
+    return sDeptId && deptIdSet.has(sDeptId);
+  });
+  const studentsCount = departmentStudentsList.length;
 
   const { value: ALLPLACEMENTS, status: placementsStatus } = useSelector(
     (state) => state.placement.AllPlacements

@@ -210,16 +210,18 @@ const DynamicForm = ({ schema }) => {
 
   const renderFileUpload = ({ name }) => {
     // Allow uploading any file, show its name and allow removal
-    const fileList = formData[name]
-      ? [
-        {
-          uid: "-1",
-          name: formData[name].split("/").pop(),
-          status: "done",
-          url: formData[name],
-        },
-      ]
-      : [];
+    const fileUrl = formData[name];
+    const fileList =
+      fileUrl && typeof fileUrl === "string"
+        ? [
+            {
+              uid: "-1",
+              name: fileUrl.split("/").pop() || "file",
+              status: "done",
+              url: fileUrl,
+            },
+          ]
+        : [];
 
     return (
       <div className={styles.uploadField}>
@@ -242,11 +244,12 @@ const DynamicForm = ({ schema }) => {
               ...prev,
               [name]: "",
             }));
+            return false;
           }}
-          showUploadList={{ showPreviewIcon: false, showRemoveIcon: true }}
+          showUploadList={{ showPreviewIcon: false, showRemoveIcon: isEditing }}
           disabled={!isEditing}
         >
-          {!formData[name] && (
+          {!fileUrl && (
             <Button disabled={!isEditing} type="dashed">
               Click to Upload
             </Button>
@@ -401,16 +404,17 @@ const DynamicForm = ({ schema }) => {
   const renderFileUploadForArray = (arrayName, index, field) => {
     const fieldKey = field.name;
     const fileUrl = formData[arrayName]?.[index]?.[fieldKey] || "";
-    const fileList = fileUrl
-      ? [
-        {
-          uid: "-1",
-          name: fileUrl.split("/").pop(),
-          status: "done",
-          url: fileUrl,
-        },
-      ]
-      : [];
+    const fileList =
+      fileUrl && typeof fileUrl === "string"
+        ? [
+            {
+              uid: "-1",
+              name: fileUrl.split("/").pop() || "file",
+              status: "done",
+              url: fileUrl,
+            },
+          ]
+        : [];
 
     return (
       <div className={styles.uploadField}>
@@ -440,15 +444,19 @@ const DynamicForm = ({ schema }) => {
             setFormData((prev) => {
               const updatedItems = [...(prev[arrayName] || [])];
               if (updatedItems[index]) {
-                updatedItems[index][fieldKey] = "";
+                updatedItems[index] = {
+                  ...updatedItems[index],
+                  [fieldKey]: "",
+                };
               }
               return {
                 ...prev,
                 [arrayName]: updatedItems,
               };
             });
+            return false;
           }}
-          showUploadList={{ showPreviewIcon: false, showRemoveIcon: true }}
+          showUploadList={{ showPreviewIcon: false, showRemoveIcon: isEditing }}
           disabled={!isEditing}
         >
           {!fileUrl && (

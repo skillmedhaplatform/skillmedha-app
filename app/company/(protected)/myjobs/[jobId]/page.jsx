@@ -117,9 +117,16 @@ export default function JobPreviewPage() {
   const filteredApplicants =
     JOBPROFILE?.applicants?.filter((applicant) => {
       const search = searchText.toLowerCase();
+      const userName = (
+        applicant?.userName ||
+        `${applicant?.firstName || ""} ${applicant?.lastName || ""}`.trim()
+      ).toLowerCase();
+      const enrollementId = applicant?.enrollementId?.toLowerCase() || "";
+      const email = applicant?.email?.toLowerCase() || "";
       return (
-        applicant?.userName?.toLowerCase().includes(search) ||
-        applicant?.enrollementId?.toLowerCase().includes(search)
+        userName.includes(search) ||
+        enrollementId.includes(search) ||
+        email.includes(search)
       );
     }) || [];
 

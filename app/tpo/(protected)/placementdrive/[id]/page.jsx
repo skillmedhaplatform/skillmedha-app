@@ -126,12 +126,8 @@ const PlacementDetails = () => {
     setCurrentPage(1);
   };
 
-  // Pagination calculation
-  const totalPages = Math.ceil(filteredJobs.length / pageSize);
-  const paginatedJobs = filteredJobs.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // Display all job profiles on a single page
+  const paginatedJobs = filteredJobs;
 
   return (
     <>
@@ -273,71 +269,6 @@ const PlacementDetails = () => {
             </div>
           )}
         </div>
-
-        {/* ── Pagination ── */}
-        {filteredJobs.length > 0 && (
-          <div className={allStudents.paginationRow}>
-            <div className={allStudents.paginationLeft}>
-              <span className={allStudents.pageSizeLabel}>Items per page:</span>
-              <Select
-                className={allStudents.pageSizeSelect}
-                value={pageSize}
-                onChange={handlePageSizeChange}
-                options={PAGE_SIZES.map((s) => ({
-                  value: s,
-                  label: `${s}`,
-                }))}
-                size="middle"
-                style={{ width: 80 }}
-              />
-              <span className={allStudents.showingText}>
-                Showing {(currentPage - 1) * pageSize + 1}–
-                {Math.min(currentPage * pageSize, filteredJobs.length)} of{" "}
-                {filteredJobs.length} job profiles
-              </span>
-            </div>
-
-            <div className={allStudents.paginationRight}>
-              <button
-                className={allStudents.pageBtn}
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                ‹
-              </button>
-
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let page;
-                if (totalPages <= 5) {
-                  page = i + 1;
-                } else if (currentPage <= 3) {
-                  page = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  page = totalPages - 4 + i;
-                } else {
-                  page = currentPage - 2 + i;
-                }
-                return (
-                  <button
-                    key={page}
-                    className={`${allStudents.pageBtn} ${currentPage === page ? allStudents.pageBtnActive : ""}`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-
-              <button
-                className={allStudents.pageBtn}
-                disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                ›
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       <JobDetailsModal

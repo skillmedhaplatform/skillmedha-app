@@ -131,7 +131,7 @@ export default function JobDetails({ JOBPROFILE, ALLPLACEMENTS }) {
       <h3 className={styles.subheading}>Job Description</h3>
       <div className={styles.infoBox}>
         <div>
-          <p>{JOBPROFILE?.description || "No job description provided."}</p>
+          <p>{JOBPROFILE?.jobDescription || JOBPROFILE?.description || "No job description provided."}</p>
         </div>
       </div>
 

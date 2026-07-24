@@ -10,6 +10,7 @@ import {
   Input,
   Space,
   Tooltip,
+  Popconfirm,
 } from "antd";
 import styles from "./notice.module.scss";
 import NoticeForm from "./(components)/form";
@@ -19,6 +20,7 @@ import { FcExpired } from "react-icons/fc";
 import { CiSaveDown2 } from "react-icons/ci";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  DeleteNotice,
   ExpireNotice,
   GetNoticeByStatus,
   PublishNotice,
@@ -31,6 +33,7 @@ const Page = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [selectedNoticeId, setSelectedNoticeId] = useState(null);
+  const [editingNotice, setEditingNotice] = useState(null);
   const [currentTab, setCurrentTab] = useState("active");
   const [searchText, setSearchText] = useState("");
   const [filterType, setFilterType] = useState("");
@@ -54,13 +57,16 @@ const Page = () => {
   );
 
   const showDrawer = (record = null) => {
-    setSelectedNoticeId(record?._id);
+    setEditingNotice(record);
+    if (record?._id) {
+      setSelectedNoticeId(record._id);
+    }
     setOpen(true);
   };
 
   const onFinish = () => {
     setOpen(false);
-    setSelectedNoticeId(selectedNoticeId || NoticeBoard?.[0]?._id || "");
+    setEditingNotice(null);
   };
 
   const getSelectedNotice = () => {
@@ -107,6 +113,10 @@ const Page = () => {
     } else if (status === "pending") {
       dispatch(PublishNotice({ NoticeId: record?._id, dispatch }));
     }
+  };
+
+  const handleDelete = (noticeId) => {
+    dispatch(DeleteNotice({ NoticeId: noticeId, currentTab, dispatch }));
   };
 
   const getActionLabel = (status) => {
@@ -193,33 +203,35 @@ const Page = () => {
   ];
 
   return (
-    <>
-      <PageHeader
-        title="Notice Board"
-        subtitle="Create and manage system announcements"
-        actionText="+ Create Notice"
-        onActionClick={() => showDrawer(null)}
-      />
-      <div className={styles.tabsWrapper} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className={styles.tabsRow}>
-          {noticeTabs.map((tab) => {
-            const isActive = currentTab === tab.key;
-            return (
-              <div
-                key={tab.key}
-                className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
-                onClick={() => handleTabChange(tab.key)}
-              >
-                {tab.icon}
-                <span>{tab.name}</span>
-                {isActive && <div className={styles.activeIndicator} />}
-              </div>
-            );
-          })}
+    <div className={styles.noticePageContainer}>
+      <div className={styles.stickyHeader}>
+        <PageHeader
+          title="Notice Board"
+          subtitle="Create and manage system announcements"
+          actionText="+ Create Notice"
+          onActionClick={() => showDrawer(null)}
+        />
+        <div className={styles.tabsWrapper}>
+          <div className={styles.tabsRow}>
+            {noticeTabs.map((tab) => {
+              const isActive = currentTab === tab.key;
+              return (
+                <div
+                  key={tab.key}
+                  className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
+                  onClick={() => handleTabChange(tab.key)}
+                >
+                  {tab.icon}
+                  <span>{tab.name}</span>
+                  {isActive && <div className={styles.activeIndicator} />}
+                </div>
+              );
+            })}
+          </div>
+          <Button type="primary" onClick={() => showDrawer(null)}>
+            + Create Notice
+          </Button>
         </div>
-        <Button type="primary" onClick={() => setOpen(true)}>
-          + Create Notice
-        </Button>
       </div>
       <div className={styles.noticemainCont}>
         <div className={styles.bottomCont}>
@@ -301,6 +313,18 @@ const Page = () => {
                         >
                           Edit
                         </button>
+                        <Popconfirm
+                          title="Delete Notice"
+                          description="Are you sure you want to delete this notice?"
+                          onConfirm={() => handleDelete(record._id)}
+                          okText="Yes"
+                          cancelText="No"
+                          okButtonProps={{ danger: true }}
+                        >
+                          <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`}>
+                            Delete
+                          </button>
+                        </Popconfirm>
                       </div>
                     </div>
                   );
@@ -326,15 +350,15 @@ const Page = () => {
           <Drawer
             title={
               <div className={styles.drawerHeader}>
-                <h3>{selectedNoticeId ? "Edit Notice" : "Create Notice"}</h3>
-                <Button type="text" onClick={() => onFinish(selectedNoticeId)}>
+                <h3>{editingNotice ? "Edit Notice" : "Create Notice"}</h3>
+                <Button type="text" onClick={() => onFinish()}>
                   ❌
                 </Button>
               </div>
             }
             placement="right"
             closable={false}
-            onClose={() => onFinish(selectedNoticeId)}
+            onClose={() => onFinish()}
             open={open}
             getContainer={false}
             // mask={false}
@@ -342,14 +366,14 @@ const Page = () => {
             rootStyle={{ position: "absolute" }}
           >
             <NoticeForm
-              initialValues={getSelectedNotice()}
-              onFinish={() => onFinish(selectedNoticeId)}
+              initialValues={editingNotice}
+              onFinish={() => onFinish()}
               currentTab={currentTab}
             />
           </Drawer>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
