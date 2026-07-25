@@ -88,9 +88,17 @@ export default function JobPreviewPage() {
   const filteredApplicants =
     JOBPROFILE?.applicants?.filter((applicant) => {
       const search = searchText.toLowerCase();
-      const userName = applicant?.userName?.toLowerCase() || "";
+      const userName = (
+        applicant?.userName ||
+        `${applicant?.firstName || ""} ${applicant?.lastName || ""}`.trim()
+      ).toLowerCase();
       const enrollementId = applicant?.enrollementId?.toLowerCase() || "";
-      return userName.includes(search) || enrollementId.includes(search);
+      const email = applicant?.email?.toLowerCase() || "";
+      return (
+        userName.includes(search) ||
+        enrollementId.includes(search) ||
+        email.includes(search)
+      );
     }) || [];
 
   const tabList = [
@@ -109,13 +117,23 @@ export default function JobPreviewPage() {
     }
   };
 
+  const handleEditClick = () => {
+    const tabMap = {
+      basic: "basicdetails",
+      jobProfile: "profiledetails",
+      interview: "interviewprocess",
+    };
+    const targetPage = tabMap[activeTab] || "basicdetails";
+    router.replace(`/tpo/placementdrive/${id}/${jobid}/createjob/${targetPage}`);
+  };
+
   return (
     <>
       <PageHeader
         title={JOBPROFILE?.jobTitle || "Job Details"}
         subtitle={`${JOBPROFILE?.companyName || "Company"} - ${JOBPROFILE?.city || "City not specified"}, ${JOBPROFILE?.country || "Country not specified"}`}
         actionText="Edit"
-        onActionClick={() => router.replace(`/tpo/placementdrive/${id}/${jobid}/createjob/basicdetails`)}
+        onActionClick={handleEditClick}
       />
 
       <div className={styles.container}>
@@ -146,7 +164,7 @@ export default function JobPreviewPage() {
               );
             })}
           </div>
-          <Button type="primary" onClick={() => router.replace(`/tpo/placementdrive/${id}/${jobid}/createjob/basicdetails`)}>
+          <Button type="primary" onClick={handleEditClick}>
             Edit
           </Button>
         </div>

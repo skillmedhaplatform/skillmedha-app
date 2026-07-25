@@ -234,7 +234,7 @@ export default function JobDetails({ JOBPROFILE, ALLPLACEMENTS, activeTab = "bas
             <span>Full Job Description</span>
           </div>
           <div className={styles.descriptionBox}>
-            {JOBPROFILE?.description || "No job description provided."}
+            {JOBPROFILE?.jobDescription || JOBPROFILE?.description || "No job description provided."}
           </div>
         </div>
 

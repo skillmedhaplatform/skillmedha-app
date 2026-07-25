@@ -108,7 +108,6 @@ const Page = () => {
     : Array.isArray(StudentsLength)
       ? StudentsLength
       : [];
-  const studentsCount = studentsList.length;
 
   const placementsList = Array.isArray(ALLPLACEMENTS?.data)
     ? ALLPLACEMENTS.data
@@ -121,6 +120,15 @@ const Page = () => {
     : Array.isArray(departMent)
       ? departMent
       : [];
+
+  const deptIdSet = new Set(departmentsList.map((d) => d._id?.toString()).filter(Boolean));
+
+  // Students belonging to existing departments
+  const departmentStudentsList = studentsList.filter((s) => {
+    const sDeptId = typeof s.department === "object" ? s.department?._id?.toString() : s.department?.toString();
+    return sDeptId && deptIdSet.has(sDeptId);
+  });
+  const studentsCount = departmentStudentsList.length;
 
   // Companies count: unique company names from all jobs in all placement drives
   const uniqueCompanies = new Set();
@@ -140,7 +148,7 @@ const Page = () => {
   const jobProfilesCount = totalJobsCount;
 
   // Count placed students
-  const placedStudentsList = studentsList.filter(
+  const placedStudentsList = departmentStudentsList.filter(
     (student) => student.placementStatus === "placed"
   );
   const placedCount = placedStudentsList.length;
@@ -275,7 +283,10 @@ const Page = () => {
   // D. Department-wise Placement Statistics
   const departmentPlacements = departmentsList.map((dept) => {
     const deptIdStr = dept._id?.toString();
-    const deptStudents = studentsList.filter(s => s.department?.toString() === deptIdStr);
+    const deptStudents = studentsList.filter(s => {
+      const sDeptId = typeof s.department === 'object' ? s.department?._id?.toString() : s.department?.toString();
+      return sDeptId === deptIdStr;
+    });
     const eligible = deptStudents.length;
     const placed = deptStudents.filter(s => s.placementStatus === "placed").length;
     return {

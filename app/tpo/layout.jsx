@@ -4,6 +4,11 @@ import Providers from "@/utils/universalUtils/progressloading";
 import { Suspense } from "react";
 import TpoSessionBridge from "@/modules/tpo/components/TpoSessionBridge";
 
+export const metadata = {
+  title: "TPO Portal | SkillMedha",
+  description: "SkillMedha TPO Coordinator Dashboard",
+};
+
 export default function RootLayout({ children }) {
   return (
     <StoreProvider>

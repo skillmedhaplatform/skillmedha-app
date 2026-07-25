@@ -9,7 +9,8 @@ const Page = () => {
 
   const getFileType = (fileUrl) => {
     if (!fileUrl || typeof fileUrl !== "string") return "unknown";
-    const extension = fileUrl?.split(".").pop()?.toLowerCase();
+    const cleanUrl = fileUrl.split("?")[0].split("#")[0];
+    const extension = cleanUrl?.split(".").pop()?.toLowerCase();
     if (["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(extension)) {
       return "image";
     }
@@ -83,7 +84,17 @@ const Page = () => {
                         title={`PDF Certificate ${index}`}
                       />
                     ) : (
-                      <p className="text-slate-400 text-sm">Unsupported format</p>
+                      <div className="flex flex-col items-center gap-2 text-center px-4">
+                        <p className="text-slate-400 text-sm">Preview not available for this file type</p>
+                        <a
+                          href={fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 text-sm font-semibold underline"
+                        >
+                          Open / Download File
+                        </a>
+                      </div>
                     )}
                   </div>
                 </div>

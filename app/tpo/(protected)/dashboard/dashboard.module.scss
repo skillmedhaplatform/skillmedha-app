@@ -3,10 +3,21 @@
   height: 100%;
   width: 100%;
   display: flex;
-  overflow-y: auto;
+  overflow: hidden;
   flex-direction: column;
   background-color: transparent;
   font-family: 'Inter', sans-serif;
+}
+
+.dashboardContent {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -27,14 +38,6 @@
 
   scrollbar-width: thin;
   scrollbar-color: #6BA8ED transparent;
-}
-
-.dashboardContent {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
 }
 
 .headerRow {
