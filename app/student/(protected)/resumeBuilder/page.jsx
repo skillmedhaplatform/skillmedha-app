@@ -63,7 +63,7 @@ import { restUrl } from "@/config/urls";
 import { getLstorage } from "@/universalUtils/windowMW";
 import VolunteeringDetails from "./components/volunteringDetails";
 import { PreviewContext, ResumeEditorContext } from "./Templates/components/resumeTemplateData";
-import { Button, message } from "antd";
+import { Button, message, Modal } from "antd";
 import CertificateDetails from "./components/certificateDetails";
 import useResponsive from "@/hooks/useResponsive";
 import MobileResumeBuilder from "@/mobile_views/resumeBuilder/MobileResumeBuilder";
@@ -320,7 +320,13 @@ function Form() {
   const defaultSummary = "Motivated Computer Science graduate with a strong foundation in Java, Data Structures, SQL, and Web Development. Passionate about building user-friendly applications and continuously learning new technologies. Seeking an opportunity to contribute technical skills while growing as a software engineer.";
   
   const getSummary = (val) => {
-    if (!val || val.trim() === "" || val === "<p><br></p>" || val === '"<p><br></p>"') return defaultSummary;
+    if (!val) return defaultSummary;
+    let v = val;
+    if (typeof v === 'string') {
+      v = v.trim();
+      while (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1);
+      if (v === "" || v === "<p><br></p>" || v === "<p></p>") return defaultSummary;
+    }
     return val;
   };
 
@@ -406,15 +412,56 @@ function Form() {
   const [languages, setLanguages] = useState([""]);
   const [links, setLinks] = useState([{ title: "", link: "" }]);
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [downloadImage, setDownloadImage] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [expandedSection, setExpandedSection] = useState("Personal Information");
+  const [expandedSection, setExpandedSection] = useState(null);
   const [visibleOptionalSections, setVisibleOptionalSections] = useState([]);
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(true);
   const [previewOptionalSection, setPreviewOptionalSection] = useState("Certifications");
+
+  const sectionRefs = useRef({});
+  const [activeSection, setActiveSection] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('resumeBuilder_lastTemplate');
+      return saved || "template1";
+    }
+    return "template1";
+  });
+  const [previewTemplate, setPreviewTemplate] = useState(null);
+  const [previewScale, setPreviewScale] = useState(65);
+  const [previewMode, setPreviewMode] = useState("desktop");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("All Templates");
+  const [step, setStep] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("resumeBuilderStep") || "landing";
+    }
+    return "landing";
+  });
+
+  // Track the template ID that the current state belongs to
+  const currentStateTemplateRef = useRef(null);
+  
+  // Track download status for the warning popup
+  const [hasDownloaded, setHasDownloaded] = useState(false);
+    const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && selectedTemplate) {
+      localStorage.setItem('resumeBuilder_lastTemplate', selectedTemplate);
+    }
+  }, [selectedTemplate]);
+
+    // Removed step persistence to always show landing page on section open
+
+
+  // Modal states
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showDownloadWarningModal, setShowDownloadWarningModal] = useState(false);
 
   // Handler updates for basic details
   const updateBasicDetail = (field, value) => {
@@ -705,10 +752,77 @@ function Form() {
   useEffect(() => {
     if (!studentDetails) return;
 
-    // The user requested that only default sections be visible initially,
-    // and all optional sections must be manually added via "Add New Section",
-    // even if they have data in the profile.
-    setVisibleOptionalSections([]);
+    const draftKey = `resumeDraft_${selectedTemplate}`;
+    const savedDraftStr = localStorage.getItem(draftKey);
+
+    if (savedDraftStr) {
+      try {
+        const savedDraft = JSON.parse(savedDraftStr);
+        const savedBasicDetails = savedDraft.basicDetails || {};
+        setBasicDetails({
+          ...savedBasicDetails,
+          professionalSummary: getSummary(savedBasicDetails.professionalSummary || studentDetails?.professionalSummary)
+        });
+        setEducationDetails(savedDraft.educationDetails?.length ? savedDraft.educationDetails : [{
+          type: "",
+          board: "",
+          school: "",
+          hallticket: "",
+          startDate: "",
+          endDate: "",
+          yearofPass: "",
+          gradingSystem: "",
+          grade: "",
+          city: "",
+          description: "",
+          stream: "",
+        }]);
+        setExperienceDetails(savedDraft.experienceDetails?.length ? savedDraft.experienceDetails : [{
+          id: Date.now(),
+          company: "",
+          role: "",
+          startDate: "",
+          endDate: "",
+          city: "",
+          description: "",
+          type: "work",
+        }]);
+        setInternshipDetails(savedDraft.internships?.length ? savedDraft.internships : [{
+          id: Date.now(),
+          company: "",
+          role: "",
+          startDate: "",
+          endDate: "",
+          city: "",
+          description: "",
+          type: "internship",
+        }]);
+        setProjectDetails(savedDraft.projectDetails?.length ? savedDraft.projectDetails : [{
+          id: Date.now() + 1,
+          company: "",
+          project: "",
+          startDate: "",
+          endDate: "",
+          city: "",
+          description: "",
+        }]);
+        setAccDetails(savedDraft.accDetails);
+        setSkills(savedDraft.skills);
+        setLanguages(savedDraft.languages);
+        setLinks(savedDraft.links);
+        setCertificates(savedDraft.certificates);
+        setVolunteerings(savedDraft.volunteerings);
+        currentStateTemplateRef.current = selectedTemplate;
+        return;
+      } catch (e) {
+        console.error("Failed to load draft from localStorage", e);
+      }
+    }
+
+    // Use the saved visible optional sections if they exist
+    // This ensures sections stay visible until the user explicitly removes them.
+    // Otherwise, start with an empty array.
+    setVisibleOptionalSections(savedDraftStr ? (JSON.parse(savedDraftStr).visibleOptionalSections || []) : []);
 
     setVolunteerings(
       Array.isArray(studentDetails?.volunteerings) &&
@@ -875,7 +989,46 @@ function Form() {
           },
         ]
     );
-  }, [studentDetails]);
+
+    currentStateTemplateRef.current = selectedTemplate;
+  }, [studentDetails, selectedTemplate]);
+
+  // Auto-save effect
+  useEffect(() => {
+    // Only save if the state matches the currently selected template
+    // This prevents overwriting the new template's draft with old template's state during transition
+    if (currentStateTemplateRef.current !== selectedTemplate) return;
+    if (!studentDetails || !selectedTemplate) return;
+    
+    const draftKey = `resumeDraft_${selectedTemplate}`;
+    const draftData = {
+      basicDetails,
+      educationDetails,
+      experienceDetails,
+      internships,
+      projectDetails,
+      accDetails,
+      skills,
+      languages,
+      links,
+      certificates,
+      volunteerings,
+      visibleOptionalSections,
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draftData));
+    
+    // Track if they made changes after download
+    if (hasDownloaded) {
+      setHasUnsavedEdits(true);
+      if (step === 'editor') {
+        setShowDownloadWarningModal(true);
+      }
+    }
+  }, [
+    basicDetails, educationDetails, experienceDetails, internships, 
+    projectDetails, accDetails, skills, languages, links, 
+    certificates, volunteerings, visibleOptionalSections, selectedTemplate, studentDetails, hasDownloaded, step
+  ]);
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -1089,7 +1242,7 @@ function Form() {
   //     alert("Something went wrong while submitting.");
   //   }
   // };
-  const handleSubmit = async () => {
+  const processSubmit = async () => {
     setIsSubmitting(true);
     try {
       const combinedExperiences = [
@@ -1122,34 +1275,20 @@ function Form() {
       };
 
       await dispatch(updateStudent({ aboutDetails: resumeData })).unwrap();
-      message.success("Resume updated successfully!");
-      setIsEditing(false);
+      message.success("Resume saved successfully!");
+      return true;
     } catch (error) {
       console.error("Error submitting resume:", error);
       message.error("Failed to update resume.");
+      return false;
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const sectionRefs = useRef({});
-  const [activeSection, setActiveSection] = useState(null);
-  const [selectedTemplate, setSelectedTemplate] = useState("template1");
-  const [previewTemplate, setPreviewTemplate] = useState(null);
-  const [previewScale, setPreviewScale] = useState(65);
-  const [previewMode, setPreviewMode] = useState("desktop");
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("All Templates");
-  const [step, setStep] = useState("landing");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedStep = sessionStorage.getItem("resumeBuilderStep");
-      if (savedStep) {
-        setStep(savedStep);
-      }
-    }
-  }, []);
+  const handleSubmit = async () => {
+    setShowSubmitModal(true);
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -1343,6 +1482,9 @@ function Form() {
           anchor.click();
           anchor.remove();
           URL.revokeObjectURL(downloadUrl);
+          
+          setHasDownloaded(true);
+          setHasUnsavedEdits(false);
         } catch (downloadErr) {
           console.error("Download failed:", downloadErr instanceof Error ? downloadErr.message : String(downloadErr));
           throw new Error(`Download failed: ${downloadErr instanceof Error ? downloadErr.message : String(downloadErr)}`);
@@ -1597,7 +1739,14 @@ function Form() {
                     <p className="text-[#64748b] text-[13px] leading-relaxed mb-6">Pick up where you left off and update your existing resume.</p>
                     <span
                       className="cursor-pointer text-[#a855f7] font-semibold text-[15px] flex items-center justify-center lg:justify-start gap-1 hover:gap-2 transition-all mt-auto pt-2"
-                      onClick={() => setStep('editor')}
+                      onClick={() => {
+                        const hasDrafts = Object.keys(localStorage).some(k => k.startsWith('resumeDraft_'));
+                        if (hasDrafts) {
+                          setStep('continue_editing');
+                        } else {
+                          setStep('templates_initial');
+                        }
+                      }}
                     >
                       Resume Editing <span>→</span>
                     </span>
@@ -1927,6 +2076,77 @@ function Form() {
     );
   }
 
+  if (step === 'continue_editing') {
+    const draftedTemplateIds = typeof window !== 'undefined' 
+      ? Object.keys(localStorage)
+          .filter(k => k.startsWith('resumeDraft_'))
+          .map(k => k.replace('resumeDraft_', ''))
+      : [];
+
+    const draftedTemplates = TEMPLATE_OPTIONS.filter(t => draftedTemplateIds.includes(t.id));
+
+    return (
+      <div className="flex flex-col gap-0 relative bg-[#F8FAFC] h-screen overflow-hidden">
+        <StudentPageHeader
+          title="Continue Editing"
+          subtitle="Pick up where you left off with your saved drafts"
+        />
+        
+        {/* Categories Bar */}
+        <div className="bg-white border-b border-[#e2e8f0] px-4 md:px-8 py-3 flex items-center shadow-sm z-10 shrink-0 gap-6">
+          <button 
+            onClick={() => setStep('landing')}
+            className="flex items-center gap-2 text-[#475569] hover:text-[#3b82f6] transition-colors text-[14px] font-medium bg-transparent border-none shadow-none shrink-0 cursor-pointer p-0"
+          >
+            <ArrowLeftOutlined /> Back
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-8 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1] hover:[&::-webkit-scrollbar-thumb]:bg-[#94a3b8]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 max-w-[1600px] mx-auto pb-10">
+            {draftedTemplates.length > 0 ? draftedTemplates.map((template, index) => (
+              <div
+                key={template.id}
+                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer border border-[#e2e8f0] hover:border-[#1E69DA] group flex flex-col"
+                onClick={() => {
+                  setSelectedTemplate(template.id);
+                  setStep('editor');
+                }}
+              >
+                <div className="h-[340px] bg-white w-full flex items-center justify-center border-b border-[#e2e8f0] overflow-hidden relative">
+                  <div className="absolute inset-0 scale-[0.42] origin-top-left w-[238%] h-[238%] pointer-events-none opacity-90 group-hover:opacity-100 transition-opacity">
+                    <div className="w-full h-full p-8 bg-white shadow-[0_0_15px_rgba(0,0,0,0.05)] border border-[#f1f5f9]">
+                      {(() => {
+                        const Tmp = templateComponents[template.id] || Template1;
+                        return (
+                          <PreviewContext.Provider value={true}>
+                            <Tmp />
+                          </PreviewContext.Provider>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 flex items-center justify-between">
+                  <span className="font-semibold text-[#334155]">{template.label} - Draft</span>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-[18px] h-[18px] rounded-full border-[1.5px] border-[#cbd5e1]`}
+                    />
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="col-span-full text-center py-20 text-[#64748b]">
+                No drafts found. <span className="text-[#1E69DA] cursor-pointer hover:underline" onClick={() => setStep('templates_initial')}>Create a new resume</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-screen overflow-hidden">
@@ -1958,35 +2178,11 @@ function Form() {
               </div>
             </div>
 
-            <div className="flex flex-1 items-center justify-center gap-4">
-              <Button
-                onClick={() => setLeftTab('details')}
-                className={`transition-all ${leftTab === 'details' ? '!bg-white !text-[#1E69DA] !font-bold' : '!bg-transparent !text-white/80 !border-transparent hover:!text-white'}`}
-              >
-                Fill in Details
-              </Button>
-              <Button
-                onClick={() => setLeftTab('templates')}
-                className={`transition-all ${leftTab === 'templates' ? '!bg-white !text-[#1E69DA] !font-bold' : '!bg-transparent !text-white/80 !border-transparent hover:!text-white'}`}
-              >
-                Templates
-              </Button>
-            </div>
+
 
             <div className="flex items-center flex-wrap justify-end gap-3 z-10">
-              <Button onClick={() => setStep('landing')} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent transition-all">
-                Back
-              </Button>
-              <Button onClick={() => setIsEditing(!isEditing)} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
-                {isEditing ? "Disable Editing" : "Edit Details"}
-              </Button>
-              {isEditing && (
-                <Button onClick={handleSubmit} loading={isSubmitting} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
-                  Submit
-                </Button>
-              )}
-              <Button onClick={handleDownloadResume} loading={isGeneratingPdf} className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all">
-                Download Resume
+              <Button onClick={handleSubmit} loading={isSubmitting} className="!bg-[#1E69DA] !text-white !border !border-[#1E69DA] hover:!bg-[#1754B4] hover:!border-[#1754B4] focus:!bg-[#1754B4] focus:!border-[#1754B4] transition-all">
+                Submit
               </Button>
             </div>
           </div>
@@ -1996,7 +2192,30 @@ function Form() {
         <div className="flex-1 w-full flex overflow-hidden">
 
           {/* Left Panel (50%) */}
-          <div className="w-full lg:w-[50%] shrink-0 h-full overflow-y-auto bg-white border-r border-[#e2e8f0] p-4 lg:p-6 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full">
+          <div className="w-full lg:w-[50%] shrink-0 h-full overflow-y-auto bg-white border-r border-[#e2e8f0] p-4 lg:p-6 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full relative">
+            <div className="flex items-center gap-3 mb-6 sticky top-0 bg-white z-20 pb-2 border-b border-gray-100">
+              <Button onClick={() => {
+                if (selectedTemplate) {
+                  localStorage.removeItem(`resumeDraft_${selectedTemplate}`);
+                }
+                sessionStorage.setItem("resumeBuilderStep", "templates_initial");
+                window.location.reload();
+              }} className="!bg-white !text-gray-600 !border-gray-300 hover:!bg-gray-50 hover:!text-gray-800 transition-all text-[14px]">
+                &lt;- Back
+              </Button>
+              <Button
+                onClick={() => setLeftTab('details')}
+                className={`transition-all ${leftTab === 'details' ? '!bg-[#1E69DA] !text-white !font-bold !border-[#1E69DA]' : '!bg-gray-50 !text-gray-600 !border-gray-200 hover:!bg-gray-100 hover:!text-gray-800'}`}
+              >
+                Fill in Details
+              </Button>
+              <Button
+                onClick={() => setLeftTab('templates')}
+                className={`transition-all ${leftTab === 'templates' ? '!bg-[#1E69DA] !text-white !font-bold !border-[#1E69DA]' : '!bg-gray-50 !text-gray-600 !border-gray-200 hover:!bg-gray-100 hover:!text-gray-800'}`}
+              >
+                Templates
+              </Button>
+            </div>
             {leftTab === 'details' ? (
               <div className="flex flex-col">
                 <AccordionSection 
@@ -2028,7 +2247,7 @@ function Form() {
                   isExpanded={expandedSection === "Education"} 
                   onToggle={() => setExpandedSection(expandedSection === "Education" ? null : "Education")}
                 >
-                  <EducationDetails educationDetails={educationDetails} updateEducationDetail={updateEducationDetail} addEducation={addEducation} removeEducation={removeEducation} />
+                  <EducationDetails educationDetails={educationDetails} updateEducationDetail={updateEducationDetail} addEducation={addEducation} removeEducation={removeEducation} onNext={() => setExpandedSection("Experience")} />
                 </AccordionSection>
 
                 <AccordionSection 
@@ -2037,7 +2256,7 @@ function Form() {
                   isExpanded={expandedSection === "Experience"} 
                   onToggle={() => setExpandedSection(expandedSection === "Experience" ? null : "Experience")}
                 >
-                  <ExperienceDetails experiences={experienceDetails} updateExperience={updateExperience} addExperience={addExperience} removeExperience={removeExperience} />
+                  <ExperienceDetails experiences={experienceDetails} updateExperience={updateExperience} addExperience={addExperience} removeExperience={removeExperience} onNext={() => setExpandedSection("Internships")} />
                 </AccordionSection>
 
                 <AccordionSection 
@@ -2046,7 +2265,7 @@ function Form() {
                   isExpanded={expandedSection === "Internships"} 
                   onToggle={() => setExpandedSection(expandedSection === "Internships" ? null : "Internships")}
                 >
-                  <InternshipsDetails experiences={internships} updateExperience={updateInternship} addExperience={addInternship} removeExperience={removeInternship} />
+                  <InternshipsDetails experiences={internships} updateExperience={updateInternship} addExperience={addInternship} removeExperience={removeInternship} onNext={() => setExpandedSection("Projects")} />
                 </AccordionSection>
 
                 <AccordionSection 
@@ -2055,7 +2274,7 @@ function Form() {
                   isExpanded={expandedSection === "Projects"} 
                   onToggle={() => setExpandedSection(expandedSection === "Projects" ? null : "Projects")}
                 >
-                  <ProjectDetails projects={projectDetails} updateProject={updateProject} addProject={addProject} removeProject={removeProject} />
+                  <ProjectDetails projects={projectDetails} updateProject={updateProject} addProject={addProject} removeProject={removeProject} onNext={() => setExpandedSection("Skills")} />
                 </AccordionSection>
 
                 <AccordionSection 
@@ -2064,7 +2283,7 @@ function Form() {
                   isExpanded={expandedSection === "Skills"} 
                   onToggle={() => setExpandedSection(expandedSection === "Skills" ? null : "Skills")}
                 >
-                  <SkillDetails skills={skills} updateSkill={updateSkill} addSkill={addSkill} removeSkill={removeSkill} />
+                  <SkillDetails skills={skills} updateSkill={updateSkill} addSkill={addSkill} removeSkill={removeSkill} setSkills={setSkills} />
                 </AccordionSection>
 
 
@@ -2107,21 +2326,14 @@ function Form() {
                       setVisibleOptionalSections(prev => prev.filter(s => s !== "Languages"));
                     }}
                   >
-                    <Language languages={languages} updateLanguage={updateLanguage} addLanguage={addLanguage} removeLanguage={removeLanguage} />
+                    <Language languages={languages} updateLanguage={updateLanguage} addLanguage={addLanguage} removeLanguage={removeLanguage} setLanguages={setLanguages} />
                   </AccordionSection>
                 )}
                 
                 {/* Add New Section Feature */}
                 {/* Add New Section Feature */}
                 <div className="mt-4 mb-10">
-                  {!isAddSectionOpen ? (
-                    <button 
-                      onClick={() => setIsAddSectionOpen(true)}
-                      className="flex items-center gap-2 text-[#334155] font-semibold text-[18px] hover:text-[#1E69DA] bg-transparent border-none cursor-pointer p-2 transition-colors"
-                    >
-                      <PlusOutlined /> Add New Section
-                    </button>
-                  ) : (
+                  {true ? null : null}
                     <div className="flex flex-col gap-6">
                       {/* Top Header */}
                       <div className="flex items-center justify-between">
@@ -2152,7 +2364,7 @@ function Form() {
                                   if(!visibleOptionalSections.includes(section.id)) {
                                     setVisibleOptionalSections(prev => [...prev, section.id]);
                                     setExpandedSection(section.id);
-                                    setIsAddSectionOpen(false);
+                                    // setIsAddSectionOpen(false); // Kept open based on user feedback
                                   }
                                 }}
                                 className={`group flex items-center justify-between px-4 py-5 border-b border-[#f1f5f9] cursor-pointer transition-colors text-left bg-transparent ${previewOptionalSection === section.id ? 'bg-[#f8fafc]' : 'hover:bg-[#f8fafc]'}`}
@@ -2196,7 +2408,7 @@ function Form() {
                                     if(!visibleOptionalSections.includes(previewOptionalSection)) {
                                       setVisibleOptionalSections(prev => [...prev, previewOptionalSection]);
                                       setExpandedSection(previewOptionalSection);
-                                      setIsAddSectionOpen(false);
+                                      // setIsAddSectionOpen(false); // Kept open based on user feedback
                                     }
                                   }}
                                 >
@@ -2218,8 +2430,7 @@ function Form() {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -2302,6 +2513,49 @@ function Form() {
         </div>
       </div>
       {hiddenExportTemplate}
+
+      {/* Submit Modal */}
+      <Modal
+        title="Resume Saved Successfully"
+        open={showSubmitModal}
+        onCancel={() => setShowSubmitModal(false)}
+        footer={[
+          <Button key="edit" onClick={() => setShowSubmitModal(false)}>
+            Continue Editing
+          </Button>,
+          <Button
+            key="download"
+            type="primary"
+            loading={isGeneratingPdf}
+            onClick={async () => {
+              const success = await processSubmit();
+              if (success) {
+                await handleDownloadResume();
+                setShowSubmitModal(false);
+              }
+            }}
+            className="bg-[#1E69DA]"
+          >
+            Submit & Download
+          </Button>,
+        ]}
+      >
+        <p>Your resume changes have been saved. Do you want to continue editing or download the resume to your device?</p>
+      </Modal>
+
+      {/* Post-Download Edit Warning Modal */}
+      <Modal
+        title="Unsaved Changes Detected"
+        open={showDownloadWarningModal}
+        onCancel={() => setShowDownloadWarningModal(false)}
+        footer={[
+          <Button key="ok" type="primary" onClick={() => setShowDownloadWarningModal(false)} className="bg-[#1E69DA]">
+            I Understand
+          </Button>
+        ]}
+      >
+        <p>You have made changes since your last download. These new edits will <strong>not</strong> reflect in the downloaded resume. You must download the resume again to see the latest changes.</p>
+      </Modal>
     </>
   );
 }
