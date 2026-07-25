@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { message, Tooltip } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 // import { Tooltip } from "@mui/material";
 import ChipStyles from "./chip.module.scss";
 
@@ -48,8 +49,8 @@ export default function ChipInput({ initialValue = [], onChipsChange }) {
         {chips.map((name) => (
           <div key={name} className={ChipStyles.chipData}>
             <p>{name}</p>
-            <img
-              src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
+            <CloseOutlined
+              style={{ cursor: "pointer", fontSize: "11px", color: "#64748b", marginLeft: "4px" }}
               onClick={() => handleDelete(name)}
             />
           </div>

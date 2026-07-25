@@ -25,17 +25,38 @@ import { parseIfJson } from "@/utils/windowMW";
 import QuesComp from "@/app/testportal_admin/(protected)/results-database/components/quesComp";
 import DownloadTest from "./downloadtest";
 
-const stripHtml = (html) => {
-  if (typeof html !== 'string') return '';
-  let text = html
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#34;/g, '"');
-  return text.replace(/<[^>]*>/g, '');
+const stripHtml = (html = "") => {
+  if (!html || typeof html !== "string") return "";
+  let str = html;
+
+  for (let i = 0; i < 2; i++) {
+    if (typeof str === "string" && (str.startsWith('"') || str.startsWith('{') || str.startsWith('['))) {
+      try {
+        const parsed = JSON.parse(str);
+        if (typeof parsed === "string") str = parsed;
+      } catch (e) {}
+    }
+  }
+
+  str = str
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&#34;/gi, '"');
+
+  str = str
+    .replace(/<\/(p|div|h[1-6]|li|section|article)>/gi, " ")
+    .replace(/<br\s*\/?>/gi, " ");
+
+  str = str.replace(/<[^>]*>/g, "");
+
+  return str
+    .replace(/^["'\s]+|["'\s]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 };
 
 const items = [
@@ -375,6 +396,46 @@ const AllTestsComp = (props) => {
     }
   }, [allTests?.length]);
 
+  const emptyStateInfo = useMemo(() => {
+    if (props.selectedStatus === "pending") {
+      return {
+        title: "No In Progress Tests",
+        desc: "There are currently no in progress tests.",
+      };
+    }
+    if (props.selectedStatus === "active") {
+      return {
+        title: "No Active Tests",
+        desc: "There are currently no active tests.",
+      };
+    }
+    if (props.selectedStatus === "expired") {
+      return {
+        title: "No Expired Tests",
+        desc: "There are currently no expired tests.",
+      };
+    }
+    return {
+      title: "No Tests Added",
+      desc: "Get started by creating your first test assessment.",
+    };
+  }, [props.selectedStatus]);
+
+  // Helper to format test duration safely
+  const formatTestDuration = (testObj) => {
+    const duration = testObj?.time?.testDuration?.testDuration?.duration;
+    if (
+      duration &&
+      (duration.val1 !== undefined || duration.val2 !== undefined) &&
+      (duration.val1 !== "" || duration.val2 !== "")
+    ) {
+      const h = String(duration.val1 ?? "00").replace(/\s/g, "").padStart(2, "0");
+      const m = String(duration.val2 ?? "00").replace(/\s/g, "").padStart(2, "0");
+      return `${h}H:${m}M`;
+    }
+    return "00H:30M";
+  };
+
   return (
     <div className={CourseStyles.con} ref={containerRef}>
       <div className={CourseStyles.cardsContainer}>
@@ -396,7 +457,7 @@ const AllTestsComp = (props) => {
             return (
               <React.Fragment key={test?._id || actualIndex}>
                 <div
-                  className={CourseStyles.card_cont}
+                  className={`${CourseStyles.card_cont} ${props.selectedTestIds?.includes(test._id) ? CourseStyles.selectedCard : ""}`}
                   onClick={() => onTestClick(test)}
                 >
                   {/* Card Image */}
@@ -419,7 +480,16 @@ const AllTestsComp = (props) => {
                       
                       {/* Checkbox */}
                       <div className={CourseStyles.checkboxWrapper} onClick={(e) => e.stopPropagation()}>
-                        <Checkbox className={CourseStyles.checkbox} />
+                        <Checkbox
+                          className={CourseStyles.checkbox}
+                          checked={props.selectedTestIds?.includes(test._id)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            if (props.onToggleSelectTest) {
+                              props.onToggleSelectTest(test._id);
+                            }
+                          }}
+                        />
                       </div>
 
                       {/* Status Badge */}
@@ -479,8 +549,7 @@ const AllTestsComp = (props) => {
                               <Popconfirm
                                 title="Delete the Test"
                                 description="Are you sure to delete this Test?"
-                                okText="Yes"
-                                cancelText="No"
+                                okText="Yes" cancellationText="No"
                                 onConfirm={(e) => { e.stopPropagation(); deleteTest(test); }}
                                 onCancel={(e) => e.stopPropagation()}
                               >
@@ -531,9 +600,7 @@ const AllTestsComp = (props) => {
                         <div className={CourseStyles.statItem}>
                           <ClockCircleOutlined />
                           <span>
-                            {test?.time?.testDuration?.testDuration?.duration?.val1 && test?.time?.testDuration?.testDuration?.duration?.val2
-                              ? `${String(test.time.testDuration.testDuration.duration.val1).padStart(2, '0')}H:${String(test.time.testDuration.testDuration.duration.val2).padStart(2, '0')}M`
-                              : "00H:30M"}
+                            {formatTestDuration(test)}
                           </span>
                         </div>
                         <span className={CourseStyles.divider}>•</span>
@@ -545,18 +612,7 @@ const AllTestsComp = (props) => {
 
                       {/* Description */}
                       <div className={CourseStyles.description}>
-                        <span
-                          dangerouslySetInnerHTML={{
-                            __html: (() => {
-                              try {
-                                const shortDesc = JSON.parse(test?.shortDescription || "");
-                                return stripHtml(shortDesc);
-                              } catch (error) {
-                                return stripHtml(test?.shortDescription || "");
-                              }
-                            })(),
-                          }}
-                        />
+                        <span>{stripHtml(test?.shortDescription || "")}</span>
                       </div>
                     </div>
 
@@ -597,10 +653,7 @@ const AllTestsComp = (props) => {
                           <div className={DownloadTestStyles.title}> {selectedTest?.title || 'N/A'}</div>
                           <div className={DownloadTestStyles.time_marks_cont}>
                             <div>
-                              Time: {selectedTest?.time?.testDuration?.testDuration?.duration?.val1 &&
-                                selectedTest?.time?.testDuration?.testDuration?.duration?.val2
-                                ? `${selectedTest?.time?.testDuration?.testDuration?.duration?.val1}H : ${selectedTest?.time?.testDuration?.testDuration?.duration?.val2}M`
-                                : "00"}
+                              Time: {formatTestDuration(selectedTest)}
                             </div>
                             <div>Marks : {totalTestMarks.find((mark) => mark.id === selectedTest._id)?.score || 0}</div>
                           </div>
@@ -661,13 +714,8 @@ const AllTestsComp = (props) => {
             <span className={AllTestsStyles.emptyIcon}>
               <FileTextOutlined />
             </span>
-            <h3 className={AllTestsStyles.emptyTitle}>No Tests Added</h3>
-            <p className={AllTestsStyles.emptyDesc}>
-              Get started by creating your first test assessment.
-            </p>
-            <button className={AllTestsStyles.emptyBtn} onClick={props.onAddNewTest}>
-              Create New Test
-            </button>
+            <h3 className={AllTestsStyles.emptyTitle}>{emptyStateInfo.title}</h3>
+            <p className={AllTestsStyles.emptyDesc}>{emptyStateInfo.desc}</p>
           </div>
         )}
       </div>

@@ -194,7 +194,12 @@ const ProgressComp = ({ deptId }) => {
   const avgScore = resultsCount > 0
     ? (filteredResultsList.reduce((sum, r) => sum + (r?.scoreData?.finalScore || 0), 0) / resultsCount).toFixed(1)
     : "0";
-  const testsCount = new Set(filteredResultsList.map((r) => r?.testDetails?.title).filter(Boolean)).size;
+  const testsCount = new Set(
+    filteredResultsList
+      .filter((r) => !r?.testDetails?.status || r?.testDetails?.status?.toLowerCase() === "active")
+      .map((r) => r?.testDetails?.title)
+      .filter(Boolean)
+  ).size;
 
   const handleTableChange = (pagination) => {
     setCurrentPage(pagination.current || 1);

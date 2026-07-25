@@ -288,3 +288,280 @@
 .activeIcon {
   color: #1e69da;
 }
+
+// Question Bank Modal & AI Modal Styling
+.modal_maincont {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
+
+  .modal_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+
+    .searchCon {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 0 0.85rem;
+      height: 40px;
+      flex: 1;
+      min-width: 240px;
+
+      svg {
+        color: #1e69da;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+      }
+
+      input {
+        width: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        margin-left: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #0f172a;
+
+        &::placeholder {
+          color: #94a3b8;
+        }
+      }
+    }
+
+    .filterings {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      :global(.ant-select) {
+        min-width: 170px !important;
+      }
+
+      :global(.ant-select-selector) {
+        border-radius: 8px !important;
+        border-color: #cbd5e1 !important;
+        height: 40px !important;
+        padding: 4px 12px !important;
+        font-weight: 500 !important;
+      }
+    }
+  }
+
+  .questions_cont {
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 10px;
+    }
+  }
+
+  .btn_div {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+}
+
+// Question Accordion Item Header & Answer Cards
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
+  padding: 0.25rem 0;
+
+  div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #0f172a;
+
+    span {
+      white-space: nowrap;
+    }
+  }
+
+  .accordianArrow {
+    font-size: 0.85rem;
+    color: #64748b;
+    transition: transform 0.2s ease;
+  }
+
+  .activeAccordianArrow {
+    transform: rotate(90deg);
+    color: #1e69da;
+  }
+
+  .checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #1e69da;
+    margin: 0;
+  }
+
+  .buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      background-color: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+
+      strong {
+        color: #0f172a;
+      }
+    }
+  }
+}
+
+.question {
+  font-size: 0.875rem;
+  color: #334155;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+.ansCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.35rem;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #f1f5f9;
+  font-size: 0.85rem;
+  color: #334155;
+
+  .optionContent {
+    flex: 1;
+  }
+}
+
+// AI Question Generator Modal Styling
+.generateAiContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
+
+  p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  .editorStyles {
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.875rem;
+      color: #0f172a;
+      outline: none;
+      resize: vertical;
+
+      &:focus {
+        border-color: #1e69da;
+        box-shadow: 0 0 0 3px rgba(30, 105, 218, 0.12);
+      }
+    }
+  }
+
+  .bottomFlex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .bottomFlexLeft {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+
+      :global(.ant-select) {
+        width: 180px !important;
+      }
+
+      input[type="number"] {
+        height: 38px;
+        padding: 0 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        font-size: 0.875rem;
+        outline: none;
+        width: 180px;
+
+        &:focus {
+          border-color: #1e69da;
+        }
+      }
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+    }
+  }
+
+  .generateButton {
+    background: linear-gradient(135deg, #1e69da 0%, #3b82f6 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+    height: 42px !important;
+    border-radius: 10px !important;
+    font-size: 0.95rem !important;
+
+    &:hover {
+      opacity: 0.95;
+    }
+  }
+}
