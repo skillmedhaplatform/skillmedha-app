@@ -899,16 +899,16 @@ export default function Page() {
                   <Checkbox
                     checked={checkbox}
                     onChange={() => setCheckBox(!checkbox)}
-                    className="mt-[2px]"
+                    className="mt-[2px] flex-shrink-0"
                   />
-                  <span
+                  <div
                     dangerouslySetInnerHTML={{
                       __html:
                         typeof testData.startPage.consetForm === "string"
                           ? parseIfJson(testData.startPage.consetForm)
                           : testData.startPage.consetForm,
                     }}
-                    className="text-[13px] text-gray-600 leading-relaxed"
+                    className="flex-1 min-w-0 text-[13px] text-gray-600 leading-relaxed break-words [&_p]:m-0 [&_p]:inline"
                   />
                 </div>
               )}
