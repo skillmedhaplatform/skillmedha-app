@@ -38,7 +38,7 @@ const Accesspage = () => {
   const [honestRespondentvalue, sethonestRespondentvalue] = useState("Disable");
   const [Snapshotvalue, setSnapshotvalue] = useState("Disable");
   const [FaceRecValue, setFaceRecValue] = useState("Disable");
-  const [attemptsPerRespondent, setAttemptsPerRespondent] = useState(-1);
+  const [attemptsPerRespondent, setAttemptsPerRespondent] = useState(2);
 
   const emailColumns = [
     {
@@ -75,10 +75,17 @@ const Accesspage = () => {
   };
 
   const handleUpdate = () => {
+    let finalAttempts = Number(attemptsPerRespondent);
+    if (isNaN(finalAttempts) || finalAttempts === 0 || finalAttempts < -1) {
+      finalAttempts = -1;
+    } else if (finalAttempts > 100) {
+      finalAttempts = 100;
+    }
+
     let payload = {
       access: {
         type: accessType,
-        attemptsPerRespondent: attemptsPerRespondent,
+        attemptsPerRespondent: finalAttempts,
       },
     };
 
@@ -155,10 +162,10 @@ const Accesspage = () => {
         setSelectedRowKeys([]);
       }
 
-      if (access.attemptsPerRespondent) {
+      if (access.attemptsPerRespondent !== undefined && access.attemptsPerRespondent !== null && access.attemptsPerRespondent !== "") {
         setAttemptsPerRespondent(access.attemptsPerRespondent);
       } else {
-        setAttemptsPerRespondent(-1);
+        setAttemptsPerRespondent(2);
       }
     }
   }, [SingleTest?.access]);
@@ -432,23 +439,38 @@ const Accesspage = () => {
               <div className={AccessStyles.exitsSelectContainer}>
                 <div className={AccessStyles.exitsLeft}>
                   <h4>Maximum Attempts Allowed</h4>
+                  <span>
+                    <InfoCircleOutlined /> Enter an integer between 1 and 100 for normal attempts, or -1 for unlimited attempts.
+                  </span>
                 </div>
-                <select
-                  value={attemptsPerRespondent}
-                  onChange={(e) => setAttemptsPerRespondent(Number(e.target.value))}
-                >
-                  <option value={1}>1</option>
-                  <option value={2}>2</option>
-                  <option value={3}>3</option>
-                  <option value={4}>4</option>
-                  <option value={5}>5</option>
-                  <option value={6}>6</option>
-                  <option value={7}>7</option>
-                  <option value={8}>8</option>
-                  <option value={9}>9</option>
-                  <option value={10}>10</option>
-                  <option value={-1}>Unlimited</option>
-                </select>
+                <input
+                  type="number"
+                  min={-1}
+                  max={100}
+                  step={1}
+                  value={attemptsPerRespondent === "" ? "" : attemptsPerRespondent}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") {
+                      setAttemptsPerRespondent("");
+                      return;
+                    }
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) {
+                      setAttemptsPerRespondent(num);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (attemptsPerRespondent === "" || isNaN(attemptsPerRespondent)) {
+                      setAttemptsPerRespondent(2);
+                    } else if (attemptsPerRespondent === 0 || attemptsPerRespondent < -1) {
+                      setAttemptsPerRespondent(-1);
+                    } else if (attemptsPerRespondent > 100) {
+                      setAttemptsPerRespondent(100);
+                    }
+                  }}
+                  placeholder="e.g. 2"
+                />
               </div>
             </div>
           </div>

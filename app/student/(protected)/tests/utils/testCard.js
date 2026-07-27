@@ -213,12 +213,15 @@ export default function TestCard({
 
   const attemptsPerRespondentValue = testData?.access?.attemptsPerRespondent;
   const maxAttemptsNum = Number(attemptsPerRespondentValue);
+  const isUnlimited =
+    attemptsPerRespondentValue === undefined ||
+    attemptsPerRespondentValue === null ||
+    attemptsPerRespondentValue === "" ||
+    maxAttemptsNum === -1 ||
+    attemptsPerRespondentValue === "unlimited";
+
   const attemptsExceeded =
-    attemptsPerRespondentValue !== undefined &&
-    attemptsPerRespondentValue !== "" &&
-    attemptsPerRespondentValue !== null &&
-    maxAttemptsNum !== -1 &&
-    (maxAttemptsNum - attemptsDone <= 0);
+    !isUnlimited && (maxAttemptsNum - attemptsDone <= 0);
 
   const isExpiredStatus = countdowns[index] === "Expired" || testData?.status?.toLowerCase() === "expired" || testData?.status?.toLowerCase() === "completed";
 
@@ -501,12 +504,12 @@ export default function TestCard({
           </div>
           <div className="flex flex-col mt-0.5">
             <div className="text-[#1a3b8b] text-[15px] font-bold leading-tight">
-              {attemptsDone || 0} / {attemptsPerRespondentValue || '∞'}
+              {attemptsDone || 0} / {isUnlimited ? '∞' : attemptsPerRespondentValue}
             </div>
             <div className="text-[#8c94a3] text-[11px] font-medium mt-0.5">
-              {attemptsPerRespondentValue 
-                ? `${Math.max(0, Number(attemptsPerRespondentValue) - (attemptsDone || 0))} remaining` 
-                : 'Unlimited remaining'}
+              {isUnlimited 
+                ? 'Unlimited remaining' 
+                : `${Math.max(0, maxAttemptsNum - (attemptsDone || 0))} remaining`}
             </div>
           </div>
         </div>

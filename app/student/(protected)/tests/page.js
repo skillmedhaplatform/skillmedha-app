@@ -85,8 +85,15 @@ export default function Tests() {
         )?.length;
 
         const totalAttemps = SingleTest?.access?.attemptsPerRespondent;
+        const maxAttemptsNum = Number(totalAttemps);
+        const isUnlimited =
+          totalAttemps === undefined ||
+          totalAttemps === null ||
+          totalAttemps === "" ||
+          maxAttemptsNum === -1 ||
+          totalAttemps === "unlimited";
 
-        if (studentAttemptedLength > totalAttemps) {
+        if (!isUnlimited && studentAttemptedLength >= maxAttemptsNum) {
           message.error(<strong>Maximum attempts already reached</strong>);
         } else {
           if (SingleTest?.access?.type == "private") {
