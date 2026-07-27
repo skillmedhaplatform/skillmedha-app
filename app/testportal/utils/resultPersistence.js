@@ -102,7 +102,14 @@ function deriveResultSummary({ response = {}, questions = [], scoreData = {} } =
 
     if (status === "correct") {
       derivedCorrect += 1;
-      derivedScore += getNumericValue(responseEntry?.correctScore, 0);
+      // Multiple-choice questions carry a separate bonusScore (full-marks
+      // bonus for selecting every correct option) that isn't folded into
+      // correctScore — drop it here and the recomputed total undercounts
+      // every multi-select question, even though the per-question display
+      // and the server-side scoreData.finalScore both include it correctly.
+      derivedScore +=
+        getNumericValue(responseEntry?.correctScore, 0) +
+        getNumericValue(responseEntry?.bonusScore, 0);
     } else if (status === "incorrect") {
       derivedIncorrect += 1;
       derivedScore += getNumericValue(responseEntry?.negativeScore, 0);
