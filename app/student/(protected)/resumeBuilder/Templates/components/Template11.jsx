@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { MailOutlined, PhoneFilled, EnvironmentOutlined } from "@ant-design/icons";
@@ -107,7 +107,7 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-3.5">
               {workExperience.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.92rem] font-bold text-[#18181b]">{item?.role} — {item?.company}</h3>
                     <p className="m-0 text-[0.78rem] text-[#71717a] whitespace-nowrap">
                       {item?.start || item?.startDate} – {item?.end || item?.endDate || "Present"}
@@ -128,7 +128,7 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-3.5">
               {internshipDetails.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.92rem] font-bold text-[#18181b]">{item?.role} — {item?.company}</h3>
                     <p className="m-0 text-[0.78rem] text-[#71717a] whitespace-nowrap">
                       {item?.start || item?.startDate} – {item?.end || item?.endDate || "Present"}
@@ -149,7 +149,7 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-3.5">
               {projectDetails.filter((item) => item?.project).map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.92rem] font-bold text-[#18181b]">
                       {item.project} {item?.company ? `— ${item.company}` : ""}
                     </h3>
@@ -169,7 +169,7 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <SectionTitle>Education</SectionTitle>
             <div className="space-y-2.5">
               {educationDetails.map((item, index) => (
-                <div key={index} className="flex flex-wrap justify-between gap-x-4">
+                <div key={index} className="flex flex-wrap items-center gap-x-4">
                   <div>
                     <h3 className="m-0 text-[0.9rem] font-bold text-[#18181b]">{item?.type}</h3>
                     <p className="m-0 text-[0.83rem] text-[#52525b]">{item?.school || item?.board}</p>

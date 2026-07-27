@@ -1056,6 +1056,20 @@ function Form() {
   const sectionRefs = useRef({});
   const [activeSection, setActiveSection] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState("template1");
+  // Shared theme-colour state for the current template. Templates that
+  // expose a colour swatch picker used to keep that choice in their own
+  // local useState — harmless on screen, but page.jsx always renders a
+  // second, hidden instance of the same template purely to capture the
+  // PDF (so downloads still work while the visible preview is replaced
+  // by the edit form). Two separate component instances mean two
+  // separate useState values, so picking a colour in the visible one
+  // never reached the hidden one actually used for the export, and the
+  // download silently kept the template's default colour. Lifting the
+  // colour here and passing it to both instances keeps them in sync.
+  const [templateAccent, setTemplateAccent] = useState(null);
+  useEffect(() => {
+    setTemplateAccent(null);
+  }, [selectedTemplate]);
   const templateComponents = {
     template1: Template1,
     template2: Template2,
@@ -1261,6 +1275,8 @@ function Form() {
         resumeTemplateRef={exportTemplateRef}
         activeSection={null}
         isGeneratingPdf={true}
+        accent={templateAccent}
+        onAccentChange={setTemplateAccent}
       />
     </div>
   );
@@ -1467,6 +1483,8 @@ function Form() {
                     resumeTemplateRef={resumeTemplateRef}
                     activeSection={activeSection}
                     isGeneratingPdf={isGeneratingPdf}
+                    accent={templateAccent}
+                    onAccentChange={setTemplateAccent}
                   />
                 </div>
               ) : (

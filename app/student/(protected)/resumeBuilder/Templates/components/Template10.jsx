@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { MailOutlined, PhoneFilled, EnvironmentOutlined } from "@ant-design/icons";
@@ -42,7 +42,7 @@ const Template17 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
   const TimelineItem = ({ title, subtitle, date, description, isProject }) => (
     <div className="relative pl-8 pb-6 last:pb-0 border-l-2 border-[#dbeafe] last:border-transparent">
       <span className="absolute -left-[7px] top-0.5 w-3 h-3 rounded-full bg-[#1d4ed8] ring-4 ring-[#dbeafe]" />
-      <div className="flex flex-wrap justify-between gap-x-4">
+      <div className="flex flex-wrap items-center gap-x-4">
         <h3 className="m-0 text-[0.95rem] font-bold text-[#0f172a]">{title}</h3>
         <p className="m-0 text-[0.8rem] font-semibold text-[#1d4ed8] whitespace-nowrap">{date}</p>
       </div>
@@ -64,7 +64,7 @@ const Template17 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
     >
       <header
         id="section-Basic-Details"
-        className={`flex flex-wrap items-center justify-between gap-4 pb-6 p-4 -m-4 scroll-mt-8 ${sectionState("Basic Details")}`}
+        className={`flex flex-wrap items-center gap-4 pb-6 p-4 -m-4 scroll-mt-8 ${sectionState("Basic Details")}`}
       >
         <div>
           <h1 className="m-0 text-[2.1rem] font-bold text-[#0f172a]">

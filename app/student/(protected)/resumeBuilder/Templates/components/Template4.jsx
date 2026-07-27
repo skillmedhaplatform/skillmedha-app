@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -163,9 +163,9 @@ const S = {
     justifyContent: "space-between",
     columnGap: "16px",
   },
-  entryTitle: { margin: 0, fontSize: "15.5px", fontWeight: 700, color: "#1a1a1a" },
+  entryTitle: { margin: 0, flex: "1 1 auto", minWidth: 0, fontSize: "15.5px", fontWeight: 700, color: "#1a1a1a" },
   entrySub: { fontWeight: 400, color: "#555555" },
-  entryDate: (accent) => ({
+  entryDate: (accent) => ({ flexShrink: 0, marginLeft: "auto",
     whiteSpace: "nowrap",
     fontSize: "12.5px",
     fontWeight: 700,
@@ -174,7 +174,7 @@ const S = {
   entryDesc: { margin: "4px 0 0", fontSize: "14px", lineHeight: 1.55, color: "#333333" },
 };
 
-const Template8 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
+const Template8 = ({ resumeTemplateRef, activeSection, isGeneratingPdf, accent: accentProp, onAccentChange }) => {
   const {
     basicDetails,
     educationDetails,
@@ -189,7 +189,9 @@ const Template8 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
     volunteerings,
   } = useResumeTemplateData();
   const profileBase64 = useProfileImage(basicDetails?.profile);
-  const [accent, setAccent] = useState(COLOR_OPTIONS[0].value);
+  const [internalAccent, setInternalAccent] = useState(COLOR_OPTIONS[0].value);
+  const accent = accentProp ?? internalAccent;
+  const setAccent = onAccentChange ?? setInternalAccent;
 
   const profileLinks = links.filter((item) => item?.link);
   const linkIcons = [<LinkedinFilled key="li" />, <GithubOutlined key="gh" />, <GlobalOutlined key="gl" />];

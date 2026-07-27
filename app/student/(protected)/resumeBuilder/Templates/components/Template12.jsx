@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import {
@@ -123,7 +123,7 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-5">
               {combinedExperience.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.9rem] font-semibold text-[#1e293b]">
                       {item?.role}
                       {item?.company ? <span className="font-normal text-[#64748b]"> · {item.company}</span> : ""}
@@ -147,7 +147,7 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <SectionLabel>Education</SectionLabel>
             <div className="space-y-3">
               {educationDetails.map((item, index) => (
-                <div key={index} className="flex flex-wrap justify-between gap-x-4">
+                <div key={index} className="flex flex-wrap items-center gap-x-4">
                   <div>
                     <h3 className="m-0 text-[0.87rem] font-semibold text-[#1e293b]">{item?.type}</h3>
                     <p className="m-0 text-[0.8rem] text-[#64748b]">{item?.school || item?.board}</p>

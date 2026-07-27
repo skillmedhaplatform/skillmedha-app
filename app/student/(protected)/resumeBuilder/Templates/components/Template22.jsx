@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import {
@@ -119,8 +119,8 @@ const Template22 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {combinedExperience.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h3 className="m-0 text-[0.95rem] font-bold text-[#1f1b16]">
+                  <div className="flex flex-wrap items-center gap-x-3">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.95rem] font-bold text-[#1f1b16]">
                       {item?.role}{item?.company ? `, ${item.company}` : ""}
                     </h3>
                     <span className="text-[0.78rem] italic text-[#5c5647] whitespace-nowrap">{dateRange(item)}</span>
@@ -147,8 +147,8 @@ const Template22 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {projectDetails.filter((item) => item?.project).map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h3 className="m-0 text-[0.95rem] font-bold text-[#1f1b16]">
+                  <div className="flex flex-wrap items-center gap-x-3">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.95rem] font-bold text-[#1f1b16]">
                       {item.project}{item?.company ? ` — ${item.company}` : ""}
                     </h3>
                     <span className="text-[0.78rem] italic text-[#5c5647] whitespace-nowrap">
@@ -172,8 +172,8 @@ const Template22 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <SectionTitle>Education</SectionTitle>
             <div className="space-y-2">
               {educationDetails.map((item, index) => (
-                <div key={index} className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <h3 className="m-0 text-[0.9rem] font-bold text-[#1f1b16]">
+                <div key={index} className="flex flex-wrap items-center gap-x-3">
+                  <h3 className="flex-1 min-w-0 m-0 text-[0.9rem] font-bold text-[#1f1b16]">
                     {item?.type}{item?.school ? `, ${item.school}` : ""}
                     {item?.grade ? ` — ${item.grade}${item?.gradeType === "percentage" ? "%" : item?.gradeType ? "/10" : ""}` : ""}
                   </h3>

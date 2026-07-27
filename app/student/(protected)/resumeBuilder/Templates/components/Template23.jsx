@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -125,10 +125,10 @@ const S = {
   labelBar: (accent) => ({ height: "14px", width: "4px", borderRadius: "2px", backgroundColor: accent, flexShrink: 0 }),
   summaryText: { fontSize: "14.5px", lineHeight: 1.65, color: "#3a3a3a", margin: 0 },
   entryList: { display: "flex", flexDirection: "column", gap: "18px" },
-  entryHeadRow: { display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", columnGap: "16px" },
-  entryTitle: { margin: 0, fontSize: "15px", fontWeight: 700, color: "#1a1a1a" },
+  entryHeadRow: { display: "flex", flexWrap: "wrap", alignItems: "center", columnGap: "16px" },
+  entryTitle: { margin: 0, flex: "1 1 auto", minWidth: 0, fontSize: "15px", fontWeight: 700, color: "#1a1a1a" },
   entrySub: { fontWeight: 500, color: "#666666" },
-  entryDate: (accent) => ({
+  entryDate: (accent) => ({ flexShrink: 0, marginLeft: "auto",
     whiteSpace: "nowrap",
     fontSize: "12px",
     fontWeight: 700,

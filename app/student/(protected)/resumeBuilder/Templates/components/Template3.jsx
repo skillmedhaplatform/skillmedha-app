@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -58,7 +58,7 @@ const Card = ({ id, wide, activeSection, accent, children, className = "" }) => 
   </div>
 );
 
-const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
+const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf, accent: accentProp, onAccentChange }) => {
   const {
     basicDetails,
     educationDetails,
@@ -73,7 +73,9 @@ const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
     links,
   } = useResumeTemplateData();
   const profileBase64 = useProfileImage(basicDetails?.profile);
-  const [accent, setAccent] = useState(COLOR_OPTIONS[0].value);
+  const [internalAccent, setInternalAccent] = useState(COLOR_OPTIONS[0].value);
+  const accent = accentProp ?? internalAccent;
+  const setAccent = onAccentChange ?? setInternalAccent;
 
   const CardTitle = ({ children }) => (
     <h2 className="m-0 mb-3 text-[0.76rem] font-bold uppercase tracking-[0.1em]" style={{ color: accent }}>
@@ -182,8 +184,8 @@ const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {combinedExperience.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h3 className="m-0 text-[0.9rem] font-bold text-[#0f172a]">
+                  <div className="flex flex-wrap items-center gap-x-3">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.9rem] font-bold text-[#0f172a]">
                       {item?.role}{item?.company && <span className="font-normal text-[#64748b]">, {item.company}</span>}
                     </h3>
                     <span
@@ -240,8 +242,8 @@ const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-3">
               {projectDetails.filter((item) => item?.project).map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h3 className="m-0 text-[0.87rem] font-bold text-[#0f172a]">
+                  <div className="flex flex-wrap items-center gap-x-3">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.87rem] font-bold text-[#0f172a]">
                       {item.project}{item?.company ? <span className="font-normal text-[#64748b]"> — {item.company}</span> : ""}
                     </h3>
                     <span className="text-[0.74rem] whitespace-nowrap text-[#64748b]">

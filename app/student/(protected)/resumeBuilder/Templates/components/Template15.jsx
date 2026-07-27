@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useEffect, useRef, useState } from "react";
 import { MailOutlined, PhoneFilled } from "@ant-design/icons";
 import { useSelector } from "react-redux";
@@ -244,7 +244,7 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
             <h2>Experience</h2>
             {experienceDetails?.filter((e) => e?.type == "work").map((job, i) => (
               <div className="mb-3" key={i}>
-                <div className="flex justify-between items-baseline mb-1">
+                <div className="flex items-center mb-1">
                   <span className="font-bold text-[0.95rem]">{job?.role}, {job?.company}</span>
                   <span className="text-[0.82rem] italic text-[#64748b] whitespace-nowrap ml-4">
                     {job?.start || job?.startDate} – {job?.end || job?.endDate}
@@ -261,7 +261,7 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
             <h2>Internships</h2>
             {experienceDetails?.filter((e) => e?.type !== "work").map((job, i) => (
               <div className="mb-3" key={i}>
-                <div className="flex justify-between items-baseline mb-1">
+                <div className="flex items-center mb-1">
                   <span className="font-bold text-[0.95rem]">{job?.role}, {job?.company}</span>
                   <span className="text-[0.82rem] italic text-[#64748b] whitespace-nowrap ml-4">
                     {job?.start || job?.startDate} – {job?.end || job?.endDate}
@@ -278,7 +278,7 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
             <h2>Education</h2>
             {educationDetails?.map((edu, i) => (
               <div className="mb-3" key={i}>
-                <div className="flex justify-between items-baseline mb-1">
+                <div className="flex items-center mb-1">
                   <span className="font-bold text-[0.95rem]">
                     {edu?.type} - {edu?.school} | {edu?.grade}{edu?.gradeType ? (edu?.gradeType == "percentage" ? "%" : "/10") : null}
                   </span>
@@ -297,7 +297,7 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
             <h2>Projects</h2>
             {projectDetails?.map((proj, i) => (
               <div className="mb-3" key={i}>
-                <div className="flex justify-between items-baseline mb-1">
+                <div className="flex items-center mb-1">
                   <span className="font-bold text-[0.95rem]">
                     {proj?.project} {proj?.company ? `(${proj.company})` : ""}
                   </span>
@@ -316,7 +316,7 @@ const Template3 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
             <h2>Volunteering</h2>
             {volunteeringList.map((v, i) => (
               <div className="mb-3" key={i}>
-                <div className="flex justify-between items-baseline mb-1">
+                <div className="flex items-center mb-1">
                   <span className="font-bold text-[0.95rem]">{v?.volunteering}{v?.organization ? `, ${v.organization}` : ""}</span>
                   <span className="text-[0.82rem] italic text-[#64748b] whitespace-nowrap ml-4">{v?.start} – {v?.end}</span>
                 </div>
