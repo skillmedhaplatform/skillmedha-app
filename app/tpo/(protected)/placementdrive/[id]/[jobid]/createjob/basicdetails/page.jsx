@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./basicdetail.module.scss";
-import { Button, Divider, Input, message, Radio, Select, Space } from "antd";
+import { Button, Divider, Input, message, Radio, Select, Space, Modal } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { CreateJob, UpdateJob } from "@/redux/slices/tpo/placementsSlice";
 ;
@@ -148,13 +148,22 @@ export default function BasicDetailsPage() {
   };
 
   const handleDeleteItem = (type, index) => {
-    if (type === "courses") {
-      const updated = courses.filter((_, i) => i !== index);
-      setCourses(updated);
-    } else if (type === "eligibility") {
-      const updated = eligibilityCriteria.filter((_, i) => i !== index);
-      setEligibilityCriteria(updated);
-    }
+    Modal.confirm({
+      title: `Delete ${type === "courses" ? "Course" : "Eligibility Criteria"}`,
+      content: "Are you sure you want to delete this item?",
+      okText: "Yes, Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: () => {
+        if (type === "courses") {
+          const updated = courses.filter((_, i) => i !== index);
+          setCourses(updated);
+        } else if (type === "eligibility") {
+          const updated = eligibilityCriteria.filter((_, i) => i !== index);
+          setEligibilityCriteria(updated);
+        }
+      },
+    });
   };
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -6,11 +6,7 @@ export const profileSidebarItems = [
     path: `${basePath}/institution`,
     disable: false,
   },
-  {
-    name: "Accreditations and Ranking",
-    path: `${basePath}/accreditation`,
-    disable: false,
-  },
+
   {
     name: "TPO Support Team Details",
     path: `${basePath}/tpo_support_team`,
