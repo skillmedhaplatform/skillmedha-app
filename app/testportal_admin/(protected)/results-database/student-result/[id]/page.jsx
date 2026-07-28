@@ -395,11 +395,10 @@ export default function StudentResult({ params }) {
           useCORS: true,
           letterRendering: true,
           scrollY: 0,
-          windowWidth: element.scrollWidth,
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: {
-          mode: ["avoid-all", "css", "legacy"],
+          mode: ["css"],
           before: ".page-break-before",
           after: ".page-break-after",
           avoid: ".no-page-break",
@@ -653,6 +652,8 @@ export default function StudentResult({ params }) {
                               series={chartData?.series}
                               labels={chartData?.labels}
                               colors={chartData?.colors}
+                              width={140}
+                              height={140}
                             />
                           ) : (
                             <Skeleton.Avatar active shape="circle" size={120} />
@@ -1530,8 +1531,17 @@ export default function StudentResult({ params }) {
       const customFilename = `${studentName.replace(/\s+/g, "_")}_results_${date}`;
       const element = contentRef.current;
 
+      // html2pdf locks its capture container to the PDF page's printable width
+      // (A4 width minus left/right margin, in mm). html2canvas evaluates CSS
+      // media queries against `windowWidth`, which defaults to the live
+      // browser window's width — not this narrow printable width — so
+      // responsive breakpoints (antd Row/Col) pick the wrong layout unless we
+      // explicitly match it here.
+      const pdfMarginMM = [15, 15, 15, 15];
+      const pdfInnerWidthPx = Math.floor((210 - pdfMarginMM[1] - pdfMarginMM[3]) * (96 / 25.4));
+
       const opt = {
-        margin: [15, 15, 15, 15],
+        margin: pdfMarginMM,
         filename: `${customFilename}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
@@ -1539,13 +1549,13 @@ export default function StudentResult({ params }) {
           useCORS: true,
           letterRendering: true,
           scrollY: 0,
-          windowWidth: 1000,
+          windowWidth: pdfInnerWidthPx,
           allowTaint: true,
           logging: false,
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: {
-          mode: ["avoid-all", "css", "legacy"],
+          mode: ["css"],
           before: ".page-break-before",
           after: ".page-break-after",
           avoid: ".no-page-break",
@@ -1799,6 +1809,8 @@ export default function StudentResult({ params }) {
                               series={chartData?.series}
                               labels={chartData?.labels}
                               colors={chartData?.colors}
+                              width={140}
+                              height={140}
                             />
                           ) : (
                             <Skeleton.Avatar active shape="circle" size={120} />
