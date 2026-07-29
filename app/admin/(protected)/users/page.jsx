@@ -535,27 +535,27 @@ export default function User() {
     {
       label: "Total",
       value: processedData.length,
-      icon: <UserOutlined />,
+      icon: <UserOutlined style={{ color: "#2563eb", fontSize: "1.25rem" }} />,
     },
     {
       label: "Active",
       value: processedData.filter((u) => u.isActive).length,
-      icon: <CheckCircleOutlined />,
+      icon: <CheckCircleOutlined style={{ color: "#16a34a", fontSize: "1.25rem" }} />,
     },
     {
       label: "Admins",
       value: processedData.filter((u) => u.role === "ADMIN").length,
-      icon: <CrownOutlined />,
+      icon: <FaCrown style={{ fontSize: "1.25rem", color: "gold" }} />,
     },
     {
       label: "Moderators",
       value: processedData.filter((u) => u.role === "MODERATOR").length,
-      icon: <BsShield />,
+      icon: <FaShieldAlt style={{ fontSize: "1.25rem", color: "green" }} />,
     },
     {
       label: "Viewers",
       value: processedData.filter((u) => u.role === "VIEWER").length,
-      icon: <EyeOutlined />,
+      icon: <FaEye style={{ fontSize: "1.25rem", color: "gray" }} />,
     },
   ];
 
