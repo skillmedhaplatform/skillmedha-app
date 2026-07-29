@@ -6,6 +6,7 @@ import { decrypt } from "@/utils/windowMW";
 import BreadcrumbComponent from "@/modules/admin/components/breadcrumbs/breadcrumbs";
 import {
   CreateOrgUser,
+  DeleteHR,
   getUsersByOrg,
   resetUsers,
 } from "@/redux/slices/admin/adminOrgSlice";
@@ -50,6 +51,7 @@ function Page() {
 
   // Permission check
   const canCreate = canAccess(PERMISSION_VALUES.CREATE);
+  const canDelete = canAccess(PERMISSION_VALUES.DELETE);
 
   const encryptedOrgId = searchParams.get("orgId");
   const encryptedOrgName = searchParams.get("orgName");
@@ -183,6 +185,9 @@ function Page() {
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteModalData, setDeleteModalData] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [form] = Form.useForm();
 
   const handleSearch = useCallback(
@@ -526,6 +531,27 @@ function Page() {
                 <div className={styles.roleInfo}>
                   <strong>Role:</strong> {user?.role ?? "N/A"}
                 </div>
+
+                <Tooltip
+                  title={
+                    !canDelete
+                      ? getPermissionMessage(PERMISSION_VALUES.DELETE)
+                      : ""
+                  }
+                >
+                  <span>
+                    <Button
+                      style={{ width: "100%", marginTop: "16px" }}
+                      onClick={() => {
+                        setDeleteModalData(user);
+                        setDeleteModal(true);
+                      }}
+                      disabled={!canDelete}
+                    >
+                      Delete HR
+                    </Button>
+                  </span>
+                </Tooltip>
               </Card>
             ))}
           </div>
@@ -616,6 +642,45 @@ function Page() {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Delete HR User Modal */}
+      <Modal
+        title="Delete HR User"
+        open={deleteModal}
+        onOk={async () => {
+          setDeleteLoading(true);
+          try {
+            await dispatch(
+              DeleteHR({
+                hrId: deleteModalData?.globalId || deleteModalData?._id,
+                orgId: ORG_ID,
+                page: currentPage,
+                limit: itemsPerPage,
+              })
+            ).unwrap();
+            message.success("HR user deleted successfully");
+            setDeleteModal(false);
+            setDeleteModalData(null);
+          } catch (e) {
+            message.error(e || "Failed to delete HR user");
+          } finally {
+            setDeleteLoading(false);
+          }
+        }}
+        onCancel={() => {
+          setDeleteModal(false);
+          setDeleteModalData(null);
+        }}
+        confirmLoading={deleteLoading}
+        mask={{ closable: false }}
+      >
+        <p>
+          Are you sure you want to delete{" "}
+          {deleteModalData
+            ? deleteModalData.userName || deleteModalData.name || deleteModalData.email
+            : ""}?
+        </p>
       </Modal>
     </div>
   );
