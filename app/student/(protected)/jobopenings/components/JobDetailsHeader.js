@@ -71,10 +71,10 @@ export default function JobDetailsHeader({
   };
 
   return (
-    <div className="flex items-center justify-between mb-6 border border-[#e2e8f0] bg-white rounded-2xl p-6 shadow-sm">
+    <div className="w-full bg-white border border-[#e2e8f0] rounded-[16px] p-6 mb-6 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] flex items-center justify-between">
       <div className="flex items-center gap-4">
         {job?.companyLogo ? (
-          <div className="w-14 h-14 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center p-1">
+          <div className="w-16 h-16 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center p-1">
             <img
               src={job?.companyLogo}
               alt="Company logo"
@@ -82,22 +82,29 @@ export default function JobDetailsHeader({
             />
           </div>
         ) : (
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#1E69DA] to-[#5694F0] flex items-center justify-center text-white font-bold text-[24px] flex-shrink-0">
+          <div className="w-16 h-16 rounded-xl bg-[#1E69DA] flex items-center justify-center text-white font-bold text-[28px] flex-shrink-0">
             {firstLetter}
           </div>
         )}
-        <div className="flex flex-col">
-          <p className="text-[20px] font-bold text-[#1E69DA] m-0 leading-tight">
-            {job?.companyName} - {job?.jobTitle}
-          </p>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="text-[14px] text-[#64748b] font-medium m-0">
-              {job?.companyName}
-              {job?.city && <span className="mx-1">•</span>}
-              {job?.city}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <p className="text-[22px] font-bold text-[#0f172a] m-0 leading-tight">
+              {job?.companyName} {job?.jobTitle ? `- ${job.jobTitle}` : ''}
+            </p>
+            {job?.status !== "closed" && !isDeadlineOver && (
+              <span className="px-2 py-0.5 rounded bg-[#dcfce7] text-[#16a34a] text-[12px] font-bold">
+                Active
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="text-[14px] text-[#64748b] font-medium m-0 flex items-center">
+              <span className="mr-1">🏢</span> {job?.companyName}
+              {job?.city && <span className="mx-2">•</span>}
+              {job?.city && <span className="mr-1">📍</span>} {job?.city}
             </p>
             {isDeadlineOver || job?.status === "closed" ? (
-              <span className="px-2 py-0.5 rounded-full bg-red-50 text-[#ef4444] text-[11px] font-bold border border-red-100">
+              <span className="px-2 py-0.5 rounded-full bg-red-50 text-[#ef4444] text-[11px] font-bold border border-red-100 ml-2">
                 Deadline Closed
               </span>
             ) : null}
