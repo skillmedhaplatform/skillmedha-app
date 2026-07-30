@@ -36,6 +36,17 @@ import {
   RobotOutlined,
   ThunderboltOutlined,
   SaveOutlined,
+  CalendarOutlined,
+  EnvironmentOutlined,
+  GlobalOutlined,
+  ExportOutlined,
+  SafetyCertificateOutlined,
+  CodeOutlined,
+  DatabaseOutlined,
+  PieChartOutlined,
+  InfoCircleOutlined,
+  SyncOutlined,
+  DashboardOutlined,
 } from "@ant-design/icons";
 import dynamic from "next/dynamic";
 import styles from "./page.module.scss";
@@ -159,11 +170,6 @@ const DashboardHeader = ({ orgName, orgType, breadcrumbItems }) => {
             ))}
           </div>
         )}
-        <h2 style={{ marginTop: "4px" }}>{orgName || "Dashboard"}</h2>
-        <span className={styles.subtitle}>
-          {orgType === "college" ? "Educational Institution" : "Company"}{" "}
-          Dashboard
-        </span>
       </div>
       <div className={styles.headerRight}></div>
     </div>
@@ -175,24 +181,27 @@ const StatsCard = ({ stat }) => {
   return (
     <div className={styles.statsCard} style={{ borderLeftColor: stat.color }}>
       <div className={styles.cardHeader}>
-        <div className={styles.avatar} style={{ backgroundColor: stat.color }}>
-          {stat.icon}
+        <div className={styles.cardValue} style={{ color: stat.color }}>
+          {stat.value.toLocaleString()}
         </div>
         <div
           className={styles.trend}
           style={{
-            backgroundColor: `${stat.color}15`,
+            backgroundColor: `${stat.color}10`,
             color: stat.color,
+            border: `1px solid ${stat.color}25`
           }}
         >
-          <RiseOutlined />
+          <RiseOutlined style={{ fontSize: '12px' }} />
           {stat.trend}
         </div>
       </div>
       <div className={styles.cardBody}>
-        <div className={styles.cardTitle}>{stat.title}</div>
-        <div className={styles.cardValue} style={{ color: stat.color }}>
-          {stat.value.toLocaleString()}
+        <div className={styles.titleWrapper}>
+          <div className={styles.iconMini} style={{ color: stat.color }}>
+            {stat.icon}
+          </div>
+          <div className={styles.cardTitle}>{stat.title}</div>
         </div>
       </div>
     </div>
@@ -224,7 +233,6 @@ const AITokenLimitCard = ({
     const hide = message.loading("Updating AI token limit...", 0);
 
     try {
-      // Add this action to your Redux slice
       await dispatch(
         updateOrganisationAILimit({
           orgId: orgId,
@@ -234,8 +242,6 @@ const AITokenLimitCard = ({
 
       hide();
       message.success("AI token limit updated successfully!");
-
-      // Refresh organization stats
       dispatch(getOrganisationStats(orgId));
     } catch (error) {
       hide();
@@ -251,103 +257,95 @@ const AITokenLimitCard = ({
       ? Math.min(((aiUsage?.totalTokens || 0) / tokenLimit) * 100, 100)
       : 0;
 
-  const isNearLimit = usagePercentage >= 80;
-  const isOverLimit =
-    (aiUsage?.totalTokens || 0) > tokenLimit && tokenLimit > 0;
-
   return (
-    <div className={styles.detailCard}>
-      <div className={styles.cardTitle}>
-        <h3>
-          <ThunderboltOutlined className={styles.icon} />
-          AI Token Limit Management
-        </h3>
+    <div className={styles.aiLimitCard}>
+      <div className={styles.aiCardHeader}>
+        <div className={styles.iconBox} style={{ backgroundColor: '#eff6ff', color: '#2563eb' }}>
+          <ThunderboltOutlined />
+        </div>
+        <div className={styles.headerText}>
+          <h3>AI Token Limit Management</h3>
+          <p>Manage and monitor your AI token usage limit</p>
+        </div>
       </div>
-      <div className={styles.cardContent}>
-        {/* Current Usage */}
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Current Usage:</span>
-          <span className={styles.value}>
-            {(aiUsage?.totalTokens || 0).toLocaleString()} tokens
-          </span>
+
+      <div className={styles.limitTopSection}>
+        <div className={styles.currentUsageBox}>
+          <div className={styles.label}>Current Usage</div>
+          <div className={styles.usageValue}>
+            <span className={styles.bigNumber}>{(aiUsage?.totalTokens || 0).toLocaleString()}</span>
+            <span className={styles.unitText}>tokens</span>
+          </div>
         </div>
 
-        {/* Token Limit Input */}
-        <div className={styles.tokenLimitSection}>
-          <label className={styles.label}>Set Token Limit:</label>
-          <div className={styles.inputGroup}>
-            <InputNumber
-              min={0}
-              step={10000}
-              value={tokenLimit}
-              onChange={(value) => setTokenLimit(value)}
-              formatter={(value) =>
-                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-              }
-              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-              style={{ width: "100%", marginTop: 8 }}
-              placeholder="Enter token limit"
-              size="large"
-            />
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              onClick={handleUpdateLimit}
-              loading={isUpdating}
-              disabled={tokenLimit === aiTokenLimit}
-              style={{ marginTop: 8, width: "100%" }}
+        <div className={styles.setLimitBox}>
+          <div className={styles.label}>Set Token Limit</div>
+          <InputNumber
+            min={0}
+            step={10000}
+            value={tokenLimit}
+            onChange={(value) => setTokenLimit(value)}
+            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+            className={styles.limitInput}
+            size="large"
+          />
+          <Button
+            type="primary"
+            icon={<SaveOutlined />}
+            onClick={handleUpdateLimit}
+            loading={isUpdating}
+            disabled={tokenLimit === aiTokenLimit}
+            className={styles.updateBtn}
+          >
+            Update Limit
+          </Button>
+        </div>
+      </div>
+
+      <div className={styles.progressBox}>
+        <div className={styles.progressHeader}>
+          <div className={styles.progressText}>
+            Usage: <span className={styles.highlight}>{(aiUsage?.totalTokens || 0).toLocaleString()} / {tokenLimit.toLocaleString()}</span> tokens
+          </div>
+          <div className={styles.progressPercent}>{Math.round(usagePercentage)}%</div>
+        </div>
+        <Progress
+          percent={usagePercentage}
+          showInfo={false}
+          strokeColor="#2563eb"
+          trailColor="#e2e8f0"
+          className={styles.progressBar}
+        />
+        <div className={styles.progressTicks}>
+          <span>0</span>
+          <span>25%</span>
+          <span>50%</span>
+          <span>75%</span>
+          <span>100%</span>
+        </div>
+      </div>
+
+      <div className={styles.quickSetBox}>
+        <div className={styles.quickSetHeader}>
+          <h4>Quick Set</h4>
+          <p>Set token limit quickly</p>
+        </div>
+        <div className={styles.quickButtons}>
+          {[
+            { label: '50K', value: 50000, color: '#2563eb' },
+            { label: '100K', value: 100000, color: '#16a34a' },
+            { label: '500K', value: 500000, color: '#ea580c' },
+            { label: '1M', value: 1000000, color: '#9333ea' }
+          ].map((preset) => (
+            <div 
+              key={preset.value}
+              className={styles.presetBtn}
+              onClick={() => setTokenLimit(preset.value)}
             >
-              Update Limit
-            </Button>
-          </div>
-        </div>
-
-        {/* Usage Progress Bar */}
-        {tokenLimit > 0 && (
-          <div className={styles.progressSection} style={{ marginTop: 20 }}>
-            <span className={styles.progressLabel}>
-              Usage: {(aiUsage?.totalTokens || 0).toLocaleString()} /{" "}
-              {tokenLimit.toLocaleString()} tokens
-            </span>
-            <Progress
-              percent={parseFloat(usagePercentage.toFixed(2))}
-              status={
-                isOverLimit ? "exception" : isNearLimit ? "normal" : "active"
-              }
-              strokeColor={
-                isOverLimit ? "#ff4d4f" : isNearLimit ? "#faad14" : "#52c41a"
-              }
-            />
-            {isOverLimit && (
-              <span className={styles.warningText} style={{ color: "#ff4d4f" }}>
-                ⚠️ Token limit exceeded!
-              </span>
-            )}
-            {isNearLimit && !isOverLimit && (
-              <span className={styles.warningText} style={{ color: "#faad14" }}>
-                ⚠️ Approaching token limit
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Quick Actions */}
-        <div className={styles.quickActions} style={{ marginTop: 20 }}>
-          <span className={styles.label}>Quick Set:</span>
-          <div className={styles.buttonGroup}>
-            {[50000, 100000, 500000, 1000000].map((preset) => (
-              <Button
-                key={preset}
-                size="small"
-                onClick={() => setTokenLimit(preset)}
-                style={{ marginRight: 8, marginTop: 8 }}
-              >
-                {preset >= 1000000
-                  ? `${preset / 1000000}M`
-                  : `${preset / 1000}K`}
-              </Button>
-            ))}
-          </div>
+              <DashboardOutlined style={{ color: preset.color }} /> {preset.label}
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -571,54 +569,145 @@ const FeatureManagement = ({
 };
 
 // ==================== ORGANIZATION DETAILS FOR COLLEGE ====================
-const OrganizationDetails = ({ institutionDetails, accreditationDetails }) => {
+const OrganizationDetails = ({ institutionDetails, accreditationDetails, organization }) => {
+  const renderValue = (value) => value ? value : <span style={{ color: '#8c8c8c' }}>N/A <span style={{ fontSize: '0.85em' }}>(still not filled)</span></span>;
+
+  // Format Address
+  let address = null;
+  if (organization?.address) {
+    const { street, city, state, pincode, country } = organization.address;
+    const parts = [street, city, state, pincode, country].filter(Boolean);
+    if (parts.length > 0) {
+      address = parts.join(", ");
+    }
+  }
+
   return (
-    <div className={styles.detailCard}>
-      <div className={styles.cardTitle}>
+    <div className={styles.orgDetailCard}>
+      <div className={styles.cardHeader}>
         <h3>
           <BankOutlined className={styles.icon} />
           Organization Details
         </h3>
       </div>
-      <div className={styles.cardContent}>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Institution:</span>
-          <span className={styles.value}>
-            {institutionDetails?.institutionName || "N/A"}
-          </span>
+      <div className={styles.cardContentTable}>
+        {/* Row 1 */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <BankOutlined /> Institution
+          </div>
+          <div className={styles.tableValue}>
+            {renderValue(institutionDetails?.institutionName)}
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Established:</span>
-          <span className={styles.value}>
-            {institutionDetails?.establishedYear || "N/A"}
-          </span>
+        {/* Row 2 */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <CalendarOutlined /> Established
+          </div>
+          <div className={styles.tableValue}>
+            {renderValue(institutionDetails?.establishedYear)}
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Type:</span>
-          <span
-            className={styles.tag}
-            style={{ backgroundColor: "#e6f7ff", color: "#1E69DA" }}
-          >
-            {institutionDetails?.institutionType || "N/A"}
-          </span>
+        {/* Row 3 */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <TrophyOutlined /> Type
+          </div>
+          <div className={styles.tableValue}>
+            {institutionDetails?.institutionType ? (
+              <span className={styles.bluePill}>{institutionDetails.institutionType}</span>
+            ) : renderValue(null)}
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Affiliation:</span>
-          <span className={styles.value}>
-            {institutionDetails?.affiliation || "N/A"}
-          </span>
+        {/* Row 4 */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <BankOutlined /> Affiliation
+          </div>
+          <div className={styles.tableValue}>
+            {renderValue(institutionDetails?.affiliation)}
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>NAAC Grade:</span>
-          <span className={styles.badge}>
-            {accreditationDetails?.naacGradeCycle || "N/A"}
-          </span>
+        {/* Principal Info */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <UserOutlined /> Principal / Director
+          </div>
+          <div className={styles.tableValue}>
+            {renderValue(institutionDetails?.principalName)}
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>NBA Status:</span>
-          <span className={styles.value}>
-            {accreditationDetails?.nbaStatus || "N/A"}
-          </span>
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <PhoneOutlined /> Principal Contact
+          </div>
+          <div className={styles.tableValue}>
+             <div className={styles.contactRow}>
+              <span><PhoneOutlined style={{ marginRight: 4, color: '#64748b' }} /> {institutionDetails?.principalContact || "N/A (still not filled)"}</span>
+              <span className={styles.separator}>|</span>
+              <span><MailOutlined style={{ marginRight: 4, color: '#64748b' }} /> {institutionDetails?.principalEmail || "N/A (still not filled)"}</span>
+            </div>
+          </div>
+        </div>
+        {/* Row 5 */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <SafetyCertificateOutlined /> NAAC Grade
+          </div>
+          <div className={styles.tableValue}>
+            {accreditationDetails?.naacGradeCycle ? (
+              <span className={styles.statusDot}>
+                <span className={styles.dot}></span>
+                {accreditationDetails.naacGradeCycle}
+              </span>
+            ) : renderValue(null)}
+          </div>
+        </div>
+        {/* Row 6 */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <BankOutlined /> NBA Status
+          </div>
+          <div className={styles.tableValue}>
+            {renderValue(accreditationDetails?.nbaStatus)}
+          </div>
+        </div>
+        {/* Row 7 */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <EnvironmentOutlined /> Address
+          </div>
+          <div className={styles.tableValue}>
+            {renderValue(address)}
+          </div>
+        </div>
+        {/* Row 8 */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <PhoneOutlined /> Contact
+          </div>
+          <div className={styles.tableValue}>
+            <div className={styles.contactRow}>
+              <span><PhoneOutlined style={{ marginRight: 4, color: '#64748b' }} /> {organization?.phone || organization?.mobileNumber || "N/A (still not filled)"}</span>
+              <span className={styles.separator}>|</span>
+              <span><MailOutlined style={{ marginRight: 4, color: '#64748b' }} /> {organization?.email || "N/A (still not filled)"}</span>
+            </div>
+          </div>
+        </div>
+        {/* Row 9 */}
+        <div className={styles.tableRow}>
+          <div className={styles.tableLabel}>
+            <GlobalOutlined /> Website
+          </div>
+          <div className={styles.tableValue}>
+            {organization?.websiteUrl ? (
+              <a href={organization.websiteUrl} target="_blank" rel="noreferrer" className={styles.websiteLink}>
+                <GlobalOutlined style={{ marginRight: 6 }} /> {organization.websiteUrl}
+                <ExportOutlined className={styles.exportIcon} />
+              </a>
+            ) : renderValue(null)}
+          </div>
         </div>
       </div>
     </div>
@@ -676,45 +765,95 @@ const CompanyDetails = ({ organization }) => {
 };
 const AIUsageDetails = ({ aiUsage }) => {
   return (
-    <div className={styles.detailCard}>
-      <div className={styles.cardTitle}>
-        <h3>
-          <RobotOutlined className={styles.icon} />
-          AI Usage Statistics
-        </h3>
+    <div className={styles.aiUsageCard}>
+      <div className={styles.aiCardHeader}>
+        <div className={styles.iconBox} style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
+          <BarChartOutlined />
+        </div>
+        <div className={styles.headerText}>
+          <h3>AI Usage Statistics</h3>
+          <p>Overview of AI usage and token consumption</p>
+        </div>
       </div>
-      <div className={styles.cardContent}>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Total Requests:</span>
-          <span className={styles.value}>
+      
+      <div className={styles.usageList}>
+        <div className={styles.usageItem}>
+          <div className={styles.itemIcon} style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
+            <FileTextOutlined />
+          </div>
+          <div className={styles.itemText}>
+            <h4>Total Requests</h4>
+            <p>All AI requests made</p>
+          </div>
+          <div className={styles.itemValue}>
             {(aiUsage?.totalRequests || 0).toLocaleString()}
-          </span>
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Completion Tokens:</span>
-          <span className={styles.value}>
+        
+        <div className={styles.usageItem}>
+          <div className={styles.itemIcon} style={{ backgroundColor: '#f0fdf4', color: '#22c55e' }}>
+            <CheckCircleOutlined />
+          </div>
+          <div className={styles.itemText}>
+            <h4>Completion Tokens</h4>
+            <p>Tokens used for responses</p>
+          </div>
+          <div className={styles.itemValue}>
             {(aiUsage?.totalCompletionTokens || 0).toLocaleString()}
-          </span>
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Prompt Tokens:</span>
-          <span className={styles.value}>
+        
+        <div className={styles.usageItem}>
+          <div className={styles.itemIcon} style={{ backgroundColor: '#fff7ed', color: '#f97316' }}>
+            <CodeOutlined />
+          </div>
+          <div className={styles.itemText}>
+            <h4>Prompt Tokens</h4>
+            <p>Tokens used for prompts</p>
+          </div>
+          <div className={styles.itemValue}>
             {(aiUsage?.totalPromptTokens || 0).toLocaleString()}
-          </span>
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Total Tokens:</span>
-          <span className={styles.badge}>
-            {(aiUsage?.totalTokens || 0).toLocaleString()}
-          </span>
+        
+        <div className={styles.usageItem}>
+          <div className={styles.itemIcon} style={{ backgroundColor: '#f5f3ff', color: '#8b5cf6' }}>
+            <DatabaseOutlined />
+          </div>
+          <div className={styles.itemText}>
+            <h4>Total Tokens</h4>
+            <p>Total tokens consumed</p>
+          </div>
+          <div className={styles.itemValue}>
+            <span className={styles.statusDot}>
+              <span className={styles.dot}></span>
+              {(aiUsage?.totalTokens || 0).toLocaleString()}
+            </span>
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Avg Tokens/Request:</span>
-          <span className={styles.value}>
+
+        <div className={styles.usageItem}>
+          <div className={styles.itemIcon} style={{ backgroundColor: '#ecfeff', color: '#06b6d4' }}>
+            <PieChartOutlined />
+          </div>
+          <div className={styles.itemText}>
+            <h4>Avg Tokens/Request</h4>
+            <p>Average tokens per request</p>
+          </div>
+          <div className={styles.itemValue}>
             {aiUsage?.totalRequests > 0
-              ? Math.round(aiUsage.totalTokens / aiUsage.totalRequests)
+              ? Math.round(aiUsage.totalTokens / aiUsage.totalRequests).toLocaleString()
               : 0}
-          </span>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.aiCardFooter}>
+        <div className={styles.footerLeft}>
+          <InfoCircleOutlined /> All values are updated in real-time
+        </div>
+        <div className={styles.footerRight}>
+          Last updated: just now <SyncOutlined />
         </div>
       </div>
     </div>
@@ -1487,22 +1626,20 @@ const HorizontalBarChart = ({ departmentData, onDepartmentClick }) => {
   ];
 
   return (
-    <div className={`${styles.chartsGrid} ${styles.fullWidth}`}>
-      <div className={styles.chartCard}>
-        <div className={styles.chartTitle}>
-          Department-wise Student Comparison
-          <span className={styles.chartSubtitle}>
-            Click on bars to view details
-          </span>
-        </div>
-        <div className={styles.chartWrapper}>
-          <ReactApexChart
-            options={barChartOptions}
-            series={barChartSeries}
-            type="bar"
-            height={400}
-          />
-        </div>
+    <div className={styles.chartCard}>
+      <div className={styles.chartTitle}>
+        Department-wise Student Comparison
+        <span className={styles.chartSubtitle}>
+          Click on bars to view details
+        </span>
+      </div>
+      <div className={styles.chartWrapper}>
+        <ReactApexChart
+          options={barChartOptions}
+          series={barChartSeries}
+          type="bar"
+          height={350}
+        />
       </div>
     </div>
   );
@@ -1847,6 +1984,7 @@ function DashboardPage() {
             <OrganizationDetails
               institutionDetails={tpoList[0]?.institutionDetails}
               accreditationDetails={tpoList[0]?.accreditationDetails}
+              organization={stats?.organization}
             />
             <FeatureManagement
               features={stats?.organization?.features} // Pass the features object
@@ -1978,7 +2116,7 @@ function DashboardPage() {
               <h3>Department Analytics</h3>
             </div>
 
-            <div className={styles.chartsGrid}>
+            <div className={`${styles.chartsGrid} ${styles.threeColumns}`}>
               <ColumnChart
                 departmentData={departmentData}
                 onDepartmentClick={handleDepartmentNavigation}
@@ -1988,12 +2126,11 @@ function DashboardPage() {
                 totalStudents={stats?.counts?.students}
                 onDepartmentClick={handleDepartmentNavigation}
               />
+              <HorizontalBarChart
+                departmentData={departmentData}
+                onDepartmentClick={handleDepartmentNavigation}
+              />
             </div>
-
-            <HorizontalBarChart
-              departmentData={departmentData}
-              onDepartmentClick={handleDepartmentNavigation}
-            />
           </div>
         )
       )}

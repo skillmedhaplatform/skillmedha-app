@@ -823,17 +823,21 @@ export default function TestPage() {
                 });
                 localStorage.setItem('pendingPracticeNotices', JSON.stringify(notices));
                 // ACTUALLY AWARD THE BADGE
+                const userId = studentCreds?._id || "";
+                const claimedKey = `claimedAchievements_${userId}`;
+                const unseenKey = `unseenPracticeBadges_${userId}`;
+                
                 const badgeId = `practice_badge|${subjectType}|${subjectTitle || "General"}|${testTitle || "Test"}|Flawless|1`;
-                const claimed = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+                const claimed = JSON.parse(localStorage.getItem(claimedKey) || "[]");
                 if (!claimed.includes(badgeId)) {
                   claimed.push(badgeId);
-                  localStorage.setItem("claimedAchievements", JSON.stringify(claimed));
+                  localStorage.setItem(claimedKey, JSON.stringify(claimed));
                   
                   // Mark as NEW
-                  const unseen = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]");
+                  const unseen = JSON.parse(localStorage.getItem(unseenKey) || "[]");
                   if (!unseen.includes(badgeId)) {
                     unseen.push(badgeId);
-                    localStorage.setItem("unseenPracticeBadges", JSON.stringify(unseen));
+                    localStorage.setItem(unseenKey, JSON.stringify(unseen));
                   }
                 }
 

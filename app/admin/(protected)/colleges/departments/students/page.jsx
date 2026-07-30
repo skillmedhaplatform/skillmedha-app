@@ -163,8 +163,8 @@ const Students = () => {
         getStudentsInDepartment({
           orgId: ORG_ID,
           departmentId: Dep_Id,
-          page: pagination.current,
-          limit: pagination.pageSize,
+          page: 1,
+          limit: 999999,
           search: debouncedSearch,
         })
       );
@@ -503,22 +503,6 @@ const Students = () => {
                 </div>
               );
             })}
-          </div>
-
-          <div className={styles.paginationContainer}>
-            <Pagination
-              current={pagination.current}
-              pageSize={pagination.pageSize}
-              total={totalCount}
-              showSizeChanger={true}
-              showTotal={(total, range) =>
-                `${range[0]}-${range[1]} of ${total} students`
-              }
-              pageSizeOptions={["10", "20", "50", "100"]}
-              showQuickJumper={true}
-              onChange={onTableChange}
-              onShowSizeChange={onTableChange}
-            />
           </div>
         </>
       )}

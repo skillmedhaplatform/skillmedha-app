@@ -539,11 +539,11 @@ export default function College() {
 
       <div className={styles.collegeGrid}>
         {loading ? (
-          Array.from({ length: pageSize }).map((_, index) => (
+          Array.from({ length: 8 }).map((_, index) => (
             <SkeletonCard key={index} />
           ))
-        ) : paginatedColleges.length > 0 ? (
-          paginatedColleges.map((college) => (
+        ) : sortedColleges.length > 0 ? (
+          sortedColleges.map((college) => (
             <div key={college._id} className={styles.collegeCard}>
               <div className={styles.cardHeader}>
                 <div className={styles.collegeInitial}>
@@ -713,22 +713,6 @@ export default function College() {
         )}
       </div>
 
-      {!loading && filteredColleges.length > 0 && (
-        <div className={styles.pagination}>
-          <Pagination
-            current={currentPage}
-            total={sortedColleges.length}
-            pageSize={pageSize}
-            onChange={handlePageChange}
-            showSizeChanger={true}
-            onShowSizeChange={handlePageSizeChange}
-            pageSizeOptions={[8, 16, 24, 32, 48]}
-            showTotal={(total, range) =>
-              `${range[0]}-${range[1]} of ${total} colleges`
-            }
-          />
-        </div>
-      )}
 
       <Modal
         title={editingCollege ? "Edit College" : "Add New College"}

@@ -224,7 +224,7 @@ const ProfileSection = ({ profileValues, router, studentCreds }) => (
           size={46}
           strokeWidth={8}
           strokeColor="#3b82f6"
-          trailColor="#e2e8f0"
+          railColor="#e2e8f0"
           format={(percent) => (
             <span className="text-[13px] font-black text-[#0f172a] leading-none">{percent}%</span>
           )}
@@ -392,13 +392,31 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
       
       const loadClaimed = () => {
         let stored = studentCreds?.claimedAchievements || [];
-        if (!stored.length) {
-          stored = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+        if (typeof window !== "undefined") {
+          const userId = studentCreds?._id || "";
+          const scopedKey = `claimedAchievements_${userId}`;
+          
+          // Temporary Migration to restore lost badges
+          const oldLocal = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+          let currentScoped = JSON.parse(localStorage.getItem(scopedKey) || "[]");
+          
+          if (oldLocal.length > 0 && currentScoped.length === 0) {
+             const practiceBadges = oldLocal.filter(id => typeof id === 'string' && id.startsWith('practice_badge'));
+             if (practiceBadges.length > 0) {
+                 localStorage.setItem(scopedKey, JSON.stringify(practiceBadges));
+                 currentScoped = practiceBadges;
+             }
+          }
+          
+          stored = [...stored, ...currentScoped];
         }
         
-
-        setClaimedAchievements(stored);
-        setUnseenBadges(JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]"));
+        setClaimedAchievements(Array.from(new Set(stored)));
+        
+        if (typeof window !== "undefined") {
+          const userId = studentCreds?._id || "";
+          setUnseenBadges(JSON.parse(localStorage.getItem(`unseenPracticeBadges_${userId}`) || "[]"));
+        }
         
         // Auto-open modal if redirected from test result page
         const autoOpen = localStorage.getItem("autoOpenBadgeModal");
@@ -409,9 +427,11 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
             setSelectedBadgeDetail(null);
             
             // Auto clear unseen for this type
-            const remaining = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]").filter(id => !id.includes(autoOpen));
+            const userId = studentCreds?._id || "";
+            const unseenKey = `unseenPracticeBadges_${userId}`;
+            const remaining = JSON.parse(localStorage.getItem(unseenKey) || "[]").filter(id => !id.includes(autoOpen));
             setUnseenBadges(remaining);
-            localStorage.setItem("unseenPracticeBadges", JSON.stringify(remaining));
+            localStorage.setItem(unseenKey, JSON.stringify(remaining));
             localStorage.removeItem("autoOpenBadgeModal");
           }, 300);
         }
@@ -429,9 +449,11 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
             setIsPracticeModalOpen(true);
             setSelectedBadgeDetail(null);
             
-            const remaining = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]").filter(id => !id.includes(type));
+            const userId = studentCreds?._id || "";
+            const unseenKey = `unseenPracticeBadges_${userId}`;
+            const remaining = JSON.parse(localStorage.getItem(unseenKey) || "[]").filter(id => !id.includes(type));
             setUnseenBadges(remaining);
-            localStorage.setItem("unseenPracticeBadges", JSON.stringify(remaining));
+            localStorage.setItem(unseenKey, JSON.stringify(remaining));
             
             // Clean up hash without reloading
             history.pushState("", document.title, window.location.pathname + window.location.search);
@@ -454,8 +476,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
   }, [studentCreds?.claimedAchievements]);
 
   const practiceBadges = Array.from(new Set([
-    ...(claimedAchievements || []),
-    ...JSON.parse(localStorage.getItem("claimedAchievements") || "[]")
+    ...(claimedAchievements || [])
   ]))
     .filter(id => typeof id === 'string' && (id.startsWith("practice_badge|") || id.startsWith("practice_badge_")))
     .filter(id => id !== "practice_badge_Coding_Programming_C_Silver_1") // Remove mock
@@ -501,12 +522,14 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
     setSelectedBadgeDetail(null);
     
     // Clear unseen badges for this type
+    const userId = studentCreds?._id || "";
+    const unseenKey = `unseenPracticeBadges_${userId}`;
     const remainingUnseen = unseenBadges.filter(id => {
       const badge = practiceBadges.find(b => b.id === id);
       return badge && badge.section !== type;
     });
     setUnseenBadges(remainingUnseen);
-    localStorage.setItem("unseenPracticeBadges", JSON.stringify(remainingUnseen));
+    localStorage.setItem(unseenKey, JSON.stringify(remainingUnseen));
   };
 
   const renderBadgeList = (badges) => {
@@ -678,8 +701,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
 
   const renderAllAchievements = () => {
     const rawClaimed = Array.from(new Set([
-      ...(studentCreds?.claimedAchievements || []),
-      ...(typeof window !== "undefined" ? JSON.parse(localStorage.getItem("claimedAchievements") || "[]") : [])
+      ...(studentCreds?.claimedAchievements || [])
     ]));
 
     // Helper to get score (0 = newest, 9999 = oldest/unknown)
@@ -852,6 +874,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true);
+
     const handleOpenNoticeBoard = (e) => {
       if (e.detail?.index !== undefined) {
         setActiveNoticeIndex(e.detail.index);
@@ -860,7 +883,7 @@ export default function DashboardPage() {
     };
     window.addEventListener("openNoticeBoard", handleOpenNoticeBoard);
     return () => window.removeEventListener("openNoticeBoard", handleOpenNoticeBoard);
-  }, []);
+  }, [studentCreds?._id]);
 
   const isMobile = useResponsive(); // < 1024px → mobile layout
 
@@ -1235,7 +1258,12 @@ export default function DashboardPage() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {paginatedLearningData.map((item) => {
+                  {paginatedLearningData.length === 0 ? (
+                    <div className="flex items-center justify-center h-[100px] text-[#64748b] text-[14px]">
+                      No active courses or internships found.
+                    </div>
+                  ) : (
+                    paginatedLearningData.map((item) => {
                     const hasLastAccessed = item?.lastAccessedSection !== undefined && item?.lastAccessedSection !== null;
                     const handleNavigate = () => {
                       const basePath = item?.type === "internship" ? "/student/learning-internship" : "/student/learning-course";
@@ -1294,7 +1322,7 @@ export default function DashboardPage() {
                               size="small" 
                               showInfo={false} 
                               strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'} 
-                              trailColor="#f1f5f9"
+                              railColor="#f1f5f9"
                               className="m-0 w-[120px]"
                             />
                             <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{progressVal}%</span>
@@ -1314,7 +1342,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                   );
-                })}
+                }))}
               </motion.div>
               </AnimatePresence>
             )}

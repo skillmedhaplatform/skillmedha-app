@@ -5,6 +5,7 @@ import { FaShieldAlt, FaEye } from "react-icons/fa";
 import { FaCrown } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { usePathname } from "next/navigation";
+import { sideBarTitles } from "@/utils/windowMW";
 
 const AdminBanner = () => {
   const [mounted, setMounted] = useState(false);
@@ -34,34 +35,45 @@ const AdminBanner = () => {
 
   const isDashboard = !pathname || pathname.includes("/dashboard");
 
+  const coursesData = useSelector((state) => state.adminInternship?.allCourses?.data);
+  const internshipsData = useSelector((state) => state.adminInternship?.allInternShips?.data);
+  const workshopsData = useSelector((state) => state.adminInternship?.allWorkshops?.data);
+  const orgStats = useSelector((state) => state.adminOrg?.orgStats?.value);
+
   const getSectionContent = () => {
     if (isDashboard) {
       return {
         greeting: mounted && userName ? `Hi ${userName.charAt(0).toUpperCase() + userName.slice(1)},` : "Hi,",
         title: `${mounted ? getGreetingTime() : "Welcome"}! Let's manage SkillMedha today.`,
+        icon: null
       };
     }
-    if (pathname.includes("/course")) return { title: "Course Management" };
-    if (pathname.includes("/users")) return { title: "User Management" };
-    if (pathname.includes("/internship")) return { title: "Internships" };
-    if (pathname.includes("/colleges")) return { title: "Colleges" };
-    if (pathname.includes("/companies")) return { title: "Companies" };
-    if (pathname.includes("/practice")) return { title: "Practice Module" };
-    if (pathname.includes("/questionManager")) return { title: "Question Manager" };
-    if (pathname.includes("/liveLect")) return { title: "Live Lectures" };
-    if (pathname.includes("/payment")) return { title: "Payments" };
-    if (pathname.includes("/workshops")) return { title: "Workshops" };
-    if (pathname.includes("/website-newsflash")) return { title: "Newsflash" };
-    if (pathname.includes("/organisationDetails")) return { title: "Organisation" };
 
-    return { title: "Admin Panel" };
+    const matchedItem = sideBarTitles.find(item => pathname.includes(item.path));
+    const defaultIcon = matchedItem ? React.cloneElement(matchedItem.icon, { size: "1.2em", className: "opacity-90" }) : null;
+
+    if (pathname.includes("/course")) return { title: "Course Management", icon: defaultIcon };
+    if (pathname.includes("/users")) return { title: "User Management", icon: defaultIcon };
+    if (pathname.includes("/internship")) return { title: "Internships", icon: defaultIcon };
+    if (pathname.includes("/colleges")) return { title: "Colleges", icon: defaultIcon };
+    if (pathname.includes("/companies")) return { title: "Companies", icon: defaultIcon };
+    if (pathname.includes("/practice")) return { title: "Practice Module", icon: defaultIcon };
+    if (pathname.includes("/questionManager")) return { title: "Question Manager", icon: defaultIcon };
+    if (pathname.includes("/liveLect")) return { title: "Live Lectures", icon: defaultIcon };
+    if (pathname.includes("/payment")) return { title: "Payments", icon: defaultIcon };
+    if (pathname.includes("/workshops")) return { title: "Workshops", icon: defaultIcon };
+    if (pathname.includes("/website-newsflash")) return { title: "Newsflash", icon: defaultIcon };
+    if (pathname.includes("/organisationDetails")) {
+      const orgName = orgStats?.organization?.orgName || "Organisation";
+      const orgType = orgStats?.organization?.orgType || "college";
+      const subtitle = orgType === "college" ? "Educational Institution Dashboard" : "Company Dashboard";
+      return { title: orgName, subtitle, icon: defaultIcon };
+    }
+
+    return { title: "Admin Panel", icon: defaultIcon };
   };
 
-  const { greeting, title } = getSectionContent();
-
-  const coursesData = useSelector((state) => state.adminInternship?.allCourses?.data);
-  const internshipsData = useSelector((state) => state.adminInternship?.allInternShips?.data);
-  const workshopsData = useSelector((state) => state.adminInternship?.allWorkshops?.data);
+  const { greeting, title, subtitle, icon } = getSectionContent();
 
   const getSectionStats = () => {
     if (!pathname) return null;
@@ -94,9 +106,17 @@ const AdminBanner = () => {
             {greeting}
           </p>
         )}
-        <p className="text-[18px] lg:text-[28px] font-bold text-white m-0 tracking-tight flex items-center">
-          {title}
-        </p>
+        <div className="text-[18px] lg:text-[28px] font-bold text-white m-0 tracking-tight flex items-center gap-3">
+          {icon && <span className="flex items-center justify-center opacity-90 text-[1.2em]">{icon}</span>}
+          <div className="flex flex-col">
+            <span>{title}</span>
+            {subtitle && (
+              <span className="text-[13px] lg:text-[15px] font-normal text-[#cbd5e1] mt-1 tracking-normal">
+                {subtitle}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Right Column (Date + Role Card) */}
