@@ -73,7 +73,98 @@ const Accesspage = () => {
     preserveSelectedRowKeys: true,
   };
 
+  const getDepartmentOptions = () => {
+    let list = [];
+    if (Array.isArray(departments?.value)) {
+      list = departments.value;
+    } else if (Array.isArray(departments?.value?.data)) {
+      list = departments.value.data;
+    } else if (Array.isArray(departments)) {
+      list = departments;
+    }
+
+    const optionsMap = new Map();
+
+    list.forEach((item) => {
+      if (item && item._id) {
+        optionsMap.set(String(item._id), {
+          label: item.title || item.name || String(item._id),
+          value: String(item._id),
+        });
+      } else if (item) {
+        optionsMap.set(String(item), {
+          label: String(item),
+          value: String(item),
+        });
+      }
+    });
+
+    if (Array.isArray(selectedDepartments)) {
+      selectedDepartments.forEach((deptId) => {
+        if (deptId && !optionsMap.has(String(deptId))) {
+          optionsMap.set(String(deptId), {
+            label: String(deptId),
+            value: String(deptId),
+          });
+        }
+      });
+    }
+
+    return Array.from(optionsMap.values());
+  };
+
+  const getBatchOptions = () => {
+    let list = [];
+    if (Array.isArray(batches?.value)) {
+      list = batches.value;
+    } else if (Array.isArray(batches?.value?.data)) {
+      list = batches.value.data;
+    } else if (Array.isArray(batches)) {
+      list = batches;
+    }
+
+    const optionsMap = new Map();
+
+    // Standard common batch years so the dropdown is never empty ("No data")
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear - 4; y <= currentYear + 5; y++) {
+      const yrStr = String(y);
+      optionsMap.set(yrStr, { label: yrStr, value: yrStr });
+    }
+
+    // Add items from backend API
+    list.forEach((item) => {
+      let year =
+        item?.yearOfPassing !== undefined
+          ? item.yearOfPassing
+          : item?.batch !== undefined
+          ? item.batch
+          : item;
+      if (year !== null && year !== undefined && String(year).trim() !== "" && String(year) !== "null") {
+        const yearStr = String(year).trim();
+        optionsMap.set(yearStr, { label: yearStr, value: yearStr });
+      }
+    });
+
+    // Add currently selected batches
+    if (Array.isArray(selectedBatches)) {
+      selectedBatches.forEach((yr) => {
+        if (yr !== null && yr !== undefined && String(yr).trim() !== "") {
+          const yrStr = String(yr).trim();
+          if (!optionsMap.has(yrStr)) {
+            optionsMap.set(yrStr, { label: yrStr, value: yrStr });
+          }
+        }
+      });
+    }
+
+    return Array.from(optionsMap.values());
+  };
+
   const handleUpdate = () => {
+    const cleanBatches = (selectedBatches || []).map((y) => String(y).trim()).filter(Boolean);
+    const cleanDepts = (selectedDepartments || []).map((d) => String(d).trim()).filter(Boolean);
+
     let payload = {
       access: {
         type: accessType,
@@ -81,17 +172,23 @@ const Accesspage = () => {
     };
 
     if (accessType === "department") {
-      payload.access.department = selectedDepartments;
+      payload.access.department = cleanDepts;
+      payload.access.yearOfPassing = [];
+      payload.access.batch = [];
     } else if (accessType === "batch") {
-      payload.access.yearOfPassing = selectedBatches;
+      payload.access.yearOfPassing = cleanBatches;
+      payload.access.batch = cleanBatches;
+      payload.access.department = [];
     } else if (accessType === "department_batch") {
-      payload.access.yearOfPassing = selectedBatches;
-      payload.access.department = selectedDepartments;
+      payload.access.yearOfPassing = cleanBatches;
+      payload.access.batch = cleanBatches;
+      payload.access.department = cleanDepts;
     } else if (accessType === "student") {
       payload.access.students = selectedRowKeys;
     } else {
       payload.access.department = [];
       payload.access.yearOfPassing = [];
+      payload.access.batch = [];
       payload.access.students = [];
     }
 
@@ -113,27 +210,22 @@ const Accesspage = () => {
       setAccessType(access.type || "department");
 
       if (Array.isArray(access.department)) {
-        setSelectedDepartments(access.department);
+        setSelectedDepartments(access.department.map(String));
       } else if (typeof access.department === "string" && access.department) {
-        setSelectedDepartments([access.department]);
-      } else {
-        setSelectedDepartments([]);
+        setSelectedDepartments([String(access.department)]);
       }
 
-      if (Array.isArray(access.yearOfPassing)) {
-        setSelectedBatches(access.yearOfPassing);
-      } else if (typeof access.yearOfPassing === "string" && access.yearOfPassing) {
-        setSelectedBatches([access.yearOfPassing]);
-      } else {
-        setSelectedBatches([]);
+      const batchList = access.yearOfPassing || access.batch;
+      if (Array.isArray(batchList)) {
+        setSelectedBatches(batchList.map(String));
+      } else if (batchList !== undefined && batchList !== null && String(batchList).trim() !== "") {
+        setSelectedBatches([String(batchList)]);
       }
-
+      
       if (Array.isArray(access.students)) {
         setSelectedRowKeys(access.students);
       } else if (typeof access.students === "string" && access.students) {
         setSelectedRowKeys([access.students]);
-      } else {
-        setSelectedRowKeys([]);
       }
     }
   }, [SingleTest?.access]);
@@ -213,56 +305,31 @@ const Accesspage = () => {
           <div className={AccessStyles.toggleGroup}>
             <button
               className={accessType === "all" ? AccessStyles.active : ""}
-              onClick={() => {
-                setAccessType("all");
-                setSelectedDepartments([]);
-                setSelectedBatches([]);
-                setSelectedRowKeys([]);
-              }}
+              onClick={() => setAccessType("all")}
             >
               All Users
             </button>
             <button
               className={accessType === "department" ? AccessStyles.active : ""}
-              onClick={() => {
-                setAccessType("department");
-                setSelectedDepartments([]);
-                setSelectedBatches([]);
-                setSelectedRowKeys([]);
-              }}
+              onClick={() => setAccessType("department")}
             >
               Department
             </button>
             <button
               className={accessType === "batch" ? AccessStyles.active : ""}
-              onClick={() => {
-                setAccessType("batch");
-                setSelectedDepartments([]);
-                setSelectedBatches([]);
-                setSelectedRowKeys([]);
-              }}
+              onClick={() => setAccessType("batch")}
             >
               Batch
             </button>
             <button
               className={accessType === "department_batch" ? AccessStyles.active : ""}
-              onClick={() => {
-                setAccessType("department_batch");
-                setSelectedDepartments([]);
-                setSelectedBatches([]);
-                setSelectedRowKeys([]);
-              }}
+              onClick={() => setAccessType("department_batch")}
             >
               Department & Batch
             </button>
             <button
               className={accessType === "student" ? AccessStyles.active : ""}
-              onClick={() => {
-                setAccessType("student");
-                setSelectedDepartments([]);
-                setSelectedBatches([]);
-                setSelectedRowKeys([]);
-              }}
+              onClick={() => setAccessType("student")}
             >
               Specific Students
             </button>
@@ -275,41 +342,24 @@ const Accesspage = () => {
                 allowClear
                 style={{ width: "100%", maxWidth: "360px" }}
                 value={selectedDepartments}
-                options={
-                  (Array.isArray(departments?.value)
-                    ? departments.value
-                    : Array.isArray(departments?.value?.data)
-                    ? departments.value.data
-                    : []
-                  ).map((e) => ({
-                    label: e?.title,
-                    value: e?._id,
-                  }))
-                }
-                onChange={(selectedIds) => setSelectedDepartments(selectedIds)}
+                options={getDepartmentOptions()}
+                onChange={(selectedIds) => setSelectedDepartments(selectedIds.map(String))}
                 placeholder="Select Departments"
               />
             )}
 
             {accessType === "batch" && (
               <Select
-                mode="multiple"
+                mode="tags"
                 allowClear
                 style={{ width: "100%", maxWidth: "360px" }}
                 value={selectedBatches}
-                options={
-                  (Array.isArray(batches?.value)
-                    ? batches.value
-                    : Array.isArray(batches?.value?.data)
-                    ? batches.value.data
-                    : []
-                  ).map((e) => ({
-                    label: e?.yearOfPassing,
-                    value: e?.yearOfPassing,
-                  }))
-                }
-                onChange={(selectedYears) => setSelectedBatches(selectedYears)}
-                placeholder="Select Batch Years"
+                options={getBatchOptions()}
+                onChange={(selectedYears) => {
+                  const cleanYears = selectedYears.map((y) => String(y).trim()).filter(Boolean);
+                  setSelectedBatches(cleanYears);
+                }}
+                placeholder="Select or enter Batch Years (e.g. 2024, 2025)"
               />
             )}
 
@@ -322,38 +372,21 @@ const Accesspage = () => {
                     allowClear
                     style={{ width: "100%", maxWidth: "280px" }}
                     value={selectedDepartments}
-                    options={
-                      (Array.isArray(departments?.value)
-                        ? departments.value
-                        : Array.isArray(departments?.value?.data)
-                        ? departments.value.data
-                        : []
-                      ).map((e) => ({
-                        label: e?.title,
-                        value: e?._id,
-                      }))
-                    }
-                    onChange={(selectedIds) => setSelectedDepartments(selectedIds)}
+                    options={getDepartmentOptions()}
+                    onChange={(selectedIds) => setSelectedDepartments(selectedIds.map(String))}
                     placeholder="Select Departments"
                   />
                   <Select
-                    mode="multiple"
+                    mode="tags"
                     allowClear
                     style={{ width: "100%", maxWidth: "280px" }}
                     value={selectedBatches}
-                    options={
-                      (Array.isArray(batches?.value)
-                        ? batches.value
-                        : Array.isArray(batches?.value?.data)
-                        ? batches.value.data
-                        : []
-                      ).map((e) => ({
-                        label: e?.yearOfPassing,
-                        value: e?.yearOfPassing,
-                      }))
-                    }
-                    onChange={(selectedYears) => setSelectedBatches(selectedYears)}
-                    placeholder="Select Batch Years"
+                    options={getBatchOptions()}
+                    onChange={(selectedYears) => {
+                      const cleanYears = selectedYears.map((y) => String(y).trim()).filter(Boolean);
+                      setSelectedBatches(cleanYears);
+                    }}
+                    placeholder="Select or enter Batch Years (e.g. 2024, 2025)"
                   />
                 </div>
               </div>

@@ -50,6 +50,7 @@ import {
   DeleteOutlined,
   UploadOutlined,
   CloseCircleOutlined,
+  CloseOutlined,
   DatabaseOutlined,
   OrderedListOutlined,
   CodeOutlined,
@@ -307,9 +308,7 @@ const QuestionManager = () => {
             <div className={QuestionStyles.header}>
               <div>
                 <CaretRightOutlined
-                  className={`${QuestionStyles.accordianArrow} ${activePanel.find((e) => e == question._id) &&
-                    QuestionStyles.activeAccordianArrow
-                    }`}
+                  className={`${QuestionStyles.accordianArrow} ${(Array.isArray(activePanel) ? activePanel.includes(question._id) : activePanel === question._id) ? QuestionStyles.activeAccordianArrow : ""}`}
                 />
                 <input
                   type="checkbox"
@@ -332,15 +331,16 @@ const QuestionManager = () => {
                   <strong>Score:</strong>{" "}
                   {parseInt(
                     question?.scoreSettings?.pointsForCorrectAns ||
-                    question?.scoreSettings?.PointsForEachCorrectAnswer
+                    question?.scoreSettings?.PointsForEachCorrectAnswer ||
+                    0
                   )}
                 </button>
 
                 {question?.questionCategory?.length > 0 &&
                   (question?.questionCategory.length > 1 ? (
                     <Popover
-                      content={question?.questionCategory.map((e) => (
-                        <p style={{ fontSize: ".8rem", fontWeight: "700" }}>
+                      content={question?.questionCategory.map((e, idx) => (
+                        <p key={idx} style={{ fontSize: ".8rem", fontWeight: "700" }}>
                           {e.name}
                         </p>
                       ))}
@@ -351,21 +351,21 @@ const QuestionManager = () => {
                       placement="bottom"
                     >
                       <button>
-                        <strong>Tag : </strong>{" "}
+                        <strong>Tag:</strong>{" "}
                         {question?.questionCategory[0]?.name}
-                        &nbsp;&nbsp;&nbsp;
+                        &nbsp;
                         {`+${question?.questionCategory.length - 1}`}
                       </button>
                     </Popover>
                   ) : (
                     <button>
-                      <strong>Tag : </strong>{" "}
+                      <strong>Tag:</strong>{" "}
                       {question?.questionCategory[0]?.name}
                     </button>
                   ))}
                 {question?.questionType && (
                   <button>
-                    <strong>Type :</strong> {question?.questionType}
+                    <strong>Type:</strong> {question?.questionType}
                   </button>
                 )}
               </div>
@@ -1119,54 +1119,20 @@ const QuestionManager = () => {
           open={questionBankModal}
           onCancel={() => setQuestionBankModal(false)}
           width={1000}
-          closeIcon={
-            <img
-              width={"20rem"}
-              src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
-              alt="close"
-            />
-          }
+          closeIcon={<CloseOutlined style={{ fontSize: "16px", color: "#64748b" }} />}
           footer={null}
         >
-          <Select
-            mode="multiple"
-            allowClear
-            style={{ width: "100%" }}
-            placeholder="Please select tests"
-            onChange={(value) => setSelectedTests(value)}
-          >
-            {allTests?.map((test) => (
-              <Select.Option key={test._id} value={test._id}>
-                {test.title}
-              </Select.Option>
-            ))}
-          </Select>
-        </Modal>
+          <section className={QuestionStyles.modal_maincont}>
+            <div className={QuestionStyles.modal_header}>
+              <div className={QuestionStyles.searchCon}>
+                <HiSearch size={20} />
 
-      <Modal
-        title="Question Bank"
-        open={questionBankModal}
-        onCancel={() => setQuestionBankModal(false)}
-        width={1000}
-        closeIcon={
-          <img
-            width={"20rem"}
-            src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
-            alt="close"
-          />
-        }
-        footer={null}
-      >
-        <section className={QuestionStyles.modal_maincont}>
-          <div className={QuestionStyles.modal_header}>
-            <div className={QuestionStyles.searchCon}>
-              <HiSearch size={20} />
-
-              <input
-                placeholder="Search Questions"
-                onClick={(e) => setSearchBarInputValueBank(e.target.value)}
-              />
-            </div>
+                <input
+                  placeholder="Search Questions"
+                  value={searchBarInputValueBank}
+                  onChange={(e) => setSearchBarInputValueBank(e.target.value)}
+                />
+              </div>
             <div className={QuestionStyles.filterings}>
               <Select
                 className={QuestionStyles.Select_tag}
@@ -1547,13 +1513,7 @@ const QuestionManager = () => {
         destroyOnHidden={true}
         title="Generate using AI"
         footer={null}
-        closeIcon={
-          <img
-            width={"20rem"}
-            src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
-            alt="close"
-          />
-        }
+        closeIcon={<CloseOutlined style={{ fontSize: "16px", color: "#64748b" }} />}
       >
         {generatedQuestions?.length > 0 && isGenerated ? (
           <div className={QuestionStyles.generatedQuestions}>

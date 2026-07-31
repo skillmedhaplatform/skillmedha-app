@@ -329,13 +329,18 @@ export default function TestCard({
 
   let rawDesc = parseIfJson(parseIfJson(testData?.shortDescription || "")) || "";
   let cleanDesc = String(rawDesc)
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&#34;/gi, '"')
+    .replace(/<\/(p|div|h[1-6]|li|section|article)>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, ' ')
     .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+    .replace(/^["'\s]+|["'\s]+$/g, '')
+    .replace(/\s+/g, ' ')
     .trim();
   let firstSentence = cleanDesc;
   if (firstSentence.includes('.')) {
@@ -441,8 +446,8 @@ export default function TestCard({
           </span>
           <strong className="text-[#1a3b8b] text-[15px] font-bold leading-tight uppercase truncate">
             {isAssessment 
-              ? (testData?.testDurationDisplay?.hours || testData?.testDurationDisplay?.minutes ? `${testData?.testDurationDisplay?.hours || 0}H : ${testData?.testDurationDisplay?.minutes || 0}M` : "NA")
-              : (testDuration?.val1 || testDuration?.val2 ? `${testDuration?.val1 || 0}H : ${testDuration?.val2 || 0}M` : "NA")}
+              ? (testData?.testDurationDisplay?.hours || testData?.testDurationDisplay?.minutes ? `${String(testData?.testDurationDisplay?.hours || 0).padStart(2, '0')}H : ${String(testData?.testDurationDisplay?.minutes || 0).padStart(2, '0')}M` : "NA")
+              : (testDuration && (testDuration.val1 !== undefined || testDuration.val2 !== undefined) ? `${String(testDuration.val1 ?? 0).padStart(2, '0')}H : ${String(testDuration.val2 ?? 0).padStart(2, '0')}M` : "NA")}
           </strong>
         </div>
         {!isAssessment && (

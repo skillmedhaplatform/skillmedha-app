@@ -293,7 +293,37 @@ const About = () => {
   };
   // Helpers for Preview card
   const stripHtml = (html = "") => {
-    return html.replace(/<[^>]*>/g, "");
+    if (!html || typeof html !== "string") return "";
+    let str = html;
+
+    for (let i = 0; i < 2; i++) {
+      if (typeof str === "string" && (str.startsWith('"') || str.startsWith('{') || str.startsWith('['))) {
+        try {
+          const parsed = JSON.parse(str);
+          if (typeof parsed === "string") str = parsed;
+        } catch (e) {}
+      }
+    }
+
+    str = str
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/&#34;/gi, '"');
+
+    str = str
+      .replace(/<\/(p|div|h[1-6]|li|section|article)>/gi, " ")
+      .replace(/<br\s*\/?>/gi, " ");
+
+    str = str.replace(/<[^>]*>/g, "");
+
+    return str
+      .replace(/^["'\s]+|["'\s]+$/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   };
 
   const calculateTotalMarks = () => {
@@ -328,8 +358,14 @@ const About = () => {
 
   const getDurationText = () => {
     const duration = SingleTest?.time?.testDuration?.testDuration?.duration;
-    if (duration?.val1 && duration?.val2) {
-      return `${String(duration.val1).padStart(2, "0")}H:${String(duration.val2).padStart(2, "0")}M`;
+    if (
+      duration &&
+      (duration.val1 !== undefined || duration.val2 !== undefined) &&
+      (duration.val1 !== "" || duration.val2 !== "")
+    ) {
+      const h = String(duration.val1 ?? "00").replace(/\s/g, "").padStart(2, "0");
+      const m = String(duration.val2 ?? "00").replace(/\s/g, "").padStart(2, "0");
+      return `${h}H:${m}M`;
     }
     return "00H:30M";
   };
