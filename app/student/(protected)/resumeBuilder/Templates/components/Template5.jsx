@@ -18,8 +18,10 @@ const Template1 = ({ downloadImage, setDownloadImage, resumeTemplateRef, activeS
   const educationDetails = useSelector((state) => state.student.student?.data?.educationDetails) || [];
   const experienceDetails = useSelector((state) => state.student.student?.data?.experiences) || [];
   const projectDetails = useSelector((state) => state.student.student?.data?.projects) || [];
-  const skillss = useSelector((state) => state.student.student?.data?.technical) || [];
-  const lang = useSelector((state) => state.student.student?.data?.languages) || [];
+  const rawSkills = useSelector((state) => state.student.student?.data?.technical) || [];
+  const skillss = rawSkills.map(s => typeof s === 'object' && s !== null ? s.name + (s.level ? ` - ${s.level}` : '') : s).filter(Boolean);
+  const rawLang = useSelector((state) => state.student.student?.data?.languages) || [];
+  const lang = rawLang.map(l => typeof l === 'object' && l !== null ? l.name + (l.level ? ` - ${l.level}` : '') : l).filter(Boolean);
   const linkList = useSelector((state) => state.student.student?.data?.links) || [];
   const volunteeringList = useSelector((state) => state.student.student?.data?.volunteerings) || [];
   const certificatesList = useSelector((state) => state.student.student?.data?.certificates) || [];

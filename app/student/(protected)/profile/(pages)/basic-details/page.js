@@ -74,15 +74,20 @@ export default function StudentProfileForm() {
   const validatePhoneNumber = (value) => {
     if (!value) return "";
 
-    // Indian phone number: +91 followed by 10 digits
-    const phoneRegex = /^\+91[6-9]\d{9}$/;
-
-    if (value.length < 13) {
-      return "Phone number must be 13 characters (+91xxxxxxxxxx)";
-    }
-
-    if (!phoneRegex.test(value)) {
-      return "Invalid phone format. Use +91xxxxxxxxxx (must start with 6-9)";
+    // If it's an Indian number, enforce strict 10-digit validation
+    if (value.startsWith("+91")) {
+      const phoneRegex = /^\+91[6-9]\d{9}$/;
+      if (value.length < 13) {
+        return "Please enter a valid 10-digit mobile number";
+      }
+      if (!phoneRegex.test(value)) {
+        return "Invalid phone format. Must start with 6-9 for India";
+      }
+    } else {
+      // General validation for other international numbers
+      if (value.length < 8) {
+        return "Please enter a valid phone number";
+      }
     }
 
     return "";
@@ -95,7 +100,7 @@ export default function StudentProfileForm() {
     let processedValue = value;
 
     if (name === "phone" || name === "alternatePhone") {
-      processedValue = value.replace(/[^\d+]/g, "").slice(0, 13);
+      processedValue = value.replace(/[^\d+]/g, "").slice(0, 16);
       const error = validatePhoneNumber(processedValue);
       if (name === "phone") setPhoneError(error);
     }
@@ -443,7 +448,10 @@ export default function StudentProfileForm() {
           <PhoneInput
             country={'in'}
             value={formData?.[field.name] ?? ""}
-            onChange={(phone) => handleChange({ target: { name: field.name, value: phone } })}
+            onChange={(phone) => {
+              const formattedPhone = phone.startsWith('+') ? phone : '+' + phone;
+              handleChange({ target: { name: field.name, value: formattedPhone } });
+            }}
             disabled={!isEditing || field.disable}
             inputProps={{
               name: field.name,
@@ -493,7 +501,7 @@ export default function StudentProfileForm() {
           <p className={formStyles.formSubtitle}>Update your basic details and address information below</p>
         </div>
         <div className={formStyles.editButtonContainer}>
-          <Button 
+          <Button
             onClick={toggleEdit}
             className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
             style={{ fontWeight: '600', borderRadius: '8px', padding: '4px 16px' }}

@@ -366,19 +366,7 @@ export default function MobileLibraryPage({
         )}
       </div>
 
-      {/* ---- Pagination ---- */}
-      {paginationData && paginationData.totalLength > 0 && !loading && (
-        <div className={styles.paginationWrapper}>
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={paginationData.totalLength}
-            onChange={handlePageChange}
-            size="small"
-            showSizeChanger={false}
-          />
-        </div>
-      )}
+      {/* ---- Pagination Removed ---- */}
 
       {/* ---- Info Modal ---- */}
       <Modal

@@ -260,7 +260,13 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
     });
   }, [rawCartItems, idPrefix]);
   
-  const cartTotalAmount = useSelector((state) => state.cart?.totalAmount ?? 0);
+  const cartTotalAmount = useMemo(() => {
+    return cartItems.reduce((sum, item) => {
+      const course = item.courseId || {};
+      const price = item.discountedPrice ?? item.price ?? course.discountedPrice ?? course.price ?? 0;
+      return sum + Number(price);
+    }, 0);
+  }, [cartItems]);
   const cartLoading = useSelector((state) => state.cart?.loading ?? false);
   const cartPendingIds = useSelector((state) => state.cart?.pendingIds ?? []);
   const [cartOpen, setCartOpen] = useState(false);
@@ -297,7 +303,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   };
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
-  const pageSize = parseInt(searchParams.get("limit") || "6", 10);
+  const pageSize = parseInt(searchParams.get("limit") || "1000", 10);
   const urlSearch = searchParams.get("search") || "";
   const urlCategory = searchParams.get("category") || "";
   const urlDifficulty = searchParams.get("difficulty") || "";
@@ -401,6 +407,10 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   // safeItems = my courses (enrolled)
   const safeItems = Array.isArray(items) ? items : [];
 
+  const myCoursesIds = useMemo(() => {
+    return new Set(safeItems.map((c) => c._id || c.courseId?._id));
+  }, [safeItems]);
+
   // safeAllItems = all courses from getAllCoursesOnly API: response is { data: [...], hasNext: bool }
   // allItems in redux is already payload.data (array) after slice handles it
   const safeAllItems = Array.isArray(allItems) ? allItems : [];
@@ -447,15 +457,20 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
 
     // Apply Sorting
     if (urlSort !== "default") {
+      const getFinalPrice = (item) => {
+        const originalPrice = Number(item?.pricing?.originalPrice) || Number(item?.price) || 0;
+        return Number(item?.pricing?.finalPrice) || Number(item?.pricing?.currentPrice) || originalPrice;
+      };
+
       pool = [...pool].sort((a, b) => {
         if (urlSort === "a-z") {
           return (a.title || "").localeCompare(b.title || "");
         }
         if (urlSort === "price-low") {
-          return (a.price || 0) - (b.price || 0);
+          return getFinalPrice(a) - getFinalPrice(b);
         }
         if (urlSort === "price-high") {
-          return (b.price || 0) - (a.price || 0);
+          return getFinalPrice(b) - getFinalPrice(a);
         }
         return 0;
       });
@@ -713,7 +728,10 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                handleClearAll();
+              }}
               className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer ${
                 activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"
               }`}
@@ -820,10 +838,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
             </div>
           ) : (
             (() => {
-              const isClientPaginated = activeTab === "wishlist" || activeTab === "all";
-              const displayItems = isClientPaginated 
-                ? filteredTabItems.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-                : filteredTabItems;
+              const displayItems = filteredTabItems;
               
               return displayItems.map((item, index) => {
                 const fetchedProgress = progressById[item._id];
@@ -970,7 +985,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                             nav.push(getItemUrl(item)); 
                           } else {
                             if (!inCart) handleAddToCart(item);
-                            else nav.push("/student/cart");
+                            else setCartOpen(true);
                           }
                         }}
                       >
@@ -1009,6 +1024,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                       isInWishlist={inWishlist}
                       cartLoading={isCartLoading}
                       wishlistLoading={isWishlistLoading}
+                      isEnrolled={isEnrolled}
                     />
                   }
                 >
@@ -1020,30 +1036,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
           )}
         </div>
 
-        {/* Pagination */}
-        {(() => {
-          let total = 0;
-          if (activeTab === "my" && paginationData) total = paginationData.totalLength;
-          else if (activeTab === "all" && allPaginationData) total = allPaginationData.totalLength;
-          else if (activeTab === "wishlist") total = wishlistItems.length;
-          else total = filteredTabItems.length;
-          
-          if (total > 0 && !loading && activeTab !== "recent") {
-            return (
-              <div className="w-full z-10 py-6 flex justify-center mt-6">
-                <Pagination
-                  current={currentPage}
-                  pageSize={pageSize}
-                  total={total}
-                  onChange={handlePageChange}
-                  showSizeChanger={false}
-                  pageSizeOptions={["6"]}
-                />
-              </div>
-            );
-          }
-          return null;
-        })()}
+        {/* Pagination Removed */}
       </div>
 
       {/* Info Modal */}
@@ -1086,6 +1079,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
           items={wishlistItems}
           loading={wishlistLoading}
           cartIds={cartIdSet}
+          enrolledIds={myCoursesIds}
         />
       )}
 

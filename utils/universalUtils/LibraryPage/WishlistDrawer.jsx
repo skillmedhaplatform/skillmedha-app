@@ -16,7 +16,7 @@ import { message } from "antd";
  *  loading       {boolean}
  *  cartIds       {Set}     — Set of courseId strings already in cart
  */
-const WishlistDrawer = ({ open, onClose, items = [], loading, cartIds = new Set() }) => {
+const WishlistDrawer = ({ open, onClose, items = [], loading, cartIds = new Set(), enrolledIds = new Set() }) => {
   const dispatch = useDispatch();
 console.log(items)
   const handleRemove = async (courseId) => {
@@ -183,16 +183,22 @@ console.log(items)
 
                   {/* Actions */}
                   <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-                    <Button
-                      size="small"
-                      type={inCart ? "default" : "primary"}
-                      icon={<ShoppingCartOutlined />}
-                      onClick={() => handleMoveToCart(courseId)}
-                      style={{ fontSize: 12, flex: 1 }}
-                      disabled={inCart}
-                    >
-                      {inCart ? "In Cart" : "Move to Cart"}
-                    </Button>
+                    {enrolledIds?.has(courseId) ? (
+                      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#16a34a", fontWeight: 600, fontSize: 12, background: "#f0fdf4", border: "1px solid #4ade80", borderRadius: 6 }}>
+                        ✓ Enrolled
+                      </div>
+                    ) : (
+                      <Button
+                        size="small"
+                        type={inCart ? "default" : "primary"}
+                        icon={<ShoppingCartOutlined />}
+                        onClick={() => handleMoveToCart(courseId)}
+                        style={{ fontSize: 12, flex: 1 }}
+                        disabled={inCart}
+                      >
+                        {inCart ? "In Cart" : "Move to Cart"}
+                      </Button>
+                    )}
                     <Button
                       size="small"
                       danger

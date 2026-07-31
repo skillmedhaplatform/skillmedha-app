@@ -23,8 +23,8 @@ const Page = () => {
       title: "Company Name",
       key: "companyName",
       render: (_, record) => {
-        // Extract company name from jobDetails
-        const companyName = record?.jobDetails?.companyName || "N/A";
+        // Extract company name from jobDetails or root
+        const companyName = record?.jobDetails?.companyName || record?.companyName || record?.company || "N/A";
         return <Text>{companyName}</Text>;
       },
       width: 130,
@@ -33,7 +33,7 @@ const Page = () => {
       title: "Job Title",
       key: "jobTitle",
       render: (_, record) => {
-        const jobTitle = record?.jobDetails?.jobTitle || "N/A";
+        const jobTitle = record?.jobDetails?.jobTitle || record?.jobTitle || record?.title || record?.profileName || record?.jobDetails?.profileName || "N/A";
         return <Text>{jobTitle}</Text>;
       },
       width: 130,
@@ -68,30 +68,66 @@ const Page = () => {
       width: 100,
     },
     {
-      title: "Interview Date & Time",
-      key: "interviewDateTime",
+      title: "Interview Details",
+      key: "interviewDetails",
       render: (_, record) => {
-        if (record?.interviewDetails) {
-          const { date, time } = record.interviewDetails;
+        let interviewDetails = record?.interviewDetails;
+        
+        // Fallback to checking the root job details
+        if (!interviewDetails && record?.jobDetails?.scheduledInterviews) {
+          const globalIdStr = studentDetails?.globalId || studentId;
+          interviewDetails = record.jobDetails.scheduledInterviews.find(
+            (i) => i.studentId === studentId || i.studentId === globalIdStr
+          );
+        }
+
+        if (interviewDetails) {
+          const { date, time, type } = interviewDetails;
+          
+          let formattedDate = date;
+          let formattedTime = time;
+          
+          if (date && date.includes('-')) {
+            const [year, month, day] = date.split('-');
+            formattedDate = `${day}-${month}-${year}`;
+          }
+          
+          if (time && time.includes(':')) {
+            const [hourStr, minute] = time.split(':');
+            const hour = parseInt(hourStr, 10);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const formattedHour = hour % 12 || 12;
+            const paddedHour = formattedHour.toString().padStart(2, '0');
+            formattedTime = `${paddedHour}:${minute} ${ampm}`;
+          }
+          
+          const typeFormatted = type ? type.charAt(0).toUpperCase() + type.slice(1) : "";
+
           return (
             <div>
-              <Text strong>{date}</Text>
-              <br />
-              <Text type="secondary">{time}</Text>
+              <Text strong>{formattedDate}</Text>
+              <Text type="secondary" style={{ marginLeft: 8 }}>{formattedTime}</Text>
+              {typeFormatted && (
+                <div style={{ marginTop: 4 }}>
+                  <Tag color={type === 'online' ? 'blue' : 'orange'}>{typeFormatted}</Tag>
+                </div>
+              )}
             </div>
           );
         }
-        return <Text type="secondary">N/A</Text>;
+        return <Text type="secondary" italic style={{ fontSize: "0.85rem" }}>Will be updated soon</Text>;
       },
       width: 100,
     },
   ];
 
   // Clean data source - pass the original record structure
-  const dataSource = appliedJobs.map((job, index) => ({
-    ...job, // Keep all original data
-    key: job.id || index,
-  }));
+  const dataSource = appliedJobs.map((job, index) => {
+    return {
+      ...job, // Keep all original data
+      key: job.id || index,
+    };
+  });
 
   // Loading state
   if (!studentDetails) {
