@@ -6,6 +6,7 @@ import SocketComp from "./socket";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import FormPage from "./utils/formPage";
 import { v4 as uuid } from "uuid";
+import { CloseOutlined } from "@ant-design/icons";
 import { Button, Checkbox, message, Modal, notification, Skeleton } from "antd";
 import axios from "axios";
 import Image from "next/image";
@@ -55,13 +56,7 @@ const CaptureModal = memo(function CaptureModal(props) {
       onCancel={onCancel}
       footer={null}
       width={900}
-      closeIcon={
-        <img
-          width={"20rem"}
-          src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
-          alt="close"
-        />
-      }
+      closeIcon={<CloseOutlined style={{ fontSize: "16px", color: "#64748b" }} />}
       destroyOnHidden={true}
       centered={true}
     >

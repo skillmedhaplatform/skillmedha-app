@@ -118,10 +118,10 @@ export default function ProfileLayout({ children, activeView, setView }) {
       USER_DETAILS?.institutionDetails?.principalContact,
       USER_DETAILS?.institutionDetails?.principalEmail,
       USER_DETAILS?.institutionDetails?.institutionLogo,
-      // Accreditations and Ranking
-      USER_DETAILS?.accreditationDetails?.naacGradeCycle,
-      USER_DETAILS?.accreditationDetails?.nbaStatus,
-      USER_DETAILS?.accreditationDetails?.nirfRanking,
+      // Accreditations and Ranking (now in Institution Details)
+      USER_DETAILS?.institutionDetails?.naacGradeCycle,
+      USER_DETAILS?.institutionDetails?.nbaStatus,
+      USER_DETAILS?.institutionDetails?.nirfRanking,
       // TPO Support Team Details
       USER_DETAILS?.tpoSupportTeamDetails?.placementOffice?.name,
       USER_DETAILS?.tpoSupportTeamDetails?.placementOffice?.contact,
@@ -143,8 +143,6 @@ export default function ProfileLayout({ children, activeView, setView }) {
         return <FaUser />;
       case "institution details":
         return <FaBuilding />;
-      case "accreditations and ranking":
-        return <FaAward />;
       case "tpo support team details":
         return <FaUserFriends />;
       case "placement cell mous":

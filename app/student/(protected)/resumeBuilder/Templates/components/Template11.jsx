@@ -6,6 +6,7 @@ import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_c
 import {
   asHtmlString,
   normalizeExternalLink,
+  useProfileImage,
   useResumeTemplateData,
 } from "./resumeTemplateData";
 
@@ -27,6 +28,7 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
     languages,
     links,
   } = useResumeTemplateData();
+  const profileBase64 = useProfileImage(basicDetails?.profile);
 
   const sectionState = (sectionName) =>
     activeSection === sectionName ? "bg-[#f5f3ff] rounded-md" : "";
@@ -48,9 +50,17 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
         id="section-Basic-Details"
         className={`flex items-center gap-4 pb-6 p-4 -m-4 scroll-mt-8 ${sectionState("Basic Details")}`}
       >
-        <span className="w-14 h-14 rounded-full bg-[#5b21b6] text-white flex items-center justify-center text-[1.1rem] font-bold shrink-0">
-          {initials || "?"}
-        </span>
+        {profileBase64 ? (
+          <img
+            src={profileBase64}
+            alt="profile"
+            className="w-14 h-14 rounded-full object-cover shrink-0"
+          />
+        ) : (
+          <span className="w-14 h-14 rounded-full bg-[#5b21b6] text-white flex items-center justify-center text-[1.1rem] font-bold shrink-0">
+            {initials || "?"}
+          </span>
+        )}
         <div>
           <h1 className="m-0 text-[1.7rem] font-bold text-[#18181b]">
             {basicDetails?.firstName} {basicDetails?.middleName} {basicDetails?.lastName}

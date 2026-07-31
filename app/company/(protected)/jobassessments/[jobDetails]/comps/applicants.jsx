@@ -124,7 +124,7 @@ import StudentCard from "@/app/company/(protected)/skillsets/components/candidat
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import applicantStyles from "./styles/applicants.module.scss";
-import { DatePicker, Input, Button, Checkbox, Empty, Pagination } from "antd";
+import { DatePicker, Input, Button, Checkbox, Empty } from "antd";
 import dayjs from "dayjs";
 import {
   getAllAppliedStudents,
@@ -249,9 +249,7 @@ const Applicants = () => {
     setPageSize(newPageSize);
   };
 
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentApplicants = appliedStudents?.slice(startIndex, endIndex) || [];
+  const currentApplicants = appliedStudents || [];
 
   return (
     <div className={applicantStyles.container}>
@@ -363,18 +361,6 @@ const Applicants = () => {
         )}
       </div>
 
-      {appliedStudents?.length > 0 && (
-        <div style={{ marginTop: "2rem", display: "flex", justifyContent: "flex-end" }}>
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={appliedStudents.length}
-            onChange={onPageChange}
-            showSizeChanger
-            pageSizeOptions={['4', '10', '20', '50']}
-          />
-        </div>
-      )}
     </div>
   );
 };

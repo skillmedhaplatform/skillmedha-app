@@ -12,6 +12,7 @@ const BuyNowPopoverContent = ({
   isInWishlist = false,
   cartLoading = false,
   wishlistLoading = false,
+  isEnrolled = false,
 }) => {
   const originalPrice = Number(item?.pricing?.originalPrice) || Number(item?.price) || 0;
   const finalPrice =
@@ -33,7 +34,7 @@ const BuyNowPopoverContent = ({
         ? "#f59e0b"
         : "#22c55e";
 
-  const isPurchased = item?.isPurchased || item?.isEnrolled;
+  const isPurchased = item?.isPurchased || item?.isEnrolled || isEnrolled;
   const isFree = item?.price === 0 || item?.isFree;
 
   return (
@@ -218,7 +219,17 @@ const BuyNowPopoverContent = ({
         )}
 
         {isPurchased && (
-          <div style={{ marginTop: 10, textAlign: "center", color: "#16a34a", fontWeight: 700, fontSize: 13 }}>
+          <div style={{ 
+            marginTop: 12, 
+            textAlign: "center", 
+            color: "#16a34a", 
+            fontWeight: 700, 
+            fontSize: 14,
+            background: "#f0fdf4",
+            border: "1px solid #4ade80",
+            borderRadius: 8,
+            padding: "10px 16px"
+          }}>
             ✓ Already Enrolled
           </div>
         )}

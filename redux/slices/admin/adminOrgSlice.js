@@ -115,6 +115,35 @@ const OrgSlice = createSlice({
       state.orgs.error = action.error.message;
     });
 
+    // toggleOrganizationStatus
+    builder.addCase(toggleOrganizationStatus.fulfilled, (state, action) => {
+      // Find the org in state and update its active status
+      const orgId = action.meta.arg.orgId;
+      const active = action.meta.arg.active;
+      const org = state.orgs.value.find((o) => o.orgId === orgId);
+      if (org) {
+        org.active = active;
+      }
+    });
+
+    // toggleTpoStatus
+    builder.addCase(toggleTpoStatus.fulfilled, (state, action) => {
+      const { tpoId, active } = action.payload;
+      const tpo = state.tpos.value.find((t) => t.globalId === tpoId || t._id === tpoId);
+      if (tpo) {
+        tpo.active = active;
+      }
+    });
+
+    // getAllDepartmentsFromOrgs
+    builder.addCase(toggleHrStatus.fulfilled, (state, action) => {
+      const { hrId, active } = action.payload;
+      const hrUser = state.users.value.find((t) => t.globalId === hrId || t._id === hrId);
+      if (hrUser) {
+        hrUser.active = active;
+      }
+    });
+
     // getAllDepartmentsFromOrgs
     builder.addCase(getAllDepartmentsFromOrgs.pending, (state) => {
       state.departments.loading = true;
@@ -611,6 +640,78 @@ export const updateOrganisationAILimit = createAsyncThunk(
       return data;
     } catch (error) {
       return rejectWithValue(error.message);
+    }
+  }
+);
+export const toggleOrganizationStatus = createAsyncThunk(
+  "org/toggleOrganizationStatus",
+  async ({ orgId, active }, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.put(
+        `${restUrl}/toggleOrganizationStatus/${orgId}`,
+        { active },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getLstorage("jwtToken")}`,
+          },
+        }
+      );
+      return data;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.err ||
+        error.message ||
+        "Error toggling organization status";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+export const toggleTpoStatus = createAsyncThunk(
+  "org/toggleTpoStatus",
+  async ({ tpoId, active }, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.put(
+        `${restUrl}/toggleTpoStatus/${tpoId}`,
+        { active },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getLstorage("jwtToken")}`,
+          },
+        }
+      );
+      return { data, tpoId, active };
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.err ||
+        error.message ||
+        "Error toggling TPO status";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+export const toggleHrStatus = createAsyncThunk(
+  "org/toggleHrStatus",
+  async ({ hrId, active }, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.put(
+        `${restUrl}/toggleHrStatus/${hrId}`,
+        { active },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getLstorage("jwtToken")}`,
+          },
+        }
+      );
+      return { data, hrId, active };
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.err ||
+        error.message ||
+        "Error toggling HR status";
+      return rejectWithValue(errorMessage);
     }
   }
 );

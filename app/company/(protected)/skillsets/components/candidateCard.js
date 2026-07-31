@@ -134,8 +134,8 @@ const StudentCard = ({
 
           const mmYyyyMatch = dateStr.match(/^(\d{2})\/(\d{4})$/);
           if (mmYyyyMatch) {
-            const month = parseInt(mmYyyyMatch[9]) - 1;
-            const year = parseInt(mmYyyyMatch);
+            const month = parseInt(mmYyyyMatch[1], 10) - 1;
+            const year = parseInt(mmYyyyMatch[2], 10);
             return new Date(year, month, 1);
           }
 

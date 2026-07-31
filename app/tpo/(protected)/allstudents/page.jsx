@@ -57,13 +57,9 @@ export default function Page() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (departmentStatus !== "sucess" && departmentStatus !== "loading") {
-      dispatch(getAllDepartments());
-    }
-    if (studentsStatus !== "succeeded" && studentsStatus !== "loading") {
-      dispatch(fetchAllStudents({}));
-    }
-  }, [dispatch, departmentStatus, studentsStatus]);
+    dispatch(getAllDepartments());
+    dispatch(fetchAllStudents({}));
+  }, [dispatch]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -78,15 +74,31 @@ export default function Page() {
           (d) => d?._id === departmentId
         );
         if (departmentDetails) {
-          setInputChange({ ...departmentDetails });
+          let cleanMobile = (departmentDetails.mobile || "").replace(/\D/g, "");
+          if (cleanMobile.length > 10) cleanMobile = cleanMobile.slice(-10);
+          setInputChange({ ...departmentDetails, mobile: cleanMobile });
           setIsModalOpen(true);
         }
         return;
       case "DELETE":
-        handleDeleteDepartment(departmentId);
+        Modal.confirm({
+          title: "Delete Department",
+          content: "Are you sure you want to delete this department? This action cannot be undone.",
+          okText: "Yes, Delete",
+          okType: "danger",
+          cancelText: "Cancel",
+          onOk: () => handleDeleteDepartment(departmentId),
+        });
         return;
       case "DELETE_ALL_STUDENTS":
-        dispatch(deleteAllStudents({ departmentId, dispatch }));
+        Modal.confirm({
+          title: "Delete All Students",
+          content: "Are you sure you want to delete all students in this department?",
+          okText: "Yes, Delete All",
+          okType: "danger",
+          cancelText: "Cancel",
+          onOk: () => dispatch(deleteAllStudents({ departmentId, dispatch })),
+        });
         return;
       case "GET":
         router.push(`/tpo/allstudents/${departmentId}`);
@@ -106,6 +118,14 @@ export default function Page() {
 
   const handleOk = (submitType) => {
     const { _id = "", ...rest } = inputChange;
+
+    if (!rest.title?.trim() || !rest.hodName?.trim() || !rest.mobile?.trim() || !rest.email?.trim()) {
+      return message.error("Please fill all required fields (Department Name, HOD, Mobile, Email)");
+    }
+
+    if (rest.mobile && rest.mobile.length > 0 && rest.mobile.length !== 10) {
+      return message.error("Mobile number must be exactly 10 digits");
+    }
 
     if (submitType === "Update") {
       dispatch(
@@ -142,7 +162,10 @@ export default function Page() {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    if (name === "mobile") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
     setInputChange((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -174,9 +197,6 @@ export default function Page() {
           if (department.active === false) return false;
         } else if (filterType === "SPOC") {
           if (!department.spoc || department.spoc === "N/A" || department.spoc.trim() === "") return false;
-        } else if (filterType === "Incomplete") {
-          const hasIncomplete = !department.hodName || department.hodName === "N/A" || !department.spoc || department.spoc === "N/A";
-          if (!hasIncomplete) return false;
         }
 
         // Search Query Filter
@@ -211,84 +231,64 @@ export default function Page() {
         onActionClick={showModal}
       />
 
-      <div className={allStudents.mainContent}>
-        {/* Department Summary Cards */}
-        <div className={allStudents.summaryGrid}>
-          <div className={`${allStudents.summaryCard} ${allStudents.deptsCard}`}>
-            <div className={`${allStudents.iconWrapper} ${allStudents.depts}`}>
-              <FaUniversity />
-            </div>
-            <div className={allStudents.summaryInfo}>
-              <span className={allStudents.summaryValue}>{departmentsCount}</span>
-              <span className={allStudents.summaryLabel}>Departments</span>
-            </div>
+      <div className={allStudents.topSectionWrapper}>
+        <div className={allStudents.leftControls}>
+          <div className={allStudents.searchInput}>
+            <Search
+              placeholder="Search by name, HOD, email or SPOC..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onSearch={handleSearch}
+              allowClear
+              onClear={() => setSearchQuery("")}
+            />
           </div>
-          <div className={`${allStudents.summaryCard} ${allStudents.studentsCard}`}>
-            <div className={`${allStudents.iconWrapper} ${allStudents.students}`}>
-              <FaUserGraduate />
-            </div>
-            <div className={allStudents.summaryInfo}>
-              <span className={allStudents.summaryValue}>{studentsCount}</span>
-              <span className={allStudents.summaryLabel}>Students registered</span>
-            </div>
-          </div>
-          <div className={`${allStudents.summaryCard} ${allStudents.spocsCard}`}>
-            <div className={`${allStudents.iconWrapper} ${allStudents.spocs}`}>
-              <FaUserTie />
-            </div>
-            <div className={allStudents.summaryInfo}>
-              <span className={allStudents.summaryValue}>{spocsCount}</span>
-              <span className={allStudents.summaryLabel}>SPOCs assigned</span>
-            </div>
+          
+          <div className={allStudents.chipsContainer}>
+            <span
+              className={`${allStudents.chip} ${filterType === "All" ? allStudents.activeChip : ""}`}
+              onClick={() => setFilterType("All")}
+            >
+              All • {departmentsCount}
+            </span>
+            <span
+              className={`${allStudents.chip} ${filterType === "Active" ? allStudents.activeChip : ""}`}
+              onClick={() => setFilterType("Active")}
+            >
+              Active
+            </span>
+            <span
+              className={`${allStudents.chip} ${filterType === "SPOC" ? allStudents.activeChip : ""}`}
+              onClick={() => setFilterType("SPOC")}
+            >
+              SPOC
+            </span>
           </div>
         </div>
 
-        {/* Search & Filter Chips Row */}
-        <div className={allStudents.searchFilterRow} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div className={allStudents.searchInput}>
-              <Search
-                placeholder="Search by name, HOD, email or SPOC..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onSearch={handleSearch}
-                allowClear
-                onClear={() => setSearchQuery("")}
-              />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div className={allStudents.miniStatsContainer}>
+            <div className={`${allStudents.miniStat} ${allStudents.deptsStat}`}>
+              <span className={allStudents.miniStatValue}>{departmentsCount}</span>
+              <span className={allStudents.miniStatLabel}>Departments</span>
             </div>
-            
-            <div className={allStudents.chipsContainer}>
-              <span
-                className={`${allStudents.chip} ${filterType === "All" ? allStudents.activeChip : ""}`}
-                onClick={() => setFilterType("All")}
-              >
-                All • {departmentsCount}
-              </span>
-              <span
-                className={`${allStudents.chip} ${filterType === "Active" ? allStudents.activeChip : ""}`}
-                onClick={() => setFilterType("Active")}
-              >
-                Active
-              </span>
-              <span
-                className={`${allStudents.chip} ${filterType === "SPOC" ? allStudents.activeChip : ""}`}
-                onClick={() => setFilterType("SPOC")}
-              >
-                SPOC
-              </span>
-              <span
-                className={`${allStudents.chip} ${filterType === "Incomplete" ? allStudents.activeChip : ""}`}
-                onClick={() => setFilterType("Incomplete")}
-              >
-                Incomplete data
-              </span>
+            <div className={`${allStudents.miniStat} ${allStudents.studentsStat}`}>
+              <span className={allStudents.miniStatValue}>{studentsCount}</span>
+              <span className={allStudents.miniStatLabel}>Students</span>
+            </div>
+            <div className={`${allStudents.miniStat} ${allStudents.spocsStat}`}>
+              <span className={allStudents.miniStatValue}>{spocsCount}</span>
+              <span className={allStudents.miniStatLabel}>SPOCs</span>
             </div>
           </div>
+
           <Button type="primary" onClick={showModal}>
             + Add department
           </Button>
         </div>
+      </div>
 
+      <div className={allStudents.mainContent}>
         {/* Department Cards Grid */}
         <div className={allStudents.cardsList}>
           <div className={allStudents.cards}>
@@ -316,7 +316,9 @@ export default function Page() {
         <div style={{ padding: "1rem" }}>
           <Row gutter={[16, 16]}>
             <Col span={12}>
-              <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>Department Name</label>
+              <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>
+                Department Name <span style={{ color: "red" }}>*</span>
+              </label>
               <Input
                 name="title"
                 value={inputChange.title}
@@ -325,7 +327,9 @@ export default function Page() {
               />
             </Col>
             <Col span={12}>
-              <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>Name of HOD</label>
+              <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>
+                Name of HOD <span style={{ color: "red" }}>*</span>
+              </label>
               <Input
                 name="hodName"
                 value={inputChange.hodName}
@@ -334,16 +338,24 @@ export default function Page() {
               />
             </Col>
             <Col span={12}>
-              <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>Mobile</label>
+              <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>
+                Mobile <span style={{ color: "red" }}>*</span>
+              </label>
               <Input
                 name="mobile"
                 value={inputChange.mobile}
                 onChange={handleChange}
                 placeholder="Enter mobile number"
+                maxLength={10}
               />
+              {inputChange.mobile && inputChange.mobile.length !== 10 && (
+                <span style={{ color: "red", fontSize: "12px" }}>Must be exactly 10 digits</span>
+              )}
             </Col>
             <Col span={12}>
-              <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>Email</label>
+              <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>
+                Email <span style={{ color: "red" }}>*</span>
+              </label>
               <Input
                 name="email"
                 value={inputChange.email}

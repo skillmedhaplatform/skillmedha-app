@@ -10,88 +10,68 @@
 }
 
 /* ===== Summary Stats ===== */
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.topSectionWrapper {
+  background: white;
+  padding: 1rem 2.5rem;
+  border-bottom: 1px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.miniStatsContainer {
+  display: flex;
+  align-items: center;
   gap: 1rem;
 }
 
-.statCard {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.25rem;
+.miniStat {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 1rem;
-  transition: all 0.2s ease;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
 
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    transform: translateY(-1px);
-  }
-
-  &.companiesCard {
+  &.companiesStat {
     background: #e8f8f0;
+    border: 1px solid rgba(36, 160, 88, 0.15);
+    .miniStatValue { color: #24a058; }
+    .miniStatLabel { color: #24a058; opacity: 0.9; }
   }
 
-  &.activeDrivesCard {
+  &.activeDrivesStat {
     background: #fff1f2;
+    border: 1px solid rgba(225, 29, 72, 0.15);
+    .miniStatValue { color: #e11d48; }
+    .miniStatLabel { color: #e11d48; opacity: 0.9; }
   }
 
-  &.studentsPlacedCard {
+  &.studentsPlacedStat {
     background: #fff2e6;
+    border: 1px solid rgba(221, 107, 32, 0.15);
+    .miniStatValue { color: #dd6b20; }
+    .miniStatLabel { color: #dd6b20; opacity: 0.9; }
   }
 
-  &.latestAddedCard {
+  &.latestAddedStat {
     background: #f3ecff;
+    border: 1px solid rgba(128, 90, 213, 0.15);
+    .miniStatValue { color: #805ad5; }
+    .miniStatLabel { color: #805ad5; opacity: 0.9; }
   }
 }
 
-.statIcon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.miniStatValue {
+  font-weight: 700;
   font-size: 1.1rem;
-  flex-shrink: 0;
 }
 
-.statValue {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #1a202c;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.statTextCont {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.statLabel {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #1a202c;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.statSub {
-  font-size: 0.76rem;
+.miniStatLabel {
   font-weight: 600;
-  color: #4a5568;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.82rem;
 }
 
 /* ===== Tabs ===== */

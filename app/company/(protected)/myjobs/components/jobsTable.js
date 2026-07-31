@@ -1,7 +1,7 @@
 "use client";
 
 import { getAllJobs, setJobStatus } from "@/redux/slices/company/jobs";
-import { Button, Table, message, Pagination, Empty } from "antd";
+import { Button, Table, message, Empty } from "antd";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -311,20 +311,7 @@ export default function JobsTable({
     };
   });
 
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const pageSize = 5;
-
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [currTab?.fetchType]);
-
-  React.useEffect(() => {
-    if ((currentPage - 1) * pageSize >= data.length && currentPage > 1) {
-      setCurrentPage(1);
-    }
-  }, [data.length, currentPage, pageSize]);
-
-  const paginatedData = data.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginatedData = data;
 
   if (loading) {
     return <Table loading={true} columns={columns} dataSource={[]} />;
@@ -370,18 +357,6 @@ export default function JobsTable({
         </div>
       ) : (
         <Empty description={`No ${currTab?.label?.toLowerCase() || 'jobs'} found`} style={{ margin: "3rem 0" }} />
-      )}
-      
-      {data.length > 0 && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={data.length}
-            onChange={(page) => setCurrentPage(page)}
-            showSizeChanger={false}
-          />
-        </div>
       )}
     </div>
   );

@@ -17,7 +17,7 @@ export const getLstorage = (name) => {
     let val = window.localStorage[name];
 
     // Unified login fallback: token is now in cookies, not localStorage
-    if (name === "token" && !val) {
+    if (name === "token" && !val && typeof document !== "undefined") {
       const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
       if (match) {
         val = match[2];

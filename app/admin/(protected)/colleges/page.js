@@ -14,6 +14,8 @@ import {
   Space,
   Badge,
   message,
+  Switch,
+  Popconfirm,
 } from "antd";
 import {
   SearchOutlined,
@@ -38,6 +40,7 @@ import {
   registerOrg,
   updateOrganization,
   deleteOrginasition,
+  toggleOrganizationStatus,
 } from "@/redux/slices/admin/adminOrgSlice";
 import { useDispatch, useSelector } from "react-redux";
 import SkeletonCard from "@/modules/admin/components/SkeletonCard";
@@ -539,17 +542,33 @@ export default function College() {
 
       <div className={styles.collegeGrid}>
         {loading ? (
-          Array.from({ length: pageSize }).map((_, index) => (
+          Array.from({ length: 8 }).map((_, index) => (
             <SkeletonCard key={index} />
           ))
-        ) : paginatedColleges.length > 0 ? (
-          paginatedColleges.map((college) => (
+        ) : sortedColleges.length > 0 ? (
+          sortedColleges.map((college) => (
             <div key={college._id} className={styles.collegeCard}>
               <div className={styles.cardHeader}>
                 <div className={styles.collegeInitial}>
                   {college.orgName.charAt(0).toUpperCase()}
                 </div>
-                <div style={{ display: "flex" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Tooltip title={college.active === false ? "Deactivated" : "Active"}>
+                    <Popconfirm
+                      title={college.active === false ? "Reactivate College" : "Deactivate College"}
+                      description={college.active === false ? "Are you sure you want to reactivate this college? Associated users will be able to log in." : "Are you sure you want to deactivate this college? All associated TPOs and students will be unable to log in."}
+                      onConfirm={() => handleToggleStatus(college.orgId, college.active !== false)}
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      <Switch
+                        checked={college.active !== false}
+                        disabled={!canEdit}
+                        size="small"
+                        style={{ marginRight: 8 }}
+                      />
+                    </Popconfirm>
+                  </Tooltip>
                   <Tooltip
                     title={
                       !canEdit
@@ -595,7 +614,7 @@ export default function College() {
                     <Button
                       type="text"
                       size="large"
-                      icon={<PoweroffOutlined />}
+                      icon={<DeleteOutlined />}
                       className={styles.cardOptions}
                       onClick={() => {
                         if (!canEdit) {
@@ -679,7 +698,7 @@ export default function College() {
                     push(
                       `/admin/colleges/tpo?orgId=${encrypt(
                         college?.orgId
-                      )}&orgName=${encrypt(college?.orgName)}`
+                      )}&orgName=${encrypt(college?.orgName)}&from=college`
                     )
                   }
                 >
@@ -691,7 +710,7 @@ export default function College() {
                     push(
                       `/admin/colleges/departments?orgId=${encrypt(
                         college?.orgId
-                      )}&orgName=${encrypt(college?.orgName)}`
+                      )}&orgName=${encrypt(college?.orgName)}&from=college`
                     )
                   }
                 >
@@ -713,22 +732,6 @@ export default function College() {
         )}
       </div>
 
-      {!loading && filteredColleges.length > 0 && (
-        <div className={styles.pagination}>
-          <Pagination
-            current={currentPage}
-            total={sortedColleges.length}
-            pageSize={pageSize}
-            onChange={handlePageChange}
-            showSizeChanger={true}
-            onShowSizeChange={handlePageSizeChange}
-            pageSizeOptions={[8, 16, 24, 32, 48]}
-            showTotal={(total, range) =>
-              `${range[0]}-${range[1]} of ${total} colleges`
-            }
-          />
-        </div>
-      )}
 
       <Modal
         title={editingCollege ? "Edit College" : "Add New College"}
@@ -842,7 +845,7 @@ export default function College() {
         </Form>
       </Modal>
       <Modal
-        title={"Inactivate College"}
+        title={"Delete College"}
         open={deleteModal}
         onOk={() => {
           dispatch(
@@ -857,13 +860,14 @@ export default function College() {
         onCancel={() => setDeleteModal(false)}
         confirmLoading={status == "pending"}
         mask={{ closable: false }}
-        // keyboard={!submitting}
-        // closable={!submitting}
-        okText={"Inactivate"}
+        okText={"Delete"}
         cancelText="Cancel"
         width={500}
       >
-        <h4>Are you sure you want to inactivate this college?</h4>
+        <h4>Are you sure you want to delete this college?</h4>
+        <p style={{ color: "#ff4d4f", marginTop: "10px" }}>
+          <strong>Warning:</strong> If you delete this college, it will be removed entirely. To recover a deleted college, you must contact the development team.
+        </p>
       </Modal>
     </div>
   );

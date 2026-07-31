@@ -102,15 +102,6 @@ const Template17 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             ))}
           </div>
         </div>
-        {profileBase64 && (
-          <img
-            src={profileBase64}
-            alt="profile"
-            width="88"
-            height="88"
-            className="rounded-full object-cover border-4 border-[#dbeafe]"
-          />
-        )}
       </header>
 
       <div className="space-y-7">

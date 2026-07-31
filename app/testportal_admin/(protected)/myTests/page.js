@@ -5,10 +5,12 @@ import AllTestsStyles from "./styles/alltests.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import AllTestsComp from "./components/allTests";
 import { useRouter } from "@bprogress/next/app";
+import { Popconfirm } from "antd";
 import {
   clearTestVals,
   getTestCategories,
   getTests,
+  bulkDeleteTests,
 } from "@/redux/slices/testportal_admin/slice/test";
 import { setFormValues } from "@/redux/slices/testportal_admin/slice/stepform";
 import { clearSstorageVals, setSstorage } from "@/utils/universalUtils/windowMW";
@@ -19,13 +21,18 @@ import {
   CheckCircleOutlined, 
   ClockCircleOutlined,
   SyncOutlined,
-  PlusOutlined
+  PlusOutlined,
+  DeleteOutlined,
+  CheckSquareOutlined,
+  BorderOutlined
 } from "@ant-design/icons";
 
 const Page = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all"); // "all", "active", "expired"
+  const [selectedTestIds, setSelectedTestIds] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const allTests = useSelector((state) => state.tests.value) || [];
   const singleTest = useSelector((state) => state.tests.test);
@@ -40,10 +47,9 @@ const Page = () => {
     });
     dispatch(getTestCategories());
     dispatch(clearSelectQuestions());
+    setSstorage("questionObj", null);
+    setSstorage("quesId", null);
   }, [dispatch, nav]);
-
-  setSstorage("questionObj", null);
-  setSstorage("quesId", null);
 
   const isTestExpired = (test) => {
     const expiryDate =
@@ -85,6 +91,43 @@ const Page = () => {
 
     return matchesSearch && matchesStatus;
   });
+
+  const displayTestIds = displayTests.map((t) => t._id);
+  const isAllSelected =
+    displayTestIds.length > 0 &&
+    displayTestIds.every((id) => selectedTestIds.includes(id));
+
+  const handleToggleSelectTest = (testId) => {
+    setSelectedTestIds((prev) =>
+      prev.includes(testId)
+        ? prev.filter((id) => id !== testId)
+        : [...prev, testId]
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedTestIds((prev) =>
+        prev.filter((id) => !displayTestIds.includes(id))
+      );
+    } else {
+      setSelectedTestIds((prev) =>
+        Array.from(new Set([...prev, ...displayTestIds]))
+      );
+    }
+  };
+
+  const handleBulkDelete = () => {
+    setIsDeleting(true);
+    dispatch(bulkDeleteTests({ testIds: selectedTestIds, dispatch }))
+      .unwrap()
+      .then(() => {
+        setSelectedTestIds([]);
+      })
+      .finally(() => {
+        setIsDeleting(false);
+      });
+  };
 
   return (
     <React.Fragment>
@@ -138,6 +181,36 @@ const Page = () => {
                 <ClockCircleOutlined /> Expired <span className={AllTestsStyles.badge}>{expiredCount}</span>
               </button>
             </div>
+
+            {/* Bulk Action Buttons (Visible only when any test is selected) */}
+            {selectedTestIds.length > 0 && (
+              <div className={AllTestsStyles.bulkActionsGroup}>
+                <button
+                  className={AllTestsStyles.selectAllBtn}
+                  onClick={handleToggleSelectAll}
+                >
+                  {isAllSelected ? <BorderOutlined /> : <CheckSquareOutlined />}
+                  {isAllSelected ? "Deselect All" : `Select All (${displayTests.length})`}
+                </button>
+
+                <Popconfirm
+                  title="Delete Selected Tests"
+                  description={`Are you sure you want to delete ${selectedTestIds.length} selected test(s)?`}
+                  okText="Yes, Delete"
+                  cancelText="Cancel"
+                  okButtonProps={{ danger: true, loading: isDeleting }}
+                  onConfirm={handleBulkDelete}
+                >
+                  <button
+                    className={AllTestsStyles.bulkDeleteBtn}
+                    disabled={isDeleting}
+                  >
+                    <DeleteOutlined />
+                    Delete Selected ({selectedTestIds.length})
+                  </button>
+                </Popconfirm>
+              </div>
+            )}
           </div>
 
           <div className={AllTestsStyles.headerRight}>
@@ -160,6 +233,8 @@ const Page = () => {
             displayTests={displayTests} 
             loading={loading} 
             selectedStatus={selectedStatus}
+            selectedTestIds={selectedTestIds}
+            onToggleSelectTest={handleToggleSelectTest}
             onAddNewTest={() => {
               clearSstorageVals();
               dispatch(setFormValues({}));

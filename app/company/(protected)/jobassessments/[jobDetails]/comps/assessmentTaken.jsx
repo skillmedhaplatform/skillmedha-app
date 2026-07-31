@@ -6,7 +6,7 @@ import {
   getAllAppliedStudentsWithAssesmentResults,
   updateStudentAndJobStatus,
 } from "@/redux/slices/company/skillMedhaData";
-import { Dropdown, Modal, Table, Tag, Pagination } from "antd";
+import { Dropdown, Modal, Table, Tag } from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { useParams, useRouter } from "next/navigation";
@@ -228,9 +228,7 @@ const AssessmentTaken = () => {
     setPageSize(newPageSize);
   };
 
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentDataSource = dataSource?.slice(startIndex, endIndex) || [];
+  const currentDataSource = dataSource || [];
 
   return (
     <div className={AtStyles.container}>
@@ -358,19 +356,6 @@ const AssessmentTaken = () => {
           <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>No candidates found</div>
         )}
       </div>
-
-      {dataSource?.length > 0 && (
-        <div style={{ marginTop: "2rem", display: "flex", justifyContent: "flex-end", paddingRight: "1rem" }}>
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={dataSource.length}
-            onChange={onPageChange}
-            showSizeChanger
-            pageSizeOptions={['4', '10', '20', '50']}
-          />
-        </div>
-      )}
 
       <Modal
         title="PDF Viewer"

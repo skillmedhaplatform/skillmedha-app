@@ -134,14 +134,33 @@ const PlacementDetails = () => {
       <PageHeader
         title={getName(id) || "Company Details"}
         subtitle="Manage jobs and job description postings for this company"
-        actionText="+ Add New Job"
-        onActionClick={() =>
-          router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`)
-        }
       />
+
+      <div className={allStudents.topSectionWrapper}>
+        <div className={allStudents.leftControls}>
+          <Select
+            value={selectedProfile}
+            style={{ width: 300, height: 38, textAlign: "center" }}
+            onChange={(value) => setSelectedProfile(value)}
+            options={profileOptions}
+          />
+          <Search
+            placeholder="Search by profile or company name"
+            style={{ width: 300, height: 38 }}
+            allowClear
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className={allStudents.rightControls}>
+          <Button type="primary" onClick={() => router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`)}>
+            + Add New Job
+          </Button>
+        </div>
+      </div>
+
       <div className={allStudents.container}>
         {/* Breadcrumbs Trail */}
-        <div className={allStudents.headerCont} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className={allStudents.headerCont} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           <div>
             {pathSegments.map((segment, index) => {
               const displayName = resolveName(segment, index);
@@ -167,32 +186,6 @@ const PlacementDetails = () => {
               );
             })}
           </div>
-          <Button type="primary" onClick={() => router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`)}>
-            + Add New Job
-          </Button>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: "1.5rem",
-            marginBottom: "1.5rem",
-            gap: "1.5rem",
-          }}
-        >
-          <Select
-            value={selectedProfile}
-            style={{ width: 415, height: 38, textAlign: "center" }}
-            onChange={(value) => setSelectedProfile(value)}
-            options={profileOptions}
-          />
-          <Search
-            placeholder="Search by profile or company name"
-            style={{ width: 415, height: 38 }}
-            allowClear
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
         </div>
 
         <div className={allStudents.cardsList}>

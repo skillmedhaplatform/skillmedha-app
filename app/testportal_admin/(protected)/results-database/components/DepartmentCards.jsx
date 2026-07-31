@@ -18,6 +18,7 @@ import {
 } from "@ant-design/icons";
 import { getAllProgress } from "@/redux/slices/testportal_admin/slice/resultsDatabase";
 import { getDepartments } from "@/redux/slices/testportal_admin/slice/studentSlice";
+import { getTests } from "@/redux/slices/testportal_admin/slice/test";
 import styles from "../styles/departmentCards.module.scss";
 
 const DepartmentCards = () => {
@@ -28,6 +29,7 @@ const DepartmentCards = () => {
     const progressStatus = useSelector((state) => state.resultsDatabase.status);
     const departmentsList = useSelector((state) => state.Student.departments.value) || [];
     const deptStatus = useSelector((state) => state.Student.departments.status);
+    const allTestsList = useSelector((state) => state.tests.value) || [];
 
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("results-desc");
@@ -43,6 +45,7 @@ const DepartmentCards = () => {
     useEffect(() => {
         dispatch(getAllProgress({ limit: 500 }));
         dispatch(getDepartments());
+        dispatch(getTests({ limit: 500 }));
     }, [dispatch]);
 
     // Calculate global stats for the 4 overview cards
@@ -51,16 +54,26 @@ const DepartmentCards = () => {
         const totalResults = progressData?.length || 0;
         
         let totalScore = 0;
-        const uniqueTests = new Set();
+        const activeTestsFromProgress = new Set();
         
         progressData.forEach((record) => {
             totalScore += record?.scoreData?.finalScore || 0;
             const testTitle = record?.testDetails?.title;
-            if (testTitle) uniqueTests.add(testTitle);
+            const testStatus = record?.testDetails?.status?.toLowerCase();
+            if (testTitle && (testStatus === "active" || !testStatus)) {
+                activeTestsFromProgress.add(testTitle);
+            }
         });
 
+        const activeTestsFromList = Array.isArray(allTestsList)
+            ? allTestsList.filter((t) => t?.status?.toLowerCase() === "active").length
+            : 0;
+
+        const activeTests = (Array.isArray(allTestsList) && allTestsList.length > 0)
+            ? activeTestsFromList
+            : activeTestsFromProgress.size;
+
         const avgScoreAll = totalResults > 0 ? (totalScore / totalResults).toFixed(2) : "0.00";
-        const activeTests = uniqueTests.size;
 
         return {
             totalDepts,
@@ -68,7 +81,7 @@ const DepartmentCards = () => {
             avgScoreAll,
             activeTests
         };
-    }, [departmentsList, progressData]);
+    }, [departmentsList, progressData, allTestsList]);
 
     // Calculate details map for each department
     const departmentStats = useMemo(() => {

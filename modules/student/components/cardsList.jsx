@@ -27,8 +27,11 @@ export default function CardsList({ type, isModal = false, progressById, combine
     if (typeof window !== "undefined") {
       const loadClaimed = () => {
         let stored = studentData?.claimedAchievements || [];
-        if (!stored.length) {
-          stored = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+        if (typeof window !== "undefined") {
+          const userId = studentData?._id || "";
+          const local = JSON.parse(localStorage.getItem(`claimedAchievements_${userId}`) || "[]");
+          // Merge avoiding duplicates
+          stored = Array.from(new Set([...stored, ...local]));
         }
         setClaimedAchievements(stored);
       };
@@ -51,7 +54,8 @@ export default function CardsList({ type, isModal = false, progressById, combine
     e.stopPropagation();
     const newClaimed = [...claimedAchievements, achievementId];
     setClaimedAchievements(newClaimed);
-    localStorage.setItem("claimedAchievements", JSON.stringify(newClaimed));
+    const userId = studentData?._id || "";
+    localStorage.setItem(`claimedAchievements_${userId}`, JSON.stringify(newClaimed));
     
     if (studentData) {
       dispatch(updateStudent({
@@ -228,7 +232,8 @@ export default function CardsList({ type, isModal = false, progressById, combine
       }
 
       if (typeof window !== "undefined") {
-        const pendingPracticeNoticesRaw = JSON.parse(localStorage.getItem("pendingPracticeNotices") || "[]");
+        const userId = studentData?._id || "";
+        const pendingPracticeNoticesRaw = JSON.parse(localStorage.getItem(`pendingPracticeNotices_${userId}`) || "[]");
         
         // Filter out notices older than 7 days (7 * 24 * 60 * 60 * 1000 ms) and corrupted generic ones
         const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -251,11 +256,15 @@ export default function CardsList({ type, isModal = false, progressById, combine
               validNotices.unshift(notice);
             }
           }
+          const noticeKey = `pendingPracticeNotices_${userId}`;
+          const currentNotices = JSON.parse(localStorage.getItem(noticeKey) || "[]");
+          const updatedNotices = currentNotices.filter(n => n.id !== notice.id);
+          localStorage.setItem(noticeKey, JSON.stringify(updatedNotices));
         }
         const pendingPracticeNotices = validNotices;
         
         if (pendingPracticeNotices.length !== pendingPracticeNoticesRaw.length) {
-          localStorage.setItem("pendingPracticeNotices", JSON.stringify(pendingPracticeNotices));
+          localStorage.setItem(`pendingPracticeNotices_${userId}`, JSON.stringify(pendingPracticeNotices));
         }
         
 
