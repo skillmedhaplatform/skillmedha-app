@@ -325,13 +325,16 @@ export default function DriveDetails() {
 
   const handleOpenEditModal = (company) => {
     setEditingId(company._id);
+    let cleanPhone = (company.phoneNumber || "").replace(/\D/g, "");
+    if (cleanPhone.length > 10) cleanPhone = cleanPhone.slice(-10);
+
     setFormData({
       companyName: company.companyName || "",
       companyLogo: company.companyLogo || "",
       startDate: company.startDate || "",
       endDate: company.endDate || "",
       createdBy: company.createdBy || "",
-      phoneNumber: company.phoneNumber || "",
+      phoneNumber: cleanPhone,
     });
     if (company.companyLogo) {
       setFileList([
@@ -351,6 +354,10 @@ export default function DriveDetails() {
   const handleSave = async () => {
     if (!formData.companyName) {
       alert("Please fill required fields");
+      return;
+    }
+    if (formData.phoneNumber && formData.phoneNumber.length > 0 && formData.phoneNumber.length !== 10) {
+      message.error("Phone number must be exactly 10 digits");
       return;
     }
     if (editingId) {
@@ -374,7 +381,14 @@ export default function DriveDetails() {
   };
 
   const handleDelete = (record) => {
-    dispatch(deleteJobProfile({ profileId: record?._id }));
+    Modal.confirm({
+      title: "Delete Company Profile",
+      content: "Are you sure you want to delete this company profile? This action cannot be undone.",
+      okText: "Yes, Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: () => dispatch(deleteJobProfile({ profileId: record?._id })),
+    });
   };
 
   // ─── Table columns (for table view toggle) ────────────────
@@ -454,101 +468,51 @@ export default function DriveDetails() {
         onActionClick={handleOpenCreateModal}
       />
 
-      <div className={styles.container}>
-        {/* ── Summary Stats ── */}
-        <div className={styles.statsGrid}>
-          <div className={`${styles.statCard} ${styles.companiesCard}`}>
+      <div className={styles.topSectionWrapper}>
+        <div className={styles.tabBar} style={{ borderBottom: 'none', marginBottom: 0 }}>
+          {TABS.map((tab) => (
             <div
-              className={styles.statIcon}
-              style={{ backgroundColor: "rgba(36, 160, 88, 0.1)", color: "#24a058" }}
+              key={tab.key}
+              className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab(tab.key)}
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M17 17V5a2 2 0 00-2-2H5a2 2 0 00-2 2v12l3.5-2 3.5 2 3.5-2L17 17z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-              </svg>
+              {tab.label}
+              <span className={styles.tabCount}>{tabCounts[tab.key]}</span>
             </div>
-            <span className={styles.statValue}>{stats.companiesCount}</span>
-            <div className={styles.statTextCont}>
-              <span className={styles.statLabel}>Companies</span>
-              <span className={styles.statSub}>Total registered</span>
-            </div>
-          </div>
-
-          <div className={`${styles.statCard} ${styles.activeDrivesCard}`}>
-            <div
-              className={styles.statIcon}
-              style={{ backgroundColor: "rgba(225, 29, 72, 0.1)", color: "#e11d48" }}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 6V10L13 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.5"/>
-              </svg>
-            </div>
-            <span className={styles.statValue}>{stats.activeDrives}</span>
-            <div className={styles.statTextCont}>
-              <span className={styles.statLabel}>Active Drives</span>
-              <span className={styles.statSub}>Currently hiring</span>
-            </div>
-          </div>
-
-          <div className={`${styles.statCard} ${styles.studentsPlacedCard}`}>
-            <div
-              className={styles.statIcon}
-              style={{ backgroundColor: "rgba(197, 120, 43, 0.1)", color: "#c5782b" }}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M14 16.5V15C14 13.3431 12.6569 12 11 12H7C5.34315 12 4 13.3431 4 15V16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="9" cy="7" r="3" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M16 12.5V8.5M14 10.5H18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <span className={styles.statValue}>{stats.studentsPlaced}</span>
-            <div className={styles.statTextCont}>
-              <span className={styles.statLabel}>Students Placed</span>
-              <span className={styles.statSub}>Across all drives</span>
-            </div>
-          </div>
-
-          <div className={`${styles.statCard} ${styles.latestAddedCard}`}>
-            <div
-              className={styles.statIcon}
-              style={{ backgroundColor: "rgba(89, 60, 193, 0.1)", color: "#593cc1" }}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 3L3 7L10 11L17 7L10 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                <path d="M3 13L10 17L17 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M3 10L10 14L17 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <span className={styles.statValue} title={stats.latestName}>
-              {stats.latestName.length > 12
-                ? stats.latestName.slice(0, 12) + "…"
-                : stats.latestName}
-            </span>
-            <div className={styles.statTextCont}>
-              <span className={styles.statLabel}>Latest Added</span>
-              <span className={styles.statSub}>Most recent company</span>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* ── Tabs ── */}
-        <div className={styles.tabBar} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex' }}>
-            {TABS.map((tab) => (
-              <div
-                key={tab.key}
-                className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ""}`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                {tab.label}
-                <span className={styles.tabCount}>{tabCounts[tab.key]}</span>
-              </div>
-            ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div className={styles.miniStatsContainer}>
+            <div className={`${styles.miniStat} ${styles.companiesStat}`}>
+              <span className={styles.miniStatValue}>{stats.companiesCount}</span>
+              <span className={styles.miniStatLabel}>Companies</span>
+            </div>
+            <div className={`${styles.miniStat} ${styles.activeDrivesStat}`}>
+              <span className={styles.miniStatValue}>{stats.activeDrives}</span>
+              <span className={styles.miniStatLabel}>Active Drives</span>
+            </div>
+            <div className={`${styles.miniStat} ${styles.studentsPlacedStat}`}>
+              <span className={styles.miniStatValue}>{stats.studentsPlaced}</span>
+              <span className={styles.miniStatLabel}>Students Placed</span>
+            </div>
+            <div className={`${styles.miniStat} ${styles.latestAddedStat}`}>
+              <span className={styles.miniStatValue} title={stats.latestName}>
+                {stats.latestName.length > 12
+                  ? stats.latestName.slice(0, 12) + "…"
+                  : stats.latestName}
+              </span>
+              <span className={styles.miniStatLabel}>Latest Added</span>
+            </div>
           </div>
-          <Button type="primary" onClick={handleOpenCreateModal} style={{ marginBottom: "8px" }}>
+
+          <Button type="primary" onClick={handleOpenCreateModal}>
             + Create Company
           </Button>
         </div>
+      </div>
+
+      <div className={styles.container}>
 
         {/* ── Toolbar ── */}
         <div className={styles.toolbar}>
@@ -801,24 +765,21 @@ export default function DriveDetails() {
 
           <div className={styles.formRow}>
             <label>Phone Number</label>
-            <input
-              type="text"
-              placeholder="e.g., 9876543210"
-              value={formData.phoneNumber}
-              onChange={(e) => {
-                let value = e.target.value;
-                value = value.replace(/(?!^\+)\D/g, "");
-                if (value.length > 13) {
-                  value = value.slice(0, 13);
-                }
-                const phoneRegex = /^(\+91[6-9]\d{9}|[6-9]\d{9})$/;
-                const isValid = phoneRegex.test(value) || value.length === 0;
-                handleChange("phoneNumber", value);
-                if (value.length > 0 && !isValid && value.length >= 10) {
-                  message.error("Invalid phone format");
-                }
-              }}
-            />
+              <input
+                type="text"
+                placeholder="e.g., 9876543210"
+                maxLength={10}
+                value={formData.phoneNumber}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  handleChange("phoneNumber", value);
+                }}
+              />
+              {formData.phoneNumber && formData.phoneNumber.length !== 10 && (
+                <div style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                  Must be exactly 10 digits
+                </div>
+              )}
           </div>
 
           <div className={styles.buttonRow}>

@@ -21,14 +21,18 @@ export const formSchemas = {
         label: "Phone",
         name: "phone",
         type: "tel",
-        placeholder: "+91 xxx xxx xxxx",
+        placeholder: "9876543210",
         required: true,
+        pattern: "^\\d{10}$",
+        message: "Must be exactly 10 digits",
       },
       {
         label: "Alternate Phone",
         name: "alternatePhone",
         type: "tel",
-        placeholder: "+91 xxx xxx xxxx",
+        placeholder: "9876543210",
+        pattern: "^\\d{10}$",
+        message: "Must be exactly 10 digits",
       },
       {
         label: "Email",
@@ -145,6 +149,24 @@ export const formSchemas = {
         required: true,
       },
       {
+        label: "NAAC Grade & Cycle",
+        name: "naacGradeCycle",
+        type: "text",
+        placeholder: "As per AICTE/UGC records",
+      },
+      {
+        label: "NBA Accreditation Status",
+        name: "nbaStatus",
+        type: "text",
+        placeholder: "1999",
+      },
+      {
+        label: "NIRF / ARIIA Ranking",
+        name: "nirfRanking",
+        type: "text",
+        placeholder: "JNTUK / AICTE / AU, etc.",
+      },
+      {
         label: "Institution Logo",
         name: "institutionLogo",
         type: "ImageUpload",
@@ -215,29 +237,7 @@ export const formSchemas = {
     ],
   },
 
-  accreditation: {
-    title: "Accreditation and Ranking",
-    fields: [
-      {
-        label: "NAAC Grade & Cycle",
-        name: "naacGradeCycle",
-        type: "text",
-        placeholder: "As per AICTE/UGC records",
-      },
-      {
-        label: "NBA Accreditation Status",
-        name: "nbaStatus",
-        type: "text",
-        placeholder: "1999",
-      },
-      {
-        label: "NIRF / ARIIA Ranking",
-        name: "nirfRanking",
-        type: "text",
-        placeholder: "JNTUK / AICTE / AU, etc.",
-      },
-    ],
-  },
+
   tpo_support_team: {
     title: "TPO Support Team Details",
     fields: [
