@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import styles from "./sidebar.module.scss";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, Menu, App, Tooltip, Skeleton, Modal, Dropdown } from "antd";
 import {
   LogoutOutlined,
@@ -27,6 +27,7 @@ import { changeCollapse } from "@/redux/slices/sidebar";
 const SideBar = ({ activeView, setView }) => {
   const pathName = usePathname();
   const nav = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { message } = App.useApp();
   
@@ -34,6 +35,11 @@ const SideBar = ({ activeView, setView }) => {
   
   const [openKeys, setOpenKeys] = useState([]);
   const [loadingPath, setLoadingPath] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const { value, loading } = useSelector((s) => s.adminAuth?.user || {});
   const userDetails = value?.user;
@@ -92,6 +98,14 @@ const SideBar = ({ activeView, setView }) => {
 
   const getSelectedKey = () => {
     const pathToCheck = activeView || pathName;
+    
+    // Explicit override for organization details
+    if (pathToCheck.includes("/admin/organisationDetails")) {
+      const type = searchParams.get("type");
+      if (type === "company") return "/admin/companies";
+      return "/admin/colleges";
+    }
+    
     for (const item of sideBarTitles) {
       if (item.children) {
         for (const child of item.children) {
@@ -230,7 +244,7 @@ const SideBar = ({ activeView, setView }) => {
 
       <div className={styles.bottom}>
         <div style={{ padding: isCollapsed ? "0" : "0 1rem", display: "flex", justifyContent: "center" }}>
-          {loading ? (
+          {!mounted || loading ? (
             <div className={styles.profilePillSkeleton}>
               <Skeleton.Avatar active size="large" shape="circle" />
               {!isCollapsed && (

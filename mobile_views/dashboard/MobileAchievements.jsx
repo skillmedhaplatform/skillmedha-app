@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal } from "antd";
 
-export default function MobileAchievements({ progressById, combinedLearningData }) {
+export default function MobileAchievements({ progressById, combinedLearningData, studentCreds }) {
   const [streak, setStreak] = useState(1);
   const [claimedAchievements, setClaimedAchievements] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -17,24 +17,19 @@ export default function MobileAchievements({ progressById, combinedLearningData 
       setStreak(parseInt(localStorage.getItem("loginStreak") || "1", 10));
       
       const loadClaimed = () => {
-        const stored = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
-        
-        // Add sample badges if none exist for testing purposes
-        const hasSample = stored.some(id => typeof id === 'string' && id.startsWith("practice_badge|"));
-        if (!hasSample) {
-          stored.push("practice_badge|Technical|Programming|JavaScript Basics|Flawless|1");
-          stored.push("practice_badge|Technical|Programming|JavaScript Basics|Flawless|2");
-          stored.push("practice_badge|Technical|Programming|React Hooks|Recall|1");
-          stored.push("practice_badge|Non-Technical|Aptitude|Time and Work|Flawless|1");
-          localStorage.setItem("claimedAchievements", JSON.stringify(stored));
-          
-          // Seed some unseen badges for testing the notification dot
-          const initialUnseen = ["practice_badge|Technical|Programming|JavaScript Basics|Flawless|2"];
-          localStorage.setItem("unseenPracticeBadges", JSON.stringify(initialUnseen));
+        let stored = studentCreds?.claimedAchievements || [];
+        if (typeof window !== "undefined") {
+          const userId = studentCreds?._id || "";
+          const local = JSON.parse(localStorage.getItem(`claimedAchievements_${userId}`) || "[]");
+          stored = [...stored, ...local];
         }
-
-        setClaimedAchievements(stored);
-        setUnseenBadges(JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]"));
+        
+        setClaimedAchievements(Array.from(new Set(stored)));
+        
+        if (typeof window !== "undefined") {
+          const userId = studentCreds?._id || "";
+          setUnseenBadges(JSON.parse(localStorage.getItem(`unseenPracticeBadges_${userId}`) || "[]"));
+        }
         
         // Auto-open modal if redirected from test result page
         const autoOpen = localStorage.getItem("autoOpenBadgeModal");
@@ -45,9 +40,11 @@ export default function MobileAchievements({ progressById, combinedLearningData 
             setSelectedBadgeDetail(null);
             
             // Auto clear unseen for this type
-            const remaining = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]").filter(id => !id.includes(autoOpen));
+            const userId = studentCreds?._id || "";
+            const unseenKey = `unseenPracticeBadges_${userId}`;
+            const remaining = JSON.parse(localStorage.getItem(unseenKey) || "[]").filter(id => !id.includes(autoOpen));
             setUnseenBadges(remaining);
-            localStorage.setItem("unseenPracticeBadges", JSON.stringify(remaining));
+            localStorage.setItem(unseenKey, JSON.stringify(remaining));
             localStorage.removeItem("autoOpenBadgeModal");
           }, 300);
         }
@@ -64,9 +61,11 @@ export default function MobileAchievements({ progressById, combinedLearningData 
             setIsModalVisible(true);
             setSelectedBadgeDetail(null);
             
-            const remaining = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]").filter(id => !id.includes(type));
+            const userId = studentCreds?._id || "";
+            const unseenKey = `unseenPracticeBadges_${userId}`;
+            const remaining = JSON.parse(localStorage.getItem(unseenKey) || "[]").filter(id => !id.includes(type));
             setUnseenBadges(remaining);
-            localStorage.setItem("unseenPracticeBadges", JSON.stringify(remaining));
+            localStorage.setItem(unseenKey, JSON.stringify(remaining));
             
             history.pushState("", document.title, window.location.pathname + window.location.search);
           }
@@ -80,7 +79,7 @@ export default function MobileAchievements({ progressById, combinedLearningData 
         window.removeEventListener("hashchange", handleHashChange);
       };
     }
-  }, []);
+  }, [studentCreds?._id, studentCreds?.claimedAchievements]);
 
   let streakCoins = 5;
   if (streak === 1) streakCoins = 10;
@@ -160,8 +159,10 @@ export default function MobileAchievements({ progressById, combinedLearningData 
       const badge = practiceBadges.find(b => b.id === id);
       return badge && badge.section !== type;
     });
+    const userId = studentCreds?._id || "";
+    const unseenKey = `unseenPracticeBadges_${userId}`;
     setUnseenBadges(remainingUnseen);
-    localStorage.setItem("unseenPracticeBadges", JSON.stringify(remainingUnseen));
+    localStorage.setItem(unseenKey, JSON.stringify(remainingUnseen));
   };
 
   const renderBadgeList = (badges) => {
