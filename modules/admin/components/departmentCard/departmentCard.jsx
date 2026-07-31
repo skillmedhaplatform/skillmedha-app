@@ -1,62 +1,16 @@
 import React from "react";
-import { Button, Dropdown, Menu, message, Popconfirm } from "antd";
+import { Button, Tooltip } from "antd";
 import styles from "./departmentcard.module.scss";
-import { HiDotsVertical } from "react-icons/hi";
-import { deleteLstorageVal, setSstorage } from "@/utils/windowMW";
-import { useDispatch } from "react-redux";
-
-const DepartmentCard = ({ handleClick, item }) => {
-  const dispatch = useDispatch();
-  const menu = (
-    <Menu>
-      <Menu.Item
-        key="1"
-        onClick={(e) => {
-          e.domEvent.stopPropagation();
-          handleClick(item?._id, "EDIT");
-        }}
-      >
-        Edit
-      </Menu.Item>
-
-      <Menu.Item
-        key="2"
-        onClick={(e) => {
-          e.domEvent.stopPropagation();
-          handleClick(item?._id, "DELETE");
-        }}
-      >
-        Delete
-      </Menu.Item>
-      <Menu.Item key="3" onClick={(e) => e.domEvent.stopPropagation()}>
-        <Popconfirm
-          title="Are you sure you want to delete all students?"
-          onConfirm={() => {
-            handleClick(item?._id, "DELETE_ALL_STUDENTS");
-          }}
-          onCancel={() => {
-            message.info("Deletion canceled");
-          }}
-          okText="Yes"
-          cancelText="No"
-        >
-          <span style={{ cursor: "pointer", color: "red" }}>
-            Delete All Students
-          </span>
-        </Popconfirm>
-      </Menu.Item>
-    </Menu>
-  );
-
+import { 
+  ArrowRightOutlined, 
+  UserOutlined, 
+  PhoneOutlined, 
+  MailOutlined, 
+  TeamOutlined 
+} from "@ant-design/icons";
+const DepartmentCard = ({ item, onActionClick }) => {
   return (
-    <div
-      className={styles.cardCont}
-      onClick={() => {
-        // deleteLstorageVal("departmentTitle");
-        // setSstorage("departmentTitle", item?.title);
-        // handleClick(item?._id, "GET");
-      }}
-    >
+    <div className={styles.cardCont}>
       <div className={styles.imgCont}>
         <img
           className={styles.branchImage}
@@ -66,44 +20,64 @@ const DepartmentCard = ({ handleClick, item }) => {
       </div>
       <div className={styles.titleCont}>
         <p className={styles.title}>{item?.title || "Department"}</p>
-
-        {/* <Dropdown overlay={menu} trigger={["click"]}>
-          <Button type="text" onClick={(e) => e.stopPropagation()}>
-            <HiDotsVertical className={styles.moreIcon} />
-          </Button>
-        </Dropdown> */}
       </div>
 
       <div className={styles.infoSection}>
         <div className={styles.titleSection}>
-          <p>Number of students registered: {item?.students?.length || 0}</p>
+          <p style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ fontSize: "20px", fontWeight: "bold", color: "#1E69DA", marginRight: "8px" }}>
+              {item?.students?.length || 0}
+            </span>
+            <span style={{ color: "#334155", fontWeight: 500 }}>students registered</span>
+          </p>
         </div>
 
-        <div className={styles.detailsSection}>
-          <p>
-            <strong>HOD:</strong> {item?.hodName || "N/A"}
-          </p>
-          <p>
-            <strong>Phone:</strong> {item?.mobile || "N/A"}
-          </p>
-          <p>
-            <strong>Email:</strong> {item?.email || "N/A"}
-          </p>
-          <p>
-            <strong>SPOC:</strong> {item?.spoc || "N/A"}
-          </p>
+        <div className={styles.detailsSection} style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
+          <div style={{ display: "flex", alignItems: "flex-start" }}>
+            <UserOutlined style={{ fontSize: "16px", color: "#334155", width: "24px", marginTop: "3px" }} />
+            <strong style={{ width: "60px", color: "#1e293b", flexShrink: 0 }}>HOD</strong>
+            <span style={{ color: "#475569", wordBreak: "break-word", flex: 1 }}>{item?.hodName || "N/A"}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "flex-start" }}>
+            <PhoneOutlined style={{ fontSize: "16px", color: "#334155", width: "24px", marginTop: "3px" }} />
+            <strong style={{ width: "60px", color: "#1e293b", flexShrink: 0 }}>Phone</strong>
+            <span style={{ color: "#475569", wordBreak: "break-word", flex: 1 }}>{item?.mobile || "N/A"}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "flex-start" }}>
+            <MailOutlined style={{ fontSize: "16px", color: "#334155", width: "24px", marginTop: "3px" }} />
+            <strong style={{ width: "60px", color: "#1e293b", flexShrink: 0 }}>Email</strong>
+            <span style={{ color: "#475569", wordBreak: "break-all", flex: 1 }}>{item?.email || "N/A"}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "flex-start" }}>
+            <TeamOutlined style={{ fontSize: "16px", color: "#334155", width: "24px", marginTop: "3px" }} />
+            <strong style={{ width: "60px", color: "#1e293b", flexShrink: 0 }}>SPOC</strong>
+            <span style={{ color: "#475569", wordBreak: "break-word", flex: 1 }}>{item?.spoc || "N/A"}</span>
+          </div>
         </div>
       </div>
 
-      {/* <Button
-        type="primary"
-        className={styles.brochureBtn}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        Download Brochure
-      </Button> */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "auto", paddingTop: "12px" }}>
+        <Tooltip title="View Students">
+          <Button 
+            shape="circle" 
+            icon={<ArrowRightOutlined />} 
+            onClick={(e) => {
+              e.stopPropagation();
+              onActionClick && onActionClick();
+            }}
+            style={{
+              background: "#fff",
+              color: "#1E69DA",
+              borderColor: "#c7d2fe",
+              borderWidth: "2px",
+              boxShadow: "none",
+              width: "36px",
+              height: "36px"
+            }}
+          />
+        </Tooltip>
+      </div>
+
     </div>
   );
 };

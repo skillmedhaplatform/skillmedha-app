@@ -2,7 +2,8 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { decrypt, encrypt } from "@/utils/windowMW";
+import Link from "next/link";
+import { encrypt, decrypt } from "@/utils/windowMW";
 import BreadcrumbComponent from "@/modules/admin/components/breadcrumbs/breadcrumbs";
 import { getAllDepartmentsFromOrgs } from "@/redux/slices/admin/adminOrgSlice";
 import {
@@ -128,16 +129,6 @@ function Page() {
     return result;
   }, [departmentsList, searchQuery, sortBy]);
 
-  // Pagination calculations
-  const totalItems = filteredAndSortedDepartments.length;
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedDepartments = filteredAndSortedDepartments.slice(
-    startIndex,
-    endIndex
-  );
-  const totalPages = Math.ceil(totalItems / pageSize);
-
   // Active filters count
   const activeFilterCount =
     (searchQuery ? 1 : 0) + (sortBy !== "name-asc" ? 1 : 0);
@@ -146,7 +137,7 @@ function Page() {
     router.push(
       `/admin/colleges/departments/students?orgId=${encryptedOrgId}&orgName=${encryptedOrgName}&deptId=${encrypt(
         department?._id
-      )}&deptName=${encrypt(department?.title)}`
+      )}&deptName=${encrypt(department?.title)}&from=${from || ''}`
     );
   };
 
@@ -161,12 +152,6 @@ function Page() {
     setSortBy(value);
     setCurrentPage(1);
     updateUrl({ sort: value, page: 1 });
-  };
-
-  const handlePageChange = (page, pageSize) => {
-    setCurrentPage(page);
-    setPageSize(pageSize);
-    updateUrl({ page, pageSize });
   };
 
   const handleClearSearch = () => {
@@ -189,15 +174,53 @@ function Page() {
     updateUrl({ search: undefined, sort: "name-asc", page: 1, pageSize: 12 });
   };
 
+  const from = searchParams.get("from");
+  const orgName = encryptedOrgName ? decrypt(encryptedOrgName) : null;
+
+  const breadcrumbItems = [
+    { title: <Link href="/admin/colleges">Colleges & Students</Link> },
+    { title: "Departments" }
+  ];
+
   return (
     <div className={styles.pageContainer}>
-      <BreadcrumbComponent />
-
-      {loading && (
-        <div className={styles.loadingContainer}>
-          <Spin size="large" />
+      <div className={styles.headerWrapper}>
+        <div className={styles.departmentHeader}>
+          <BreadcrumbComponent customItems={breadcrumbItems} />
+          <Space className={styles.controls} size="middle" style={{ flexWrap: "wrap" }}>
+            <Search
+                placeholder="Search departments..."
+                onChange={handleSearchChange}
+                value={searchQuery}
+                prefix={<SearchOutlined />}
+                allowClear
+                className={styles.searchInput}
+                styles={{ input: { borderRadius: "8px" } }}
+                style={{ borderRadius: "8px" }}
+              />
+              <Select
+                value={sortBy}
+                onChange={handleSortChange}
+                className={styles.sortSelect}
+                style={{ borderRadius: "8px" }}
+              >
+                <Option value="name-asc">Name (A-Z)</Option>
+                <Option value="name-desc">Name (Z-A)</Option>
+                <Option value="students-desc">Most Students</Option>
+                <Option value="students-asc">Least Students</Option>
+                <Option value="hod-asc">HOD (A-Z)</Option>
+                <Option value="hod-desc">HOD (Z-A)</Option>
+              </Select>
+          </Space>
         </div>
-      )}
+      </div>
+
+      <div className={styles.contentScrollContainer}>
+        {loading && (
+          <div className={styles.loadingContainer}>
+            <Spin size="large" />
+          </div>
+        )}
 
       {error && (
         <div className={styles.errorContainer}>
@@ -213,44 +236,6 @@ function Page() {
 
       {!loading && !error && departmentsList.length > 0 && (
         <>
-          <div className={styles.departmentHeader}>
-            <div className={styles.headerInfo}>
-              <h3>{organizationName}</h3>
-              <Space className={styles.controls} size="middle">
-                <Search
-                  placeholder="Search departments..."
-                  onChange={handleSearchChange}
-                  value={searchQuery}
-                  prefix={<SearchOutlined />}
-                  allowClear
-                  className={styles.searchInput}
-                  styles={{
-                    input: {
-                      borderRadius: "8px",
-                    },
-                  }}
-                  style={{
-                    borderRadius: "8px",
-                  }}
-                />
-                <Select
-                  value={sortBy}
-                  onChange={handleSortChange}
-                  className={styles.sortSelect}
-                  style={{
-                    borderRadius: "8px",
-                  }}
-                >
-                  <Option value="name-asc">Name (A-Z)</Option>
-                  <Option value="name-desc">Name (Z-A)</Option>
-                  <Option value="students-desc">Most Students</Option>
-                  <Option value="students-asc">Least Students</Option>
-                  <Option value="hod-asc">HOD (A-Z)</Option>
-                  <Option value="hod-desc">HOD (Z-A)</Option>
-                </Select>
-              </Space>
-            </div>
-          </div>
           {/* Active Filters Section */}
           {activeFilterCount > 0 && (
             <div className={styles.activeFilters}>
@@ -280,42 +265,24 @@ function Page() {
               </Space>
             </div>
           )}
-          {paginatedDepartments.length === 0 ? (
+          {filteredAndSortedDepartments.length === 0 ? (
             <div className={styles.emptyState}>
               <p>No departments match your search</p>
             </div>
           ) : (
             <>
               <div className={styles.gridContainer}>
-                {paginatedDepartments.map((department) => (
-                  <div
-                    key={department._id}
-                    onClick={() => handleDepartmentClick(department)}
-                  >
-                    <DepartmentCard item={department} />
+                {filteredAndSortedDepartments.map((department) => (
+                  <div key={department._id}>
+                    <DepartmentCard item={department} onActionClick={() => handleDepartmentClick(department)} />
                   </div>
                 ))}
-              </div>
-
-              {/* Pagination */}
-              <div className={styles.paginationContainer}>
-                <Pagination
-                  current={currentPage}
-                  total={totalItems}
-                  pageSize={pageSize}
-                  onChange={handlePageChange}
-                  showSizeChanger
-                  showQuickJumper
-                  showTotal={(total, range) =>
-                    `${range[0]}-${range[1]} of ${total} departments`
-                  }
-                  pageSizeOptions={["12", "24", "48", "96"]}
-                />
               </div>
             </>
           )}
         </>
       )}
+      </div>
     </div>
   );
 }

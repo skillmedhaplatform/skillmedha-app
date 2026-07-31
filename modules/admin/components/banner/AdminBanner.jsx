@@ -4,8 +4,8 @@ import { BsX, BsPlus, BsStar } from "react-icons/bs";
 import { FaShieldAlt, FaEye } from "react-icons/fa";
 import { FaCrown } from "react-icons/fa6";
 import { useSelector } from "react-redux";
-import { usePathname } from "next/navigation";
-import { sideBarTitles } from "@/utils/windowMW";
+import { usePathname, useSearchParams } from "next/navigation";
+import { sideBarTitles, decrypt } from "@/utils/windowMW";
 
 const AdminBanner = () => {
   const [mounted, setMounted] = useState(false);
@@ -13,6 +13,7 @@ const AdminBanner = () => {
   const userDetails = value?.user;
   const userName = userDetails?.fullname || userDetails?.username || "";
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
@@ -39,6 +40,8 @@ const AdminBanner = () => {
   const internshipsData = useSelector((state) => state.adminInternship?.allInternShips?.data);
   const workshopsData = useSelector((state) => state.adminInternship?.allWorkshops?.data);
   const orgStats = useSelector((state) => state.adminOrg?.orgStats?.value);
+  const studentsData = useSelector((state) => state.adminOrg?.students?.value);
+  const jobsData = useSelector((state) => state.adminOrg?.jobs?.pagination);
 
   const getSectionContent = () => {
     if (isDashboard) {
@@ -55,8 +58,49 @@ const AdminBanner = () => {
     if (pathname.includes("/course")) return { title: "Course Management", icon: defaultIcon };
     if (pathname.includes("/users")) return { title: "User Management", icon: defaultIcon };
     if (pathname.includes("/internship")) return { title: "Internships", icon: defaultIcon };
+    if (pathname.includes("/colleges/tpo")) return { title: "Training & Placement Officers", icon: defaultIcon };
+    if (pathname.includes("/colleges/departments/students")) {
+      const encryptedOrgName = searchParams.get("orgName");
+      const encryptedDeptName = searchParams.get("deptName");
+      const orgName = encryptedOrgName ? decrypt(encryptedOrgName) : "";
+      const deptName = encryptedDeptName ? decrypt(encryptedDeptName) : "";
+      const totalStudents = studentsData?.totalCount || 0;
+      return { 
+        title: `${orgName}${orgName && deptName ? ' - ' : ''}${deptName}`,
+        subtitle: `Total Students: ${totalStudents}`,
+        icon: defaultIcon 
+      };
+    }
+    if (pathname.includes("/colleges/departments")) {
+      const encryptedOrgName = searchParams.get("orgName");
+      const orgName = encryptedOrgName ? decrypt(encryptedOrgName) : "Departments";
+      return { title: orgName, icon: defaultIcon };
+    }
     if (pathname.includes("/colleges")) return { title: "Colleges", icon: defaultIcon };
+    if (pathname.includes("/companies/hr")) {
+      const encryptedOrgName = searchParams.get("orgName");
+      const orgName = encryptedOrgName ? decrypt(encryptedOrgName) : "";
+      return { title: `HR Users at ${orgName}`, icon: defaultIcon };
+    }
+    if (pathname.includes("/companies/jobs")) {
+      const encryptedOrgName = searchParams.get("orgName");
+      const orgName = encryptedOrgName ? decrypt(encryptedOrgName) : "";
+      const totalJobs = jobsData?.totalJobs || 0;
+      return { 
+        title: `Job Opportunities at ${orgName}`, 
+        subtitle: `${totalJobs} position${totalJobs !== 1 ? 's' : ''} available`,
+        icon: defaultIcon 
+      };
+    }
     if (pathname.includes("/companies")) return { title: "Companies", icon: defaultIcon };
+    if (pathname.includes("/organisationDetails") && pathname.split("/").length >= 4) {
+      // It's the job details page
+      return { 
+        title: "Job Details", 
+        subtitle: "View complete information and applicants for this position",
+        icon: defaultIcon 
+      };
+    }
     if (pathname.includes("/practice")) return { title: "Practice Module", icon: defaultIcon };
     if (pathname.includes("/questionManager")) return { title: "Question Manager", icon: defaultIcon };
     if (pathname.includes("/liveLect")) return { title: "Live Lectures", icon: defaultIcon };

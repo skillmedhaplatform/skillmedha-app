@@ -4,6 +4,7 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { decrypt } from "@/utils/windowMW";
 import { debounce } from "lodash";
+import Link from "next/link";
 import BreadcrumbComponent from "@/modules/admin/components/breadcrumbs/breadcrumbs";
 import { getStudentsInDepartment } from "@/redux/slices/admin/adminOrgSlice";
 import { Table, Input, Button, Space, Tag, Spin, Divider, Tooltip, Pagination } from "antd";
@@ -33,6 +34,14 @@ const Students = () => {
   const Dep_Name = encrypteddepartMentName
     ? decrypt(encrypteddepartMentName)
     : null;
+
+  const from = searchParams.get("from");
+
+  const breadcrumbItems = [
+    { title: <Link href="/admin/colleges">Colleges & Students</Link> },
+    { title: <Link href={`/admin/colleges/departments?orgId=${encryptedOrgId}&orgName=${encryptedOrgName}${from ? `&from=${from}` : ''}`}>Departments</Link> },
+    { title: "Students" }
+  ];
 
   // Filter states - initialize from URL params
   const [globalSearch, setGlobalSearch] = useState("");
@@ -386,37 +395,37 @@ const Students = () => {
   };
 
   return (
-    <div className={styles.studentsContainer}>
-      <div className={styles.header}>
-        <div>
-          <BreadcrumbComponent />
-          <h2 style={{ marginTop: "8px" }}>
-            {ORG_Name} - {Dep_Name}
-          </h2>
-          <p className={styles.subtitle}>
-            Total Students: <strong>{totalCount}</strong>
-          </p>
+    <div className={styles.pageContainer}>
+      <div className={styles.headerWrapper}>
+        <div className={styles.header}>
+          <div className={styles.headerInfo}>
+            <div className={styles.titleSection}>
+              <BreadcrumbComponent customItems={breadcrumbItems} />
+            </div>
+            <Space className={styles.controls}>
+              <Input
+                placeholder="Search by name or email... (3+ chars)"
+                value={globalSearch}
+                onChange={(e) => handleGlobalSearch(e.target.value)}
+                prefix={<SearchOutlined />}
+                style={{ width: 280, borderRadius: "8px" }}
+                allowClear
+                onClear={handleClearSearch}
+              />
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={handleRefresh}
+                loading={loading}
+                type="default"
+              >
+                Refresh
+              </Button>
+            </Space>
+          </div>
         </div>
-        <Space>
-          <Input
-            placeholder="Search by name or email... (3+ chars)"
-            value={globalSearch}
-            onChange={(e) => handleGlobalSearch(e.target.value)}
-            prefix={<SearchOutlined />}
-            style={{ width: 280 }}
-            allowClear
-            onClear={handleClearSearch}
-          />
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={handleRefresh}
-            loading={loading}
-            type="default"
-          >
-            Refresh
-          </Button>
-        </Space>
       </div>
+
+      <div className={styles.contentScrollContainer}>
 
       {/* Active Filters Section */}
       {activeFilterCount > 0 && (
@@ -506,6 +515,7 @@ const Students = () => {
           </div>
         </>
       )}
+      </div>
     </div>
   );
 };

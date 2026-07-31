@@ -2090,63 +2090,66 @@ function DashboardPage() {
       )}
 
       {/* Charts Section - Conditional based on type */}
-      {isCompany ? (
-        <>
-          {stats?.statistics?.jobsByStatus && (
+      <div className={styles.analyticsRow}>
+        {isCompany ? (
+          <>
+            {stats?.statistics?.jobsByStatus && (
+              <div className={styles.chartsSection}>
+                <div className={styles.sectionTitle}>
+                  <h3>Job Analytics</h3>
+                </div>
+
+                <div className={styles.chartsGrid}>
+                  <JobStatusChart jobsByStatus={stats.statistics.jobsByStatus} />
+                  {stats?.recentApplications?.length > 0 && (
+                    <ApplicationsTrendChart
+                      recentApplications={stats.recentApplications}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          departmentData.length > 0 && (
             <div className={styles.chartsSection}>
               <div className={styles.sectionTitle}>
-                <h3>Job Analytics</h3>
+                <h3>Department Analytics</h3>
               </div>
 
-              <div className={styles.chartsGrid}>
-                <JobStatusChart jobsByStatus={stats.statistics.jobsByStatus} />
-                {stats?.recentApplications?.length > 0 && (
-                  <ApplicationsTrendChart
-                    recentApplications={stats.recentApplications}
-                  />
-                )}
+              <div className={`${styles.chartsGrid} ${styles.threeColumns}`}>
+                <ColumnChart
+                  departmentData={departmentData}
+                  onDepartmentClick={handleDepartmentNavigation}
+                />
+                <PieChart
+                  departmentData={departmentData}
+                  totalStudents={stats?.counts?.students}
+                  onDepartmentClick={handleDepartmentNavigation}
+                />
+                <HorizontalBarChart
+                  departmentData={departmentData}
+                  onDepartmentClick={handleDepartmentNavigation}
+                />
               </div>
             </div>
-          )}
-        </>
-      ) : (
-        departmentData.length > 0 && (
+          )
+        )}
+
+        {stats?.aiUsage && (
           <div className={styles.chartsSection}>
             <div className={styles.sectionTitle}>
-              <h3>Department Analytics</h3>
+              <h3>AI Usage Analytics</h3>
             </div>
-
-            <div className={`${styles.chartsGrid} ${styles.threeColumns}`}>
-              <ColumnChart
-                departmentData={departmentData}
-                onDepartmentClick={handleDepartmentNavigation}
-              />
-              <PieChart
-                departmentData={departmentData}
-                totalStudents={stats?.counts?.students}
-                onDepartmentClick={handleDepartmentNavigation}
-              />
-              <HorizontalBarChart
-                departmentData={departmentData}
-                onDepartmentClick={handleDepartmentNavigation}
+            <div className={styles.chartsGrid}>
+              <AIUsageChart
+                aiUsage={stats.aiUsage}
+                monthlyChangeRate={stats.monthlyChangeRate}
               />
             </div>
           </div>
-        )
-      )}
-      {stats?.aiUsage && (
-        <div className={styles.chartsSection}>
-          <div className={styles.sectionTitle}>
-            <h3>AI Usage Analytics</h3>
-          </div>
-          <div className={styles.chartsGrid}>
-            <AIUsageChart
-              aiUsage={stats.aiUsage}
-              monthlyChangeRate={stats.monthlyChangeRate}
-            />
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

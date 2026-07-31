@@ -51,8 +51,6 @@ function Page() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date-desc");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Sync states with URL params
   useEffect(() => {
@@ -60,15 +58,11 @@ function Page() {
     const urlStatus = searchParams.get("status") || "all";
     const urlCity = searchParams.get("city") || "all";
     const urlSort = searchParams.get("sort") || "date-desc";
-    const urlPage = parseInt(searchParams.get("page") || "1", 10);
-    const urlLimit = parseInt(searchParams.get("limit") || "10", 10);
 
     setSearchQuery(urlSearch);
     setStatusFilter(urlStatus);
     setCityFilter(urlCity);
     setSortBy(urlSort);
-    setCurrentPage(urlPage);
-    setItemsPerPage(urlLimit);
   }, [searchParams]);
 
   // Update URL with filters (client-side only)
@@ -92,18 +86,18 @@ function Page() {
     [searchParams, pathname, router]
   );
 
-  // Fetch jobs ONLY for pagination (server-side)
+  // Fetch all jobs for the organization
   useEffect(() => {
     if (ORG_ID) {
       dispatch(
         getJobsByOrg({
           orgId: ORG_ID,
-          page: currentPage,
-          limit: itemsPerPage,
+          page: 1,
+          limit: 1000,
         })
       );
     }
-  }, [ORG_ID, currentPage, itemsPerPage, dispatch]);
+  }, [ORG_ID, dispatch]);
 
   // Cities from current page data
   const cities = useMemo(() => {
@@ -221,18 +215,6 @@ function Page() {
     [updateURL]
   );
 
-  const handlePageChange = useCallback(
-    (page, pageSize) => {
-      setCurrentPage(page);
-      setItemsPerPage(pageSize || itemsPerPage);
-      updateURL({
-        page: page.toString(),
-        limit: pageSize?.toString() || itemsPerPage.toString(),
-      });
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    },
-    [updateURL, itemsPerPage]
-  );
 
   // Active filter count
   const activeFilterCount =
@@ -307,71 +289,70 @@ function Page() {
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.headerSection}>
-        <BreadcrumbComponent />
-        <h1 className={styles.pageTitle} style={{ marginTop: "8px" }}>Job Opportunities at {ORG_NAME}</h1>
-        <div className={styles.headerContent}>
-          <p className={styles.positionsCount}>
-            {pagination?.totalJobs ?? 0} position
-            {pagination?.totalJobs !== 1 ? "s" : ""} available
-          </p>
-          <div className={styles.filterSection}>
-            <Input
-              placeholder="Search jobs..."
-              allowClear
-              prefix={<SearchOutlined />}
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              style={{ width: 280 }}
-              className={styles.searchBar}
-            />
+      <div className={styles.headerWrapper}>
+        <div className={styles.headerSection}>
+          <BreadcrumbComponent />
+          <div className={styles.headerContent}>
+            <div className={styles.filterSection}>
+              <Input
+                placeholder="Search jobs..."
+                allowClear
+                prefix={<SearchOutlined />}
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                style={{ width: 280 }}
+                className={styles.searchBar}
+              />
 
-            <Space size="small" className={styles.filterControls} wrap>
-              <Select
-                value={statusFilter}
-                onChange={handleStatusChange}
-                size="middle"
-                className={styles.filterSelect}
-              >
-                <Option value="all">All Status</Option>
-                <Option value="active">Active</Option>
-                <Option value="pending">Pending</Option>
-                <Option value="expired">Expired</Option>
-              </Select>
+              <Space size="small" className={styles.filterControls} wrap>
+                <Select
+                  value={statusFilter}
+                  onChange={handleStatusChange}
+                  size="middle"
+                  className={styles.filterSelect}
+                >
+                  <Option value="all">All Status</Option>
+                  <Option value="active">Active</Option>
+                  <Option value="pending">Pending</Option>
+                  <Option value="expired">Expired</Option>
+                </Select>
 
-              <Select
-                value={cityFilter}
-                onChange={handleCityChange}
-                size="middle"
-                className={styles.filterSelect}
-              >
-                <Option value="all">All Cities</Option>
-                {cities.map((city) => (
-                  <Option key={city} value={city}>
-                    {city}
-                  </Option>
-                ))}
-              </Select>
+                <Select
+                  value={cityFilter}
+                  onChange={handleCityChange}
+                  size="middle"
+                  className={styles.filterSelect}
+                >
+                  <Option value="all">All Cities</Option>
+                  {cities.map((city) => (
+                    <Option key={city} value={city}>
+                      {city}
+                    </Option>
+                  ))}
+                </Select>
 
-              <Select
-                value={sortBy}
-                onChange={handleSortChange}
-                size="middle"
-                className={styles.filterSelect}
-              >
-                <Option value="date-desc">Newest First</Option>
-                <Option value="date-asc">Oldest First</Option>
-                <Option value="title-asc">Title (A-Z)</Option>
-                <Option value="title-desc">Title (Z-A)</Option>
-                <Option value="ctc-desc">Highest CTC</Option>
-                <Option value="ctc-asc">Lowest CTC</Option>
-                <Option value="applicants-desc">Most Applicants</Option>
-                <Option value="applicants-asc">Least Applicants</Option>
-              </Select>
-            </Space>
+                <Select
+                  value={sortBy}
+                  onChange={handleSortChange}
+                  size="middle"
+                  className={styles.filterSelect}
+                >
+                  <Option value="date-desc">Newest First</Option>
+                  <Option value="date-asc">Oldest First</Option>
+                  <Option value="title-asc">Title (A-Z)</Option>
+                  <Option value="title-desc">Title (Z-A)</Option>
+                  <Option value="ctc-desc">Highest CTC</Option>
+                  <Option value="ctc-asc">Lowest CTC</Option>
+                  <Option value="applicants-desc">Most Applicants</Option>
+                  <Option value="applicants-asc">Least Applicants</Option>
+                </Select>
+              </Space>
+            </div>
           </div>
         </div>
       </div>
+
+      <div className={styles.contentScrollContainer}>
 
       {/* Active Filters Section */}
       {activeFilterCount > 0 && (
@@ -523,24 +504,9 @@ function Page() {
               </div>
             ))}
           </div>
-
-          <div className={styles.paginationContainer}>
-            <Pagination
-              current={currentPage}
-              total={pagination?.totalJobs ?? 0}
-              pageSize={itemsPerPage}
-              onChange={handlePageChange}
-              onShowSizeChange={handlePageChange}
-              showSizeChanger
-              showTotal={(total, range) =>
-                `${range[0]}-${range[1]} of ${total} jobs`
-              }
-              pageSizeOptions={["10", "20", "30", "50"]}
-              disabled={loading}
-            />
-          </div>
         </>
       )}
+      </div>
     </div>
   );
 }

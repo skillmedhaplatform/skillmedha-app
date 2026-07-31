@@ -2,30 +2,25 @@
 @import "@/modules/admin/styles/mixins.scss";
 
 .pageContainer {
-  height: calc(100% - 2rem);
-  min-height: 80vh;
-  width: auto;
-  margin: 1rem;
-  padding: 0 2rem;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  overflow-y: auto;
-  @include custom-scrollbar();
-  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.headerWrapper {
+  background-color: #fff;
+  padding: 0.25rem 1.5rem;
 }
 
 .headerSection {
-  position: sticky;
-  top: 0;
-  background-color: #fff;
-  z-index: 9;
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  margin-bottom: 1.5rem;
-
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0;
+  
   .pageTitle {
     font-size: 24px;
     margin: 8px 0 0 0;
@@ -36,10 +31,10 @@
   .headerContent {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     gap: 1rem;
-    margin-top: 8px;
+    margin: 0;
   }
 
   .positionsCount {
@@ -54,6 +49,14 @@
     color: #475569;
     background-color: #f8fafc;
   }
+}
+
+.contentScrollContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  background-color: transparent;
+  @include custom-scrollbar();
 }
 
 .filterSection {

@@ -1065,12 +1065,28 @@
     }
   }
 
+  .analyticsRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    align-items: stretch;
+
+    .chartsSection {
+      margin-top: 0;
+      height: 100%;
+    }
+  }
+
   // Charts Section
   .chartsSection {
     margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
 
     .chartsGrid {
       @include charts-grid(500px, 1rem);
+      flex: 1;
 
       &.threeColumns {
         @include charts-grid(300px, 1rem);
@@ -1086,6 +1102,9 @@
         box-shadow: $shadowSm;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 1px solid rgba(190, 190, 190, 0.2);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
 
         &:hover {
           box-shadow: $shadowMd;
@@ -1107,6 +1126,7 @@
 
         .chartWrapper {
           width: 100%;
+          flex: 1;
           overflow: hidden;
           margin-top: 0.75rem;
         }

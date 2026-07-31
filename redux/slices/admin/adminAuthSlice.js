@@ -224,7 +224,9 @@ export const updateAdminUser = createAsyncThunk(
         }
       );
 
-      return data;
+      if (data.success) {
+        return data;
+      }
 
       throw new Error(data.err || data.message || "Failed to update user");
     } catch (error) {
