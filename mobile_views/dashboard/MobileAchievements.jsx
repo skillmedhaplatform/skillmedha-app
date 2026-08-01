@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Modal } from "antd";
+import { Modal, Button } from "antd";
 
 export default function MobileAchievements({ progressById, combinedLearningData, studentCreds }) {
   const [streak, setStreak] = useState(1);
@@ -11,6 +11,9 @@ export default function MobileAchievements({ progressById, combinedLearningData,
   // Notification states
   const [unseenBadges, setUnseenBadges] = useState([]);
   const [selectedBadgeDetail, setSelectedBadgeDetail] = useState(null);
+  
+  const [selectedAchievement, setSelectedAchievement] = useState(null);
+  const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -115,6 +118,9 @@ export default function MobileAchievements({ progressById, combinedLearningData,
           const shortCategoryText = categoryText.charAt(0).toUpperCase() + categoryText.slice(1);
           const courseTitle = course.title || course.courseTitle || course.name || `${shortCategoryText} Course`;
           achievementsList.push({
+            type: course.type === 'internships' ? 'internship' : 'course',
+            id: achievementId,
+            courseData: course,
             emoji: "🥇",
             title: `${courseTitle} Complete`,
             desc: "+50 coins earned",
@@ -145,9 +151,11 @@ export default function MobileAchievements({ progressById, combinedLearningData,
 
   const technicalBadges = practiceBadges.filter(b => b.section === "Technical");
   const nonTechnicalBadges = practiceBadges.filter(b => b.section === "Non-Technical");
+  const codingBadges = practiceBadges.filter(b => b.section === "Coding");
 
   const hasUnseenTech = technicalBadges.some(b => unseenBadges.includes(b.id));
   const hasUnseenNonTech = nonTechnicalBadges.some(b => unseenBadges.includes(b.id));
+  const hasUnseenCoding = codingBadges.some(b => unseenBadges.includes(b.id));
 
   const openModal = (type) => {
     setModalType(type);
@@ -255,18 +263,18 @@ export default function MobileAchievements({ progressById, combinedLearningData,
       <div 
         key="tech"
         onClick={() => openModal("Technical")}
-        className={`flex items-center justify-between p-3.5 rounded-2xl border ${hasUnseenTech ? 'border-[#3b82f6] shadow-sm' : 'border-[#e2e8f0]'} bg-white cursor-pointer hover:shadow-md transition-shadow relative`}
+        className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenTech ? 'border-[#3b82f6] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
       >
         {hasUnseenTech && <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[#3b82f6] rounded-full border-[1.5px] border-white shadow-sm z-10 animate-pulse" />}
-        <div className="flex items-center gap-3">
-          <div className="text-[26px]">💻</div>
-          <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">Tech Badges</span>
-            <span className="text-[#64748b] text-[12px]">View your technical practice badges</span>
+        <div className="flex items-center gap-3 overflow-hidden mr-2">
+          <div className="text-[24px] shrink-0 group-hover:scale-110 transition-transform">💻</div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-[#0f172a] text-[14px] truncate group-hover:text-[#3b82f6] transition-colors">Tech Badges</span>
+            <span className="text-[#64748b] text-[12px] truncate">View your technical practice badges</span>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <span className="text-white bg-[#5694F0] px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">{technicalBadges.length} Earned</span>
+          <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold shrink-0 min-w-[70px] text-center flex justify-center">{technicalBadges.length} Earned</span>
           {hasUnseenTech && <span className="text-[9px] font-bold text-[#3b82f6] uppercase tracking-wider">New</span>}
         </div>
       </div>
@@ -276,27 +284,52 @@ export default function MobileAchievements({ progressById, combinedLearningData,
       <div 
         key="non-tech"
         onClick={() => openModal("Non-Technical")}
-        className={`flex items-center justify-between p-3.5 rounded-2xl border ${hasUnseenNonTech ? 'border-[#8b5cf6] shadow-sm' : 'border-[#e2e8f0]'} bg-white cursor-pointer hover:shadow-md transition-shadow relative`}
+        className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenNonTech ? 'border-[#8b5cf6] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
       >
         {hasUnseenNonTech && <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[#8b5cf6] rounded-full border-[1.5px] border-white shadow-sm z-10 animate-pulse" />}
-        <div className="flex items-center gap-3">
-          <div className="text-[26px]">🧠</div>
-          <div className="flex flex-col">
-            <span className="font-bold text-[#0f172a] text-[14px]">Non-Tech Badges</span>
-            <span className="text-[#64748b] text-[12px]">View your aptitude & reasoning badges</span>
+        <div className="flex items-center gap-3 overflow-hidden mr-2">
+          <div className="text-[24px] shrink-0 group-hover:scale-110 transition-transform">🧠</div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-[#0f172a] text-[14px] truncate group-hover:text-[#3b82f6] transition-colors">Non-Tech Badges</span>
+            <span className="text-[#64748b] text-[12px] truncate">View your aptitude & reasoning badges</span>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <span className="text-white bg-[#5694F0] px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">{nonTechnicalBadges.length} Earned</span>
+          <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold shrink-0 min-w-[70px] text-center flex justify-center">{nonTechnicalBadges.length} Earned</span>
           {hasUnseenNonTech && <span className="text-[9px] font-bold text-[#8b5cf6] uppercase tracking-wider">New</span>}
         </div>
       </div>
     );
 
-    if (hasUnseenNonTech && !hasUnseenTech) {
-      return [nonTechTile, techTile];
-    }
-    return [techTile, nonTechTile];
+    const codingTile = (
+      <div 
+        key="coding"
+        onClick={() => openModal("Coding")}
+        className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenCoding ? 'border-[#f59e0b] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
+      >
+        {hasUnseenCoding && <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-[#f59e0b] rounded-full border-[1.5px] border-white shadow-sm z-10 animate-pulse" />}
+        <div className="flex items-center gap-3 overflow-hidden mr-2">
+          <div className="text-[24px] shrink-0 group-hover:scale-110 transition-transform">⌨️</div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-[#0f172a] text-[14px] truncate group-hover:text-[#3b82f6] transition-colors">Coding Badges</span>
+            <span className="text-[#64748b] text-[12px] truncate">View your programming badges</span>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold shrink-0 min-w-[70px] text-center flex justify-center">{codingBadges.length} Earned</span>
+          {hasUnseenCoding && <span className="text-[9px] font-bold text-[#f59e0b] uppercase tracking-wider">New</span>}
+        </div>
+      </div>
+    );
+
+    const tiles = [
+      { el: techTile, hasUnseen: hasUnseenTech },
+      { el: nonTechTile, hasUnseen: hasUnseenNonTech },
+      { el: codingTile, hasUnseen: hasUnseenCoding }
+    ];
+
+    tiles.sort((a, b) => (b.hasUnseen ? 1 : 0) - (a.hasUnseen ? 1 : 0));
+    return tiles.map(t => t.el);
   };
 
   return (
@@ -305,7 +338,7 @@ export default function MobileAchievements({ progressById, combinedLearningData,
       {renderTiles()}
 
       <Modal
-        title={<span className="font-bold text-[18px] flex items-center gap-2">{modalType === "Technical" ? '💻' : '🧠'} {modalType} Practice Badges</span>}
+        title={<span className="font-bold text-[18px] flex items-center gap-2">{modalType === "Technical" ? '💻' : modalType === "Coding" ? '⌨️' : '🧠'} {modalType} Practice Badges</span>}
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
@@ -314,23 +347,150 @@ export default function MobileAchievements({ progressById, combinedLearningData,
         bodyStyle={{ maxHeight: '70vh', overflowY: 'auto', padding: '24px 16px' }}
         closeIcon={<span className="text-gray-400 hover:text-gray-600 text-xl">✕</span>}
       >
-        {renderBadgeList(modalType === "Technical" ? technicalBadges : nonTechnicalBadges)}
+        {renderBadgeList(modalType === "Technical" ? technicalBadges : modalType === "Coding" ? codingBadges : nonTechnicalBadges)}
       </Modal>
 
       <div className="w-full h-[1px] bg-gray-100 my-1"></div>
 
       {achievementsList.map((item, idx) => (
-        <div key={idx} className="flex items-center justify-between p-3.5 rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="text-[26px]">{item.emoji}</div>
-            <div className="flex flex-col">
-              <span className="font-bold text-[#0f172a] text-[14px]">{item.title}</span>
-              <span className="text-[#64748b] text-[12px]">{item.desc}</span>
+        <div 
+          key={idx} 
+          className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-white h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group"
+          onClick={() => {
+            setSelectedAchievement(item);
+            setIsAchievementModalOpen(true);
+          }}
+        >
+          <div className="flex items-center gap-3 overflow-hidden mr-2">
+            <div className="text-[24px] shrink-0 group-hover:scale-110 transition-transform">{item.emoji}</div>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-[#0f172a] text-[14px] truncate group-hover:text-[#3b82f6] transition-colors">{item.title}</span>
+              <span className="text-[#64748b] text-[12px] truncate">{item.desc}</span>
             </div>
           </div>
-          <span className="text-white bg-[#5694F0] px-2.5 py-1 rounded-full text-[11px] font-bold">{item.status}</span>
+          <span className="text-white bg-gradient-to-br from-[#1E69DA] to-[#5694F0] px-2 py-1 rounded-full text-[11px] font-bold shrink-0 min-w-[70px] text-center flex justify-center">{item.status}</span>
         </div>
       ))}
+      <AchievementDetailsModal 
+        isOpen={isAchievementModalOpen} 
+        onClose={() => setIsAchievementModalOpen(false)} 
+        achievement={selectedAchievement} 
+      />
     </div>
   );
 }
+
+const AchievementDetailsModal = ({ isOpen, onClose, achievement }) => {
+  if (!achievement) return null;
+
+  const renderContent = () => {
+    switch (achievement.type) {
+      case 'course':
+      case 'internship':
+        const course = achievement.courseData;
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">{achievement.type === 'course' ? 'Course Details' : 'Internship Details'}</h4>
+            <div className="flex items-center gap-2 mb-3 text-[13px] text-[#64748b]">
+              <span className="shrink-0">⏱️</span> 
+              <span>{course.duration ? `Duration: ${course.duration}` : "Completed"}</span>
+            </div>
+            
+            <h5 className="font-bold text-[#334155] text-[13px] mb-2">What you learned</h5>
+            <div className="flex flex-col gap-2">
+              {course.skillsToMaster?.length > 0 ? (
+                course.skillsToMaster.slice(0, 4).map((skill, i) => (
+                  <div key={i} className="flex items-center gap-2 text-[13px] text-[#475569]">
+                    <span className="text-[#10b981]">✅</span> <span>{skill}</span>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 text-[13px] text-[#475569]"><span className="text-[#10b981]">✅</span> <span>Core Fundamentals</span></div>
+                  <div className="flex items-center gap-2 text-[13px] text-[#475569]"><span className="text-[#10b981]">✅</span> <span>Advanced Techniques</span></div>
+                  <div className="flex items-center gap-2 text-[13px] text-[#475569]"><span className="text-[#10b981]">✅</span> <span>Best Practices</span></div>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      case 'practice':
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Test Performance</h4>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[#64748b] text-[13px]">Accuracy</span>
+              <span className="font-bold text-[#10b981] text-[14px]">100%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[#64748b] text-[13px]">Questions Answered</span>
+              <span className="font-bold text-[#1e293b] text-[14px]">All</span>
+            </div>
+          </div>
+        );
+      case 'streak':
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Consistency is Key!</h4>
+            <p className="text-[13px] text-[#64748b] leading-relaxed">
+              You've logged in for {achievement.streak || 30} consecutive days. Keep up the great work and continue building your skills every day!
+            </p>
+          </div>
+        );
+      default:
+        return (
+          <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
+            <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Achievement Unlocked</h4>
+            <p className="text-[13px] text-[#64748b] leading-relaxed">
+              {achievement.desc}. Keep exploring the platform to earn more badges!
+            </p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <Modal
+      open={isOpen}
+      onCancel={onClose}
+      footer={null}
+      centered
+      width={400}
+      className="achievement-modal"
+      closeIcon={<span className="text-gray-400 hover:text-gray-600 text-lg">✕</span>}
+      bodyStyle={{ padding: 0 }}
+    >
+      <div className="flex flex-col items-center justify-center p-6 pt-10 relative overflow-hidden bg-white/60 backdrop-blur-md rounded-2xl border border-white/50">
+        <div className="absolute top-[-50px] w-[200px] h-[200px] bg-[#f59e0b] rounded-full blur-[80px] opacity-20"></div>
+        
+        <div className="text-[80px] leading-none mb-4 drop-shadow-xl relative z-10 animate-bounce-slight" style={{ filter: 'drop-shadow(0px 10px 15px rgba(245, 158, 11, 0.4))' }}>
+          {achievement.emoji}
+        </div>
+        
+        <h2 className="text-[24px] font-extrabold text-[#0f172a] text-center mb-1 relative z-10 w-full px-2" style={{ wordBreak: 'break-word', lineHeight: '1.2' }}>
+          {achievement.title}
+        </h2>
+        
+        <div className="flex items-center gap-2 text-[13px] text-[#64748b] font-medium mb-2 relative z-10">
+          <span>Earned Recently</span>
+          <span>•</span>
+          <span className="flex items-center gap-1 text-[#f59e0b] font-bold">
+            💰 {achievement.desc.includes('coins earned') ? achievement.desc : '+50 coins'}
+          </span>
+        </div>
+        
+        <div className="w-full relative z-10 flex flex-col items-center">
+          {renderContent()}
+        </div>
+        
+        <Button 
+          className="w-full mt-6 h-[44px] rounded-xl font-bold text-[15px] border-none text-white shadow-md shadow-[#3b82f6]/30 transition-all hover:opacity-90 hover:scale-[1.02]"
+          style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
+          onClick={onClose}
+        >
+          Awesome!
+        </Button>
+      </div>
+    </Modal>
+  );
+};

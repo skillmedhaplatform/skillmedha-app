@@ -456,7 +456,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
             localStorage.setItem(unseenKey, JSON.stringify(remaining));
             
             // Clean up hash without reloading
-            history.pushState("", document.title, window.location.pathname + window.location.search);
+            history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
           }
         }
       };
