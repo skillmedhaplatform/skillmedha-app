@@ -14,6 +14,7 @@ export default function QuesComp({
   testRes,
   questionNo,
   flagged,
+  resultConfig,
 }) {
   const shortAns = useRef({});
   const searchQuery = useSearchParams();
@@ -118,6 +119,11 @@ export default function QuesComp({
     }
   }
 
+  const canShow = (field) => {
+    if (!resultConfig) return true;
+    return resultConfig.permissions?.[field] !== false;
+  };
+
   return (
     <div key={e?._id} className={resultStyles.qBlock}>
       <div className={resultStyles.qBlockHeader}>
@@ -136,17 +142,17 @@ export default function QuesComp({
         </div>
         <div className={resultStyles.qBlockType}>{e?.questionType}</div>
         <div className={resultStyles.qBlockScores}>
-          {(correctScore || partialScore) ? (
+          {canShow('showMarksPerQuestion') && (correctScore || partialScore) ? (
             <div className={`${resultStyles.scoreChip} ${resultStyles.due}`}>
               Score Due: {correctScore ? correctScore : partialScore}
             </div>
           ) : null}
-          {bonusScore ? (
+          {canShow('showMarksPerQuestion') && bonusScore ? (
             <div className={`${resultStyles.scoreChip} ${resultStyles.due}`}>
               Bonus: {bonusScore}
             </div>
           ) : null}
-          {negativeScore ? (
+          {canShow('showMarksPerQuestion') && negativeScore ? (
             <div className={`${resultStyles.scoreChip} ${resultStyles.neg}`}>
               Penalty: -{negativeScore}
             </div>
@@ -179,15 +185,29 @@ export default function QuesComp({
             let optClass = "";
             let iconClass = "";
             
-            if (isCorrect && isSelected) {
-              optClass = resultStyles.correct;
-              iconClass = "ti ti-circle-check";
-            } else if (!isCorrect && isSelected) {
-              optClass = resultStyles.wrongSelected;
-              iconClass = "ti ti-circle-x";
-            } else if (isCorrect && !isSelected) {
-              optClass = resultStyles.correctNotSelected;
-              iconClass = "ti ti-circle-check";
+            const allowHighlightCorrect = canShow('highlightCorrectOption');
+            const allowHighlightWrong = canShow('highlightWrongOption');
+            const allowShowCorrect = canShow('showCorrectAnswers');
+            const allowShowSelected = canShow('showSelectedAnswers');
+
+            const effectiveIsSelected = allowShowSelected ? isSelected : false;
+            const effectiveIsCorrect = allowShowCorrect ? isCorrect : false;
+
+            if (effectiveIsSelected && isCorrect) {
+              if (allowHighlightCorrect) {
+                optClass = resultStyles.correct;
+                iconClass = "ti ti-circle-check";
+              }
+            } else if (effectiveIsSelected && !isCorrect) {
+              if (allowHighlightWrong) {
+                optClass = resultStyles.wrongSelected;
+                iconClass = "ti ti-circle-x";
+              }
+            } else if (!effectiveIsSelected && effectiveIsCorrect) {
+              if (allowShowCorrect && allowHighlightCorrect) {
+                optClass = resultStyles.correctNotSelected;
+                iconClass = "ti ti-circle-check";
+              }
             }
 
             return (
@@ -196,7 +216,7 @@ export default function QuesComp({
                 <div className={resultStyles.akOptText} dangerouslySetInnerHTML={{ __html: parseIfJson(opt[key]) }}></div>
                 {iconClass && <i className={`${iconClass} ${resultStyles.akOptIcon}`} />}
                 
-                {e?.scoreSettings?.scoreType == "partialScore" && (
+                {e?.scoreSettings?.scoreType == "partialScore" && canShow('showMarksPerQuestion') && (
                   <span style={{ fontSize: '11px', fontWeight: 600, marginLeft: '10px', color: 'rgba(0,0,0,0.5)' }}>
                     {isSelected && isCorrect
                       ? `(+${+partialScore})`
@@ -219,15 +239,29 @@ export default function QuesComp({
             let optClass = "";
             let iconClass = "";
             
-            if (isCorrect && isSelected) {
-              optClass = resultStyles.correct;
-              iconClass = "ti ti-circle-check";
-            } else if (!isCorrect && isSelected) {
-              optClass = resultStyles.wrongSelected;
-              iconClass = "ti ti-circle-x";
-            } else if (isCorrect && !isSelected) {
-              optClass = resultStyles.correctNotSelected;
-              iconClass = "ti ti-circle-check";
+            const allowHighlightCorrect = canShow('highlightCorrectOption');
+            const allowHighlightWrong = canShow('highlightWrongOption');
+            const allowShowCorrect = canShow('showCorrectAnswers');
+            const allowShowSelected = canShow('showSelectedAnswers');
+
+            const effectiveIsSelected = allowShowSelected ? isSelected : false;
+            const effectiveIsCorrect = allowShowCorrect ? isCorrect : false;
+
+            if (effectiveIsSelected && isCorrect) {
+              if (allowHighlightCorrect) {
+                optClass = resultStyles.correct;
+                iconClass = "ti ti-circle-check";
+              }
+            } else if (effectiveIsSelected && !isCorrect) {
+              if (allowHighlightWrong) {
+                optClass = resultStyles.wrongSelected;
+                iconClass = "ti ti-circle-x";
+              }
+            } else if (!effectiveIsSelected && effectiveIsCorrect) {
+              if (allowShowCorrect && allowHighlightCorrect) {
+                optClass = resultStyles.correctNotSelected;
+                iconClass = "ti ti-circle-check";
+              }
             }
 
             return (
@@ -241,16 +275,22 @@ export default function QuesComp({
 
         {e?.questionType == "Short Paragraph" && (
           <div style={{ marginTop: '10px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text3)', marginBottom: '4px' }}>Student Answer</div>
-            <div className={`${resultStyles.akOption} ${totalScoreGained > 0 ? resultStyles.correct : (totalScoreGained < 0 ? resultStyles.wrongSelected : '')}`} style={{ padding: '12px 14px' }}>
-              <div className={resultStyles.akOptText}>{currentTestRes?.[e?._id]?.answers || "Not Answered"}</div>
-            </div>
+            {canShow('showSelectedAnswers') && (
+              <>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text3)', marginBottom: '4px' }}>Student Answer</div>
+                <div className={`${resultStyles.akOption} ${canShow('highlightCorrectOption') && totalScoreGained > 0 ? resultStyles.correct : (canShow('highlightWrongOption') && totalScoreGained < 0 ? resultStyles.wrongSelected : '')}`} style={{ padding: '12px 14px' }}>
+                  <div className={resultStyles.akOptText}>{currentTestRes?.[e?._id]?.answers || "Not Answered"}</div>
+                </div>
+              </>
+            )}
             
-            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text3)', marginTop: '10px', marginBottom: '4px' }}>Actual Answer</div>
-            {e?.answer?.shortpara && (
-              <div className={resultStyles.akOption} style={{ padding: '12px 14px', background: 'var(--bg-success)' }}>
-                <div className={resultStyles.akOptText} dangerouslySetInnerHTML={{ __html: parseIfJson(e?.answer?.shortpara) }} />
-              </div>
+            {canShow('showCorrectAnswers') && e?.answer?.shortpara && (
+              <>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text3)', marginTop: '10px', marginBottom: '4px' }}>Actual Answer</div>
+                <div className={resultStyles.akOption} style={{ padding: '12px 14px', background: 'var(--bg-success)' }}>
+                  <div className={resultStyles.akOptText} dangerouslySetInnerHTML={{ __html: parseIfJson(e?.answer?.shortpara) }} />
+                </div>
+              </>
             )}
           </div>
         )}
@@ -296,6 +336,7 @@ export default function QuesComp({
         )}
       </div>
 
+      {canShow('showMarksPerQuestion') && (
       <div className={resultStyles.scoreDetailsBox}>
         <div className={resultStyles.scoreDetailsRow}>
           <div className={`${resultStyles.scoreDetailChip} ${resultStyles.cs}`}>
@@ -319,8 +360,9 @@ export default function QuesComp({
           )}
         </div>
       </div>
+      )}
 
-      {e?.answer?.explanation && (
+      {canShow('showExplanations') && e?.answer?.explanation && (
         <div className={resultStyles.explanationBox}>
           <b>Explanation:</b> <span dangerouslySetInnerHTML={{ __html: parseIfJson(e?.answer?.explanation) }} />
         </div>

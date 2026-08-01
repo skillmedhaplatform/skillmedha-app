@@ -51,6 +51,23 @@ function getPersistedPortalResult(testId) {
   }
 }
 
+function clearPersistedPortalResult(testId) {
+  if (!testId) return;
+
+  try {
+    const storage =
+      typeof window !== "undefined"
+        ? window.sessionStorage
+        : globalThis.sessionStorage;
+
+    if (storage) {
+      storage.removeItem(getResultStorageKey(testId));
+    }
+  } catch (error) {
+    console.error("Unable to clear persisted test result", error);
+  }
+}
+
 function getNumericValue(value, fallback = 0) {
   const parsedValue = Number(value);
   return Number.isFinite(parsedValue) ? parsedValue : fallback;
@@ -85,7 +102,14 @@ function deriveResultSummary({ response = {}, questions = [], scoreData = {} } =
 
     if (status === "correct") {
       derivedCorrect += 1;
-      derivedScore += getNumericValue(responseEntry?.correctScore, 0);
+      // Multiple-choice questions carry a separate bonusScore (full-marks
+      // bonus for selecting every correct option) that isn't folded into
+      // correctScore — drop it here and the recomputed total undercounts
+      // every multi-select question, even though the per-question display
+      // and the server-side scoreData.finalScore both include it correctly.
+      derivedScore +=
+        getNumericValue(responseEntry?.correctScore, 0) +
+        getNumericValue(responseEntry?.bonusScore, 0);
     } else if (status === "incorrect") {
       derivedIncorrect += 1;
       derivedScore += getNumericValue(responseEntry?.negativeScore, 0);
@@ -114,5 +138,6 @@ export {
   getResultStorageKey,
   persistPortalResult,
   getPersistedPortalResult,
+  clearPersistedPortalResult,
   deriveResultSummary,
 };

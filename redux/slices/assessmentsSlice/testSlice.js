@@ -141,7 +141,7 @@ export const fetchAllTests = createAsyncThunk(
   async (action, { getState }) => {
     const state = getState();
     const studentId = state.student?.student?.data?._id || getSstorage("studentId");
-    
+
     const { data } = await axios.post(
       assessment_gql_url,
       {

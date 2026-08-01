@@ -480,9 +480,9 @@ const CreateCourse = ({ type = "course" }) => {
     if (!courseBasic.description || isHtmlEmpty(courseBasic.description)) {
       errors.description = `${typeCapitalized} description is required`;
     } else {
-      const descriptionLength = normalizeHtmlContent(
+      const descriptionLength = getPlainTextLength(
         courseBasic.description
-      ).length;
+      );
       if (descriptionLength < 100) {
         errors.description = "Description must be at least 100 characters";
       } else if (descriptionLength > 10000) {
@@ -683,12 +683,47 @@ const CreateCourse = ({ type = "course" }) => {
         }
         break;
 
+      case "description":
+        if (!value || isHtmlEmpty(value)) {
+          newErrors.description = `${typeCapitalized} description is required`;
+        } else {
+          const descriptionLength = getPlainTextLength(value);
+          if (descriptionLength < 100) {
+            newErrors.description = "Description must be at least 100 characters";
+          } else if (descriptionLength > 10000) {
+            newErrors.description = "Description must not exceed 10,000 characters";
+          } else {
+            delete newErrors.description;
+          }
+        }
+        break;
+
       default:
         break;
     }
 
     setValidationErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Helper to extract plain text length from HTML content (stripping tags & entities)
+  const getPlainTextLength = (content) => {
+    if (!content) return 0;
+    let html = content;
+    try {
+      html = JSON.parse(content);
+    } catch (e) {}
+    if (typeof html !== "string") return 0;
+    const text = html
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&#39;/g, "'")
+      .replace(/&quot;/g, '"')
+      .trim();
+    return text.length;
   };
 
   // Helper to normalize HTML content (handles TextEditor JSON-stringified output)
@@ -1379,9 +1414,10 @@ const CreateCourse = ({ type = "course" }) => {
           <TextEditor
             name="description"
             initialContent={editorInitialContent}
-            editorFun={(val) =>
-              setCourseBasic((prev) => ({ ...prev, description: val }))
-            }
+            editorFun={(val) => {
+              setCourseBasic((prev) => ({ ...prev, description: val }));
+              validateField("description", val);
+            }}
           />
           {renderFieldError("description")}
         </div>

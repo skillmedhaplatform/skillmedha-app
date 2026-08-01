@@ -11,7 +11,8 @@ import {
   LockOutlined, 
   PlayCircleOutlined, 
   HistoryOutlined, 
-  ClockCircleOutlined 
+  ClockCircleOutlined,
+  FileTextOutlined
 } from "@ant-design/icons";
 
 import { getOneTests, updateTest } from "@/redux/slices/testportal_admin/slice/test";
@@ -54,6 +55,7 @@ const TestSlugLayout = ({ children }) => {
     startPage: "Start Page",
     grading: "Grading & Summary",
     time: "Time",
+    results: "Results",
   };
 
   const activeTabKey = Object.keys(tabNamesMap).find(key => currPath.includes(key)) || "";
@@ -118,6 +120,7 @@ const TestSlugLayout = ({ children }) => {
     { key: "access", name: "Pricing & Access", icon: <LockOutlined /> },
     { key: "startPage", name: "Start Page", icon: <PlayCircleOutlined /> },
     { key: "grading", name: "Grading & Summary", icon: <HistoryOutlined /> },
+    { key: "results", name: "Results", icon: <FileTextOutlined /> },
     { key: "time", name: "Time", icon: <ClockCircleOutlined /> },
   ];
 

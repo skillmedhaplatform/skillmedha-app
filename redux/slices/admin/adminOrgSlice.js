@@ -584,6 +584,36 @@ export const DeleteTPO = createAsyncThunk(
   }
 );
 
+export const DeleteHR = createAsyncThunk(
+  "organisation/DeleteHR",
+  async (args, { rejectWithValue, dispatch }) => {
+    try {
+      const { data } = await axios.delete(
+        `${restUrl}/deleteHr/${args?.hrId}?orgId=${args?.orgId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getLstorage("jwtToken")}`,
+          },
+        }
+      );
+      dispatch(
+        getUsersByOrg({
+          orgId: args?.orgId,
+          page: args?.page || 1,
+          limit: args?.limit || 10,
+        })
+      );
+      return data.data;
+    } catch (error) {
+      console.log(error);
+      const errorMessage =
+        error.response?.data?.err || error.message || "Error deleting HR user";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 // Add this async thunk
 export const updateOrganisationAILimit = createAsyncThunk(
   "org/updateAILimit",

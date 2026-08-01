@@ -595,7 +595,7 @@ export default function User() {
       label: "Moderators",
       subtitle: "Content moderators",
       value: userData.filter((u) => u.role === "MODERATOR").length,
-      icon: <BsShield />,
+      icon: <FaShieldAlt />,
       iconClass: styles.iconOrange,
       onClick: () => handleStatClick("role", "MODERATOR"),
     },

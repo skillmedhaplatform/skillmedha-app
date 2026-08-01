@@ -1,8 +1,6 @@
 import { FaGlobe, FaKey, FaUsers, FaMoneyBillWave } from "react-icons/fa";
 import CommercialPage from "../components/commercial";
 import GroupPassword from "../components/group";
-import PrivateComponent from "../components/private";
-import PublicComponent from "../components/public";
 import TrainingComponent from "../components/training";
 
 export const headTitles = [
@@ -13,13 +11,13 @@ export const headTitles = [
   //   image: <FaGlobe size={20} />,
   //   type: "public",
   // },
-  {
-    name: "Private Access Code",
-    comp: <PrivateComponent />,
-    message: "Anyone who has access code will be able to take the test",
-    image: <FaKey size={20} />,
-    type: "private",
-  },
+  // {
+  //   name: "Private Access Code",
+  //   comp: <PrivateComponent />,
+  //   message: "Anyone who has access code will be able to take the test",
+  //   image: <FaKey size={20} />,
+  //   type: "private",
+  // },
   // {
   //   name: "Commercial",
   //   comp: <CommercialPage />,
