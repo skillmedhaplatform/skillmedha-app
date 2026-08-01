@@ -4,10 +4,10 @@ import { Button } from "antd";
 import styles from "./styles/pageheader.module.scss";
 
 import { BsX, BsPlus, BsStar } from "react-icons/bs";
-import { 
-  HiOutlineAcademicCap, 
-  HiOutlineClipboardDocumentCheck, 
-  HiOutlineUser, 
+import {
+  HiOutlineAcademicCap,
+  HiOutlineClipboardDocumentCheck,
+  HiOutlineUser,
   HiOutlineQuestionMarkCircle,
   HiOutlineDocumentText,
   HiOutlineSquares2X2,
@@ -26,6 +26,7 @@ const PageHeader = ({
   onTabChange,
   showGreeting,
   userName,
+  rightSlot,
 }) => {
   const [currentDate, setCurrentDate] = React.useState("");
   const [greetingText, setGreetingText] = React.useState("Good Afternoon");
@@ -60,35 +61,38 @@ const PageHeader = ({
       </div>
 
       <div className={styles.headerTop}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', position: 'relative', zIndex: 10 }}>
-          {!showGreeting && (
-            <div style={{
-              width: '56px', height: '56px', backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.1)', flexShrink: 0
-            }}>
-              {getIcon()}
-            </div>
-          )}
-          <div className={styles.headerLeft} style={showGreeting ? { width: '100%', gap: '0.4rem' } : { flex: 1, justifyContent: 'center' }}>
-            {breadcrumb && <span className={styles.breadcrumb}>{breadcrumb}</span>}
-            {showGreeting ? (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                  <h1 style={{ fontSize: '2.2rem', fontWeight: '800', lineHeight: '1.2' }}>Hi {userName},</h1>
-                  <p className="m-0 text-[11px] lg:text-[13px] font-bold tracking-[0.5px] uppercase text-[#cbd5e1]">{currentDate}</p>
-                </div>
-                <p className={styles.subtitle} style={{ fontSize: '1.3rem', color: '#e2e8f0', marginTop: '0.8rem', lineHeight: '1.4' }}>
-                  {greetingText}! Here’s an overview of today’s placement activities.
-                </p>
-              </>
-            ) : (
-              <>
-                {title && <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white', margin: 0, lineHeight: 1.2 }}>{title}</h1>}
-                {subtitle && <p className={styles.subtitle} style={{ margin: 0, marginTop: '0.25rem' }}>{subtitle}</p>}
-              </>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', width: '100%', position: 'relative', zIndex: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {!showGreeting && (
+              <div style={{
+                width: '56px', height: '56px', backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.1)', flexShrink: 0
+              }}>
+                {getIcon()}
+              </div>
             )}
+            <div className={styles.headerLeft} style={showGreeting ? { width: '100%', gap: '0.4rem' } : { justifyContent: 'center' }}>
+              {breadcrumb && <span className={styles.breadcrumb}>{breadcrumb}</span>}
+              {showGreeting ? (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <h1 style={{ fontSize: '2.2rem', fontWeight: '800', lineHeight: '1.2' }}>Hi {userName},</h1>
+                    <p className="m-0 text-[11px] lg:text-[13px] font-bold tracking-[0.5px] uppercase text-[#cbd5e1]">{currentDate}</p>
+                  </div>
+                  <p className={styles.subtitle} style={{ fontSize: '1.3rem', color: '#e2e8f0', marginTop: '0.8rem', lineHeight: '1.4' }}>
+                    {greetingText}! Here’s an overview of today’s placement activities.
+                  </p>
+                </>
+              ) : (
+                <>
+                  {title && <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white', margin: 0, lineHeight: 1.2 }}>{title}</h1>}
+                  {subtitle && <p className={styles.subtitle} style={{ margin: 0, marginTop: '0.25rem' }}>{subtitle}</p>}
+                </>
+              )}
+            </div>
           </div>
+          {rightSlot && <div style={{ zIndex: 10 }}>{rightSlot}</div>}
         </div>
       </div>
 

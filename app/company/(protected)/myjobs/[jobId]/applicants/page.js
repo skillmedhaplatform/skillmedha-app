@@ -3,7 +3,7 @@ import StudentCard from "@/app/company/(protected)/skillsets/components/candidat
 import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import applicantStyles from "./applicants.module.scss";
-import { DatePicker, Input, Button, Checkbox } from "antd";
+import { DatePicker, Input, Button, Empty } from "antd";
 import dayjs from "dayjs";
 import {
   getAllAppliedStudents,
@@ -11,6 +11,8 @@ import {
 } from "@/redux/slices/company/skillMedhaData";
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { useParams } from "next/navigation";
+import PageHeader from "@/modules/tpo/components/PageHeader";
+import { FilterOutlined } from "@ant-design/icons";
 
 const { RangePicker } = DatePicker;
 const dateFormat = "YYYY/MM/DD";
@@ -83,15 +85,49 @@ const Applicants = () => {
     );
   };
 
-  return (
-    <>
-      <div className={applicantStyles.container}>
-        <div className={applicantStyles.headContainer}>
-          <div className={applicantStyles.title}>{oneJobData?.jobTitle}</div>
+  const bannerStats = (
+    <div style={{ display: "flex", alignItems: "center", gap: "2rem", paddingRight: "1rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <span style={{ fontSize: "28px", fontWeight: "800", lineHeight: "1", color: "#ffffff" }}>
+          {oneJobData?.applicants?.length || 0}
+        </span>
+        <span style={{ fontSize: "13px", color: "rgba(255, 255, 255, 0.7)", fontWeight: "600", marginTop: "4px" }}>
+          Total Applicants
+        </span>
+      </div>
 
-          <div className={applicantStyles.filterSec}>
+      <div style={{ width: "1px", height: "36px", backgroundColor: "rgba(255, 255, 255, 0.2)" }} />
+
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <span style={{ fontSize: "28px", fontWeight: "800", lineHeight: "1", color: "#ffffff" }}>
+          {appliedStudents?.length || 0}
+        </span>
+        <span style={{ fontSize: "13px", color: "rgba(255, 255, 255, 0.7)", fontWeight: "600", marginTop: "4px" }}>
+          Filtered
+        </span>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={applicantStyles.container}>
+      <PageHeader
+        title={oneJobData?.jobTitle ? `${oneJobData.jobTitle} - Applicants` : "Job Applicants"}
+        subtitle="Review candidate profiles, filter by qualifications, and manage job applications"
+        rightSlot={bannerStats}
+      />
+
+      <div className={applicantStyles.filterCard}>
+        <div className={applicantStyles.filterHeader}>
+          <FilterOutlined style={{ color: "#1E69DA", fontSize: "1.1rem" }} />
+          <span className={applicantStyles.filterTitle}>Filter Candidates</span>
+        </div>
+
+        <div className={applicantStyles.filterSec}>
+          <div className={applicantStyles.filterGroup}>
+            <label className={applicantStyles.filterLabel}>Min CGPA</label>
             <Input
-              style={{ width: "10rem" }}
+              style={{ width: "9rem" }}
               allowClear
               type="number"
               title="CGPA"
@@ -104,19 +140,28 @@ const Applicants = () => {
                 setCgpa(val);
               }}
             />
+          </div>
 
-            <DatePicker picker="year" onChange={onChangePassYear} />
+          <div className={applicantStyles.filterGroup}>
+            <label className={applicantStyles.filterLabel}>Passout Year</label>
+            <DatePicker picker="year" placeholder="Select year" onChange={onChangePassYear} style={{ width: "10rem" }} />
+          </div>
 
+          <div className={applicantStyles.filterGroup}>
+            <label className={applicantStyles.filterLabel}>Applied Date Range</label>
             <RangePicker
               format={dateFormat}
               value={dateRange}
               onChange={(dates) => setDateRange(dates)}
+              style={{ width: "16rem" }}
             />
           </div>
         </div>
+      </div>
 
-        <div className={applicantStyles.bodyStyles}>
-          {appliedStudents?.map((student) => (
+      <div className={applicantStyles.bodyStyles}>
+        {appliedStudents && appliedStudents.length > 0 ? (
+          appliedStudents.map((student) => (
             <StudentCard
               key={student._id}
               student={student}
@@ -126,10 +171,14 @@ const Applicants = () => {
               isSelected={selectedStudentIds.includes(student._id)}
               onSelect={(checked) => handleStudentSelect(student._id, checked)}
             />
-          ))}
-        </div>
+          ))
+        ) : (
+          <div className={applicantStyles.emptyState}>
+            <Empty description="No candidate applications match the selected criteria" />
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
