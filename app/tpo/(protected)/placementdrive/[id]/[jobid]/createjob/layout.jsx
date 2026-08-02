@@ -67,6 +67,27 @@ export default function FormLayout({ children }) {
         subtitle="Manage basic information, profile details and interview rounds"
       />
       <div className={styles.mainContainer}>
+        <div className={styles.tabsWrapper}>
+          <div className={styles.tabsRow}>
+            {routes.map((e) => {
+              const isActive = path === e?.path;
+              const disabled = isDisabled();
+              return (
+                <div
+                  key={e.path}
+                  className={`${styles.tabItem} ${isActive ? styles.activeTab : ""} ${disabled ? styles.disabled : ""}`}
+                  onClick={() => {
+                    if (!disabled) router.push(e?.path);
+                  }}
+                >
+                  <span>{e?.name}</span>
+                  {isActive && <div className={styles.activeIndicator} />}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div className={styles.headerCont}>
           {pathSegments.map((segment, index) => {
             let displayName = segment;
@@ -117,27 +138,6 @@ export default function FormLayout({ children }) {
               </span>
             );
           })}
-        </div>
-
-        <div className={styles.tabsWrapper}>
-          <div className={styles.tabsRow}>
-            {routes.map((e) => {
-              const isActive = path === e?.path;
-              const disabled = isDisabled();
-              return (
-                <div
-                  key={e.path}
-                  className={`${styles.tabItem} ${isActive ? styles.activeTab : ""} ${disabled ? styles.disabled : ""}`}
-                  onClick={() => {
-                    if (!disabled) router.push(e?.path);
-                  }}
-                >
-                  <span>{e?.name}</span>
-                  {isActive && <div className={styles.activeIndicator} />}
-                </div>
-              );
-            })}
-          </div>
         </div>
 
         <div className={styles.bottomCont}>

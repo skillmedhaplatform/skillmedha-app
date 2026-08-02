@@ -600,7 +600,7 @@ const QuestionCard = ({ questions, index }) => {
               {paginatedQuestions.map((question, index) => {
                 const questionNumber = startIndex + index + 1;
                 const isExpanded = activePanel.includes(question._id);
-                const score = parseInt(
+                const score = parseFloat(
                   question?.scoreSettings?.pointsForCorrectAns ||
                   question?.scoreSettings?.PointsForEachCorrectAnswer ||
                   question?.questionScore ||
@@ -1107,7 +1107,7 @@ const QuestionCard = ({ questions, index }) => {
               paddingTop: "0.75rem",
               marginTop: "0.5rem"
             }}>
-              <span>Score: {parseInt(previewQuestion?.scoreSettings?.pointsForCorrectAns || previewQuestion?.scoreSettings?.PointsForEachCorrectAnswer || previewQuestion?.questionScore || 0)} pts</span>
+              <span>Score: {parseFloat(previewQuestion?.scoreSettings?.pointsForCorrectAns || previewQuestion?.scoreSettings?.PointsForEachCorrectAnswer || previewQuestion?.questionScore || 0)} pts</span>
               <span>Type: {previewQuestion?.questionType}</span>
               <span>Category: {previewQuestion?.questionCategory?.[0]?.name || "General"}</span>
             </div>

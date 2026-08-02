@@ -2,12 +2,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import Link from "next/link";
 import { decrypt } from "@/utils/windowMW";
 import BreadcrumbComponent from "@/modules/admin/components/breadcrumbs/breadcrumbs";
 import {
   CreateOrgUser,
   DeleteTPO,
   getAllTposInOrg,
+  toggleTpoStatus,
 } from "@/redux/slices/admin/adminOrgSlice";
 import {
   Divider,
@@ -20,6 +22,8 @@ import {
   Form,
   Tooltip,
   message,
+  Switch,
+  Popconfirm,
 } from "antd";
 import {
   UserOutlined,
@@ -27,6 +31,11 @@ import {
   PhoneOutlined,
   SearchOutlined,
   PlusOutlined,
+  DeleteOutlined,
+  IdcardOutlined,
+  MobileOutlined,
+  ReadOutlined,
+  TagOutlined,
 } from "@ant-design/icons";
 import styles from "./tpo.module.scss";
 import { usePermissions, PERMISSION_VALUES } from "@/hooks/usepermission";
@@ -47,6 +56,18 @@ function Page() {
 
   const encryptedOrgId = searchParams.get("orgId");
   const ORG_ID = encryptedOrgId ? decrypt(encryptedOrgId) : null;
+  const encryptedOrgName = searchParams.get("orgName");
+  const ORG_NAME = encryptedOrgName ? decrypt(encryptedOrgName) : null;
+  const from = searchParams.get("from");
+
+  const breadcrumbItems = from === "college" ? [
+    { title: <Link href="/admin/colleges">Colleges & Students</Link> },
+    { title: "Training & Placement Officers" }
+  ] : [
+    { title: <Link href="/admin/colleges">Colleges & Students</Link> },
+    ...(ORG_NAME ? [{ title: <Link href={`/admin/organisationDetails/${ORG_ID}`}>{ORG_NAME}</Link> }] : []),
+    { title: "Training & Placement Officers" }
+  ];
 
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("name-asc");
@@ -146,6 +167,17 @@ function Page() {
     setSortBy(value);
   };
 
+  const handleToggleStatus = (tpoId, currentStatus) => {
+    dispatch(toggleTpoStatus({ tpoId, active: !currentStatus }))
+      .unwrap()
+      .then((res) => {
+        message.success(res.msg || "Status updated successfully");
+      })
+      .catch((error) => {
+        message.error(error || "Failed to update status");
+      });
+  };
+
   const handleModalSubmit = async () => {
     try {
       const values = await form.validateFields();
@@ -206,7 +238,10 @@ function Page() {
 
         <div className={styles.cardBody}>
           <div className={styles.infoRow}>
-            <span className={styles.label}>Designation:</span>
+            <span className={styles.label}>
+              <span className={styles.iconWrapper} style={{ color: "#1890ff" }}><IdcardOutlined /></span>
+              Designation
+            </span>
             <span className={styles.value}>
               {displayValue(tpo.designation)}
             </span>
@@ -214,51 +249,133 @@ function Page() {
 
           <div className={styles.infoRow}>
             <span className={styles.label}>
-              <PhoneOutlined /> Phone:
+              <span className={styles.iconWrapper} style={{ color: "#389e0d" }}><PhoneOutlined /></span>
+              Phone
             </span>
             <span className={styles.value}>{displayValue(tpo.phone)}</span>
           </div>
 
           <div className={styles.infoRow}>
-            <span className={styles.label}>Alt Phone:</span>
+            <span className={styles.label}>
+              <span className={styles.iconWrapper} style={{ color: "#722ed1" }}><MobileOutlined /></span>
+              Alt Phone
+            </span>
             <span className={styles.value}>
               {displayValue(tpo.alternatePhone)}
             </span>
           </div>
 
           <div className={styles.infoRow}>
-            <span className={styles.label}>Qualification:</span>
+            <span className={styles.label}>
+              <span className={styles.iconWrapper} style={{ color: "#1890ff" }}><ReadOutlined /></span>
+              Qualification
+            </span>
             <span className={styles.value}>
               {displayValue(tpo.qualification)}
             </span>
           </div>
 
           <div className={styles.infoRow}>
-            <span className={styles.label}>Gender:</span>
+            <span className={styles.label}>
+              <span className={styles.iconWrapper} style={{ color: "#389e0d" }}><UserOutlined /></span>
+              Gender
+            </span>
             <span className={styles.value}>{displayValue(tpo.gender)}</span>
           </div>
 
           <div className={styles.infoRow}>
-            <span className={styles.label}>Type:</span>
+            <span className={styles.label}>
+              <span className={styles.iconWrapper} style={{ color: "#722ed1" }}><TagOutlined /></span>
+              Type
+            </span>
             <span className={styles.badge}>{displayValue(tpo.type)}</span>
           </div>
         </div>
-        <Button
-          style={{ width: "100%", marginTop: "16px" }}
-          onClick={() => {
-            setDeleteModalData(tpo);
-            setDeleteModal(true);
-          }}
-        >
-          Delete TPO
-        </Button>
+        <Divider style={{ margin: "16px 0 12px 0" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "14px", fontWeight: 500, color: "#595959" }}>Active</span>
+            <Tooltip title={tpo.active === false ? "Deactivated" : "Active"}>
+              <Popconfirm
+                title={tpo.active === false ? "Reactivate TPO" : "Deactivate TPO"}
+                description={tpo.active === false ? "Are you sure you want to reactivate this TPO? They will be able to log in." : "Are you sure you want to deactivate this TPO? They will be unable to log in."}
+                onConfirm={() => handleToggleStatus(tpo.globalId || tpo._id, tpo.active !== false)}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Switch
+                  checked={tpo.active !== false}
+                  size="small"
+                />
+              </Popconfirm>
+            </Tooltip>
+          </div>
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            style={{ borderRadius: "6px", display: "flex", alignItems: "center" }}
+            onClick={() => {
+              setDeleteModalData(tpo);
+              setDeleteModal(true);
+            }}
+          >
+            Delete TPO
+          </Button>
+        </div>
       </div>
     );
   };
 
   return (
     <div className={styles.pageContainer}>
-      <BreadcrumbComponent />
+      <div className={styles.headerWrapper}>
+        <div className={styles.tpoHeader}>
+          <div className={styles.headerInfo}>
+            <BreadcrumbComponent customItems={breadcrumbItems} />
+            <Space className={styles.controls} size="middle" style={{ flexWrap: "wrap" }}>
+              <Search
+                placeholder="Search TPOs..."
+                onChange={handleSearchChange}
+                value={searchQuery}
+                prefix={<SearchOutlined />}
+                allowClear
+                className={styles.searchInput}
+                styles={{ input: { borderRadius: "8px" } }}
+                style={{ borderRadius: "8px" }}
+              />
+              <Select
+                value={sortBy}
+                onChange={handleSortChange}
+                className={styles.sortSelect}
+                style={{ borderRadius: "8px", minWidth: "200px" }}
+              >
+                <Option value="name-asc">Name (A-Z)</Option>
+                <Option value="name-desc">Name (Z-A)</Option>
+                <Option value="email-asc">Email (A-Z)</Option>
+                <Option value="email-desc">Email (Z-A)</Option>
+                <Option value="designation-asc">Designation (A-Z)</Option>
+                <Option value="designation-desc">Designation (Z-A)</Option>
+                <Option value="type-asc">Type (A-Z)</Option>
+                <Option value="type-desc">Type (Z-A)</Option>
+              </Select>
+              <Tooltip title={!canCreate ? getPermissionMessage(PERMISSION_VALUES.CREATE) : ""}>
+                <span>
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => setIsModalVisible(true)}
+                    disabled={!canCreate}
+                  >
+                    Add TPO
+                  </Button>
+                </span>
+              </Tooltip>
+            </Space>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.contentScrollContainer}>
 
       {loading && (
         <div className={styles.loadingContainer}>
@@ -273,138 +390,16 @@ function Page() {
       )}
 
       {!loading && !error && (!tpos || tpos.length === 0) && (
-        <>
-          <div className={styles.tpoHeader}>
-            <div className={styles.headerInfo}>
-              <h3>Training & Placement Officers</h3>
-              <Space className={styles.controls} size="middle">
-                <Search
-                  placeholder="Search TPOs..."
-                  onChange={handleSearchChange}
-                  value={searchQuery}
-                  prefix={<SearchOutlined />}
-                  allowClear
-                  className={styles.searchInput}
-                  styles={{
-                    input: {
-                      borderRadius: "8px",
-                    },
-                  }}
-                  style={{
-                    borderRadius: "8px",
-                  }}
-                />
-                <Select
-                  value={sortBy}
-                  onChange={handleSortChange}
-                  className={styles.sortSelect}
-                  style={{
-                    borderRadius: "8px",
-                    minWidth: "200px",
-                  }}
-                >
-                  <Option value="name-asc">Name (A-Z)</Option>
-                  <Option value="name-desc">Name (Z-A)</Option>
-                  <Option value="email-asc">Email (A-Z)</Option>
-                  <Option value="email-desc">Email (Z-A)</Option>
-                  <Option value="designation-asc">Designation (A-Z)</Option>
-                  <Option value="designation-desc">Designation (Z-A)</Option>
-                  <Option value="type-asc">Type (A-Z)</Option>
-                  <Option value="type-desc">Type (Z-A)</Option>
-                </Select>
-                <Tooltip
-                  title={
-                    !canCreate
-                      ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-                      : ""
-                  }
-                >
-                  <span>
-                    <Button
-                      type="primary"
-                      icon={<PlusOutlined />}
-                      onClick={() => setIsModalVisible(true)}
-                      disabled={!canCreate}
-                    >
-                      Add TPO
-                    </Button>
-                  </span>
-                </Tooltip>
-              </Space>
-            </div>
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>
+            <UserOutlined />
           </div>
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>
-              <UserOutlined />
-            </div>
-            <p>No Training & Placement Officers found</p>
-          </div>
-        </>
+          <p>No Training & Placement Officers found</p>
+        </div>
       )}
 
       {!loading && !error && tpos && tpos.length > 0 && (
         <>
-          <div className={styles.tpoHeader}>
-            <div className={styles.headerInfo}>
-              <h3>Training & Placement Officers</h3>
-              <Space className={styles.controls} size="middle">
-                <Search
-                  placeholder="Search TPOs..."
-                  onChange={handleSearchChange}
-                  value={searchQuery}
-                  prefix={<SearchOutlined />}
-                  allowClear
-                  className={styles.searchInput}
-                  styles={{
-                    input: {
-                      borderRadius: "8px",
-                    },
-                  }}
-                  style={{
-                    borderRadius: "8px",
-                  }}
-                />
-                <Select
-                  value={sortBy}
-                  onChange={handleSortChange}
-                  className={styles.sortSelect}
-                  style={{
-                    borderRadius: "8px",
-                    minWidth: "200px",
-                  }}
-                >
-                  <Option value="name-asc">Name (A-Z)</Option>
-                  <Option value="name-desc">Name (Z-A)</Option>
-                  <Option value="email-asc">Email (A-Z)</Option>
-                  <Option value="email-desc">Email (Z-A)</Option>
-                  <Option value="designation-asc">Designation (A-Z)</Option>
-                  <Option value="designation-desc">Designation (Z-A)</Option>
-                  <Option value="type-asc">Type (A-Z)</Option>
-                  <Option value="type-desc">Type (Z-A)</Option>
-                </Select>
-                <Tooltip
-                  title={
-                    !canCreate
-                      ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-                      : ""
-                  }
-                >
-                  <span>
-                    <Button
-                      type="primary"
-                      icon={<PlusOutlined />}
-                      onClick={() => setIsModalVisible(true)}
-                      disabled={!canCreate}
-                    >
-                      Add TPO
-                    </Button>
-                  </span>
-                </Tooltip>
-              </Space>
-            </div>
-          </div>
-          <Divider style={{ margin: ".3rem 0", width: "100%" }} />
-
           {filteredAndSortedTpos.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>
@@ -420,6 +415,8 @@ function Page() {
         </>
       )}
 
+      </div>
+
       <Modal
         title="Add New TPO"
         open={isModalVisible}
@@ -434,6 +431,10 @@ function Page() {
         width={500}
       >
         <Form form={form} layout="vertical" name="addTpo" autoComplete="off">
+          {/* Hidden inputs to trick Chrome's aggressive autofill */}
+          <input type="text" name="hidden_username" autoComplete="username" style={{ display: 'none' }} />
+          <input type="password" name="hidden_password" autoComplete="current-password" style={{ display: 'none' }} />
+          
           <Form.Item
             label="Username"
             name="userName"
@@ -447,7 +448,7 @@ function Page() {
               },
             ]}
           >
-            <Input placeholder="Enter username" disabled={submitting} />
+            <Input placeholder="Enter username" disabled={submitting} autoComplete="off" />
           </Form.Item>
 
           <Form.Item
@@ -462,6 +463,7 @@ function Page() {
               placeholder="Enter email address"
               disabled={submitting}
               prefix={<MailOutlined />}
+              autoComplete="off"
             />
           </Form.Item>
 
@@ -482,6 +484,7 @@ function Page() {
             <Input.Password
               placeholder="Enter password"
               disabled={submitting}
+              autoComplete="new-password"
             />
           </Form.Item>
         </Form>
@@ -515,10 +518,13 @@ function Page() {
         confirmLoading={deleteLoading}
         mask={{ closable: false }}
       >
-        <p>
+        <p style={{ fontSize: "16px", fontWeight: 500 }}>
           Are you sure you want to delete{" "}
           {deleteModalData ? getFullName(deleteModalData) || deleteModalData.userName : ""}
           ?
+        </p>
+        <p style={{ color: "#ff4d4f", marginTop: "10px" }}>
+          <strong>Warning:</strong> If you delete this TPO, their account will be removed entirely. To recover a deleted TPO, you must contact the development team.
         </p>
       </Modal>
     </div>

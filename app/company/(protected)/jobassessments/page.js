@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import JaStyles from "./page.module.scss";
 import {
   Input,
-  Pagination,
   Spin,
   Empty,
   Button,
@@ -139,7 +138,7 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-end",
-          height: "25%",
+          marginTop: "auto",
         }}
       >
         <Button
@@ -277,9 +276,8 @@ export default function JobAssessments() {
   const allCount = jobData.length;
 
   const currentJobs = React.useMemo(() => {
-    const startIndex = (pageNo - 1) * pageSize;
-    return filteredJobs.slice(startIndex, startIndex + pageSize);
-  }, [filteredJobs, pageNo, pageSize]);
+    return filteredJobs;
+  }, [filteredJobs]);
 
   const totalFiltered = filteredJobs.length;
 
@@ -392,25 +390,12 @@ export default function JobAssessments() {
     return renderAssessmentCards();
   };
 
-  const renderPagination = () => (
-    <div className={JaStyles.paginationContainer}>
-      <Pagination
-        current={pageNo}
-        total={totalFiltered}
-        pageSize={pageSize}
-        showSizeChanger={false}
-        onChange={handlePageChange}
-      />
-    </div>
-  );
-
   // ===== MAIN RENDER =====
   return (
     <div className={JaStyles.container}>
       {renderHeader()}
       {renderSummaryBoxes()}
       <div className={JaStyles.bodyStyles}>{renderBodyContent()}</div>
-      {renderPagination()}
     </div>
   );
 }

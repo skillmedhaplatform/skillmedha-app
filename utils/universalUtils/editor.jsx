@@ -81,6 +81,7 @@ export default function TextEditor({
   name,
   initialContent,
   readOnly = false,
+  placeholder = "",
 }) {
   // const quillRef = useRef();
 
@@ -122,6 +123,7 @@ export default function TextEditor({
       className={name}
       value={content[name]}
       readOnly={readOnly}
+      placeholder={placeholder}
     />
   ) : <div style={{ height: "100px" }}>Loading editor...</div>;
 }

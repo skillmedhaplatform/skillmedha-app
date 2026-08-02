@@ -8,6 +8,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ChipStyles from "./chip.module.scss";
 import { message } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 import { Tooltip } from "@mui/material";
 
 export default function ChipInput({ keyName, initialValue, handleUpdate }) {
@@ -86,8 +87,8 @@ export default function ChipInput({ keyName, initialValue, handleUpdate }) {
             return (
               <div key={e._id} className={ChipStyles.chipData}>
                 <p>{e.name}</p>
-                <img
-                  src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
+                <CloseOutlined
+                  style={{ cursor: "pointer", fontSize: "11px", color: "#64748b", marginLeft: "4px" }}
                   onClick={() => handleChipDelete(e)}
                 />
               </div>

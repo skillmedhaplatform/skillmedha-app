@@ -2,10 +2,12 @@
 import React, { createRef, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import _ from "lodash";
+import axios from "axios";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { TbTriangleInvertedFilled } from "react-icons/tb";
 import resultStyles from "./results.module.scss";
+import { testUrl } from "@/config/urls";
 
 import { Collapse, Input, Select, Tag, message, Skeleton, Card, Row, Col, Statistic } from "antd";
 import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, ThunderboltOutlined, PercentageOutlined, TrophyOutlined, CaretRightOutlined } from "@ant-design/icons";
@@ -33,6 +35,11 @@ export default function Page() {
 
   const [totalMarks, setTotalMarks] = useState(0);
   const [testBlocked, setTestBlocked] = useState("");
+  const [resultConfig, setResultConfig] = useState(null);
+  const [apiError, setApiError] = useState("");
+
+  const searchQuery = useSearchParams();
+  const progressId = searchQuery.get("progressId");
 
   useEffect(() => {
     const isBlocked = testData?.value?.test?.blockedStudents?.find(
@@ -101,7 +108,6 @@ export default function Page() {
     colors: [],
   });
 
-  const searchQuery = useSearchParams();
   const sstestId = getSstorage("selectedTest");
   const sqTestId = searchQuery.get("testId");
   let testId = sqTestId || sstestId;
@@ -189,6 +195,38 @@ export default function Page() {
   const shortAns = useRef({});
   const dispatch = useDispatch();
 
+  const allCompletedResults = useMemo(() => {
+    if (!StudentData_New?.progress) return [];
+    return StudentData_New.progress.filter(
+      (entry) => entry?.testId == testId && (entry?.response || entry?.scoreData)
+    ).sort((a, b) => {
+       const dateA = new Date(a.createdAt || 0).getTime();
+       const dateB = new Date(b.createdAt || 0).getTime();
+       return dateA - dateB;
+    });
+  }, [StudentData_New?.progress, testId]);
+
+  const bestCompletedResultId = useMemo(() => {
+    const completedResults = [...allCompletedResults];
+    if (completedResults.length === 0) return null;
+    const best = completedResults.sort((a, b) => {
+      const aHasScoreData = Boolean(a?.scoreData && Object.keys(a.scoreData).length);
+      const bHasScoreData = Boolean(b?.scoreData && Object.keys(b.scoreData).length);
+      if (aHasScoreData !== bHasScoreData) return aHasScoreData ? -1 : 1;
+
+      const aResponseCount = Object.keys(a?.response || {}).length;
+      const bResponseCount = Object.keys(b?.response || {}).length;
+      if (aResponseCount !== bResponseCount) return bResponseCount - aResponseCount;
+
+      const aScore = Number(a?.scoreData?.finalScore || 0);
+      const bScore = Number(b?.scoreData?.finalScore || 0);
+      if (aScore !== bScore) return bScore - aScore;
+
+      return 0;
+    })[0];
+    return best?._id;
+  }, [allCompletedResults]);
+
   // Persist results to sessionStorage when available
   useEffect(() => {
     if (testId && testRes?.value?.[testId]) {
@@ -261,7 +299,60 @@ export default function Page() {
         );
       }
     }
-  }, [StudentData_New, testId, testRes?.value, dispatch, finishedTestData?.questions, studentData?._id]);
+  }, [StudentData_New, testId, testRes?.value, dispatch, finishedTestData?.questions, studentData?._id, progressId]);
+
+  // Fetch from getResultsData API
+  useEffect(() => {
+    if (progressId && finishedTestData?.questions?.length > 0) {
+      const fetchApi = async () => {
+        try {
+            const token = getLstorage("token");
+            const res = await axios.post(`${testUrl}/getResultsData/${progressId}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = res.data;
+            setResultConfig({
+               type: data.type,
+               permissions: data.permissions || {},
+               downloadAllowed: data.downloadAllowed,
+               previewAllowed: data.previewAllowed
+            });
+            
+            const derivedScoreData = deriveResultSummary({
+              response: data.data.response || {},
+              questions: finishedTestData.questions || [],
+              scoreData: data.data.scoreData || {},
+            });
+
+            dispatch(saveTestResults({
+              userId: studentData?._id,
+              testId: testId,
+              response: data.data.response,
+              studentData: data.data.studentData || studentData,
+              flagged: data.data.flagged,
+              marked: data.data.marked,
+              scoreData: derivedScoreData,
+            }));
+        } catch (e) {
+            setApiError(e.response?.data?.err || "Failed to load result");
+        }
+      }
+      fetchApi();
+    }
+  }, [progressId, finishedTestData?.questions]);
+
+  // Handle one-time unmount
+  useEffect(() => {
+    return () => {
+      if (resultConfig?.type === 'ONE_TIME' && progressId) {
+         const token = getLstorage("token");
+         axios.post(`${testUrl}/markOneTimeResultViewed/${progressId}`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+         }).catch(err => console.error(err));
+      }
+    };
+  }, [resultConfig?.type, progressId]);
+
 
   // Determine loading state based on actual data readiness
   const isDataReady = useMemo(() => {
@@ -274,16 +365,31 @@ export default function Page() {
     );
   }, [finishedTestData, ques, chartData, score, totalMarks]);
 
-  const loading = testStatus === "evaluatingTest" || !isDataReady;
+  const loading = (testStatus === "evaluatingTest" || !isDataReady) && !apiError;
 
   const fromParam = searchQuery.get("from");
   const handleBack = () => {
+    if (resultConfig?.type === 'ONE_TIME' && progressId) {
+       const token = getLstorage("token");
+       axios.post(`${testUrl}/markOneTimeResultViewed/${progressId}`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+       }).catch(err => console.error(err));
+    }
     if (fromParam === "job") {
       nav.push("/student/jobAssessments");
     } else {
       nav.push("/student/tests");
     }
   };
+
+  const isDownload = searchQuery.get("download") === "true";
+  useEffect(() => {
+    if (isDataReady && !loading && isDownload && (!resultConfig || resultConfig.downloadAllowed !== false)) {
+      setTimeout(() => {
+        window.print();
+      }, 1000);
+    }
+  }, [isDataReady, loading, isDownload, resultConfig]);
 
   let questionNo = 1;
 
@@ -396,9 +502,18 @@ export default function Page() {
         if (selectedStatus === "AnsweredMarked" && !(isMarked && isAnswered)) return false;
       }
 
+      // Skipped question filter based on config
+      if (resultConfig && resultConfig.permissions?.showSkippedQuestions === false) {
+        let studentAnswers = currentTestRes?.[q?._id]?.answers;
+        let isAnswered = Array.isArray(studentAnswers) && studentAnswers.length > 0;
+        if (!isAnswered) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [ques, questionSearchQuery, selectedCategory, selectedStatus, testRes, testId, currentTestRes, finishedTestData]);
+  }, [ques, questionSearchQuery, selectedCategory, selectedStatus, testRes, testId, currentTestRes, finishedTestData, resultConfig]);
 
   // Get all unique categories for filter dropdown
   const allCategories = useMemo(() => {
@@ -425,6 +540,24 @@ export default function Page() {
     );
   }
 
+  if (apiError) {
+    return (
+      <div style={{ padding: "4rem", textAlign: "center" }}>
+        <i className="ti ti-lock" style={{ fontSize: "4rem", color: "#ef4444" }}></i>
+        <h2 style={{ marginTop: "1rem", color: "#1e293b" }}>Access Denied</h2>
+        <p style={{ marginTop: "0.5rem", fontSize: "1.1rem", color: "#64748b" }}>
+          {apiError}
+        </p>
+        <button
+          onClick={() => nav.push("/student/testResults")}
+          className="px-6 py-2 mt-6 bg-blue-600 text-white rounded-md font-medium shadow-sm hover:bg-blue-700 transition-colors"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
   const rawPassScore = finishedTestData?.grading?.passScore !== undefined ? finishedTestData?.grading?.passScore : finishedTestData?.grading?.gradingCriteria?.passScore;
   const hasPassMark = rawPassScore !== undefined && rawPassScore !== null && rawPassScore !== "";
   const PassScoreNum = hasPassMark ? Number(rawPassScore) : 0;
@@ -436,6 +569,11 @@ export default function Page() {
   } else if (isFailGrade) {
     isPassed = false;
   }
+
+  const canShow = (field) => {
+    if (!resultConfig) return true; // Default allow for legacy/unconfigured
+    return resultConfig.permissions?.[field] !== false;
+  };
 
   return (
     <div style={{ height: "calc(100vh - 72px)", display: "flex", flexDirection: "column", overflow: "hidden", margin: "0", padding: "0" }}>
@@ -456,6 +594,7 @@ export default function Page() {
           ) : (
             <>
               {/* Result Banner */}
+              {canShow('showPassFail') && (
               <div className={`${resultStyles.resultBanner} ${isPassed === false ? resultStyles.fail : resultStyles.pass}`}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}>
                   <div className={resultStyles.resultBannerIcon}>
@@ -484,22 +623,105 @@ export default function Page() {
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={handleBack}
-                  className="px-4 py-2 bg-white text-gray-800 rounded-md font-medium shadow-sm hover:bg-gray-50 border border-gray-200 transition-colors flex items-center gap-2 cursor-pointer"
-                  style={{ marginLeft: 'auto', flexShrink: 0, outline: 'none' }}
-                >
-                  <i className="ti ti-arrow-left" /> Back to Tests
-                </button>
+              {canShow('showPassFail') && (
+                <div style={{ marginLeft: 'auto', flexShrink: 0, display: 'flex', gap: '10px' }}>
+                  {(!resultConfig || resultConfig.downloadAllowed !== false) && (
+                    <button
+                      onClick={() => window.print()}
+                      className="px-4 py-2 bg-blue-50 text-blue-700 rounded-md font-medium shadow-sm hover:bg-blue-100 border border-blue-200 transition-colors flex items-center gap-2 cursor-pointer"
+                      style={{ outline: 'none' }}
+                    >
+                      <i className="ti ti-download" /> Download PDF
+                    </button>
+                  )}
+                  <button
+                    onClick={handleBack}
+                    className="px-4 py-2 bg-white text-gray-800 rounded-md font-medium shadow-sm hover:bg-gray-50 border border-gray-200 transition-colors flex items-center gap-2 cursor-pointer"
+                    style={{ outline: 'none' }}
+                  >
+                    <i className="ti ti-arrow-left" /> Back to Tests
+                  </button>
+                </div>
+              )}
               </div>
+              )}
+              
+              {/* We need the back button even if banner is hidden, so if banner is hidden we just render the back button alone */}
+              {!canShow('showPassFail') && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px', gap: '10px' }}>
+                  {(!resultConfig || resultConfig.downloadAllowed !== false) && (
+                    <button
+                      onClick={() => window.print()}
+                      className="px-4 py-2 bg-blue-50 text-blue-700 rounded-md font-medium shadow-sm hover:bg-blue-100 border border-blue-200 transition-colors flex items-center gap-2 cursor-pointer"
+                      style={{ outline: 'none' }}
+                    >
+                      <i className="ti ti-download" /> Download PDF
+                    </button>
+                  )}
+                  <button
+                    onClick={handleBack}
+                    className="px-4 py-2 bg-white text-gray-800 rounded-md font-medium shadow-sm hover:bg-gray-50 border border-gray-200 transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <i className="ti ti-arrow-left" /> Back to Tests
+                  </button>
+                </div>
+              )}
+
+              {/* Attempts History — hidden during a One-Time result view; the
+                  student should only see the attempt they just completed,
+                  not the full history of past attempts. */}
+              {allCompletedResults?.length > 1 && resultConfig?.type !== 'ONE_TIME' && (
+                <div className={resultStyles.overviewCard} style={{ marginBottom: "20px" }}>
+                  <div className={resultStyles.ocHeader}>
+                    <i className="ti ti-history" /> Attempts History
+                  </div>
+                  <div className={resultStyles.ocBody} style={{ flexDirection: "column", gap: "10px", alignItems: "stretch" }}>
+                    {allCompletedResults.map((attempt, index) => {
+                      const isCurrent = attempt._id === (progressId || bestCompletedResultId);
+                      const attemptScore = attempt?.scoreData?.finalScore !== undefined ? attempt.scoreData.finalScore : attempt?.score || 0;
+                      const attemptPercent = totalMarks > 0 ? Math.round((Number(attemptScore) / totalMarks) * 100) : 0;
+                      const attemptDate = attempt.createdAt ? new Date(attempt.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "N/A";
+                      
+                      return (
+                        <div key={attempt._id || index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", background: isCurrent ? "#f0f7ff" : "#fff", border: isCurrent ? "1px solid #1E69DA" : "1px solid #e2e8f0", borderRadius: "8px", flexWrap: "wrap", gap: "10px" }}>
+                           <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                             <span style={{ fontWeight: "bold", color: isCurrent ? "#1E69DA" : "#1e293b", fontSize: "15px" }}>Attempt {index + 1} {isCurrent && "(Currently Viewing)"}</span>
+                             <span style={{ fontSize: "12px", color: "#64748b" }}><i className="ti ti-calendar-event" /> {attemptDate}</span>
+                           </div>
+                           <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+                             <div style={{ textAlign: "right" }}>
+                                <div style={{ fontWeight: "bold", color: "#1e293b", fontSize: "14px" }}>Score: {attemptScore}</div>
+                                <div style={{ fontSize: "12px", color: "#64748b" }}>Accuracy: {attemptPercent}%</div>
+                             </div>
+                             {!isCurrent && (
+                               <button 
+                                 onClick={() => {
+                                    dispatch(fetchTestData({ testId: attempt.testId }));
+                                    nav.push(`/student/tests/${testData?.value?.test?.title?.split(" ").join("-")}/result?testId=${testId}&progressId=${attempt._id}`);
+                                 }}
+                                 className="px-4 py-2 bg-white text-gray-800 rounded-md font-medium shadow-sm hover:bg-gray-50 border border-gray-200 transition-colors flex items-center gap-2 cursor-pointer text-[13px]"
+                                 style={{ outline: 'none' }}
+                               >
+                                 View Result
+                               </button>
+                             )}
+                           </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Score Overview */}
+              {(canShow('showPercentage') || canShow('showMarks') || canShow('showTimeTaken')) && (
               <div className={resultStyles.overviewCard}>
                 <div className={resultStyles.ocHeader}>
                   <i className="ti ti-chart-bar" /> Score Overview
                 </div>
                 <div className={resultStyles.ocBody}>
                   <div className={resultStyles.ocStats}>
+                    {canShow('showPercentage') && (
                     <div className={resultStyles.statBox}>
                       <div className={resultStyles.statBoxLbl}><i className="ti ti-percentage" /> Percentage</div>
                       <div className={`${resultStyles.statBoxVal} ${score?.totalScore < PassScore ? resultStyles.red : resultStyles.green}`}>
@@ -507,6 +729,8 @@ export default function Page() {
                       </div>
                       <div className={resultStyles.statBoxSub}>Overall Accuracy</div>
                     </div>
+                    )}
+                    {canShow('showMarks') && (
                     <div className={resultStyles.statBox}>
                       <div className={resultStyles.statBoxLbl}><i className="ti ti-target-arrow" /> Score</div>
                       <div className={`${resultStyles.statBoxVal} ${resultStyles.blue}`}>
@@ -514,22 +738,27 @@ export default function Page() {
                       </div>
                       <div className={resultStyles.statBoxSub}>Out of {totalMarks || 0}</div>
                     </div>
-                    <div className={resultStyles.statBox}>
-                      <div className={resultStyles.statBoxLbl}><i className="ti ti-clock-hour-4" /> Time Taken</div>
-                      <div className={resultStyles.statBoxVal}>
-                        {parseFloat((score?.totalTimeTaken || 0) / 60).toFixed(2)}m
-                      </div>
-                      <div className={resultStyles.statBoxSub}>Total Duration</div>
-                    </div>
-                    <div className={resultStyles.statBox}>
-                      <div className={resultStyles.statBoxLbl}><i className="ti ti-bolt" /> Speed</div>
-                      <div className={resultStyles.statBoxVal}>
-                        {parseInt(score?.averageTimeTaken || 0) > 60 ? parseFloat((score?.averageTimeTaken || 0) / 60).toFixed(1) : parseInt(score?.averageTimeTaken || 0)}
-                      </div>
-                      <div className={resultStyles.statBoxSub}>
-                        {parseInt(score?.averageTimeTaken || 0) > 60 ? "mins/Q" : "secs/Q"} Average
-                      </div>
-                    </div>
+                    )}
+                    {canShow('showTimeTaken') && (
+                      <>
+                        <div className={resultStyles.statBox}>
+                          <div className={resultStyles.statBoxLbl}><i className="ti ti-clock-hour-4" /> Time Taken</div>
+                          <div className={resultStyles.statBoxVal}>
+                            {parseFloat((score?.totalTimeTaken || 0) / 60).toFixed(2)}m
+                          </div>
+                          <div className={resultStyles.statBoxSub}>Total Duration</div>
+                        </div>
+                        <div className={resultStyles.statBox}>
+                          <div className={resultStyles.statBoxLbl}><i className="ti ti-bolt" /> Speed</div>
+                          <div className={resultStyles.statBoxVal}>
+                            {parseInt(score?.averageTimeTaken || 0) > 60 ? parseFloat((score?.averageTimeTaken || 0) / 60).toFixed(1) : parseInt(score?.averageTimeTaken || 0)}
+                          </div>
+                          <div className={resultStyles.statBoxSub}>
+                            {parseInt(score?.averageTimeTaken || 0) > 60 ? "mins/Q" : "secs/Q"} Average
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Extra Status Stats */}
@@ -561,6 +790,7 @@ export default function Page() {
                   </div>
 
                   {/* Donut Chart */}
+                  {canShow('showDonutGraph') && (
                   <div className={resultStyles.donutWrap}>
                     <div className={resultStyles.donutSvg}>
                       {chartData?.series?.length > 0 && (
@@ -589,11 +819,13 @@ export default function Page() {
                       </div>
                     </div>
                   </div>
+                  )}
                 </div>
               </div>
+              )}
 
               {/* Category-wise Results */}
-              {Object.keys(categoryScores)?.length > 0 && (
+              {Object.keys(categoryScores)?.length > 0 && canShow('showTopicWise') && (
                 <div className={resultStyles.categoryCard}>
                   <div className={resultStyles.catHeader}>
                     <div className={resultStyles.catTitle}><i className="ti ti-category" /> Category-wise Progress</div>
@@ -624,6 +856,7 @@ export default function Page() {
               )}
 
               {/* Answer Key */}
+              {canShow('showQuestions') && (
               <div className={resultStyles.answerKeyCard}>
                 <div className={resultStyles.akHeader}>
                   <div className={resultStyles.akTitle}><i className="ti ti-list-check" /> Answer Key</div>
@@ -703,6 +936,7 @@ export default function Page() {
                                     testRes={testRes}
                                     questionNo={qNo}
                                     flagged={flaggedQues}
+                                    resultConfig={resultConfig}
                                   />
                                 </div>
                               );
@@ -722,6 +956,7 @@ export default function Page() {
                               testRes={testRes}
                               questionNo={qNo}
                               flagged={flaggedQues}
+                              resultConfig={resultConfig}
                             />
                           </div>
                         );
@@ -730,6 +965,7 @@ export default function Page() {
                   </>
                 )}
               </div>
+              )}
             </>
           )}
         </div>

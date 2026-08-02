@@ -2,78 +2,57 @@
 @import "@/modules/admin/styles/mixins.scss";
 
 .pageContainer {
-  height: calc(100% - 2rem);
-  min-height: 80vh;
-  width: auto;
-  margin: 1rem;
-  padding: 0 2rem;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  overflow-y: auto;
-  @include custom-scrollbar();
-  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.headerSection {
-  position: sticky;
-  top: 0;
+.headerWrapper {
   background-color: #fff;
-  z-index: 9;
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  margin-bottom: 1.5rem;
+  padding: 0.25rem 1.5rem;
+}
 
-  .pageTitle {
-    font-size: 24px;
-    margin: 8px 0 0 0;
-    font-weight: 600;
-    color: #1a1a1a;
+.tpoHeader {
+  margin-bottom: 0;
+
+  .headerInfo {
+    @include flexBox(row, center, space-between, 1rem);
+    flex-wrap: wrap;
+    padding-top: 0;
   }
 
-  .headerContent {
+  .controls {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
     gap: 1rem;
-    margin-top: 8px;
-  }
-
-  .usersCount {
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    height: fit-content;
-    display: flex;
-    align-items: center;
-    padding: 0.3rem 1rem;
-    border-radius: $borderRadius;
-    margin: 0;
-    font-size: 0.9rem;
-    color: #475569;
-    background-color: #f8fafc;
+    flex-wrap: wrap;
   }
 }
 
-.filterSection {
-  @include flexBox(row, center, space-between, 1rem);
+.searchInput {
+  min-width: 250px;
+  border-radius: $borderRadius !important;
 
-  .searchBar {
-    flex: 1;
-    max-width: 400px;
+  :global(.ant-input) {
+    border-radius: $borderRadius;
   }
+}
 
-  .filterControls {
-    width: auto;
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 0.5rem;
+.sortSelect {
+  min-width: 200px;
+  border-radius: $borderRadius;
 
-    .filterSelect {
-      min-width: 150px;
-    }
+  :global(.ant-select-selector) {
+    border-radius: $borderRadius !important;
   }
+}
+
+.contentScrollContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  @include custom-scrollbar(#1890ff);
 }
 
 .loadingContainer {

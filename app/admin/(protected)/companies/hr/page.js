@@ -2,12 +2,15 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import Link from "next/link";
 import { decrypt } from "@/utils/windowMW";
 import BreadcrumbComponent from "@/modules/admin/components/breadcrumbs/breadcrumbs";
 import {
   CreateOrgUser,
+  DeleteHR,
   getUsersByOrg,
   resetUsers,
+  toggleHrStatus,
 } from "@/redux/slices/admin/adminOrgSlice";
 import {
   Divider,
@@ -25,6 +28,8 @@ import {
   Modal,
   Form,
   message,
+  Switch,
+  Popconfirm,
 } from "antd";
 import {
   SearchOutlined,
@@ -34,6 +39,7 @@ import {
   CalendarOutlined,
   PlusOutlined,
   CloseCircleOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import styles from "./users.module.scss";
 import { usePermissions, PERMISSION_VALUES } from "@/hooks/usepermission";
@@ -50,11 +56,23 @@ function Page() {
 
   // Permission check
   const canCreate = canAccess(PERMISSION_VALUES.CREATE);
+  const canDelete = canAccess(PERMISSION_VALUES.DELETE);
 
   const encryptedOrgId = searchParams.get("orgId");
   const encryptedOrgName = searchParams.get("orgName");
   const ORG_ID = encryptedOrgId ? decrypt(encryptedOrgId) : null;
   const ORG_NAME = encryptedOrgName ? decrypt(encryptedOrgName) : "";
+
+  const from = searchParams.get("from");
+
+  const breadcrumbItems = from === "company" ? [
+    { title: <Link href="/admin/companies">Companies</Link> },
+    { title: "HR Users" }
+  ] : [
+    { title: <Link href="/admin/companies">Companies</Link> },
+    ...(ORG_NAME ? [{ title: <Link href={`/admin/organisationDetails/${ORG_ID}?type=company`}>{ORG_NAME}</Link> }] : []),
+    { title: "HR Users" }
+  ];
 
   const {
     value: users,
@@ -183,6 +201,9 @@ function Page() {
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteModalData, setDeleteModalData] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [form] = Form.useForm();
 
   const handleSearch = useCallback(
@@ -332,47 +353,40 @@ function Page() {
     router.push(`${pathname}/${userId}?${searchParams.toString()}`);
   };
 
+  const handleToggleStatus = async (hrId, active) => {
+    try {
+      await dispatch(toggleHrStatus({ hrId, active })).unwrap();
+      message.success(`HR successfully ${active ? "activated" : "deactivated"}`);
+    } catch (error) {
+      message.error(error || "Failed to update HR status");
+    }
+  };
+
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.headerSection}>
-        <BreadcrumbComponent />
-        <h1 className={styles.pageTitle} style={{ marginTop: "8px" }}>HR Users at {ORG_NAME}</h1>
-        <div className={styles.headerContent}>
-          <p className={styles.usersCount}>
-            {pagination?.totalUsers ?? 0} user
-            {(pagination?.totalUsers ?? 0) !== 1 ? "s" : ""} registered
-          </p>
-          <div className={styles.filterSection}>
-            <Input
-              placeholder="Search users by name, email, phone..."
-              allowClear
-              prefix={<SearchOutlined />}
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              style={{ width: 280 }}
-              className={styles.searchBar}
-            />
+      <div className={styles.headerWrapper}>
+        <div className={styles.tpoHeader}>
+          <div className={styles.headerInfo}>
+            <BreadcrumbComponent customItems={breadcrumbItems} />
+            <Space className={styles.controls} size="middle" style={{ flexWrap: "wrap" }}>
+              <Input
+                placeholder="Search users by name, email, phone..."
+                allowClear
+                prefix={<SearchOutlined />}
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className={styles.searchInput}
+                styles={{ input: { borderRadius: "8px" } }}
+                style={{ borderRadius: "8px" }}
+              />
 
-            <Space size="small" className={styles.filterControls} wrap>
-              <Select
-                value={typeFilter}
-                onChange={handleTypeChange}
-                size="middle"
-                className={styles.filterSelect}
-              >
-                <Option value="all">All Types</Option>
-                {userTypes.map((type) => (
-                  <Option key={type} value={type}>
-                    {type}
-                  </Option>
-                ))}
-              </Select>
+
 
               <Select
                 value={sortBy}
                 onChange={handleSortChange}
-                size="middle"
-                className={styles.filterSelect}
+                className={styles.sortSelect}
+                style={{ borderRadius: "8px", minWidth: "200px" }}
               >
                 <Option value="date-desc">Newest First</Option>
                 <Option value="date-asc">Oldest First</Option>
@@ -405,7 +419,8 @@ function Page() {
         </div>
       </div>
 
-      {/* Active Filters Section */}
+      <div className={styles.contentScrollContainer}>
+        {/* Active Filters Section */}
       {activeFilterCount > 0 && (
         <div
           className={styles.activeFilters}
@@ -526,27 +541,55 @@ function Page() {
                 <div className={styles.roleInfo}>
                   <strong>Role:</strong> {user?.role ?? "N/A"}
                 </div>
+                
+                <Divider style={{ margin: "16px 0 12px 0" }} />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "14px", fontWeight: 500, color: "#595959" }}>Active</span>
+                    <Tooltip title={user.active === false ? "Deactivated" : "Active"}>
+                      <Popconfirm
+                        title={user.active === false ? "Reactivate HR" : "Deactivate HR"}
+                        description={user.active === false ? "Are you sure you want to reactivate this HR?" : "Are you sure you want to deactivate this HR? They will be unable to log in."}
+                        onConfirm={() => handleToggleStatus(user.globalId || user._id, user.active !== false)}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+                        <Switch checked={user.active !== false} size="small" />
+                      </Popconfirm>
+                    </Tooltip>
+                  </div>
+                  <Tooltip
+                    title={
+                      !canDelete
+                        ? getPermissionMessage(PERMISSION_VALUES.DELETE)
+                        : ""
+                    }
+                  >
+                    <span>
+                      <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        style={{ borderRadius: "6px", display: "flex", alignItems: "center" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteModalData(user);
+                          setDeleteModal(true);
+                        }}
+                        disabled={!canDelete}
+                      >
+                        Delete HR
+                      </Button>
+                    </span>
+                  </Tooltip>
+                </div>
               </Card>
             ))}
           </div>
 
-          <div className={styles.paginationContainer}>
-            <Pagination
-              current={currentPage}
-              total={pagination?.totalUsers ?? 0}
-              pageSize={itemsPerPage}
-              onChange={handlePageChange}
-              onShowSizeChange={handlePageChange}
-              showSizeChanger
-              showTotal={(total, range) =>
-                `${range[0]}-${range[1]} of ${total} users`
-              }
-              pageSizeOptions={["10", "20", "30", "50"]}
-              disabled={loading}
-            />
-          </div>
+
         </>
       )}
+      </div>
 
       {/* Add HR User Modal */}
       <Modal
@@ -616,6 +659,45 @@ function Page() {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Delete HR User Modal */}
+      <Modal
+        title="Delete HR User"
+        open={deleteModal}
+        onOk={async () => {
+          setDeleteLoading(true);
+          try {
+            await dispatch(
+              DeleteHR({
+                hrId: deleteModalData?.globalId || deleteModalData?._id,
+                orgId: ORG_ID,
+                page: currentPage,
+                limit: itemsPerPage,
+              })
+            ).unwrap();
+            message.success("HR user deleted successfully");
+            setDeleteModal(false);
+            setDeleteModalData(null);
+          } catch (e) {
+            message.error(e || "Failed to delete HR user");
+          } finally {
+            setDeleteLoading(false);
+          }
+        }}
+        onCancel={() => {
+          setDeleteModal(false);
+          setDeleteModalData(null);
+        }}
+        confirmLoading={deleteLoading}
+        mask={{ closable: false }}
+      >
+        <p>
+          Are you sure you want to delete{" "}
+          {deleteModalData
+            ? deleteModalData.userName || deleteModalData.name || deleteModalData.email
+            : ""}?
+        </p>
       </Modal>
     </div>
   );

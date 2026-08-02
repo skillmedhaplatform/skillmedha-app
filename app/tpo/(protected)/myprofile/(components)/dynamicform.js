@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Button, Select, Upload } from "antd";
+import { Button, Select, Upload, Modal } from "antd";
 import ImgCrop from "antd-img-crop";
 import styles from "../form.module.scss";
 import { useParams } from "next/navigation";
@@ -10,6 +10,7 @@ import { UpdateUser } from "@/redux/slices/tpo/userSlice";
 import { getUpdatedFields, getUpdateKey } from "./functions";
 import { handleS3Upload as uploadToS3 } from "@/utils/universalUtils/s3uploads";
 import { restUrl } from "@/utils/universalUtils/urls";
+import { message } from "antd";
 
 const { Option } = Select;
 
@@ -62,7 +63,13 @@ const DynamicForm = ({ schema }) => {
               : "";
         });
       } else {
-        initial[field.name] = value !== undefined ? value : "";
+        if (field.type === "tel" && value !== undefined && value !== null) {
+          let cleanPhone = String(value).replace(/\D/g, "");
+          if (cleanPhone.length > 10) cleanPhone = cleanPhone.slice(-10);
+          initial[field.name] = cleanPhone;
+        } else {
+          initial[field.name] = value !== undefined ? value : "";
+        }
       }
     });
     setFormData(initial);
@@ -112,9 +119,18 @@ const DynamicForm = ({ schema }) => {
 
   const handleRemoveArrayItem = (arrayName, index) => {
     if (!isEditing) return;
-    const updated = [...formData[arrayName]];
-    updated.splice(index, 1);
-    setFormData((prev) => ({ ...prev, [arrayName]: updated }));
+    Modal.confirm({
+      title: "Delete Item",
+      content: "Are you sure you want to delete this item?",
+      okText: "Yes, Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: () => {
+        const updated = [...formData[arrayName]];
+        updated.splice(index, 1);
+        setFormData((prev) => ({ ...prev, [arrayName]: updated }));
+      },
+    });
   };
 
   // ========== RENDER FIELD METHODS ========== //
@@ -137,16 +153,23 @@ const DynamicForm = ({ schema }) => {
     }
   };
 
-  const renderInput = ({ type, name, placeholder, required, disabled }) => (
-    <input
-      type={type}
-      name={name}
-      value={formData[name] ?? ""}
-      required={required}
-      disabled={disabled || !isEditing}
-      onChange={(e) => handleChange(e, name, null, null, false, null, type)}
-      className={styles.inputField}
-    />
+  const renderInput = ({ type, name, placeholder, required, disabled, message: errorMsg }) => (
+    <>
+      <input
+        type={type}
+        name={name}
+        value={formData[name] ?? ""}
+        required={required}
+        disabled={disabled || !isEditing}
+        onChange={(e) => handleChange(e, name, null, null, false, null, type)}
+        className={styles.inputField}
+      />
+      {type === "tel" && formData[name] && formData[name].length !== 10 && (
+        <div style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+          {errorMsg || "Must be exactly 10 digits"}
+        </div>
+      )}
+    </>
   );
 
   const renderSelect = ({ name, options, disabled }) => (
@@ -210,16 +233,18 @@ const DynamicForm = ({ schema }) => {
 
   const renderFileUpload = ({ name }) => {
     // Allow uploading any file, show its name and allow removal
-    const fileList = formData[name]
-      ? [
-        {
-          uid: "-1",
-          name: formData[name].split("/").pop(),
-          status: "done",
-          url: formData[name],
-        },
-      ]
-      : [];
+    const fileUrl = formData[name];
+    const fileList =
+      fileUrl && typeof fileUrl === "string"
+        ? [
+            {
+              uid: "-1",
+              name: fileUrl.split("/").pop() || "file",
+              status: "done",
+              url: fileUrl,
+            },
+          ]
+        : [];
 
     return (
       <div className={styles.uploadField}>
@@ -242,11 +267,12 @@ const DynamicForm = ({ schema }) => {
               ...prev,
               [name]: "",
             }));
+            return false;
           }}
-          showUploadList={{ showPreviewIcon: false, showRemoveIcon: true }}
+          showUploadList={{ showPreviewIcon: false, showRemoveIcon: isEditing }}
           disabled={!isEditing}
         >
-          {!formData[name] && (
+          {!fileUrl && (
             <Button disabled={!isEditing} type="dashed">
               Click to Upload
             </Button>
@@ -401,16 +427,17 @@ const DynamicForm = ({ schema }) => {
   const renderFileUploadForArray = (arrayName, index, field) => {
     const fieldKey = field.name;
     const fileUrl = formData[arrayName]?.[index]?.[fieldKey] || "";
-    const fileList = fileUrl
-      ? [
-        {
-          uid: "-1",
-          name: fileUrl.split("/").pop(),
-          status: "done",
-          url: fileUrl,
-        },
-      ]
-      : [];
+    const fileList =
+      fileUrl && typeof fileUrl === "string"
+        ? [
+            {
+              uid: "-1",
+              name: fileUrl.split("/").pop() || "file",
+              status: "done",
+              url: fileUrl,
+            },
+          ]
+        : [];
 
     return (
       <div className={styles.uploadField}>
@@ -440,15 +467,19 @@ const DynamicForm = ({ schema }) => {
             setFormData((prev) => {
               const updatedItems = [...(prev[arrayName] || [])];
               if (updatedItems[index]) {
-                updatedItems[index][fieldKey] = "";
+                updatedItems[index] = {
+                  ...updatedItems[index],
+                  [fieldKey]: "",
+                };
               }
               return {
                 ...prev,
                 [arrayName]: updatedItems,
               };
             });
+            return false;
           }}
-          showUploadList={{ showPreviewIcon: false, showRemoveIcon: true }}
+          showUploadList={{ showPreviewIcon: false, showRemoveIcon: isEditing }}
           disabled={!isEditing}
         >
           {!fileUrl && (
@@ -522,6 +553,19 @@ const DynamicForm = ({ schema }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isEditing) return;
+
+    let hasError = false;
+    schema?.fields?.forEach((field) => {
+      if (field.type === "tel" && formData[field.name] && formData[field.name].length !== 10) {
+        hasError = true;
+      }
+    });
+
+    if (hasError) {
+      message.error("Please ensure all phone numbers are exactly 10 digits.");
+      return;
+    }
+
     const updateKey = getUpdateKey(form);
     const structuredData = updateKey ? { [updateKey]: formData } : formData;
     const updates = getUpdatedFields(initialValues, structuredData);

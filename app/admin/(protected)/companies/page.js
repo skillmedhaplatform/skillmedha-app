@@ -13,6 +13,8 @@ import {
   Tag,
   Space,
   message,
+  Switch,
+  Popconfirm,
 } from "antd";
 import {
   SearchOutlined,
@@ -37,6 +39,7 @@ import {
   getAllOrgs,
   registerOrg,
   updateOrganization,
+  toggleOrganizationStatus,
 } from "@/redux/slices/admin/adminOrgSlice";
 import { useDispatch, useSelector } from "react-redux";
 import SkeletonCard from "@/modules/admin/components/SkeletonCard";
@@ -254,6 +257,15 @@ export default function Company() {
       }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleToggleStatus = async (orgId, active) => {
+    try {
+      await dispatch(toggleOrganizationStatus({ orgId, active })).unwrap();
+      message.success(`Company successfully ${active ? "activated" : "deactivated"}`);
+    } catch (error) {
+      message.error(error || "Failed to update company status");
     }
   };
 
@@ -541,14 +553,30 @@ export default function Company() {
           Array.from({ length: pageSize }).map((_, index) => (
             <SkeletonCard key={index} />
           ))
-        ) : paginatedCompanies.length > 0 ? (
-          paginatedCompanies.map((company) => (
+        ) : sortedCompanies.length > 0 ? (
+          sortedCompanies.map((company) => (
             <div key={company._id} className={styles.collegeCard}>
               <div className={styles.cardHeader}>
                 <div className={styles.collegeInitial}>
                   {company.orgName.charAt(0).toUpperCase()}
                 </div>
-                <div style={{ display: "flex" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Tooltip title={company.active === false ? "Deactivated" : "Active"}>
+                    <Popconfirm
+                      title={company.active === false ? "Reactivate Company" : "Deactivate Company"}
+                      description={company.active === false ? "Are you sure you want to reactivate this company?" : "Are you sure you want to deactivate this company? Associated users will be unable to log in."}
+                      onConfirm={() => handleToggleStatus(company.orgId, company.active !== false)}
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      <Switch
+                        checked={company.active !== false}
+                        disabled={!canEdit}
+                        size="small"
+                        style={{ marginRight: 8 }}
+                      />
+                    </Popconfirm>
+                  </Tooltip>
                   <Tooltip
                     title={
                       !canEdit
@@ -593,7 +621,7 @@ export default function Company() {
                     <Button
                       type="text"
                       size="large"
-                      icon={<PoweroffOutlined />}
+                      icon={<DeleteOutlined />}
                       className={styles.cardOptions}
                       onClick={() => {
                         if (!canEdit) {
@@ -669,7 +697,7 @@ export default function Company() {
                     push(
                       `/admin/companies/hr?orgId=${encrypt(
                         company?.orgId
-                      )}&orgName=${encrypt(company?.orgName)}`
+                      )}&orgName=${encrypt(company?.orgName)}&from=company`
                     )
                   }
                 >
@@ -703,22 +731,6 @@ export default function Company() {
         )}
       </div>
 
-      {!loading && filteredCompanies.length > 0 && (
-        <div className={styles.pagination}>
-          <Pagination
-            current={currentPage}
-            total={sortedCompanies.length}
-            pageSize={pageSize}
-            onChange={handlePageChange}
-            showSizeChanger={true}
-            onShowSizeChange={handlePageSizeChange}
-            pageSizeOptions={[8, 16, 24, 32, 48]}
-            showTotal={(total, range) =>
-              `${range[0]}-${range[1]} of ${total} companies`
-            }
-          />
-        </div>
-      )}
 
       <Modal
         title={editingCompany ? "Edit Company" : "Add New Company"}
@@ -832,7 +844,7 @@ export default function Company() {
         </Form>
       </Modal>
       <Modal
-        title={"Inactivate Company"}
+        title={"Delete Company"}
         open={deleteModal}
         onOk={() => {
           dispatch(
@@ -847,13 +859,14 @@ export default function Company() {
         onCancel={() => setDeleteModal(false)}
         confirmLoading={status == "pending"}
         mask={{ closable: false }}
-        // keyboard={!submitting}
-        // closable={!submitting}
-        okText={"Inactivate"}
+        okText={"Delete"}
         cancelText="Cancel"
         width={500}
       >
-        <h4>Are you sure you want to inactivate this company?</h4>
+        <h4>Are you sure you want to delete this company?</h4>
+        <p style={{ color: "#ff4d4f", marginTop: "10px" }}>
+          <strong>Warning:</strong> If you delete this company, it will be removed entirely. To recover a deleted company, you must contact the development team.
+        </p>
       </Modal>
     </div>
   );

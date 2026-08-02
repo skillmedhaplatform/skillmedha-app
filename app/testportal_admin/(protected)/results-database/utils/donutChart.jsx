@@ -3,37 +3,41 @@
 import dynamic from "next/dynamic";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-function DonutChart({ id, series, labels, colors, width = 180, height = 180 }) {
+function DonutChart({ id, series, labels, colors, width = 140, height = 140 }) {
   const option = {
     chart: {
       id,
     },
-    series,
-    labels,
-    colors,
+    series: series || [],
+    labels: labels || [],
+    colors: colors || [],
     dataLabels: {
       enabled: false,
     },
     plotOptions: {
       pie: {
-        expandOnClick: true,
+        expandOnClick: false,
+        donut: {
+          size: "72%",
+        },
       },
     },
     legend: {
       show: false,
     },
+    tooltip: {
+      enabled: true,
+    },
   };
 
   return (
-    <>
-      <Chart
-        type="donut"
-        options={option}
-        series={option.series}
-        height={height}
-        width={width}
-      />
-    </>
+    <Chart
+      type="donut"
+      options={option}
+      series={option.series}
+      height={height}
+      width={width}
+    />
   );
 }
 

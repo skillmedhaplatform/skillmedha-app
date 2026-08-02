@@ -3,22 +3,22 @@
 
 .pageContainer {
   width: 100%;
-  min-height: 60vh;
   height: 100%;
-  overflow-y: auto;
-  padding: 1rem 1.5rem;
-  @include custom-scrollbar(#1E69DA);
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.headerWrapper {
+  background-color: #fff;
+  padding: 0.25rem 1.5rem;
 }
 
 .departmentHeader {
   @include flexBox(row, center, space-between);
-  padding: 0.5rem 0;
   flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  background-color: #fff;
-  z-index: 10;
+  gap: 16px;
+
   .headerInfo {
     @include flexBox(row, flex-start, space-between);
     width: 100%;
@@ -43,6 +43,13 @@
   .controls {
     @include flexBox(row, center, flex-end, 0.75rem);
   }
+}
+
+.contentScrollContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  @include custom-scrollbar(#1E69DA);
 }
 
 .searchInput {

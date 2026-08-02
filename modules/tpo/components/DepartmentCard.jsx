@@ -99,9 +99,18 @@ const DepartmentCard = ({ handleClick, item, cardType, studentsList = [] }) => {
       {/* Header Row */}
       <div className={styles.headerRow}>
         <div className={styles.headerLeft}>
-          <div className={styles.initialsBlock} style={{ backgroundColor: theme.initialsBg }}>
-            {initials}
-          </div>
+          {item?.branchLogo ? (
+            <img 
+              src={item.branchLogo} 
+              alt={item.title || "Department logo"} 
+              className={styles.initialsBlock} 
+              style={{ objectFit: 'cover', border: '1px solid #e2e8f0' }} 
+            />
+          ) : (
+            <div className={styles.initialsBlock} style={{ backgroundColor: theme.initialsBg }}>
+              {initials}
+            </div>
+          )}
           <div className={styles.headerInfo}>
             <h4 className={styles.deptTitle}>{item?.title || "Department"}</h4>
             <span className={styles.spocInfo}>

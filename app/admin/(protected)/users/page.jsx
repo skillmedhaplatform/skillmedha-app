@@ -20,6 +20,7 @@ import {
   App,
   Skeleton,
   Tooltip,
+  message,
 } from "antd";
 import {
   EditOutlined,
@@ -36,6 +37,7 @@ import {
   CheckCircleOutlined,
   CrownOutlined,
   TeamOutlined,
+  BankOutlined,
 } from "@ant-design/icons";
 import { FaShieldAlt, FaStar, FaEye } from "react-icons/fa";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -77,7 +79,6 @@ const SECTION_PERMISSIONS = {
 };
 
 export default function User() {
-  const { message } = App.useApp();
   const router = useRouter();
   const dispatch = useDispatch();
   const pathname = usePathname();
@@ -88,8 +89,13 @@ export default function User() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("basicInfo");
+  const [completedSteps, setCompletedSteps] = useState(["basicInfo"]);
+  const [permissionsSubTab, setPermissionsSubTab] = useState("general");
   const [isActive, setIsActive] = useState(true);
   const [editingUserKey, setEditingUserKey] = useState(null);
+
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteModalData, setDeleteModalData] = useState(null);
 
   // Redux selectors
   const { list: USERS, loading } = useSelector((s) => s.adminAuth?.adminUsers || {});
@@ -238,28 +244,28 @@ export default function User() {
   };
 
   const showModal = () => {
-    setIsModalOpen(true);
     form.resetFields();
-    setActiveTab("basicInfo");
     setIsActive(true);
     setEditingUserKey(null);
-    setCollegeSearch("");
-    setCompanySearch("");
+    setActiveTab("basicInfo");
+    setCompletedSteps(["basicInfo"]);
+    setIsModalOpen(true);
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
     form.resetFields();
+    setActiveTab("basicInfo");
+    setCompletedSteps(["basicInfo"]);
     setEditingUserKey(null);
-    setCollegeSearch("");
-    setCompanySearch("");
   };
 
   const handleCreateOrUpdateUser = () => {
     form
       .validateFields()
-      .then((values) => {
-        const basicInfo = values.basicInfo;
+      .then(() => {
+        const values = form.getFieldsValue(true);
+        const basicInfo = values.basicInfo || {};
 
         // Get the previous user data if editing
         const prevUser = editingUserKey
@@ -365,6 +371,10 @@ export default function User() {
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
+        if (info.errorFields && info.errorFields.length > 0) {
+          message.error("Please fill in all required fields in the Basic Info tab.");
+          setActiveTab("basicInfo");
+        }
       });
   };
 
@@ -405,10 +415,10 @@ export default function User() {
     const user = userData.find((u) => u.key === key);
     if (!user || !user.id) {
       message.error("Invalid user id");
-      return;
+      return Promise.reject("Invalid user id");
     }
 
-    dispatch(
+    return dispatch(
       updateAdminUser({
         userId: user.id,
         updateData: { isActive: checked },
@@ -423,6 +433,7 @@ export default function User() {
       })
       .catch((err) => {
         message.error(err || "Failed to update status");
+        throw err;
       });
   };
 
@@ -531,31 +542,70 @@ export default function User() {
     [userData, tableParams, globalSearch]
   );
 
+  const handleStatClick = (type, value) => {
+    const newFilters = { ...tableParams.filters };
+    if (type === "status") {
+      newFilters.status = [value];
+      newFilters.role = []; // Clear role when selecting status from top cards
+    } else if (type === "role") {
+      newFilters.role = [value];
+      newFilters.status = []; // Clear status when selecting role
+    }
+    
+    // Maintain email search if it exists
+    const finalFilters = {
+      status: newFilters.status || [],
+      role: newFilters.role || [],
+      email: newFilters.email || []
+    };
+
+    setTableParams({ ...tableParams, filters: finalFilters });
+    updateUrlFromTable(finalFilters, tableParams.sorter);
+  };
+
   const stats = [
     {
-      label: "Total",
-      value: processedData.length,
-      icon: <UserOutlined />,
+      label: "Total Users",
+      subtitle: "All registered users",
+      value: userData.length,
+      icon: <TeamOutlined />,
+      iconClass: styles.iconBlue,
+      onClick: () => {
+        setTableParams({ ...tableParams, filters: {} });
+        updateUrlFromTable({}, tableParams.sorter);
+      },
     },
     {
-      label: "Active",
-      value: processedData.filter((u) => u.isActive).length,
+      label: "Active Users",
+      subtitle: "Currently active",
+      value: userData.filter((u) => u.isActive).length,
       icon: <CheckCircleOutlined />,
+      iconClass: styles.iconGreen,
+      onClick: () => handleStatClick("status", "Active"),
     },
     {
       label: "Admins",
-      value: processedData.filter((u) => u.role === "ADMIN").length,
+      subtitle: "Full access users",
+      value: userData.filter((u) => u.role === "ADMIN").length,
       icon: <CrownOutlined />,
+      iconClass: styles.iconPurple,
+      onClick: () => handleStatClick("role", "ADMIN"),
     },
     {
       label: "Moderators",
-      value: processedData.filter((u) => u.role === "MODERATOR").length,
-      icon: <BsShield />,
+      subtitle: "Content moderators",
+      value: userData.filter((u) => u.role === "MODERATOR").length,
+      icon: <FaShieldAlt />,
+      iconClass: styles.iconOrange,
+      onClick: () => handleStatClick("role", "MODERATOR"),
     },
     {
       label: "Viewers",
-      value: processedData.filter((u) => u.role === "VIEWER").length,
+      subtitle: "Content viewers",
+      value: userData.filter((u) => u.role === "VIEWER").length,
       icon: <EyeOutlined />,
+      iconClass: styles.iconBlue,
+      onClick: () => handleStatClick("role", "VIEWER"),
     },
   ];
 
@@ -619,7 +669,6 @@ export default function User() {
   const PermissionSummary = () => (
     <Form.Item noStyle shouldUpdate>
       {() => {
-        const role = form.getFieldValue(["basicInfo", "role"]);
         const permissions =
           form.getFieldValue(["permissions", "general"]) || [];
         const sections = form.getFieldValue(["permissions", "sections"]) || {};
@@ -633,74 +682,56 @@ export default function User() {
           internship: "Internship Library",
           practice: "Practice Questions",
           skill: "Skill Library",
+          workshops: "Workshops Library",
         };
         const activeSections = Object.keys(sections).filter((k) => sections[k]);
 
+        const renderTags = (items, colorClass, labelMap = null) => {
+          if (!items || items.length === 0) return <div className={styles.summaryTagsCustom}></div>;
+          const max = 2;
+          const visible = items.slice(0, max);
+          const hidden = items.slice(max);
+          
+          return (
+            <div className={styles.summaryTagsCustom}>
+              {visible.map((item) => (
+                <Tag key={item} className={colorClass}>
+                  {labelMap ? labelMap[item] || item : item}
+                </Tag>
+              ))}
+              {hidden.length > 0 && (
+                <Tooltip title={hidden.map(h => labelMap ? labelMap[h] || h : h).join(", ")}>
+                  <Tag className={colorClass} style={{ cursor: 'pointer' }}>+{hidden.length}</Tag>
+                </Tooltip>
+              )}
+            </div>
+          );
+        };
+
         return (
-          <div className={styles.permissionSummary}>
-            <h3>Permission Summary</h3>
-            <div className={styles.summaryGrid}>
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryLabel}>Role:</span>
-                <span className={styles.summaryValue}>{role || "—"}</span>
+          <div className={styles.permissionSummaryCustom}>
+            <div className={styles.summaryHeaderCustom}>
+              <SafetyOutlined className={styles.summaryIconCustom} />
+              <h3>Permissions Summary</h3>
+            </div>
+            <div className={styles.summaryGridCustom}>
+              <div className={styles.summaryItemCustom}>
+                <span className={styles.summaryLabelCustom}>General Permissions</span>
+                <span className={styles.summaryValueCustom}>{permissions.length} granted</span>
+                {renderTags(permissions, styles.customTagBlue)}
               </div>
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryLabel}>
-                  General Permissions:
-                </span>
-                <span className={styles.summaryValue}>
-                  {permissions.length} granted
-                </span>
+              <div className={styles.summaryItemCustom}>
+                <span className={styles.summaryLabelCustom}>Section Access</span>
+                <span className={styles.summaryValueCustom}>{activeSections.length} enabled</span>
+                {renderTags(activeSections, styles.customTagGreen, sectionNames)}
               </div>
-              {permissions.length > 0 && (
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Selected:</span>
-                  <span className={styles.summaryValue}>
-                    {permissions.map((perm) => (
-                      <Tag
-                        key={perm}
-                        color={colorMap[perm] || "default"}
-                        className={styles.permissionTag}
-                      >
-                        {perm}
-                      </Tag>
-                    ))}
-                  </span>
-                </div>
-              )}
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryLabel}>Section Access:</span>
-                <span className={styles.summaryValue}>
-                  {activeSections.length} enabled
-                </span>
+              <div className={styles.summaryItemCustom}>
+                <span className={styles.summaryLabelCustom}>Colleges</span>
+                <span className={styles.summaryValueCustom}>{selectedColleges.length} selected</span>
               </div>
-              {activeSections.length > 0 && (
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Sections:</span>
-                  <span className={styles.summaryValue}>
-                    {activeSections.map((section) => (
-                      <Tag
-                        key={section}
-                        color="cyan"
-                        className={styles.permissionTag}
-                      >
-                        {sectionNames[section] || section}
-                      </Tag>
-                    ))}
-                  </span>
-                </div>
-              )}
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryLabel}>Colleges:</span>
-                <span className={styles.summaryValue}>
-                  {selectedColleges.length} selected
-                </span>
-              </div>
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryLabel}>Companies:</span>
-                <span className={styles.summaryValue}>
-                  {selectedCompanies.length} selected
-                </span>
+              <div className={styles.summaryItemCustom}>
+                <span className={styles.summaryLabelCustom}>Companies</span>
+                <span className={styles.summaryValueCustom}>{selectedCompanies.length} selected</span>
               </div>
             </div>
           </div>
@@ -718,37 +749,41 @@ export default function User() {
         </span>
       ),
       children: (
-        <div className={styles.tabContent}>
+        <div className={styles.tabContentCustom}>
           <Form.Item
-            label="Full Name"
+            label={<span className={styles.customLabel}>Full Name</span>}
             name={["basicInfo", "fullName"]}
             labelCol={{ span: 6 }}
             wrapperCol={{ span: 18 }}
             rules={[{ required: true, message: "Please enter full name" }]}
+            className={styles.customFormItem}
           >
             <Input
-              prefix={<UserOutlined />}
+              prefix={<UserOutlined style={{ color: "#94a3b8" }} />}
               placeholder="Enter full name"
-              size="middle"
+              size="large"
+              className={styles.customInput}
             />
           </Form.Item>
 
           <Form.Item
-            label="Username"
+            label={<span className={styles.customLabel}>Username</span>}
             name={["basicInfo", "username"]}
             labelCol={{ span: 6 }}
             wrapperCol={{ span: 18 }}
             rules={[{ required: true, message: "Please enter username" }]}
+            className={styles.customFormItem}
           >
             <Input
-              prefix={<UserOutlined />}
+              prefix={<UserOutlined style={{ color: "#94a3b8" }} />}
               placeholder="Enter username"
-              size="middle"
+              size="large"
+              className={styles.customInput}
             />
           </Form.Item>
 
           <Form.Item
-            label="Email Address"
+            label={<span className={styles.customLabel}>Email Address</span>}
             name={["basicInfo", "email"]}
             labelCol={{ span: 6 }}
             wrapperCol={{ span: 18 }}
@@ -756,16 +791,18 @@ export default function User() {
               { required: true, message: "Please enter email" },
               { type: "email", message: "Please enter a valid email" },
             ]}
+            className={styles.customFormItem}
           >
             <Input
-              prefix={<MailOutlined />}
+              prefix={<MailOutlined style={{ color: "#94a3b8" }} />}
               placeholder="Enter email address"
-              size="middle"
+              size="large"
+              className={styles.customInput}
             />
           </Form.Item>
 
           <Form.Item
-            label="Password"
+            label={<span className={styles.customLabel}>Password</span>}
             name={["basicInfo", "password"]}
             labelCol={{ span: 6 }}
             wrapperCol={{ span: 18 }}
@@ -776,15 +813,17 @@ export default function User() {
               },
               { min: 6, message: "Password must be at least 6 characters" },
             ]}
+            className={styles.customFormItem}
           >
             <Input.Password
-              prefix={<LockOutlined />}
+              prefix={<LockOutlined style={{ color: "#94a3b8" }} />}
               placeholder={
                 editingUserKey
                   ? "Enter new password (optional)"
                   : "Enter password"
               }
-              size="middle"
+              size="large"
+              className={styles.customInput}
               iconRender={(visible) =>
                 visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
               }
@@ -792,210 +831,146 @@ export default function User() {
           </Form.Item>
 
           <Form.Item
-            label="User Role"
-            name={["basicInfo", "role"]}
+            label={<span className={styles.customLabel}>User Role</span>}
             labelCol={{ span: 6 }}
             wrapperCol={{ span: 18 }}
-            rules={[{ required: true, message: "Please select a role" }]}
+            className={styles.customFormItem}
+            required
           >
-            <Select placeholder="Select user role" size="middle">
-              <Select.Option value="ADMIN">Admin</Select.Option>
-              <Select.Option value="MODERATOR">Moderator</Select.Option>
-              <Select.Option value="VIEWER">Viewer</Select.Option>
-            </Select>
+            <div className={styles.selectWithPrefix}>
+              <SafetyOutlined className={styles.selectPrefixIcon} />
+              <Form.Item
+                name={["basicInfo", "role"]}
+                rules={[{ required: true, message: "Please select a role" }]}
+                style={{ margin: 0 }}
+              >
+                <Select placeholder="Select user role" size="large" className={styles.customSelect}>
+                  <Select.Option value="ADMIN">Admin</Select.Option>
+                  <Select.Option value="MODERATOR">Moderator</Select.Option>
+                  <Select.Option value="VIEWER">Viewer</Select.Option>
+                </Select>
+              </Form.Item>
+            </div>
           </Form.Item>
 
           <Form.Item
-            label="Active"
+            label={<span className={styles.customLabel}>Status</span>}
             name={["basicInfo", "isActive"]}
             labelCol={{ span: 6 }}
             wrapperCol={{ span: 18 }}
             valuePropName="checked"
+            className={styles.customFormItem}
           >
-            <Switch
-              checked={isActive}
-              onChange={(checked) => {
-                setIsActive(checked);
-                form.setFieldsValue({
-                  basicInfo: {
-                    ...form.getFieldValue("basicInfo"),
-                    isActive: checked,
-                  },
-                });
-              }}
-              checkedChildren="Active"
-              unCheckedChildren="Inactive"
-            />
+            <div className={styles.switchWrapper}>
+              <Switch
+                checked={isActive}
+                onChange={(checked) => {
+                  setIsActive(checked);
+                  form.setFieldsValue({
+                    basicInfo: {
+                      ...form.getFieldValue("basicInfo"),
+                      isActive: checked,
+                    },
+                  });
+                }}
+              />
+              <span className={styles.switchLabel}>{isActive ? "Active" : "Inactive"}</span>
+            </div>
           </Form.Item>
         </div>
       ),
     },
     {
       key: "permissions",
-      label: (
-        <span>
-          <SafetyOutlined /> Permissions
-        </span>
-      ),
+      label: "Permissions",
       children: (
-        <div className={styles.tabContent}>
-          <Tabs
-            defaultActiveKey="general"
-            type="card"
-            items={[
-              {
-                key: "general",
-                label: "General Permissions",
-                children: (
-                  <div className={styles.permissionSection}>
-                    <div className={styles.orgHeaderRow}>
-                      <h3 className={styles.orgTitle}>
-                        Select General Permissions
-                      </h3>
+        <div className={styles.tabContentCustom}>
+          <div className={styles.pillTabsContainer}>
+            <div 
+              className={`${styles.pillTab} ${permissionsSubTab === "general" ? styles.pillTabActive : ""}`}
+              onClick={() => setPermissionsSubTab("general")}
+            >
+              <SafetyOutlined className={styles.pillIcon} /> General Permissions
+            </div>
+            <div 
+              className={`${styles.pillTab} ${permissionsSubTab === "sections" ? styles.pillTabActive : ""}`}
+              onClick={() => setPermissionsSubTab("sections")}
+            >
+              <span className={styles.pillIcon}>🗂</span> Section Permissions
+            </div>
+          </div>
+
+          <div className={styles.permissionSectionCustom}>
+            {permissionsSubTab === "general" && (
+              <>
+                <div className={styles.sectionHeaderCustom}>
+                  <h3>Select General Permissions</h3>
+                  <p>Choose what this user will be able to access and manage.</p>
+                </div>
+                
+                <Form.Item name={["permissions", "general"]} noStyle>
+                  <Checkbox.Group className={styles.customCardGroup}>
+                    <div className={styles.cardGrid}>
+                      {[
+                        { value: PERMISSION_VALUES.CREATE, icon: <span className={styles.cIcon}>📝</span>, title: "Create Content", desc: "Allow user to create new content" },
+                        { value: PERMISSION_VALUES.EDIT, icon: <EditOutlined className={styles.cIcon} />, title: "Edit Content", desc: "Allow user to edit existing content" },
+                        { value: PERMISSION_VALUES.DELETE, icon: <DeleteOutlined className={styles.cIcon} style={{color: '#3b82f6'}} />, title: "Delete Content", desc: "Allow user to delete content" },
+                        { value: PERMISSION_VALUES.PUBLISH, icon: <span className={styles.cIcon}>📤</span>, title: "Publish Content", desc: "Allow user to publish/unpublish content" },
+                        { value: PERMISSION_VALUES.MANAGE_USERS, icon: <TeamOutlined className={styles.cIcon} />, title: "Manage Users", desc: "Allow user to manage other users" },
+                      ].map(item => (
+                        <label key={item.value} className={styles.customSelectCard}>
+                          <div className={styles.cardIconWrapper}>
+                            {item.icon}
+                          </div>
+                          <div className={styles.cardTextContent}>
+                            <h4 className={styles.cardTitle}>{item.title}</h4>
+                            <p className={styles.cardDesc}>{item.desc}</p>
+                          </div>
+                          <Checkbox value={item.value} className={styles.cardCheckbox} />
+                        </label>
+                      ))}
                     </div>
+                  </Checkbox.Group>
+                </Form.Item>
+              </>
+            )}
 
-                    <Form.Item name={["permissions", "general"]} noStyle>
-                      <Checkbox.Group className={styles.orgCheckboxGroup}>
-                        <div className={styles.orgGrid}>
-                          <div className={styles.orgCard}>
-                            <Checkbox value={PERMISSION_VALUES.CREATE}>
-                              <strong>Create Content</strong>
-                              <div className={styles.permissionDesc}>
-                                Allow user to create new content
-                              </div>
-                            </Checkbox>
+            {permissionsSubTab === "sections" && (
+              <>
+                <div className={styles.sectionHeaderCustom}>
+                  <h3>Select Section Access</h3>
+                  <p>Choose which sections of the platform this user can access.</p>
+                </div>
+                
+                <div className={styles.cardGrid}>
+                  {[
+                    { name: ["permissions", "sections", "course"], icon: <span className={styles.cIcon}>📚</span>, title: "Course Library", desc: "Access to course management" },
+                    { name: ["permissions", "sections", "internship"], icon: <span className={styles.cIcon}>💼</span>, title: "Internship Library", desc: "Access to internship management" },
+                    { name: ["permissions", "sections", "practice"], icon: <span className={styles.cIcon}>🎯</span>, title: "Practice Questions", desc: "Access to question practice portal" },
+                    { name: ["permissions", "sections", "skill"], icon: <span className={styles.cIcon}>⚡</span>, title: "Skill Library", desc: "Access to skill/question manager" },
+                    { name: ["permissions", "sections", "workshops"], icon: <span className={styles.cIcon}>🎪</span>, title: "Workshops Library", desc: "Access to workshops management" },
+                  ].map(item => (
+                    <Form.Item key={item.title} name={item.name} valuePropName="checked" noStyle>
+                      <Checkbox style={{ display: 'none' }} />
+                      {/* Fake label block to trigger the hidden checkbox... Wait, noStyle means we can render the Checkbox directly. */}
+                      <label className={styles.customSelectCard}>
+                          <div className={styles.cardIconWrapper}>
+                            {item.icon}
                           </div>
-
-                          <div className={styles.orgCard}>
-                            <Checkbox value={PERMISSION_VALUES.EDIT}>
-                              <strong>Edit Content</strong>
-                              <div className={styles.permissionDesc}>
-                                Allow user to edit existing content
-                              </div>
-                            </Checkbox>
+                          <div className={styles.cardTextContent}>
+                            <h4 className={styles.cardTitle}>{item.title}</h4>
+                            <p className={styles.cardDesc}>{item.desc}</p>
                           </div>
-
-                          <div className={styles.orgCard}>
-                            <Checkbox value={PERMISSION_VALUES.DELETE}>
-                              <strong>Delete Content</strong>
-                              <div className={styles.permissionDesc}>
-                                Allow user to delete content
-                              </div>
-                            </Checkbox>
-                          </div>
-
-                          <div className={styles.orgCard}>
-                            <Checkbox value={PERMISSION_VALUES.PUBLISH}>
-                              <strong>Publish Content</strong>
-                              <div className={styles.permissionDesc}>
-                                Allow user to publish/unpublish
-                              </div>
-                            </Checkbox>
-                          </div>
-
-                          <div className={styles.orgCard}>
-                            <Checkbox value={PERMISSION_VALUES.MANAGE_USERS}>
-                              <strong>Manage Users</strong>
-                              <div className={styles.permissionDesc}>
-                                Allow user to manage other users
-                              </div>
-                            </Checkbox>
-                          </div>
-                        </div>
-                      </Checkbox.Group>
+                          <Form.Item name={item.name} valuePropName="checked" noStyle>
+                            <Checkbox className={styles.cardCheckbox} />
+                          </Form.Item>
+                      </label>
                     </Form.Item>
-                  </div>
-                ),
-              },
-              {
-                key: "sections",
-                label: "Section Permissions",
-                children: (
-                  <div className={styles.permissionSection}>
-                    <div className={styles.orgHeaderRow}>
-                      <h3 className={styles.orgTitle}>Select Section Access</h3>
-                    </div>
-
-                    <div className={styles.orgGrid}>
-                      <div className={styles.orgCard}>
-                        <Form.Item
-                          name={["permissions", "sections", "course"]}
-                          valuePropName="checked"
-                          noStyle
-                        >
-                          <Checkbox>
-                            <strong>Course Library</strong>
-                            <div className={styles.permissionDesc}>
-                              Access to course management
-                            </div>
-                          </Checkbox>
-                        </Form.Item>
-                      </div>
-
-                      <div className={styles.orgCard}>
-                        <Form.Item
-                          name={["permissions", "sections", "internship"]}
-                          valuePropName="checked"
-                          noStyle
-                        >
-                          <Checkbox>
-                            <strong>Internship Library</strong>
-                            <div className={styles.permissionDesc}>
-                              Access to internship management
-                            </div>
-                          </Checkbox>
-                        </Form.Item>
-                      </div>
-
-                      <div className={styles.orgCard}>
-                        <Form.Item
-                          name={["permissions", "sections", "practice"]}
-                          valuePropName="checked"
-                          noStyle
-                        >
-                          <Checkbox>
-                            <strong>Practice Questions</strong>
-                            <div className={styles.permissionDesc}>
-                              Access to question practice portal
-                            </div>
-                          </Checkbox>
-                        </Form.Item>
-                      </div>
-
-                      <div className={styles.orgCard}>
-                        <Form.Item
-                          name={["permissions", "sections", "skill"]}
-                          valuePropName="checked"
-                          noStyle
-                        >
-                          <Checkbox>
-                            <strong>Skill Library</strong>
-                            <div className={styles.permissionDesc}>
-                              Access to skill/question manager
-                            </div>
-                          </Checkbox>
-                        </Form.Item>
-                      </div>
-                      <div className={styles.orgCard}>
-                        <Form.Item
-                          name={["permissions", "sections", "workshops"]}
-                          valuePropName="checked"
-                          noStyle
-                        >
-                          <Checkbox>
-                            <strong>Workshops Library</strong>
-                            <div className={styles.permissionDesc}>
-                              Access to workshops management
-                            </div>
-                          </Checkbox>
-                        </Form.Item>
-                      </div>
-                    </div>
-                  </div>
-                ),
-              },
-            ]}
-          />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       ),
     },
@@ -1005,17 +980,20 @@ export default function User() {
       key: "colleges",
       label: "Colleges",
       children: (
-        <div className={styles.tabContent}>
-          <div className={styles.orgHeaderRow}>
-            <h3 className={styles.orgTitle}>Select Colleges</h3>
+        <div className={styles.tabContentCustom}>
+          <div className={styles.orgHeaderRowCustom}>
+            <div className={styles.sectionHeaderCustom} style={{ marginBottom: 0 }}>
+              <h3>Select Colleges</h3>
+              <p>Choose which colleges this user can access.</p>
+            </div>
 
             <Input
               allowClear
-              size="middle"
+              size="large"
               placeholder="Search colleges"
-              className={styles.orgSearch}
+              className={styles.orgSearchCustom}
               value={collegeSearch}
-              prefix={<SearchOutlined />}
+              prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
               onChange={(e) => setCollegeSearch(e.target.value)}
             />
           </div>
@@ -1041,27 +1019,32 @@ export default function User() {
                 return matchesSearch && notAlreadySelected;
               });
 
-              // Combine: selected first, then search results, limit to 9 total
+              // Combine: selected first, then search results
               const displayedColleges = [
                 ...selectedCollegeObjs,
                 ...searchResults,
-              ].slice(0, 9);
+              ];
 
               return (
                 <Form.Item name={["colleges", "selected"]} noStyle>
-                  <Checkbox.Group className={styles.orgCheckboxGroup}>
-                    <div className={styles.orgGrid}>
+                  <Checkbox.Group className={styles.customCardGroup}>
+                    <div className={styles.cardGrid}>
                       {displayedColleges.map((org) => {
                         const isSelected = selectedColleges.includes(org.orgId);
                         return (
-                          <div
+                          <label
                             key={org._id}
-                            className={`${styles.orgCard} ${
-                              isSelected ? styles.orgCardSelected : ""
-                            }`}
+                            className={styles.customSelectCard}
                           >
-                            <Checkbox value={org.orgId}>{org.orgName}</Checkbox>
-                          </div>
+                            <div className={styles.cardIconWrapper} style={{ backgroundColor: "#f1f5f9" }}>
+                              <BankOutlined className={styles.cIcon} style={{ color: "#64748b" }} />
+                            </div>
+                            <div className={styles.cardTextContent}>
+                              <h4 className={styles.cardTitle}>{org.orgName}</h4>
+                              <p className={styles.cardDesc}>College Institution</p>
+                            </div>
+                            <Checkbox value={org.orgId} className={styles.cardCheckbox} />
+                          </label>
                         );
                       })}
                     </div>
@@ -1078,16 +1061,20 @@ export default function User() {
       key: "companies",
       label: "Companies",
       children: (
-        <div className={styles.tabContent}>
-          <div className={styles.orgHeaderRow}>
-            <h3 className={styles.orgTitle}>Select Companies</h3>
+        <div className={styles.tabContentCustom}>
+          <div className={styles.orgHeaderRowCustom}>
+            <div className={styles.sectionHeaderCustom} style={{ marginBottom: 0 }}>
+              <h3>Select Companies</h3>
+              <p>Choose which companies this user can access.</p>
+            </div>
 
             <Input
               allowClear
-              size="middle"
+              size="large"
               placeholder="Search companies"
+              className={styles.orgSearchCustom}
               value={companySearch}
-              prefix={<SearchOutlined />}
+              prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
               onChange={(e) => setCompanySearch(e.target.value)}
             />
           </div>
@@ -1113,29 +1100,34 @@ export default function User() {
                 return matchesSearch && notAlreadySelected;
               });
 
-              // Combine: selected first, then search results, limit to 9 total
+              // Combine: selected first, then search results
               const displayedCompanies = [
                 ...selectedCompanyObjs,
                 ...searchResults,
-              ].slice(0, 9);
+              ];
 
               return (
                 <Form.Item name={["companies", "selected"]} noStyle>
-                  <Checkbox.Group className={styles.orgCheckboxGroup}>
-                    <div className={styles.orgGrid}>
+                  <Checkbox.Group className={styles.customCardGroup}>
+                    <div className={styles.cardGrid}>
                       {displayedCompanies.map((org) => {
                         const isSelected = selectedCompanies.includes(
                           org.orgId
                         );
                         return (
-                          <div
+                          <label
                             key={org._id}
-                            className={`${styles.orgCard} ${
-                              isSelected ? styles.orgCardSelected : ""
-                            }`}
+                            className={styles.customSelectCard}
                           >
-                            <Checkbox value={org.orgId}>{org.orgName}</Checkbox>
-                          </div>
+                            <div className={styles.cardIconWrapper} style={{ backgroundColor: "#f1f5f9" }}>
+                              <TeamOutlined className={styles.cIcon} style={{ color: "#64748b" }} />
+                            </div>
+                            <div className={styles.cardTextContent}>
+                              <h4 className={styles.cardTitle}>{org.orgName}</h4>
+                              <p className={styles.cardDesc}>Corporate Partner</p>
+                            </div>
+                            <Checkbox value={org.orgId} className={styles.cardCheckbox} />
+                          </label>
                         );
                       })}
                     </div>
@@ -1248,12 +1240,27 @@ export default function User() {
       filteredValue: tableParams.filters.status || null,
       render: (isActiveVal, record) =>
         canAccess(PERMISSION_VALUES.MANAGE_USERS) ? (
-          <Switch
-            checked={!!isActiveVal}
-            onChange={(checked) => handleStatusToggle(record.key, checked)}
-            checkedChildren="Active"
-            unCheckedChildren="Inactive"
-          />
+          <Tooltip title={isActiveVal ? "Active" : "Deactivated"}>
+            <Popconfirm
+              title={isActiveVal ? "Deactivate User" : "Activate User"}
+              description={`Are you sure you want to ${
+                isActiveVal ? "deactivate" : "activate"
+              } this user?`}
+              onConfirm={() => handleStatusToggle(record.key, !isActiveVal)}
+              okText="Yes"
+              cancelText="No"
+              okButtonProps={{ danger: isActiveVal }}
+            >
+              <div style={{ display: "inline-block", cursor: "pointer" }} onClick={(e) => e.stopPropagation()}>
+                <Switch
+                  checked={!!isActiveVal}
+                  checkedChildren="Active"
+                  unCheckedChildren="Inactive"
+                  style={{ pointerEvents: "none" }}
+                />
+              </div>
+            </Popconfirm>
+          </Tooltip>
         ) : (
           <span>{isActiveVal ? "Active" : "Inactive"}</span>
         ),
@@ -1310,24 +1317,19 @@ export default function User() {
             }
           >
             <>
-              <Popconfirm
-                title="Delete User"
-                description="Are you sure you want to delete this user?"
-                onConfirm={() => handleDeleteUser(record)}
-                okText="Yes"
-                cancelText="No"
-                okButtonProps={{ danger: true }}
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                size="small"
                 disabled={!canAccess(PERMISSION_VALUES.DELETE)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteModalData(record);
+                  setDeleteModal(true);
+                }}
               >
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  size="small"
-                  disabled={!canAccess(PERMISSION_VALUES.DELETE)}
-                >
-                  Delete
-                </Button>
-              </Popconfirm>
+                Delete
+              </Button>
             </>
           </Tooltip>
         </Space>
@@ -1418,13 +1420,14 @@ export default function User() {
 
       <div className={styles.statsGrid}>
         {stats.map((stat, index) => (
-          <div key={index} className={styles.statCard}>
-            <div className={styles.statLabel}>{stat.label}</div>
-            <div className={styles.statValue}>
-              {stat.icon && (
-                <span className={styles.statIcon}>{stat.icon}</span>
-              )}
-              {stat.value}
+          <div key={index} className={styles.statCard} onClick={stat.onClick}>
+            <div className={`${styles.statIconWrapper} ${stat.iconClass}`}>
+              {stat.icon}
+            </div>
+            <div className={styles.statContent}>
+              <div className={styles.statLabel}>{stat.label}</div>
+              <div className={styles.statValue}>{stat.value}</div>
+              <div className={styles.statSubtitle}>{stat.subtitle}</div>
             </div>
           </div>
         ))}
@@ -1435,56 +1438,256 @@ export default function User() {
           columns={columns}
           dataSource={processedData}
           onChange={handleTableChange}
-          pagination={{
-            pageSize: 10,
-            showTotal: (total) => `Total ${total} users`,
-            responsive: true,
-          }}
+          pagination={false}
           className={styles.userTable}
+          sticky={true}
         />
       </div>
 
       <Modal
-        title={
-          <div className={styles.modalHeader}>
-            <UserOutlined className={styles.modalIcon} />
-            {editingUserKey ? "Edit User" : "Create New User"}
-          </div>
-        }
         open={isModalOpen}
         onCancel={handleCancel}
-        footer={[
-          <Button key="cancel" onClick={handleCancel}>
-            Cancel
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handleCreateOrUpdateUser}
-          >
-            {editingUserKey ? "Update User" : "Create User"}
-          </Button>,
-        ]}
-        width={1000}
+        footer={null}
+        width={1150}
         className={styles.userModal}
         destroyOnHidden
         centered
         mask={{ closable: false }}
+        closeIcon={<span className={styles.closeIcon}>✕</span>}
       >
+        <div className={styles.modalHeaderCustom}>
+          <div className={styles.headerTitleRow}>
+            <div className={styles.headerIconWrapper}>
+              <UserOutlined />
+            </div>
+            <div>
+              <h2 className={styles.headerTitle}>
+                {editingUserKey ? "Edit User" : "Create New User"}
+              </h2>
+              <p className={styles.headerSubtitle}>
+                {editingUserKey ? "Update user details and permissions" : "Add a new user to your platform"}
+              </p>
+            </div>
+          </div>
+          
+          <div className={styles.stepperContainer}>
+            {(() => {
+              const allSteps = [
+                { key: "basicInfo", label: "Basic Info", icon: <UserOutlined /> },
+                { key: "permissions", label: "Permissions", icon: <SafetyOutlined /> },
+                { key: "colleges", label: "Colleges", icon: <BankOutlined /> },
+                { key: "companies", label: "Companies", icon: <TeamOutlined /> },
+              ];
+              if (activeTab === "review" || completedSteps.includes("review")) {
+                allSteps.push({ key: "review", label: "Review & Create", icon: <CheckCircleOutlined /> });
+              }
+
+              return allSteps.map((step, idx) => {
+                const isActiveStep = activeTab === step.key;
+                const isCompleted = completedSteps.includes(step.key) && !isActiveStep;
+                
+                return (
+                  <div key={step.key} className={styles.stepItemWrapper}>
+                    <div 
+                      className={`${styles.stepItem} ${isActiveStep ? styles.stepActive : ""} ${isCompleted ? styles.stepCompleted : ""}`}
+                      onClick={() => {
+                        // Allow navigating back to completed steps
+                        if (completedSteps.includes(step.key)) {
+                          setActiveTab(step.key);
+                        }
+                      }}
+                    >
+                      <span className={styles.stepIcon}>
+                        {isCompleted ? <CheckCircleOutlined /> : step.icon}
+                      </span>
+                      <span className={styles.stepLabel}>{step.label}</span>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+
         <Form
           form={form}
           layout="horizontal"
           labelAlign="left"
           className={styles.userForm}
         >
-          <Tabs
-            activeKey={activeTab}
-            onChange={setActiveTab}
-            items={tabItems}
-            className={styles.modalTabs}
-          />
-          <PermissionSummary />
+          <div className={styles.formContentWrapper}>
+            {tabItems.find((t) => t.key === activeTab)?.children}
+            {activeTab === "review" && (
+              <div className={styles.reviewTabContent}>
+                <div className={styles.reviewHeader}>
+                  <div className={styles.successIconWrapper}>
+                    <CheckCircleOutlined />
+                  </div>
+                  <h3>Review & Create</h3>
+                  <p>Please review the information below and click "Create User" to finish.</p>
+                </div>
+                
+                <div className={styles.reviewGrid}>
+                  <div className={styles.reviewCol}>
+                    <div className={styles.reviewItem}>
+                      <UserOutlined className={styles.rIcon} />
+                      <span className={styles.rLabel}>Full Name</span>
+                      <span className={styles.rValue}>{form.getFieldValue(["basicInfo", "fullName"])}</span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <UserOutlined className={styles.rIcon} />
+                      <span className={styles.rLabel}>Username</span>
+                      <span className={styles.rValue}>{form.getFieldValue(["basicInfo", "username"])}</span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <MailOutlined className={styles.rIcon} />
+                      <span className={styles.rLabel}>Email Address</span>
+                      <span className={styles.rValue}>{form.getFieldValue(["basicInfo", "email"])}</span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <SafetyOutlined className={styles.rIcon} />
+                      <span className={styles.rLabel}>User Role</span>
+                      <span className={styles.rRoleBadge}>{form.getFieldValue(["basicInfo", "role"])}</span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <Switch size="small" checked={form.getFieldValue(["basicInfo", "isActive"])} />
+                      <span className={styles.rLabel}>Status</span>
+                      <span className={styles.rStatusBadge}>{form.getFieldValue(["basicInfo", "isActive"]) ? "Active" : "Inactive"}</span>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.reviewCol}>
+                    <div className={styles.reviewItem}>
+                      <SafetyOutlined className={styles.rIcon} />
+                      <span className={styles.rLabel}>General Permissions</span>
+                      <span className={styles.rValueBlack}>{form.getFieldValue(["permissions", "general"])?.length || 0} granted</span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <span className={styles.rIcon}>🗂</span>
+                      <span className={styles.rLabel}>Section Access</span>
+                      <span className={styles.rValueBlack}>{
+                        ["course", "internship", "practice", "skill", "workshops"].filter(
+                          (sec) => form.getFieldValue(["permissions", "sections", sec])
+                        ).length
+                      } enabled</span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <BankOutlined className={styles.rIcon} />
+                      <span className={styles.rLabel}>Colleges</span>
+                      <span className={styles.rValueBlack}>{form.getFieldValue(["colleges", "selected"])?.length || 0} selected</span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <TeamOutlined className={styles.rIcon} />
+                      <span className={styles.rLabel}>Companies</span>
+                      <span className={styles.rValueBlack}>{form.getFieldValue(["companies", "selected"])?.length || 0} selected</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Permission Summary sticky box only for non-review steps */}
+          {activeTab !== "review" && (
+            <div className={styles.stickySummaryWrapper}>
+               <PermissionSummary />
+            </div>
+          )}
+
+          <div className={styles.modalFooterCustom}>
+             <div className={styles.footerLeft}>
+               {activeTab !== "basicInfo" && (
+                 <Button 
+                   onClick={() => {
+                     const steps = ["basicInfo", "permissions", "colleges", "companies", "review"];
+                     const prevStep = steps[steps.indexOf(activeTab) - 1];
+                     if (prevStep) setActiveTab(prevStep);
+                   }}
+                   icon={<span style={{ marginRight: 8 }}>&larr;</span>}
+                 >
+                   Back
+                 </Button>
+               )}
+             </div>
+             
+             <div className={styles.footerRight}>
+               <Button onClick={handleCancel} className={styles.cancelBtn}>Cancel</Button>
+               
+               {activeTab === "basicInfo" && (
+                 <Button type="primary" onClick={async () => {
+                   try {
+                     await form.validateFields([
+                       ["basicInfo", "fullName"],
+                       ["basicInfo", "username"],
+                       ["basicInfo", "email"],
+                       ["basicInfo", "password"],
+                       ["basicInfo", "role"]
+                     ]);
+                     setCompletedSteps(prev => [...new Set([...prev, "permissions"])]);
+                     setActiveTab("permissions");
+                   } catch(e) { /* validation failed */ }
+                 }}>Next: Permissions &rarr;</Button>
+               )}
+
+               {activeTab === "permissions" && (
+                 <Button type="primary" onClick={() => {
+                   setCompletedSteps(prev => [...new Set([...prev, "colleges"])]);
+                   setActiveTab("colleges");
+                 }}>Next: Colleges &rarr;</Button>
+               )}
+
+               {activeTab === "colleges" && (
+                 <Button type="primary" onClick={() => {
+                   setCompletedSteps(prev => [...new Set([...prev, "companies"])]);
+                   setActiveTab("companies");
+                 }}>Next: Companies &rarr;</Button>
+               )}
+
+               {activeTab === "companies" && (
+                 <Button type="primary" onClick={() => {
+                   setCompletedSteps(prev => [...new Set([...prev, "review"])]);
+                   setActiveTab("review");
+                 }}>Review & Create &rarr;</Button>
+               )}
+
+               {activeTab === "review" && (
+                 <Button type="primary" onClick={handleCreateOrUpdateUser} icon={<CheckCircleOutlined />}>
+                   {editingUserKey ? "Update User" : "Create User"}
+                 </Button>
+               )}
+             </div>
+          </div>
         </Form>
+      </Modal>
+
+      <Modal
+        title={"Delete User"}
+        open={deleteModal}
+        onOk={() => {
+          const userId = deleteModalData?._id || deleteModalData?.id;
+          if (!userId) return;
+          
+          dispatch(deleteAdminUser(userId))
+            .then(() => {
+              message.success("User Deleted Successfully");
+              dispatch(getAllAdminUsers());
+              setDeleteModal(false);
+            })
+            .catch((err) => {
+              console.error("Failed to delete user:", err);
+            });
+        }}
+        onCancel={() => setDeleteModal(false)}
+        mask={{ closable: false }}
+        okText={"Delete"}
+        okButtonProps={{ danger: true }}
+        cancelText="Cancel"
+        width={500}
+      >
+        <h4>Are you sure you want to delete this user?</h4>
+        <p style={{ color: "#ff4d4f", marginTop: "10px" }}>
+          <strong>Warning:</strong> If you delete this user, it will be removed entirely and cannot be recovered.
+        </p>
       </Modal>
     </div>
   );

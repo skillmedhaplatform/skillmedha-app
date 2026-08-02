@@ -4,7 +4,7 @@ import styles from "./interview.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 ;
 import { UpdateJob } from "@/redux/slices/tpo/placementsSlice";
-import { DatePicker, Radio, Select, message } from "antd";
+import { DatePicker, Radio, Select, message, Modal } from "antd";
 import { FaChevronDown } from "react-icons/fa";
 import dayjs from "dayjs";
 import { useRouter } from "@bprogress/next/app";
@@ -104,8 +104,17 @@ export default function InterviewPage() {
   };
 
   const deleteRound = (id) => {
-    const updatedRounds = rounds.filter((round) => round.id !== id);
-    setRounds(updatedRounds);
+    Modal.confirm({
+      title: "Delete Interview Round",
+      content: "Are you sure you want to delete this interview round?",
+      okText: "Yes, Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: () => {
+        const updatedRounds = rounds.filter((round) => round.id !== id);
+        setRounds(updatedRounds);
+      },
+    });
   };
 
   const handleSubmitAll = async () => {

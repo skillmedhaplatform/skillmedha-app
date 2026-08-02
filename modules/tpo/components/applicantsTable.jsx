@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "@bprogress/next/app";
 import { Select, Table, Input, Button } from "antd";
 import {
@@ -35,6 +35,17 @@ export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
 
   const [expandedRowKey, setExpandedRowKey] = useState(null);
   const [selectedRound, setSelectedRound] = useState("");
+
+  const displayedApplicants = useMemo(() => {
+    if (!selectedRound) return filteredApplicants;
+    return (filteredApplicants || []).filter((student) => {
+      const studentEntry = JOBPROFILE?.interviewStatusByApplicant?.find(
+        (s) => s?.studentId === student?._id
+      );
+      const interviewStatus = studentEntry?.interviewStatus || [];
+      return interviewStatus.some((s) => s.roundName === selectedRound);
+    });
+  }, [filteredApplicants, selectedRound, JOBPROFILE]);
 
   const [rowSelection, setRowSelection] = useState({
     selectedRowKeys: [],
@@ -243,7 +254,14 @@ export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
       title: "Name",
       dataIndex: "userName",
       key: "userName",
-      render: (_, record) => <strong>{record?.userName}</strong>,
+      render: (_, record) => (
+        <strong>
+          {record?.userName ||
+            `${record?.firstName || ""} ${record?.lastName || ""}`.trim() ||
+            record?.email ||
+            "Student"}
+        </strong>
+      ),
     },
     {
       title: "Skillmedha Id",
@@ -324,11 +342,6 @@ export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
             className={styles.select}
             suffixIcon={<FaCaretDown />}
             size="middle"
-          />
-          <Select
-            className={styles.select}
-            suffixIcon={<FaCaretDown />}
-            size="middle"
             placeholder="Interview Rounds"
             allowClear
             options={JOBPROFILE?.interviewRounds?.map((round, index) => ({
@@ -345,7 +358,7 @@ export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
         <Table
           rowKey="_id"
           columns={columns}
-          dataSource={filteredApplicants}
+          dataSource={displayedApplicants}
           pagination={false}
           scroll={{ y: 600 }}
           onRow={(record) => {

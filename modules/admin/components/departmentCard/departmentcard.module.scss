@@ -9,11 +9,11 @@
   flex-direction: column;
   box-shadow: $shadowMd;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
+  cursor: default;
   &:hover {
     border-color: #1E69DA;
     box-shadow: $shadowMd;
-    // transform: translateY(-4px);
+    transform: translateY(-4px);
   }
   &:hover .branchImage {
     transform: scale(1.1);

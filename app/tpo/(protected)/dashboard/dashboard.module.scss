@@ -3,10 +3,21 @@
   height: 100%;
   width: 100%;
   display: flex;
-  overflow-y: auto;
+  overflow: hidden;
   flex-direction: column;
   background-color: transparent;
   font-family: 'Inter', sans-serif;
+}
+
+.dashboardContent {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -17,24 +28,16 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #6BA8ED;
+    background-color: #1e69da;
     border-radius: 6px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #1555b0;
+    background-color: #1150b3;
   }
 
   scrollbar-width: thin;
-  scrollbar-color: #6BA8ED transparent;
-}
-
-.dashboardContent {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
+  scrollbar-color: #1e69da transparent;
 }
 
 .headerRow {

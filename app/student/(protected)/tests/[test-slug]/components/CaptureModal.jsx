@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Button } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 import testPageStyles from "../test.module.scss";
 
 export default function CaptureModal({
@@ -28,13 +29,7 @@ export default function CaptureModal({
             }}
             footer={null}
             width={900}
-            closeIcon={
-                <img
-                    width={"20rem"}
-                    src="https://res.cloudinary.com/cliqtick/image/upload/v1722511937/sysnper/53da26962c207566fc273c8904009a36_o2mxsj.png"
-                    alt="close"
-                />
-            }
+            closeIcon={<CloseOutlined style={{ fontSize: "16px", color: "#64748b" }} />}
             destroyOnHidden={true}
             centered={true}
         >

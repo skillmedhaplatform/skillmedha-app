@@ -3,7 +3,7 @@ import { getScheduledInterviewsForJob, updateStudentAndJobStatus } from "@/redux
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Dropdown, Pagination } from "antd";
+import { Button, Dropdown } from "antd";
 // import { ChevronRight } from "lucide-react";
 import styles from "./styles/int.module.scss";
 import JobStyles from "../../../myjobs/components/myJobsStyles.module.scss";
@@ -128,9 +128,7 @@ const handleMenuClick = (e, studentId) => {
     return (name[0] || "U").toUpperCase();
   };
 
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentDataSource = dataSource.slice(startIndex, endIndex);
+  const currentDataSource = dataSource;
 
   return (
     <div className={styles.wrapper} style={{ marginTop: "1rem" }}>
@@ -273,18 +271,6 @@ const handleMenuClick = (e, studentId) => {
         <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>No scheduled interviews found</div>
       )}
 
-      {dataSource?.length > 0 && (
-        <div style={{ marginTop: "2rem", display: "flex", justifyContent: "flex-end" }}>
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={dataSource.length}
-            onChange={onPageChange}
-            showSizeChanger
-            pageSizeOptions={['4', '10', '20', '50']}
-          />
-        </div>
-      )}
     </div>
   );
 };

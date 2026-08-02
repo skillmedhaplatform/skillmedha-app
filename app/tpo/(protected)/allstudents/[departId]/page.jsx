@@ -11,7 +11,8 @@ import {
   Input,
   Dropdown,
   Pagination,
-  Select
+  Select,
+  Checkbox
 } from "antd";
 import { EllipsisOutlined, UploadOutlined } from "@ant-design/icons";
 import students from "./students.module.scss";
@@ -26,6 +27,7 @@ import {
   getStudentsWithoutValidDepartment,
   updateStudent
 } from "@/redux/slices/tpo/getAllStudentsSlice";
+import { getAllDepartments } from "@/redux/slices/tpo/departmentSlice";
 import { restUrl } from "@/utils/universalUtils/urls";
 import styles from "./students.module.scss";
 import { CreateStudentAccount } from "@/redux/slices/tpo/getAllDetailsSlice";
@@ -57,7 +59,12 @@ const StudentData = () => {
   };
 
   const { value, loading } = useSelector((state) => state.students.allStudents);
+  const { value: departMent } = useSelector((state) => state.department.getAllDepartments);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [moveTargetDepartment, setMoveTargetDepartment] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState("");
@@ -82,6 +89,7 @@ const StudentData = () => {
   const [uploadResultData, setUploadResultData] = useState(null);
   useEffect(() => {
     dispatch(getStudentsInDepartments({ id: params?.departId }));
+    dispatch(getAllDepartments());
   }, [dispatch, params?.departId]);
 
   useEffect(() => {
@@ -117,17 +125,79 @@ const StudentData = () => {
     setOriginal(student);
     setModalType("single");
     setIsModalOpen(true);
+    let cleanPhone = (student.phone || "").replace(/\D/g, "");
+    if (cleanPhone.length > 10) cleanPhone = cleanPhone.slice(-10);
+
     setStudentPayload({
-      ...student
+      ...student,
+      phone: cleanPhone
     });
     setSelectedStudentId(student?._id);
   };
 
   const handleDelete = (student) => {
     const { globalId } = student;
-    dispatch(
-      DeleteStudentAccount({ globalId, dapartment: params.departId, dispatch })
-    );
+    Modal.confirm({
+      title: "Delete Student",
+      content: "Are you sure you want to delete this student? This action cannot be undone.",
+      okText: "Yes, Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: () => {
+        dispatch(
+          DeleteStudentAccount({ globalId, dapartment: params.departId, dispatch })
+        );
+      },
+    });
+  };
+
+  const handleBulkDelete = () => {
+    Modal.confirm({
+      title: `Delete ${selectedStudentIds.length} Students`,
+      content: "Are you sure you want to delete the selected students? This action cannot be undone.",
+      okText: "Yes, Delete All",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        const hide = message.loading("Deleting students...", 0);
+        try {
+          await Promise.all(
+            selectedStudentIds.map(globalId =>
+              dispatch(DeleteStudentAccount({ globalId, dapartment: params.departId, dispatch }))
+            )
+          );
+          setSelectedStudentIds([]);
+          dispatch(getStudentsInDepartments({ id: params?.departId }));
+        } finally {
+          hide();
+        }
+      },
+    });
+  };
+
+  const handleBulkMove = async () => {
+    if (!moveTargetDepartment) {
+      return message.warning("Please select a target department first.");
+    }
+    const hide = message.loading("Moving students...", 0);
+    try {
+      await Promise.all(
+        selectedStudentIds.map(globalId =>
+          dispatch(
+            updateStudent({
+              aboutDetails: { _id: globalId, globalId, department: moveTargetDepartment },
+              departmentId: params?.departId
+            })
+          )
+        )
+      );
+      setSelectedStudentIds([]);
+      setIsMoveModalOpen(false);
+      setMoveTargetDepartment(null);
+      dispatch(getStudentsInDepartments({ id: params?.departId }));
+    } finally {
+      hide();
+    }
   };
 
   const isUpdate = !!selectedStudentId;
@@ -150,11 +220,10 @@ const StudentData = () => {
     }
 
     // Validate phone
-    const phoneRegex = /^(\+91[6-9]\d{9}|[6-9]\d{9})$/;
     const cleanPhone = (phone || "").replace(/[\s-]/g, "");
-    if (!cleanPhone || !phoneRegex.test(cleanPhone)) {
+    if (!cleanPhone || cleanPhone.length !== 10) {
       return message.error(
-        "Invalid phone number. Must be 10 digits starting with 6-9 or +91xxxxxxxxxx"
+        "Phone number must be exactly 10 digits"
       );
     }
 
@@ -475,10 +544,8 @@ const StudentData = () => {
     return ((firstName?.[0] || "") + (lastName?.[0] || "")).toUpperCase();
   };
 
-  const paginatedData = (filteredData || []).slice(
-    (pagination.current - 1) * pagination.pageSize,
-    pagination.current * pagination.pageSize
-  );
+  // Display all students on a single page
+  const paginatedData = filteredData || [];
 
   return (
     <>
@@ -486,53 +553,12 @@ const StudentData = () => {
         title={getSstorage("departmentTitle") || "Department"}
         subtitle="Manage students registered in this department"
       />
-      <div className={students.container}>
-        {/* Breadcrumbs Trail */}
-        <div className={students.headerCont}>
-          {pathSegments.map((segment, index) => {
-            const displayName = resolveName(segment, index);
-            const isLast = index === pathSegments.length - 1;
-            let pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
-            if (pathToHere === "/tpo") {
-              pathToHere = "/tpo/dashboard";
-            }
-            return (
-              <span
-                key={index}
-                className={isLast ? students.activeCrumb : students.crumb}
-                onClick={() => {
-                  if (!isLast) router.push(pathToHere);
-                }}
-                style={{ display: "inline-flex", alignItems: "center" }}
-              >
-                {displayName}&nbsp;
-                {index < pathSegments.length - 1 && (
-                  <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />
-                )}
-              </span>
-            );
-          })}
-        </div>
 
-        {params?.departId !== "noDept" && (
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end", marginBottom: "1rem" }}>
-            <Button onClick={() => showModal("bulk")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
-              Bulk Upload Students
-            </Button>
-            <Button onClick={() => showModal("single")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
-              Add Single Student
-            </Button>
-            <Button onClick={openDownloadModal} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
-              Download Students
-            </Button>
-          </div>
-        )}
-
-        {/* Toolbar containing search query and layout controls */}
-        <div className={students.toolbar}>
+      <div className={students.topSectionWrapper}>
+        <div className={students.leftControls}>
           <Search
             placeholder="Search by name, email, phone, or roll no."
-            style={{ flex: 1 }}
+            style={{ width: 400 }}
             allowClear
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
@@ -562,6 +588,54 @@ const StudentData = () => {
           </div>
         </div>
 
+        {params?.departId !== "noDept" && (
+          <div className={students.rightControls}>
+            {selectedStudentIds.length > 0 && (
+              <Button onClick={() => setIsBulkModalOpen(true)} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+                Bulk Actions ({selectedStudentIds.length})
+              </Button>
+            )}
+            <Button onClick={() => showModal("bulk")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+              Bulk Upload Students
+            </Button>
+            <Button onClick={() => showModal("single")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+              Add Single Student
+            </Button>
+            <Button onClick={openDownloadModal} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+              Download Students
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <div className={students.container}>
+        {/* Breadcrumbs Trail */}
+        <div className={students.headerCont}>
+          {pathSegments.map((segment, index) => {
+            const displayName = resolveName(segment, index);
+            const isLast = index === pathSegments.length - 1;
+            let pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
+            if (pathToHere === "/tpo") {
+              pathToHere = "/tpo/dashboard";
+            }
+            return (
+              <span
+                key={index}
+                className={isLast ? students.activeCrumb : students.crumb}
+                onClick={() => {
+                  if (!isLast) router.push(pathToHere);
+                }}
+                style={{ display: "inline-flex", alignItems: "center" }}
+              >
+                {displayName}&nbsp;
+                {index < pathSegments.length - 1 && (
+                  <FaCaretRight style={{ fontSize: "14px", color: "#64748b", margin: "0 4px" }} />
+                )}
+              </span>
+            );
+          })}
+        </div>
+
         {/* Condition on View Mode */}
         {viewMode === "cards" ? (
           <>
@@ -577,6 +651,18 @@ const StudentData = () => {
                       onClick={() => handleClick(record)}
                     >
                       <div className={students.cardHeader}>
+                        <Checkbox 
+                          style={{ marginRight: '8px' }}
+                          checked={selectedStudentIds.includes(record.globalId)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedStudentIds(prev => [...prev, record.globalId]);
+                            } else {
+                              setSelectedStudentIds(prev => prev.filter(id => id !== record.globalId));
+                            }
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
                         <div className={students.studentAvatar}>
                           {getInitials(record.firstName, record.lastName) || "ST"}
                         </div>
@@ -662,6 +748,18 @@ const StudentData = () => {
                       onClick={() => handleClick(record)}
                     >
                       <div className={students.cardHeader}>
+                        <Checkbox 
+                          style={{ marginRight: '8px' }}
+                          checked={selectedStudentIds.includes(record.globalId)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedStudentIds(prev => [...prev, record.globalId]);
+                            } else {
+                              setSelectedStudentIds(prev => prev.filter(id => id !== record.globalId));
+                            }
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
                         <div className={students.studentAvatar}>
                           {getInitials(record.firstName, record.lastName) || "ST"}
                         </div>
@@ -733,46 +831,6 @@ const StudentData = () => {
               </div>
             )}
           </>
-        )}
-
-        {/* Unified Pagination Row */}
-        {filteredData && filteredData.length > 0 && (
-          <div className={students.paginationRow}>
-            <div className={students.paginationLeft}>
-              <span className={students.pageSizeLabel}>Items per page</span>
-              <Select
-                value={pagination.pageSize}
-                onChange={(value) => {
-                  setPagination((prev) => ({
-                    ...prev,
-                    pageSize: value,
-                    current: 1,
-                  }));
-                }}
-                options={[
-                  { value: 8, label: "8" },
-                  { value: 10, label: "10" },
-                  { value: 25, label: "25" },
-                  { value: 50, label: "50" },
-                  { value: 100, label: "100" },
-                ]}
-                className={students.pageSizeSelect}
-                size="small"
-              />
-              <span className={students.showingText}>
-                Showing {paginatedData.length} students • Page {pagination.current} of {Math.ceil(filteredData.length / pagination.pageSize) || 1}
-              </span>
-            </div>
-            <div className={students.paginationRight}>
-              <Pagination
-                current={pagination.current}
-                pageSize={pagination.pageSize}
-                total={filteredData.length}
-                onChange={(page) => setPagination((prev) => ({ ...prev, current: page }))}
-                showSizeChanger={false}
-              />
-            </div>
-          </div>
         )}
 
         {/* Single / Bulk Add Modal */}
@@ -850,12 +908,19 @@ const StudentData = () => {
                   name="phone"
                   type="tel"
                   placeholder="Enter phone number"
+                  maxLength={10}
                   value={studentPayload.phone}
                   onChange={(e) => {
-                    const { name, value } = e.target;
+                    let { name, value } = e.target;
+                    if (name === "phone") {
+                      value = value.replace(/\D/g, "").slice(0, 10);
+                    }
                     setStudentPayload((prev) => ({ ...prev, [name]: value }));
                   }}
                 />
+                {studentPayload.phone && studentPayload.phone.length !== 10 && (
+                  <span style={{ color: "red", fontSize: "12px" }}>Must be exactly 10 digits</span>
+                )}
               </div>
               <div>
                 <strong>Year of passing *</strong>
@@ -928,7 +993,7 @@ const StudentData = () => {
                 <Table
                   dataSource={uploadResultData.errors}
                   rowKey={(record, index) => `${record.row}-${index}`}
-                  pagination={{ pageSize: 5 }}
+                  pagination={false}
                   columns={[
                     { title: "Row", dataIndex: "row", key: "row", width: 80 },
                     { title: "Email", dataIndex: "email", key: "email" },
@@ -956,6 +1021,48 @@ const StudentData = () => {
           filename="students"
         />
       </div>
+
+
+      <Modal
+        title="Bulk Actions"
+        open={isBulkModalOpen}
+        onCancel={() => setIsBulkModalOpen(false)}
+        footer={null}
+      >
+        <p style={{ fontSize: '16px', marginBottom: '24px' }}>
+          You have selected <strong>{selectedStudentIds.length}</strong> students. What would you like to do with them?
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <Button onClick={() => { setIsBulkModalOpen(false); setSelectedStudentIds([]); }}>Cancel Selection</Button>
+          <Button type="primary" onClick={() => { setIsBulkModalOpen(false); setIsMoveModalOpen(true); }}>Move Selected</Button>
+          <Button type="primary" danger onClick={() => { setIsBulkModalOpen(false); handleBulkDelete(); }}>Delete Selected</Button>
+        </div>
+      </Modal>
+
+      <Modal
+        title="Move Students"
+        open={isMoveModalOpen}
+        onOk={handleBulkMove}
+        onCancel={() => {
+          setIsMoveModalOpen(false);
+          setMoveTargetDepartment(null);
+        }}
+        okText="Move"
+      >
+        <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+          <p style={{ marginBottom: '8px' }}>Select target department:</p>
+          <Select
+            style={{ width: '100%' }}
+            placeholder="Select a department"
+            value={moveTargetDepartment}
+            onChange={setMoveTargetDepartment}
+          >
+            {departMent?.data?.map(d => (
+              <Select.Option key={d._id} value={d._id}>{d.title}</Select.Option>
+            ))}
+          </Select>
+        </div>
+      </Modal>
     </>
   );
 };

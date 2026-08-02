@@ -90,9 +90,13 @@ const TestsSlice = createSlice({
     builder.addCase(getTests.pending, (state, { payload }) => {
       state.getAllTestStatus.status = "pending";
     });
-    builder.addCase(getTests.fulfilled, (state, { payload }) => {
-      const withPrev = [...state.value, ...payload];
-      state.value = _.uniqBy(withPrev, "_id");
+    builder.addCase(getTests.fulfilled, (state, { payload, meta }) => {
+      if (!meta?.arg?.cursor) {
+        state.value = payload;
+      } else {
+        const combined = [...payload, ...state.value];
+        state.value = _.uniqBy(combined, "_id");
+      }
       state.getAllTestStatus.status = "fulfilled";
     });
     builder.addCase(getOneTests.pending, (state, action) => {
@@ -102,6 +106,12 @@ const TestsSlice = createSlice({
       state.singleTestStatus.status = "fulfilled";
       state.test = action.payload;
       if (!state.test) state.test = {};
+      if (action.payload?._id && state.value?.length) {
+        const index = state.value.findIndex((t) => t._id === action.payload._id);
+        if (index !== -1) {
+          state.value[index] = { ...state.value[index], ...action.payload };
+        }
+      }
       if (action.payload?.err) {
         state.test = {};
         message.error(action.payload?.err);
@@ -109,9 +119,9 @@ const TestsSlice = createSlice({
       if (state.test) {
         if (!state.test.access) {
           state.test.access = {};
-          state.test.access.attemptsPerRespondent = 1;
+          state.test.access.attemptsPerRespondent = 2;
         } else if (!state.test.access.attemptsPerRespondent)
-          state.test.access.attemptsPerRespondent = 1;
+          state.test.access.attemptsPerRespondent = 2;
         if (!state.test.startPage) {
           state.test.startPage = {};
           state.test.startPage.formRequirements = [
@@ -130,6 +140,19 @@ const TestsSlice = createSlice({
     builder.addCase(getOneTests.rejected, (state, action) => {
       state.singleTestStatus.status = "rejected";
       state.singleTestStatus.error = action.error;
+    });
+    builder.addCase(updateTest.fulfilled, (state, action) => {
+      if (action.meta?.arg?.id && action.meta?.arg?.updates) {
+        const id = action.meta.arg.id;
+        const updates = action.meta.arg.updates;
+        if (state.test && state.test._id === id) {
+          state.test = { ...state.test, ...updates };
+        }
+        const index = state.value.findIndex((t) => t._id === id);
+        if (index !== -1) {
+          state.value[index] = { ...state.value[index], ...updates };
+        }
+      }
     });
     builder.addCase(createTests.pending, (state, action) => {
       state.newTest.status = "pending";
@@ -298,21 +321,25 @@ export const GetOneUser = createAsyncThunk("/getOneUser", async (args) => {
 });
 
 export const getTests = createAsyncThunk("/getAllTests", async (args) => {
+  try {
     const response = await axios.post(
-    gqlUrl,
-    {
-      query: AllTests,
-      variables: {
-        cursor: args.cursor,
-        limit: args.limit,
-        category: args.category,
-        language: args.language,
-        status: args.status,
-      },
-    }
-  );
-  if (!response?.data?.data?.tests?.tests) args?.nav?.replace("/");
-  return response?.data?.data?.tests?.tests || [];
+      gqlUrl,
+      {
+        query: AllTests,
+        variables: {
+          cursor: args?.cursor,
+          limit: args?.limit,
+          category: args?.category,
+          language: args?.language,
+          status: args?.status,
+        },
+      }
+    );
+    return response?.data?.data?.tests?.tests || [];
+  } catch (error) {
+    console.error("Failed to fetch tests:", error);
+    return [];
+  }
 });
 
 export const createTests = createAsyncThunk(
@@ -428,6 +455,28 @@ export const SendBulkEmailMail = createAsyncThunk(
       hideLoading();
       message.error(error.message);
       return rejectWithValue({ err: error.message });
+    }
+  }
+);
+
+export const bulkDeleteTests = createAsyncThunk(
+  "/bulkDeleteTests",
+  async ({ testIds, dispatch }) => {
+    const hideLoading = message.loading(`Deleting ${testIds.length} selected test(s)...`, 0);
+    try {
+      await Promise.all(
+        testIds.map((id) =>
+          axios.post(testsUrl + "/deleteTest/" + id, {})
+        )
+      );
+      hideLoading();
+      message.success(`Successfully deleted ${testIds.length} test(s)`);
+      dispatch(getTests({ cursor: null, limit: 100 }));
+      return testIds;
+    } catch (error) {
+      hideLoading();
+      message.error(error.message || "Failed to delete selected tests");
+      throw error;
     }
   }
 );

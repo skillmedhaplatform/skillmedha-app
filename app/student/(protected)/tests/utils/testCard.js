@@ -199,13 +199,10 @@ export default function TestCard({
     );
   };
 
-  const progressForTest = studentCreds?.progress?.filter((e) => e?.testId == testData?._id) || [];
+  const currentGen = testData?.attemptGeneration || 0;
+  const progressForTest = studentCreds?.progress?.filter((e) => e?.testId == testData?._id && (e?.attemptGeneration || 0) === currentGen) || [];
   const backendAttemptsDone = progressForTest.length;
-  
-  const localAttempts = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("localAttempts") || "{}") : {};
-  const localAttemptCount = localAttempts[testData?._id] || 0;
-  
-  const attemptsDone = Math.max(backendAttemptsDone, localAttemptCount);
+  const attemptsDone = backendAttemptsDone;
   
   const latestAttempt = progressForTest[backendAttemptsDone - 1];
   const score = latestAttempt?.scoreData?.finalScore !== undefined ? latestAttempt.scoreData.finalScore : latestAttempt?.score;
@@ -215,11 +212,16 @@ export default function TestCard({
   const noQuestions = !testData?.questions?.length && !testData?.questionIds?.length;
 
   const attemptsPerRespondentValue = testData?.access?.attemptsPerRespondent;
+  const maxAttemptsNum = Number(attemptsPerRespondentValue);
+  const isUnlimited =
+    attemptsPerRespondentValue === undefined ||
+    attemptsPerRespondentValue === null ||
+    attemptsPerRespondentValue === "" ||
+    maxAttemptsNum === -1 ||
+    attemptsPerRespondentValue === "unlimited";
+
   const attemptsExceeded =
-    attemptsPerRespondentValue !== undefined &&
-    attemptsPerRespondentValue !== "" &&
-    attemptsPerRespondentValue !== null &&
-    (Number(attemptsPerRespondentValue) - attemptsDone <= 0);
+    !isUnlimited && (maxAttemptsNum - attemptsDone <= 0);
 
   const isExpiredStatus = countdowns[index] === "Expired" || testData?.status?.toLowerCase() === "expired" || testData?.status?.toLowerCase() === "completed";
 
@@ -250,6 +252,9 @@ export default function TestCard({
 
   const handleStartTestClick = () => {
     switch (true) {
+      case attemptsExceeded:
+        message.error(<strong>Maximum attempts reached for this test.</strong>);
+        break;
       case isExpiredStatus:
         message.error(<strong>The test you are trying to access has expired.</strong>);
         break;
@@ -299,13 +304,44 @@ export default function TestCard({
             </Button>
           </Popover>
         );
+      case attemptsExceeded:
+        return (
+          <Button
+            type="primary"
+            disabled
+            style={{ backgroundColor: "#FACE53", color: "#000000", border: "none" }}
+          >
+            Attempts exceeded
+          </Button>
+        );
       default:
         if (isResultTab) {
           return (
             <Button
               type="primary"
-              disabled
-              className="font-semibold !bg-white !text-[#1E69DA] !border-[#1E69DA] opacity-80"
+              onClick={(e) => {
+                e.stopPropagation();
+                
+                const completedResult = studentCreds?.progress?.filter(
+                  (entry) => entry?.testId == testData?._id
+                );
+                
+                if (completedResult?.length > 0) {
+                  dispatch(
+                    fetchTestData({
+                      testId: completedResult[completedResult.length - 1]?.testId,
+                    })
+                  );
+                }
+                
+                nav.push(
+                  "/student/tests/" +
+                  testData?.title?.split(" ").join("-") +
+                  "/result?testId=" +
+                  testData?._id
+                );
+              }}
+              className="font-semibold !bg-white !text-[#1E69DA] !border-[#1E69DA] hover:!bg-[#1E69DA] hover:!text-white transition-all"
             >
               View result
             </Button>
@@ -329,13 +365,18 @@ export default function TestCard({
 
   let rawDesc = parseIfJson(parseIfJson(testData?.shortDescription || "")) || "";
   let cleanDesc = String(rawDesc)
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&#34;/gi, '"')
+    .replace(/<\/(p|div|h[1-6]|li|section|article)>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, ' ')
     .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+    .replace(/^["'\s]+|["'\s]+$/g, '')
+    .replace(/\s+/g, ' ')
     .trim();
   let firstSentence = cleanDesc;
   if (firstSentence.includes('.')) {
@@ -441,8 +482,8 @@ export default function TestCard({
           </span>
           <strong className="text-[#1a3b8b] text-[15px] font-bold leading-tight uppercase truncate">
             {isAssessment 
-              ? (testData?.testDurationDisplay?.hours || testData?.testDurationDisplay?.minutes ? `${testData?.testDurationDisplay?.hours || 0}H : ${testData?.testDurationDisplay?.minutes || 0}M` : "NA")
-              : (testDuration?.val1 || testDuration?.val2 ? `${testDuration?.val1 || 0}H : ${testDuration?.val2 || 0}M` : "NA")}
+              ? (testData?.testDurationDisplay?.hours || testData?.testDurationDisplay?.minutes ? `${String(testData?.testDurationDisplay?.hours || 0).padStart(2, '0')}H : ${String(testData?.testDurationDisplay?.minutes || 0).padStart(2, '0')}M` : "NA")
+              : (testDuration && (testDuration.val1 !== undefined || testDuration.val2 !== undefined) ? `${String(testDuration.val1 ?? 0).padStart(2, '0')}H : ${String(testDuration.val2 ?? 0).padStart(2, '0')}M` : "NA")}
           </strong>
         </div>
         {!isAssessment && (
@@ -466,8 +507,15 @@ export default function TestCard({
           <div className="text-[#8c94a3] text-[11px] font-bold uppercase tracking-wider">
             ATTEMPTS
           </div>
-          <div className="text-[#1a3b8b] text-[16px] font-bold leading-tight mt-0.5">
-            {attemptsDone || 0}
+          <div className="flex flex-col mt-0.5">
+            <div className="text-[#1a3b8b] text-[15px] font-bold leading-tight">
+              {attemptsDone || 0} / {isUnlimited ? '∞' : attemptsPerRespondentValue}
+            </div>
+            <div className="text-[#8c94a3] text-[11px] font-medium mt-0.5">
+              {isUnlimited 
+                ? 'Unlimited remaining' 
+                : `${Math.max(0, maxAttemptsNum - (attemptsDone || 0))} remaining`}
+            </div>
           </div>
         </div>
         {renderMainButton()}

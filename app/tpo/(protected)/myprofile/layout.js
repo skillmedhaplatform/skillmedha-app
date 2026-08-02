@@ -32,11 +32,26 @@ export default function ProfileLayout({ children, activeView, setView }) {
   const { value: StudentsLength, status: studentsStatus } = useSelector(
     (state) => state.dashboard.AllStudents
   );
-  const studentsCount = Array.isArray(StudentsLength?.data)
-    ? StudentsLength.data.length
+  const studentsList = Array.isArray(StudentsLength?.data)
+    ? StudentsLength.data
     : Array.isArray(StudentsLength)
-    ? StudentsLength.length
-    : 0;
+    ? StudentsLength
+    : [];
+
+  const departmentsList = Array.isArray(departMent?.data)
+    ? departMent.data
+    : Array.isArray(departMent)
+    ? departMent
+    : [];
+
+  const deptIdSet = new Set(departmentsList.map((d) => d._id?.toString()).filter(Boolean));
+
+  // Students belonging to existing departments
+  const departmentStudentsList = studentsList.filter((s) => {
+    const sDeptId = typeof s.department === "object" ? s.department?._id?.toString() : s.department?.toString();
+    return sDeptId && deptIdSet.has(sDeptId);
+  });
+  const studentsCount = departmentStudentsList.length;
 
   const { value: ALLPLACEMENTS, status: placementsStatus } = useSelector(
     (state) => state.placement.AllPlacements
@@ -103,10 +118,10 @@ export default function ProfileLayout({ children, activeView, setView }) {
       USER_DETAILS?.institutionDetails?.principalContact,
       USER_DETAILS?.institutionDetails?.principalEmail,
       USER_DETAILS?.institutionDetails?.institutionLogo,
-      // Accreditations and Ranking
-      USER_DETAILS?.accreditationDetails?.naacGradeCycle,
-      USER_DETAILS?.accreditationDetails?.nbaStatus,
-      USER_DETAILS?.accreditationDetails?.nirfRanking,
+      // Accreditations and Ranking (now in Institution Details)
+      USER_DETAILS?.institutionDetails?.naacGradeCycle,
+      USER_DETAILS?.institutionDetails?.nbaStatus,
+      USER_DETAILS?.institutionDetails?.nirfRanking,
       // TPO Support Team Details
       USER_DETAILS?.tpoSupportTeamDetails?.placementOffice?.name,
       USER_DETAILS?.tpoSupportTeamDetails?.placementOffice?.contact,
@@ -128,8 +143,6 @@ export default function ProfileLayout({ children, activeView, setView }) {
         return <FaUser />;
       case "institution details":
         return <FaBuilding />;
-      case "accreditations and ranking":
-        return <FaAward />;
       case "tpo support team details":
         return <FaUserFriends />;
       case "placement cell mous":

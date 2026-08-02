@@ -1498,9 +1498,8 @@ export default function StudentResult({ params }) {
     || singleProgress?.studentDetails?.phone
     || "N/A";
 
-  const percentageValue = parseFloat(
-    ((parseInt(score?.totalScore || 0)) / (parseInt(totalMarks) || 1)) * 100
-  ).toFixed(0);
+  const rawPercentage = ((Number(score?.totalScore) || 0) / Math.max(Number(totalMarks) || 1, 1)) * 100;
+  const percentageValue = isNaN(rawPercentage) || !isFinite(rawPercentage) ? 0 : Math.max(0, Math.round(rawPercentage));
 
   // Extract flagged question indices
   const flaggedIndices = singleProgress?.flagged
@@ -1801,6 +1800,7 @@ export default function StudentResult({ params }) {
                             alignItems: "center",
                             justifyContent: "center",
                             position: "relative",
+                            overflow: "hidden",
                           }}
                         >
                           {chartData?.series?.length > 0 ? (
@@ -1815,7 +1815,7 @@ export default function StudentResult({ params }) {
                           ) : (
                             <Skeleton.Avatar active shape="circle" size={120} />
                           )}
-                          <div style={{ position: "absolute", textAlign: "center", zIndex: 5 }}>
+                          <div style={{ position: "absolute", textAlign: "center", zIndex: 5, pointerEvents: "none" }}>
                             <div style={{ fontSize: "15px", fontWeight: "800", color: "#0f172a" }}>{percentageValue}%</div>
                             <div style={{ fontSize: "9px", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>Score</div>
                           </div>
@@ -1824,8 +1824,8 @@ export default function StudentResult({ params }) {
                           <Text style={{ fontSize: "12px", fontWeight: 600 }}>
                             <Badge color="#87CC85" /> Correct:{" "}
                             <strong>
-                              {parseFloat(
-                                ((chartData?.series?.[0] || 0) /
+                              {(
+                                (Math.max(0, chartData?.series?.[0] || 0) /
                                   Math.max(parseInt(ques?.length || 1), 1)) *
                                 100
                               ).toFixed(1)}
@@ -1835,8 +1835,8 @@ export default function StudentResult({ params }) {
                           <Text style={{ fontSize: "12px", fontWeight: 600 }}>
                             <Badge color="#E43E5F" /> Incorrect:{" "}
                             <strong>
-                              {parseFloat(
-                                ((chartData?.series?.[1] || 0) /
+                              {(
+                                (Math.max(0, chartData?.series?.[1] || 0) /
                                   Math.max(parseInt(ques?.length || 1), 1)) *
                                 100
                               ).toFixed(1)}
@@ -1846,8 +1846,8 @@ export default function StudentResult({ params }) {
                           <Text style={{ fontSize: "12px", fontWeight: 600 }}>
                             <Badge color="#869DF0" /> Unattempted:{" "}
                             <strong>
-                              {parseFloat(
-                                ((chartData?.series?.[2] || 0) /
+                              {(
+                                (Math.max(0, chartData?.series?.[2] || 0) /
                                   Math.max(parseInt(ques?.length || 1), 1)) *
                                 100
                               ).toFixed(1)}
@@ -1857,8 +1857,8 @@ export default function StudentResult({ params }) {
                           <Text style={{ fontSize: "12px", fontWeight: 600 }}>
                             <Badge color="#4e4eff" /> Not Answered:{" "}
                             <strong>
-                              {parseFloat(
-                                ((chartData?.series?.[3] || 0) /
+                              {(
+                                (Math.max(0, chartData?.series?.[3] || 0) /
                                   Math.max(parseInt(ques?.length || 1), 1)) *
                                 100
                               ).toFixed(1)}

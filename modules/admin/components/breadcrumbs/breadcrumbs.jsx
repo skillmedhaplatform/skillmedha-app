@@ -6,11 +6,14 @@ import { sideBarTitles } from "@/utils/windowMW";
 import { FaCaretRight } from "react-icons/fa6";
 import "./Breadcrumb.css";
 
-const BreadcrumbComponent = ({ customLabels = {} }) => {
+const BreadcrumbComponent = ({ customLabels = {}, customItems = null }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const breadcrumbItems = useMemo(() => {
+    if (customItems) {
+      return customItems;
+    }
     const pathSegments = pathname.split("/").filter(Boolean);
 
     const items = [];

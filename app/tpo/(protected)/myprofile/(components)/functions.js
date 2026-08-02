@@ -47,7 +47,7 @@ export const getUpdateKey = (form) => {
   const keyMap = {
     personal: null,
     institution: "institutionDetails",
-    accreditation: "accreditationDetails",
+
     tpo_support_team: "tpoSupportTeamDetails",
     placement_cell_social_media: "placementCellSocialMedia",
     placement_cell_documents: "placementCellDocuments",

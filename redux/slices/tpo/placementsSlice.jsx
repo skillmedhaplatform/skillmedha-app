@@ -130,12 +130,40 @@ export const CreateOnePlacement = createAsyncThunk(
       }
       return data;
     } catch (error) {
-      hideLoading();
-      message.error("Failed to Create Placement Drive");
       console.log(error);
     }
   }
 );
+
+export const UpdateJobProfile = createAsyncThunk(
+  "/updateJobProfile",
+  async (args) => {
+    const hideloading = message.loading("Updating Placement Drive...");
+    try {
+      const { dispatch, profileId, payload } = args;
+      const { data } = await axios.post(
+        `${baseurl}/updateJobProfile/${profileId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${getLstorage("token") || token}`,
+          },
+        }
+      );
+      hideloading();
+      if (data) {
+        message.success("Updated Placement Drive");
+        dispatch(GetAllPlacements());
+      }
+      return data;
+    } catch (error) {
+      hideloading();
+      message.error("Failed to Update Placement Drive");
+      console.log(error);
+    }
+  }
+);
+
 
 export const deleteJobProfile = createAsyncThunk(
   "/deleteJobProfile",

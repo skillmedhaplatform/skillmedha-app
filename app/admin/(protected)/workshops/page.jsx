@@ -880,9 +880,21 @@ const Page = () => {
                 className={internshipLibStyles.card}
                 role="button"
                 tabIndex={0}
+                onDoubleClick={() => {
+                  if (!canAccess(PERMISSION_VALUES.EDIT)) {
+                    message.info(getPermissionMessage(PERMISSION_VALUES.EDIT));
+                    return;
+                  }
+                  handleCardClick(eachData);
+                }}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ")
+                  if (e.key === "Enter" || e.key === " ") {
+                    if (!canAccess(PERMISSION_VALUES.EDIT)) {
+                      message.info(getPermissionMessage(PERMISSION_VALUES.EDIT));
+                      return;
+                    }
                     handleCardClick(eachData);
+                  }
                 }}
               >
                 <div className={internshipLibStyles.thumbWrapper}>
@@ -919,6 +931,10 @@ const Page = () => {
                         e.stopPropagation();
                       }}
                       onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onDoubleClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                       }}

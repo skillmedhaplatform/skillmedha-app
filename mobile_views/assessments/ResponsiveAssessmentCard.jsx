@@ -180,10 +180,9 @@ export default function ResponsiveAssessmentCard({
 
         {/* Short Description */}
         {shortDescription && (
-          <div 
-            className={styles.description}
-            dangerouslySetInnerHTML={{ __html: shortDescription }}
-          />
+          <div className={styles.description}>
+            {shortDescription}
+          </div>
         )}
       </div>
 

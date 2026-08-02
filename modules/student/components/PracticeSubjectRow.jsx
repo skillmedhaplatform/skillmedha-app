@@ -135,8 +135,13 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
       const isNonTech = path.includes('/nontechnical');
       const sectionType = isCoding ? "Coding" : isNonTech ? "Non-Technical" : "Technical";
 
-      let pendingNotices = JSON.parse(localStorage.getItem("pendingPracticeNotices") || "[]");
-      let claimedBadges = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
+      const userId = studentData?._id || "";
+      const noticeKey = `pendingPracticeNotices_${userId}`;
+      const claimedKey = `claimedAchievements_${userId}`;
+      const unseenKey = `unseenPracticeBadges_${userId}`;
+
+      let pendingNotices = JSON.parse(localStorage.getItem(noticeKey) || "[]");
+      let claimedBadges = JSON.parse(localStorage.getItem(claimedKey) || "[]");
       let hasUpdates = false;
 
       const totalProgress = subtopics.reduce((acc, st) => {
@@ -164,12 +169,12 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
             const badgeId = `practice_badge|${sectionType}|${st.topicTitle || subject.title}|${st.title}|Flawless|${i}`;
             if (!claimedBadges.includes(badgeId)) {
               claimedBadges.push(badgeId);
-              localStorage.setItem("claimedAchievements", JSON.stringify(claimedBadges));
+              localStorage.setItem(claimedKey, JSON.stringify(claimedBadges));
               
-              const unseen = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]");
+              const unseen = JSON.parse(localStorage.getItem(unseenKey) || "[]");
               if (!unseen.includes(badgeId)) {
                 unseen.push(badgeId);
-                localStorage.setItem("unseenPracticeBadges", JSON.stringify(unseen));
+                localStorage.setItem(unseenKey, JSON.stringify(unseen));
               }
 
               if (!pendingNotices.find(n => n.id.includes(badgeId))) {
@@ -191,12 +196,12 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
             const badgeId = `practice_badge|${sectionType}|${st.topicTitle || subject.title}|${st.title}|Recall|${i}`;
             if (!claimedBadges.includes(badgeId)) {
               claimedBadges.push(badgeId);
-              localStorage.setItem("claimedAchievements", JSON.stringify(claimedBadges));
+              localStorage.setItem(claimedKey, JSON.stringify(claimedBadges));
               
-              const unseen = JSON.parse(localStorage.getItem("unseenPracticeBadges") || "[]");
+              const unseen = JSON.parse(localStorage.getItem(unseenKey) || "[]");
               if (!unseen.includes(badgeId)) {
                 unseen.push(badgeId);
-                localStorage.setItem("unseenPracticeBadges", JSON.stringify(unseen));
+                localStorage.setItem(unseenKey, JSON.stringify(unseen));
               }
 
               if (!pendingNotices.find(n => n.id.includes(badgeId))) {

@@ -88,9 +88,17 @@ export default function JobPreviewPage() {
   const filteredApplicants =
     JOBPROFILE?.applicants?.filter((applicant) => {
       const search = searchText.toLowerCase();
-      const userName = applicant?.userName?.toLowerCase() || "";
+      const userName = (
+        applicant?.userName ||
+        `${applicant?.firstName || ""} ${applicant?.lastName || ""}`.trim()
+      ).toLowerCase();
       const enrollementId = applicant?.enrollementId?.toLowerCase() || "";
-      return userName.includes(search) || enrollementId.includes(search);
+      const email = applicant?.email?.toLowerCase() || "";
+      return (
+        userName.includes(search) ||
+        enrollementId.includes(search) ||
+        email.includes(search)
+      );
     }) || [];
 
   const tabList = [
@@ -109,18 +117,51 @@ export default function JobPreviewPage() {
     }
   };
 
+  const handleEditClick = () => {
+    const tabMap = {
+      basic: "basicdetails",
+      jobProfile: "profiledetails",
+      interview: "interviewprocess",
+    };
+    const targetPage = tabMap[activeTab] || "basicdetails";
+    router.replace(`/tpo/placementdrive/${id}/${jobid}/createjob/${targetPage}`);
+  };
+
   return (
     <>
       <PageHeader
         title={JOBPROFILE?.jobTitle || "Job Details"}
         subtitle={`${JOBPROFILE?.companyName || "Company"} - ${JOBPROFILE?.city || "City not specified"}, ${JOBPROFILE?.country || "Country not specified"}`}
         actionText="Edit"
-        onActionClick={() => router.replace(`/tpo/placementdrive/${id}/${jobid}/createjob/basicdetails`)}
+        onActionClick={handleEditClick}
       />
+
+      <div className={styles.topSectionWrapper}>
+        <div className={styles.tabBar}>
+          {tabList.map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <div
+                key={tab.key}
+                className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
+                onClick={() => handleTabChange(tab.key)}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <Button type="primary" onClick={handleEditClick} style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+            Edit
+          </Button>
+        </div>
+      </div>
 
       <div className={styles.container}>
         {/* Breadcrumbs Trail moved directly below the banner */}
-        <div className={styles.headerCont} style={{ padding: "0.25rem 0", borderBottom: "none", marginBottom: "0.5rem", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className={styles.headerCont} style={{ padding: "0.25rem 0", borderBottom: "none", marginBottom: "0.5rem", display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           <div>
             {pathSegments.map((segment, index) => {
               const displayName = resolveName(segment, index);
@@ -146,29 +187,9 @@ export default function JobPreviewPage() {
               );
             })}
           </div>
-          <Button type="primary" onClick={() => router.replace(`/tpo/placementdrive/${id}/${jobid}/createjob/basicdetails`)}>
-            Edit
-          </Button>
         </div>
 
-        {/* Horizontal Tabs row */}
-        <div className={styles.tabsContainer}>
-          <div className={styles.tabsRow}>
-            {tabList.map((tab) => {
-              const isActive = activeTab === tab.key;
-              return (
-                <div
-                  key={tab.key}
-                  className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
-                  onClick={() => handleTabChange(tab.key)}
-                >
-                  {tab.icon}
-                  <span>{tab.label}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+
 
         {/* Active Content view */}
         {activeTab === "applicants" ? (

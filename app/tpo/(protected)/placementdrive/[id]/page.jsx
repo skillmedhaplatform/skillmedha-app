@@ -126,26 +126,41 @@ const PlacementDetails = () => {
     setCurrentPage(1);
   };
 
-  // Pagination calculation
-  const totalPages = Math.ceil(filteredJobs.length / pageSize);
-  const paginatedJobs = filteredJobs.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // Display all job profiles on a single page
+  const paginatedJobs = filteredJobs;
 
   return (
     <>
       <PageHeader
         title={getName(id) || "Company Details"}
         subtitle="Manage jobs and job description postings for this company"
-        actionText="+ Add New Job"
-        onActionClick={() =>
-          router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`)
-        }
       />
+
+      <div className={allStudents.topSectionWrapper}>
+        <div className={allStudents.leftControls}>
+          <Select
+            value={selectedProfile}
+            style={{ width: 300, height: 38, textAlign: "center" }}
+            onChange={(value) => setSelectedProfile(value)}
+            options={profileOptions}
+          />
+          <Search
+            placeholder="Search by profile or company name"
+            style={{ width: 300, height: 38 }}
+            allowClear
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className={allStudents.rightControls}>
+          <Button type="primary" onClick={() => router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`)}>
+            + Add New Job
+          </Button>
+        </div>
+      </div>
+
       <div className={allStudents.container}>
         {/* Breadcrumbs Trail */}
-        <div className={allStudents.headerCont} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className={allStudents.headerCont} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           <div>
             {pathSegments.map((segment, index) => {
               const displayName = resolveName(segment, index);
@@ -171,32 +186,6 @@ const PlacementDetails = () => {
               );
             })}
           </div>
-          <Button type="primary" onClick={() => router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`)}>
-            + Add New Job
-          </Button>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: "1.5rem",
-            marginBottom: "1.5rem",
-            gap: "1.5rem",
-          }}
-        >
-          <Select
-            value={selectedProfile}
-            style={{ width: 415, height: 38, textAlign: "center" }}
-            onChange={(value) => setSelectedProfile(value)}
-            options={profileOptions}
-          />
-          <Search
-            placeholder="Search by profile or company name"
-            style={{ width: 415, height: 38 }}
-            allowClear
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
         </div>
 
         <div className={allStudents.cardsList}>
@@ -273,71 +262,6 @@ const PlacementDetails = () => {
             </div>
           )}
         </div>
-
-        {/* ── Pagination ── */}
-        {filteredJobs.length > 0 && (
-          <div className={allStudents.paginationRow}>
-            <div className={allStudents.paginationLeft}>
-              <span className={allStudents.pageSizeLabel}>Items per page:</span>
-              <Select
-                className={allStudents.pageSizeSelect}
-                value={pageSize}
-                onChange={handlePageSizeChange}
-                options={PAGE_SIZES.map((s) => ({
-                  value: s,
-                  label: `${s}`,
-                }))}
-                size="middle"
-                style={{ width: 80 }}
-              />
-              <span className={allStudents.showingText}>
-                Showing {(currentPage - 1) * pageSize + 1}–
-                {Math.min(currentPage * pageSize, filteredJobs.length)} of{" "}
-                {filteredJobs.length} job profiles
-              </span>
-            </div>
-
-            <div className={allStudents.paginationRight}>
-              <button
-                className={allStudents.pageBtn}
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                ‹
-              </button>
-
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let page;
-                if (totalPages <= 5) {
-                  page = i + 1;
-                } else if (currentPage <= 3) {
-                  page = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  page = totalPages - 4 + i;
-                } else {
-                  page = currentPage - 2 + i;
-                }
-                return (
-                  <button
-                    key={page}
-                    className={`${allStudents.pageBtn} ${currentPage === page ? allStudents.pageBtnActive : ""}`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-
-              <button
-                className={allStudents.pageBtn}
-                disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                ›
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       <JobDetailsModal
