@@ -878,7 +878,14 @@ export default function StudentResult({ params }) {
                                 border: "1px solid #e2e8f0",
                                 borderRadius: "10px",
                                 marginBottom: "10px",
-                                overflow: "hidden",
+                                // No overflow:hidden: it's purely cosmetic (keeps
+                                // the header's background from spilling past the
+                                // rounded corners) and html2canvas's own layout
+                                // re-implementation handles overflow-clipped,
+                                // dynamically-grown content (our page-break
+                                // padding divs) unreliably — better to drop the
+                                // clip than risk it silently eating content in
+                                // the rendered PDF.
                               },
                               label: (
                                 <div
@@ -1529,8 +1536,17 @@ export default function StudentResult({ params }) {
       const customFilename = `${studentName.replace(/\s+/g, "_")}_results_${date}`;
       const element = contentRef.current;
 
+      // html2pdf locks its capture container to the PDF page's printable width
+      // (A4 width minus left/right margin, in mm). html2canvas evaluates CSS
+      // media queries against `windowWidth`, which defaults to the live
+      // browser window's width (or, previously, a hardcoded 1000) — not this
+      // narrow printable width — so responsive breakpoints (antd Row/Col)
+      // picked the wrong layout unless this is matched explicitly.
+      const pdfMarginMM = [15, 15, 15, 15];
+      const pdfInnerWidthPx = Math.floor((210 - pdfMarginMM[1] - pdfMarginMM[3]) * (96 / 25.4));
+
       const opt = {
-        margin: [15, 15, 15, 15],
+        margin: pdfMarginMM,
         filename: `${customFilename}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
@@ -1538,20 +1554,61 @@ export default function StudentResult({ params }) {
           useCORS: true,
           letterRendering: true,
           scrollY: 0,
-          windowWidth: 1000,
+          windowWidth: pdfInnerWidthPx,
           allowTaint: true,
           logging: false,
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: {
-          mode: ["avoid-all", "css", "legacy"],
+          // No "avoid" detection here at all (neither "avoid-all" nor "css").
+          // html2pdf's own CSS-based avoid pass and our manual pass below
+          // would otherwise both try to reposition the same `.questionContainer`
+          // elements — two separate approximations of the same problem,
+          // liable to disagree. Our manual pass (using the same box the
+          // canvas is about to rasterize) is the single source of truth;
+          // this option only still handles the explicit before/after markers.
+          mode: [],
           before: ".page-break-before",
           after: ".page-break-after",
-          avoid: ".no-page-break",
         },
       };
 
-      await html2pdf().set(opt).from(element).save();
+      const worker = html2pdf().set(opt).from(element);
+      await worker.toContainer();
+
+      // Independently ensure no `.no-page-break` block (each question)
+      // straddles a page boundary, computed directly on the clone
+      // html2canvas is about to rasterize.
+      const container = worker.prop.container;
+      const pxPageHeight = worker.prop.pageSize.inner.px.height;
+      const containerTop = container.getBoundingClientRect().top;
+      // Sub-pixel rounding means an element sitting exactly at a page
+      // boundary can measure as e.g. 1008.9997 instead of 1009 — a fixed
+      // epsilon keeps that from being misread as straddling into the
+      // previous page and getting an unnecessary (and disruptive) extra pad.
+      const PAGE_EDGE_EPS = 4;
+      // html2canvas re-implements layout rather than screenshotting the
+      // real browser render, so its computed heights can drift a few px
+      // from what getBoundingClientRect() reports here. Push a little past
+      // the exact boundary rather than flush against it, so that drift
+      // can't reintroduce a straddle in the rasterized output.
+      const PUSH_SAFETY_BUFFER = 6;
+      container.querySelectorAll(".no-page-break").forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.height >= pxPageHeight) return; // taller than one page; can't avoid a split
+        const top = rect.top - containerTop;
+        const bottom = rect.bottom - containerTop;
+        const startPage = Math.floor((top + PAGE_EDGE_EPS) / pxPageHeight);
+        const endPage = Math.floor((bottom - PAGE_EDGE_EPS) / pxPageHeight);
+        if (startPage !== endPage) {
+          const pad = document.createElement("div");
+          pad.style.display = "block";
+          pad.style.height = `${pxPageHeight - (top % pxPageHeight) + PUSH_SAFETY_BUFFER}px`;
+          el.parentNode.insertBefore(pad, el);
+        }
+      });
+
+      await worker.save();
 
       message.success({ content: "PDF downloaded successfully!", key: "pdf-download", duration: 2 });
     } catch (error) {
@@ -1640,8 +1697,8 @@ export default function StudentResult({ params }) {
               {/* Student Results Card */}
               <Card
                 title={
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#1e69da" }}>
-                    <FileTextOutlined />
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#1e69da", padding: "4px 0" }}>
+                    <FileTextOutlined style={{ fontSize: "16px", position: "relative", top: "1px" }} />
                     <span style={{ fontWeight: 800 }}>Student Results — {fullName}</span>
                   </div>
                 }
@@ -2026,7 +2083,14 @@ export default function StudentResult({ params }) {
                                 border: "1px solid #e2e8f0",
                                 borderRadius: "10px",
                                 marginBottom: "10px",
-                                overflow: "hidden",
+                                // No overflow:hidden: it's purely cosmetic (keeps
+                                // the header's background from spilling past the
+                                // rounded corners) and html2canvas's own layout
+                                // re-implementation handles overflow-clipped,
+                                // dynamically-grown content (our page-break
+                                // padding divs) unreliably — better to drop the
+                                // clip than risk it silently eating content in
+                                // the rendered PDF.
                               },
                               label: (
                                 <div

@@ -1,4 +1,4 @@
-import StoreProvider from "@/redux/storeProvider";
+import StoreProvider from "@/redux/provider";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { App, ConfigProvider } from "antd";
 import React from "react";
