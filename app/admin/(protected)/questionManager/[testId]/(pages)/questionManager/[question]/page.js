@@ -216,15 +216,15 @@ const QuestionEditor = () => {
       }
     }
     if (!singleTest?.difficulty) {
-      alert("Please select a difficulty level");
+      message.warning("Please select a difficulty level");
       return;
     }
     if (!singleTest?.question?.trim()) {
-      alert("Please enter a question");
+      message.warning("Please enter a question");
       return;
     }
     if (!singleTest?.explanation?.trim()) {
-      alert("Please enter an answer explanation");
+      message.warning("Please enter an answer explanation");
       return;
     }
 
@@ -241,11 +241,11 @@ const QuestionEditor = () => {
     ) {
       const validOpts = options.filter((o) => o.text.trim());
       if (validOpts.length < 2) {
-        alert("Please add at least 2 options");
+        message.warning("Please add at least 2 options");
         return;
       }
       if (!validOpts.some((o) => o.isAnswer)) {
-        alert("Please select at least one correct answer");
+        message.warning("Please select at least one correct answer");
         return;
       }
 
@@ -303,30 +303,30 @@ const QuestionEditor = () => {
           })
         );
         if (updateQuestions.fulfilled.match(res)) {
-          alert("Question updated successfully!");
+          message.success("Question updated successfully!");
           resetFormValues();
           router.push(
             `/admin/questionManager/${params?.testId}/questionManager/questionsList`
           );
         } else {
-          alert(res.payload || "Failed to update question");
+          message.error(res.payload || "Failed to update question");
         }
       } else {
         // Create new question
         const res = await dispatch(addQuestions(questionData));
         if (addQuestions.fulfilled.match(res)) {
-          alert("Question created successfully!");
+          message.success("Question created successfully!");
           resetFormValues();
           router.push(
             `/admin/questionManager/${params?.testId}/questionManager/questionsList`
           );
         } else {
-          alert(res.payload || "Failed to create question");
+          message.error(res.payload || "Failed to create question");
         }
       }
     } catch (e) {
       console.error("Error:", e);
-      alert("Error saving question");
+      message.error("Error saving question");
     }
   };
 
@@ -356,203 +356,202 @@ const QuestionEditor = () => {
   }
 
   return (
-    <div className={QuestionStyles.QuestionContainer}>
-      <div className={QuestionStyles.QuestionHeader}>
-        <div>{isUpdateMode ? "Update Question" : "Create New Question"}</div>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <Button type="dashed" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Tooltip
-            title={
-              !isUpdateMode
-                ? !canAccess(PERMISSION_VALUES.CREATE)
-                  ? getPermissionMessage(PERMISSION_VALUES.CREATE)
+    <div className={QuestionStyles.detailsContainer}>
+      <div className={QuestionStyles.QuestionContainer}>
+        <div className={QuestionStyles.QuestionHeader}>
+          <div>{isUpdateMode ? "Update Question" : "Create New Question"}</div>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <Button type="dashed" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Tooltip
+              title={
+                !isUpdateMode
+                  ? !canAccess(PERMISSION_VALUES.CREATE)
+                    ? getPermissionMessage(PERMISSION_VALUES.CREATE)
+                    : ""
+                  : !canAccess(PERMISSION_VALUES.EDIT)
+                  ? getPermissionMessage(PERMISSION_VALUES.EDIT)
                   : ""
-                : !canAccess(PERMISSION_VALUES.EDIT)
-                ? getPermissionMessage(PERMISSION_VALUES.EDIT)
-                : ""
-            }
-          >
-            <span>
-              <Button
-                type="primary"
-                onClick={handleSubmit}
-                loading={currentState?.status === "pending"}
-                disabled={
-                  currentState?.status === "pending" ||
-                  (isUpdateMode
-                    ? !canAccess(PERMISSION_VALUES.EDIT)
-                    : !canAccess(PERMISSION_VALUES.CREATE))
-                }
-              >
-                {isUpdateMode ? "Update Question" : "Save Question"}
-              </Button>
-            </span>
-          </Tooltip>
-        </div>
-      </div>
-
-      {currentState?.error && (
-        <div
-          style={{
-            color: "red",
-            marginBottom: 16,
-            padding: 8,
-            background: "#ffe6e6",
-            borderRadius: 4,
-          }}
-        >
-          Error: {currentState.error}
-        </div>
-      )}
-
-      <div
-        className={QuestionStyles.QuestionBody}
-        style={{ paddingBottom: "5rem" }}
-      >
-        <div className={QuestionStyles.QuestionBodyFlexHead}>
-          <div
-            className={`${QuestionStyles.title} ${QuestionStyles.titleAlign}`}
-          >
-            Question Type*
-          </div>
-          <div className={`${QuestionStyles.typeContent}`}>
-            {labelOptions.map((o) => (
-              <Button
-                key={o.name}
-                onClick={() => handleQuestionTypeChange(o.name)}
-                type={questionType === o.name ? "primary" : "default"}
-                icon={o.icon}
-              >
-                {/* <Image src={o.icon} alt={`${o.name} Icon`} /> */}
-                <div>{o.name}</div>
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {questionType === QUESTION_TYPES.AUDIO && (
-          <div className={QuestionStyles.QuestionBodyFlex}>
-            <div className={`${QuestionStyles.title}`}>Audio*</div>
-            <div className={`${QuestionStyles.rightBody}`}>
-              <AudioUpload
-                audioUrl={audioUrl}
-                setAudioUrl={(url) => {
-                  setAudioUrl(url);
-                }}
-                restUrl={restUrl}
-              />
-            </div>
-          </div>
-        )}
-
-        {questionType === QUESTION_TYPES.VIDEO && (
-          <div className={QuestionStyles.QuestionBodyFlex}>
-            <div className={`${QuestionStyles.title}`}>Video*</div>
-            <div className={`${QuestionStyles.rightBody}`}>
-              <VideoUpload
-                videoUrl={videoUrl}
-                setVideoUrl={(url) => {
-                  setVideoUrl(url);
-                }}
-                restUrl={process.env.NEXT_PUBLIC_API_URL}
-              />
-            </div>
-          </div>
-        )}
-
-        <div className={QuestionStyles.QuestionBodyFlex}>
-          <div className={`${QuestionStyles.title}`}>Difficulty*</div>
-          <div className={`${QuestionStyles.rightBody}`}>
-            <Select
-              placeholder="Select Difficulty"
-              allowClear
-              style={{ width: "40%" }}
-              onChange={(v) => updateFormField("difficulty", v)}
-              value={singleTest?.difficulty}
-              options={DIFFICULTY_LEVELS}
-            />
-          </div>
-        </div>
-
-        <div className={QuestionStyles.QuestionBodyFlex}>
-          <div className={`${QuestionStyles.title}`}>Question*</div>
-          <div className={`${QuestionStyles.rightBody}`}>
-            <TextEditor
-              name="question"
-              editorFun={(v) => updateFormField("question", v)}
-              initialContent={{ question: singleTest?.question }}
-            />
-          </div>
-        </div>
-
-        {isChoiceType && (
-          <div>
-            {options.map((opt, i) => (
-              <div key={i} className={QuestionStyles.QuestionBodyFlex}>
-                <div className={`${QuestionStyles.title}`}>
-                  <input
-                    type={
-                      questionType === QUESTION_TYPES.SINGLE_CHOICE
-                        ? "radio"
-                        : "checkbox"
-                    }
-                    checked={opt.isAnswer}
-                    onChange={() => handleAnswerSelection(i)}
-                    name={
-                      questionType === QUESTION_TYPES.SINGLE_CHOICE
-                        ? "correctAnswer"
-                        : undefined
-                    }
-                  />
-                  <span className={QuestionStyles.OptionText}>{`Option ${
-                    i + 1
-                  }`}</span>
-                </div>
-                <div className={`${QuestionStyles.rightBody1}`}>
-                  <TextEditor
-                    name={`option ${i + 1}`}
-                    editorFun={(v) => handleOptionChange(i, v)}
-                    className={QuestionStyles.correctAns}
-                    placeholder={`Enter option ${i + 1}`}
-                    initialContent={{ [`option ${i + 1}`]: opt.text }}
-                  />
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-                  <Button
-                    type="text"
-                    onClick={() => removeOption(i)}
-                    disabled={options.length === 1}
-                    danger
-                  >
-                    <RiDeleteBinLine style={{ color: "red" }} />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            <div className={QuestionStyles.QuestionBodyFlex}>
-              <div className={`${QuestionStyles.title}`} />
-              <div className={`${QuestionStyles.rightBody}`}>
-                <button
-                  className={QuestionStyles.addBtn}
-                  type="button"
-                  onClick={addOption}
+              }
+            >
+              <span>
+                <Button
+                  type="primary"
+                  onClick={handleSubmit}
+                  loading={currentState?.status === "pending"}
+                  disabled={
+                    currentState?.status === "pending" ||
+                    (isUpdateMode
+                      ? !canAccess(PERMISSION_VALUES.EDIT)
+                      : !canAccess(PERMISSION_VALUES.CREATE))
+                  }
                 >
-                  Add Option
-                </button>
-              </div>
-            </div>
+                  {isUpdateMode ? "Update Question" : "Save Question"}
+                </Button>
+              </span>
+            </Tooltip>
+          </div>
+        </div>
+
+        {currentState?.error && (
+          <div
+            style={{
+              color: "red",
+              marginBottom: 16,
+              padding: 8,
+              background: "#ffe6e6",
+              borderRadius: 4,
+            }}
+          >
+            Error: {currentState.error}
           </div>
         )}
 
-        <div className={QuestionStyles.QuestionBodyFlex}>
-          <div className={`${QuestionStyles.title}`}>Answer Explanation*</div>
-          <div className={`${QuestionStyles.rightBody}`}>
-            <TextEditor
-              name="explanation"
-              editorFun={(v) => updateFormField("explanation", v)}
-              initialContent={{ explanation: singleTest?.explanation }}
-            />
+        <div className={QuestionStyles.QuestionBody}>
+          <div className={QuestionStyles.QuestionBodyFlexHead}>
+            <div
+              className={`${QuestionStyles.title} ${QuestionStyles.titleAlign}`}
+            >
+              Question Type*
+            </div>
+            <div className={`${QuestionStyles.typeContent}`}>
+              {labelOptions.map((o) => (
+                <Button
+                  key={o.name}
+                  onClick={() => handleQuestionTypeChange(o.name)}
+                  type={questionType === o.name ? "primary" : "default"}
+                  icon={o.icon}
+                >
+                  {/* <Image src={o.icon} alt={`${o.name} Icon`} /> */}
+                  <div>{o.name}</div>
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {questionType === QUESTION_TYPES.AUDIO && (
+            <div className={QuestionStyles.QuestionBodyFlex}>
+              <div className={`${QuestionStyles.title}`}>Audio*</div>
+              <div className={`${QuestionStyles.rightBody}`}>
+                <AudioUpload
+                  audioUrl={audioUrl}
+                  setAudioUrl={(url) => {
+                    setAudioUrl(url);
+                  }}
+                  restUrl={restUrl}
+                />
+              </div>
+            </div>
+          )}
+
+          {questionType === QUESTION_TYPES.VIDEO && (
+            <div className={QuestionStyles.QuestionBodyFlex}>
+              <div className={`${QuestionStyles.title}`}>Video*</div>
+              <div className={`${QuestionStyles.rightBody}`}>
+                <VideoUpload
+                  videoUrl={videoUrl}
+                  setVideoUrl={(url) => {
+                    setVideoUrl(url);
+                  }}
+                  restUrl={process.env.NEXT_PUBLIC_API_URL}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className={QuestionStyles.QuestionBodyFlex}>
+            <div className={`${QuestionStyles.title}`}>Difficulty*</div>
+            <div className={`${QuestionStyles.rightBody}`}>
+              <Select
+                placeholder="Select Difficulty"
+                allowClear
+                style={{ width: "40%" }}
+                onChange={(v) => updateFormField("difficulty", v)}
+                value={singleTest?.difficulty}
+                options={DIFFICULTY_LEVELS}
+              />
+            </div>
+          </div>
+
+          <div className={QuestionStyles.QuestionBodyFlex}>
+            <div className={`${QuestionStyles.title}`}>Question*</div>
+            <div className={`${QuestionStyles.rightBody}`}>
+              <TextEditor
+                name="question"
+                editorFun={(v) => updateFormField("question", v)}
+                initialContent={{ question: singleTest?.question }}
+              />
+            </div>
+          </div>
+
+          {isChoiceType && (
+            <div>
+              {options.map((opt, i) => (
+                <div key={i} className={QuestionStyles.QuestionBodyFlex}>
+                  <div className={`${QuestionStyles.title}`}>
+                    <input
+                      type={
+                        questionType === QUESTION_TYPES.SINGLE_CHOICE
+                          ? "radio"
+                          : "checkbox"
+                      }
+                      checked={opt.isAnswer}
+                      onChange={() => handleAnswerSelection(i)}
+                      name={
+                        questionType === QUESTION_TYPES.SINGLE_CHOICE
+                          ? "correctAnswer"
+                          : undefined
+                      }
+                    />
+                    <span className={QuestionStyles.OptionText}>{`Option ${
+                      i + 1
+                    }`}</span>
+                  </div>
+                  <div className={`${QuestionStyles.rightBody1}`}>
+                    <TextEditor
+                      name={`option ${i + 1}`}
+                      editorFun={(v) => handleOptionChange(i, v)}
+                      className={QuestionStyles.correctAns}
+                      placeholder={`Enter option ${i + 1}`}
+                      initialContent={{ [`option ${i + 1}`]: opt.text }}
+                    />
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button
+                      type="text"
+                      onClick={() => removeOption(i)}
+                      disabled={options.length === 1}
+                      danger
+                    >
+                      <RiDeleteBinLine style={{ color: "red" }} />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <div className={QuestionStyles.QuestionBodyFlex}>
+                <div className={`${QuestionStyles.title}`} />
+                <div className={`${QuestionStyles.rightBody}`}>
+                  <button
+                    className={QuestionStyles.addBtn}
+                    type="button"
+                    onClick={addOption}
+                  >
+                    Add Option
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className={QuestionStyles.QuestionBodyFlex}>
+            <div className={`${QuestionStyles.title}`}>Answer Explanation*</div>
+            <div className={`${QuestionStyles.rightBody}`}>
+              <TextEditor
+                name="explanation"
+                editorFun={(v) => updateFormField("explanation", v)}
+                initialContent={{ explanation: singleTest?.explanation }}
+              />
+            </div>
           </div>
         </div>
       </div>

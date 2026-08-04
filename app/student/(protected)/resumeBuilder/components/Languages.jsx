@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button, Input, Select, Tooltip } from "antd";
 import { DeleteOutlined, EditOutlined, HolderOutlined, InfoCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+// import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const Language = ({ languages, updateLanguage, setLanguages, onNext }) => {
   const [newLanguageName, setNewLanguageName] = useState("");
@@ -85,7 +85,7 @@ const Language = ({ languages, updateLanguage, setLanguages, onNext }) => {
                 {validLanguages.map((lang, index) => {
                   const name = typeof lang === 'string' ? lang : lang.name;
                   const level = typeof lang === 'object' ? lang.level : null;
-                  
+
                   return (
                     <Draggable key={`lang-${index}`} draggableId={`lang-${index}`} index={index}>
                       {(provided) => (
@@ -98,7 +98,7 @@ const Language = ({ languages, updateLanguage, setLanguages, onNext }) => {
                             <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600">
                               <HolderOutlined />
                             </div>
-                            
+
                             {editingIndex === index ? (
                               <div className="flex items-center gap-2">
                                 <Input
@@ -130,21 +130,21 @@ const Language = ({ languages, updateLanguage, setLanguages, onNext }) => {
                               </div>
                             )}
                           </div>
-                          
+
                           {editingIndex !== index && (
                             <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Tooltip title="Edit">
-                                <Button 
-                                  type="text" 
-                                  icon={<EditOutlined className="text-[#4096ff]" />} 
+                                <Button
+                                  type="text"
+                                  icon={<EditOutlined className="text-[#4096ff]" />}
                                   onClick={() => handleEditClick(index, lang)}
                                   className="flex items-center justify-center p-0 w-8 h-8 rounded-full hover:bg-blue-50"
                                 />
                               </Tooltip>
                               <Tooltip title="Delete">
-                                <Button 
-                                  type="text" 
-                                  icon={<DeleteOutlined className="text-red-500" />} 
+                                <Button
+                                  type="text"
+                                  icon={<DeleteOutlined className="text-red-500" />}
                                   onClick={() => handleRemove(index)}
                                   className="flex items-center justify-center p-0 w-8 h-8 rounded-full hover:bg-red-50"
                                 />
@@ -164,9 +164,9 @@ const Language = ({ languages, updateLanguage, setLanguages, onNext }) => {
       )}
 
       {!isAdding && (
-        <Button 
-          type="dashed" 
-          icon={<PlusOutlined />} 
+        <Button
+          type="dashed"
+          icon={<PlusOutlined />}
           onClick={() => setIsAdding(true)}
           className="w-full text-[#4096ff] border-[#4096ff] hover:bg-blue-50 h-[40px]"
         >
@@ -218,7 +218,7 @@ const Language = ({ languages, updateLanguage, setLanguages, onNext }) => {
           <strong>Tip:</strong> Mention languages that are relevant to the role you are applying for.
         </span>
       </div>
-      
+
       {validLanguages.length > 0 && onNext && (
         <div className="flex justify-end mt-4">
           <Button type="primary" size="large" onClick={onNext}>

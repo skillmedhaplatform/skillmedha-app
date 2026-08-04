@@ -26,7 +26,7 @@ const TEMPLATES = [
   { name: "Coding Questions", file: "coding_questions_template.xlsx", desc: "For programming challenges with test cases" },
 ];
 
-export default function BulkUploadModal({ open, onCancel, subjectId, topicId, subTopicId, allowedType, excludedTypes = [] }) {
+export default function BulkUploadModal({ open, onCancel, subjectId, skillId, topicId, subTopicId, allowedType, excludedTypes = [], onSuccess }) {
   const dispatch = useDispatch();
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -150,21 +150,15 @@ export default function BulkUploadModal({ open, onCancel, subjectId, topicId, su
 
     setUploading(true);
     
-    // Convert parsed data to payload format expected by backend
-    // Or send the raw file if backend handles parsing (based on your request, backend handles it?)
-    // Actually, in the redux slice we implemented bulkUploadPracQuestions which takes FormData content
-    // But since we parsed it client-side to validate, we can either send the file or the JSON.
-    // The previous prompt implementation suggests the backend endpoint accepts a file.
-    // So let's send the original file.
-    
     const formData = new FormData();
     formData.append("file", fileList[0]);
-    // Note: IDs are now sent via query params, not body data
     
-    const params = {
-      subjectId,
-      isTest:true
-    };
+    const params = {};
+    if (subjectId) {
+      params.subjectId = subjectId;
+      params.isTest = true;
+    }
+    if (skillId) params.skillId = skillId;
     if (topicId) params.topicId = topicId;
     if (subTopicId) params.subTopicId = subTopicId;
 
@@ -172,7 +166,8 @@ export default function BulkUploadModal({ open, onCancel, subjectId, topicId, su
       const result = await dispatch(bulkUploadPracQuestions({ formData, params })).unwrap();
       setUploadResult(result);
       setCurrentStep(2);
-      dispatch(fetchQuestions({ subjectId }));
+      if (subjectId) dispatch(fetchQuestions({ subjectId }));
+      if (onSuccess) onSuccess();
       message.success("Bulk upload completed!");
     } catch (error) {
       message.error(error.message || "Upload failed");
@@ -208,10 +203,10 @@ export default function BulkUploadModal({ open, onCancel, subjectId, topicId, su
   };
 
   const renderStep0 = () => (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
       <div className={styles.templateSection}>
-        <h4 style={{ marginBottom: 12 }}>1. Download Template</h4>
-        <p style={{ marginBottom: 16, color: "#666" }}>
+        <h4 style={{ marginBottom: 8, fontSize: "14px", fontWeight: 700 }}>1. Download Template</h4>
+        <p style={{ marginBottom: 12, color: "#64748b", fontSize: "13px" }}>
           Choose a template based on the questions you want to add.
           {allowedType && <strong> Only '{allowedType}' questions are allowed here.</strong>}
         </p>
@@ -229,27 +224,31 @@ export default function BulkUploadModal({ open, onCancel, subjectId, topicId, su
         </Space>
       </div>
 
-      <h4 style={{ marginBottom: 12 }}>2. Upload Filled File</h4>
-      <Dragger
-        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-        beforeUpload={(file) => {
-          setFileList([file]);
-          handleFileUpload(file);
-          return false;
-        }}
-        showUploadList={false}
-        className={styles.uploadArea}
-      >
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">Click or drag file to this area to upload</p>
-        <p className="ant-upload-hint">
-          Support for .xlsx and .csv files. Please use the templates provided above.
-          {allowedType && <div>Note: Ensure all questions in the file are of type <strong>{allowedType}</strong>.</div>}
-          {excludedTypes.length > 0 && <div>Note: <strong>{excludedTypes.join(", ")}</strong> types are not allowed here.</div>}
-        </p>
-      </Dragger>
+      <div>
+        <h4 style={{ marginBottom: 10, fontSize: "14px", fontWeight: 700 }}>2. Upload Filled File</h4>
+        <Dragger
+          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          beforeUpload={(file) => {
+            setFileList([file]);
+            handleFileUpload(file);
+            return false;
+          }}
+          showUploadList={false}
+          className={styles.uploadArea}
+        >
+          <p className="ant-upload-drag-icon" style={{ marginBottom: 8 }}>
+            <InboxOutlined style={{ fontSize: 36, color: "#1e69da" }} />
+          </p>
+          <p className="ant-upload-text" style={{ fontSize: 15, fontWeight: 600, color: "#1e293b", marginBottom: 4 }}>
+            Click or drag file to this area to upload
+          </p>
+          <p className="ant-upload-hint" style={{ fontSize: 13, color: "#64748b" }}>
+            Support for .xlsx and .csv files. Please use the templates provided above.
+            {allowedType && <div>Note: Ensure all questions in the file are of type <strong>{allowedType}</strong>.</div>}
+            {excludedTypes.length > 0 && <div>Note: <strong>{excludedTypes.join(", ")}</strong> types are not allowed here.</div>}
+          </p>
+        </Dragger>
+      </div>
     </div>
   );
 
