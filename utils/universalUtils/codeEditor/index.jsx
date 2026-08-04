@@ -213,7 +213,7 @@ const Playground = ({ questionData, onTestResults }) => {
   };
 
   // ── Run all test cases (Test Results tab) ────────────────────────────────
-  const runTestCases = async () => {
+  async function runTestCases() {
     const tcs = questionData?.questionContent?.testCases || [];
     if (!tcs.length) { message.warning("No test cases found"); return; }
     const language_id = languageKey?.id;

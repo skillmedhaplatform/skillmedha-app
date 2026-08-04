@@ -70,7 +70,7 @@ export default function MobileAchievements({ progressById, combinedLearningData,
             setUnseenBadges(remaining);
             localStorage.setItem(unseenKey, JSON.stringify(remaining));
             
-            history.pushState("", document.title, window.location.pathname + window.location.search);
+            history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
           }
         }
       };

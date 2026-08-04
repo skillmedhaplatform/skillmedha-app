@@ -56,8 +56,7 @@ console.log(items)
       placement="right"
       onClose={onClose}
       open={open}
-      width={420}
-      styles={{ body: { padding: 0, display: "flex", flexDirection: "column" } }}
+      styles={{ wrapper: { width: 420 }, body: { padding: 0, display: "flex", flexDirection: "column" } }}
     >
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 300 }}>

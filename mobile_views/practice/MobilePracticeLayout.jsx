@@ -27,7 +27,7 @@ export default function MobilePracticeLayout({
     { name: "Coding", path: "/student/practice-new/coding" },
   ];
 
-  const currentActiveTab = categoryTabs.find(tab => pathname.includes(tab.path)) || categoryTabs[0];
+  const currentActiveTab = categoryTabs.find(tab => pathname?.includes(tab.path)) || categoryTabs[0];
 
   const handleTabClick = (tab) => {
     router.push(tab.path);

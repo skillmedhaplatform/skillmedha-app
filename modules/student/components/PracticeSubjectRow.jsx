@@ -25,6 +25,7 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
   const [loading, setLoading] = useState(true);
   const pageSize = pageSizeOverride || 4; // default 1 row of 4
   const studentPracResults = useSelector((state) => state.practice.studentPracResults || []);
+  const studentData = useSelector((state) => state.student.student?.data);
   const dispatch = useDispatch();
 
   useEffect(() => {

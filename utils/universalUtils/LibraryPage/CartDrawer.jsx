@@ -141,7 +141,7 @@ const CartDrawer = ({ open, onClose, cartItems = [], totalAmount = 0, loading = 
   };
 
   return (
-    <Drawer title="Cart" placement="right" width={420} open={open} onClose={onClose}>
+    <Drawer title="Cart" placement="right" styles={{ wrapper: { width: 420 } }} open={open} onClose={onClose}>
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
           <Spin />

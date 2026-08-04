@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Pagination, Tooltip, Button, Select, Input, Modal, Tag, Row, Col, message, Badge, Popover } from "antd";
-import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined, HeartOutlined, ShoppingCartOutlined, LockOutlined, LoadingOutlined } from "@ant-design/icons";
+import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined, HeartOutlined, ShoppingCartOutlined, LockOutlined, LoadingOutlined, FilterOutlined } from "@ant-design/icons";
 import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase } from "react-icons/bs";
 import { HiOutlineBuildingOffice2, HiOutlineBookOpen } from "react-icons/hi2";
 import { useSearchParams, usePathname } from "next/navigation";
@@ -171,8 +171,26 @@ const InfoContent = ({ item }) => {
   );
 };
 
-const MobileLibraryPageWrapper = ({ title, items, ...props }) => {
-  return <MobileLibraryPage title={title} items={items} {...props} />;
+const MobileLibraryPageWrapper = ({ title, items, progressById, safeItems, activeTab, ...props }) => {
+  // Enrich items with UI state (enrollment, progress) so mobile view can render cards correctly
+  const enrichedItems = items?.map((item) => {
+    const fetchedProgress = progressById?.[item._id];
+    const inMyCourses = safeItems?.some((myCourse) => myCourse._id === item._id);
+    const isEnrolled = activeTab === "my" || inMyCourses;
+    const progressVal = fetchedProgress ? (fetchedProgress.totalProgress ?? 0) : (item.progress || 0);
+    const isProgressLoading = fetchedProgress?.loading;
+    
+    return {
+      ...item,
+      _uiState: {
+        isEnrolled,
+        progressVal,
+        isProgressLoading,
+      }
+    };
+  });
+
+  return <MobileLibraryPage title={title} items={enrichedItems} progressById={progressById} activeTab={activeTab} {...props} />;
 };
 
 const LibraryPage = ({
@@ -588,52 +606,109 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   const isCourse = title ? title.toLowerCase().includes("course") : false;
   const moduleName = isCourse ? "courses" : "internships";
 
-  const isMobile = useResponsive();
+  const isMobile = useResponsive(768);
 
   if (isMobile) {
     return (
-      <MobileLibraryPageWrapper
-        title={title}
-        viewLabel={viewLabel}
-        searchPlaceholder={searchPlaceholder}
-        idPrefix={idPrefix}
-        renderMetaChips={renderMetaChips}
-        getItemUrl={getItemUrl}
-        items={filteredTabItems}
-        loading={loading}
-        paginationData={paginationData}
-        searchInput={searchInput}
-        handleSearchChange={handleSearchChange}
-        urlCategory={urlCategory}
-        urlDifficulty={urlDifficulty}
-        urlSort={urlSort}
-        categoryOptions={categoryOptions}
-        difficultyOptions={difficultyOptions}
-        sortOptions={sortOptions}
-        activeFilters={activeFilters}
-        hasActiveFilters={hasActiveFilters}
-        handleCategoryChange={handleCategoryChange}
-        handleDifficultyChange={handleDifficultyChange}
-        handleSortChange={handleSortChange}
-        handleClearAll={handleClearAll}
-        removeFilter={removeFilter}
-        pushParams={pushParams}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        handlePageChange={handlePageChange}
-        selectedItem={selectedItem}
-        setSelectedItem={setSelectedItem}
-        nav={nav}
-        progressById={progressById}
-        showWishlist={showWishlist}
-        wishlistIdSet={wishlistIdSet}
-        wishlistPendingIds={wishlistPendingIds}
-        onWishlistToggle={handleWishlistToggle}
-        showBuyNow={showBuyNow}
-        cartIdSet={cartIdSet}
-        cartPendingIds={cartPendingIds}
-        onAddToCart={handleAddToCart}
-      />
+      <>
+        <MobileLibraryPageWrapper
+          title={title}
+          viewLabel={viewLabel}
+          searchPlaceholder={searchPlaceholder}
+          idPrefix={idPrefix}
+          renderMetaChips={renderMetaChips}
+          getItemUrl={getItemUrl}
+          items={filteredTabItems}
+          loading={loading}
+          paginationData={paginationData}
+          searchInput={searchInput}
+          handleSearchChange={handleSearchChange}
+          urlCategory={urlCategory}
+          urlDifficulty={urlDifficulty}
+          urlSort={urlSort}
+          categoryOptions={categoryOptions}
+          difficultyOptions={difficultyOptions}
+          sortOptions={sortOptions}
+          activeFilters={activeFilters}
+          hasActiveFilters={hasActiveFilters}
+          handleCategoryChange={handleCategoryChange}
+          handleDifficultyChange={handleDifficultyChange}
+          handleSortChange={handleSortChange}
+          handleClearAll={handleClearAll}
+          removeFilter={removeFilter}
+          pushParams={pushParams}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          handlePageChange={handlePageChange}
+          selectedItem={selectedItem}
+          setSelectedItem={setSelectedItem}
+          nav={nav}
+          progressById={progressById}
+          safeItems={safeItems}
+          showWishlist={showWishlist}
+          wishlistIdSet={wishlistIdSet}
+          wishlistPendingIds={wishlistPendingIds}
+          onWishlistToggle={handleWishlistToggle}
+          showBuyNow={showBuyNow}
+          cartIdSet={cartIdSet}
+          cartPendingIds={cartPendingIds}
+          onAddToCart={handleAddToCart}
+          totalAvailable={allPaginationData ? allPaginationData.totalLength : safeAllItems.length}
+          wishlistCount={wishlistItems.length}
+          cartCount={cartItems.length}
+          setWishlistOpen={setWishlistOpen}
+          setCartOpen={setCartOpen}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+
+        {/* Course Info Modal */}
+        <Modal
+          title={<span style={{ fontWeight: 600, fontSize: "20px" }}>Course Details</span>}
+          open={!!selectedItem}
+          onCancel={() => setSelectedItem(null)}
+          footer={[
+            <Button key="close" onClick={() => setSelectedItem(null)}>Close</Button>,
+            <Button key="view" type="primary" onClick={() => { nav.push(getItemUrl(selectedItem)); setSelectedItem(null); }}>
+              {viewLabel}
+            </Button>,
+          ]}
+          width={1100}
+          centered={true}
+          styles={{ body: { padding: 0 } }}
+        >
+          <div
+            className="[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#d0d0d0] hover:[&::-webkit-scrollbar-thumb]:bg-[#aaa] [&::-webkit-scrollbar-thumb]:rounded-full"
+            style={{ maxHeight: "75vh", overflowY: "auto", overflowX: "hidden", padding: "24px" }}
+          >
+            {selectedItem && <InfoContent item={selectedItem} />}
+          </div>
+        </Modal>
+
+        {/* Wishlist Drawer */}
+        {showWishlist && (
+          <WishlistDrawer
+            open={wishlistOpen}
+            onClose={() => setWishlistOpen(false)}
+            items={wishlistItems}
+            loading={wishlistLoading}
+            cartIds={cartIdSet}
+            enrolledIds={myCoursesIds}
+          />
+        )}
+
+        {/* Cart Drawer */}
+        {showBuyNow && (
+          <CartDrawer
+            open={cartOpen}
+            onClose={() => setCartOpen(false)}
+            cartItems={cartItems}
+            totalAmount={cartTotalAmount}
+            loading={cartLoading}
+            nav={nav}
+          />
+        )}
+      </>
     );
   }
 
@@ -642,7 +717,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
       {/* Fixed Header Section */}
       <div className="flex flex-col w-full z-[40] bg-[#EFF5FB] shrink-0">
         {/* Banner */}
-      <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-between p-4 lg:px-8 pt-6 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+      <div className="w-full h-[110px] lg:h-[140px] min-h-[110px] lg:min-h-[140px] flex flex-col justify-between p-4 lg:px-8 pt-6 shadow-sm rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
         <div className="absolute inset-0 pointer-events-none z-[1]">
           <div className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]">✕</div>
           <div className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]">+</div>
@@ -663,7 +738,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
               <h1 className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0" style={{ border: "none", marginBottom: 0 }}>
                 {title}
               </h1>
-              <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
+              <p className="hidden lg:block text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
                 Explore all available {moduleName.toLowerCase()} and{" "}
                 {moduleName.toLowerCase().includes("internship") ? "kickstart your career" : "start learning"} today.
               </p>
@@ -722,7 +797,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
         <div className="flex items-center gap-8">
           {[
             { id: "all", label: `All ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
-            { id: "recent", label: "Recently added" },
+            { id: "recent", label: "Recently added", hiddenOnTablet: true },
             ...(showWishlist ? [{ id: "wishlist", label: `Wishlist (${wishlistItems.length})` }] : []),
             { id: "my", label: `My ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
           ].map((tab) => (
@@ -734,7 +809,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
               }}
               className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer ${
                 activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"
-              }`}
+              } ${tab.hiddenOnTablet ? "hidden lg:inline-block" : ""}`}
             >
               {tab.label}
               {activeTab === tab.id && (
@@ -756,26 +831,42 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
             className="w-[160px] rounded-[20px] shadow-sm border-[#e2e8f0] [&>input]:text-[#64748b] [&>input]:font-medium [&>input::placeholder]:text-[#94a3b8]"
             style={{ color: "#64748b" }}
           />
-          <Select
-            id={`${idPrefix}-difficulty`}
-            placeholder="All Levels"
-            value={urlDifficulty || undefined}
-            onChange={handleDifficultyChange}
-            allowClear
-            options={difficultyOptions}
-            className="w-[130px] shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
-            popupMatchSelectWidth={false}
-          />
-          <Select
-            id={`${idPrefix}-sort`}
-            placeholder="Sort By"
-            value={urlSort === "default" ? undefined : urlSort}
-            onChange={handleSortChange}
-            allowClear
-            options={sortOptions}
-            className="w-[150px] shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
-            popupMatchSelectWidth={false}
-          />
+          <Popover
+            content={
+              <div className="flex flex-col gap-3 p-2 w-[160px]">
+                <Select
+                  id={`${idPrefix}-difficulty`}
+                  placeholder="All Levels"
+                  value={urlDifficulty || undefined}
+                  onChange={handleDifficultyChange}
+                  allowClear
+                  options={difficultyOptions}
+                  className="w-full shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
+                  popupMatchSelectWidth={false}
+                />
+                <Select
+                  id={`${idPrefix}-sort`}
+                  placeholder="Sort By"
+                  value={urlSort === "default" ? undefined : urlSort}
+                  onChange={handleSortChange}
+                  allowClear
+                  options={sortOptions}
+                  className="w-full shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
+                  popupMatchSelectWidth={false}
+                />
+              </div>
+            }
+            trigger="click"
+            placement="bottomRight"
+          >
+            <Button 
+              shape="circle" 
+              icon={<FilterOutlined />} 
+              className={`flex items-center justify-center bg-white border-[#e2e8f0] text-[#64748b] shadow-sm transition-colors ${
+                (urlDifficulty || (urlSort && urlSort !== "default")) ? "text-[#1E69DA] border-[#1E69DA] bg-[#eff6ff]" : ""
+              }`}
+            />
+          </Popover>
           {hasActiveFilters && (
             <Button type="text" danger size="middle" onClick={handleClearAll} className="font-medium hover:bg-red-50 rounded-lg px-2">
               Clear
@@ -888,7 +979,6 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
               const cardNode = (
                 <div
                   key={item?._id}
-                  onClick={(e) => { e.stopPropagation(); nav.push(getItemUrl(item)); }}
                   className="group flex flex-col bg-white text-black border-[1px] border-[#cbd5e1] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-md"
                   role="button"
                   tabIndex={0}
@@ -1014,7 +1104,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                   trigger="hover"
                   placement="right"
                   overlayStyle={{ maxWidth: 380 }}
-                  overlayInnerStyle={{ borderRadius: 16, padding: 0, overflow: "hidden", border: "1px solid #cbd5e1", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
+                  styles={{ body: { borderRadius: 16, padding: 0, overflow: "hidden", border: "1px solid #cbd5e1", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" } }}
                   content={
                     <BuyNowPopoverContent
                       item={item}
