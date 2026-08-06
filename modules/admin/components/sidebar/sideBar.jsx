@@ -40,7 +40,25 @@ const SideBar = ({ activeView, setView }) => {
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
+  // The sidebar only ever toggles between 270px (expanded) and 75px
+  // (collapsed) via manual click — there's no automatic breakpoint, so on
+  // tablet/mobile widths the expanded sidebar eats most of the viewport and
+  // squeezes every admin page's content into an unusably narrow strip.
+  // Auto-collapse to the icon-only rail once when the viewport is too
+  // narrow for the expanded layout; never auto-expand back (respects a
+  // user's manual choice once the viewport widens again).
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 992px)");
+    const collapseIfNarrow = (matches) => {
+      if (matches) dispatch(changeCollapse(true));
+    };
+    collapseIfNarrow(mq.matches);
+    const handler = (e) => collapseIfNarrow(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [dispatch]);
+
   const { value, loading } = useSelector((s) => s.adminAuth?.user || {});
   const userDetails = value?.user;
   const userPermissions = userDetails?.permissions || {};

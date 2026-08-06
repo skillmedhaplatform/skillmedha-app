@@ -306,11 +306,17 @@
 
           .tableValue {
             width: 65%;
+            min-width: 0;
             padding: 0.875rem 1rem;
             color: #334155;
             font-size: 0.95rem;
             display: flex;
             align-items: center;
+            // Long unbroken strings (emails, URLs) don't wrap just because
+            // the flex row around them does — they need their own
+            // word-break to stop overflowing the 65%-width column.
+            word-break: break-word;
+            overflow-wrap: anywhere;
 
             .bluePill {
               background-color: #eff6ff;
