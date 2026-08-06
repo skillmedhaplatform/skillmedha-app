@@ -135,12 +135,11 @@ export default function InterviewPage() {
           <div className={styles.mainCont}>
             <div className={styles.roundCont}>
               <h3>Round {index + 1}</h3>
-              <div style={{ display: "flex", width: "100%" }}>
+              <div className={styles.rowFlex}>
                 <div className={styles.fieldCont1}>
                   <label>Round Type</label>
                   <Select
                     placeholder="Select Round Type"
-                    style={{ width: "50%" }}
                     value={round.type || null}
                     suffixIcon={<FaChevronDown />}
                     onChange={(value) =>
@@ -156,7 +155,6 @@ export default function InterviewPage() {
                 <div className={styles.fieldCont1}>
                   <label>Mode</label>
                   <Radio.Group
-                    style={{ width: "70%" }}
                     value={round.mode}
                     onChange={(e) =>
                       handleRoundChange(round.id, "mode", e.target.value)
@@ -171,20 +169,7 @@ export default function InterviewPage() {
                   />
                 </div>
               </div>
-              {/* {round.type === "Assessment" && round.mode === "Online" && (
-                <div className={styles.fieldCont}>
-                  <label>Assessment URL</label>
-                  <input
-                    type="url"
-                    placeholder="Enter online assessment link"
-                    value={round.link || ""}
-                    onChange={(e) =>
-                      handleRoundChange(round.id, "link", e.target.value)
-                    }
-                    disabled={!round.isEditable}
-                  />
-                </div>
-              )} */}
+
               <div className={styles.fieldCont}>
                 <label>Round Name</label>
                 <input
@@ -265,14 +250,7 @@ export default function InterviewPage() {
                 />
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-end",
-                  gap: "5%",
-                }}
-              >
+              <div className={styles.roundActions}>
                 <button
                   className={styles.saveBtn}
                   onClick={() => toggleEdit(round.id)}
@@ -280,7 +258,7 @@ export default function InterviewPage() {
                   {round.isEditable ? "Save" : "Edit"}
                 </button>
                 <button
-                  className={styles.saveBtn}
+                  className={styles.deleteBtn}
                   onClick={() => deleteRound(round.id)}
                   disabled={rounds.length === 1}
                 >
@@ -292,8 +270,8 @@ export default function InterviewPage() {
         </div>
       ))}
 
-      <div className={styles.actionButtonsCont} style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
-        <button className={styles.saveBtn} onClick={addNewRound}>
+      <div className={styles.actionButtonsCont}>
+        <button className={styles.addRoundBtn} onClick={addNewRound}>
           + Add New Round
         </button>
         <button className={styles.saveBtn} onClick={handleSubmitAll}>

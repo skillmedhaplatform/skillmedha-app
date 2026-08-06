@@ -5,6 +5,7 @@ import formStyles from "./styles/formPage.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { Button, message } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 import {
   getOneJobAssessment,
   updateJobAssessment,
@@ -126,12 +127,9 @@ const Page = () => {
             onChange={() => handleMandatoryToggle(index)}
           />
           <label htmlFor={`checkbox-${index}`}>Mandatory</label>
-          <img
-            src="https://res.cloudinary.com/cliqtick/image/upload/v1718799083/sysnper/f29853d87e22f70d1cc10a3fcd7959c4_phnqgw.png"
-            width="20px"
-            style={{ cursor: "pointer" }}
+          <DeleteOutlined
+            style={{ fontSize: "1.1rem", color: "#ff4d4f", cursor: "pointer" }}
             onClick={() => handleDeleteItem(index)}
-            alt="Delete"
           />
         </div>
       </div>

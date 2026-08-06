@@ -134,12 +134,8 @@ export default function MyjobsHome() {
       />
       <div style={{ padding: "2rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
         
-        {/* Title and Create Job Button Row */}
+        {/* Controls Row (Search & Create Job Button) */}
         <div className={JobStyles.headerRowFlex}>
-          <div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#1e293b", margin: 0 }}>My Jobs</h2>
-            <p style={{ fontSize: "0.875rem", color: "#64748b", margin: 0 }}>Manage your job postings and track applicants</p>
-          </div>
           <div className={JobStyles.actionsGroup}>
             <Input
               placeholder="Search job with title..."

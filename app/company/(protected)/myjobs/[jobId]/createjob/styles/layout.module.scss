@@ -91,23 +91,27 @@
   background-color: white;
   padding: 0 1.75rem;
   width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   z-index: 1;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .tabsRow {
   display: flex;
   gap: 2.5rem;
   align-items: center;
-  width: 100%;
-  overflow-x: auto;
-  
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  width: max-content;
+  min-width: 100%;
 }
 
 .tabItem {
@@ -122,6 +126,7 @@
   transition: all 0.2s ease-in-out;
   position: relative;
   white-space: nowrap;
+  flex-shrink: 0;
 
   &:hover {
     color: #6BA8ED;
@@ -149,23 +154,31 @@
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   .tabsWrapper {
     padding: 0 0.75rem;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
 
   .tabsRow {
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 
   .tabItem {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     padding: 0.75rem 0;
   }
 
   .mainContainer {
-    padding: 0.75rem 1rem !important;
+    padding: 0.75rem 0.75rem !important;
     gap: 0.75rem !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 }
