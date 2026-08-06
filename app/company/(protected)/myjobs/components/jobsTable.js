@@ -1,9 +1,9 @@
 "use client";
 
 import { getAllJobs, setJobStatus } from "@/redux/slices/company/jobs";
-import { Button, Table, message, Empty } from "antd";
+import { Button, Table, message, Empty, Drawer } from "antd";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   HiOutlineBriefcase,
@@ -72,6 +72,9 @@ export default function JobsTable({
 }) {
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const checkJobEndDate = (job) => {
     if (!job.endDate) return { valid: false, message: "Job has no end date" };
@@ -181,6 +184,10 @@ export default function JobsTable({
 
     return {
       key: e._id,
+      rawJob: e,
+      theme: theme,
+      endDate: endDate,
+      isExpired: isExpired,
       jobTitle: (
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <div
@@ -320,44 +327,184 @@ export default function JobsTable({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       {paginatedData.length > 0 ? (
-        <div className={JobStyles.cardsList}>
-          {paginatedData.map((item) => (
-            <div
-              key={item.key}
-              className={JobStyles.jobCard}
-              onClick={() => router.push(`/company/myjobs/${item.key}/createjob`)}
-            >
-              {/* Job Title / Logo takes up left space automatically since it's already a flex container */}
-              <div style={{ flex: 1, minWidth: "220px" }}>
-                {item.jobTitle}
-              </div>
+        <>
+          {/* Desktop View (Full cards layout) */}
+          <div className={`${JobStyles.cardsList} ${JobStyles.desktopOnly}`}>
+            {paginatedData.map((item) => (
+              <div
+                key={item.key}
+                className={JobStyles.jobCard}
+                onClick={() => router.push(`/company/myjobs/${item.key}/createjob`)}
+              >
+                {/* Job Title / Logo takes up left space automatically since it's already a flex container */}
+                <div style={{ flex: 1, minWidth: "220px" }}>
+                  {item.jobTitle}
+                </div>
 
-              {/* Meta information */}
-              <div className={JobStyles.cardMeta}>
-                <div className={JobStyles.metaItem}>
-                  <span className={JobStyles.metaLabel}>Colleges</span>
-                  <span className={JobStyles.metaValue}>{item.colleges}</span>
+                {/* Meta information */}
+                <div className={JobStyles.cardMeta}>
+                  <div className={JobStyles.metaItem}>
+                    <span className={JobStyles.metaLabel}>Colleges</span>
+                    <span className={JobStyles.metaValue}>{item.colleges}</span>
+                  </div>
+                  <div className={JobStyles.metaItem}>
+                    <span className={JobStyles.metaLabel}>Posted On</span>
+                    <span className={JobStyles.metaValue}>{item.createdAt}</span>
+                  </div>
+                  <div className={JobStyles.metaItem}>
+                    <span className={JobStyles.metaLabel}>Applicants</span>
+                    <span className={JobStyles.metaValue}>{item.applicants}</span>
+                  </div>
                 </div>
-                <div className={JobStyles.metaItem}>
-                  <span className={JobStyles.metaLabel}>Posted On</span>
-                  <span className={JobStyles.metaValue}>{item.createdAt}</span>
-                </div>
-                <div className={JobStyles.metaItem}>
-                  <span className={JobStyles.metaLabel}>Applicants</span>
-                  <span className={JobStyles.metaValue}>{item.applicants}</span>
-                </div>
-              </div>
 
-              {/* Action Button */}
-              <div className={JobStyles.cardActions}>
-                {item.action}
+                {/* Action Button */}
+                <div className={JobStyles.cardActions}>
+                  {item.action}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {/* Mobile View (Compact Tiles Layout - Title & Icon only) */}
+          <div className={`${JobStyles.mobileOnly} ${JobStyles.mobileTileList}`}>
+            {paginatedData.map((item) => {
+              const theme = item.theme;
+              return (
+                <div
+                  key={item.key}
+                  className={JobStyles.jobMobileTile}
+                  onClick={() => {
+                    setSelectedJob(item);
+                    setIsDrawerOpen(true);
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "8px",
+                      backgroundColor: theme.bgColor,
+                      color: theme.color,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {theme.icon}
+                  </div>
+                  <div className={JobStyles.tileTitleInfo}>
+                    <span className={JobStyles.tileTitleText}>{item.rawJob?.jobTitle}</span>
+                    <span className={JobStyles.tileSubtext}>
+                      JOB-{item.key ? item.key.substring(item.key.length - 4).toUpperCase() : "NEW"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
       ) : (
         <Empty description={`No ${currTab?.label?.toLowerCase() || 'jobs'} found`} style={{ margin: "3rem 0" }} />
       )}
+
+      {/* Bottom Drawer for Mobile View */}
+      <Drawer
+        title="Job Details"
+        placement="bottom"
+        closable={true}
+        onClose={() => setIsDrawerOpen(false)}
+        open={isDrawerOpen}
+        height="90vh"
+        bodyStyle={{ padding: "1.25rem" }}
+        headerStyle={{ borderBottom: "1px solid #f1f5f9" }}
+        style={{ borderTopLeftRadius: "16px", borderTopRightRadius: "16px", overflow: "hidden" }}
+      >
+        {selectedJob && (
+          <div className={JobStyles.drawerContent}>
+            {/* Drawer Header */}
+            <div className={JobStyles.drawerHeader}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "10px",
+                  backgroundColor: selectedJob.theme.bgColor,
+                  color: selectedJob.theme.color,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                {selectedJob.theme.icon}
+              </div>
+              <div className={JobStyles.drawerMainInfo}>
+                <span className={JobStyles.drawerTitleName}>
+                  {selectedJob.rawJob?.jobTitle}
+                </span>
+                <span className={JobStyles.drawerSubtext}>
+                  JOB-{selectedJob.key ? selectedJob.key.substring(selectedJob.key.length - 4).toUpperCase() : "NEW"}
+                </span>
+              </div>
+            </div>
+
+            {/* Job Metadata details */}
+            <div className={JobStyles.drawerDetailGrid}>
+              <div className={JobStyles.detailItem}>
+                <span className={JobStyles.detailLabel}>Colleges Partnered</span>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem", marginTop: "0.25rem" }}>
+                  {selectedJob.colleges}
+                </div>
+              </div>
+
+              <div className={JobStyles.detailItem}>
+                <span className={JobStyles.detailLabel}>Posted On</span>
+                <div style={{ marginTop: "0.25rem" }}>
+                  {selectedJob.createdAt}
+                </div>
+              </div>
+
+              {selectedJob.rawJob?.endDate && (
+                <div className={JobStyles.detailItem}>
+                  <span className={JobStyles.detailLabel}>End Date</span>
+                  <span className={JobStyles.detailValue} style={{ fontSize: "0.85rem", color: "#64748b", display: "inline-flex", alignItems: "center", gap: "0.4rem", marginTop: "0.25rem" }}>
+                    <HiOutlineCalendar style={{ fontSize: "0.95rem", color: "#94a3b8" }} />
+                    {new Date(selectedJob.rawJob.endDate).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Action Row */}
+            <div className={JobStyles.drawerActionRow}>
+              <div onClick={(e) => e.stopPropagation()} style={{ flex: 1 }}>
+                {selectedJob.applicants}
+              </div>
+              <div onClick={(e) => { e.stopPropagation(); setIsDrawerOpen(false); }} style={{ flex: 1 }}>
+                {selectedJob.action}
+              </div>
+            </div>
+
+            {/* Edit Job button */}
+            <Button
+              type="default"
+              onClick={() => {
+                router.push(`/company/myjobs/${selectedJob.key}/createjob`);
+                setIsDrawerOpen(false);
+              }}
+              style={{ width: "100%", height: "40px", borderRadius: "8px", fontWeight: "600", borderColor: "#cbd5e1" }}
+            >
+              Edit Job Details
+            </Button>
+          </div>
+        )}
+      </Drawer>
     </div>
   );
 }

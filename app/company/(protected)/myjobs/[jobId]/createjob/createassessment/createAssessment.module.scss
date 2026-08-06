@@ -399,16 +399,26 @@
 // Responsive design
 @media (max-width: 768px) {
   .mainCont {
-    padding: 16px;
+    padding: 16px !important;
+    border-radius: 16px !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
+    height: auto !important;
+    max-height: none !important;
 
     > p:first-child {
-      font-size: 24px;
-      margin-bottom: 24px;
+      font-size: 20px;
+      margin-bottom: 20px;
     }
   }
 
   .formSection {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+
+    .sectionLabel {
+      font-size: 14px !important;
+    }
   }
 
   .skillsSelect,
@@ -428,22 +438,60 @@
     }
   }
 
-  .configSection {
-    padding: 16px;
-    margin-bottom: 20px;
+  .configSection,
+  .hrtSection,
+  .snapshotSection,
+  .proctoringSection {
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+    border-radius: 12px !important;
 
     .configHeader {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+
+      .configTitle {
+        font-size: 16px !important;
+      }
+
       :global(.ant-radio-group) {
         flex-wrap: wrap;
         gap: 8px;
 
         .ant-radio-button-wrapper {
-          height: 32px;
-          line-height: 30px;
-          padding: 0 12px;
+          height: 36px;
+          line-height: 34px;
+          padding: 0 14px;
           font-size: 13px;
           border-radius: 4px !important;
-          margin-bottom: 4px;
+        }
+      }
+    }
+
+    .configContent {
+      .contentDescription {
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+      }
+
+      .infoSection {
+        padding: 12px !important;
+        border-radius: 10px !important;
+
+        .infoContent p {
+          font-size: 13px !important;
+        }
+      }
+
+      .maxLeavesSection {
+        .maxLeavesHeader {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+        }
+
+        .maxLeavesSelect {
+          width: 100% !important;
         }
       }
     }
@@ -452,6 +500,15 @@
   .saveButton {
     width: 100%;
     margin-top: 24px;
+    height: 44px !important;
+    border-radius: 9999px !important;
+    font-size: 15px !important;
+  }
+
+  :global(.ant-btn-primary) {
+    width: 100% !important;
+    height: 44px !important;
+    border-radius: 9999px !important;
   }
 }
 

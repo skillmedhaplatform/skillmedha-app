@@ -161,4 +161,19 @@
     color: white !important;
     font-weight: 600;
   }
+
+  .rightSlotWrapper {
+    z-index: 10;
+  }
 }
+
+@media (max-width: 1023px) {
+  .headerSection {
+    padding: 1rem 1.25rem;
+    min-height: auto;
+
+    .rightSlotWrapper {
+      display: none !important;
+    }
+  }
+}

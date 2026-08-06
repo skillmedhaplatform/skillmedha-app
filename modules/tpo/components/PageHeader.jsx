@@ -92,7 +92,7 @@ const PageHeader = ({
               )}
             </div>
           </div>
-          {rightSlot && <div style={{ zIndex: 10 }}>{rightSlot}</div>}
+          {rightSlot && <div className={styles.rightSlotWrapper}>{rightSlot}</div>}
         </div>
       </div>
 

@@ -78,6 +78,21 @@
   }
 }
 
+.interactiveCard {
+  cursor: pointer;
+
+  &:hover {
+    border-color: #6BA8ED !important;
+    background-color: #fafbfc;
+  }
+}
+
+.activeCard {
+  border-color: #6BA8ED !important;
+  box-shadow: 0 0 0 2px rgba(107, 168, 237, 0.15), 0 4px 12px rgba(107, 168, 237, 0.08) !important;
+  background-color: #f7fafc !important;
+}
+
 .statIcon {
   width: 48px;
   height: 48px;
@@ -183,4 +198,230 @@
   gap: 0.4rem;
   flex-shrink: 0;
   margin-left: 0.5rem;
+}
+
+/* Header Row & Controls styles */
+.headerRowFlex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+}
+
+.actionsGroup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+}
+
+.searchBoxTop {
+  width: 280px;
+  border-radius: 8px !important;
+  padding: 0.4rem 1rem !important;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+
+  @media (max-width: 768px) {
+    width: 100% !important;
+  }
+}
+
+.createJobBtn {
+  height: auto !important;
+  padding: 0.6rem 1.5rem !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  background-color: #6BA8ED !important;
+  border-color: #6BA8ED !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+
+  @media (max-width: 768px) {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* Desktop-only / Mobile-only helper classes */
+.desktopOnly {
+  display: block;
+
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.mobileOnly {
+  display: none !important;
+
+  @media (max-width: 768px) {
+    display: block !important;
+  }
+}
+
+/* Mobile Stats Grid 2x2 override */
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.6rem !important;
+  }
+  .statCard {
+    padding: 0.75rem !important;
+    gap: 0.6rem !important;
+  }
+  .statIcon {
+    width: 36px !important;
+    height: 36px !important;
+    svg {
+      width: 18px !important;
+      height: 18px !important;
+    }
+  }
+  .statValue {
+    font-size: 1.25rem !important;
+  }
+  .statLabel {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Mobile tiles listing styles */
+.mobileTileList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+}
+
+.jobMobileTile {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f8fafc;
+  }
+
+  .tileTitleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .tileTitleText {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tileSubtext {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Bottom Drawer content styling */
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  font-family: sans-serif;
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+
+  .drawerMainInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .drawerTitleName {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .drawerSubtext {
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+}
+
+.drawerDetailGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detailLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.detailValue {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.drawerActionRow {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.25rem;
+
+  button {
+    width: 100% !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 }

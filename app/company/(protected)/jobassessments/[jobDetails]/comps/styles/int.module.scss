@@ -2,6 +2,10 @@
   padding: 20px;
   border-radius: 10px;
   color: #fff;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0 !important;
+  }
 }
 
 .heading {
@@ -62,6 +66,10 @@
   border-radius: 8px;
   padding: 0.25rem;
   border: 1px solid #e2e8f0;
+
+  @media (max-width: 768px) {
+    display: none !important;
+  }
 }
 
 .toggleBtn {
@@ -141,6 +149,12 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
     border-color: #cbd5e0;
   }
+
+  @media (max-width: 768px) {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+  }
 }
 
 .metaItem {
@@ -160,5 +174,301 @@
     font-size: 0.85rem;
     font-weight: 600;
     color: #2d3748;
+  }
+}
+
+.candidateInfo {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    min-width: 100% !important;
+  }
+}
+
+.avatarCont {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(107, 168, 237, 0.15) 0%, rgba(163, 204, 250, 0.25) 100%);
+  color: #6BA8ED;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.nameCont {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.nameText {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1.1rem;
+}
+
+.subInfoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.metaRowList {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-left: 1rem;
+  border-left: 1px dashed #e2e8f0;
+
+  @media (max-width: 768px) {
+    flex: none !important;
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    padding-left: 0 !important;
+    border-left: none !important;
+    border-top: 1px dashed #e2e8f0 !important;
+    padding-top: 1rem !important;
+  }
+}
+
+.metaItemColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  @media (max-width: 768px) {
+    align-items: flex-start !important;
+  }
+}
+
+.metaLabelText {
+  font-size: 0.7rem;
+  color: #a0aec0;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.metaValueRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dateValText {
+  font-size: 0.95rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.bulletDot {
+  color: #cbd5e1;
+}
+
+.dateTimeText {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.interviewerName {
+  font-size: 0.95rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.interviewerDesig {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.scoreValueText {
+  font-size: 1.2rem;
+  color: #6BA8ED;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Desktop-only / Mobile-only display helper classes */
+.desktopOnly {
+  display: block;
+
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.mobileOnly {
+  display: none !important;
+
+  @media (max-width: 768px) {
+    display: block !important;
+  }
+}
+
+/* Mobile tile container styles */
+.mobileTileList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+}
+
+.studentMobileTile {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f8fafc;
+  }
+
+  .tileCheckbox {
+    width: 16px;
+    height: 16px;
+    accent-color: #2563eb;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .tileInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .tileName {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tileEmail {
+    font-size: 0.75rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Bottom Drawer content styling */
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  font-family: sans-serif;
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+
+  .drawerAvatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #e0f2fe;
+    color: #0284c7;
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .drawerMainInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .drawerName {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .drawerEmail {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+}
+
+.drawerDetailGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detailLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.detailValue {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.detailSubText {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.actionRow {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.25rem;
+
+  button {
+    flex: 1;
+    height: 40px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
   }
 }

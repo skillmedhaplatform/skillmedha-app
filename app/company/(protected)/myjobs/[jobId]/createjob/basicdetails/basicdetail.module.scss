@@ -220,3 +220,105 @@
   width: 100% !important;
   max-width: none !important;
 }
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 768px) {
+  .mainCont {
+    border-radius: 16px !important;
+    padding: 16px !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
+    max-height: none !important;
+    gap: 1rem !important;
+
+    .fieldCont {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      width: 100% !important;
+      gap: 0.4rem !important;
+    }
+
+    .coursefieldCont {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      width: 100% !important;
+      gap: 0.5rem !important;
+
+      .courseInputmainCont {
+        .CourseInpuCont {
+          flex-direction: column !important;
+          align-items: stretch !important;
+
+          .degreeInput,
+          .departmentInput {
+            width: 100% !important;
+            flex: none !important;
+          }
+        }
+      }
+    }
+
+    label {
+      width: 100% !important;
+      min-width: 100% !important;
+      font-size: 14px !important;
+      margin-bottom: 0 !important;
+      color: #334155;
+    }
+
+    .inpuCont {
+      width: 100% !important;
+      flex: none !important;
+    }
+
+    .inpuContbtn {
+      width: 100% !important;
+      flex: none !important;
+
+      .btnsCont {
+        gap: 0.5rem !important;
+      }
+    }
+
+    .textarea,
+    input {
+      width: 100% !important;
+      min-height: 44px !important;
+      font-size: 15px !important;
+      flex: none !important;
+    }
+
+    .textarea {
+      min-height: 10rem !important;
+    }
+
+    .button {
+      padding: 0.5rem 0.75rem !important;
+      font-size: 13px !important;
+      border-radius: 9999px !important;
+    }
+
+    :global {
+      .ant-select {
+        width: 100% !important;
+      }
+
+      .ant-select-selector {
+        min-height: 44px !important;
+      }
+
+      .ant-picker {
+        width: 100% !important;
+        min-height: 44px !important;
+      }
+    }
+  }
+
+  .saveBtn {
+    width: 100% !important;
+    height: 44px !important;
+    border-radius: 9999px !important;
+    font-size: 15px !important;
+  }
+}

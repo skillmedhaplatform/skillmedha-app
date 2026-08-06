@@ -1,5 +1,14 @@
 @import "@/utils/universalUtils/colors.module.scss";
 
+/* ─── Sticky Header (Banner + Tabs) ─── */
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  flex-shrink: 0;
+}
+
 .mainContainer {
   padding: 1.5rem 2rem;
   display: flex;
@@ -19,22 +28,20 @@
     background-color: transparent;
     margin-bottom: 0.75rem;
 
-    .crumb {
-      font-size: 16px;
-      font-weight: 500;
-      color: #6BA8ED;
+    .backBtn {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2563eb;
       cursor: pointer;
       display: flex;
       align-items: center;
+      gap: 0.25rem;
+      transition: opacity 0.2s ease;
+
       &:hover {
         text-decoration: underline;
+        opacity: 0.85;
       }
-    }
-
-    .activeCrumb {
-      color: #0f172a;
-      font-size: 16px;
-      font-weight: 600;
     }
   }
   .bottomCont {
@@ -79,6 +86,7 @@
   }
 }
 
+/* ─── Tabs ─── */
 .tabsWrapper {
   background-color: white;
   padding: 0 1.75rem;
@@ -133,4 +141,31 @@
   background-color: #6BA8ED;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
+}
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 768px) {
+  .stickyHeader {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .tabsWrapper {
+    padding: 0 0.75rem;
+  }
+
+  .tabsRow {
+    gap: 1.5rem;
+  }
+
+  .tabItem {
+    font-size: 0.78rem;
+    padding: 0.75rem 0;
+  }
+
+  .mainContainer {
+    padding: 0.75rem 1rem !important;
+    gap: 0.75rem !important;
+  }
 }

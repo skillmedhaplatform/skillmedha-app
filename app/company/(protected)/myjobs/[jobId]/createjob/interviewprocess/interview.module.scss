@@ -206,3 +206,187 @@
     align-self: center;
   }
 }
+
+/* ─── Timeline Container ─── */
+.timelineContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  max-height: 90%;
+  overflow-y: auto;
+  padding-bottom: 3rem;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #6BA8ED;
+    border-radius: 6px;
+  }
+  scrollbar-width: thin;
+  scrollbar-color: #6BA8ED transparent;
+}
+
+.timelineItem {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Hidden on desktop, shown on mobile */
+.timelineConnector {
+  display: none;
+}
+
+.actionButtonsCont {
+  margin-top: 1rem;
+}
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 768px) {
+  .main {
+    padding-bottom: 1rem !important;
+    gap: 0 !important;
+  }
+
+  .timelineContainer {
+    padding-left: 0 !important;
+  }
+
+  .timelineItem {
+    display: flex !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+
+  .timelineConnector {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    width: 24px !important;
+    padding-top: 1.25rem;
+  }
+
+  .timelineDot {
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    background-color: #2563eb !important;
+    border: 3px solid #bfdbfe !important;
+    flex-shrink: 0 !important;
+    z-index: 1;
+  }
+
+  .timelineLine {
+    width: 2px !important;
+    flex: 1 !important;
+    background-color: #bfdbfe !important;
+    min-height: 20px !important;
+  }
+
+  .mainCont {
+    border-radius: 16px !important;
+    padding: 16px !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
+    width: 100% !important;
+    flex: 1 !important;
+    margin-bottom: 0.75rem !important;
+
+    .roundCont {
+      gap: 1rem !important;
+
+      h3 {
+        font-size: 16px !important;
+        color: #1e40af;
+        margin-bottom: 0.25rem;
+      }
+
+      .fieldCont,
+      .fieldCont1 {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 0.4rem !important;
+
+        label {
+          width: 100% !important;
+          min-width: 100% !important;
+          font-size: 14px !important;
+          color: #334155;
+        }
+
+        .inpuCont {
+          width: 100% !important;
+          flex: none !important;
+        }
+
+        .scheduleInput {
+          width: 100% !important;
+          flex-direction: column !important;
+        }
+
+        .textarea,
+        input:not([class*="ant-select"]) {
+          width: 100% !important;
+          min-height: 44px !important;
+          font-size: 15px !important;
+          flex: none !important;
+        }
+
+        .textarea {
+          min-height: 8rem !important;
+        }
+
+        :global {
+          .ant-select {
+            width: 100% !important;
+          }
+
+          .ant-select-selector {
+            min-height: 44px !important;
+          }
+
+          .ant-picker {
+            width: 100% !important;
+            min-height: 44px !important;
+          }
+
+          .ant-radio-group {
+            width: 100% !important;
+          }
+        }
+      }
+
+      /* The row containing Round Type + Mode selects */
+      > div[style*="display: flex"] {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+      }
+    }
+  }
+
+  .saveBtn {
+    width: auto !important;
+    height: 40px !important;
+    border-radius: 9999px !important;
+    font-size: 14px !important;
+    padding: 0.3rem 1.2rem !important;
+  }
+
+  .actionButtonsCont {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    padding-left: 2.25rem;
+
+    .saveBtn {
+      width: 100% !important;
+    }
+  }
+}
