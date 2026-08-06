@@ -165,7 +165,7 @@ const EducationDetails = ({
         /* Form View */
         <div className="w-full max-w-3xl mx-auto">
           <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-6 border-b border-[#f1f5f9]">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 pb-6 border-b border-[#f1f5f9]">
               <div className="flex flex-col">
                 <div className="flex items-center gap-3 mb-1">
                   <ArrowLeftOutlined 
@@ -207,7 +207,7 @@ const EducationDetails = ({
                 <h4 className="font-bold text-[#0f172a] text-[16px] m-0">Basic Information</h4>
                 <div className="flex-1 h-[1px] bg-[#e2e8f0] ml-2"></div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-[13px] font-semibold text-[#475569]">{labels.instLabel} <span className="text-[#ef4444]">*</span></label>
                   <AutoComplete
@@ -311,7 +311,7 @@ const EducationDetails = ({
                 <h4 className="font-bold text-[#0f172a] text-[16px] m-0">Duration</h4>
                 <div className="flex-1 h-[1px] bg-[#e2e8f0] ml-2"></div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-[13px] font-semibold text-[#475569]">Start Date <span className="text-[#ef4444]">*</span></label>
                   <DatePicker
@@ -346,7 +346,7 @@ const EducationDetails = ({
                 <h4 className="font-bold text-[#0f172a] text-[16px] m-0">Grade / Score</h4>
                 <div className="flex-1 h-[1px] bg-[#e2e8f0] ml-2"></div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-[13px] font-semibold text-[#475569]">Grade Type</label>
                   <Select

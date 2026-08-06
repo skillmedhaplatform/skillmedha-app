@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useOptimistic, useState, useTransition, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, ConfigProvider, message, Result, Segmented, Select, Input, Tabs, Tooltip } from "antd";
+import { Button, ConfigProvider, message, Result, Segmented, Select, Input, Tabs, Tooltip, Drawer, Popover } from "antd";
 import {
   CloseCircleOutlined,
   SearchOutlined,
@@ -12,17 +12,20 @@ import {
   SendOutlined
 } from "@ant-design/icons";
 import _ from "lodash";
+import { HiOutlineBriefcase } from "react-icons/hi";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ApplyJob, GetAllJobs } from "@/redux/slices/jobopenings";
 import { checkIfJobApplied } from "@/app/student/(protected)/jobopenings/utils/jobUtils";
 import { getEligibilityStatus } from "@/app/student/(protected)/jobopenings/components/eligibilityCheck";
 import { JobListSkeleton, JobDetailsSkeleton } from "@/app/student/(protected)/jobopenings/components/skeletons";
 import timeAgo from "@/helpers/timeAgo";
-import CountdownTimer from "@/app/student/(protected)/jobopenings/components/countdowntimer";
+import JobCard from "@/app/student/(protected)/jobopenings/components/JobCard";
+import JobDetailsHeader from "@/app/student/(protected)/jobopenings/components/JobDetailsHeader";
+import JobDetailsTabs from "@/app/student/(protected)/jobopenings/components/JobDetailsTabs";
 import styles from "./mobileJobOpenings.module.scss";
 
 const { Search } = Input;
-const PRIMARY = "#24A058";
+const PRIMARY = "#1E69DA";
 
 export default function MobileJobOpenings() {
   const dispatch = useDispatch();
@@ -51,7 +54,7 @@ export default function MobileJobOpenings() {
   const [isPending, startTransition] = useTransition();
 
   // ── UI state ───────────────────────────────────────────────
-  const [viewMode, setViewMode] = useState("list"); // "list" or "details"
+  // "viewMode" state removed; details render in a Drawer
   const [selectedId, setSelectedId] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const [listFilter, setListFilter] = useState("all");
@@ -170,14 +173,7 @@ export default function MobileJobOpenings() {
 
   const selectedJob = filteredJobs?.find((j) => j?._id === selectedId) || null;
 
-  // ── Auto-select first job on load ──
-  useEffect(() => {
-    if (!filteredJobs?.length) return;
-    const stillExists = filteredJobs.some((j) => j?._id === selectedId);
-    if (!selectedId || !stillExists) setSelectedId(filteredJobs[0]?._id || "");
-  }, [filteredJobs]);
-
-  // ── Reset active tab when selected ID changes ─────────────
+  // Removed auto-select so the drawer doesn't open immediately  // ── Reset active tab when selected ID changes ─────────────
   useEffect(() => {
     setActiveTab("overview");
   }, [selectedId]);
@@ -233,46 +229,64 @@ export default function MobileJobOpenings() {
     );
   };
 
+  const totalJobs = pagination?.totalDocs || JOBS.length;
+  const todayCount = JOBS.filter(
+    (job) => new Date(job.createdAt).toDateString() === new Date().toDateString()
+  ).length;
+  const totalApplied = optimisticAppliedIds.length;
+
   return (
     <div className={styles.container}>
-      {viewMode === "list" ? (
-        <>
-          {/* 1. Compact Filters */}
-          <div className={styles.filtersRow}>
-            <div className={styles.filtersSelects}>
-              <Select
-                id="mobile-job-selector"
-                style={{ flex: 1, minWidth: 100 }}
-                value={filters.profileName}
-                options={jobOptions}
-                placeholder="Job Profile"
-                loading={isFetching}
-                onChange={(value) => {
-                  setFilters((prev) => ({ ...prev, profileName: value }));
-                  router.push(pathname + "?" + createQueryString("profileName", value));
-                  handleDispatchFilter("profileName", value);
-                }}
-              />
-              <Select
-                id="mobile-sort-selector"
-                style={{ flex: 1, minWidth: 100 }}
-                value={filters.sort}
-                options={sortOptions}
-                suffixIcon={<SortAscendingOutlined />}
-                onChange={(value) => {
-                  setFilters((prev) => ({ ...prev, sort: value }));
-                  router.push(pathname + "?" + createQueryString("sort", value));
-                  handleDispatchFilter("sort", value);
-                }}
-              />
+      {/* ── Banner Section ── */}
+      <div className="w-[calc(100%+28px)] -ml-[14px] h-[120px] min-h-[120px] flex flex-col justify-center p-4 shadow-sm bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[50] mt-[-14px] sticky top-0 mb-4">
+        {/* Decorative Icons */}
+        <div className="absolute inset-0 pointer-events-none z-[1]">
+          <div className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]">✕</div>
+          <div className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]">+</div>
+          <div className="absolute top-[40%] right-[50%] text-[#1E69DA] opacity-50 text-[1.1rem]">★</div>
+          <div className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]">✕</div>
+        </div>
+
+        <div className="flex items-center justify-between w-full relative z-[2]">
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="w-[48px] h-[48px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
+              <HiOutlineBriefcase className="text-white text-2xl" />
             </div>
-            <div className={styles.filtersSearch}>
+            <div className="flex flex-col justify-center">
+              <div className="text-[20px] font-bold text-white m-0 leading-tight">
+                Job Openings
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 relative z-10">
+            <div className="flex flex-col items-center min-w-[40px]">
+              <span className="text-[18px] font-bold text-white leading-none">{totalJobs}</span>
+              <span className="text-[9px] text-[#94a3b8] font-bold uppercase mt-1 text-center">Jobs</span>
+            </div>
+            <div className="w-[1px] h-[24px] bg-white/20"></div>
+            <div className="flex flex-col items-center min-w-[40px]">
+              <span className="text-[18px] font-bold text-white leading-none">{todayCount}</span>
+              <span className="text-[9px] text-[#94a3b8] font-bold uppercase mt-1 text-center">New</span>
+            </div>
+            <div className="w-[1px] h-[24px] bg-white/20"></div>
+            <div className="flex flex-col items-center min-w-[40px]">
+              <span className="text-[18px] font-bold text-white leading-none">{totalApplied}</span>
+              <span className="text-[9px] text-[#94a3b8] font-bold uppercase mt-1 text-center">Applied</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+          {/* Filter & Search Bar Section */}
+          <div className="bg-white p-3 border-b border-[#e2e8f0] flex flex-col gap-3">
+            <div className="flex gap-2 w-full">
               <Search
                 id="mobile-job-search"
                 placeholder="Search jobs..."
                 allowClear
                 enterButton={<SearchOutlined />}
-                style={{ width: "100%" }}
+                style={{ flex: 1 }}
                 value={filters.search}
                 loading={isFetching}
                 onChange={(e) => {
@@ -281,37 +295,53 @@ export default function MobileJobOpenings() {
                   if (!value) handleClearFilter();
                 }}
                 onSearch={(value) => {
-                  if (value) {
-                    router.push(pathname + "?" + createQueryString("search", value));
-                    handleDispatchFilter("search", value);
-                  } else {
-                    handleClearFilter();
-                  }
+                  router.push(pathname + "?" + createQueryString("search", value));
+                  handleDispatchFilter("search", value);
                 }}
               />
-              <Button
-                type="link"
-                danger
-                icon={<CloseCircleOutlined />}
-                className="whitespace-nowrap text-[#24A058] font-extrabold underline cursor-pointer"
-                onClick={handleClearFilter}
-                style={{ padding: "0 4px" }}
+              <Popover
+                placement="bottomRight"
+                trigger="click"
+                content={
+                  <div className="flex flex-col gap-3 p-2 w-[200px]">
+                    <div className="font-bold text-sm text-gray-700">Filters & Sort</div>
+                    <Select
+                      value={filters.profileName}
+                      options={jobOptions}
+                      placeholder="Job Profile"
+                      onChange={(value) => {
+                        setFilters((prev) => ({ ...prev, profileName: value }));
+                        router.push(pathname + "?" + createQueryString("profileName", value));
+                        handleDispatchFilter("profileName", value);
+                      }}
+                      style={{ width: "100%" }}
+                    />
+                    <Select
+                      value={filters.sort}
+                      options={sortOptions}
+                      suffixIcon={<SortAscendingOutlined />}
+                      onChange={(value) => {
+                        setFilters((prev) => ({ ...prev, sort: value }));
+                        router.push(pathname + "?" + createQueryString("sort", value));
+                        handleDispatchFilter("sort", value);
+                      }}
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+                }
               >
-                Clear
-              </Button>
+                <Button icon={<span style={{ fontSize: '18px' }}>⚙️</span>} style={{ height: '32px' }} />
+              </Popover>
             </div>
-          </div>
 
-          {/* 2. List Tabs */}
-          <div className={styles.segmentedTabCon}>
             <ConfigProvider
               theme={{
                 components: {
                   Segmented: {
-                    itemSelectedBg: "#24A058",
+                    itemSelectedBg: "#1E69DA",
                     itemSelectedColor: "#ffffff",
-                    itemActiveBg: "#24A058",
-                    trackBg: "rgba(39,174,96,0.1)",
+                    itemActiveBg: "#1E69DA",
+                    trackBg: "rgba(30,105,218,0.1)",
                     fontSize: 14,
                   },
                 },
@@ -341,266 +371,161 @@ export default function MobileJobOpenings() {
                 subTitle="New openings are added regularly!"
               />
             ) : (
-              filteredJobs.map((job) => {
-                const applied = isJobApplied(job?._id);
-                return (
-                  <div
+              <div className="flex flex-col gap-3 pt-3 px-3">
+                {filteredJobs.map((job) => (
+                  <JobCard
                     key={job?._id}
-                    className={`${styles.jobTile} ${selectedId === job?._id ? styles.selected : ""}`}
-                    onClick={() => {
-                      setSelectedId(job?._id);
-                      setViewMode("details");
-                    }}
-                  >
-                    <h3 className={styles.tileCompany}>{job?.companyName}</h3>
-                    <div className={styles.tileRole}>{job?.jobTitle || job?.profileName}</div>
-                    <div className={styles.tileLocation}>{job?.city || "Not Mentioned"}</div>
-                    <div className={styles.tileFooter}>
-                      <span>{timeAgo(job.createdAt)}</span>
-                      <span className={`${styles.tileBadge} ${applied ? styles.applied : styles.notApplied}`}>
-                        {applied ? "Applied" : "Not Applied"}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-
-            {listFilter === "all" && pagination && (
-              <div className="flex flex-col gap-3 pt-3 border-t border-[#e2e8f0] bg-white mt-4 pb-2">
-                {/* Top row: items per page and showing info */}
-                <div className="flex items-center justify-between text-xs text-gray-500 font-medium px-2">
-                  <div className="flex items-center gap-1.5">
-                    <span>Show:</span>
-                    <Select
-                      size="small"
-                      value={pagination.limit}
-                      onChange={(val) => {
-                        const params = new URLSearchParams(searchParams);
-                        params.set("limit", String(val));
-                        params.set("page", "1");
-                        router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
-                      }}
-                      options={[
-                        { value: 10, label: "10" },
-                        { value: 25, label: "25" },
-                        { value: 50, label: "50" },
-                        { value: 100, label: "100" },
-                      ]}
-                      style={{ width: 65 }}
-                    />
-                  </div>
-                  <span>
-                    Showing {Math.min(pagination.totalDocs, (pagination.currentPage - 1) * pagination.limit + 1)}–
-                    {Math.min(pagination.totalDocs, pagination.currentPage * pagination.limit)} of {pagination.totalDocs}
-                  </span>
-                </div>
-
-                {/* Bottom row: Page buttons */}
-                <div className="flex items-center justify-center gap-1 flex-wrap px-2">
-                  <Button
-                    size="small"
-                    disabled={pagination.currentPage === 1}
-                    onClick={() => {
-                      const params = new URLSearchParams(searchParams);
-                      params.set("page", String(pagination.currentPage - 1));
-                      router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
-                    }}
-                  >
-                    ‹
-                  </Button>
-
-                  {Array.from({ length: pagination.totalPages }, (_, i) => {
-                    const pageNum = i + 1;
-                    // Limit showing max 4 pages around current page for mobile
-                    if (
-                      pagination.totalPages > 4 &&
-                      Math.abs(pagination.currentPage - pageNum) > 1 &&
-                      pageNum !== 1 &&
-                      pageNum !== pagination.totalPages
-                    ) {
-                      if (
-                        (pageNum === 2 && pagination.currentPage > 3) ||
-                        (pageNum === pagination.totalPages - 1 && pagination.currentPage < pagination.totalPages - 2)
-                      ) {
-                        return <span key={pageNum} className="text-gray-400 px-0.5">...</span>;
-                      }
-                      return null;
-                    }
-
-                    return (
-                      <Button
-                        key={pageNum}
-                        size="small"
-                        type={pagination.currentPage === pageNum ? "primary" : "default"}
-                        className={
-                          pagination.currentPage === pageNum
-                            ? "!bg-[#24A058] !border-[#24A058] !text-white"
-                            : ""
-                        }
-                        onClick={() => {
-                          const params = new URLSearchParams(searchParams);
-                          params.set("page", String(pageNum));
-                          router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
-                        }}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-
-                  <Button
-                    size="small"
-                    disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
-                    onClick={() => {
-                      const params = new URLSearchParams(searchParams);
-                      params.set("page", String(pagination.currentPage + 1));
-                      router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
-                    }}
-                  >
-                    ›
-                  </Button>
-                </div>
+                    job={job}
+                    isSelected={selectedId === job?._id}
+                    onSelect={setSelectedId}
+                    isApplied={isJobApplied(job?._id)}
+                  />
+                ))}
               </div>
             )}
           </div>
-        </>
-      ) : (
-        /* ════════ DETAILS MODE ════════ */
-        <div className={styles.jobDetailsCon}>
-          {/* Back button */}
-          <div className={styles.backButtonRow}>
-            <Button
-              type="text"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => setViewMode("list")}
-              className={styles.backBtn}
-            >
-              Back to jobs
-            </Button>
-          </div>
+
+          {/* Sticky Pagination at Bottom */}
+          {listFilter === "all" && pagination && (
+            <div className="flex flex-col gap-3 pt-3 px-3 pb-3 border-t border-[#e2e8f0] bg-white shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] relative z-10">
+              {/* Top row: items per page and showing info */}
+              <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
+                <div className="flex items-center gap-1.5">
+                  <span>Show:</span>
+                  <Select
+                    size="small"
+                    value={pagination.limit}
+                    onChange={(val) => {
+                      const params = new URLSearchParams(searchParams);
+                      params.set("limit", String(val));
+                      params.set("page", "1");
+                      router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                    }}
+                    options={[
+                      { value: 10, label: "10" },
+                      { value: 25, label: "25" },
+                      { value: 50, label: "50" },
+                      { value: 100, label: "100" },
+                    ]}
+                    style={{ width: 65 }}
+                  />
+                </div>
+                <span>
+                  Showing {Math.min(pagination.totalDocs, (pagination.currentPage - 1) * pagination.limit + 1)}–
+                  {Math.min(pagination.totalDocs, pagination.currentPage * pagination.limit)} of {pagination.totalDocs}
+                </span>
+              </div>
+
+              {/* Bottom row: Page buttons */}
+              <div className="flex items-center justify-center gap-1 flex-wrap">
+                <Button
+                  size="small"
+                  disabled={pagination.currentPage === 1}
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams);
+                    params.set("page", String(pagination.currentPage - 1));
+                    router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                  }}
+                >
+                  ‹
+                </Button>
+
+                {Array.from({ length: pagination.totalPages }, (_, i) => {
+                  const pageNum = i + 1;
+                  // Limit showing max 4 pages around current page for mobile
+                  if (
+                    pagination.totalPages > 4 &&
+                    Math.abs(pagination.currentPage - pageNum) > 1 &&
+                    pageNum !== 1 &&
+                    pageNum !== pagination.totalPages
+                  ) {
+                    if (
+                      (pageNum === 2 && pagination.currentPage > 3) ||
+                      (pageNum === pagination.totalPages - 1 && pagination.currentPage < pagination.totalPages - 2)
+                    ) {
+                      return <span key={pageNum} className="text-gray-400 px-0.5">...</span>;
+                    }
+                    return null;
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      size="small"
+                      type={pagination.currentPage === pageNum ? "primary" : "default"}
+                      className={
+                        pagination.currentPage === pageNum
+                          ? "!bg-[#1E69DA] !border-[#1E69DA] !text-white"
+                          : ""
+                      }
+                      onClick={() => {
+                        const params = new URLSearchParams(searchParams);
+                        params.set("page", String(pageNum));
+                        router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                      }}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+
+                <Button
+                  size="small"
+                  disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams);
+                    params.set("page", String(pagination.currentPage + 1));
+                    router.push(pathname + "?" + params.toString().replace(/\+/g, "%20"));
+                  }}
+                >
+                  ›
+                </Button>
+              </div>
+            </div>
+          )}
+
+      {/* ── Job Details Drawer (Bottom Sheet) ── */}
+      <Drawer
+        placement="bottom"
+        open={!!selectedId && !!selectedJob}
+        onClose={() => setSelectedId("")}
+        closable={false}
+        height="90vh"
+        styles={{ body: { padding: 0, backgroundColor: "#ffffff" } }}
+      >
+        <div className="relative pt-4 pb-4 h-full flex flex-col bg-[#ffffff]">
+          {/* Drag Handle */}
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[36px] h-[4px] rounded-full bg-[#cbd5e1] z-10"></div>
+          
+          <div className={styles.jobDetailsCon} style={{ paddingTop: '10px' }}>
 
           {isFetching && !selectedJob ? (
             <div style={{ padding: 16 }}><JobDetailsSkeleton /></div>
           ) : (
-            <div className={styles.detailsContentScroll}>
-              {/* Header section */}
-              <div className={styles.companyHeader}>
-                <div className={styles.logoWrapper}>
-                  <img
-                    src={selectedJob?.companyLogo}
-                    alt="Company logo"
-                    className={styles.logoImg}
-                  />
-                </div>
-                <div className={styles.headerInfoCon}>
-                  <h2 className={styles.headerTitle}>{selectedJob?.companyName} - {selectedJob?.jobTitle || selectedJob?.profileName}</h2>
-                  <div className={styles.headerSubtitle}>
-                    {selectedJob?.companyName} {selectedJob?.city && `· ${selectedJob.city}`}
-                  </div>
-                  <div className={styles.applyBtnRow}>
-                    {renderApplyButton()}
-                    <div className={styles.countdownWrapper}>
-                      <CountdownTimer jobEndDate={selectedJob?.endDate} onDeadlineOver={setIsDeadlineOver} />
-                    </div>
-                  </div>
-                </div>
+          <>
+            <div className="flex flex-col h-full bg-[#eff5fb] overflow-hidden">
+              <div className="px-4 pt-4 shrink-0">
+                <JobDetailsHeader
+                  job={selectedJob}
+                  student={student}
+                  isApplied={isJobApplied(selectedJob?._id)}
+                  onApply={handleApply}
+                  applyPending={isPending}
+                />
               </div>
-
-              {/* Stacked meta cards */}
-              <div className={styles.metaGrid}>
-                <div className={styles.metaItem}>
-                  <span className={styles.metaLabel}>Location</span>
-                  <span className={styles.metaValue}>{selectedJob?.city || "Not Specified"}</span>
-                </div>
-                <div className={styles.metaItem}>
-                  <span className={styles.metaLabel}>CTC</span>
-                  <span className={styles.metaValue}>{selectedJob?.ctc || "As per standards"}</span>
-                </div>
-                <div className={styles.metaItem}>
-                  <span className={styles.metaLabel}>Category</span>
-                  <span className={styles.metaValue}>{selectedJob?.sector || "Job"}</span>
-                </div>
-                <div className={styles.metaItem}>
-                  <span className={styles.metaLabel}>Function</span>
-                  <span className={styles.metaValue}>{selectedJob?.jobTitle || "Engineering"}</span>
-                </div>
-              </div>
-
-              {/* Tabs */}
-              <div className={styles.detailsTabsCon}>
-                <Tabs
-                  activeKey={activeTab}
-                  onChange={setActiveTab}
-                  items={[
-                    {
-                      key: "overview",
-                      label: "Overview",
-                      children: (
-                        <div
-                          className={styles.detailsSectionText}
-                          style={{ whiteSpace: "pre-wrap" }}
-                        >
-                          {selectedJob?.jobDescription || "No description provided."}
-                        </div>
-                      )
-                    },
-                    {
-                      key: "hiring",
-                      label: "Hiring Process",
-                      children: (
-                        <div
-                          className={styles.detailsSectionText}
-                          style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-                        >
-                          {selectedJob?.interviewRounds?.length ? (
-                            selectedJob.interviewRounds.map((round, index) => (
-                              <div key={index} style={{ padding: "12px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "#ffffff" }}>
-                                <p style={{ margin: 0, fontWeight: "600" }}>
-                                  {index + 1}. {round?.roundName}:{" "}
-                                  <span style={{ fontWeight: "normal" }}>{round?.description}</span>
-                                </p>
-                              </div>
-                            ))
-                          ) : (
-                            <p style={{ margin: 0, color: "#64748b" }}>No interview rounds specified.</p>
-                          )}
-                        </div>
-                      )
-                    },
-                    {
-                      key: "eligibility",
-                      label: "Eligibility",
-                      children: (
-                        <div
-                          className={styles.detailsSectionText}
-                          style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-                        >
-                          {selectedJob?.eligibilityCriteria?.length ? (
-                            selectedJob.eligibilityCriteria.map((item, index) => (
-                              <div key={index} style={{ padding: "12px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "#ffffff" }}>
-                                <p style={{ margin: "0 0 8px 0" }}>
-                                  <strong>Education Level:</strong> {item?.educationLevel || "N/A"}
-                                </p>
-                                <p style={{ margin: 0 }}>
-                                  <strong>Minimum Marks Percentage:</strong>{" "}
-                                  {item?.minMarksPercentage || "N/A"}%
-                                </p>
-                              </div>
-                            ))
-                          ) : (
-                            <p style={{ margin: 0, color: "#64748b" }}>No eligibility criteria specified.</p>
-                          )}
-                        </div>
-                      )
-                    }
-                  ]}
+              <div className="flex-1 overflow-hidden px-4 pb-4 mt-4">
+                <JobDetailsTabs
+                  job={selectedJob}
+                  selectedTab={activeTab}
+                  onTabChange={setActiveTab}
                 />
               </div>
             </div>
+          </>
           )}
         </div>
-      )}
+        </div>
+      </Drawer>
     </div>
   );
 }

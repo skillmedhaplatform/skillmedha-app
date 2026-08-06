@@ -13,7 +13,6 @@ import PracticeFilters from "@/modules/student/components/PracticeFilters";
 import PracticeSubjectRow from "@/modules/student/components/PracticeSubjectRow";
 import PracticeBannerTabs from "../components/PracticeBannerTabs";
 import { Divider, Result, Spin, Tooltip, message } from "antd";
-import useResponsive from "@/hooks/useResponsive";
 import styles from "@/mobile_views/practice/mobilePracticeLayout.module.scss";
 
 export default function NontechnicalPage() {
@@ -26,7 +25,6 @@ export default function NontechnicalPage() {
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeSort, setActiveSort] = useState("Default");
-  const isMobile = useResponsive();
 
   const categoryTabs = [
     { name: "Non-Technical", path: "/student/practice-new/nontechnical" },
@@ -57,41 +55,6 @@ export default function NontechnicalPage() {
     );
   }
 
-  if (isMobile) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.categoryTabs}>
-          {categoryTabs.map((tab) => {
-            const isActive = tab.path === "/student/practice-new/nontechnical";
-            return (
-              <button
-                key={tab.path}
-                onClick={() => router.push(tab.path)}
-                className={`${styles.tabBtn} ${isActive ? styles.activeTab : ""}`}
-              >
-                {tab.name}
-              </button>
-            );
-          })}
-        </div>
-        <div className={styles.contentArea}>
-          {subjects && subjects.length > 0 ? (
-            <div className="px-4 py-6">
-              {subjects.map((subject, index) => (
-                <PracticeSubjectRow key={subject._id || index} subject={subject} />
-              ))}
-            </div>
-          ) : (
-            <Result
-              status="404"
-              title="No Practice Data Found"
-              subTitle="Sorry, there is no practice data available right now."
-            />
-          )}
-        </div>
-      </div>
-    );
-  }
 
   const dynamicSubtitle = subjects?.map(s => s.title).join(" • ") || "Improve your aptitude, reasoning, and verbal abilities.";
   
@@ -100,7 +63,7 @@ export default function NontechnicalPage() {
   const totalQuestions = subjects?.reduce((acc, curr) => acc + (curr.totalQuestions || 0), 0) || 0;
 
   const RightStats = (
-    <div className="flex items-center gap-6 lg:gap-10 text-white mr-2 lg:mr-8">
+    <div className="hidden sm:flex items-center gap-6 lg:gap-10 text-white mr-2 lg:mr-8">
       <div className="flex flex-col items-center">
         <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalTopics}</span>
         <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">TOPICS</span>
@@ -138,8 +101,15 @@ export default function NontechnicalPage() {
       <div className="flex flex-col h-full overflow-hidden bg-[#EFF5FB]">
         <div className="flex-shrink-0 bg-[#EFF5FB] shadow-sm">
           <StudentPageHeader 
-            title="Practice" 
-            subtitleSlot={<PracticeBannerTabs />}
+            title={
+              <div className="flex items-center gap-3">
+                <span>Practice</span>
+                <div className="sm:hidden -mt-1">
+                  <PracticeBannerTabs />
+                </div>
+              </div>
+            }
+            subtitleSlot={<div className="hidden sm:block"><PracticeBannerTabs /></div>}
             rightSlot={RightStats}
           />
           

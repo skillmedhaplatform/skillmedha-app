@@ -276,7 +276,7 @@ const ResumeUpload = () => {
               className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${
                 dragOver
                   ? "border-[#1358b0] bg-[#dbeafe] shadow-md"
-                  : "border-[#1E69DA] bg-[#eff6ff] hover:bg-[#dbeafe]"
+                  : "border-[#1E69DA] bg-white hover:bg-[#eff6ff]"
               }`}
               onClick={() => fileInputRef.current?.click()}
               onDragOver={handleDragOver}
@@ -364,7 +364,7 @@ const ResumeUpload = () => {
               value={jobDescription}
               onChange={(e) => dispatch(setJobDescription(e.target.value))}
               maxLength={5000}
-              className="border border-[#e2e8f0] rounded-lg px-4 py-3 text-[13px] min-h-[100px] resize-y text-[#071631] placeholder:text-[#94a3b8] focus:outline-none focus:border-[#1E69DA] transition-colors"
+              className="bg-white border border-[#e2e8f0] rounded-lg px-4 py-3 text-[13px] min-h-[100px] resize-y text-[#071631] placeholder:text-[#94a3b8] focus:outline-none focus:border-[#1E69DA] transition-colors"
             />
             <span className="text-[11px] text-[#94a3b8]">
               {jobDescription.length}/5000 characters

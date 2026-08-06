@@ -22,6 +22,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { fetchPracQuestions, savePracResults } from "@/redux/slices/practiceSlice";
 import useResponsive from "@/hooks/useResponsive";
 import MobileQuestionPlayer from "@/mobile_views/practice/MobileQuestionPlayer";
+import DeviceBlocker from "@/modules/student/components/DeviceBlocker";
 
 const { TextArea } = Input;
 
@@ -852,8 +853,8 @@ export default function TestPage() {
     );
   }
   return (
-
-    <div className={pageStyles.main}>
+    <DeviceBlocker returnPath="back" returnText="Return to Practice">
+      <div className={pageStyles.main}>
       <div className={pageStyles.topbar}>
         <div className={pageStyles.topbarLeft}>
           <div className={pageStyles.topicTitle}>{testTitle || "Practice Test"}</div>
@@ -1147,6 +1148,6 @@ export default function TestPage() {
       </Modal>
 
     </div>
-
+    </DeviceBlocker>
   );
 }

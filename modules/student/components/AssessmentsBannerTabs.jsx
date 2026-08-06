@@ -13,7 +13,7 @@ export default function AssessmentsBannerTabs() {
   ];
 
   return (
-    <div className="flex gap-3 -mt-2">
+    <div className="flex flex-col md:flex-row gap-3 md:-mt-2">
       {categoryTabs.map((tab) => {
         // Strict match or startsWith depending on how nested they are, but these seem to be top level.
         const isActive = currPath === tab.path || currPath.startsWith(tab.path + "/");
@@ -21,7 +21,7 @@ export default function AssessmentsBannerTabs() {
           <button
             key={tab.path}
             onClick={() => router.push(tab.path)}
-            className={`px-5 py-1.5 rounded-lg text-[14px] font-medium transition-all duration-300 border cursor-pointer ${
+            className={`px-3 md:px-5 py-1.5 md:py-1.5 rounded-lg text-[12px] md:text-[14px] font-medium transition-all duration-300 border cursor-pointer whitespace-nowrap ${
               isActive
                 ? "bg-white/5 backdrop-blur-md border-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_4px_10px_rgba(0,0,0,0.1)] text-white"
                 : "bg-transparent text-white/90 border-white/40 hover:bg-white/10"

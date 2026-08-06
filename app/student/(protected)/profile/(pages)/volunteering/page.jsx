@@ -15,6 +15,8 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 
+import { getLstorage } from "@/universalUtils/windowMW";
+import { useMobileEditBlocker } from "../_utils/useMobileEditBlocker";
 import { updateStudent } from "@/redux/slices/student";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -36,6 +38,7 @@ export default function WorkAndVolunteeringPage() {
   const dispatch = useDispatch();
   const studentDetails = useSelector((state) => state.student.student?.data);
   const [volunteerings, setVolunteerings] = useState([]);
+  const { checkEditClick, MobileEditModal } = useMobileEditBlocker();
 
   // Load existing or default
   useEffect(() => {
@@ -64,8 +67,11 @@ export default function WorkAndVolunteeringPage() {
       return arr;
     });
 
-  const addVolunteering = () =>
-    setVolunteerings((prev) => [...prev, { ...initialVolunteering }]);
+  const addVolunteering = () => {
+    checkEditClick(() => {
+      setVolunteerings((prev) => [...prev, { ...initialVolunteering }]);
+    });
+  };
 
   const saveVolunteering = (idx) => {
     const item = volunteerings[idx];
@@ -148,7 +154,7 @@ export default function WorkAndVolunteeringPage() {
             <div className={formStyles.editButtonContainer} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               {!item.editing && (
                 <Button
-                  onClick={() => updateField(idx, "editing", true)}
+                  onClick={() => checkEditClick(() => updateField(idx, "editing", true))}
                   className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
                   style={{ fontWeight: "600", borderRadius: "8px" }}
                 >
@@ -320,7 +326,7 @@ export default function WorkAndVolunteeringPage() {
           + Add Volunteering
         </Button>
       </div>
+      {MobileEditModal}
     </div>
   );
 }
-

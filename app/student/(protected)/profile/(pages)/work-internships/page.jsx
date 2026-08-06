@@ -37,6 +37,7 @@ import { restUrl } from "@/config/urls";
 import { updateStudent } from "@/redux/slices/student";
 import { useDispatch, useSelector } from "react-redux";
 import { getLstorage } from "@/universalUtils/windowMW";
+import { useMobileEditBlocker } from "../_utils/useMobileEditBlocker";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
 
 
@@ -60,6 +61,7 @@ export default function WorkAndInternshipPage() {
   const studentDetails = useSelector((state) => state.student.student?.data);
   const [experiences, setExperiences] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
+  const { checkEditClick, MobileEditModal } = useMobileEditBlocker();
   const [loading, setLoading] = useState(false);
   const { Option } = Select;
 
@@ -191,15 +193,16 @@ export default function WorkAndInternshipPage() {
   };
 
   const addExperience = () => {
-    if (editingIndex !== null) {
-      message.warning(
-        "Please save or cancel the current editing experience first"
-      );
-      return;
-    }
-
-    setExperiences((prev) => [...prev, { ...initialExperience }]);
-    setEditingIndex(experiences.length);
+    checkEditClick(() => {
+      if (editingIndex !== null) {
+        message.warning(
+          "Please save or cancel the current editing experience first"
+        );
+        return;
+      }
+      setExperiences([...experiences, { ...initialExperience }]);
+      setEditingIndex(experiences.length);
+    });
   };
 
   const addCustomDoc = (idx) => {
@@ -296,11 +299,13 @@ export default function WorkAndInternshipPage() {
   };
 
   const startEditing = (idx) => {
-    if (editingIndex !== null) {
-      message.warning("Only one experience can be edited at a time");
-      return;
-    }
-    setEditingIndex(idx);
+    checkEditClick(() => {
+      if (editingIndex !== null) {
+        message.warning("Only one experience can be edited at a time");
+        return;
+      }
+      setEditingIndex(idx);
+    });
   };
 
   const removeCustomDoc = (idx, docIndex) => {
@@ -801,6 +806,7 @@ export default function WorkAndInternshipPage() {
           + Add Experience
         </Button>
       </div>
+      {MobileEditModal}
     </div>
   );
 }

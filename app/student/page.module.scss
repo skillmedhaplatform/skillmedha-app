@@ -1,8 +1,10 @@
 @use "../../utils/universalUtils/colors.module.scss" as *;
 @use "../../utils/universalUtils/mixins.scss" as *;
 .pageContainer {
-  width: 100vw;
-  height: 100vh;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
   display: flex;
   flex-direction: row;
   gap: 0;
@@ -24,6 +26,7 @@
     flex: 1;
     padding: 0;
     overflow-y: auto;
+    overscroll-behavior-y: none;
     border-radius: 0;
     border: none;
     

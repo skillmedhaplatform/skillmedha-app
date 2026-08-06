@@ -44,7 +44,7 @@ export default function StudentShell({ children }) {
       <CssBaseline />
       <div className={PageStyles.pageContainer} style={{ flexDirection: (mounted ? isMobileState : false) ? "column" : "row" }}>
         {(mounted ? isMobileState : false) ? <MobileSidebar /> : <SideBar />}
-        <div className={PageStyles.rightColumn} style={{ height: (mounted ? isMobileState : false) ? "calc(100vh - 64px)" : "100%" }}>
+        <div className={PageStyles.rightColumn} style={{ height: (mounted ? isMobileState : false) ? "calc(100dvh - 64px)" : "100%" }}>
           <Header isHeaderVisible={isHeaderVisible} />
           {currPath === "/AssessmentLibrary" && (
             <div className={PageStyles.header2}>

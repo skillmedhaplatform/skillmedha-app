@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { useDispatch, useSelector } from "react-redux";
 import { updateStudent } from "@/redux/slices/student";
+import { useMobileEditBlocker } from "../_utils/useMobileEditBlocker";
 import formStyles from "../../form.module.scss";
 import { Select, Button } from "antd";
 
@@ -47,6 +48,8 @@ export default function TagPanels() {
     subjects: 'subjectsVerificationType',
   };
 
+  const { checkEditClick, MobileEditModal } = useMobileEditBlocker();
+
   // Sync tags from store once when data arrives
   useEffect(() => {
     if (studentDetails) {
@@ -78,7 +81,11 @@ export default function TagPanels() {
     );
   };
 
-  const openModal = (section) => setModal({ open: true, section, value: "" });
+  const openModal = (section) => {
+    checkEditClick(() => {
+      setModal({ open: true, section, value: "" });
+    });
+  };
   const closeModal = () => setModal((m) => ({ ...m, open: false }));
 
   const addTag = () => {
@@ -99,15 +106,25 @@ export default function TagPanels() {
   };
 
   const removeTag = (section, tag) => {
-    const newTags = {
-      ...tags,
-      [section]: tags[section].filter((t) => t !== tag),
-    };
-    setTags(newTags);
-    saveTags(newTags);
+    checkEditClick(() => {
+      const newTags = {
+        ...tags,
+        [section]: tags[section].filter((t) => t !== tag),
+      };
+      setTags(newTags);
+      saveTags(newTags);
+    });
   };
 
   const titles = { technical: "Technical Skills", languages: "Languages", subjects: "Subjects" };
+
+  const handleLanguageChange = (value) => {
+    checkEditClick(() => {
+      const newTags = { ...tags, languages: value };
+      setTags(newTags);
+      saveTags(newTags);
+    });
+  };
 
   return (
     <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -167,11 +184,7 @@ export default function TagPanels() {
                       className={formStyles.selectField}
                       placeholder="Select languages"
                       value={tags.languages}
-                      onChange={(selected) => {
-                        const newTags = { ...tags, languages: selected };
-                        setTags(newTags);
-                        saveTags(newTags);
-                      }}
+                      onChange={handleLanguageChange}
                       options={allLangsArr.map((lang) => ({ label: lang, value: lang }))}
                     />
                   </div>
@@ -250,6 +263,7 @@ export default function TagPanels() {
           </div>
         </div>
       )}
+      {MobileEditModal}
     </div>
   );
 }

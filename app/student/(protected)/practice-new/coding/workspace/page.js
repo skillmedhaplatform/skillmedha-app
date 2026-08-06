@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { restUrl } from "@/config/urls";
 import { getLstorage } from "@/utils/universalUtils/windowMW";
 import { executeCode } from "@/utils/judge0";
+import DeviceBlocker from "@/modules/student/components/DeviceBlocker";
 import styles from "./page.module.scss";
 
 const wrapCodeForJudge = (lang, rawCode) => {
@@ -565,7 +566,8 @@ export default function Workspace() {
   );
 
   return (
-    <div className={styles.workspaceContainer}>
+    <DeviceBlocker returnPath="back" returnText="Return to Practice">
+      <div className={styles.workspaceContainer}>
       
       {/* Top Navbar */}
       <div className={styles.topNavbar}>
@@ -1050,7 +1052,7 @@ export default function Workspace() {
           </div>
         )}
       </div>
-
-    </div>
+      </div>
+    </DeviceBlocker>
   );
 }

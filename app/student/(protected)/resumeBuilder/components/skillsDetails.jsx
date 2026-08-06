@@ -85,7 +85,7 @@ const SkillsDetails = ({ skills, updateSkill, setSkills, onNext }) => {
           <h3 className="text-[18px] font-bold text-[#0f172a] m-0">Add Skill</h3>
         </div>
         
-        <div className="flex flex-col md:flex-row items-end gap-4">
+        <div className="flex flex-col xl:flex-row items-end gap-4">
           <div className="flex flex-col gap-1 flex-1">
             <label className="text-[13px] font-semibold text-[#475569]">Skill Name <span className="text-[#ef4444]">*</span></label>
             <Input
@@ -96,7 +96,7 @@ const SkillsDetails = ({ skills, updateSkill, setSkills, onNext }) => {
               className="h-11 rounded-lg border-[#e2e8f0]"
             />
           </div>
-          <div className="flex flex-col gap-1 w-full md:w-[200px]">
+          <div className="flex flex-col gap-1 w-full xl:w-[200px]">
             <label className="text-[13px] font-semibold text-[#475569]">Proficiency Level <span className="text-[#ef4444]">*</span></label>
             <Select
               placeholder="Select level"
@@ -106,7 +106,7 @@ const SkillsDetails = ({ skills, updateSkill, setSkills, onNext }) => {
               className="h-11 w-full"
             />
           </div>
-          <div className="flex gap-2 w-full md:w-auto">
+          <div className="flex gap-2 w-full xl:w-auto">
             <Button 
               className="h-11 px-5 border-[#e2e8f0] text-[#475569] font-semibold rounded-lg hover:!border-[#cbd5e1] hover:!text-[#0f172a]" 
               onClick={() => { setNewSkillName(""); setNewSkillLevel(null); setIsAdding(false); }}
@@ -153,7 +153,7 @@ const SkillsDetails = ({ skills, updateSkill, setSkills, onNext }) => {
                             className="bg-white rounded-lg border border-[#e2e8f0] p-3 flex items-center justify-between shadow-sm group hover:border-[#cbd5e1] transition-all"
                           >
                             {isEditing ? (
-                              <div className="flex flex-col md:flex-row items-center gap-3 w-full pl-8">
+                              <div className="flex flex-col xl:flex-row items-center gap-3 w-full pl-8">
                                 <Input
                                   value={editSkillName}
                                   onChange={(e) => setEditSkillName(e.target.value)}

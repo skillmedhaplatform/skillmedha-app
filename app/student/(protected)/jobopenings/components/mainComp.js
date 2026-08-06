@@ -168,7 +168,7 @@ export default function MainComp() {
     <div className="flex items-start h-full gap-4">
 
       {/* ════════ LEFT: Job List panel ════════ */}
-      <div className="w-[30%] min-w-[300px] h-full flex flex-col gap-4 overflow-hidden bg-white border border-[#e2e8f0] rounded-xl shadow-sm p-4">
+      <div className="w-[300px] md:w-[350px] lg:w-[30%] lg:min-w-[350px] shrink-0 h-full flex flex-col gap-4 overflow-hidden bg-white border border-[#e2e8f0] rounded-xl shadow-sm p-4">
 
         {/* List filter — antd Segmented (themed) */}
         <div className="mb-0">
@@ -348,7 +348,7 @@ export default function MainComp() {
       </div>
 
       {/* ════════ RIGHT: Job Details panel ════════ */}
-      <div className="w-[70%] p-6 h-full overflow-hidden bg-white border border-[#e2e8f0] rounded-xl shadow-sm flex flex-col">
+      <div className="flex-1 min-w-0 p-4 lg:p-6 h-full overflow-hidden bg-white border border-[#e2e8f0] rounded-xl shadow-sm flex flex-col">
         {isFetching && !selectedJob ? (
           <JobDetailsSkeleton />
         ) : (

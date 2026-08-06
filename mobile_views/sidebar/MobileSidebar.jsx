@@ -46,7 +46,7 @@ export default function MobileSidebar() {
           </div>
         </div>
 
-        {(pathname === "/student/dashboard" || pathname === "/student/talktoai") && (
+        {(pathname === "/student/dashboard" || pathname === "/student/talktoai" || pathname === "/student/resumeBuilder") && (
           <div className={styles.headerActions}>
             <button 
               className={styles.actionBtn} 

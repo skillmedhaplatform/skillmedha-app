@@ -26,6 +26,7 @@ import {
 // Use dayjs instead of moment for month-based dates
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { useMobileEditBlocker } from "../_utils/useMobileEditBlocker";
 dayjs.extend(customParseFormat);
 
 import { restUrl } from "@/config/urls";
@@ -53,6 +54,7 @@ export default function WorkAndResponsibilitiesPage() {
   const dispatch = useDispatch();
   const studentDetails = useSelector((state) => state.student.student?.data);
   const [responsibilities, setResponsibilities] = useState([]);
+  const { checkEditClick, MobileEditModal } = useMobileEditBlocker();
 
   // Initialize from studentDetails.responsibilities or default
   useEffect(() => {
@@ -137,8 +139,11 @@ export default function WorkAndResponsibilitiesPage() {
       return arr;
     });
 
-  const addResponsibility = () =>
-    setResponsibilities((prev) => [...prev, { ...initialResponsibility }]);
+  const addResponsibility = () => {
+    checkEditClick(() => {
+      setResponsibilities((prev) => [...prev, { ...initialResponsibility }]);
+    });
+  };
 
   const addCustomDoc = (idx) => {
     const title = prompt("Enter document title");
@@ -253,7 +258,7 @@ export default function WorkAndResponsibilitiesPage() {
             <div className={formStyles.editButtonContainer} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               {!item.editing && (
                 <Button
-                  onClick={() => updateField(idx, "editing", true)}
+                  onClick={() => checkEditClick(() => updateField(idx, "editing", true))}
                   className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
                   style={{ fontWeight: "600", borderRadius: "8px" }}
                 >
@@ -511,6 +516,7 @@ export default function WorkAndResponsibilitiesPage() {
           + Add Position
         </Button>
       </div>
+      {MobileEditModal}
     </div>
   );
 }

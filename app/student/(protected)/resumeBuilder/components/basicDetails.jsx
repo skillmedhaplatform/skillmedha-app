@@ -36,16 +36,16 @@ const BasicDetails = ({ data, updateField, activeTemplate }) => {
 
   return (
     <div className="w-full flex flex-col gap-8">
-      <div className={`grid gap-6 ${supportsImage ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'}`}>
+      <div className={`grid gap-6 ${supportsImage ? 'grid-cols-1 xl:grid-cols-3' : 'grid-cols-1'}`}>
         
         {/* Left Column: Personal Details */}
-        <div className={`flex flex-col gap-4 ${supportsImage ? 'md:col-span-2' : ''}`}>
+        <div className={`flex flex-col gap-4 ${supportsImage ? 'xl:col-span-2' : ''}`}>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1 h-5 bg-[#1E69DA] rounded-full"></div>
             <h3 className="text-[15px] font-semibold text-[#0f172a] m-0">Personal Details</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             <div className="flex flex-col">
               <label className="text-[13px] font-semibold mb-1.5 text-[#334155]">First Name <span className="text-red-500">*</span></label>
               <div className="relative">
@@ -121,7 +121,7 @@ const BasicDetails = ({ data, updateField, activeTemplate }) => {
               </div>
             </div>
 
-            <div className="flex flex-col md:col-span-2">
+            <div className="flex flex-col xl:col-span-2">
               <label className="text-[13px] font-semibold mb-1.5 text-[#334155]">Email <span className="text-red-500">*</span></label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -141,7 +141,7 @@ const BasicDetails = ({ data, updateField, activeTemplate }) => {
 
         {/* Right Column: Profile Photo */}
         {supportsImage && (
-          <div className="flex flex-col gap-2 md:border-l border-[#e2e8f0] md:pl-6">
+          <div className="flex flex-col gap-2 xl:border-l border-[#e2e8f0] xl:pl-6">
             <h3 className="text-[15px] font-semibold text-[#0f172a] m-0 mb-4">Profile Photo</h3>
             
             <div className="flex flex-col items-center justify-center bg-[#f8fafc] rounded-xl border border-dashed border-[#cbd5e1] p-6 relative">

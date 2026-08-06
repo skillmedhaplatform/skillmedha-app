@@ -318,7 +318,7 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
       <AnimatePresence mode="wait">
         <motion.div 
           key={currentPage}
-          className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -344,19 +344,6 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
         </motion.div>
       </AnimatePresence>
       
-      {/* Pagination on bottom for mobile */}
-      <div className="flex justify-end mt-6 lg:hidden">
-        {subtopics.length > pageSize && (
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={subtopics.length}
-            onChange={setCurrentPage}
-            size="small"
-            showSizeChanger={false}
-          />
-        )}
-      </div>
     </motion.div>
   );
 }

@@ -61,7 +61,7 @@ export default function CodingPracticeCard({
       {/* Sleek top accent line */}
       <div className="h-1 w-full bg-blue-500 absolute top-0 left-0 transition-transform origin-left transform scale-x-0 group-hover:scale-x-100" />
       
-      <div className="p-6 pb-4">
+      <div className="p-6 pb-4 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm border border-blue-100">
@@ -105,9 +105,9 @@ export default function CodingPracticeCard({
           </Tooltip>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-2">
-          <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col justify-center">
-             <div className="flex items-center gap-1.5 mb-1 text-slate-500">
+        <div className="grid grid-cols-2 gap-3 mb-2 h-full flex-1">
+          <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col justify-start h-full">
+             <div className="flex items-center gap-1.5 mb-2 text-slate-500">
                 <Target size={14} className="text-slate-400" />
                 <span className="text-[11px] font-bold uppercase tracking-wider">Up Next</span>
              </div>
@@ -119,8 +119,8 @@ export default function CodingPracticeCard({
                Solve Now <ArrowRight size={12} />
              </button>
           </div>
-          <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col justify-center relative">
-             <div className="flex items-center justify-between mb-1 text-slate-500">
+          <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col justify-start h-full relative">
+             <div className="flex items-center justify-between mb-2 text-slate-500">
                 <div className="flex items-center gap-1.5">
                   <Trophy size={14} className="text-slate-400" />
                   <span className="text-[11px] font-bold uppercase tracking-wider">Current Badge</span>
