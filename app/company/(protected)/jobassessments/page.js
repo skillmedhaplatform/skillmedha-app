@@ -154,6 +154,24 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
   );
 };
 
+const isJobExpired = (job) => {
+  const expiryDate =
+    job?.time?.expiryDates?.accessClosingDate ||
+    job?.time?.expiryDates?.testExpirationData ||
+    job?.expiryDate ||
+    job?.endDate;
+
+  const hasExpiry =
+    job?.time?.expiryDates?.expiry || job?.hasExpiry || expiryDate;
+
+  if (hasExpiry && expiryDate) {
+    const targetDate = new Date(expiryDate);
+    const today = new Date();
+    return targetDate - today <= 0;
+  }
+  return false;
+};
+
 export default function JobAssessments() {
   // ===== STATE MANAGEMENT =====
   const [pageNo, setPageNo] = useState(ASSESSMENT_CONFIG.DEFAULT_PAGE_NO);
@@ -254,23 +272,23 @@ export default function JobAssessments() {
 
   // ===== CLIENT-SIDE FILTERING & PAGINATION =====
   const filteredJobs = React.useMemo(() => {
-    return jobData.map((job, idx) => ({ job, originalIdx: idx })).filter(({ originalIdx }) => {
-      const status = countdowns[originalIdx];
+    return jobData.map((job, idx) => ({ job, originalIdx: idx })).filter(({ job }) => {
+      const expired = isJobExpired(job);
       if (filterType === "Active") {
-        return status && status !== "Expired";
+        return !expired;
       } else if (filterType === "Expired") {
-        return status === "Expired";
+        return expired;
       }
       return true;
     });
   }, [jobData, countdowns, filterType]);
 
   const activeCount = React.useMemo(() => {
-    return jobData.filter((_, idx) => countdowns[idx] && countdowns[idx] !== "Expired").length;
+    return jobData.filter((job) => !isJobExpired(job)).length;
   }, [jobData, countdowns]);
 
   const expiredCount = React.useMemo(() => {
-    return jobData.filter((_, idx) => countdowns[idx] === "Expired").length;
+    return jobData.filter((job) => isJobExpired(job)).length;
   }, [jobData, countdowns]);
 
   const allCount = jobData.length;
@@ -301,9 +319,48 @@ export default function JobAssessments() {
   };
 
   // ===== RENDER FUNCTIONS =====
+  const bannerStats = (
+    <div style={{ display: "flex", alignItems: "center", gap: "2rem", paddingRight: "1rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <span style={{ fontSize: "28px", fontWeight: "800", lineHeight: "1", color: "#ffffff" }}>
+          {allCount}
+        </span>
+        <span style={{ fontSize: "13px", color: "rgba(255, 255, 255, 0.7)", fontWeight: "600", marginTop: "4px" }}>
+          Total
+        </span>
+      </div>
+
+      <div style={{ width: "1px", height: "36px", backgroundColor: "rgba(255, 255, 255, 0.2)" }} />
+
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <span style={{ fontSize: "28px", fontWeight: "800", lineHeight: "1", color: "#ffffff" }}>
+          {activeCount}
+        </span>
+        <span style={{ fontSize: "13px", color: "rgba(255, 255, 255, 0.7)", fontWeight: "600", marginTop: "4px" }}>
+          Active
+        </span>
+      </div>
+
+      <div style={{ width: "1px", height: "36px", backgroundColor: "rgba(255, 255, 255, 0.2)" }} />
+
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <span style={{ fontSize: "28px", fontWeight: "800", lineHeight: "1", color: "#ffffff" }}>
+          {expiredCount}
+        </span>
+        <span style={{ fontSize: "13px", color: "rgba(255, 255, 255, 0.7)", fontWeight: "600", marginTop: "4px" }}>
+          Expired
+        </span>
+      </div>
+    </div>
+  );
+
   const renderHeader = () => (
     <div style={{ padding: "0 0 1rem 0" }}>
-      <PageHeader title="Job Assessments" subtitle="Manage created assessments and view insights" />
+      <PageHeader
+        title="Job Assessments"
+        subtitle="Manage created assessments and view insights"
+        rightSlot={bannerStats}
+      />
       <div style={{ padding: "1.5rem 1.5rem 0", display: "flex", justifyContent: "flex-end" }}>
         <Input
           prefix={<SearchOutlined />}

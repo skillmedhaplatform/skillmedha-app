@@ -984,78 +984,142 @@ $white: #ffffff;
 
           /* Notes section */
           .notesContainer {
-            max-width: 800px;
+            max-width: 900px;
+            padding: 0.5rem 0;
 
-            .notesDisplayWrapper,
-            .notesEditWrapper {
-              padding: 0;
-              background-color: transparent;
-              border: none;
+            .notesWrapper {
+              display: flex;
+              flex-direction: column;
+              gap: 1.25rem;
+            }
+
+            .noteComposerTrigger {
+              border: 1px solid #cbd5e1;
+              border-radius: 10px;
+              padding: 14px 20px;
+              cursor: pointer;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              color: #334155;
+              background-color: #f8fafc;
+              transition: all 0.2s ease;
+
+              &:hover {
+                border-color: $primaryColor;
+                background-color: #f0f7ff;
+                color: $primaryColor;
+              }
+
+              .noteComposerTriggerLabel {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #475569;
+
+                strong {
+                  color: #0f172a;
+                  font-weight: 700;
+                }
+              }
+            }
+
+            .notesList {
+              display: flex;
+              flex-direction: column;
+              gap: 1rem;
+            }
+
+            .notesEmptyState {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 12px;
+              padding: 3rem 2rem;
+              background-color: #f8fafc;
+              border: 1.5px dashed #cbd5e1;
+              border-radius: 12px;
+              text-align: center;
+              color: #64748b;
+              font-size: 14px;
+              font-weight: 500;
+              margin-top: 0.5rem;
+
+              span {
+                max-width: 400px;
+                line-height: 1.6;
+              }
+            }
+
+            .noteCard {
+              background: #ffffff;
+              border: 1px solid #e2e8f0;
+              border-radius: 10px;
+              padding: 16px 20px;
+              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+              transition: all 0.2s ease;
+
+              &:hover {
+                border-color: #cbd5e1;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+              }
             }
 
             .notesHeader {
               display: flex;
               justify-content: space-between;
               align-items: center;
-              padding: 0.5rem 0;
-              margin-bottom: 0.5rem;
+              padding-bottom: 10px;
+              margin-bottom: 10px;
+              border-bottom: 1px solid #f1f5f9;
 
               .notesHeaderTitle {
-                font-size: 18px;
-                color: #1c1d1f;
+                font-size: 14px;
+                color: #1e293b;
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 10px;
 
                 strong {
                   font-weight: 700;
-                  color: #1c1d1f;
+                  color: #0f172a;
                 }
 
                 .notesHeaderTopicName {
-                  color: #6a6f73;
-                  font-weight: 400;
+                  color: #64748b;
+                  font-size: 13px;
                 }
               }
 
               .notesHeaderIcons {
                 display: flex;
                 gap: 4px;
-
-                button {
-                  color: #1c1d1f;
-
-                  &:hover {
-                    color: $primaryColor;
-                    background-color: transparent;
-                  }
-                }
               }
             }
 
+            .noteTimestampPill {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background-color: $primaryColor;
+              color: #ffffff;
+              padding: 4px 12px;
+              border-radius: 14px;
+              font-size: 12px;
+              font-weight: 600;
+              white-space: nowrap;
+            }
+
             .notesDisplayMode {
-              padding: 1.5rem;
-              background-color: #f7f9fa;
-              font-size: 16px;
+              padding: 12px 16px;
+              background-color: #f8fafc;
+              border-radius: 8px;
+              font-size: 14px;
               line-height: 1.6;
-              color: #1c1d1f;
-
-              :global(p) {
-                margin-bottom: 1em;
-              }
-
-              :global(ul),
-              :global(ol) {
-                margin-bottom: 1em;
-                padding-left: 2rem;
-              }
-
-              :global(pre),
-              :global(code) {
-                background-color: #f0f0f0;
-                padding: 0.2rem 0.4rem;
-                border-radius: 4px;
-              }
+              color: #334155;
             }
 
             .notesEditWrapper {
@@ -1067,91 +1131,10 @@ $white: #ffffff;
             }
 
             .notesActions {
-              margin-top: 1.5rem;
+              margin-top: 1rem;
               display: flex;
               justify-content: flex-end;
-              gap: 1rem;
-
-              :global(.ant-btn) {
-                border-radius: 6px;
-                height: 48px;
-                padding: 0 24px;
-                font-weight: 600;
-                transition: all 0.3s;
-              }
-
-              :global(.ant-btn-primary) {
-                background: $primaryColor !important;
-                border-color: $primaryColor !important;
-                color: #fff !important;
-
-                &:hover,
-                &:focus {
-                  background: lighten($primaryColor, 8%) !important;
-                  border-color: lighten($primaryColor, 8%) !important;
-                }
-              }
-            }
-
-            .notesWrapper {
-              display: flex;
-              flex-direction: column;
-              gap: 2rem;
-            }
-
-            .notesTriggerBar {
-              border: 1px solid #d9dce7;
-              border-radius: 6px;
-              padding: 12px 15px;
-              cursor: text;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              color: #6a6f73;
-              background-color: #ffffff;
-              transition: border-color 0.2s;
-
-              &:hover {
-                border-color: $primaryColor;
-                color: $primaryColor;
-              }
-            }
-
-            .notesCreateHeader {
-              margin-bottom: 1rem;
-              font-weight: 600;
-              font-size: 15px;
-              color: #1c1d1f;
-            }
-
-            .notesEditWrapperSpaced {
-              margin-bottom: 2rem;
-            }
-
-            .notesList {
-              display: flex;
-              flex-direction: column;
-              gap: 2rem;
-            }
-
-            .noteTimestampPill {
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              background-color: $primaryColor;
-              color: #fff;
-              padding: 4px 12px;
-              border-radius: 16px;
-              font-size: 13px;
-              font-weight: 600;
-              white-space: nowrap;
-            }
-
-            .notesEmpty {
-              text-align: center;
-              color: #8c8c8c;
-              padding: 2rem 0;
-              font-size: 14px;
+              gap: 0.75rem;
             }
           }
 
