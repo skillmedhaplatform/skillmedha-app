@@ -16,7 +16,7 @@ import { Button, message, Modal, notification, Spin, Pagination } from "antd";
 import { getLstorage, getSstorage } from "@/universalUtils/windowMW";
 import { formVals } from "@/redux/slices/assessmentsSlice/userForm";
 import CardSkeleton from "./reusable_comp/cardSkeleton";
-import { getStudent } from "@/redux/slices/student";
+import { getStudent, getStudentCreds } from "@/redux/slices/student";
 
 const PAGE_LIMIT = 10;
 
@@ -59,6 +59,7 @@ export default function Tests() {
   useEffect(() => {
     if (!studentCreds?._id) return;
     setLoading(true);
+    dispatch(getStudentCreds());
     dispatch(fetchAllTests({ limit: limitFromUrl })).finally(() => {
       setLoading(false);
     });
@@ -80,12 +81,19 @@ export default function Tests() {
       ({ payload }) => {
         const SingleTest = payload.test;
         const studentAttemptedLength = studentCreds?.progress?.filter(
-          (progress) => progress?.testId == SingleTest?._id,
+          (progress) => progress?.testId == SingleTest?._id && (progress?.attemptGeneration || 0) === (SingleTest?.attemptGeneration || 0),
         )?.length;
 
         const totalAttemps = SingleTest?.access?.attemptsPerRespondent;
+        const maxAttemptsNum = Number(totalAttemps);
+        const isUnlimited =
+          totalAttemps === undefined ||
+          totalAttemps === null ||
+          totalAttemps === "" ||
+          maxAttemptsNum === -1 ||
+          totalAttemps === "unlimited";
 
-        if (studentAttemptedLength > totalAttemps) {
+        if (!isUnlimited && studentAttemptedLength >= maxAttemptsNum) {
           message.error(<strong>Maximum attempts already reached</strong>);
         } else {
           if (SingleTest?.access?.type == "private") {
@@ -190,54 +198,59 @@ export default function Tests() {
   const resultsCount = allTests?.filter(t => attemptedTestIds.includes(t?._id)).length || 0;
 
   const bannerStats = (
-    <div className="flex items-center gap-8 pr-4">
-      <div className="flex flex-col items-center">
-        <span className="text-[32px] font-extrabold leading-none text-white">{allTests?.length || 0}</span>
-        <span className="text-[14px] text-white/70 font-semibold tracking-wide">Total tests</span>
+    <div className="flex items-center gap-4 lg:gap-8 pr-2 lg:pr-4">
+      <div className="hidden md:flex items-center gap-8">
+        <div className="flex flex-col items-center">
+          <span className="text-[32px] font-extrabold leading-none text-white">{allTests?.length || 0}</span>
+          <span className="text-[14px] text-white/70 font-semibold tracking-wide">Total tests</span>
+        </div>
+
+        {(activeTab === "all" || activeTab === "active") && (
+          <>
+            <div className="w-[1px] h-12 bg-white/20"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[32px] font-extrabold leading-none text-white">{activeCount}</span>
+              <span className="text-[14px] text-white/70 font-semibold tracking-wide">Active</span>
+            </div>
+          </>
+        )}
+
+        {(activeTab === "all" || activeTab === "expired") && (
+          <>
+            <div className="w-[1px] h-12 bg-white/20"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[32px] font-extrabold leading-none text-white">{expiredCount}</span>
+              <span className="text-[14px] text-white/70 font-semibold tracking-wide">Expired</span>
+            </div>
+          </>
+        )}
+
+        {activeTab === "results" && (
+          <>
+            <div className="w-[1px] h-12 bg-white/20"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[32px] font-extrabold leading-none text-white">{resultsCount}</span>
+              <span className="text-[14px] text-white/70 font-semibold tracking-wide">Attempted</span>
+            </div>
+          </>
+        )}
       </div>
-
-      {(activeTab === "all" || activeTab === "active") && (
-        <>
-          <div className="w-[1px] h-12 bg-white/20"></div>
-          <div className="flex flex-col items-center">
-            <span className="text-[32px] font-extrabold leading-none text-white">{activeCount}</span>
-            <span className="text-[14px] text-white/70 font-semibold tracking-wide">Active</span>
-          </div>
-        </>
-      )}
-
-      {(activeTab === "all" || activeTab === "expired") && (
-        <>
-          <div className="w-[1px] h-12 bg-white/20"></div>
-          <div className="flex flex-col items-center">
-            <span className="text-[32px] font-extrabold leading-none text-white">{expiredCount}</span>
-            <span className="text-[14px] text-white/70 font-semibold tracking-wide">Expired</span>
-          </div>
-        </>
-      )}
-
-      {activeTab === "results" && (
-        <>
-          <div className="w-[1px] h-12 bg-white/20"></div>
-          <div className="flex flex-col items-center">
-            <span className="text-[32px] font-extrabold leading-none text-white">{resultsCount}</span>
-            <span className="text-[14px] text-white/70 font-semibold tracking-wide">Attempted</span>
-          </div>
-        </>
-      )}
+      <div className="flex md:hidden">
+        <AssessmentsBannerTabs />
+      </div>
     </div>
   );
 
   return (
-    <div className="relative flex flex-col bg-[#EFF5FB] h-screen overflow-hidden">
-      <StudentPageHeader title="Tests" subtitleSlot={<AssessmentsBannerTabs />} rightSlot={bannerStats} />
+    <div className="absolute inset-0 flex flex-col bg-[#EFF5FB] overflow-hidden overscroll-none">
+      <StudentPageHeader title="Tests" subtitleSlot={<div className="hidden md:block"><AssessmentsBannerTabs /></div>} rightSlot={bannerStats} />
 
       {/* Tabs Section */}
-      <div className="w-full bg-white flex items-center border-b border-gray-200 sticky top-0 z-[1]">
-        <div className="flex gap-8 px-6 pt-4">
+      <div className="w-full bg-white flex items-center border-b border-gray-200 sticky top-0 z-[1] overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-6 md:gap-8 px-4 md:px-6 pt-4 min-w-max">
           <button
             onClick={() => setActiveTab("all")}
-            className={`pb-4 text-[16px] font-bold transition-all border-b-[3px] ${
+            className={`pb-4 text-[15px] md:text-[16px] font-bold transition-all border-b-[3px] whitespace-nowrap ${
               activeTab === "all" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
             }`}
           >
@@ -245,7 +258,7 @@ export default function Tests() {
           </button>
           <button
             onClick={() => setActiveTab("active")}
-            className={`pb-4 text-[16px] font-bold transition-all border-b-[3px] ${
+            className={`pb-4 text-[15px] md:text-[16px] font-bold transition-all border-b-[3px] whitespace-nowrap ${
               activeTab === "active" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
             }`}
           >
@@ -253,7 +266,7 @@ export default function Tests() {
           </button>
           <button
             onClick={() => setActiveTab("expired")}
-            className={`pb-4 text-[16px] font-bold transition-all border-b-[3px] ${
+            className={`pb-4 text-[15px] md:text-[16px] font-bold transition-all border-b-[3px] whitespace-nowrap ${
               activeTab === "expired" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
             }`}
           >
@@ -261,7 +274,7 @@ export default function Tests() {
           </button>
           <button
             onClick={() => setActiveTab("results")}
-            className={`pb-4 text-[16px] font-bold transition-all border-b-[3px] ${
+            className={`pb-4 text-[15px] md:text-[16px] font-bold transition-all border-b-[3px] whitespace-nowrap ${
               activeTab === "results" ? "border-[#1E69DA] text-[#1E69DA]" : "border-transparent text-gray-500 hover:text-gray-800"
             }`}
           >
@@ -270,7 +283,7 @@ export default function Tests() {
         </div>
       </div>
 
-      <section className="w-full flex-1 overflow-y-auto px-4 mt-8 pb-12 [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#e2e8f0] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent">
+      <section className="w-full flex-1 overflow-y-auto overscroll-y-none px-4 mt-8 pb-2 [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#e2e8f0] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-hidden">
           {loading ? (
             <>
@@ -341,7 +354,7 @@ export default function Tests() {
 
         {/* End of list message */}
         {!loading && filteredTests?.length > 0 && !pageinfo?.hasNextPage && (
-          <div style={{ textAlign: "center", padding: "20px 0", color: "#aaa", fontSize: "13px" }}>
+          <div style={{ textAlign: "center", paddingTop: "20px", paddingBottom: "10px", color: "#aaa", fontSize: "13px" }}>
             You&apos;ve seen all {filteredTests.length} test{filteredTests.length !== 1 ? "s" : ""}
           </div>
         )}

@@ -166,7 +166,7 @@ const CodingQuestion = ({ onSubmit }) => {
     setIsSubmitted(false);
   };
 
-  const runTestCases = async () => {
+  async function runTestCases() {
     if (!questionData.testCases || questionData.testCases.length === 0) return;
 
     setIsLoading(true);

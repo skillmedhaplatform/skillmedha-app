@@ -6,6 +6,7 @@ import styles from "./mobileSidebar.module.scss";
 import { RxHamburgerMenu } from "react-icons/rx";
 import MobileSidebarDrawer from "./MobileSidebarDrawer";
 import useSpecialOrg from "@/helpers/useSpecialOrg";
+import { FiBell, FiAward } from "react-icons/fi";
 
 export default function MobileSidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,6 +45,35 @@ export default function MobileSidebar() {
             SKILL<span>MEDHA</span>
           </div>
         </div>
+
+        {(pathname === "/student/dashboard" || pathname === "/student/talktoai" || pathname === "/student/resumeBuilder") && (
+          <div className={styles.headerActions}>
+            <button 
+              className={styles.actionBtn} 
+              onClick={() => {
+                if (pathname === "/student/dashboard") {
+                  window.dispatchEvent(new CustomEvent('open-achievements'));
+                } else {
+                  nav.push('/student/dashboard#openBadges_Technical');
+                }
+              }}
+            >
+              <FiAward />
+            </button>
+            <button 
+              className={styles.actionBtn} 
+              onClick={() => {
+                if (pathname === "/student/dashboard") {
+                  window.dispatchEvent(new CustomEvent('open-notices'));
+                } else {
+                  nav.push('/student/dashboard#openNotices');
+                }
+              }}
+            >
+              <FiBell />
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Slide-out Drawer */}

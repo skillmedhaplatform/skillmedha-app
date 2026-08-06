@@ -94,7 +94,7 @@ const CertificateDetails = ({
         /* Form View */
         <div className="w-full max-w-3xl mx-auto">
           <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-6 border-b border-[#f1f5f9]">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 pb-6 border-b border-[#f1f5f9]">
               <div className="flex flex-col">
                 <div className="flex items-center gap-3 mb-1">
                   <ArrowLeftOutlined 
@@ -113,7 +113,7 @@ const CertificateDetails = ({
             
             <div className="flex flex-col gap-6 mt-4">
               <div className="flex flex-col gap-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1">
                     <label className="text-[13px] font-semibold text-[#475569]">Certificate Name <span className="text-[#ef4444]">*</span></label>
                     <Input
@@ -134,7 +134,7 @@ const CertificateDetails = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
                   <div className="flex flex-col gap-1">
                     <label className="text-[13px] font-semibold text-[#475569]">Issue Date <span className="text-[#ef4444]">*</span></label>
                     <DatePicker

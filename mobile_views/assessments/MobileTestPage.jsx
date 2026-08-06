@@ -79,7 +79,7 @@ export default function MobileTestPage({
               onChange={() => setCheckBox(!checkbox)}
               className={styles.consentCheckbox}
             />
-            <span
+            <div
               dangerouslySetInnerHTML={{
                 __html:
                   typeof testData.startPage.consetForm === "string"

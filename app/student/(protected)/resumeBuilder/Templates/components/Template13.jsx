@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { MailOutlined, PhoneFilled, EnvironmentOutlined } from "@ant-design/icons";
@@ -123,7 +123,7 @@ const Template19 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {workExperience.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.95rem] font-bold text-[#500724]">{item?.role}, {item?.company}</h3>
                     <p className="m-0 text-[0.8rem] font-semibold text-[#db2777] whitespace-nowrap">
                       {item?.start || item?.startDate} – {item?.end || item?.endDate || "Present"}
@@ -144,7 +144,7 @@ const Template19 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {internshipDetails.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.95rem] font-bold text-[#500724]">{item?.role}, {item?.company}</h3>
                     <p className="m-0 text-[0.8rem] font-semibold text-[#db2777] whitespace-nowrap">
                       {item?.start || item?.startDate} – {item?.end || item?.endDate || "Present"}

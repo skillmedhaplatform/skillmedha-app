@@ -297,17 +297,7 @@ export default function AllCandidates() {
       </div>
 
       <div className={styles.cardContainer}>
-        {/* Results count */}
-        <div
-          style={{
-            marginBottom: "1rem",
-            color: "#666",
-            fontSize: "0.875rem",
-          }}
-        >
-          Showing {allStudents.length} of {totalCount} candidates
-          {loading && " (Loading...)"}
-        </div>
+
 
         {/* Student Cards */}
         {allStudents?.map((student, index) => {

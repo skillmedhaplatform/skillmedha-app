@@ -8,7 +8,6 @@ import {
   Select,
   Collapse,
   Empty,
-  Pagination,
   Spin,
   message,
 } from "antd";
@@ -38,7 +37,7 @@ export default function SkillLibraryModal({
   // Modal state management
   const [modalSelectedQuestions, setModalSelectedQuestions] = useState([]);
   const [modalCurrentPage, setModalCurrentPage] = useState(1);
-  const [modalPageSize, setModalPageSize] = useState(10);
+  const [modalPageSize, setModalPageSize] = useState(1000);
   const [modalFilters, setModalFilters] = useState({
     difficulty: null,
     tags: [],
@@ -403,29 +402,7 @@ export default function SkillLibraryModal({
             alignItems: "center",
           }}
         >
-          {/* Pagination in footer */}
-          <div>
-            {modalPagination &&
-              (modalPagination?.totalQuestions || 0) > modalPageSize && (
-                <Pagination
-                  current={modalCurrentPage}
-                  total={modalPagination?.totalQuestions || 0}
-                  pageSize={modalPageSize}
-                  onChange={handlePageChange}
-                  onShowSizeChange={(current, size) =>
-                    handlePageChange(current, size)
-                  }
-                  showTotal={(total, range) =>
-                    `${range?.[0] || 0}-${range?.[1] || 0} of ${
-                      total || 0
-                    } questions`
-                  }
-                  pageSizeOptions={["5", "10", "20", "50"]}
-                  showSizeChanger
-                  size="small"
-                />
-              )}
-          </div>
+          <div />
 
           <div style={{ fontSize: "16px", color: "#6BA8ED" }}>
             Total Selected: {modalSelectedQuestions?.length || 0}

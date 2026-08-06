@@ -38,6 +38,7 @@ const Accesspage = () => {
   const [honestRespondentvalue, sethonestRespondentvalue] = useState("Disable");
   const [Snapshotvalue, setSnapshotvalue] = useState("Disable");
   const [FaceRecValue, setFaceRecValue] = useState("Disable");
+  const [attemptsPerRespondent, setAttemptsPerRespondent] = useState(2);
 
   const emailColumns = [
     {
@@ -162,12 +163,20 @@ const Accesspage = () => {
   };
 
   const handleUpdate = () => {
+    let finalAttempts = Number(attemptsPerRespondent);
+    if (isNaN(finalAttempts) || finalAttempts === 0 || finalAttempts < -1) {
+      finalAttempts = -1;
+    } else if (finalAttempts > 100) {
+      finalAttempts = 100;
+    }
+
     const cleanBatches = (selectedBatches || []).map((y) => String(y).trim()).filter(Boolean);
     const cleanDepts = (selectedDepartments || []).map((d) => String(d).trim()).filter(Boolean);
 
     let payload = {
       access: {
         type: accessType,
+        attemptsPerRespondent: finalAttempts,
       },
     };
 
@@ -204,6 +213,23 @@ const Accesspage = () => {
     });
   };
 
+  const handleReopenTest = () => {
+    if (window.confirm("Are you sure you want to reopen this test for all students? They will be able to take it again.")) {
+      // TODO: Future improvement: Update backend to use MongoDB `$inc: { attemptGeneration: 1 }` 
+      // instead of client-side increment to prevent race conditions.
+      dispatch(
+        updateTest({ 
+          id: selectedId, 
+          updates: { attemptGeneration: (SingleTest.attemptGeneration || 0) + 1 } 
+        })
+      ).then((res) => {
+        if (res?.payload) {
+          message.success("Test reopened successfully");
+        }
+      });
+    }
+  };
+
   useEffect(() => {
     if (SingleTest && SingleTest.access) {
       const access = SingleTest.access;
@@ -226,6 +252,12 @@ const Accesspage = () => {
         setSelectedRowKeys(access.students);
       } else if (typeof access.students === "string" && access.students) {
         setSelectedRowKeys([access.students]);
+      }
+
+      if (access.attemptsPerRespondent !== undefined && access.attemptsPerRespondent !== null && access.attemptsPerRespondent !== "") {
+        setAttemptsPerRespondent(access.attemptsPerRespondent);
+      } else {
+        setAttemptsPerRespondent(2);
       }
     }
   }, [SingleTest?.access]);
@@ -423,6 +455,60 @@ const Accesspage = () => {
           </div>
         </div>
 
+        {/* Card 1.5: Attempt Restrictions */}
+        <div className={AccessStyles.cardSection}>
+          <div className={AccessStyles.sectionHeader}>
+            <div className={AccessStyles.headerLeft}>
+              <InfoCircleOutlined className={AccessStyles.sectionIcon} />
+              <h3>Attempt Restrictions</h3>
+            </div>
+          </div>
+          <p className={AccessStyles.description}>
+            Configure the maximum number of attempts each student is allowed for this test.
+          </p>
+
+          <div className={AccessStyles.infoContainer} style={{ marginTop: "1rem" }}>
+            <div className={AccessStyles.subInfoBlock}>
+              <div className={AccessStyles.exitsSelectContainer}>
+                <div className={AccessStyles.exitsLeft}>
+                  <h4>Maximum Attempts Allowed</h4>
+                  <span>
+                    <InfoCircleOutlined /> Enter an integer between 1 and 100 for normal attempts, or -1 for unlimited attempts.
+                  </span>
+                </div>
+                <input
+                  type="number"
+                  min={-1}
+                  max={100}
+                  step={1}
+                  value={attemptsPerRespondent === "" ? "" : attemptsPerRespondent}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") {
+                      setAttemptsPerRespondent("");
+                      return;
+                    }
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) {
+                      setAttemptsPerRespondent(num);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (attemptsPerRespondent === "" || isNaN(attemptsPerRespondent)) {
+                      setAttemptsPerRespondent(2);
+                    } else if (attemptsPerRespondent === 0 || attemptsPerRespondent < -1) {
+                      setAttemptsPerRespondent(-1);
+                    } else if (attemptsPerRespondent > 100) {
+                      setAttemptsPerRespondent(100);
+                    }
+                  }}
+                  placeholder="e.g. 2"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Card 2: Honest Respondent Technology */}
         <div className={AccessStyles.cardSection}>
           <div className={AccessStyles.sectionHeader}>
@@ -595,6 +681,16 @@ const Accesspage = () => {
           <button className={AccessStyles.saveBtn} onClick={handleUpdate}>
             Update
           </button>
+          {SingleTest?._id && (
+            <button
+              type="button"
+              className={AccessStyles.saveBtn}
+              style={{ backgroundColor: '#FACE53', color: '#000', marginLeft: '10px' }}
+              onClick={handleReopenTest}
+            >
+              Reopen Test
+            </button>
+          )}
           <button 
             className={AccessStyles.discardBtn} 
             onClick={() => router.push("/testportal_admin/myTests")}

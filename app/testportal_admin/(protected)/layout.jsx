@@ -35,7 +35,7 @@ const GroupLayout = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (!token) nav.replace("/testportal_admin/login");
+    if (!token) nav.replace("/login?portal=tpo");
     if (currPath === "/testportal_admin" || currPath === "/testportal_admin/") {
       nav.replace("/testportal_admin/myTests");
     }

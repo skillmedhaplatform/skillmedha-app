@@ -395,11 +395,10 @@ export default function StudentResult({ params }) {
           useCORS: true,
           letterRendering: true,
           scrollY: 0,
-          windowWidth: element.scrollWidth,
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: {
-          mode: ["avoid-all", "css", "legacy"],
+          mode: ["css"],
           before: ".page-break-before",
           after: ".page-break-after",
           avoid: ".no-page-break",
@@ -653,6 +652,8 @@ export default function StudentResult({ params }) {
                               series={chartData?.series}
                               labels={chartData?.labels}
                               colors={chartData?.colors}
+                              width={140}
+                              height={140}
                             />
                           ) : (
                             <Skeleton.Avatar active shape="circle" size={120} />
@@ -1539,9 +1540,9 @@ export default function StudentResult({ params }) {
       // html2pdf locks its capture container to the PDF page's printable width
       // (A4 width minus left/right margin, in mm). html2canvas evaluates CSS
       // media queries against `windowWidth`, which defaults to the live
-      // browser window's width (or, previously, a hardcoded 1000) — not this
-      // narrow printable width — so responsive breakpoints (antd Row/Col)
-      // picked the wrong layout unless this is matched explicitly.
+      // browser window's width — not this narrow printable width — so
+      // responsive breakpoints (antd Row/Col) pick the wrong layout unless we
+      // explicitly match it here.
       const pdfMarginMM = [15, 15, 15, 15];
       const pdfInnerWidthPx = Math.floor((210 - pdfMarginMM[1] - pdfMarginMM[3]) * (96 / 25.4));
 
@@ -1560,14 +1561,7 @@ export default function StudentResult({ params }) {
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: {
-          // No "avoid" detection here at all (neither "avoid-all" nor "css").
-          // html2pdf's own CSS-based avoid pass and our manual pass below
-          // would otherwise both try to reposition the same `.questionContainer`
-          // elements — two separate approximations of the same problem,
-          // liable to disagree. Our manual pass (using the same box the
-          // canvas is about to rasterize) is the single source of truth;
-          // this option only still handles the explicit before/after markers.
-          mode: [],
+          mode: ["css"],
           before: ".page-break-before",
           after: ".page-break-after",
         },

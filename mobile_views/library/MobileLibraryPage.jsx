@@ -12,13 +12,21 @@ import {
   Tag,
   Row,
   Col,
+  Badge,
 } from "antd";
 import {
   SearchOutlined,
   InfoCircleOutlined,
   FilterOutlined,
   CheckCircleOutlined,
+  HeartOutlined,
+  ShoppingCartOutlined,
+  LockOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
+import { BsX, BsPlus, BsStar, BsCheckCircleFill, BsBookmarkFill, BsBookmark, BsCodeSlash, BsClock, BsJournalBookmark } from "react-icons/bs";
+import { HiOutlineBuildingOffice2, HiOutlineBookOpen } from "react-icons/hi2";
+import BuyNowPopoverContent from "@/universalUtils/LibraryPage/BuyNowPopoverContent";
 import styles from "./mobileLibrary.module.scss";
 
 // ---- Helpers (mirrors LibraryPage) ----
@@ -230,27 +238,153 @@ export default function MobileLibraryPage({
   setSelectedItem,
   // Navigation
   nav,
+  // Added for new mobile banner & tabs
+  totalAvailable,
+  wishlistCount,
+  cartCount,
+  setWishlistOpen,
+  setCartOpen,
+  activeTab,
+  setActiveTab,
+  // Added for card interactions
+  wishlistIdSet,
+  wishlistPendingIds,
+  onWishlistToggle,
+  showWishlist,
+  showBuyNow,
+  cartIdSet,
+  cartPendingIds,
+  onAddToCart,
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [buyDrawerItem, setBuyDrawerItem] = useState(null);
 
   return (
     <div className={styles.container}>
-      {/* ---- Sticky Header ---- */}
-      <div className={styles.header}>
-        <h1 className={styles.headerTitle}>{title}</h1>
-        <div className={styles.headerActions}>
+      {/* Banner Section */}
+      <div className="w-[calc(100%+28px)] -ml-[14px] h-[120px] min-h-[120px] flex flex-col justify-center p-4 shadow-sm bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[50] mt-[-12px] sticky top-0">
+        <div className="absolute inset-0 pointer-events-none z-[1]">
+          <BsX className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]" />
+          <BsPlus className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]" />
+          <BsStar className="absolute top-[40%] right-[50%] text-[#1E69DA] opacity-50 text-[1.1rem]" />
+          <BsX className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]" />
+        </div>
+
+        <div className="flex items-center justify-between w-full relative z-[2]">
+          <div className="flex items-center gap-3 relative z-10 flex-1">
+            <div className="w-[48px] h-[48px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
+              {title.toLowerCase().includes("internship") ? (
+                <HiOutlineBuildingOffice2 className="text-white text-2xl" />
+              ) : (
+                <HiOutlineBookOpen className="text-white text-2xl" />
+              )}
+            </div>
+            <div className="flex items-center overflow-hidden">
+              <h1 className="text-[20px] font-bold text-white m-0 tracking-tight leading-none truncate border-none pb-0" style={{ border: 'none', borderBottom: 'none', outline: 'none' }}>
+                {title}
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="flex flex-col items-center justify-center w-[36px]">
+              <span className="text-[18px] font-bold text-white leading-none">{totalAvailable || 0}</span>
+              <span className="text-[9px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1 text-center truncate w-full">Courses</span>
+            </div>
+            {setCartOpen && (
+              <Badge count={cartCount || 0} size="small" offset={[-2, 2]}>
+                <button
+                  onClick={() => setCartOpen(true)}
+                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer p-0 m-0 w-[36px]"
+                >
+                  <ShoppingCartOutlined className="text-white text-[20px] leading-none" style={{ color: '#ffffff' }} />
+                  <span className="text-[9px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1 text-center truncate w-full">Cart</span>
+                </button>
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ---- White Background Tabs Section ---- */}
+      <div className="w-[calc(100%+28px)] -ml-[14px] px-4 bg-white flex items-center justify-between border-b border-[#e2e8f0] shadow-sm mb-4 sticky top-[120px] z-[49] mt-[-12px]">
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar flex-1 mr-2 pr-4">
+          {/* All Internships/Courses */}
           <button
-            className={`${styles.filterBtn} ${hasActiveFilters ? styles.filterBtnActive : ""}`}
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Open filters"
+            onClick={() => {
+              setActiveTab?.("all");
+              handleClearAll?.();
+            }}
+            className={`py-3 px-1 text-[14px] font-bold transition-all relative border-none bg-transparent cursor-pointer whitespace-nowrap flex-shrink-0 min-w-max ${
+              activeTab === "all" ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"
+            }`}
           >
-            <span className={styles.filterIcon}><FilterOutlined /></span>
-            Filters
-            {hasActiveFilters && (
-              <span className={styles.filterBadge}>{activeFilters.length}</span>
+            All {title.toLowerCase().includes("internship") ? "Internships" : "Courses"}
+            {activeTab === "all" && (
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1E69DA] rounded-t-md"></div>
             )}
           </button>
+          
+          {/* Wishlist Button */}
+          {showWishlist && (
+            <button 
+              onClick={() => {
+                setActiveTab?.("wishlist");
+                handleClearAll?.();
+              }}
+              className={`py-3 px-1 text-[14px] font-bold transition-all relative border-none bg-transparent cursor-pointer whitespace-nowrap flex-shrink-0 min-w-max ${
+                activeTab === "wishlist" ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"
+              }`}
+            >
+              Wishlist {wishlistCount > 0 ? `(${wishlistCount})` : ""}
+              {activeTab === "wishlist" && (
+                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1E69DA] rounded-t-md"></div>
+              )}
+            </button>
+          )}
+
+          {/* My Internships/Courses */}
+          <button
+            onClick={() => {
+              setActiveTab?.("my");
+              handleClearAll?.();
+            }}
+            className={`py-3 px-1 text-[14px] font-bold transition-all relative border-none bg-transparent cursor-pointer whitespace-nowrap flex-shrink-0 min-w-max ${
+              activeTab === "my" ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"
+            }`}
+          >
+            My {title.toLowerCase().includes("internship") ? "Internships" : "Courses"}
+            {activeTab === "my" && (
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1E69DA] rounded-t-md"></div>
+            )}
+          </button>
+          
+          {/* Spacer for horizontal scroll cutoff fix */}
+          <div className="w-4 min-w-[16px] shrink-0" aria-hidden="true" />
         </div>
+        
+        <button
+          className="w-[36px] h-[36px] rounded-full flex items-center justify-center bg-[#F1F5F9] text-[#64748B] shrink-0 border-none relative cursor-pointer active:bg-gray-200 transition-colors"
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Open filters"
+        >
+          <FilterOutlined style={{ fontSize: 16 }} />
+          {hasActiveFilters && (
+            <div className="absolute -top-1 -right-1 w-[14px] h-[14px] bg-red-500 rounded-full border-2 border-white" />
+          )}
+        </button>
+      </div>
+
+      {/* ---- Search Input Row ---- */}
+      <div className="w-full mb-3">
+        <Input
+          placeholder={searchPlaceholder || `Search ${title.toLowerCase()}...`}
+          value={searchInput}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          prefix={<SearchOutlined className="text-[#94a3b8]" />}
+          allowClear
+          className="w-full rounded-xl h-[42px] bg-white border border-[#e2e8f0] shadow-sm hover:border-[#1E69DA] focus-within:border-[#1E69DA] focus-within:shadow-[0_0_0_2px_rgba(30,105,218,0.1)] transition-all [&>input]:text-[#0f172a] [&>input::placeholder]:text-[#94a3b8]"
+        />
       </div>
 
       {/* ---- Active Filter Chips ---- */}
@@ -296,73 +430,157 @@ export default function MobileLibraryPage({
             )}
           </div>
         ) : (
-          items.map((item) => (
-            <div key={item?._id} className={styles.tile}>
-              {/* Thumbnail */}
-              <div className={styles.tileThumbnail}>
-                <img
-                  src={item?.media?.thumbnailImage || item?.thumbnail || item?.image || item?.bannerImage || item?.coverImage || item?.companyLogo || item?.media?.coverImage || "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80"}
-                  alt={item?.title || title}
-                  loading="lazy"
-                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80"; }}
-                />
-              </div>
+          items.map((item) => {
+            const isEnrolled = item?._uiState?.isEnrolled || false;
+            const progressVal = item?._uiState?.progressVal || 0;
+            const isProgressLoading = item?._uiState?.isProgressLoading || false;
+            
+            const duration = item?.duration || item?.courseIncludes?.videoDuration;
+            const modulesCount = item?.sections?.length || 0;
+            const createdAtDate = item?.createdAt ? formatUpdatedDate(item.createdAt) : "";
 
-              {/* Content */}
-              <div className={styles.tileContent}>
-                <Tooltip title={item?.title} placement="topLeft" mouseEnterDelay={0.5}>
-                  <h3 className={styles.tileTitle}>{item?.title}</h3>
-                </Tooltip>
+            const inWishlist = wishlistIdSet?.has(item?._id);
+            const isWishlistLoading = wishlistPendingIds?.includes(item?._id);
+            const inCart = cartIdSet?.has(item?._id);
+            const isCartLoading = cartPendingIds?.includes(item?._id);
 
-                <div className={styles.tileChips}>
-                  {item?.category && (
-                    <span className={styles.tileChip}>{item.category}</span>
-                  )}
-                  {renderMetaChips?.(item)}
-                  {item?.sections?.length ? (
-                    <span className={styles.tileChip}>{item.sections.length} Modules</span>
-                  ) : null}
+            let statusText = "Not started";
+            let buttonText = "Start";
+            let statusColor = "text-[#94a3b8]";
+
+            if (isProgressLoading) {
+              statusText = "Loading…";
+            } else if (isEnrolled) {
+              if (progressVal > 0) {
+                statusText = `${progressVal}% complete`;
+                buttonText = "Continue";
+                statusColor = "text-[#10b981]";
+              }
+            } else {
+              buttonText = "Buy";
+            }
+
+            const imageUrl =
+              item?.media?.thumbnailImage ||
+              item?.media?.coverImage ||
+              item?.thumbnail ||
+              item?.image ||
+              item?.bannerImage ||
+              item?.coverImage ||
+              item?.companyLogo ||
+              "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80";
+
+            return (
+              <div
+                key={item?._id}
+                className="group flex flex-col bg-white text-black border-[1px] border-[#cbd5e1] rounded-2xl overflow-hidden transition-all duration-300 shadow-sm"
+              >
+                {/* Card Image */}
+                <div className="relative w-full h-[170px] p-2 pb-0 bg-white">
+                  <div className="relative w-full h-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
+                    <img src={imageUrl} alt={item.title || "Thumbnail"} className="w-full h-full object-cover" />
+
+                    {isEnrolled && (
+                      <div className="absolute top-2 left-2 bg-[#022c22] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-[#047857]">
+                        <BsCheckCircleFill className="text-[#10b981] text-[10px]" />
+                        <span className="text-[#10b981] text-[11px] font-medium tracking-wide">Enrolled</span>
+                      </div>
+                    )}
+                    {onWishlistToggle && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onWishlistToggle(item, e); }}
+                        disabled={isWishlistLoading}
+                        aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                        className="absolute top-2 right-2 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10 cursor-pointer transition-colors disabled:opacity-60 z-10"
+                      >
+                        {inWishlist ? (
+                          <BsBookmarkFill className="text-[#facc15] text-[14px]" />
+                        ) : (
+                          <BsBookmark className="text-white text-[14px]" />
+                        )}
+                      </button>
+                    )}
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-0.5 bg-black/20 backdrop-blur-sm rounded-lg">
+                      <BsCodeSlash className="text-white/80 text-[12px]" />
+                      <span className="text-white/90 text-[11px] font-medium">{item.category || "General"}</span>
+                    </div>
+                    {item.difficulty && (
+                      <div className={`absolute bottom-2 right-2 px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase backdrop-blur-sm ${
+                        item.difficulty?.toLowerCase() === "beginner" ? "bg-[#047857]/90 text-white" :
+                        item.difficulty?.toLowerCase() === "intermediate" ? "bg-[#d97706]/90 text-white" :
+                        "bg-[#dc2626]/90 text-white"
+                      }`}>
+                        {item.difficulty}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <p className={styles.tileDescription}>
-                  {(() => {
-                    const text = stripHtml(item?.description) || "";
-                    return text.slice(0, 100) + (text.length > 100 ? "…" : "");
-                  })()}
-                </p>
+                {/* Card Content */}
+                <div className="flex flex-col p-3 flex-1">
+                  <Tooltip title={item?.title} placement="topLeft" mouseEnterDelay={0.5}>
+                    <h3 className="text-[15px] font-bold text-[#1e293b] leading-tight mb-2 line-clamp-2 min-h-[36px]">
+                      {item?.title}
+                    </h3>
+                  </Tooltip>
 
-                <div className={styles.tileMeta}>
-                  <span className={styles.tileDate}>
-                    {item?.updatedAt && `Updated ${formatUpdatedDate(item.updatedAt)}`}
-                  </span>
+                  <p className="text-[#64748b] text-[12px] font-medium leading-snug mb-3 line-clamp-2 min-h-[34px]">
+                    {stripHtml(item?.description)}
+                  </p>
+
+                  {/* Progress Bar */}
+                  <div className="w-full flex items-center gap-3 mb-4">
+                    <div className="flex-1 h-[8px] bg-[#f1f5f9] rounded-full overflow-hidden">
+                      {isEnrolled && (
+                        <div
+                          className="h-full bg-gradient-to-br from-[#1E69DA] to-[#5694F0] rounded-full transition-all duration-500"
+                          style={{ width: `${progressVal}%` }}
+                        />
+                      )}
+                    </div>
+                    <span className="text-[13px] font-bold text-[#64748b] min-w-[32px] text-right">
+                      {isEnrolled ? `${progressVal}%` : "0%"}
+                    </span>
+                  </div>
+
+                  {/* Meta Row */}
+                  <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] font-bold mb-4">
+                    {duration && <span className="flex items-center gap-1"><BsClock /> {duration}</span>}
+                    {duration && modulesCount > 0 && <span>•</span>}
+                    {modulesCount > 0 && <span className="flex items-center gap-1"><BsJournalBookmark /> {modulesCount} modules</span>}
+                    {createdAtDate && (duration || modulesCount > 0) && <span>•</span>}
+                    {createdAtDate && <span>{createdAtDate}</span>}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f1f5f9]">
+                    <span className={`text-[12px] font-bold flex items-center gap-1 ${statusColor}`}>
+                      {statusText}
+                    </span>
+                    <button
+                      className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] active:opacity-90 text-white text-[13px] font-medium py-1.5 px-5 rounded-[20px] border-none cursor-pointer transition-opacity flex items-center gap-1.5 shadow-sm"
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        if (isEnrolled) {
+                          nav.push(getItemUrl(item)); 
+                        } else {
+                          setBuyDrawerItem(item);
+                        }
+                      }}
+                    >
+                      {buttonText === "Buy" ? (
+                        <><LockOutlined /> Buy</>
+                      ) : buttonText === "Start" ? (
+                        "+ Start"
+                      ) : (
+                        `▷ ${buttonText}`
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              {/* Action */}
-              <div className={styles.tileAction}>
-                <button
-                  className={styles.infoBtn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedItem(item);
-                  }}
-                  aria-label="View details"
-                >
-                  <InfoCircleOutlined />
-                </button>
-                <Button
-                  type="primary"
-                  className={styles.viewBtn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    nav.push(getItemUrl(item));
-                  }}
-                >
-                  {viewLabel}
-                </Button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -420,61 +638,38 @@ export default function MobileLibraryPage({
       >
         <div className={styles.drawerContent}>
           <div className={styles.drawerField}>
-            <label>Search</label>
-            <Input
-              id={`${idPrefix}-mobile-search`}
-              prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
-              placeholder={searchPlaceholder}
-              value={searchInput}
-              onChange={handleSearchChange}
-              allowClear
-              onClear={() => pushParams({ search: "" })}
-              style={{ borderRadius: 8 }}
-            />
-          </div>
-
-          <div className={styles.drawerField}>
             <label>Category</label>
             <Select
-              id={`${idPrefix}-mobile-category`}
               placeholder="All Categories"
               value={urlCategory || undefined}
               onChange={handleCategoryChange}
               allowClear
               options={categoryOptions}
-              style={{ width: "100%" }}
-              popupMatchSelectWidth={false}
+              className="w-full"
             />
           </div>
-
           <div className={styles.drawerField}>
-            <label>Level</label>
+            <label>Difficulty</label>
             <Select
-              id={`${idPrefix}-mobile-difficulty`}
               placeholder="All Levels"
               value={urlDifficulty || undefined}
               onChange={handleDifficultyChange}
               allowClear
               options={difficultyOptions}
-              style={{ width: "100%" }}
-              popupMatchSelectWidth={false}
+              className="w-full"
             />
           </div>
-
           <div className={styles.drawerField}>
             <label>Sort By</label>
             <Select
-              id={`${idPrefix}-mobile-sort`}
               placeholder="Sort By"
               value={urlSort === "default" ? undefined : urlSort}
               onChange={handleSortChange}
               allowClear
               options={sortOptions}
-              style={{ width: "100%" }}
-              popupMatchSelectWidth={false}
+              className="w-full"
             />
           </div>
-
           <div className={styles.drawerActions}>
             {hasActiveFilters && (
               <Button
@@ -496,6 +691,39 @@ export default function MobileLibraryPage({
               Done
             </Button>
           </div>
+        </div>
+      </Drawer>
+
+      {/* ---- Buy Now Drawer (Bottom Sheet) ---- */}
+      <Drawer
+        placement="bottom"
+        open={!!buyDrawerItem}
+        onClose={() => setBuyDrawerItem(null)}
+        closable={false}
+        className={styles.filterDrawer}
+        height="auto"
+        styles={{ body: { padding: 0 } }}
+      >
+        <div className="relative pt-3 pb-4">
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[36px] h-[4px] rounded-full bg-[#cbd5e1] z-10"></div>
+          {buyDrawerItem && (
+            <BuyNowPopoverContent
+              item={buyDrawerItem}
+              onAddToWishlist={(it) => onWishlistToggle?.(it)}
+              onAddToCart={(it) => {
+                if (!cartIdSet?.has(it._id)) {
+                  onAddToCart?.(it);
+                } else {
+                  setCartOpen?.(true);
+                }
+              }}
+              isInCart={cartIdSet?.has(buyDrawerItem?._id)}
+              isInWishlist={wishlistIdSet?.has(buyDrawerItem?._id)}
+              cartLoading={cartPendingIds?.includes(buyDrawerItem?._id)}
+              wishlistLoading={wishlistPendingIds?.includes(buyDrawerItem?._id)}
+              isEnrolled={buyDrawerItem?._uiState?.isEnrolled}
+            />
+          )}
         </div>
       </Drawer>
     </div>

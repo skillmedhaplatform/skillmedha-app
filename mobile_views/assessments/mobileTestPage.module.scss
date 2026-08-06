@@ -154,15 +154,20 @@
 
 .consentCheckbox {
   margin-top: 3px;
+  flex-shrink: 0;
 }
 
 .consentText {
   font-size: 0.85rem;
   color: #475569;
   line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
 
   :global(p) {
     margin: 0;
+    display: inline;
   }
 }
 

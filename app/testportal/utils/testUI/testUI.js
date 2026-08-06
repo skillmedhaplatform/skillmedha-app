@@ -36,7 +36,7 @@ import {
   getStudent,
 } from "@/app/testportal/redux/slices/studentSlice";
 import axios from "axios";
-import { awsUrl, proctoringUrl, studentSiteUrl } from "../urls";
+import { awsUrl, proctoringUrl, studentSiteUrl, testUrl } from "../urls";
 import { TimerColors } from "@/app/testportal/styles/colors";
 import { parseIfJson } from "./jsonparse";
 import useStudentProctoring from "../liveProctoring/proctoringClient";
@@ -44,6 +44,7 @@ import { saveTestResults } from "@/app/testportal/redux/slices/studentSlice";
 import {
   persistPortalResult,
   getPersistedPortalResult,
+  clearPersistedPortalResult,
 } from "../resultPersistence";
 
 export default function TestUI({
@@ -688,9 +689,18 @@ export default function TestUI({
   };
 
   const submitTest = () => {
+    // Any result persisted under this testId belongs to a previous attempt —
+    // clear it now so the fallback redirect below can never reuse a stale
+    // progressId (or none at all) if the socket response is slow.
+    clearPersistedPortalResult(testId);
+
     const finalResponses = mergeCodingIntoResponses(responses.value);
     const submissionPayload = {
-      userId: getSstorage("userId"),
+      // `getSstorage("userId")` is never actually set anywhere in this app —
+      // it always resolved to undefined, which is why saveTestProgress kept
+      // logging "student not found". `stId` (the "sId" URL param) is the
+      // real student id and is already used this way elsewhere in this file.
+      userId: stId,
       ...userData,
       flagged: flagCheck,
       marked: questionsAddedMark,
@@ -766,19 +776,48 @@ export default function TestUI({
         } else {
           const isJobAssessment = window.location.pathname.includes('/jobAssessments');
           const source = isJobAssessment ? 'job' : 'test';
-          const studentSiteUrl = `/student/tests/${testData?.title}/result?testId=${testId}&from=${source}`;
+          const submittedProgressId = payload?.progressId || payload?.progData?.toString() || payload?._id;
+          const progressQuery = submittedProgressId ? `&progressId=${submittedProgressId}` : '';
+          const studentSiteUrl = `/student/tests/${testData?.title}/result?testId=${testId}&from=${source}${progressQuery}`;
           window.location.href = studentSiteUrl;
         }
       }
     };
 
+    // Last-resort save: used whenever we're about to redirect without a
+    // progressId (socket never responded / timed out, or there's no socket
+    // at all). Without a progressId the results page can't fetch this
+    // attempt's config, and silently defaults to showing everything
+    // (attempts history, all fields) instead of the configured one-time view.
+    const saveViaRestAndRedirect = (fallbackPayload) => {
+      axios
+        .post(
+          `${testUrl}/saveTestProgress`,
+          { ...submissionPayload, studentId: submissionPayload.userId },
+          { headers: { Authorization: `Bearer ${getLstorage("token")}` } },
+        )
+        .then(({ data }) => {
+          handleRedirect({ ...submissionPayload, progressId: data?.progressId });
+        })
+        .catch((err) => {
+          console.error("Failed to save test progress over REST:", err);
+          handleRedirect(fallbackPayload);
+        });
+    };
+
     if (socket) {
       socket.once("testEndedtestportal", handleRedirect);
-      // Fallback in case socket event is missed
-      setTimeout(() => handleRedirect(getPersistedPortalResult(testId)), 2500);
+      // Fallback in case the socket event is missed or too slow. The server
+      // does a GraphQL fetch + scoring + DB insert before responding, which
+      // routinely takes longer than the old 2.5s — that made this fallback
+      // win the race and redirect with no (or a stale, previous-attempt)
+      // progressId. Save over REST instead of trusting stale local data.
+      setTimeout(() => {
+        if (redirected) return;
+        saveViaRestAndRedirect(getPersistedPortalResult(testId));
+      }, 8000);
     } else {
-      persistSubmissionResult();
-      setTimeout(() => handleRedirect(), 2500);
+      saveViaRestAndRedirect(submissionPayload);
     }
   };
   // ALL YOUR OTHER EXISTING STATE AND FUNCTIONS
@@ -999,19 +1038,6 @@ export default function TestUI({
       if (requestMethod) {
         requestMethod.call(element);
         setFullScreen(true);
-        if (!testStartedRef.current) {
-          setTestStarted(true);
-          testStartedRef.current = true;
-
-          try {
-            const currentTestId = testData?.value?.test?._id || testId;
-            if (currentTestId) {
-              const attempts = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("localAttempts") || "{}") : {};
-              attempts[currentTestId] = (attempts[currentTestId] || 0) + 1;
-              localStorage.setItem("localAttempts", JSON.stringify(attempts));
-            }
-          } catch (e) { console.error("Error updating localAttempts", e); }
-        }
       }
     }
   }
@@ -1154,7 +1180,21 @@ export default function TestUI({
     );
   };
 
-  useEffect(() => {
+  const handleStartTest = () => {
+    requestFullScreen();
+    setTestStarted(true);
+    testStartedRef.current = true;
+    try {
+      const currentTestId = testData?._id || testId;
+      if (currentTestId) {
+        const generation = testData?.attemptGeneration || 0;
+        const attemptKey = `${currentTestId}_${generation}`;
+        const attempts = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("localAttempts") || "{}") : {};
+        attempts[attemptKey] = (attempts[attemptKey] || 0) + 1;
+        localStorage.setItem("localAttempts", JSON.stringify(attempts));
+      }
+    } catch (e) { console.error("Error updating localAttempts", e); }
+
     if (testType === "jobtest") {
       socket.emit("jobAssessmentStarted", {
         userId: stId,
@@ -1164,6 +1204,20 @@ export default function TestUI({
       socket.emit("testStarted", {
         userId: stId,
       });
+    }
+  };
+
+  useEffect(() => {
+    if (testStartedRef.current) {
+      if (testType === "jobtest") {
+        socket.emit("jobAssessmentStarted", {
+          userId: stId,
+        });
+      } else {
+        socket.emit("testStarted", {
+          userId: stId,
+        });
+      }
     }
   }, []);
 
@@ -1520,7 +1574,7 @@ export default function TestUI({
                   </div>
                 </div>
 
-                <button className={testStyles.gateBtn} onClick={requestFullScreen}>
+                <button className={testStyles.gateBtn} onClick={handleStartTest}>
                   <Monitor size={18} strokeWidth={2.5} />
                   Enter Full Screen &amp; Start Test
                 </button>

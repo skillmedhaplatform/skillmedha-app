@@ -135,7 +135,7 @@ function MobileCodingContent({ questionData }) {
                           {isRunning ? "⏳" : isPassed ? "✅" : isError ? "⚠️" : "❌"} Test Case {idx + 1}
                         </strong>
                         <span style={{ fontSize: "11px", fontWeight: "700" }}>
-                          {isRunning ? "RUNNING" : isPassed ? "PASSED" : isError ? "ERROR" : isFailed ? "FAILED"}
+                          {isRunning ? "RUNNING" : isPassed ? "PASSED" : isError ? "ERROR" : isFailed ? "FAILED" : ""}
                         </span>
                       </div>
                       {tc.input && (

@@ -10,6 +10,8 @@ import {
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { getLstorage } from "@/universalUtils/windowMW";
+import { useMobileEditBlocker } from "../_utils/useMobileEditBlocker";
 import { updateStudent } from "@/redux/slices/student";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -29,6 +31,8 @@ export default function WorkAndAccomplishmentsPage() {
   const dispatch = useDispatch();
   const studentDetails = useSelector((state) => state.student.student?.data);
   const [accomplishments, setAccomplishments] = useState([]);
+  const [studentObjId, setStudentObjId] = useState(null);
+  const { checkEditClick, MobileEditModal } = useMobileEditBlocker();
 
   // Initialize from studentDetails.accomplishments or default one
   useEffect(() => {
@@ -56,8 +60,11 @@ export default function WorkAndAccomplishmentsPage() {
       return arr;
     });
 
-  const addAccomplishment = () =>
-    setAccomplishments((prev) => [...prev, { ...initialAccomplishment }]);
+  const addAccomplishment = () => {
+    checkEditClick(() => {
+      setAccomplishments((prev) => [...prev, { ...initialAccomplishment }]);
+    });
+  };
 
   const saveAccomplishment = (idx) => {
     const item = accomplishments[idx];
@@ -111,7 +118,7 @@ export default function WorkAndAccomplishmentsPage() {
                 <Button
                   type="text"
                   icon={<EditOutlined />}
-                  onClick={() => updateField(idx, "editing", true)}
+                  onClick={() => checkEditClick(() => updateField(idx, "editing", true))}
                 />
               )}
               {accomplishments.length > 1 && (
@@ -260,6 +267,7 @@ export default function WorkAndAccomplishmentsPage() {
       >
         Add More Accomplishments
       </Button>
+      {MobileEditModal}
     </div>
   );
 }

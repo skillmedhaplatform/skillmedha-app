@@ -80,6 +80,7 @@ query Tests($cursor: ID, $limit: Int, $category: String, $status: String, $origi
       snapShotTechnology
       facialRecognitionTechnology
       testEvaluationType
+      attemptGeneration
     }
   }
 }
@@ -165,6 +166,7 @@ export const getOneTest = `
               honestRespondent
               snapShotTechnology
               facialRecognitionTechnology
+              attemptGeneration
     }
     ... on err {
       err

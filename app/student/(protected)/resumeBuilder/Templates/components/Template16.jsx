@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { MailOutlined, PhoneFilled, EnvironmentOutlined, GlobalOutlined, LinkedinFilled } from "@ant-design/icons";
@@ -127,8 +127,8 @@ const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {workExperience.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h3 className="m-0 text-[0.92rem] font-bold" style={{ color: INK }}>
+                  <div className="flex flex-wrap items-center gap-x-3">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.92rem] font-bold" style={{ color: INK }}>
                       {item?.role}{item?.company ? <span className="font-normal" style={{ color: SUBTLE }}>, {item.company}</span> : ""}
                     </h3>
                     <span className="text-[0.78rem] font-semibold whitespace-nowrap" style={{ color: ACCENT }}>{dateRange(item)}</span>
@@ -148,8 +148,8 @@ const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {internshipDetails.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h3 className="m-0 text-[0.92rem] font-bold" style={{ color: INK }}>
+                  <div className="flex flex-wrap items-center gap-x-3">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.92rem] font-bold" style={{ color: INK }}>
                       {item?.role}{item?.company ? <span className="font-normal" style={{ color: SUBTLE }}>, {item.company}</span> : ""}
                     </h3>
                     <span className="text-[0.78rem] font-semibold whitespace-nowrap" style={{ color: ACCENT }}>{dateRange(item)}</span>
@@ -168,8 +168,8 @@ const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <SectionTitle>Education</SectionTitle>
             <div className="space-y-2">
               {educationDetails.map((item, index) => (
-                <div key={index} className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <h3 className="m-0 text-[0.88rem] font-bold" style={{ color: INK }}>
+                <div key={index} className="flex flex-wrap items-center gap-x-3">
+                  <h3 className="flex-1 min-w-0 m-0 text-[0.88rem] font-bold" style={{ color: INK }}>
                     {item?.type}{item?.school ? `, ${item.school}` : ""}
                     {item?.grade ? ` — ${item.grade}${item?.gradeType === "percentage" ? "%" : item?.gradeType ? "/10" : ""}` : ""}
                   </h3>
@@ -188,8 +188,8 @@ const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {projectDetails.filter((p) => p?.project).map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h3 className="m-0 text-[0.92rem] font-bold" style={{ color: INK }}>
+                  <div className="flex flex-wrap items-center gap-x-3">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.92rem] font-bold" style={{ color: INK }}>
                       {item.project}{item?.company ? <span className="font-normal" style={{ color: SUBTLE }}> — {item.company}</span> : ""}
                     </h3>
                     <span className="text-[0.78rem] font-semibold whitespace-nowrap" style={{ color: ACCENT }}>
@@ -208,8 +208,8 @@ const Template16 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <SectionTitle>Certifications</SectionTitle>
             <div className="space-y-3">
               {certificates.filter((c) => c?.name || c?.organization).map((item, index) => (
-                <div key={index} className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <div>
+                <div key={index} className="flex flex-wrap items-center gap-x-3">
+                  <div className="flex-1 min-w-0">
                     <p className="m-0 text-[0.85rem] font-bold" style={{ color: INK }}>
                       {item?.name}{item?.organization ? `, ${item.organization}` : ""}
                     </p>

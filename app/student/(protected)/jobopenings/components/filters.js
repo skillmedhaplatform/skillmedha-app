@@ -70,7 +70,7 @@ export default function JobHeader() {
 
   return (
     <ConfigProvider theme={{ token: { colorPrimary: "#1E69DA" } }}>
-      <div className="flex items-center justify-between gap-2 flex-nowrap mb-4 bg-white/50 backdrop-blur-sm p-3 rounded-xl border border-[#e2e8f0]">
+      <div className="flex items-center justify-between gap-2 flex-nowrap py-3 w-full">
         {/* ── Left: Search ── */}
         <div className="flex-1 flex items-center justify-start gap-3">
           <Search

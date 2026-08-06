@@ -190,7 +190,7 @@ const SideBar = ({ activeView, setView }) => {
         mainItems.push(menuItem);
       } else if (['practice', 'internshiplibrary', 'courseslibrary'].includes(title.slug)) {
         learnItems.push(menuItem);
-      } else if (['resumebuilder', 'atsResumeChecker', 'jobopenings', 'myassessments', 'testresults'].includes(title.slug)) {
+      } else if (['resumebuilder', 'jobopenings', 'myassessments', 'testresults'].includes(title.slug)) {
         careerItems.push(menuItem);
       } else if (title.slug === 'help') {
         supportItems.push(menuItem);
@@ -258,6 +258,9 @@ const SideBar = ({ activeView, setView }) => {
     } else if (clickedTitle) {
       setSstorage("currPathTitle", "others");
       setSstorage("subPath", "");
+      if (clickedTitle.path === "/student/resumeBuilder") {
+        sessionStorage.removeItem("resumeBuilderStep");
+      }
       nav.replace(clickedTitle.path);
     }
   };

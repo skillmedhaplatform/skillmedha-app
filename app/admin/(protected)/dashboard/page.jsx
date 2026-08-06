@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAiUsageGrowth,
@@ -25,9 +26,11 @@ import styles from "./dashboard.module.scss";
 import AIUsageChart from "@/modules/admin/components/dashboard/AIUsageChart"; // NEW
 
 export default function DashboardPage() {
+  const router = useRouter();
   const dispatch = useDispatch();
   const { user: userState, isAuthenticated } = useSelector((state) => state.adminAuth || {});
   const user = userState?.value?.user;
+  const authLoading = userState?.loading;
   const {
     stats,
     organizations,
@@ -41,6 +44,13 @@ export default function DashboardPage() {
   const [selectedOrgId, setSelectedOrgId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [filterType, setFilterType] = useState("all"); // all, college, company
+
+  // Redirect to admin login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.replace("/admin/login");
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   // Fetch data when authenticated
   useEffect(() => {
@@ -57,6 +67,7 @@ export default function DashboardPage() {
       dispatch(fetchRevenueAnalytics());
     }
   }, [dispatch, isAuthenticated]);
+
   const handlePeriodChange = (period) => {
     dispatch(fetchGrowthStats(period));
   };
@@ -64,17 +75,9 @@ export default function DashboardPage() {
   const handleAiPeriodChange = (period) => {
     dispatch(fetchAiUsageGrowth(period));
   };
+
   if (!isAuthenticated) {
-    return (
-      <div className={styles.unauthorized}>
-        <div className={styles.unauthorizedContent}>
-          <div className={styles.unauthorizedIcon}>🔒</div>
-          <h1>Unauthorized Access</h1>
-          <p>Please login to continue</p>
-          <button className={styles.loginButton}>Go to Login</button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -83,33 +86,6 @@ export default function DashboardPage() {
 
       <main className={styles.mainContent}>
         <div className={styles.contentWrapper}>
-          {/* Header Section */}
-          <div className={styles.pageHeader}>
-            <div className={styles.headerLeft}>
-              <h2 className={styles.pageTitle}>Dashboard Overview</h2>
-            </div>
-            <div className={styles.headerRight}>
-              <button
-                className={styles.refreshButton}
-                onClick={() => {
-                  dispatch(fetchDashboardStats());
-                  dispatch(fetchOrganizations());
-                  dispatch(fetchCourseAnalytics());
-                  dispatch(fetchJobActivity());
-                  dispatch(fetchPlacementAnalytics());
-                  dispatch(fetchRevenueAnalytics());
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M13.65 2.35C12.2 0.9 10.21 0 8 0 3.58 0 0.01 3.58 0.01 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L9 7h7V0l-2.35 2.35z"
-                    fill="currentColor"
-                  />
-                </svg>
-                Refresh
-              </button>
-            </div>
-          </div>
 
           {/* KPI Cards */}
           <section className={styles.kpiSection}>

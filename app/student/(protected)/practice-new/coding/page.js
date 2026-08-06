@@ -12,16 +12,16 @@ import {
 import PracticeFilters from "@/modules/student/components/PracticeFilters";
 import CodingPracticeCard from "@/modules/student/components/CodingPracticeCard";
 import PracticeBannerTabs from "../components/PracticeBannerTabs";
-import { Divider, Result, Spin, Tooltip, message, Select } from "antd";
-import useResponsive from "@/hooks/useResponsive";
+import { Divider, Result, Spin, Tooltip, message, Select, Dropdown, Modal } from "antd";
+import { ListFilter, MonitorSmartphone } from "lucide-react";
 import styles from "@/mobile_views/practice/mobilePracticeLayout.module.scss";
 
 // --- GitHub-style Contribution Graph Component (Blue Light Theme) ---
 const CodingContributionGraph = () => {
   const [heatmapData, setHeatmapData] = useState([]);
   const [monthLabels, setMonthLabels] = useState([]);
-  const [totalSimulated, setTotalSimulated] = useState(0);
   const [streakStats, setStreakStats] = useState({ currentStreak: 0, maxStreak: 0, activeDays: 0 });
+  const [totalSimulated, setTotalSimulated] = useState(0);
 
   useEffect(() => {
     // 1. Fetch solved history dynamically from localStorage
@@ -162,25 +162,25 @@ const CodingContributionGraph = () => {
   };
 
   return (
-    <div className="w-full text-[#24292F] p-6 font-sans border-b border-[#e2e8f0]">
+    <div className="w-full text-[#24292F] px-6 py-4 font-sans border-b border-[#e2e8f0]">
       <div className="w-full mx-auto">
         <div className="flex flex-col xl:flex-row gap-6 items-stretch w-full">
           
           {/* Left Side: Contribution Graph */}
-          <div className="border border-[#d0d7de] rounded-md p-4 lg:p-6 bg-white w-full xl:w-auto xl:flex-1 overflow-hidden shadow-sm flex flex-col">
-            <h2 className="text-[18px] font-semibold m-0 mb-6 text-gray-800">{totalSimulated} contributions in {new Date().getFullYear()}</h2>
+          <div className="border border-[#d0d7de] rounded-md px-4 py-3 lg:px-5 lg:py-4 bg-white w-full xl:w-auto xl:flex-1 overflow-hidden shadow-sm flex flex-col">
+            <h2 className="text-[16px] lg:text-[18px] font-semibold m-0 mb-2 text-gray-800">{totalSimulated} contributions in {new Date().getFullYear()}</h2>
           
-          <div className="flex w-full overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex w-full overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
             <div className="flex min-w-max mx-auto">
               {/* Day Labels */}
               <div className="flex flex-col gap-[4px] text-[12px] text-[#57606A] pr-3 pt-[20px]">
-                <div className="h-[16px]"></div>
-                <div className="h-[16px] leading-[16px]">Mon</div>
-                <div className="h-[16px]"></div>
-                <div className="h-[16px] leading-[16px]">Wed</div>
-                <div className="h-[16px]"></div>
-                <div className="h-[16px] leading-[16px]">Fri</div>
-                <div className="h-[16px]"></div>
+                <div className="h-[14px]"></div>
+                <div className="h-[14px] leading-[14px]">Mon</div>
+                <div className="h-[14px]"></div>
+                <div className="h-[14px] leading-[14px]">Wed</div>
+                <div className="h-[14px]"></div>
+                <div className="h-[14px] leading-[14px]">Fri</div>
+                <div className="h-[14px]"></div>
               </div>
               
               <div className="flex flex-col relative">
@@ -190,7 +190,7 @@ const CodingContributionGraph = () => {
                   <div 
                     key={i} 
                     className="absolute font-medium"
-                    style={{ left: `${item.colIndex * 20}px` }}
+                    style={{ left: `${item.colIndex * 18}px` }}
                   >
                     {item.month}
                   </div>
@@ -203,12 +203,12 @@ const CodingContributionGraph = () => {
                   <div key={wIndex} className="flex flex-col gap-[4px]">
                     {week.map((dayData, dIndex) => {
                       if (!dayData.isCurrentYear) {
-                        return <div key={dIndex} className="w-[16px] h-[16px] rounded-[2px] border border-transparent bg-transparent" />;
+                        return <div key={dIndex} className="w-[14px] h-[14px] rounded-[2px] border border-transparent bg-transparent" />;
                       }
                       return (
                         <div 
                           key={dIndex} 
-                          className={`w-[16px] h-[16px] rounded-[2px] border ${getColor(dayData.count)} hover:ring-1 hover:ring-black transition-all cursor-pointer`}
+                          className={`w-[14px] h-[14px] rounded-[2px] border ${getColor(dayData.count)} hover:ring-1 hover:ring-black transition-all cursor-pointer`}
                           title={`${dayData.count} submissions on ${dayData.date}`}
                         />
                       );
@@ -220,19 +220,19 @@ const CodingContributionGraph = () => {
             </div>
           </div>
           
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-auto pt-4 border-t border-gray-100 text-[12px] text-[#57606A] gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-auto pt-2 border-t border-gray-100 text-[12px] text-[#57606A] gap-3">
             <div className="flex flex-col max-w-lg">
               <span className="font-semibold text-gray-700 text-[14px] mb-1">How it works</span>
-              <span className="leading-relaxed">Solve coding problems to build your streak. Each colored box represents the number of problems you correctly solved on that specific day. Darker colors indicate higher activity. Keep practicing to maintain a solid streak!</span>
+              <span className="leading-relaxed">Darker boxes indicate more coding problems solved on that day. Keep practicing to build your streak!</span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <span className="font-medium">Less</span>
               <div className="flex gap-[4px] mx-1">
-                <div className="w-[16px] h-[16px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#ebedf0]"></div>
-                <div className="w-[16px] h-[16px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#93c5fd]"></div>
-                <div className="w-[16px] h-[16px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#60a5fa]"></div>
-                <div className="w-[16px] h-[16px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#3b82f6]"></div>
-                <div className="w-[16px] h-[16px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#1d4ed8]"></div>
+                <div className="w-[14px] h-[14px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#ebedf0]"></div>
+                <div className="w-[14px] h-[14px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#93c5fd]"></div>
+                <div className="w-[14px] h-[14px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#60a5fa]"></div>
+                <div className="w-[14px] h-[14px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#3b82f6]"></div>
+                <div className="w-[14px] h-[14px] rounded-[2px] border border-[rgba(27,31,35,0.06)] bg-[#1d4ed8]"></div>
               </div>
               <span className="font-medium">More</span>
             </div>
@@ -240,17 +240,17 @@ const CodingContributionGraph = () => {
           </div>
           
           {/* Right Side: Consistency & Streak Board */}
-          <div className="w-full xl:w-[320px] flex flex-col shrink-0">
-            <div className="bg-white rounded-md border border-[#d0d7de] p-5 shadow-sm h-full flex flex-col">
-              <h3 className="text-[16px] font-bold text-gray-800 mb-4 flex items-center gap-2 shrink-0">
+          <div className="w-full xl:w-[320px] hidden xl:flex flex-col shrink-0">
+            <div className="bg-white rounded-md border border-[#d0d7de] p-4 shadow-sm h-full flex flex-col">
+              <h3 className="text-[16px] font-bold text-gray-800 mb-3 flex items-center gap-2 shrink-0">
                 <span className="text-xl">🏆</span> Consistency Board
               </h3>
               
-              <div className="flex flex-col gap-4 flex-1 justify-center">
+              <div className="flex flex-col gap-3 flex-1 justify-center">
                 {/* Current Streak */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-orange-50 border border-orange-100 transition-all hover:shadow-sm">
+                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-orange-50 border border-orange-100 transition-all hover:shadow-sm">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 text-lg">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 text-lg">
                       🔥
                     </div>
                     <div className="flex flex-col">
@@ -261,9 +261,9 @@ const CodingContributionGraph = () => {
                 </div>
 
                 {/* Longest Streak */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50 border border-blue-100 transition-all hover:shadow-sm">
+                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-blue-50 border border-blue-100 transition-all hover:shadow-sm">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-lg">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-lg">
                       🚀
                     </div>
                     <div className="flex flex-col">
@@ -274,9 +274,9 @@ const CodingContributionGraph = () => {
                 </div>
 
                 {/* Total Active Days */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-50 border border-emerald-100 transition-all hover:shadow-sm">
+                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-100 transition-all hover:shadow-sm">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500 text-lg">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500 text-lg">
                       📅
                     </div>
                     <div className="flex flex-col">
@@ -306,8 +306,9 @@ export default function CodingPage() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSort, setActiveSort] = useState("Default");
+  const [mobileBlockModal, setMobileBlockModal] = useState({ visible: false });
+  console.log("Forcing recompile - modal state is initialized:", mobileBlockModal);
   const [solvedPerSubject, setSolvedPerSubject] = useState({});
-  const isMobile = useResponsive();
 
   const categoryTabs = [
     { name: "Non-Technical", path: "/student/practice-new/nontechnical" },
@@ -344,60 +345,13 @@ export default function CodingPage() {
     );
   }
 
-  if (isMobile) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.categoryTabs}>
-          {categoryTabs.map((tab) => {
-            const isActive = tab.path === "/student/practice-new/coding";
-            return (
-              <button
-                key={tab.path}
-                onClick={() => router.push(tab.path)}
-                className={`${styles.tabBtn} ${isActive ? styles.activeTab : ""}`}
-              >
-                {tab.name}
-              </button>
-            );
-          })}
-        </div>
-        <div className={styles.contentArea}>
-          {subjects && subjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 py-6">
-              {subjects.map((subject, index) => (
-                <CodingPracticeCard 
-                  key={subject._id || index}
-                  title={subject.title || subject.key}
-                  category="CODING"
-                  totalQuestions={subject.totalQuestions || 0}
-                  solvedCount={solvedPerSubject[subject._id] || 0}
-                  onStart={() => {
-                    router.push(`/student/practice-new/coding/problems?subjectId=${subject._id}&title=${subject.title || subject.key}`);
-                  }}
-                  onSolveNow={() => {
-                    router.push(`/student/practice-new/coding/workspace?subjectId=${subject._id}&title=${subject.title || subject.key}`);
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <Result
-              status="404"
-              title="No Practice Data Found"
-              subTitle="Sorry, there is no practice data available right now."
-            />
-          )}
-        </div>
-      </div>
-    );
-  }
 
   const dynamicSubtitle = subjects?.map(s => s.title).join(" • ") || "Master your programming skills with our coding challenges.";
   const totalTopics = subjects?.length || 0;
   const totalQuestions = subjects?.reduce((acc, curr) => acc + (curr.totalQuestions || 0), 0) || 0;
 
   const RightStats = (
-    <div className="flex items-center gap-6 lg:gap-10 text-white mr-2 lg:mr-8">
+    <div className="hidden sm:flex items-center gap-6 lg:gap-10 text-white mr-2 lg:mr-8">
       <div className="flex flex-col items-center">
         <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalTopics}</span>
         <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">TOPICS</span>
@@ -427,19 +381,27 @@ export default function CodingPage() {
   }
 
   return (
+    <>
       <div className="flex flex-col h-full overflow-hidden bg-[#EFF5FB]">
         <div className="flex-shrink-0 bg-[#EFF5FB] shadow-sm">
           <StudentPageHeader 
-            title="Practice" 
-            subtitleSlot={<PracticeBannerTabs />}
+            title={
+              <div className="flex items-center gap-3">
+                <span>Practice</span>
+                <div className="sm:hidden -mt-1">
+                  <PracticeBannerTabs />
+                </div>
+              </div>
+            }
+            subtitleSlot={<div className="hidden sm:block"><PracticeBannerTabs /></div>}
             rightSlot={RightStats}
           />
           <div className="w-full relative z-[45]">
           
             {/* Dynamic Search Bar & Filter Section */}
-            <div className="px-4 lg:px-8 py-4 bg-white border-b border-[#e2e8f0]">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="relative w-full sm:max-w-md">
+            <div className="px-4 lg:px-8 py-3 bg-white border-b border-[#e2e8f0]">
+              <div className="flex flex-row justify-between items-center gap-2 sm:gap-4">
+                <div className="relative flex-1 sm:max-w-md">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
@@ -453,34 +415,54 @@ export default function CodingPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
-                  <span className="text-[13px] font-semibold text-gray-500 whitespace-nowrap">Sort by:</span>
-                  <Select
-                    value={activeSort}
-                    onChange={(value) => setActiveSort(value)}
-                    bordered={false}
-                    className="!text-[14px] !font-bold"
-                    style={{ minWidth: 100 }}
-                    options={[
-                      { value: 'Default', label: 'Default' },
-                      { value: 'A-Z', label: 'A-Z' },
-                      { value: 'a-z', label: 'a-z' }
-                    ]}
-                  />
+                <div className="flex items-center justify-center w-auto shrink-0 bg-transparent px-0 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:border sm:border-gray-200 shadow-none">
+                  <Dropdown 
+                    menu={{ 
+                      items: [
+                        { key: 'Default', label: 'Default' },
+                        { key: 'A-Z', label: 'A-Z' },
+                        { key: 'a-z', label: 'a-z' }
+                      ],
+                      onClick: (e) => setActiveSort(e.key) 
+                    }} 
+                    trigger={['click']}
+                  >
+                    <div className="sm:hidden flex items-center justify-center cursor-pointer p-2 bg-white border border-gray-300 rounded-lg shadow-sm">
+                      <ListFilter className="w-5 h-5 text-gray-600" />
+                    </div>
+                  </Dropdown>
+                  
+                  <div className="hidden sm:flex items-center gap-2">
+                    <span className="text-[13px] font-semibold text-gray-500 whitespace-nowrap">Sort by:</span>
+                    <Select
+                      value={activeSort}
+                      onChange={(value) => setActiveSort(value)}
+                      bordered={false}
+                      className="!text-[14px] !font-bold"
+                      style={{ minWidth: 100 }}
+                      options={[
+                        { value: 'Default', label: 'Default' },
+                        { value: 'A-Z', label: 'A-Z' },
+                        { value: 'a-z', label: 'a-z' }
+                      ]}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-
-            <CodingContributionGraph />
           </div>
         </div>
 
-        {filteredSubjects && filteredSubjects.length > 0 ? (
-        <div className={`bg-[#EFF5FB] px-4 lg:px-8 pt-6 pb-6 flex-1 overflow-y-auto`}>
-          <AnimatePresence mode="wait">
-            <motion.div 
-              key={searchTerm}
-              className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6"
+        <div className={`bg-[#EFF5FB] flex-1 overflow-y-auto`}>
+          <div className="hidden sm:block">
+            <CodingContributionGraph />
+          </div>
+          {filteredSubjects && filteredSubjects.length > 0 ? (
+          <div className="px-4 lg:px-8 pt-4 pb-6">
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={searchTerm}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -494,7 +476,14 @@ export default function CodingPage() {
                   totalQuestions={subject.totalQuestions || 0}
                   solvedCount={solvedPerSubject[subject._id] || 0}
                   onStart={() => {
-                    router.push(`/student/practice-new/coding/problems?subjectId=${subject._id}&title=${subject.title || subject.key}`);
+                    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                    const isMobileAgent = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+                    
+                    if (isMobileAgent) {
+                      setMobileBlockModal({ visible: true });
+                    } else {
+                      router.push(`/student/practice-new/coding/problems?subjectId=${subject._id}&title=${subject.title || subject.key}`);
+                    }
                   }}
                   onSolveNow={() => {
                     router.push(`/student/practice-new/coding/workspace?subjectId=${subject._id}&title=${encodeURIComponent(subject.title || subject.key)}`);
@@ -503,15 +492,50 @@ export default function CodingPage() {
               ))}
             </motion.div>
           </AnimatePresence>
+          </div>
+          ) : (
+            <div className="py-10">
+              <Result
+                status="404"
+                title="No Subjects Found"
+                subTitle="Sorry, there are no subjects available for this topic right now."
+              />
+            </div>
+          )}
         </div>
-        ) : (
-          <Result
-            status="404"
-            title="No Subjects Found"
-            subTitle="Sorry, there are no subjects available for this topic right now."
-          />
-        )}
       </div>
-    
+      
+      <Modal
+        title={
+          <div className="flex items-center gap-2 text-slate-800">
+            <MonitorSmartphone className="text-blue-500" size={20} />
+            <span>Desktop View Required</span>
+          </div>
+        }
+        open={mobileBlockModal.visible}
+        onCancel={() => setMobileBlockModal({ visible: false })}
+        footer={null}
+        centered
+        width={400}
+      >
+        <div className="text-slate-600 mt-4 leading-relaxed">
+          <p className="mb-4">
+            You can view the coding problems on this mobile device by switching your browser to <strong>"Desktop Site"</strong> or <strong>"Desktop Mode"</strong>.
+          </p>
+          <p className="mb-4">
+            However, please note that you <strong>cannot attempt or write code</strong> on a mobile or tablet device.
+          </p>
+          <p>
+            To fully attempt the problems, you must log in from a physical desktop or laptop computer.
+          </p>
+          <button 
+            className="w-full mt-6 py-2.5 bg-blue-50 text-blue-600 font-bold rounded-lg hover:bg-blue-100 transition-colors"
+            onClick={() => setMobileBlockModal({ visible: false })}
+          >
+            Got it
+          </button>
+        </div>
+      </Modal>
+    </>
   );
 }

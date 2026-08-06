@@ -238,7 +238,7 @@ const QuestionCard = ({ question, index }) => {
             <div className={qStyles.tagsRow}>
               <span className={qStyles.tagCategory}>Comprehension</span>
               <span className={qStyles.tagScore}>
-                <StarOutlined /> {parseInt(question?.questionContentArr?.reduce((total, q) => total + parseInt(q?.scoreSettings?.pointsForCorrectAns || q?.scoreSettings?.PointsForEachCorrectAnswer || 0), 0) || 0)} pts
+                <StarOutlined /> {parseFloat(question?.questionContentArr?.reduce((total, q) => total + parseFloat(q?.scoreSettings?.pointsForCorrectAns || q?.scoreSettings?.PointsForEachCorrectAnswer || 0), 0) || 0)} pts
               </span>
               <span className={qStyles.tagType}>{question?.questionType}</span>
             </div>
@@ -290,7 +290,7 @@ const QuestionCard = ({ question, index }) => {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                       <span style={{ fontWeight: 700, color: "#1e293b" }}>{`Sub-Question ${eleIndex + 1}`}</span>
                       <div className={qStyles.tagsRow} style={{ scale: "0.9" }}>
-                        <span className={qStyles.tagScore}><StarOutlined /> {parseInt(eachEle?.scoreSettings?.pointsForCorrectAns || eachEle?.scoreSettings?.PointsForEachCorrectAnswer || 0)} pts</span>
+                        <span className={qStyles.tagScore}><StarOutlined /> {parseFloat(eachEle?.scoreSettings?.pointsForCorrectAns || eachEle?.scoreSettings?.PointsForEachCorrectAnswer || 0)} pts</span>
                         <span className={qStyles.tagType}>{eachEle?.questionType}</span>
                         <div onClick={(e) => e.stopPropagation()}>
                           <Dropdown
@@ -427,7 +427,7 @@ const QuestionCard = ({ question, index }) => {
     .filter((k) => k.includes("option"))
     .sort((a, b) => parseInt(a.replace("option", ""), 10) - parseInt(b.replace("option", ""), 10));
 
-  const score = parseInt(
+  const score = parseFloat(
     question?.scoreSettings?.pointsForCorrectAns ||
     question?.scoreSettings?.PointsForEachCorrectAnswer ||
     question?.questionScore ||

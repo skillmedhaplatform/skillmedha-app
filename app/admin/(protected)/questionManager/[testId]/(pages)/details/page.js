@@ -185,85 +185,86 @@ export default function Page() {
 
   return (
     <div className={styles.detailsContainer}>
-      <div className={styles.formContainer}>
-        {/* Skill Title */}
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Skill Title *</label>
-          <Input
-            placeholder={
-              isNewSkill ? "Enter skill title" : "Update skill title"
-            }
-            size="large"
-            value={formData.title}
-            onChange={(e) => handleInputChange("title", e.target.value)}
-            status={errors.title ? "error" : ""}
-          />
-          {errors.title && (
-            <span className={styles.errorText}>{errors.title}</span>
-          )}
-        </div>
-
-        {/* Skill Description */}
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Description</label>
-          <Input.TextArea
-            placeholder={
-              isNewSkill
-                ? "Enter skill description (optional)"
-                : "Update skill description"
-            }
-            size="large"
-            value={formData.description}
-            onChange={(e) => handleInputChange("description", e.target.value)}
-            status={errors.description ? "error" : ""}
-            rows={4}
-          />
-          {formData.description.length > 0 &&
-            formData.description.length < 10 && (
-              <span className={styles.errorText}>
-                {10 - formData.description.length} more characters required
-              </span>
-            )}
-        </div>
-      </div>
-
-      {/* Submit Button */}
-      <div className={styles.formGroupButton}>
-        <Tooltip
-          title={
-            !isNewSkill
-              ? !canAccess(PERMISSION_VALUES.EDIT)
-                ? getPermissionMessage(PERMISSION_VALUES.EDIT)
-                : ""
-              : !canAccess(PERMISSION_VALUES.CREATE)
-              ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-              : ""
-          }
-        >
-          <span>
-            <Button
-              type="primary"
-              size="large"
-              onClick={handleSubmit}
-              loading={currentOperationState?.status === "pending"}
-              disabled={
-                currentOperationState?.status === "pending" ||
-                (isNewSkill
-                  ? !canAccess(PERMISSION_VALUES.CREATE)
-                  : !canAccess(PERMISSION_VALUES.EDIT))
+      <div className={styles.cardContainer}>
+        <div className={styles.formContainer}>
+          {/* Skill Title */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Skill Title *</label>
+            <Input
+              placeholder={
+                isNewSkill ? "Enter skill title" : "Update skill title"
               }
-              style={{ width: "100%" }}
-            >
-              {currentOperationState?.status === "pending"
-                ? isNewSkill
-                  ? "Adding Skill..."
-                  : "Updating Skill..."
-                : isNewSkill
-                ? "Add Skill"
-                : "Update Skill"}
-            </Button>
-          </span>
-        </Tooltip>
+              size="large"
+              value={formData.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              status={errors.title ? "error" : ""}
+            />
+            {errors.title && (
+              <span className={styles.errorText}>{errors.title}</span>
+            )}
+          </div>
+
+          {/* Skill Description */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Description</label>
+            <Input.TextArea
+              placeholder={
+                isNewSkill
+                  ? "Enter skill description (optional)"
+                  : "Update skill description"
+              }
+              size="large"
+              value={formData.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
+              status={errors.description ? "error" : ""}
+              rows={4}
+            />
+            {formData.description.length > 0 &&
+              formData.description.length < 10 && (
+                <span className={styles.errorText}>
+                  {10 - formData.description.length} more characters required
+                </span>
+              )}
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <div className={styles.formGroupButton}>
+          <Tooltip
+            title={
+              !isNewSkill
+                ? !canAccess(PERMISSION_VALUES.EDIT)
+                  ? getPermissionMessage(PERMISSION_VALUES.EDIT)
+                  : ""
+                : !canAccess(PERMISSION_VALUES.CREATE)
+                ? getPermissionMessage(PERMISSION_VALUES.CREATE)
+                : ""
+            }
+          >
+            <span>
+              <Button
+                type="primary"
+                size="large"
+                onClick={handleSubmit}
+                loading={currentOperationState?.status === "pending"}
+                disabled={
+                  currentOperationState?.status === "pending" ||
+                  (isNewSkill
+                    ? !canAccess(PERMISSION_VALUES.CREATE)
+                    : !canAccess(PERMISSION_VALUES.EDIT))
+                }
+              >
+                {currentOperationState?.status === "pending"
+                  ? isNewSkill
+                    ? "Adding Skill..."
+                    : "Updating Skill..."
+                  : isNewSkill
+                  ? "Add Skill"
+                  : "Update Skill"}
+              </Button>
+            </span>
+          </Tooltip>
+        </div>
       </div>
     </div>
   );
