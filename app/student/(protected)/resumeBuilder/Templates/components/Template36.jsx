@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
@@ -71,7 +71,7 @@ const Template36 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-2">
               {combinedExperience.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-3">
+                  <div className="flex flex-wrap items-center gap-x-3">
                     <h3 className="m-0 text-[0.82rem] font-bold text-[#111827]">
                       {item?.role}{item?.company ? <span className="font-normal text-[#4b5563]"> · {item.company}</span> : ""}
                     </h3>
@@ -92,7 +92,7 @@ const Template36 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-2">
               {projectDetails.filter((item) => item?.project).map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-3">
+                  <div className="flex flex-wrap items-center gap-x-3">
                     <h3 className="m-0 text-[0.82rem] font-bold text-[#111827]">
                       {item.project}{item?.company ? <span className="font-normal text-[#4b5563]"> — {item.company}</span> : ""}
                     </h3>
@@ -126,7 +126,7 @@ const Template36 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <SectionTitle>Education</SectionTitle>
             <div className="space-y-1">
               {educationDetails.map((item, index) => (
-                <div key={index} className="flex flex-wrap justify-between gap-x-3">
+                <div key={index} className="flex flex-wrap items-center gap-x-3">
                   <h3 className="m-0 text-[0.8rem] font-bold text-[#111827]">
                     {item?.type}{item?.school ? `, ${item.school}` : ""}
                   </h3>

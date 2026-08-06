@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { GithubOutlined, GlobalOutlined, LinkedinFilled, MailOutlined, PhoneFilled } from "@ant-design/icons";
@@ -97,7 +97,7 @@ const Template1 = ({ downloadImage, resumeTemplateRef, activeSection, isGenerati
           <div className="space-y-4">
             {educationDetails.map((item, index) => (
               <div key={index} className="border-l-2 border-[#d1d5db] pl-4">
-                <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <div>
                     <h3 className="m-0 text-[1.05rem] font-semibold">{item?.type || "Course"}</h3>
                     <p className="m-0 text-[0.95rem] text-[#4b5563]">{item?.school || item?.board}</p>
@@ -122,7 +122,7 @@ const Template1 = ({ downloadImage, resumeTemplateRef, activeSection, isGenerati
           <div className="space-y-4">
             {workExperience.map((item, index) => (
               <div key={index}>
-                <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <div>
                     <h3 className="m-0 text-[1.05rem] font-semibold">{item?.role}</h3>
                     <p className="m-0 text-[0.95rem] text-[#4b5563]">{item?.company}</p>
@@ -147,7 +147,7 @@ const Template1 = ({ downloadImage, resumeTemplateRef, activeSection, isGenerati
           <div className="space-y-4">
             {internshipDetails.map((item, index) => (
               <div key={index}>
-                <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <div>
                     <h3 className="m-0 text-[1.05rem] font-semibold">{item?.role}</h3>
                     <p className="m-0 text-[0.95rem] text-[#4b5563]">{item?.company}</p>

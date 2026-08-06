@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -172,7 +172,7 @@ const S = {
   smallTitle: { fontWeight: 700, color: "#1a1a1a" },
 };
 
-const Template9 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
+const Template9 = ({ resumeTemplateRef, activeSection, isGeneratingPdf, accent: accentProp, onAccentChange }) => {
   const {
     basicDetails,
     educationDetails,
@@ -187,7 +187,9 @@ const Template9 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
     volunteerings,
   } = useResumeTemplateData();
   const profileBase64 = useProfileImage(basicDetails?.profile);
-  const [accent, setAccent] = useState(COLOR_OPTIONS[0].value);
+  const [internalAccent, setInternalAccent] = useState(COLOR_OPTIONS[0].value);
+  const accent = accentProp ?? internalAccent;
+  const setAccent = onAccentChange ?? setInternalAccent;
 
   const profileLinks = links.filter((item) => item?.link);
   const linkIcons = [<LinkedinFilled key="li" />, <GithubOutlined key="gh" />, <GlobalOutlined key="gl" />];

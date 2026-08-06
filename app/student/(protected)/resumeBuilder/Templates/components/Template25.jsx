@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
@@ -162,8 +162,8 @@ const Template25 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {combinedExperience.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h3 className="m-0 text-[0.9rem] font-bold text-black">
+                  <div className="flex flex-wrap items-center gap-x-3">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.9rem] font-bold text-black">
                       {item?.role}
                       {item?.company && <span className="font-normal text-[#4d4d4d]">, {item.company}</span>}
                     </h3>
@@ -184,8 +184,8 @@ const Template25 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {projectDetails.filter((p) => p?.project).map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h3 className="m-0 text-[0.9rem] font-bold text-black">
+                  <div className="flex flex-wrap items-center gap-x-3">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.9rem] font-bold text-black">
                       {item.project}
                       {item?.company && <span className="font-normal text-[#4d4d4d]"> — {item.company}</span>}
                     </h3>

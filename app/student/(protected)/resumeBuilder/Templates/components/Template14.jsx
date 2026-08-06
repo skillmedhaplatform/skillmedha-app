@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import {
@@ -83,10 +83,10 @@ const S = {
   contactLink: { display: "flex", alignItems: "center", gap: "6px", textDecoration: "none", color: SUBTLE },
   summary: { marginTop: "16px", maxWidth: "680px", fontSize: "15.5px", lineHeight: 1.6 },
   section: { marginBottom: "28px" },
-  entryTitle: { margin: 0, fontSize: "17px", fontWeight: 700, color: INK },
+  entryTitle: { margin: 0, flex: "1 1 auto", minWidth: 0, fontSize: "17px", fontWeight: 700, color: INK },
   entrySub: { fontWeight: 400, fontStyle: "italic", color: SUBTLE },
-  entryDate: { margin: 0, whiteSpace: "nowrap", fontFamily: "Arial, sans-serif", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: ACCENT },
-  entryHeadRow: { display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", columnGap: "16px" },
+  entryDate: { margin: 0, flexShrink: 0, marginLeft: "auto", whiteSpace: "nowrap", fontFamily: "Arial, sans-serif", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: ACCENT },
+  entryHeadRow: { display: "flex", flexWrap: "wrap", alignItems: "center", columnGap: "16px" },
 };
 
 const Template6 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
@@ -133,7 +133,7 @@ const Template6 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
   return (
     <div ref={resumeTemplateRef} style={{ ...S.page, maxWidth: isGeneratingPdf ? "800px" : "100%" }}>
       <header id="section-Basic-Details" style={highlight("Basic Details")}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "24px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           <div style={{ minWidth: 0 }}>
             <h1 style={S.name}>
               {basicDetails?.firstName} {basicDetails?.middleName} {basicDetails?.lastName}

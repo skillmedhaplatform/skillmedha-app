@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
@@ -96,11 +96,11 @@ const Template15 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {workExperience.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.95rem] font-bold uppercase text-[#1c1917]">{item?.company}</h3>
                     {item?.city && <p className="m-0 text-[0.85rem] font-bold text-[#1c1917]">{item.city}</p>}
                   </div>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <p className="m-0 text-[0.85rem] italic font-['Inter',sans-serif] text-[#57534e]">{item?.role}</p>
                     <p className="m-0 text-[0.82rem] italic font-['Inter',sans-serif] text-[#57534e] whitespace-nowrap">
                       {item?.start || item?.startDate} – {item?.end || item?.endDate || "Present"}
@@ -121,11 +121,11 @@ const Template15 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {internshipDetails.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.95rem] font-bold uppercase text-[#1c1917]">{item?.company}</h3>
                     {item?.city && <p className="m-0 text-[0.85rem] font-bold text-[#1c1917]">{item.city}</p>}
                   </div>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <p className="m-0 text-[0.85rem] italic font-['Inter',sans-serif] text-[#57534e]">{item?.role}</p>
                     <p className="m-0 text-[0.82rem] italic font-['Inter',sans-serif] text-[#57534e] whitespace-nowrap">
                       {item?.start || item?.startDate} – {item?.end || item?.endDate || "Present"}
@@ -146,7 +146,7 @@ const Template15 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-4">
               {projectDetails.filter((item) => item?.project).map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.95rem] font-bold uppercase text-[#1c1917]">{item.project}</h3>
                     <p className="m-0 text-[0.82rem] italic font-['Inter',sans-serif] text-[#57534e] whitespace-nowrap">
                       {item?.startDate} {item?.endDate ? `– ${item.endDate}` : ""}
@@ -166,11 +166,11 @@ const Template15 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
             <div className="space-y-3">
               {educationDetails.map((item, index) => (
                 <div key={index}>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <h3 className="m-0 text-[0.95rem] font-bold uppercase text-[#1c1917]">{item?.school || item?.board}</h3>
                     {item?.city && <p className="m-0 text-[0.85rem] font-bold text-[#1c1917]">{item.city}</p>}
                   </div>
-                  <div className="flex flex-wrap justify-between gap-x-4">
+                  <div className="flex flex-wrap items-center gap-x-4">
                     <p className="m-0 text-[0.85rem] italic font-['Inter',sans-serif] text-[#57534e]">{item?.type}</p>
                     <p className="m-0 text-[0.82rem] italic font-['Inter',sans-serif] text-[#57534e] whitespace-nowrap">
                       {item?.endDate || item?.startDate}

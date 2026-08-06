@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { MailOutlined, PhoneFilled, EnvironmentOutlined, GlobalOutlined, LinkedinFilled } from "@ant-design/icons";
@@ -130,8 +130,8 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
               <div className="space-y-4">
                 {workExperience.map((item, index) => (
                   <div key={index}>
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                      <h3 className="m-0 text-[0.9rem] font-bold" style={{ color: INK }}>
+                    <div className="flex flex-wrap items-center gap-x-3">
+                      <h3 className="flex-1 min-w-0 m-0 text-[0.9rem] font-bold" style={{ color: INK }}>
                         {item?.role}{item?.company ? <span className="font-normal" style={{ color: SUBTLE }}>, {item.company}</span> : ""}
                       </h3>
                       <span className="text-[0.76rem] font-semibold whitespace-nowrap" style={{ color: ACCENT }}>{dateRange(item)}</span>
@@ -151,8 +151,8 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
               <div className="space-y-4">
                 {internshipDetails.map((item, index) => (
                   <div key={index}>
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                      <h3 className="m-0 text-[0.9rem] font-bold" style={{ color: INK }}>
+                    <div className="flex flex-wrap items-center gap-x-3">
+                      <h3 className="flex-1 min-w-0 m-0 text-[0.9rem] font-bold" style={{ color: INK }}>
                         {item?.role}{item?.company ? <span className="font-normal" style={{ color: SUBTLE }}>, {item.company}</span> : ""}
                       </h3>
                       <span className="text-[0.76rem] font-semibold whitespace-nowrap" style={{ color: ACCENT }}>{dateRange(item)}</span>
@@ -206,8 +206,8 @@ const Template18 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
               <div className="space-y-4">
                 {projectDetails.filter((p) => p?.project).map((item, index) => (
                   <div key={index}>
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                      <h3 className="m-0 text-[0.88rem] font-bold" style={{ color: INK }}>{item.project}</h3>
+                    <div className="flex flex-wrap items-center gap-x-3">
+                      <h3 className="flex-1 min-w-0 m-0 text-[0.88rem] font-bold" style={{ color: INK }}>{item.project}</h3>
                       <span className="text-[0.76rem] whitespace-nowrap" style={{ color: ACCENT }}>
                         {item?.startDate} {item?.endDate ? `– ${item.endDate}` : ""}
                       </span>

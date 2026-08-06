@@ -293,8 +293,17 @@ export default function Page() {
 
       const element = contentRef.current;
 
+      // html2pdf locks its capture container to the PDF page's printable width
+      // (A4 width minus left/right margin, in mm). html2canvas evaluates CSS
+      // media queries against `windowWidth`, which defaults to the live
+      // browser window's width — not this narrow printable width — so
+      // responsive breakpoints (antd Row/Col) pick the wrong layout unless we
+      // explicitly match it here.
+      const pdfMarginMM = [10, 10, 10, 10];
+      const pdfInnerWidthPx = Math.floor((210 - pdfMarginMM[1] - pdfMarginMM[3]) * (96 / 25.4));
+
       const opt = {
-        margin: [10, 10, 10, 10],
+        margin: pdfMarginMM,
         filename: `${customFilename}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
@@ -302,7 +311,7 @@ export default function Page() {
           useCORS: true,
           letterRendering: true,
           scrollY: 0,
-          windowWidth: element.scrollWidth,
+          windowWidth: pdfInnerWidthPx,
         },
         jsPDF: {
           unit: "mm",
@@ -310,7 +319,7 @@ export default function Page() {
           orientation: "portrait",
         },
         pagebreak: {
-          mode: ["avoid-all", "css", "legacy"],
+          mode: ["css"],
           before: ".page-break-before",
           after: ".page-break-after",
           avoid: ".no-page-break",
@@ -418,83 +427,72 @@ export default function Page() {
               border: "1px solid #d9d9d9"
             }}
           >
-            <Row gutter={[24, 24]} align="middle">
-              <Col xs={24} lg={12}>
-                <Row gutter={[16, 16]}>
-                  {/* Pass/Fail & Grade Grid */}
-                  {PassScore > 0 && (
-                    <Col xs={12} sm={8}>
-                      <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
-                        <Statistic
-                          title="Status"
-                          value={(score?.totalScore < PassScore) ? "Fail" : "Pass"}
-                          valueStyle={{ color: (score?.totalScore < PassScore) ? '#cf1322' : '#3f8600', fontWeight: 'bold' }}
-                          prefix={(score?.totalScore < PassScore) ? <CloseCircleOutlined /> : <CheckCircleOutlined />}
-                        />
-                      </Card>
-                    </Col>
-                  )}
-                  {testValues?.grade && (
-                    <Col xs={12} sm={8}>
-                      <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
-                        <Statistic title="Grade" value={testValues?.grade} valueStyle={{ fontWeight: 'bold' }} />
-                      </Card>
-                    </Col>
-                  )}
-                  <Col xs={12} sm={8}>
-                    <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
-                      <Statistic
-                        title="Percentage"
-                        value={parseFloat(((parseInt(score?.totalScore || 0)) / (parseInt(totalMarks) || 1)) * 100).toFixed(0)}
-                        suffix="%"
-                        valueStyle={{ fontWeight: 'bold' }}
-                      />
-                    </Card>
-                  </Col>
-
-                  {/* Stats Grid */}
-                  <Col xs={12} sm={8}>
-                    <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
-                      <Statistic title="Score" value={`${score?.totalScore || 0} / ${totalMarks || 0}`} prefix={<CheckCircleOutlined style={{ color: '#1890ff' }} />} />
-                    </Card>
-                  </Col>
-                  <Col xs={12} sm={8}>
-                    <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
-                      <Statistic title="Time Taken" value={parseFloat((score?.totalTimeTaken || 0) / 60).toFixed(2)} suffix="mins" prefix={<ClockCircleOutlined style={{ color: '#faad14' }} />} />
-                    </Card>
-                  </Col>
-                  <Col xs={12} sm={8}>
-                    <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
-                      <Statistic
-                        title="Speed"
-                        value={parseInt(score?.averageTimeTaken || 0) > 60 ? parseFloat((score?.averageTimeTaken || 0) / 60).toFixed(1) : parseInt(score?.averageTimeTaken || 0)}
-                        suffix={parseInt(score?.averageTimeTaken || 0) > 60 ? "mins/Q" : "secs/Q"}
-                        prefix={<ThunderboltOutlined style={{ color: '#eb2f96' }} />}
-                        valueStyle={{ fontSize: '1.2rem' }}
-                      />
-                    </Card>
-                  </Col>
-                </Row>
-              </Col>
-
-              <Col xs={24} lg={12}>
-                <Card bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ width: '180px', height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {chartData?.series?.length > 0 ? (
-                        <DonutChart id={"testResult"} series={chartData?.series} labels={chartData?.labels} colors={chartData?.colors} />
-                      ) : null}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '160px' }}>
-                      <Text><Badge color="#87CC85" /> Correct: <strong>{parseFloat(((chartData?.series?.[0] || 0) / Math.max(parseInt(ques?.length || 1), 1)) * 100).toFixed(1)}%</strong></Text>
-                      <Text><Badge color="#E43E5F" /> Incorrect: <strong>{parseFloat(((chartData?.series?.[1] || 0) / Math.max(parseInt(ques?.length || 1), 1)) * 100).toFixed(1)}%</strong></Text>
-                      <Text><Badge color="#869DF0" /> Unattempted: <strong>{parseFloat(((chartData?.series?.[2] || 0) / Math.max(parseInt(ques?.length || 1), 1)) * 100).toFixed(1)}%</strong></Text>
-                      <Text><Badge color="#4e4eff" /> Not Answered: <strong>{parseFloat(((chartData?.series?.[3] || 0) / Math.max(parseInt(ques?.length || 1), 1)) * 100).toFixed(1)}%</strong></Text>
-                    </div>
-                  </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                gap: '16px',
+                marginBottom: '16px',
+              }}
+            >
+              {/* Pass/Fail & Grade Grid */}
+              {PassScore > 0 && (
+                <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
+                  <Statistic
+                    title="Status"
+                    value={(score?.totalScore < PassScore) ? "Fail" : "Pass"}
+                    valueStyle={{ color: (score?.totalScore < PassScore) ? '#cf1322' : '#3f8600', fontWeight: 'bold' }}
+                    prefix={(score?.totalScore < PassScore) ? <CloseCircleOutlined /> : <CheckCircleOutlined />}
+                  />
                 </Card>
-              </Col>
-            </Row>
+              )}
+              {testValues?.grade && (
+                <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
+                  <Statistic title="Grade" value={testValues?.grade} valueStyle={{ fontWeight: 'bold' }} />
+                </Card>
+              )}
+              <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
+                <Statistic
+                  title="Percentage"
+                  value={parseFloat(((parseInt(score?.totalScore || 0)) / (parseInt(totalMarks) || 1)) * 100).toFixed(0)}
+                  suffix="%"
+                  valueStyle={{ fontWeight: 'bold' }}
+                />
+              </Card>
+
+              {/* Stats Grid */}
+              <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
+                <Statistic title="Score" value={`${score?.totalScore || 0} / ${totalMarks || 0}`} prefix={<CheckCircleOutlined style={{ color: '#1890ff' }} />} />
+              </Card>
+              <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
+                <Statistic title="Time Taken" value={parseFloat((score?.totalTimeTaken || 0) / 60).toFixed(2)} suffix="mins" prefix={<ClockCircleOutlined style={{ color: '#faad14' }} />} />
+              </Card>
+              <Card size="small" bordered={false} style={{ background: 'rgba(255,255,255,0.7)', height: '100%', border: "1px solid #d9d9d9" }}>
+                <Statistic
+                  title="Speed"
+                  value={parseInt(score?.averageTimeTaken || 0) > 60 ? parseFloat((score?.averageTimeTaken || 0) / 60).toFixed(1) : parseInt(score?.averageTimeTaken || 0)}
+                  suffix={parseInt(score?.averageTimeTaken || 0) > 60 ? "mins/Q" : "secs/Q"}
+                  prefix={<ThunderboltOutlined style={{ color: '#eb2f96' }} />}
+                  valueStyle={{ fontSize: '1.2rem' }}
+                />
+              </Card>
+            </div>
+
+            <Card bordered={false} style={{ background: 'rgba(255,255,255,0.7)', border: "1px solid #d9d9d9" }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+                <div style={{ flex: '0 0 180px', width: '180px', height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {chartData?.series?.length > 0 ? (
+                    <DonutChart id={"testResult"} series={chartData?.series} labels={chartData?.labels} colors={chartData?.colors} width={180} height={180} />
+                  ) : null}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '160px' }}>
+                  <Text><Badge color="#87CC85" /> Correct: <strong>{parseFloat(((chartData?.series?.[0] || 0) / Math.max(parseInt(ques?.length || 1), 1)) * 100).toFixed(1)}%</strong></Text>
+                  <Text><Badge color="#E43E5F" /> Incorrect: <strong>{parseFloat(((chartData?.series?.[1] || 0) / Math.max(parseInt(ques?.length || 1), 1)) * 100).toFixed(1)}%</strong></Text>
+                  <Text><Badge color="#869DF0" /> Unattempted: <strong>{parseFloat(((chartData?.series?.[2] || 0) / Math.max(parseInt(ques?.length || 1), 1)) * 100).toFixed(1)}%</strong></Text>
+                  <Text><Badge color="#4e4eff" /> Not Answered: <strong>{parseFloat(((chartData?.series?.[3] || 0) / Math.max(parseInt(ques?.length || 1), 1)) * 100).toFixed(1)}%</strong></Text>
+                </div>
+              </div>
+            </Card>
           </Card>
         </div>
         <div className="page-break-after" style={{ pageBreakAfter: 'always', breakAfter: 'page' }}></div>
