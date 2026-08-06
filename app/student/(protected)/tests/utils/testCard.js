@@ -7,7 +7,6 @@ import { fetchTestData } from "@/redux/slices/assessmentsSlice/testSlice";
 import { getLstorage } from "@/universalUtils/windowMW";
 import { parseIfJson } from "../reusable_comp/jsonparse";
 import useResponsive from "@/hooks/useResponsive";
-import ResponsiveAssessmentCard from "@/mobile_views/assessments/ResponsiveAssessmentCard";
 import { HelpCircle, Clock, Star, Play } from 'lucide-react';
 
 const formatTimeDiff = (timeDifference) => {
@@ -381,33 +380,6 @@ export default function TestCard({
   let firstSentence = cleanDesc;
   if (firstSentence.includes('.')) {
     firstSentence = firstSentence.split('.')[0] + '.';
-  }
-
-  if (isResponsive) {
-    return (
-      <ResponsiveAssessmentCard
-        title={isAssessment ? testData?.jobTitle : testData?.title}
-        thumbnail={testData?.thumbnail}
-        category={testData?.category?.[0]?.name}
-        accessType={testData?.access?.type}
-        questionCount={ques?.length || 0}
-        duration={isAssessment ? (testData?.testDurationDisplay?.hours ? `${testData.testDurationDisplay.hours}H : ${testData.testDurationDisplay.minutes}M` : "NA") : (testDuration?.val1 ? `${testDuration.val1}H : ${testDuration.val2}M` : "NA")}
-        shortDescription={firstSentence}
-        countdown={countdowns[index]}
-        isExpired={countdowns[index] === "Expired"}
-        isTestActivated={isTestActivated}
-        activationCountdown={activationCountdown}
-        totalMarks={totalMarks}
-        isAssessment={isAssessment}
-        renderButton={renderMainButton}
-        status={attemptsDone > 0 ? "Completed" : testData?.status}
-        createdAt={testData?.createdAt}
-        attemptsDone={attemptsDone}
-        maxAttempts={attemptsPerRespondentValue}
-        percentage={percentage}
-        score={score}
-      />
-    );
   }
 
   return (

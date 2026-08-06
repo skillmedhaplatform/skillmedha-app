@@ -1,24 +1,34 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 16px;
   background-color: #EFF5FB !important;
   width: 100%;
   min-height: 100%;
-  overflow: visible;
+  box-sizing: border-box;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 // 1. Welcome Card (Dark Blue Background)
 .welcomeCard {
   background-color: #0c1e40;
-  border-radius: 12px;
-  padding: 16px 18px 18px;
+  border-radius: 0 0 0px 0px;
+  padding: 20px 16px 20px;
   color: #ffffff;
   box-shadow: 0 4px 6px -1px rgba(12, 30, 64, 0.15), 0 2px 4px -1px rgba(12, 30, 64, 0.06);
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 
   .welcomeHeader {
     display: flex;
@@ -31,6 +41,8 @@
       font-size: 20px;
       font-weight: 800;
       letter-spacing: -0.5px;
+      text-decoration: none !important;
+      border-bottom: none !important;
     }
 
     .date {
@@ -70,7 +82,9 @@
   gap: 6px;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border: 1px solid transparent;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   min-height: 110px;
 
   &:active {
@@ -106,9 +120,6 @@
   }
 
   &.coursesCard {
-    background-color: #f0fdf4;
-    border-color: #dcfce7;
-
     .iconWrapper {
       background-color: #dcfce7;
       color: #15803d;
@@ -116,9 +127,6 @@
   }
 
   &.internshipsCard {
-    background-color: #eff6ff;
-    border-color: #dbeafe;
-
     .iconWrapper {
       background-color: #dbeafe;
       color: #1e69da;
@@ -126,9 +134,6 @@
   }
 
   &.practiceCard {
-    background-color: #fff7ed;
-    border-color: #ffedd5;
-
     .iconWrapper {
       background-color: #ffedd5;
       color: #ea580c;
@@ -136,91 +141,7 @@
   }
 }
 
-// 3. Summary Grid (Horizontal flex stack)
-.summaryGrid {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 10px !important;
-  width: 100% !important;
-}
-
-.summaryCard {
-  flex: 1 !important;
-  min-width: 0 !important;
-  border-radius: 12px;
-  padding: 14px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border: 1px solid transparent;
-  min-height: 110px;
-
-  &:active {
-    transform: scale(0.97);
-  }
-
-  .iconWrapper {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    margin-bottom: 2px;
-  }
-
-  .tileLabel {
-    font-size: 11px;
-    font-weight: 700;
-    color: #475569;
-    text-align: center;
-    line-height: 1.25;
-    word-break: break-word;
-  }
-
-  .tileValue {
-    font-size: 22px;
-    font-weight: 800;
-    color: #0f172a;
-    line-height: 1;
-    margin-top: 2px;
-  }
-
-  &.perfCard {
-    background-color: #eff6ff;
-    border-color: #dbeafe;
-
-    .iconWrapper {
-      background-color: #dbeafe;
-      color: #1e69da;
-    }
-  }
-
-  &.noticeCard {
-    background-color: #fffbeb;
-    border-color: #fef3c7;
-
-    .iconWrapper {
-      background-color: #fef3c7;
-      color: #ea580c;
-    }
-  }
-
-  &.achCard {
-    background-color: #f0fdf4;
-    border-color: #dcfce7;
-
-    .iconWrapper {
-      background-color: #dcfce7;
-      color: #15803d;
-    }
-  }
-}
+// Removed summary grid
 
 // 4. Section Headers
 .sectionHeader {
@@ -242,6 +163,24 @@
     color: #64748b;
     font-weight: 500;
   }
+}
+
+// 4.1 Continue Learning Container (White Box)
+.continueLearningContainer {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
 }
 
 // 5. Continue Learning Card

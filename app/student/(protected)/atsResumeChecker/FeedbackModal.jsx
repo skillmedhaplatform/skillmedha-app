@@ -113,7 +113,7 @@ const FeedbackModal = ({ open, onClose }) => {
       onCancel={onClose}
       footer={null}
       width={560}
-      destroyOnClose
+      destroyOnHidden
     >
       {isSubmitted ? (
         <div className="text-center py-8 px-4">

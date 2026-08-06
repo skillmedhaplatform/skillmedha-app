@@ -58,7 +58,7 @@ const ProfessionalSummary = ({ data, updateField }) => {
           <BulbOutlined className="text-[#1E69DA] text-[16px]" />
           <h4 className="text-[13px] font-bold text-[#0f172a] m-0">Tips to write a great summary</h4>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           <div className="flex gap-2.5">
             <div className="w-7 h-7 rounded-full bg-[#eff6ff] flex items-center justify-center shrink-0">
               <AimOutlined className="text-[#1E69DA] text-[12px]" />

@@ -76,7 +76,7 @@ const Links = ({ links, updateLink, addLink, removeLink }) => {
 
       <div className="flex flex-col gap-3 w-full">
         {links.map((item, index) => (
-          <div className="flex w-full items-center gap-4 bg-white p-4 rounded-xl border border-[#e2e8f0]" key={index}>
+          <div className="flex flex-wrap xl:flex-nowrap w-full items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#e2e8f0]" key={index}>
             <Dropdown menu={getMenuItems(index)} trigger={['click']} placement="bottomLeft">
               <div className="flex items-center justify-center cursor-pointer hover:bg-slate-50 p-1 rounded">
                 <HolderOutlined className="text-[#94a3b8] text-[18px] hover:text-[#64748b]" />
@@ -89,7 +89,7 @@ const Links = ({ links, updateLink, addLink, removeLink }) => {
               </div>
             </Dropdown>
 
-            <div className="flex-1 grid grid-cols-2 gap-4">
+            <div className="w-full xl:w-auto xl:flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 order-last xl:order-none">
               <div className="col-span-1 flex flex-col">
                 <label className="text-[13px] font-semibold mb-1.5 text-[#64748b]">Label</label>
                 <div className="relative">
@@ -118,7 +118,7 @@ const Links = ({ links, updateLink, addLink, removeLink }) => {
               </div>
             </div>
             
-            <div className="flex items-center justify-center mt-6 ml-2">
+            <div className="flex items-center justify-center ml-auto xl:ml-2">
               <button
                 className="w-9 h-9 flex items-center justify-center rounded-lg bg-transparent border-none text-[#ef4444] hover:bg-[#fef2f2] transition-all cursor-pointer"
                 onClick={(e) => {

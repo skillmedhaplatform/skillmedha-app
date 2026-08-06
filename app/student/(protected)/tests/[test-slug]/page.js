@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import SocketComp from "./socket";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
+import DeviceBlocker from "@/modules/student/components/DeviceBlocker";
 
 import FormPage from "./utils/formPage";
 import { v4 as uuid } from "uuid";
@@ -474,7 +475,7 @@ export default function Page() {
 
   if (isMobile) {
     return (
-      <>
+      <DeviceBlocker strict={true}>
         <MobileTestPage
           testData={testData}
           hasTestDataLoaded={hasTestDataLoaded}
@@ -510,12 +511,13 @@ export default function Page() {
           setVerifying={setVerifying}
           setPreviewing={setPreviewing}
         />
-      </>
+      </DeviceBlocker>
     );
   }
 
   return (
-    <div className="bg-[#EFF5FB] h-screen overflow-hidden flex flex-col">
+    <DeviceBlocker strict={true}>
+      <div className="absolute inset-0 flex flex-col bg-[#EFF5FB] overflow-hidden overscroll-none">
       <StudentPageHeader title="Test" />
       <div className="bg-white px-6 py-4 flex items-center justify-start gap-4 z-10 sticky top-0 shadow-sm border-b border-gray-100">
         <Button
@@ -663,5 +665,6 @@ export default function Page() {
       />
         </div>
     </div>
+    </DeviceBlocker>
   );
 }

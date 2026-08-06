@@ -12,6 +12,7 @@ import { Button, Checkbox, message, Select } from "antd";
 import axios from "axios";
 import { MdDelete } from "react-icons/md";
 import { updateStudent } from "@/redux/slices/student";
+import { useMobileEditBlocker } from "../_utils/useMobileEditBlocker";
 import TextEditor from "@/universalUtils/editor";
 import { getLstorage } from "@/universalUtils/windowMW";
 import PhoneInput from 'react-phone-input-2';
@@ -48,6 +49,7 @@ export default function StudentProfileForm() {
   const [initialVal, setIntialVal] = useState({});
   const [isCurrentSameAsPermanent, setIsCurrentSameAsPermanent] =
     useState(false);
+  const { checkEditClick, MobileEditModal } = useMobileEditBlocker();
 
   // Initialize formData and checkbox flag whenever studentDetails changes
   useEffect(() => {
@@ -219,7 +221,9 @@ export default function StudentProfileForm() {
       setIsCurrentSameAsPermanent(sameAsCurrent);
       setIsEditing(false);
     } else {
-      setIsEditing(true);
+      checkEditClick(() => {
+        setIsEditing(true);
+      });
     }
   };
 
@@ -626,6 +630,7 @@ export default function StudentProfileForm() {
           </div>
         )}
       </form>
+      {MobileEditModal}
     </div>
   );
 }

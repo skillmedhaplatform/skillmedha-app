@@ -22,6 +22,7 @@ import ProfessionalSummary from "./components/ProfessionalSummary";
 import { HiOutlineDocumentText } from "react-icons/hi2";
 import {
   FileTextOutlined,
+  FileProtectOutlined,
   CheckCircleOutlined,
   CheckCircleFilled,
   UnorderedListOutlined,
@@ -32,6 +33,7 @@ import {
   EditOutlined,
   DownloadOutlined,
   FilterOutlined,
+  BarChartOutlined,
   ArrowLeftOutlined,
   CloseOutlined,
   InfoCircleOutlined,
@@ -57,6 +59,7 @@ import {
 } from "@ant-design/icons";
 
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { restUrl } from "@/config/urls";
 // import html2pdf from "html2pdf.js";
@@ -67,6 +70,7 @@ import { Button, message, Modal } from "antd";
 import CertificateDetails from "./components/certificateDetails";
 import useResponsive from "@/hooks/useResponsive";
 import MobileResumeBuilder from "@/mobile_views/resumeBuilder/MobileResumeBuilder";
+import ATSCheckerSection from "./components/ATSCheckerSection";
 const Template1 = dynamic(() => import("./Templates/components/Template3"), {
   ssr: false,
 });
@@ -266,7 +270,7 @@ const TEMPLATE_OPTIONS = [
 const AccordionSection = ({ title, icon, isExpanded, onToggle, onRemove, children }) => {
   return (
     <div className="bg-white rounded-[8px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-[#e2e8f0] overflow-hidden mb-4 transition-all duration-300">
-      <div 
+      <div
         className="px-5 py-4 cursor-pointer flex items-center justify-between hover:bg-[#f8fafc] transition-colors"
         onClick={onToggle}
       >
@@ -276,7 +280,7 @@ const AccordionSection = ({ title, icon, isExpanded, onToggle, onRemove, childre
         </div>
         <div className="flex items-center gap-4">
           {onRemove && (
-            <button 
+            <button
               onClick={(e) => { e.stopPropagation(); onRemove(); }}
               className="text-[#ef4444] hover:text-[#dc2626] bg-transparent border-none cursor-pointer text-[13px] font-medium"
             >
@@ -285,7 +289,7 @@ const AccordionSection = ({ title, icon, isExpanded, onToggle, onRemove, childre
           )}
           <div className={`text-[#64748b] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
             <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
         </div>
@@ -300,6 +304,28 @@ const AccordionSection = ({ title, icon, isExpanded, onToggle, onRemove, childre
 };
 
 function Form() {
+  const scrollContainerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+  const handleMouseLeave = () => setIsDragging(false);
+  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseMove = (e) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+  const [loading, setLoading] = useState(false);
+  const nav = useRouter();
   useEffect(() => {
     if (typeof self === "undefined") return;
     // your code here that uses self
@@ -318,7 +344,7 @@ function Form() {
   //   profile: personalDetailsResumeBuilder?.value?.profile || "",
   // });
   const defaultSummary = "Motivated Computer Science graduate with a strong foundation in Java, Data Structures, SQL, and Web Development. Passionate about building user-friendly applications and continuously learning new technologies. Seeking an opportunity to contribute technical skills while growing as a software engineer.";
-  
+
   const getSummary = (val) => {
     if (!val) return defaultSummary;
     let v = val;
@@ -445,10 +471,10 @@ function Form() {
 
   // Track the template ID that the current state belongs to
   const currentStateTemplateRef = useRef(null);
-  
+
   // Track download status for the warning popup
   const [hasDownloaded, setHasDownloaded] = useState(false);
-    const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
+  const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && selectedTemplate) {
@@ -456,7 +482,7 @@ function Form() {
     }
   }, [selectedTemplate]);
 
-    // Removed step persistence to always show landing page on section open
+  // Removed step persistence to always show landing page on section open
 
 
   // Modal states
@@ -999,7 +1025,7 @@ function Form() {
     // This prevents overwriting the new template's draft with old template's state during transition
     if (currentStateTemplateRef.current !== selectedTemplate) return;
     if (!studentDetails || !selectedTemplate) return;
-    
+
     const draftKey = `resumeDraft_${selectedTemplate}`;
     const draftData = {
       basicDetails,
@@ -1016,7 +1042,7 @@ function Form() {
       visibleOptionalSections,
     };
     localStorage.setItem(draftKey, JSON.stringify(draftData));
-    
+
     // Track if they made changes after download
     if (hasDownloaded) {
       setHasUnsavedEdits(true);
@@ -1025,8 +1051,8 @@ function Form() {
       }
     }
   }, [
-    basicDetails, educationDetails, experienceDetails, internships, 
-    projectDetails, accDetails, skills, languages, links, 
+    basicDetails, educationDetails, experienceDetails, internships,
+    projectDetails, accDetails, skills, languages, links,
     certificates, volunteerings, visibleOptionalSections, selectedTemplate, studentDetails, hasDownloaded, step
   ]);
 
@@ -1482,7 +1508,7 @@ function Form() {
           anchor.click();
           anchor.remove();
           URL.revokeObjectURL(downloadUrl);
-          
+
           setHasDownloaded(true);
           setHasUnsavedEdits(false);
         } catch (downloadErr) {
@@ -1500,7 +1526,7 @@ function Form() {
     }
   };
 
-  const isMobile = useResponsive();
+  const isMobile = useResponsive(768);
 
   const hiddenExportTemplate = (
     <div
@@ -1519,6 +1545,239 @@ function Form() {
       />
     </div>
   );
+
+  if (step === 'ats_checker') {
+    return <ATSCheckerSection onBack={() => setStep('landing')} />;
+  }
+
+  if (step === 'landing') {
+    return (
+      <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-full overflow-hidden w-full">
+        <StudentPageHeader title="Resume Builder" subtitle="Create your professional resume" />
+        <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-0 pt-4 md:pt-6 lg:pt-6 flex flex-col items-center justify-start relative w-full h-full">
+          <div className="z-10 flex flex-col items-center w-full max-w-[1600px]">
+
+            {/* Steps Graphic Top Section */}
+            {/* Steps Graphic Top Section */}
+            <div className="w-full max-w-[1200px] mb-4 md:mb-2 relative block mt-2">
+
+              {/* Wavy SVG Line */}
+              <div className="absolute top-[64px] md:top-[87px] left-[12.5%] right-[12.5%] h-[16px] md:h-[24px] -z-10">
+                <svg width="100%" height="100%" viewBox="0 0 100 24" preserveAspectRatio="none" className="overflow-visible">
+                  <path
+                    d="M0,24 C 16.66,24 16.66,0 33.33,0 C 50,0 50,24 66.66,24 C 83.33,24 83.33,0 100,0 C 105,0 108,-4 110,-10"
+                    fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="3 3" strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              {/* Paper Plane */}
+              <div className="absolute top-[44px] md:top-[64px] right-[4%] scale-75 md:scale-100">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#818cf8" className="rotate-[-10deg]">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+              </div>
+
+              <div className="flex justify-between items-start w-full relative">
+                {/* Step 1 */}
+                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-1 md:px-2 mt-[16px] md:mt-[24px]">
+                  <div className="w-[44px] h-[44px] md:w-[64px] md:h-[64px] rounded-full bg-white flex items-center justify-center mb-3 md:mb-4 shadow-[0_4px_20px_rgba(59,130,246,0.12)] border border-[#eff6ff] relative">
+                    <div className="w-[32px] h-[32px] md:w-[50px] md:h-[50px] rounded-full bg-[#eff6ff] flex items-center justify-center border border-[#bfdbfe]">
+                      <HiOutlineDocumentText className="text-[16px] md:text-[24px] text-[#3b82f6]" />
+                    </div>
+                    {/* Sparkles */}
+                    <svg viewBox="0 0 24 24" fill="#bfdbfe" className="w-2 h-2 md:w-3 md:h-3 absolute -top-1 -left-2"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="#bfdbfe" className="w-3 h-3 md:w-4 md:h-4 absolute top-1 -right-3"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
+                  </div>
+                  <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-[#3b82f6] mb-2 md:mb-4 shadow-[0_0_0_3px_#EFF5FB] md:shadow-[0_0_0_5px_#EFF5FB]"></div>
+                  <h4 className="text-[10px] md:text-[14px] font-bold text-[#0f172a] mb-1 md:mb-2">1. Create / Upload</h4>
+                  <p className="text-[9px] md:text-[12px] text-[#64748b] leading-tight max-w-[160px] hidden md:block">Start by creating a new resume or uploading your existing one.</p>
+                </div>
+
+                {/* Step 2 */}
+                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-1 md:px-2 mt-[0px]">
+                  <div className="w-[44px] h-[44px] md:w-[64px] md:h-[64px] rounded-full bg-white flex items-center justify-center mb-3 md:mb-4 shadow-[0_4px_20px_rgba(34,197,94,0.12)] border border-[#f0fdf4] relative">
+                    <div className="w-[32px] h-[32px] md:w-[50px] md:h-[50px] rounded-full bg-[#f0fdf4] flex items-center justify-center border border-[#bbf7d0]">
+                      <EditOutlined className="text-[16px] md:text-[24px] text-[#22c55e]" />
+                    </div>
+                    {/* Sparkles */}
+                    <svg viewBox="0 0 24 24" fill="#bbf7d0" className="w-3 h-3 md:w-4 md:h-4 absolute -bottom-1 -left-3"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="#bbf7d0" className="w-2 h-2 md:w-3 md:h-3 absolute top-0 -right-2"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
+                  </div>
+                  <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-[#22c55e] mb-2 md:mb-4 shadow-[0_0_0_3px_#EFF5FB] md:shadow-[0_0_0_5px_#EFF5FB]"></div>
+                  <h4 className="text-[10px] md:text-[14px] font-bold text-[#0f172a] mb-1 md:mb-2">2. Customize</h4>
+                  <p className="text-[9px] md:text-[12px] text-[#64748b] leading-tight max-w-[160px] hidden md:block">Personalize your resume with our easy-to-use customization tools.</p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-1 md:px-2 mt-[16px] md:mt-[24px]">
+                  <div className="w-[44px] h-[44px] md:w-[64px] md:h-[64px] rounded-full bg-white flex items-center justify-center mb-3 md:mb-4 shadow-[0_4px_20px_rgba(168,85,247,0.12)] border border-[#faf5ff] relative">
+                    <div className="w-[32px] h-[32px] md:w-[50px] md:h-[50px] rounded-full bg-[#faf5ff] flex items-center justify-center border border-[#e9d5ff]">
+                      <StarOutlined className="text-[16px] md:text-[24px] text-[#a855f7]" />
+                    </div>
+                    {/* Sparkles */}
+                    <svg viewBox="0 0 24 24" fill="#e9d5ff" className="w-2 h-2 md:w-3 md:h-3 absolute -bottom-2 -left-1"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="#e9d5ff" className="w-3 h-3 md:w-4 md:h-4 absolute -top-2 -right-3"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
+                  </div>
+                  <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-[#a855f7] mb-2 md:mb-4 shadow-[0_0_0_3px_#EFF5FB] md:shadow-[0_0_0_5px_#EFF5FB]"></div>
+                  <h4 className="text-[10px] md:text-[14px] font-bold text-[#0f172a] mb-1 md:mb-2">3. Optimize</h4>
+                  <p className="text-[9px] md:text-[12px] text-[#64748b] leading-tight max-w-[160px] hidden md:block">Get AI suggestions to improve your content and stand out.</p>
+                </div>
+
+                {/* Step 4 */}
+                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-1 md:px-2 mt-[0px]">
+                  <div className="w-[44px] h-[44px] md:w-[64px] md:h-[64px] rounded-full bg-white flex items-center justify-center mb-3 md:mb-4 shadow-[0_4px_20px_rgba(249,115,22,0.12)] border border-[#fff7ed] relative">
+                    <div className="w-[32px] h-[32px] md:w-[50px] md:h-[50px] rounded-full bg-[#fff7ed] flex items-center justify-center border border-[#fed7aa]">
+                      <DownloadOutlined className="text-[16px] md:text-[24px] text-[#f59e0b]" />
+                    </div>
+                    {/* Sparkles */}
+                    <svg viewBox="0 0 24 24" fill="#fed7aa" className="w-3 h-3 md:w-4 md:h-4 absolute top-2 -left-4"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="#fed7aa" className="w-2 h-2 md:w-3 md:h-3 absolute -bottom-2 -right-1"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
+                  </div>
+                  <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-[#f59e0b] mb-2 md:mb-4 shadow-[0_0_0_3px_#EFF5FB] md:shadow-[0_0_0_5px_#EFF5FB]"></div>
+                  <h4 className="text-[10px] md:text-[14px] font-bold text-[#0f172a] mb-1 md:mb-2">4. Download</h4>
+                  <p className="text-[9px] md:text-[12px] text-[#64748b] leading-tight max-w-[160px] hidden md:block">Export your resume in PDF format and land your dream job.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Header Content */}
+            <div className="flex flex-col items-center gap-0 w-full mt-0">
+              <h2
+                className="text-[28px] md:text-[32px] font-bold text-[#0f172a] mt-0 mb-0 border-none pb-0 leading-tight"
+                style={{ border: 'none' }}
+              >
+                Let's get you started
+              </h2>
+              <p className="text-[#64748b] text-[15px] md:text-[16px] mt-1 mb-0">Choose the best way to build your resume</p>
+            </div>
+
+            {/* Main Action Cards (Wide Horizontal Style) */}
+            <div className="flex flex-wrap justify-center gap-5 w-full max-w-[1300px] mx-auto mt-2 mb-6 px-4">
+
+              {/* Upload Resume Card */}
+              <div
+                className="bg-white rounded-2xl p-4 md:p-6 w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] flex flex-row items-center gap-4 md:gap-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-[#3b82f6] border-y border-r border-[#e2e8f0] group relative overflow-hidden text-left"
+              >
+                {/* Icon */}
+                <div className="w-[48px] h-[48px] md:w-[64px] md:h-[64px] shrink-0 rounded-full bg-[#eff6ff] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                  <CloudUploadOutlined className="text-[22px] md:text-[28px] text-[#3b82f6]" />
+                </div>
+                {/* Text Content */}
+                <div className="flex flex-col flex-1">
+                  <h3 className="text-[15px] md:text-[17px] font-bold text-[#0f172a] mb-1 md:mb-2">Upload Resume</h3>
+                  <p className="text-[#64748b] text-[11px] md:text-[13px] leading-snug md:leading-relaxed mb-2 md:mb-6">Upload your current resume and improve it with our suggestions.</p>
+                  <span
+                    className="cursor-pointer text-[#3b82f6] font-semibold text-[13px] md:text-[15px] flex items-center justify-start gap-1 hover:gap-2 transition-all mt-auto md:pt-2"
+                    onClick={() => message.info("Upload Resume coming soon!")}
+                  >
+                    Upload & Enhance <span>→</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Create Resume Card */}
+              <div
+                className="bg-white rounded-2xl p-4 md:p-6 w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] flex flex-row items-center gap-4 md:gap-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-[#22c55e] border-y border-r border-[#e2e8f0] group relative overflow-hidden text-left"
+              >
+                {/* Icon */}
+                <div className="w-[48px] h-[48px] md:w-[64px] md:h-[64px] shrink-0 rounded-full bg-[#f0fdf4] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                  <FileAddOutlined className="text-[22px] md:text-[28px] text-[#22c55e]" />
+                </div>
+                {/* Text Content */}
+                <div className="flex flex-col flex-1">
+                  <h3 className="text-[15px] md:text-[17px] font-bold text-[#0f172a] mb-1 md:mb-2">Create New</h3>
+                  <p className="text-[#64748b] text-[11px] md:text-[13px] leading-snug md:leading-relaxed mb-2 md:mb-6">Build your resume from scratch using our step-by-step builder.</p>
+                  <span
+                    className="cursor-pointer text-[#22c55e] font-semibold text-[13px] md:text-[15px] flex items-center justify-start gap-1 hover:gap-2 transition-all mt-auto md:pt-2"
+                    onClick={() => {
+                      if (isMobile) {
+                        message.warning("This feature is available only for tablet or desktop view.");
+                      } else {
+                        setStep('templates_initial');
+                      }
+                    }}
+                  >
+                    Create From Scratch <span>→</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* ATS Checker Card */}
+                <div
+                  className="bg-white rounded-2xl p-4 md:p-6 w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] flex flex-row items-center gap-4 md:gap-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-[#f59e0b] border-y border-r border-[#e2e8f0] group relative overflow-hidden text-left"
+                >
+                  <div className="w-[48px] h-[48px] md:w-[64px] md:h-[64px] shrink-0 rounded-full bg-[#fffbeb] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                    <BarChartOutlined className="text-[22px] md:text-[28px] text-[#f59e0b]" />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <h3 className="text-[15px] md:text-[17px] font-bold text-[#0f172a] mb-1 md:mb-2">ATS Checker</h3>
+                    <p className="text-[#64748b] text-[11px] md:text-[13px] leading-snug md:leading-relaxed mb-2 md:mb-6">Scan your resume against job descriptions to get your ATS score.</p>
+                    <span
+                      className="cursor-pointer text-[#f59e0b] font-semibold text-[13px] md:text-[15px] flex items-center justify-start gap-1 hover:gap-2 transition-all mt-auto md:pt-2"
+                      onClick={() => setStep('ats_checker')}
+                    >
+                      Check Score <span>→</span>
+                    </span>
+                  </div>
+                </div>
+
+            </div>
+
+            {/* Bottom Features Banner */}
+            <div className="bg-white rounded-2xl p-4 md:p-6 w-full shadow-sm border border-[#e2e8f0] grid grid-cols-2 lg:flex lg:flex-row items-start md:items-center justify-between gap-4 md:gap-6 lg:gap-4 max-w-[1000px] mb-4">
+              
+              {/* Feature 1 */}
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                <div className="w-[36px] h-[36px] md:w-[48px] md:h-[48px] rounded-xl bg-[#faf5ff] flex items-center justify-center border border-[#f3e8ff] shrink-0">
+                  <FileTextOutlined className="text-[16px] md:text-[20px] text-[#a855f7]" />
+                </div>
+                <div className="flex flex-col">
+                  <h4 className="text-[12px] md:text-[15px] font-bold text-[#0f172a] mb-0.5 md:mb-1">ATS Friendly</h4>
+                  <p className="text-[#64748b] text-[10px] md:text-[13px] leading-snug">Templates that pass ATS checks</p>
+                </div>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                <div className="w-[36px] h-[36px] md:w-[48px] md:h-[48px] rounded-xl bg-[#f0fdf4] flex items-center justify-center border border-[#dcfce7] shrink-0">
+                  <StarOutlined className="text-[16px] md:text-[20px] text-[#22c55e]" />
+                </div>
+                <div className="flex flex-col">
+                  <h4 className="text-[12px] md:text-[15px] font-bold text-[#0f172a] mb-0.5 md:mb-1">Professional Templates</h4>
+                  <p className="text-[#64748b] text-[10px] md:text-[13px] leading-snug">Choose from a variety of professional designs</p>
+                </div>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                <div className="w-[36px] h-[36px] md:w-[48px] md:h-[48px] rounded-xl bg-[#eff6ff] flex items-center justify-center border border-[#dbeafe] shrink-0">
+                  <EditOutlined className="text-[16px] md:text-[20px] text-[#3b82f6]" />
+                </div>
+                <div className="flex flex-col">
+                  <h4 className="text-[12px] md:text-[15px] font-bold text-[#0f172a] mb-0.5 md:mb-1">Easy to Customize</h4>
+                  <p className="text-[#64748b] text-[10px] md:text-[13px] leading-snug">Edit and customize your resume with ease</p>
+                </div>
+              </div>
+
+              {/* Feature 4 */}
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+                <div className="w-[36px] h-[36px] md:w-[48px] md:h-[48px] rounded-xl bg-[#fff7ed] flex items-center justify-center border border-[#ffedd5] shrink-0">
+                  <DownloadOutlined className="text-[16px] md:text-[20px] text-[#f97316]" />
+                </div>
+                <div className="flex flex-col">
+                  <h4 className="text-[12px] md:text-[15px] font-bold text-[#0f172a] mb-0.5 md:mb-1">Export & Download</h4>
+                  <p className="text-[#64748b] text-[10px] md:text-[13px] leading-snug">Download your resume in PDF format</p>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isMobile) {
     return (
@@ -1581,285 +1840,69 @@ function Form() {
 
 
 
-  if (step === 'landing') {
-    return (
-      <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-screen overflow-hidden w-full">
-        <StudentPageHeader title="Resume Builder" subtitle="Create your professional resume" />
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 pt-8 md:pt-12 lg:pt-20 flex flex-col items-center justify-start relative w-full h-full">
-          <div className="z-10 flex flex-col items-center w-full max-w-[1600px]">
-
-            {/* Steps Graphic Top Section */}
-            <div className="w-full max-w-[1200px] mb-8 relative hidden md:block mt-4">
-
-              {/* Wavy SVG Line */}
-              <div className="absolute top-[87px] left-[12.5%] right-[12.5%] h-[24px] -z-10">
-                <svg width="100%" height="100%" viewBox="0 0 100 24" preserveAspectRatio="none" className="overflow-visible">
-                  <path
-                    d="M0,24 C 16.66,24 16.66,0 33.33,0 C 50,0 50,24 66.66,24 C 83.33,24 83.33,0 100,0 C 105,0 108,-4 110,-10"
-                    fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="3 3" strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-
-              {/* Paper Plane */}
-              <div className="absolute top-[64px] right-[4%]">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#818cf8" className="rotate-[-10deg]">
-                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                </svg>
-              </div>
-
-              <div className="flex justify-between items-start w-full relative">
-                {/* Step 1 */}
-                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-2 mt-[24px]">
-                  <div className="w-[64px] h-[64px] rounded-full bg-white flex items-center justify-center mb-4 shadow-[0_4px_20px_rgba(59,130,246,0.12)] border border-[#eff6ff] relative">
-                    <div className="w-[50px] h-[50px] rounded-full bg-[#eff6ff] flex items-center justify-center border border-[#bfdbfe]">
-                      <HiOutlineDocumentText className="text-[24px] text-[#3b82f6]" />
-                    </div>
-                    {/* Sparkles */}
-                    <svg viewBox="0 0 24 24" fill="#bfdbfe" className="w-3 h-3 absolute -top-1 -left-2"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                    <svg viewBox="0 0 24 24" fill="#bfdbfe" className="w-4 h-4 absolute top-1 -right-3"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                  </div>
-                  <div className="w-3.5 h-3.5 rounded-full bg-[#3b82f6] mb-4 shadow-[0_0_0_5px_#EFF5FB]"></div>
-                  <h4 className="text-[14px] font-bold text-[#0f172a] mb-2">1. Create / Upload</h4>
-                  <p className="text-[12px] text-[#64748b] leading-relaxed max-w-[160px]">Start by creating a new resume or uploading your existing one.</p>
-                </div>
-
-                {/* Step 2 */}
-                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-2 mt-[0px]">
-                  <div className="w-[64px] h-[64px] rounded-full bg-white flex items-center justify-center mb-4 shadow-[0_4px_20px_rgba(34,197,94,0.12)] border border-[#f0fdf4] relative">
-                    <div className="w-[50px] h-[50px] rounded-full bg-[#f0fdf4] flex items-center justify-center border border-[#bbf7d0]">
-                      <EditOutlined className="text-[24px] text-[#22c55e]" />
-                    </div>
-                    {/* Sparkles */}
-                    <svg viewBox="0 0 24 24" fill="#bbf7d0" className="w-4 h-4 absolute -bottom-1 -left-3"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                    <svg viewBox="0 0 24 24" fill="#bbf7d0" className="w-3 h-3 absolute top-0 -right-2"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                  </div>
-                  <div className="w-3.5 h-3.5 rounded-full bg-[#22c55e] mb-4 shadow-[0_0_0_5px_#EFF5FB]"></div>
-                  <h4 className="text-[14px] font-bold text-[#0f172a] mb-2">2. Customize</h4>
-                  <p className="text-[12px] text-[#64748b] leading-relaxed max-w-[160px]">Personalize your resume with our easy-to-use customization tools.</p>
-                </div>
-
-                {/* Step 3 */}
-                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-2 mt-[24px]">
-                  <div className="w-[64px] h-[64px] rounded-full bg-white flex items-center justify-center mb-4 shadow-[0_4px_20px_rgba(168,85,247,0.12)] border border-[#faf5ff] relative">
-                    <div className="w-[50px] h-[50px] rounded-full bg-[#faf5ff] flex items-center justify-center border border-[#e9d5ff]">
-                      <StarOutlined className="text-[24px] text-[#a855f7]" />
-                    </div>
-                    {/* Sparkles */}
-                    <svg viewBox="0 0 24 24" fill="#e9d5ff" className="w-3 h-3 absolute -bottom-2 -left-1"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                    <svg viewBox="0 0 24 24" fill="#e9d5ff" className="w-4 h-4 absolute -top-2 -right-3"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                  </div>
-                  <div className="w-3.5 h-3.5 rounded-full bg-[#a855f7] mb-4 shadow-[0_0_0_5px_#EFF5FB]"></div>
-                  <h4 className="text-[14px] font-bold text-[#0f172a] mb-2">3. Optimize</h4>
-                  <p className="text-[12px] text-[#64748b] leading-relaxed max-w-[160px]">Get AI suggestions to improve your content and stand out.</p>
-                </div>
-
-                {/* Step 4 */}
-                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-2 mt-[0px]">
-                  <div className="w-[64px] h-[64px] rounded-full bg-white flex items-center justify-center mb-4 shadow-[0_4px_20px_rgba(249,115,22,0.12)] border border-[#fff7ed] relative">
-                    <div className="w-[50px] h-[50px] rounded-full bg-[#fff7ed] flex items-center justify-center border border-[#fed7aa]">
-                      <DownloadOutlined className="text-[24px] text-[#f59e0b]" />
-                    </div>
-                    {/* Sparkles */}
-                    <svg viewBox="0 0 24 24" fill="#fed7aa" className="w-4 h-4 absolute top-2 -left-4"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                    <svg viewBox="0 0 24 24" fill="#fed7aa" className="w-3 h-3 absolute -bottom-2 -right-1"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                  </div>
-                  <div className="w-3.5 h-3.5 rounded-full bg-[#f59e0b] mb-4 shadow-[0_0_0_5px_#EFF5FB]"></div>
-                  <h4 className="text-[14px] font-bold text-[#0f172a] mb-2">4. Download</h4>
-                  <p className="text-[12px] text-[#64748b] leading-relaxed max-w-[160px]">Export your resume in PDF format and land your dream job.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Header Content */}
-            <div className="flex flex-col items-center gap-0 w-full mt-0">
-              <h2
-                className="text-[28px] md:text-[36px] font-bold text-[#0f172a] mt-0 mb-0 border-none pb-0 leading-tight"
-                style={{ border: 'none' }}
-              >
-                Let's get you started
-              </h2>
-              <p className="text-[#64748b] text-[16px] md:text-[17px] mt-2 mb-0">Choose the best way to build your resume</p>
-            </div>
-
-            {/* Main Action Cards (Wide Horizontal Style) */}
-            <div className="flex flex-col lg:flex-row gap-5 w-full max-w-[1300px] justify-center mt-8 mb-8 px-4">
-
-              {/* Upload Resume Card */}
-                <div
-                  className="bg-white rounded-2xl p-6 flex-1 flex flex-col lg:flex-row items-center gap-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-[#3b82f6] border-y border-r border-[#e2e8f0] group relative overflow-hidden text-center lg:text-left"
-                >
-                  {/* Icon */}
-                  <div className="w-[64px] h-[64px] shrink-0 rounded-full bg-[#eff6ff] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                    <CloudUploadOutlined className="text-[28px] text-[#3b82f6]" />
-                  </div>
-                  {/* Text Content */}
-                  <div className="flex flex-col flex-1">
-                    <h3 className="text-[17px] font-bold text-[#0f172a] mb-2">Upload Resume</h3>
-                    <p className="text-[#64748b] text-[13px] leading-relaxed mb-6">Upload your current resume and improve it with our suggestions.</p>
-                    <span
-                      className="cursor-pointer text-[#3b82f6] font-semibold text-[15px] flex items-center justify-center lg:justify-start gap-1 hover:gap-2 transition-all mt-auto pt-2"
-                      onClick={() => message.info("Upload Resume coming soon!")}
-                    >
-                      Upload & Enhance <span>→</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Create Resume Card */}
-                <div
-                  className="bg-white rounded-2xl p-6 flex-1 flex flex-col lg:flex-row items-center gap-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-[#22c55e] border-y border-r border-[#e2e8f0] group relative overflow-hidden text-center lg:text-left"
-                >
-                  {/* Icon */}
-                  <div className="w-[64px] h-[64px] shrink-0 rounded-full bg-[#f0fdf4] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                    <FileAddOutlined className="text-[28px] text-[#22c55e]" />
-                  </div>
-                  {/* Text Content */}
-                  <div className="flex flex-col flex-1">
-                    <h3 className="text-[17px] font-bold text-[#0f172a] mb-2">Create New</h3>
-                    <p className="text-[#64748b] text-[13px] leading-relaxed mb-6">Build your resume from scratch using our step-by-step builder.</p>
-                    <span
-                      className="cursor-pointer text-[#22c55e] font-semibold text-[15px] flex items-center justify-center lg:justify-start gap-1 hover:gap-2 transition-all mt-auto pt-2"
-                      onClick={() => setStep('templates_initial')}
-                    >
-                      Create From Scratch <span>→</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Continue Editing Card */}
-                <div
-                  className="bg-white rounded-2xl p-6 flex-1 flex flex-col lg:flex-row items-center gap-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-[#a855f7] border-y border-r border-[#e2e8f0] group relative overflow-hidden text-center lg:text-left"
-                >
-                  {/* Icon */}
-                  <div className="w-[64px] h-[64px] shrink-0 rounded-full bg-[#faf5ff] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                    <EditOutlined className="text-[28px] text-[#a855f7]" />
-                  </div>
-                  {/* Text Content */}
-                  <div className="flex flex-col flex-1">
-                    <h3 className="text-[17px] font-bold text-[#0f172a] mb-2">Continue Editing</h3>
-                    <p className="text-[#64748b] text-[13px] leading-relaxed mb-6">Pick up where you left off and update your existing resume.</p>
-                    <span
-                      className="cursor-pointer text-[#a855f7] font-semibold text-[15px] flex items-center justify-center lg:justify-start gap-1 hover:gap-2 transition-all mt-auto pt-2"
-                      onClick={() => {
-                        const hasDrafts = Object.keys(localStorage).some(k => k.startsWith('resumeDraft_'));
-                        if (hasDrafts) {
-                          setStep('continue_editing');
-                        } else {
-                          setStep('templates_initial');
-                        }
-                      }}
-                    >
-                      Resume Editing <span>→</span>
-                    </span>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Bottom Features Banner */}
-              <div className="bg-white rounded-2xl p-5 md:p-6 w-full shadow-sm border border-[#e2e8f0] flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 max-w-[1000px]">
-
-                {/* Feature 1 */}
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="w-[38px] h-[38px] shrink-0 rounded-full bg-[#faf5ff] flex items-center justify-center mt-0.5">
-                    <FileTextOutlined className="text-[16px] text-[#a855f7]" />
-                  </div>
-                  <div>
-                    <h4 className="text-[15px] font-bold text-[#0f172a] mb-0.5 whitespace-nowrap">ATS Friendly</h4>
-                    <p className="text-[13px] text-[#64748b] leading-tight">Templates that pass ATS checks</p>
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="hidden md:block w-[1px] h-10 bg-[#e2e8f0]"></div>
-
-                {/* Feature 2 */}
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="w-[38px] h-[38px] shrink-0 rounded-full bg-[#f0fdf4] flex items-center justify-center mt-0.5">
-                    <StarOutlined className="text-[16px] text-[#22c55e]" />
-                  </div>
-                  <div>
-                    <h4 className="text-[15px] font-bold text-[#0f172a] mb-0.5 whitespace-nowrap">Professional Templates</h4>
-                    <p className="text-[13px] text-[#64748b] leading-tight">Choose from a variety of professional designs</p>
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="hidden md:block w-[1px] h-10 bg-[#e2e8f0]"></div>
-
-                {/* Feature 3 */}
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="w-[38px] h-[38px] shrink-0 rounded-full bg-[#eff6ff] flex items-center justify-center mt-0.5">
-                    <EditOutlined className="text-[16px] text-[#3b82f6]" />
-                  </div>
-                  <div>
-                    <h4 className="text-[15px] font-bold text-[#0f172a] mb-0.5 whitespace-nowrap">Easy to Customize</h4>
-                    <p className="text-[13px] text-[#64748b] leading-tight">Edit and customize your resume with ease</p>
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="hidden md:block w-[1px] h-10 bg-[#e2e8f0]"></div>
-
-                {/* Feature 4 */}
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="w-[38px] h-[38px] shrink-0 rounded-full bg-[#fff7ed] flex items-center justify-center mt-0.5">
-                    <DownloadOutlined className="text-[16px] text-[#f97316]" />
-                  </div>
-                  <div>
-                    <h4 className="text-[15px] font-bold text-[#0f172a] mb-0.5 whitespace-nowrap">Export & Download</h4>
-                    <p className="text-[13px] text-[#64748b] leading-tight">Download your resume in PDF format</p>
-                  </div>
-                </div>
-              </div>
-
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (step === 'templates_initial') {
-    const filteredTemplates = activeCategory === 'All Templates' 
-      ? TEMPLATE_OPTIONS 
+    const filteredTemplates = activeCategory === 'All Templates'
+      ? TEMPLATE_OPTIONS
       : TEMPLATE_OPTIONS.filter(t => getTemplateCategory(t.id) === activeCategory);
 
     return (
-      <div className="flex flex-col gap-0 relative bg-[#F8FAFC] h-screen overflow-hidden">
+      <div className="flex flex-col gap-0 relative bg-[#F8FAFC] h-[calc(100vh-70px)] overflow-hidden">
         <StudentPageHeader
           title="Choose a Template"
           subtitle="Pick a design that fits your style and make it yours"
         />
-        
+
         {/* Categories Bar */}
         <div className="bg-white border-b border-[#e2e8f0] px-4 md:px-8 py-3 flex items-center shadow-sm z-10 shrink-0 gap-6">
-          <button 
+          <button
             onClick={() => setStep('landing')}
             className="flex items-center gap-2 text-[#475569] hover:text-[#3b82f6] transition-colors text-[14px] font-medium bg-transparent border-none shadow-none shrink-0 cursor-pointer p-0"
           >
             <ArrowLeftOutlined /> Back
           </button>
-          
-          <div className="flex items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden flex-1">
+
+          <div
+            ref={scrollContainerRef}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeave}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+            className="flex items-center gap-2 overflow-x-auto flex-1 min-w-0 pb-1 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#94a3b8]"
+          >
             {["All Templates", "Modern", "Minimal", "Professional", "Creative"].map(cat => (
-              <button 
+              <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-[14px] whitespace-nowrap transition-colors ${
-                  activeCategory === cat 
-                    ? "text-[#3b82f6] bg-[#eff6ff] font-semibold" 
+                style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
+                className={`px-4 py-1.5 rounded-full text-[14px] whitespace-nowrap transition-colors ${activeCategory === cat
+                    ? "text-[#3b82f6] bg-[#eff6ff] font-semibold"
                     : "text-[#64748b] hover:text-[#0f172a] font-medium"
-                }`}
+                  }`}
               >
                 {cat}
               </button>
             ))}
           </div>
 
-          <button className="flex items-center gap-2 text-[#475569] hover:bg-[#f1f5f9] px-3 py-1.5 rounded-md transition-colors text-[14px] font-medium border border-[#e2e8f0] shrink-0">
-            <FilterOutlined /> Filter
-          </button>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => {
+                const hasDrafts = Object.keys(localStorage).some(k => k.startsWith('resumeDraft_'));
+                if (hasDrafts) {
+                  setStep('continue_editing');
+                } else {
+                  message.info("No saved drafts found. Please create a new resume.");
+                }
+              }}
+              className="flex items-center gap-2 text-[#a855f7] bg-[#faf5ff] hover:bg-[#f3e8ff] px-4 py-1.5 rounded-md transition-colors text-[14px] font-semibold border border-[#e9d5ff]"
+            >
+              <EditOutlined /> Continue Editing
+            </button>
+            <button className="flex items-center gap-2 text-[#475569] hover:bg-[#f1f5f9] px-3 py-1.5 rounded-md transition-colors text-[14px] font-medium border border-[#e2e8f0]">
+              <FilterOutlined /> Filter
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1] hover:[&::-webkit-scrollbar-thumb]:bg-[#94a3b8]">
@@ -1908,7 +1951,7 @@ function Form() {
             const templateObj = TEMPLATE_OPTIONS.find(t => t.id === previewTemplate);
             const label = templateObj ? templateObj.label : "Template";
             const category = getTemplateCategory(previewTemplate);
-            
+
             if (category === 'Modern') {
               return { name: label, category, desc: "A clean and elegant two-column layout with a sidebar for your details and a clear content area to highlight your experience.", highlights: ["Professional two-column layout", "Sidebar for contact, education & skills", "Clean typography and spacing", "Easy to customize"], bestFor: ["Developers", "Engineers", "IT Professionals"] };
             } else if (category === 'Minimal') {
@@ -1925,8 +1968,8 @@ function Form() {
               {/* Fullscreen Overlay */}
               {isFullscreen && (
                 <div className="fixed inset-0 z-[9999] bg-[#0f172a] overflow-auto flex justify-center items-start py-12">
-                  <button 
-                    onClick={() => setIsFullscreen(false)} 
+                  <button
+                    onClick={() => setIsFullscreen(false)}
                     className="fixed top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors z-50 cursor-pointer border-none"
                   >
                     <FullscreenExitOutlined className="text-[24px]" />
@@ -1947,7 +1990,7 @@ function Form() {
               {/* Normal Modal */}
               <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-[#0f172a]/80 backdrop-blur-sm transition-opacity ${isFullscreen ? 'opacity-0 pointer-events-none' : ''}`} onClick={() => setPreviewTemplate(null)}>
                 <div className="relative bg-white shadow-2xl flex flex-col overflow-hidden transition-all duration-300 w-full max-w-6xl rounded-2xl max-h-[85vh]" onClick={e => e.stopPropagation()}>
-                  
+
                   {/* Modal Header */}
                   <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-white z-10 shrink-0">
                     <div className="flex items-center gap-3">
@@ -1956,122 +1999,122 @@ function Form() {
                       </div>
                       <div className="flex flex-col">
                         <h3 className="text-[17px] font-bold text-[#0f172a] m-0 leading-tight">Template Preview</h3>
-                      <p className="text-[13px] text-[#64748b] m-0 leading-tight">See how your resume will look with this template.</p>
+                        <p className="text-[13px] text-[#64748b] m-0 leading-tight">See how your resume will look with this template.</p>
+                      </div>
                     </div>
-                  </div>
-                  <button 
-                    onClick={() => setPreviewTemplate(null)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] hover:text-[#0f172a] transition-colors border-none cursor-pointer"
-                  >
-                    <CloseOutlined className="text-[14px]" />
-                  </button>
-                </div>
-                
-                {/* Modal Body: Two columns */}
-                <div className="flex-1 flex overflow-hidden flex-col md:flex-row">
-                  
-                  {/* Left Column: Preview */}
-                  <div className="w-full md:w-[65%] bg-[#F8FAFC] p-6 overflow-y-auto [&::-webkit-scrollbar]:hidden flex justify-center items-start border-r border-[#e2e8f0]">
-                    <div 
-                      className="flex justify-center w-full"
-                      style={{ zoom: Math.max(65, previewScale) / 100 }}
+                    <button
+                      onClick={() => setPreviewTemplate(null)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] hover:text-[#0f172a] transition-colors border-none cursor-pointer"
                     >
-                      <div 
-                        className="transition-all duration-300 bg-white shadow-md origin-top overflow-hidden w-[800px] rounded-sm border border-[#e2e8f0]" 
-                        style={{ transform: `scale(${previewScale / Math.max(65, previewScale)})` }}
+                      <CloseOutlined className="text-[14px]" />
+                    </button>
+                  </div>
+
+                  {/* Modal Body: Two columns */}
+                  <div className="flex-1 flex overflow-hidden flex-col md:flex-row">
+
+                    {/* Left Column: Preview */}
+                    <div className="w-full md:w-[55%] lg:w-[65%] bg-[#F8FAFC] p-6 overflow-y-auto [&::-webkit-scrollbar]:hidden flex justify-center items-start border-r border-[#e2e8f0]">
+                      <div
+                        className="flex justify-center w-full"
+                        style={{ zoom: Math.max(65, previewScale) / 100 }}
                       >
-                        <div className="w-full">
-                        {(() => {
-                          const Tmp = templateComponents[previewTemplate] || Template1;
-                          return (
-                            <PreviewContext.Provider value={true}>
-                              <Tmp />
-                            </PreviewContext.Provider>
-                          );
-                        })()}
+                        <div
+                          className="transition-all duration-300 bg-white shadow-md origin-top overflow-hidden w-[800px] rounded-sm border border-[#e2e8f0]"
+                          style={{ transform: `scale(${previewScale / Math.max(65, previewScale)})` }}
+                        >
+                          <div className="w-full">
+                            {(() => {
+                              const Tmp = templateComponents[previewTemplate] || Template1;
+                              return (
+                                <PreviewContext.Provider value={true}>
+                                  <Tmp />
+                                </PreviewContext.Provider>
+                              );
+                            })()}
+                          </div>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Details */}
+                    <div className="w-full md:w-[45%] lg:w-[35%] bg-white p-6 overflow-y-auto flex flex-col justify-center">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-[18px] font-bold text-[#0f172a] m-0">Template: {info.name}</h2>
+                        <span className="bg-[#eff6ff] text-[#3b82f6] text-[12px] font-bold px-3 py-1 rounded-full">{info.category}</span>
+                      </div>
+
+                      <p className="text-[14px] text-[#475569] leading-relaxed mb-6">
+                        {info.desc}
+                      </p>
+
+                      <h4 className="text-[15px] font-bold text-[#0f172a] mb-3">Highlights</h4>
+                      <div className="flex flex-col gap-2.5 mb-6">
+                        {info.highlights.map(h => (
+                          <div key={h} className="flex items-center gap-2 text-[13px] text-[#475569] font-medium">
+                            <CheckCircleFilled className="text-[#10b981]" /> {h}
+                          </div>
+                        ))}
+                      </div>
+
+                      <h4 className="text-[15px] font-bold text-[#0f172a] mb-3">Best for</h4>
+                      <div className="flex items-center flex-wrap gap-2 mb-8">
+                        {info.bestFor.map(bf => (
+                          <span key={bf} className="bg-[#f1f5f9] text-[#0f172a] text-[12px] font-medium px-3 py-1 rounded-full">
+                            {bf}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex flex-col gap-3">
+                        <Button
+                          onClick={() => {
+                            setSelectedTemplate(previewTemplate);
+                            setStep('editor');
+                            setPreviewTemplate(null);
+                          }}
+                          className="!bg-[#1E69DA] hover:!bg-[#1554b3] !text-white !border-none !rounded-lg !w-full !h-[42px] font-semibold shadow-md transition-all text-[14px] flex items-center justify-center gap-2"
+                        >
+                          <FileTextOutlined /> Continue with this template
+                        </Button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right Column: Details */}
-                  <div className="w-full md:w-[35%] bg-white p-6 overflow-y-auto flex flex-col justify-center">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-[18px] font-bold text-[#0f172a] m-0">Template: {info.name}</h2>
-                      <span className="bg-[#eff6ff] text-[#3b82f6] text-[12px] font-bold px-3 py-1 rounded-full">{info.category}</span>
-                    </div>
-                    
-                    <p className="text-[14px] text-[#475569] leading-relaxed mb-6">
-                      {info.desc}
-                    </p>
-
-                    <h4 className="text-[15px] font-bold text-[#0f172a] mb-3">Highlights</h4>
-                    <div className="flex flex-col gap-2.5 mb-6">
-                      {info.highlights.map(h => (
-                        <div key={h} className="flex items-center gap-2 text-[13px] text-[#475569] font-medium">
-                          <CheckCircleFilled className="text-[#10b981]" /> {h}
-                        </div>
-                      ))}
+                  {/* Modal Footer */}
+                  <div className="px-6 py-4 border-t border-[#e2e8f0] bg-[#f8fafc] flex items-center justify-between shrink-0 z-10">
+                    <div className="flex items-center gap-2 text-[#64748b] text-[13px] font-medium">
+                      <InfoCircleOutlined className="text-[#3b82f6] text-[15px]" /> You can edit and customize every section after selecting this template.
                     </div>
 
-                    <h4 className="text-[15px] font-bold text-[#0f172a] mb-3">Best for</h4>
-                    <div className="flex items-center flex-wrap gap-2 mb-8">
-                      {info.bestFor.map(bf => (
-                        <span key={bf} className="bg-[#f1f5f9] text-[#0f172a] text-[12px] font-medium px-3 py-1 rounded-full">
-                          {bf}
-                        </span>
-                      ))}
+                    {/* Toolbar */}
+                    <div className="flex items-center gap-6">
+                      {/* Zoom Controls */}
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => setPreviewScale(Math.max(25, previewScale - 10))} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#f1f5f9] text-[#64748b] transition-colors"><MinusOutlined className="text-[12px]" /></button>
+                        <span className="text-[13px] font-medium text-[#0f172a] min-w-[36px] text-center">{previewScale}%</span>
+                        <button onClick={() => setPreviewScale(Math.min(200, previewScale + 10))} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#f1f5f9] text-[#64748b] transition-colors"><PlusOutlined className="text-[12px]" /></button>
+                      </div>
+
+                      <div className="w-[1px] h-4 bg-[#e2e8f0]"></div>
+
+                      {/* View Mode */}
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => { setPreviewMode('desktop'); setPreviewScale(65); }} className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${previewMode === 'desktop' ? 'text-[#3b82f6] bg-[#eff6ff]' : 'text-[#64748b] hover:bg-[#f1f5f9]'}`}><DesktopOutlined className="text-[15px]" /></button>
+                        <button onClick={() => message.info("This feature will be available in the future")} className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors text-[#64748b] hover:bg-[#f1f5f9]`}><MobileOutlined className="text-[15px]" /></button>
+                      </div>
+
+                      <div className="w-[1px] h-4 bg-[#e2e8f0]"></div>
+
+                      {/* Fullscreen */}
+                      <button onClick={() => setIsFullscreen(!isFullscreen)} className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#f1f5f9] text-[#64748b] transition-colors">
+                        {isFullscreen ? <FullscreenExitOutlined className="text-[15px]" /> : <FullscreenOutlined className="text-[15px]" />}
+                      </button>
                     </div>
-
-                    <div className="flex flex-col gap-3">
-                      <Button
-                        onClick={() => {
-                          setSelectedTemplate(previewTemplate);
-                          setStep('editor');
-                          setPreviewTemplate(null);
-                        }}
-                        className="!bg-[#1E69DA] hover:!bg-[#1554b3] !text-white !border-none !rounded-lg !w-full !h-[42px] font-semibold shadow-md transition-all text-[14px] flex items-center justify-center gap-2"
-                      >
-                        <FileTextOutlined /> Continue with this template
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Modal Footer */}
-                <div className="px-6 py-4 border-t border-[#e2e8f0] bg-[#f8fafc] flex items-center justify-between shrink-0 z-10">
-                  <div className="flex items-center gap-2 text-[#64748b] text-[13px] font-medium">
-                    <InfoCircleOutlined className="text-[#3b82f6] text-[15px]" /> You can edit and customize every section after selecting this template.
-                  </div>
-
-                  {/* Toolbar */}
-                  <div className="flex items-center gap-6">
-                    {/* Zoom Controls */}
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => setPreviewScale(Math.max(25, previewScale - 10))} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#f1f5f9] text-[#64748b] transition-colors"><MinusOutlined className="text-[12px]" /></button>
-                      <span className="text-[13px] font-medium text-[#0f172a] min-w-[36px] text-center">{previewScale}%</span>
-                      <button onClick={() => setPreviewScale(Math.min(200, previewScale + 10))} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#f1f5f9] text-[#64748b] transition-colors"><PlusOutlined className="text-[12px]" /></button>
-                    </div>
-                    
-                    <div className="w-[1px] h-4 bg-[#e2e8f0]"></div>
-
-                    {/* View Mode */}
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => { setPreviewMode('desktop'); setPreviewScale(65); }} className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${previewMode === 'desktop' ? 'text-[#3b82f6] bg-[#eff6ff]' : 'text-[#64748b] hover:bg-[#f1f5f9]'}`}><DesktopOutlined className="text-[15px]" /></button>
-                      <button onClick={() => message.info("This feature will be available in the future")} className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors text-[#64748b] hover:bg-[#f1f5f9]`}><MobileOutlined className="text-[15px]" /></button>
-                    </div>
-
-                    <div className="w-[1px] h-4 bg-[#e2e8f0]"></div>
-
-                    {/* Fullscreen */}
-                    <button onClick={() => setIsFullscreen(!isFullscreen)} className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#f1f5f9] text-[#64748b] transition-colors">
-                      {isFullscreen ? <FullscreenExitOutlined className="text-[15px]" /> : <FullscreenOutlined className="text-[15px]" />}
-                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-          </>
+            </>
           );
         })()}
       </div>
@@ -2079,10 +2122,10 @@ function Form() {
   }
 
   if (step === 'continue_editing') {
-    const draftedTemplateIds = typeof window !== 'undefined' 
+    const draftedTemplateIds = typeof window !== 'undefined'
       ? Object.keys(localStorage)
-          .filter(k => k.startsWith('resumeDraft_'))
-          .map(k => k.replace('resumeDraft_', ''))
+        .filter(k => k.startsWith('resumeDraft_'))
+        .map(k => k.replace('resumeDraft_', ''))
       : [];
 
     const draftedTemplates = TEMPLATE_OPTIONS.filter(t => draftedTemplateIds.includes(t.id));
@@ -2093,10 +2136,10 @@ function Form() {
           title="Continue Editing"
           subtitle="Pick up where you left off with your saved drafts"
         />
-        
+
         {/* Categories Bar */}
         <div className="bg-white border-b border-[#e2e8f0] px-4 md:px-8 py-3 flex items-center shadow-sm z-10 shrink-0 gap-6">
-          <button 
+          <button
             onClick={() => setStep('landing')}
             className="flex items-center gap-2 text-[#475569] hover:text-[#3b82f6] transition-colors text-[14px] font-medium bg-transparent border-none shadow-none shrink-0 cursor-pointer p-0"
           >
@@ -2194,7 +2237,7 @@ function Form() {
         <div className="flex-1 w-full flex overflow-hidden">
 
           {/* Left Panel (50%) */}
-          <div className="w-full lg:w-[50%] shrink-0 h-full overflow-y-auto bg-white border-r border-[#e2e8f0] p-4 lg:p-6 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full relative">
+          <div className="w-full md:w-[50%] shrink-0 h-full overflow-y-auto bg-white border-r border-[#e2e8f0] p-4 lg:p-6 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full relative">
             <div className="flex items-center gap-3 mb-6 sticky top-0 bg-white z-20 pb-2 border-b border-gray-100">
               <Button onClick={() => {
                 if (selectedTemplate) {
@@ -2220,10 +2263,10 @@ function Form() {
             </div>
             {leftTab === 'details' ? (
               <div className="flex flex-col">
-                <AccordionSection 
-                  title="Personal Information" 
-                  icon={<UserOutlined />} 
-                  isExpanded={expandedSection === "Personal Information"} 
+                <AccordionSection
+                  title="Personal Information"
+                  icon={<UserOutlined />}
+                  isExpanded={expandedSection === "Personal Information"}
                   onToggle={() => setExpandedSection(expandedSection === "Personal Information" ? null : "Personal Information")}
                 >
                   <div className="flex flex-col gap-6">
@@ -2234,55 +2277,55 @@ function Form() {
                   </div>
                 </AccordionSection>
 
-                <AccordionSection 
-                  title="Professional Summary" 
-                  icon={<UserOutlined />} 
-                  isExpanded={expandedSection === "Professional Summary"} 
+                <AccordionSection
+                  title="Professional Summary"
+                  icon={<UserOutlined />}
+                  isExpanded={expandedSection === "Professional Summary"}
                   onToggle={() => setExpandedSection(expandedSection === "Professional Summary" ? null : "Professional Summary")}
                 >
                   <ProfessionalSummary data={basicDetails} updateField={updateBasicDetail} />
                 </AccordionSection>
 
-                <AccordionSection 
-                  title="Education" 
-                  icon={<BookOutlined />} 
-                  isExpanded={expandedSection === "Education"} 
+                <AccordionSection
+                  title="Education"
+                  icon={<BookOutlined />}
+                  isExpanded={expandedSection === "Education"}
                   onToggle={() => setExpandedSection(expandedSection === "Education" ? null : "Education")}
                 >
                   <EducationDetails educationDetails={educationDetails} updateEducationDetail={updateEducationDetail} addEducation={addEducation} removeEducation={removeEducation} onNext={() => setExpandedSection("Experience")} />
                 </AccordionSection>
 
-                <AccordionSection 
-                  title="Experience" 
-                  icon={<SolutionOutlined />} 
-                  isExpanded={expandedSection === "Experience"} 
+                <AccordionSection
+                  title="Experience"
+                  icon={<SolutionOutlined />}
+                  isExpanded={expandedSection === "Experience"}
                   onToggle={() => setExpandedSection(expandedSection === "Experience" ? null : "Experience")}
                 >
                   <ExperienceDetails experiences={experienceDetails} updateExperience={updateExperience} addExperience={addExperience} removeExperience={removeExperience} onNext={() => setExpandedSection("Internships")} />
                 </AccordionSection>
 
-                <AccordionSection 
-                  title="Internships" 
-                  icon={<CheckSquareOutlined />} 
-                  isExpanded={expandedSection === "Internships"} 
+                <AccordionSection
+                  title="Internships"
+                  icon={<CheckSquareOutlined />}
+                  isExpanded={expandedSection === "Internships"}
                   onToggle={() => setExpandedSection(expandedSection === "Internships" ? null : "Internships")}
                 >
                   <InternshipsDetails experiences={internships} updateExperience={updateInternship} addExperience={addInternship} removeExperience={removeInternship} onNext={() => setExpandedSection("Projects")} />
                 </AccordionSection>
 
-                <AccordionSection 
-                  title="Projects" 
-                  icon={<CodeOutlined />} 
-                  isExpanded={expandedSection === "Projects"} 
+                <AccordionSection
+                  title="Projects"
+                  icon={<CodeOutlined />}
+                  isExpanded={expandedSection === "Projects"}
                   onToggle={() => setExpandedSection(expandedSection === "Projects" ? null : "Projects")}
                 >
                   <ProjectDetails projects={projectDetails} updateProject={updateProject} addProject={addProject} removeProject={removeProject} onNext={() => setExpandedSection("Skills")} />
                 </AccordionSection>
 
-                <AccordionSection 
-                  title="Skills" 
-                  icon={<StarOutlined />} 
-                  isExpanded={expandedSection === "Skills"} 
+                <AccordionSection
+                  title="Skills"
+                  icon={<StarOutlined />}
+                  isExpanded={expandedSection === "Skills"}
                   onToggle={() => setExpandedSection(expandedSection === "Skills" ? null : "Skills")}
                 >
                   <SkillDetails skills={skills} updateSkill={updateSkill} addSkill={addSkill} removeSkill={removeSkill} setSkills={setSkills} />
@@ -2291,10 +2334,10 @@ function Form() {
 
 
                 {visibleOptionalSections.includes("Certifications") && (
-                  <AccordionSection 
-                    title="Certifications" 
-                    icon={<SafetyCertificateOutlined />} 
-                    isExpanded={expandedSection === "Certifications"} 
+                  <AccordionSection
+                    title="Certifications"
+                    icon={<SafetyCertificateOutlined />}
+                    isExpanded={expandedSection === "Certifications"}
                     onToggle={() => setExpandedSection(expandedSection === "Certifications" ? null : "Certifications")}
                     onRemove={() => {
                       setVisibleOptionalSections(prev => prev.filter(s => s !== "Certifications"));
@@ -2305,10 +2348,10 @@ function Form() {
                 )}
 
                 {visibleOptionalSections.includes("Volunteering") && (
-                  <AccordionSection 
-                    title="Volunteering" 
-                    icon={<HeartOutlined />} 
-                    isExpanded={expandedSection === "Volunteering"} 
+                  <AccordionSection
+                    title="Volunteering"
+                    icon={<HeartOutlined />}
+                    isExpanded={expandedSection === "Volunteering"}
                     onToggle={() => setExpandedSection(expandedSection === "Volunteering" ? null : "Volunteering")}
                     onRemove={() => {
                       setVisibleOptionalSections(prev => prev.filter(s => s !== "Volunteering"));
@@ -2319,10 +2362,10 @@ function Form() {
                 )}
 
                 {visibleOptionalSections.includes("Languages") && (
-                  <AccordionSection 
-                    title="Languages" 
-                    icon={<GlobalOutlined />} 
-                    isExpanded={expandedSection === "Languages"} 
+                  <AccordionSection
+                    title="Languages"
+                    icon={<GlobalOutlined />}
+                    isExpanded={expandedSection === "Languages"}
                     onToggle={() => setExpandedSection(expandedSection === "Languages" ? null : "Languages")}
                     onRemove={() => {
                       setVisibleOptionalSections(prev => prev.filter(s => s !== "Languages"));
@@ -2331,107 +2374,107 @@ function Form() {
                     <Language languages={languages} updateLanguage={updateLanguage} addLanguage={addLanguage} removeLanguage={removeLanguage} setLanguages={setLanguages} />
                   </AccordionSection>
                 )}
-                
+
                 {/* Add New Section Feature */}
                 {/* Add New Section Feature */}
                 <div className="mt-4 mb-10">
                   {true ? null : null}
-                    <div className="flex flex-col gap-6">
-                      {/* Top Header */}
-                      <div className="flex items-center justify-between">
-                        <div className="text-[26px] font-bold text-[#334155]">
-                          + Add New Section
+                  <div className="flex flex-col gap-6">
+                    {/* Top Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="text-[26px] font-bold text-[#334155]">
+                        + Add New Section
+                      </div>
+                      <button
+                        onClick={() => setIsAddSectionOpen(false)}
+                        className="text-[#64748b] hover:text-[#334155] text-[15px] font-medium flex items-center gap-2 bg-transparent border-none cursor-pointer transition-colors"
+                      >
+                      </button>
+                    </div>
+
+                    {/* Main Card */}
+                    <div className="bg-white rounded-[24px] border border-[#e2e8f0] flex flex-col lg:flex-row h-auto lg:h-[500px] overflow-hidden shadow-sm">
+                      {/* Left sidebar - Options */}
+                      <div className="w-full lg:w-[45%] xl:w-[40%] overflow-y-auto pt-4 lg:pt-6 pr-[2px] relative" style={{ scrollbarWidth: 'thin', scrollbarColor: '#9ca3af transparent' }}>
+                        <div className="flex flex-col pl-4 pr-2">
+                          {[
+                            { id: "Certifications", icon: <SafetyCertificateOutlined />, title: "Certificates", desc: "Education doesn't end with graduation. Show that you still keep learning to gain an edge in your field.", bullets: ["Completed Advanced React certification with 98% score.", "Certified in AWS Solutions Architecture.", "Achieved mastery in cloud deployment pipelines."] },
+                            { id: "Volunteering", icon: <HeartOutlined />, title: "Volunteering", desc: "Showcase your dedication to the community and social causes.", bullets: ["Organized community food drives reaching 500+ families.", "Volunteered over 100 hours for local environmental cleanups.", "Mentored underprivileged youth in basic coding skills."] },
+                            { id: "Languages", icon: <GlobalOutlined />, title: "Languages", desc: "Highlight your communication skills in different languages.", bullets: ["English - Native or Bilingual Proficiency", "Spanish - Professional Working Proficiency", "French - Limited Working Proficiency"] }
+                          ].map(section => (
+                            <button
+                              key={section.id}
+                              onMouseEnter={() => setPreviewOptionalSection(section.id)}
+                              onClick={() => {
+                                if (!visibleOptionalSections.includes(section.id)) {
+                                  setVisibleOptionalSections(prev => [...prev, section.id]);
+                                  setExpandedSection(section.id);
+                                  // setIsAddSectionOpen(false); // Kept open based on user feedback
+                                }
+                              }}
+                              className={`group flex items-center justify-between px-4 py-5 border-b border-[#f1f5f9] cursor-pointer transition-colors text-left bg-transparent ${previewOptionalSection === section.id ? 'bg-[#f8fafc]' : 'hover:bg-[#f8fafc]'}`}
+                            >
+                              <div className="flex items-center gap-4">
+                                <span className={`text-[22px] text-[#475569]`}>{section.icon}</span>
+                                <span className={`text-[17px] text-[#334155]`}>{section.title}</span>
+                              </div>
+                              {previewOptionalSection === section.id && !visibleOptionalSections.includes(section.id) && (
+                                <PlusCircleOutlined className="text-[#ef4444] text-[18px]" />
+                              )}
+                            </button>
+                          ))}
                         </div>
-                        <button 
-                          onClick={() => setIsAddSectionOpen(false)} 
-                          className="text-[#64748b] hover:text-[#334155] text-[15px] font-medium flex items-center gap-2 bg-transparent border-none cursor-pointer transition-colors"
-                        >
-                        </button>
+                        {/* Fake scrollbar line on the right edge */}
+                        <div className="absolute right-[2px] top-6 bottom-6 w-[6px] bg-[#9ca3af] rounded-full pointer-events-none opacity-80" />
                       </div>
 
-                      {/* Main Card */}
-                      <div className="bg-white rounded-[24px] border border-[#e2e8f0] flex h-[500px] overflow-hidden shadow-sm">
-                        {/* Left sidebar - Options */}
-                        <div className="w-[45%] lg:w-[35%] overflow-y-auto pt-6 pr-[2px] relative" style={{ scrollbarWidth: 'thin', scrollbarColor: '#9ca3af transparent' }}>
-                          <div className="flex flex-col pl-4 pr-2">
-                            {[
-                              { id: "Certifications", icon: <SafetyCertificateOutlined />, title: "Certificates", desc: "Education doesn't end with graduation. Show that you still keep learning to gain an edge in your field.", bullets: ["Completed Advanced React certification with 98% score.", "Certified in AWS Solutions Architecture.", "Achieved mastery in cloud deployment pipelines."] },
-                              { id: "Volunteering", icon: <HeartOutlined />, title: "Volunteering", desc: "Showcase your dedication to the community and social causes.", bullets: ["Organized community food drives reaching 500+ families.", "Volunteered over 100 hours for local environmental cleanups.", "Mentored underprivileged youth in basic coding skills."] },
-                              { id: "Languages", icon: <GlobalOutlined />, title: "Languages", desc: "Highlight your communication skills in different languages.", bullets: ["English - Native or Bilingual Proficiency", "Spanish - Professional Working Proficiency", "French - Limited Working Proficiency"] }
-                            ].map(section => (
-                              <button
-                                key={section.id}
-                                onMouseEnter={() => setPreviewOptionalSection(section.id)}
+                      {/* Right side - Preview */}
+                      <div className="w-full lg:w-[55%] xl:w-[60%] bg-[#f8fafc] p-6 lg:p-8 flex flex-col relative items-center justify-center border-t lg:border-t-0 lg:border-l border-[#f1f5f9]">
+                        {(() => {
+                          const activeData = [
+                            { id: "Certifications", title: "Certificates", desc: "Education doesn't end with graduation. Show that you still keep learning to gain an edge in your field.", bullets: ["Completed Advanced React certification with 98% score.", "Certified in AWS Solutions Architecture.", "Achieved mastery in cloud deployment pipelines."] },
+                            { id: "Volunteering", title: "Volunteering", desc: "Use action verbs to highlight your notable contributions. By doing this, you show your track record and erase any doubts about your ability.", bullets: ["Organized community food drives reaching 500+ families.", "Volunteered over 100 hours for local environmental cleanups.", "Mentored underprivileged youth in basic coding skills."] },
+                            { id: "Languages", title: "Languages", desc: "Highlight your communication skills in different languages. Use accurate proficiency levels to show your fluency.", bullets: ["English - Native or Bilingual Proficiency", "Spanish - Professional Working Proficiency", "French - Limited Working Proficiency"] }
+                          ].find(s => s.id === previewOptionalSection) || { title: "", desc: "", bullets: [] };
+
+                          return (
+                            <div className="w-full max-w-[420px] flex flex-col items-center animate-fadeIn h-full justify-center">
+                              <h3 className="text-[19px] font-bold text-[#1e293b] mb-4 flex items-center gap-2">
+                                {activeData.title}
+                                <span className="text-[13px] italic font-bold text-[#8b5cf6]">PREMIUM</span>
+                              </h3>
+                              <p className="text-[#475569] text-[15px] leading-relaxed text-center mb-6 px-2">
+                                {activeData.desc}
+                              </p>
+
+                              {/* Mock UI for the section */}
+                              <div className="bg-white rounded-xl border border-[#e2e8f0] p-6 w-full shadow-[0_2px_10px_rgba(0,0,0,0.04)] text-left cursor-pointer"
                                 onClick={() => {
-                                  if(!visibleOptionalSections.includes(section.id)) {
-                                    setVisibleOptionalSections(prev => [...prev, section.id]);
-                                    setExpandedSection(section.id);
+                                  if (!visibleOptionalSections.includes(previewOptionalSection)) {
+                                    setVisibleOptionalSections(prev => [...prev, previewOptionalSection]);
+                                    setExpandedSection(previewOptionalSection);
                                     // setIsAddSectionOpen(false); // Kept open based on user feedback
                                   }
                                 }}
-                                className={`group flex items-center justify-between px-4 py-5 border-b border-[#f1f5f9] cursor-pointer transition-colors text-left bg-transparent ${previewOptionalSection === section.id ? 'bg-[#f8fafc]' : 'hover:bg-[#f8fafc]'}`}
                               >
-                                <div className="flex items-center gap-4">
-                                  <span className={`text-[22px] text-[#475569]`}>{section.icon}</span>
-                                  <span className={`text-[17px] text-[#334155]`}>{section.title}</span>
-                                </div>
-                                {previewOptionalSection === section.id && !visibleOptionalSections.includes(section.id) && (
-                                  <PlusCircleOutlined className="text-[#ef4444] text-[18px]" />
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                          {/* Fake scrollbar line on the right edge */}
-                          <div className="absolute right-[2px] top-6 bottom-6 w-[6px] bg-[#9ca3af] rounded-full pointer-events-none opacity-80" />
-                        </div>
-
-                        {/* Right side - Preview */}
-                        <div className="w-[55%] lg:w-[65%] bg-[#f8fafc] p-8 flex flex-col relative items-center justify-center border-l border-[#f1f5f9]">
-                          {(() => {
-                            const activeData = [
-                              { id: "Certifications", title: "Certificates", desc: "Education doesn't end with graduation. Show that you still keep learning to gain an edge in your field.", bullets: ["Completed Advanced React certification with 98% score.", "Certified in AWS Solutions Architecture.", "Achieved mastery in cloud deployment pipelines."] },
-                              { id: "Volunteering", title: "Volunteering", desc: "Use action verbs to highlight your notable contributions. By doing this, you show your track record and erase any doubts about your ability.", bullets: ["Organized community food drives reaching 500+ families.", "Volunteered over 100 hours for local environmental cleanups.", "Mentored underprivileged youth in basic coding skills."] },
-                              { id: "Languages", title: "Languages", desc: "Highlight your communication skills in different languages. Use accurate proficiency levels to show your fluency.", bullets: ["English - Native or Bilingual Proficiency", "Spanish - Professional Working Proficiency", "French - Limited Working Proficiency"] }
-                            ].find(s => s.id === previewOptionalSection) || { title: "", desc: "", bullets: [] };
-
-                            return (
-                              <div className="w-full max-w-[420px] flex flex-col items-center animate-fadeIn h-full justify-center">
-                                <h3 className="text-[19px] font-bold text-[#1e293b] mb-4 flex items-center gap-2">
-                                  {activeData.title}
-                                  <span className="text-[13px] italic font-bold text-[#8b5cf6]">PREMIUM</span>
-                                </h3>
-                                <p className="text-[#475569] text-[15px] leading-relaxed text-center mb-6 px-2">
-                                  {activeData.desc}
-                                </p>
-                                
-                                {/* Mock UI for the section */}
-                                <div className="bg-white rounded-xl border border-[#e2e8f0] p-6 w-full shadow-[0_2px_10px_rgba(0,0,0,0.04)] text-left cursor-pointer"
-                                  onClick={() => {
-                                    if(!visibleOptionalSections.includes(previewOptionalSection)) {
-                                      setVisibleOptionalSections(prev => [...prev, previewOptionalSection]);
-                                      setExpandedSection(previewOptionalSection);
-                                      // setIsAddSectionOpen(false); // Kept open based on user feedback
-                                    }
-                                  }}
-                                >
-                                  <h4 className="font-bold text-[#0f172a] text-[18px] mb-4">{activeData.title}</h4>
-                                  <ul className="list-disc pl-5 flex flex-col gap-2">
-                                    {activeData.bullets.map((bullet, i) => (
-                                      <li key={i} className="text-[#475569] text-[14px] leading-snug font-semibold">{bullet}</li>
-                                    ))}
-                                  </ul>
-                                </div>
+                                <h4 className="font-bold text-[#0f172a] text-[18px] mb-4">{activeData.title}</h4>
+                                <ul className="list-disc pl-5 flex flex-col gap-2">
+                                  {activeData.bullets.map((bullet, i) => (
+                                    <li key={i} className="text-[#475569] text-[14px] leading-snug font-semibold">{bullet}</li>
+                                  ))}
+                                </ul>
                               </div>
-                            );
-                          })()}
-                          
-                          <div className="absolute bottom-6 flex items-center justify-center w-full">
-                            <span className="flex items-center gap-2 text-[#475569] text-[14px] cursor-pointer hover:text-[#1E69DA]">
-                              <InfoCircleOutlined className="text-[18px]" /> How to list {(previewOptionalSection || "").toLowerCase()} on a resume?
-                            </span>
-                          </div>
+                            </div>
+                          );
+                        })()}
+
+                        <div className="absolute bottom-6 flex items-center justify-center w-full">
+                          <span className="flex items-center gap-2 text-[#475569] text-[14px] cursor-pointer hover:text-[#1E69DA]">
+                            <InfoCircleOutlined className="text-[18px]" /> How to list {(previewOptionalSection || "").toLowerCase()} on a resume?
+                          </span>
                         </div>
                       </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2470,12 +2513,12 @@ function Form() {
             )}
           </div>
 
-          {/* Right Canvas (60% Live Preview) */}
-          <div className="flex-1 lg:w-[60%] h-full overflow-y-auto bg-[#f8fafc] p-4 lg:p-6 flex flex-col items-center [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full">
+          {/* Right Canvas (50% Live Preview) */}
+          <div className="hidden md:flex flex-1 md:w-[50%] h-full overflow-y-auto bg-[#f8fafc] p-4 lg:p-6 flex-col items-center [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full">
             <div className="w-full max-w-[900px] flex justify-center">
               <div
-                className="bg-white shadow-lg rounded-xl overflow-hidden border border-[#e2e8f0]"
-                style={{ width: "794px", maxWidth: "100%" }}
+                className="bg-white shadow-lg rounded-xl overflow-hidden border border-[#e2e8f0] origin-top [zoom:0.45] lg:[zoom:0.6] xl:[zoom:0.75] 2xl:[zoom:0.9]"
+                style={{ width: "794px" }}
               >
                 <div className="flex items-center justify-between px-4 py-2 bg-[#f8fafc] border-b border-[#e2e8f0]">
                   <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[#64748b]">

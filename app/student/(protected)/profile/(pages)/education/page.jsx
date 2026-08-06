@@ -17,6 +17,7 @@ import {
   Degree_Courses,
 } from "@/universalUtils/arr";
 import { restUrl } from "@/config/urls";
+import { useMobileEditBlocker } from "../_utils/useMobileEditBlocker";
 import axios from "axios";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import { getLstorage } from "@/universalUtils/windowMW";
@@ -157,6 +158,8 @@ function EducationForm() {
   }));
 
   const [entries, setEntries] = useState([]);
+  const [studentObjId, setStudentObjId] = useState(null);
+  const { checkEditClick, MobileEditModal } = useMobileEditBlocker();
   const [showSemesterUpload, setShowSemesterUpload] = useState(false);
 
 
@@ -231,18 +234,20 @@ function EducationForm() {
   };
 
   const addEntry = () => {
-    if (entries.length < EDUCATION_TYPES.length) {
-      setEntries([
-        ...entries,
-        {
-          type: EDUCATION_TYPES[entries.length],
-          data: {},
-          isEditing: true,
-          semesters: [],
-          newSemester: null,
-        },
-      ]);
-    }
+    checkEditClick(() => {
+      if (entries.length < EDUCATION_TYPES.length) {
+        setEntries([
+          ...entries,
+          {
+            type: EDUCATION_TYPES[entries.length],
+            data: {},
+            isEditing: true,
+            semesters: [],
+            newSemester: null,
+          },
+        ]);
+      }
+    });
   };
 
   const updateField = (idx, key, value) => {
@@ -310,9 +315,11 @@ function EducationForm() {
   };
 
   const editEntry = (idx) => {
-    setEntries((prev) =>
-      prev.map((ent, i) => (i === idx ? { ...ent, isEditing: true } : ent))
-    );
+    checkEditClick(() => {
+      setEntries((prev) =>
+        prev.map((ent, i) => (i === idx ? { ...ent, isEditing: true } : ent))
+      );
+    });
   };
 
   const deleteEntry = (idx) => {
@@ -1014,6 +1021,7 @@ function EducationForm() {
           </Button>
         </div>
       )}
+      {MobileEditModal}
     </div>
   );
 }

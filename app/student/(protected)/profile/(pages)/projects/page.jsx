@@ -26,6 +26,7 @@ import {
 // REPLACED moment with dayjs
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { useMobileEditBlocker } from "../_utils/useMobileEditBlocker";
 dayjs.extend(customParseFormat);
 
 import { restUrl } from "@/config/urls";
@@ -53,6 +54,7 @@ export default function WorkAndProjectsPage() {
   const dispatch = useDispatch();
   const studentDetails = useSelector((state) => state.student.student?.data);
   const [projects, setProjects] = useState([]);
+  const { checkEditClick, MobileEditModal } = useMobileEditBlocker();
 
   // Initialize from studentDetails.projects or default
   useEffect(() => {
@@ -128,8 +130,11 @@ export default function WorkAndProjectsPage() {
       return arr;
     });
 
-  const addProject = () =>
-    setProjects((prev) => [...prev, { ...initialProject }]);
+  const addProject = () => {
+    checkEditClick(() => {
+      setProjects((prev) => [...prev, { ...initialProject }]);
+    });
+  };
 
   const addCustomDoc = (idx) => {
     const title = prompt("Enter document title");
@@ -160,7 +165,7 @@ export default function WorkAndProjectsPage() {
     }
     const updatedProjects = projects.map((p, i) => {
       if (i === idx) {
-        return { ...p, editing: false, status: "pending" };
+        return { ...p, editing: false, status: "success" };
       }
       return p;
     });
@@ -241,7 +246,7 @@ export default function WorkAndProjectsPage() {
             <div className={formStyles.editButtonContainer} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               {!item.editing && (
                 <Button
-                  onClick={() => updateField(idx, "editing", true)}
+                  onClick={() => checkEditClick(() => updateField(idx, "editing", true))}
                   className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
                   style={{ fontWeight: "600", borderRadius: "8px" }}
                 >
@@ -500,6 +505,7 @@ export default function WorkAndProjectsPage() {
           + Add Project
         </Button>
       </div>
+      {MobileEditModal}
     </div>
   );
 }

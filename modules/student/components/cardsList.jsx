@@ -466,7 +466,11 @@ export default function CardsList({ type, isModal = false, progressById, combine
     return (
       <div className={`flex flex-col gap-3 [&::-webkit-scrollbar]:hidden pb-2 px-1 ${isModal ? 'h-full overflow-y-auto' : 'w-full'}`}>
         {isModal && (
-          <div className="flex gap-2 mb-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden shrink-0">
+          <div 
+            className="flex flex-nowrap overflow-x-auto gap-2 mb-2 pb-2 [&::-webkit-scrollbar]:hidden w-full touch-pan-x" 
+            style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
             {filters.map(f => (
               <button
                 key={f}
@@ -474,7 +478,7 @@ export default function CardsList({ type, isModal = false, progressById, combine
                   setActiveFilter(f);
                   setActiveKey(null);
                 }}
-                className={`px-3 py-1.5 rounded-md text-[13px] font-bold whitespace-nowrap transition-colors ${activeFilter === f ? 'bg-[#3b82f6] text-white shadow-sm' : 'bg-[#e2e8f0] text-[#475569] hover:bg-[#cbd5e1]'}`}
+                className={`px-3 py-1.5 rounded-md text-[13px] font-bold whitespace-nowrap shrink-0 transition-colors ${activeFilter === f ? 'bg-[#3b82f6] text-white shadow-sm' : 'bg-[#e2e8f0] text-[#475569] hover:bg-[#cbd5e1]'}`}
               >
                 {f === "Achievements" ? "🏆 " : f === "Learning" ? "📚 " : f === "TPO Updates" ? "📢 " : f === "Company" ? "🏢 " : ""}{f}
               </button>

@@ -12,8 +12,8 @@ import {
 
 export default function StudentPageHeader({ section, title, rightSlot, leftSlot, subtitle, subtitleSlot, breadcrumb }) {
   const getIcon = () => {
-    const s = (section || "").toLowerCase();
-    const t = (title || "").toLowerCase();
+    const s = (typeof section === 'string' ? section : "").toLowerCase();
+    const t = (typeof title === 'string' ? title : "").toLowerCase();
     if (s.includes("practice") || t.includes("practice")) return <HiOutlineAcademicCap className="text-white text-3xl" />;
     if (s.includes("assessment") || t.includes("assessment")) return <HiOutlineClipboardDocumentCheck className="text-white text-3xl" />;
     if (s.includes("profile") || t.includes("profile")) return <HiOutlineUser className="text-white text-3xl" />;
@@ -23,7 +23,7 @@ export default function StudentPageHeader({ section, title, rightSlot, leftSlot,
   };
 
   return (
-    <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+    <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 shadow-sm rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
       {/* Decorative Icons */}
       <div className="absolute inset-0 pointer-events-none z-[1]">
         <BsX className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]" />

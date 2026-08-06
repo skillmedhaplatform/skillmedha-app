@@ -90,7 +90,7 @@ const ProjectDetails = ({
         /* Form View */
         <div className="w-full">
           <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-6 border-b border-[#f1f5f9]">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 pb-6 border-b border-[#f1f5f9]">
               <div className="flex flex-col">
                 <div className="flex items-center gap-3 mb-1">
                   <ArrowLeftOutlined 
@@ -134,7 +134,7 @@ const ProjectDetails = ({
                     <h4 className="font-bold text-[#0f172a] text-[16px] m-0">Basic Information</h4>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-[13px] font-semibold text-[#475569]">Project Title <span className="text-[#ef4444]">*</span></label>
                       <Input
@@ -179,7 +179,7 @@ const ProjectDetails = ({
                       />
                     </div>
 
-                    <div className="flex flex-col gap-1 md:col-span-2">
+                    <div className="flex flex-col gap-1 xl:col-span-2">
                       <label className="text-[13px] font-semibold text-[#475569]">Technologies Used (Optional)</label>
                       <Select
                         mode="tags"
@@ -200,7 +200,7 @@ const ProjectDetails = ({
                     <CalendarOutlined className="text-[#3b82f6] text-[18px]"/>
                     <h4 className="font-bold text-[#0f172a] text-[16px] m-0">Duration</h4>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-[13px] font-semibold text-[#475569]">Start Date <span className="text-[#ef4444]">*</span></label>
                       <DatePicker

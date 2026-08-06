@@ -515,7 +515,7 @@ _start:
   };
 
   // Run all test cases
-  const runTestCases = async () => {
+  async function runTestCases() {
     setIsRunningTests(true);
     const hideMessage = message.loading("Running test cases...", 0);
 
