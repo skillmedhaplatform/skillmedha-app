@@ -50,7 +50,7 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride }) {
             allSubtopics.push({
                ...s,
                topicTitle: topic.title,
-               totalQuestions: s.totalQuestions || 20 // Fallback since frontend-only doesn't have counts
+               totalQuestions: typeof s.totalQuestions === "number" ? s.totalQuestions : 20
             });
           }
         }

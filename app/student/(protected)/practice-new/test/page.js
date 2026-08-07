@@ -108,6 +108,7 @@ export default function TestPage() {
         fetchPracQuestions({
           refId: refId,
           type: fetchType,
+          subjectId: subjectId,
           userId: studentCreds?._id,
         })
       );
@@ -533,6 +534,29 @@ export default function TestPage() {
 
 
   const isMobile = useResponsive();
+
+  if (activeRefId && !loading && questions.length === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', width: '100%', backgroundColor: '#f1f5f9', padding: '20px' }}>
+        <Result
+          status="404"
+          title={<span style={{ fontSize: '24px', fontWeight: 600, color: '#1f2937' }}>No Questions Available</span>}
+          subTitle="Sorry, there are currently no questions available for this practice topic."
+          extra={[
+            <Button
+              type="primary"
+              onClick={() => router.replace(`/student/practice-new/${subjectType === "Technical" ? "technical" : "nontechnical"}`)}
+              key="back"
+              size="large"
+              style={{ backgroundColor: '#1E69DA', borderColor: '#1E69DA' }}
+            >
+              Back to Practice
+            </Button>
+          ]}
+        />
+      </div>
+    );
+  }
 
   if (isMobile && currentQuestion && !testCompleted) {
     return (
