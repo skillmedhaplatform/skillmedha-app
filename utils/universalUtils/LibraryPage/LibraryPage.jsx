@@ -1102,7 +1102,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
                 <Popover
                   key={item?._id}
                   trigger="hover"
-                  placement="right"
+                  placement="rightTop"
                   overlayStyle={{ maxWidth: 380 }}
                   styles={{ body: { borderRadius: 16, padding: 0, overflow: "hidden", border: "1px solid #cbd5e1", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" } }}
                   content={
