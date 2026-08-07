@@ -96,6 +96,10 @@
       color: #a0aec0;
       margin: 0;
       font-weight: 400;
+      
+      @media (max-width: 640px) {
+        display: none !important;
+      }
     }
   }
 

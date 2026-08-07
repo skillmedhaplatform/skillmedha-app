@@ -29,7 +29,7 @@ export default function MobileSidebarDrawer({ isOpen, onClose }) {
       <div className={`${styles.drawer} ${isOpen ? styles.open : ""}`} role="dialog" aria-modal="true">
         {/* Drawer Content - rendering the exact same Desktop SideBar */}
         <div className={styles.drawerContent}>
-          <SideBar />
+          <SideBar onLinkClick={onClose} />
         </div>
       </div>
     </>

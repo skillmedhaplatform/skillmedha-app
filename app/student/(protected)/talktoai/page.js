@@ -409,7 +409,7 @@ const Dictaphone = () => {
 
       <div className="w-full flex-1 flex flex-col items-stretch overflow-hidden relative">
         <div className="w-full h-full overflow-hidden p-4 lg:p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-[1.5rem] lg:gap-6 max-w-[1400px] mx-auto h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-[1.5rem] lg:gap-6 w-full h-full">
             {/* Left Panel - Video Recording */}
             <Card
               className="bg-white rounded-2xl shadow-md border border-[#e2e8f0] overflow-hidden [&_.ant-card-body]:p-6 [&_.ant-card-body]:flex-1 [&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:min-h-0 flex flex-col h-full"

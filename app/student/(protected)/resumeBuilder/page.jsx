@@ -1553,7 +1553,7 @@ function Form() {
       <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-full overflow-hidden w-full">
         <StudentPageHeader title="Resume Builder" subtitle="Create your professional resume" />
         <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-0 pt-4 md:pt-6 lg:pt-6 flex flex-col items-center justify-start relative w-full h-full">
-          <div className="z-10 flex flex-col items-center w-full max-w-[1600px]">
+          <div className="z-10 flex flex-col items-center justify-evenly min-h-[95%] w-full max-w-[1600px] min-[1600px]:[zoom:1.1] min-[1920px]:[zoom:1.25]">
 
             {/* Steps Graphic Top Section */}
             {/* Steps Graphic Top Section */}
@@ -1904,7 +1904,7 @@ function Form() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1] hover:[&::-webkit-scrollbar-thumb]:bg-[#94a3b8]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 max-w-[1600px] mx-auto pb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 min-[1600px]:grid-cols-5 min-[1920px]:grid-cols-6 gap-8 w-full mx-auto pb-10">
             {filteredTemplates.map((template, index) => (
               <div
                 key={template.id}
@@ -2146,7 +2146,7 @@ function Form() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1] hover:[&::-webkit-scrollbar-thumb]:bg-[#94a3b8]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 max-w-[1600px] mx-auto pb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 min-[1600px]:grid-cols-5 min-[1920px]:grid-cols-6 gap-8 w-full mx-auto pb-10">
             {draftedTemplates.length > 0 ? draftedTemplates.map((template, index) => (
               <div
                 key={template.id}
@@ -2477,7 +2477,7 @@ function Form() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 min-[1600px]:grid-cols-3 gap-4">
                 {TEMPLATE_OPTIONS.map((template, index) => {
                   const isActive = selectedTemplate === template.id;
                   const swatch = swatchFor(index);
@@ -2515,7 +2515,7 @@ function Form() {
           <div className="hidden md:flex flex-1 md:w-[50%] h-full overflow-y-auto bg-[#f8fafc] p-4 lg:p-6 flex-col items-center [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E69DA] hover:[&::-webkit-scrollbar-thumb]:bg-[#1754B4] [&::-webkit-scrollbar-thumb]:rounded-full">
             <div className="w-full max-w-[900px] flex justify-center">
               <div
-                className="bg-white shadow-lg rounded-xl overflow-hidden border border-[#e2e8f0] origin-top [zoom:0.45] lg:[zoom:0.6] xl:[zoom:0.75] 2xl:[zoom:0.9]"
+                className="bg-white shadow-lg rounded-xl overflow-hidden border border-[#e2e8f0] origin-top [zoom:0.45] lg:[zoom:0.6] xl:[zoom:0.75] 2xl:[zoom:0.9] min-[1600px]:[zoom:1.05] min-[1920px]:[zoom:1.15]"
                 style={{ width: "794px" }}
               >
                 <div className="flex items-center justify-between px-4 py-2 bg-[#f8fafc] border-b border-[#e2e8f0]">

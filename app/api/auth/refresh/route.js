@@ -64,9 +64,12 @@ export async function GET(request) {
     // because all old users from before May 1, 2026 have createdAt populated by the DB migration.
     const isNewUser = !student?.createdAt || new Date(student.createdAt).getTime() >= CUTOFF_DATE;
 
-    const ptValue = (student?.psychometricTestResults && Object.keys(student.psychometricTestResults).length > 0) || !isNewUser;
+    const hasTakenTest = student?.psychometricTestResults && Object.keys(student.psychometricTestResults).length > 0;
     
-    console.log("[DEBUG refresh/route.js] pt:", ptValue, "isNewUser:", isNewUser, "testResults:", student?.psychometricTestResults);
+    // Exempt if they already took the test, if they're an old user, or if this is NOT their first login
+    const ptValue = Boolean(hasTakenTest || !isNewUser || (student?.loginCount > 1));
+    
+    console.log("[DEBUG refresh/route.js] pt:", ptValue, "isNewUser:", isNewUser, "loginCount:", student?.loginCount, "testResults:", student?.psychometricTestResults);
 
     const permissionsEncrypted = await encryptSession({
       // Login already requires verification, so if getStudentCreds succeeds, they are verified

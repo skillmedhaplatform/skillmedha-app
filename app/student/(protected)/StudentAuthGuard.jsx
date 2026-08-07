@@ -31,7 +31,7 @@ export default function StudentAuthGuard({ children, serverToken }) {
           const isNewUser = !data?.createdAt || new Date(data.createdAt).getTime() >= CUTOFF_DATE;
           const psychometricDone =
             (data?.psychometricTestResults &&
-            Object.keys(data.psychometricTestResults).length > 0) || !isNewUser;
+            Object.keys(data.psychometricTestResults).length > 0) || !isNewUser || (data?.loginCount > 1);
           fetch("/api/auth/session", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },

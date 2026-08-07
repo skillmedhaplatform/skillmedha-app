@@ -40,6 +40,7 @@ import { getUpdatedFields } from "../../myprofile/(components)/functions";
 import { useParams, usePathname } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
 import { FaCaretRight, FaCheckCircle } from "react-icons/fa";
+import useResponsive from "@/hooks/useResponsive";
 
 import { HiOutlineEnvelope, HiOutlinePhone } from "react-icons/hi2";
 
@@ -49,17 +50,40 @@ const StudentData = () => {
   const dispatch = useDispatch();
   const path = usePathname();
   const pathSegments = path?.split("/").filter((e) => e);
+  const isMobile = useResponsive(640);
 
-  const resolveName = (segment, index) => {
-    if (segment === "allstudents") return "All Departments";
-    if (index > 0 && pathSegments[index - 1] === "allstudents") {
-      return getSstorage("departmentTitle") || "Department";
-    }
-    return segment.charAt(0).toUpperCase() + segment.slice(1);
+  const handleMobileRestrictedAction = (actionHandler) => {
+    return (e) => {
+      if (isMobile) {
+        message.warning(
+          "These actions are only done in tablet, laptop, and more than 1600px devices. Only in mobile screens you can't do these actions."
+        );
+        return;
+      }
+      if (actionHandler) actionHandler(e);
+    };
   };
 
   const { value, loading } = useSelector((state) => state.students.allStudents);
   const { value: departMent } = useSelector((state) => state.department.getAllDepartments);
+  
+  const [departmentTitle, setDepartmentTitle] = useState("Department");
+  
+  useEffect(() => {
+    const stored = getSstorage("departmentTitle");
+    if (stored) {
+      setDepartmentTitle(stored);
+    }
+  }, []);
+
+  const resolveName = (segment, index) => {
+    if (segment === "allstudents") return "All Departments";
+    if (index > 0 && pathSegments[index - 1] === "allstudents") {
+      return departmentTitle;
+    }
+    return segment.charAt(0).toUpperCase() + segment.slice(1);
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
@@ -307,6 +331,12 @@ const StudentData = () => {
   };
 
   const handleClick = (record) => {
+    if (isMobile) {
+      message.warning(
+        "These actions are only done in tablet, laptop, and more than 1600px devices. Only in mobile screens you can't do these actions."
+      );
+      return;
+    }
     router.push(`/tpo/allstudents/${params.departId}/${record.globalId}`);
   };
 
@@ -548,9 +578,9 @@ const StudentData = () => {
   const paginatedData = filteredData || [];
 
   return (
-    <>
+    <div className={students.pageContainer}>
       <PageHeader
-        title={getSstorage("departmentTitle") || "Department"}
+        title={departmentTitle}
         subtitle="Manage students registered in this department"
       />
 
@@ -558,7 +588,7 @@ const StudentData = () => {
         <div className={students.leftControls}>
           <Search
             placeholder="Search by name, email, phone, or roll no."
-            style={{ width: 400 }}
+            className={students.searchBar}
             allowClear
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
@@ -591,27 +621,26 @@ const StudentData = () => {
         {params?.departId !== "noDept" && (
           <div className={students.rightControls}>
             {selectedStudentIds.length > 0 && (
-              <Button onClick={() => setIsBulkModalOpen(true)} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+              <Button onClick={handleMobileRestrictedAction(() => setIsBulkModalOpen(true))} type="primary" className={students.actionBtn}>
                 Bulk Actions ({selectedStudentIds.length})
               </Button>
             )}
-            <Button onClick={() => showModal("bulk")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+            <Button onClick={handleMobileRestrictedAction(() => showModal("bulk"))} type="primary" className={students.actionBtn}>
               Bulk Upload Students
             </Button>
-            <Button onClick={() => showModal("single")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+            <Button onClick={handleMobileRestrictedAction(() => showModal("single"))} type="primary" className={students.actionBtn}>
               Add Single Student
             </Button>
-            <Button onClick={openDownloadModal} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+            <Button onClick={handleMobileRestrictedAction(openDownloadModal)} type="primary" className={students.actionBtn}>
               Download Students
             </Button>
           </div>
         )}
       </div>
 
-      <div className={students.container}>
-        {/* Breadcrumbs Trail */}
-        <div className={students.headerCont}>
-          {pathSegments.map((segment, index) => {
+      {/* Breadcrumbs Trail (Fixed below controls) */}
+      <div className={students.headerCont}>
+        {pathSegments.map((segment, index) => {
             const displayName = resolveName(segment, index);
             const isLast = index === pathSegments.length - 1;
             let pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
@@ -634,8 +663,10 @@ const StudentData = () => {
               </span>
             );
           })}
-        </div>
+      </div>
 
+      {/* Scrollable Main Content */}
+      <div className={students.container}>
         {/* Condition on View Mode */}
         {viewMode === "cards" ? (
           <>
@@ -1063,7 +1094,7 @@ const StudentData = () => {
           </Select>
         </div>
       </Modal>
-    </>
+    </div>
   );
 };
 
