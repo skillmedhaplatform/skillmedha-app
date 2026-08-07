@@ -42,32 +42,33 @@ export default function ProfileLayout({ children }) {
         );
         const allJobs = response.data?.data || [];
         
-        let applicantsCount = 0;
         let activeJobsCount = 0;
+        const uniqueApplicants = new Set();
 
         allJobs.forEach((job) => {
           if (job.status === "active") {
             activeJobsCount++;
-          }
-          if (
-            job.status === "active" &&
-            job.applicants &&
-            Array.isArray(job.applicants)
-          ) {
-            applicantsCount += job.applicants.length;
+            if (job.applicants && Array.isArray(job.applicants)) {
+              job.applicants.forEach((applicant) => {
+                const id = applicant?._id || applicant;
+                if (id) {
+                  uniqueApplicants.add(id.toString());
+                }
+              });
+            }
           }
         });
 
         setStats({
           totalJobs: activeJobsCount,
-          totalApplicants: applicantsCount,
+          totalApplicants: uniqueApplicants.size,
         });
       } catch (err) {
         console.error("Failed to fetch jobs stats:", err);
       }
     };
     fetchStats();
-  }, []);
+  }, [pathname]);
 
   const name = USER_DETAILS?.companyName || "Company Name";
   const email = USER_DETAILS?.email || "company@email.com";

@@ -6,7 +6,6 @@ import {
   Checkbox,
   Collapse,
   Empty,
-  Pagination,
   message,
   Dropdown,
   Select,
@@ -170,12 +169,10 @@ export default function QuestionListPage() {
     });
   }, [selectedQuestionsForMain, filters]);
 
-  // Manual pagination logic for filtered questions
+  // Show all filtered questions without pagination
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredQuestions?.slice(startIndex, endIndex) || [];
-  }, [filteredQuestions, currentPage, pageSize]);
+    return filteredQuestions || [];
+  }, [filteredQuestions]);
 
   // Reset pagination when questions or filters change
   useEffect(() => {
@@ -597,28 +594,7 @@ export default function QuestionListPage() {
           );
         })}
 
-        {/* Pagination */}
-        {filteredTotalQuestions > pageSize && (
-          <div className={styles.paginationContainer}>
-            <Pagination
-              current={currentPage}
-              total={filteredTotalQuestions}
-              pageSize={pageSize}
-              onChange={handlePageChange}
-              onShowSizeChange={(current, size) =>
-                handlePageChange(current, size)
-              }
-              showTotal={(total, range) =>
-                `${range?.[0] || 0}-${range?.[1] || 0} of ${
-                  total || 0
-                } questions`
-              }
-              pageSizeOptions={["5", "10", "20", "50"]}
-              showSizeChanger
-              size="default"
-            />
-          </div>
-        )}
+
       </>
     );
   };
@@ -747,12 +723,7 @@ export default function QuestionListPage() {
               ? `Filtered Questions: ${filteredTotalQuestions} of ${totalQuestions}`
               : `Total Questions: ${totalQuestions}`}
           </span>
-          {filteredTotalQuestions > pageSize && (
-            <span>
-              {" | "}
-              Showing {startIndex + 1}-{endIndex} of {filteredTotalQuestions}
-            </span>
-          )}
+
         </div>
       )}
 

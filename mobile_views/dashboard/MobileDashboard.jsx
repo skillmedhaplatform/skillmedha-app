@@ -234,7 +234,7 @@ export default function MobileDashboard({
   ) || [];
 
   // Dynamically select notices count from Redux state
-  const allNotices = useSelector((state) => state.jonOpenings?.allNotices?.value || []);
+  const allNotices = useSelector((state) => state.jonOpenings?.allNotices?.value || state.jobOpenings?.allNotices?.value || []);
   const activeNoticesCount = allNotices?.filter(d => d?.status !== "pending").length || 0;
 
   const handleNavigate = (item) => {
@@ -264,7 +264,7 @@ export default function MobileDashboard({
               ? studentCreds.userName.charAt(0).toUpperCase() + studentCreds.userName.slice(1)
               : "Student"},
           </h2>
-          <span className={styles.date}>
+          <span className={styles.date} suppressHydrationWarning>
             {new Date().toLocaleDateString("en-US", {
               weekday: "long",
               month: "long",

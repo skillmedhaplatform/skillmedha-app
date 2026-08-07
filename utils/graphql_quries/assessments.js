@@ -23,6 +23,7 @@ query Tests($cursor: ID, $limit: Int, $status: String, $language: String, $categ
           flagged
           studentId
           scoreData
+          attemptGeneration
         }
         _id
         blocked
@@ -107,6 +108,7 @@ query Tests($cursor: ID, $limit: Int, $status: String, $language: String, $categ
       snapShotTechnology
       facialRecognitionTechnology
       testEvaluationType
+      attemptGeneration
     }
   }
 }
@@ -152,6 +154,7 @@ export const getOneTest = `query Test($testId: String) {
           flagged
           studentId
           scoreData
+          attemptGeneration
         }
         token
         location
@@ -223,6 +226,7 @@ export const getOneTest = `query Test($testId: String) {
           }
         }
       }
+      attemptGeneration
     }
     ... on err {
       err
@@ -270,6 +274,7 @@ export const GetOneTestData = `query Test($testId: String) {
           flagged
           studentId
           scoreData
+          attemptGeneration
         }
         token
         location
@@ -347,6 +352,7 @@ export const GetOneTestData = `query Test($testId: String) {
           }
         }
       }
+      attemptGeneration
     }
     ... on err {
       err

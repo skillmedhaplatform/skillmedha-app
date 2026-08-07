@@ -196,16 +196,24 @@
     }
   }
 
-  select {
+  select,
+  input {
     height: 38px;
+    width: 120px;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
-    padding: 0 1.5rem 0 0.75rem;
+    padding: 0 0.75rem;
     background-color: #ffffff;
     font-size: 0.875rem;
     font-weight: 600;
+    color: #0f172a;
     outline: none;
-    cursor: pointer;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: #1e69da;
+      box-shadow: 0 0 0 2px rgba(30, 105, 218, 0.1);
+    }
   }
 }
 

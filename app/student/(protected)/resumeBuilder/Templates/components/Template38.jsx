@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
@@ -75,7 +75,7 @@ const Template38 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
               <div className="space-y-4 columns-1 md:columns-2 gap-8 [&>div]:break-inside-avoid">
                 {combinedExperience.map((item, index) => (
                   <div key={index} className="mb-4">
-                    <div className="flex flex-wrap justify-between gap-x-3 font-['Inter',sans-serif]">
+                    <div className="flex flex-wrap items-center gap-x-3 font-['Inter',sans-serif]">
                       <h3 className="m-0 text-[0.9rem] font-bold">{item?.role}</h3>
                       <p className="m-0 text-[0.76rem] italic text-[#78716c] whitespace-nowrap">{dateRange(item)}</p>
                     </div>
@@ -95,7 +95,7 @@ const Template38 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
               <div className="space-y-3">
                 {projectDetails.filter((item) => item?.project).map((item, index) => (
                   <div key={index}>
-                    <div className="flex flex-wrap justify-between gap-x-3 font-['Inter',sans-serif]">
+                    <div className="flex flex-wrap items-center gap-x-3 font-['Inter',sans-serif]">
                       <h3 className="m-0 text-[0.9rem] font-bold">{item.project}{item?.company ? ` — ${item.company}` : ""}</h3>
                       <p className="m-0 text-[0.76rem] italic text-[#78716c] whitespace-nowrap">
                         {item?.startDate} {item?.endDate ? `– ${item.endDate}` : ""}
@@ -127,7 +127,7 @@ const Template38 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
               <SectionTitle>Education</SectionTitle>
               <div className="space-y-2 font-['Inter',sans-serif]">
                 {educationDetails.map((item, index) => (
-                  <div key={index} className="flex flex-wrap justify-between gap-x-3">
+                  <div key={index} className="flex flex-wrap items-center gap-x-3">
                     <h3 className="m-0 text-[0.85rem] font-bold">{item?.type}{item?.school ? `, ${item.school}` : ""}</h3>
                     <p className="m-0 text-[0.76rem] italic text-[#78716c] whitespace-nowrap">{item?.startDate} – {item?.endDate}</p>
                   </div>

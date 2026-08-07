@@ -198,13 +198,10 @@ export default function TestCard({
     );
   };
 
-  const progressForTest = studentCreds?.progress?.filter((e) => e?.testId == testData?._id) || [];
+  const currentGen = testData?.attemptGeneration || 0;
+  const progressForTest = studentCreds?.progress?.filter((e) => e?.testId == testData?._id && (e?.attemptGeneration || 0) === currentGen) || [];
   const backendAttemptsDone = progressForTest.length;
-  
-  const localAttempts = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("localAttempts") || "{}") : {};
-  const localAttemptCount = localAttempts[testData?._id] || 0;
-  
-  const attemptsDone = Math.max(backendAttemptsDone, localAttemptCount);
+  const attemptsDone = backendAttemptsDone;
   
   const latestAttempt = progressForTest[backendAttemptsDone - 1];
   const score = latestAttempt?.scoreData?.finalScore !== undefined ? latestAttempt.scoreData.finalScore : latestAttempt?.score;
@@ -214,11 +211,16 @@ export default function TestCard({
   const noQuestions = !testData?.questions?.length && !testData?.questionIds?.length;
 
   const attemptsPerRespondentValue = testData?.access?.attemptsPerRespondent;
+  const maxAttemptsNum = Number(attemptsPerRespondentValue);
+  const isUnlimited =
+    attemptsPerRespondentValue === undefined ||
+    attemptsPerRespondentValue === null ||
+    attemptsPerRespondentValue === "" ||
+    maxAttemptsNum === -1 ||
+    attemptsPerRespondentValue === "unlimited";
+
   const attemptsExceeded =
-    attemptsPerRespondentValue !== undefined &&
-    attemptsPerRespondentValue !== "" &&
-    attemptsPerRespondentValue !== null &&
-    (Number(attemptsPerRespondentValue) - attemptsDone <= 0);
+    !isUnlimited && (maxAttemptsNum - attemptsDone <= 0);
 
   const isExpiredStatus = countdowns[index] === "Expired" || testData?.status?.toLowerCase() === "expired" || testData?.status?.toLowerCase() === "completed";
 
@@ -249,6 +251,9 @@ export default function TestCard({
 
   const handleStartTestClick = () => {
     switch (true) {
+      case attemptsExceeded:
+        message.error(<strong>Maximum attempts reached for this test.</strong>);
+        break;
       case isExpiredStatus:
         message.error(<strong>The test you are trying to access has expired.</strong>);
         break;
@@ -298,13 +303,44 @@ export default function TestCard({
             </Button>
           </Popover>
         );
+      case attemptsExceeded:
+        return (
+          <Button
+            type="primary"
+            disabled
+            style={{ backgroundColor: "#FACE53", color: "#000000", border: "none" }}
+          >
+            Attempts exceeded
+          </Button>
+        );
       default:
         if (isResultTab) {
           return (
             <Button
               type="primary"
-              disabled
-              className="font-semibold !bg-white !text-[#1E69DA] !border-[#1E69DA] opacity-80"
+              onClick={(e) => {
+                e.stopPropagation();
+                
+                const completedResult = studentCreds?.progress?.filter(
+                  (entry) => entry?.testId == testData?._id
+                );
+                
+                if (completedResult?.length > 0) {
+                  dispatch(
+                    fetchTestData({
+                      testId: completedResult[completedResult.length - 1]?.testId,
+                    })
+                  );
+                }
+                
+                nav.push(
+                  "/student/tests/" +
+                  testData?.title?.split(" ").join("-") +
+                  "/result?testId=" +
+                  testData?._id
+                );
+              }}
+              className="font-semibold !bg-white !text-[#1E69DA] !border-[#1E69DA] hover:!bg-[#1E69DA] hover:!text-white transition-all"
             >
               View result
             </Button>
@@ -443,8 +479,15 @@ export default function TestCard({
           <div className="text-[#8c94a3] text-[11px] font-bold uppercase tracking-wider">
             ATTEMPTS
           </div>
-          <div className="text-[#1a3b8b] text-[16px] font-bold leading-tight mt-0.5">
-            {attemptsDone || 0}
+          <div className="flex flex-col mt-0.5">
+            <div className="text-[#1a3b8b] text-[15px] font-bold leading-tight">
+              {attemptsDone || 0} / {isUnlimited ? '∞' : attemptsPerRespondentValue}
+            </div>
+            <div className="text-[#8c94a3] text-[11px] font-medium mt-0.5">
+              {isUnlimited 
+                ? 'Unlimited remaining' 
+                : `${Math.max(0, maxAttemptsNum - (attemptsDone || 0))} remaining`}
+            </div>
           </div>
         </div>
         {renderMainButton()}

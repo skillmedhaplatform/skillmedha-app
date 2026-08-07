@@ -1,24 +1,49 @@
+@use "@/modules/admin/styles/colors" as *;
+@import "@/modules/admin/styles/colors.scss";
+
 .detailsContainer {
-  padding: 1rem;
-  position: relative;
-  height: 100%;
-  max-height: 70vh;
+  padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cardContainer {
+  background-color: #ffffff;
+  border-radius: $borderRadiusLarge;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cardHeader {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 1rem;
+}
+
+.cardTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: $primaryColor;
+  margin: 0;
 }
 
 .formContainer {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  max-width: 100%;
-  // flex-wrap: wrap;
+  width: 100%;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  flex: 1 1 40%;
-  min-width: 20rem;
+  width: 100%;
 }
 
 .label {
@@ -56,9 +81,29 @@
   }
 }
 
+.formGroupButton {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  width: 100%;
+
+  span {
+    display: inline-block;
+  }
+
+  button {
+    min-width: 160px;
+    font-weight: 600;
+  }
+}
+
 @media (max-width: 768px) {
   .detailsContainer {
     padding: 1rem;
+  }
+
+  .cardContainer {
+    padding: 1.25rem;
   }
 
   .tagInput {
@@ -70,10 +115,10 @@
       margin-bottom: 0.5rem;
     }
   }
-}
-.formGroupButton {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 20%;
+
+  .formGroupButton {
+    button {
+      width: 100%;
+    }
+  }
 }

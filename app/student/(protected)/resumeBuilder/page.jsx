@@ -1540,6 +1540,8 @@ function Form() {
         resumeTemplateRef={exportTemplateRef}
         activeSection={null}
         isGeneratingPdf={true}
+        accent={templateAccent}
+        onAccentChange={setTemplateAccent}
       />
     </div>
   );
@@ -2547,6 +2549,8 @@ function Form() {
                     resumeTemplateRef={resumeTemplateRef}
                     activeSection={activeSection}
                     isGeneratingPdf={isGeneratingPdf}
+                    accent={templateAccent}
+                    onAccentChange={setTemplateAccent}
                   />
                 </ResumeEditorContext.Provider>
               </div>

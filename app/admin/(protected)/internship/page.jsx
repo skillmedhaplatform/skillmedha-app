@@ -706,149 +706,152 @@ const Page = () => {
 
   return (
     <div className={internshipLibStyles.container}>
-      <div className={internshipLibStyles.titleContainer}>
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            alignItems: "center",
-            flexWrap: "wrap",
-            marginBottom: "10px",
-            justifyContent: "space-between",
-            width: "100%",
-          }}
-        >
+      <div className={internshipLibStyles.headerWrapper}>
+        <div className={internshipLibStyles.titleContainer}>
           <div
             style={{
               display: "flex",
               gap: "12px",
               alignItems: "center",
               flexWrap: "wrap",
-              flex: 1,
+              marginBottom: "10px",
+              justifyContent: "space-between",
+              width: "100%",
             }}
           >
-            <Input
-              placeholder="Search internships... (min 3 characters)"
-              prefix={<SearchOutlined />}
-              style={{ maxWidth: "400px", minWidth: "200px" }}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              allowClear
-            />
-            <Dropdown
-              popupRender={() => filterDropdownContent}
-              trigger={["click"]}
-              open={isFilterDropdownOpen}
-              onOpenChange={setIsFilterDropdownOpen}
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                alignItems: "center",
+                flexWrap: "wrap",
+                flex: 1,
+              }}
             >
-              <Button icon={<FilterOutlined />}>
-                Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
-              </Button>
-            </Dropdown>
-            <Dropdown
-              menu={{ items: sortItems, selectedKeys: [sortParam] }}
-              trigger={["click"]}
+              <Input
+                placeholder="Search internships... (min 3 characters)"
+                prefix={<SearchOutlined />}
+                style={{ maxWidth: "400px", minWidth: "200px" }}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                allowClear
+              />
+              <Dropdown
+                popupRender={() => filterDropdownContent}
+                trigger={["click"]}
+                open={isFilterDropdownOpen}
+                onOpenChange={setIsFilterDropdownOpen}
+              >
+                <Button icon={<FilterOutlined />}>
+                  Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
+                </Button>
+              </Dropdown>
+              <Dropdown
+                menu={{ items: sortItems, selectedKeys: [sortParam] }}
+                trigger={["click"]}
+              >
+                <Button icon={<SortAscendingOutlined />}>
+                  {sortLabels[sortParam]}
+                </Button>
+              </Dropdown>
+            </div>
+
+            <Tooltip
+              title={
+                !canAccess(PERMISSION_VALUES.CREATE)
+                  ? getPermissionMessage(PERMISSION_VALUES.CREATE)
+                  : ""
+              }
             >
-              <Button icon={<SortAscendingOutlined />}>
-                {sortLabels[sortParam]}
-              </Button>
-            </Dropdown>
+              <>
+                <Button
+                  type="primary"
+                  onClick={() => nav.push("/admin/internship/newInternship")}
+                  disabled={!canAccess(PERMISSION_VALUES.CREATE)}
+                >
+                  + Create Internship
+                </Button>
+              </>
+            </Tooltip>
           </div>
-
-          <Tooltip
-            title={
-              !canAccess(PERMISSION_VALUES.CREATE)
-                ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-                : ""
-            }
-          >
-            <>
-              <Button
-                type="primary"
-                onClick={() => nav.push("/admin/internship/newInternship")}
-                disabled={!canAccess(PERMISSION_VALUES.CREATE)}
-              >
-                + Create Internship
-              </Button>
-            </>
-          </Tooltip>
         </div>
-      </div>
 
-      {/* Search and Filter Controls */}
+        {/* Search and Filter Controls */}
 
-      {/* Category Selection */}
-      {uniqueCategories.length > 0 && (
-        <div style={{ marginBottom: "16px", display: "flex", gap: "10px", overflowX: "auto", paddingLeft: "16px", paddingTop: "16px" }}>
-          <Button 
-            type={activeCategory === "All" ? "primary" : "default"} 
-            onClick={() => setActiveCategory("All")}
-            style={{ borderRadius: "20px", fontWeight: activeCategory === "All" ? "600" : "400" }}
-          >
-            All Categories
-          </Button>
-          {uniqueCategories.map(cat => (
+        {/* Category Selection */}
+        {uniqueCategories.length > 0 && (
+          <div style={{ marginBottom: "16px", display: "flex", gap: "10px", overflowX: "auto", paddingLeft: "16px", paddingTop: "8px" }}>
             <Button 
-              key={cat} 
-              type={activeCategory === cat ? "primary" : "default"} 
-              onClick={() => setActiveCategory(cat)}
-              style={{ borderRadius: "20px", fontWeight: activeCategory === cat ? "600" : "400", textTransform: "capitalize" }}
+              type={activeCategory === "All" ? "primary" : "default"} 
+              onClick={() => setActiveCategory("All")}
+              style={{ borderRadius: "20px", fontWeight: activeCategory === "All" ? "600" : "400" }}
             >
-              {cat}
+              All Categories
             </Button>
-          ))}
-        </div>
-      )}
-
-      {/* Active Filters Display */}
-      {activeFilterCount > 0 && (
-        <div
-          style={{
-            marginBottom: "16px",
-            padding: "12px 16px",
-            background: "#f5f5f5",
-            borderRadius: "8px",
-          }}
-        >
-          <Space size="small" wrap>
-            <span style={{ fontWeight: 500 }}>Active Filters:</span>
-            {filterDifficulty && (
-              <Tag
-                closable
-                onClose={() => setFilterDifficulty(undefined)}
-                color="blue"
+            {uniqueCategories.map(cat => (
+              <Button 
+                key={cat} 
+                type={activeCategory === cat ? "primary" : "default"} 
+                onClick={() => setActiveCategory(cat)}
+                style={{ borderRadius: "20px", fontWeight: activeCategory === cat ? "600" : "400", textTransform: "capitalize" }}
               >
-                Difficulty: {filterDifficulty}
-              </Tag>
-            )}
-            {filterModules && (
-              <Tag
-                closable
-                onClose={() => setFilterModules(undefined)}
-                color="cyan"
-              >
-                Modules: {filterModules}
-              </Tag>
-            )}
-            <Button
-              type="link"
-              size="small"
-              onClick={handleClearFilters}
-              style={{ padding: 0 }}
-            >
-              Clear All
-            </Button>
-          </Space>
-        </div>
-      )}
+                {cat}
+              </Button>
+            ))}
+          </div>
+        )}
 
-      {/* Results Count */}
-      {searchText.length >= 3 && (
-        <div style={{ marginBottom: "16px", color: "#666" }}>
-          Found {filteredAndSortedData.length} result
-          {filteredAndSortedData.length !== 1 ? "s" : ""} for "{searchText}"
-        </div>
-      )}
+        {/* Active Filters Display */}
+        {activeFilterCount > 0 && (
+          <div
+            style={{
+              marginBottom: "16px",
+              padding: "12px 16px",
+              background: "#f5f5f5",
+              borderRadius: "8px",
+              margin: "0 16px 16px 16px",
+            }}
+          >
+            <Space size="small" wrap>
+              <span style={{ fontWeight: 500 }}>Active Filters:</span>
+              {filterDifficulty && (
+                <Tag
+                  closable
+                  onClose={() => setFilterDifficulty(undefined)}
+                  color="blue"
+                >
+                  Difficulty: {filterDifficulty}
+                </Tag>
+              )}
+              {filterModules && (
+                <Tag
+                  closable
+                  onClose={() => setFilterModules(undefined)}
+                  color="cyan"
+                >
+                  Modules: {filterModules}
+                </Tag>
+              )}
+              <Button
+                type="link"
+                size="small"
+                onClick={handleClearFilters}
+                style={{ padding: 0 }}
+              >
+                Clear All
+              </Button>
+            </Space>
+          </div>
+        )}
+
+        {/* Results Count */}
+        {searchText.length >= 3 && (
+          <div style={{ marginBottom: "16px", color: "#666", paddingLeft: "16px" }}>
+            Found {filteredAndSortedData.length} result
+            {filteredAndSortedData.length !== 1 ? "s" : ""} for "{searchText}"
+          </div>
+        )}
+      </div>
 
       <div className={internshipLibStyles.con}>
         <div className={internshipLibStyles.cardsContainer}>
@@ -858,6 +861,22 @@ const Page = () => {
               className={internshipLibStyles.card}
               role="button"
               tabIndex={0}
+              onDoubleClick={() => {
+                if (!canAccess(PERMISSION_VALUES.EDIT)) {
+                  message.info(getPermissionMessage(PERMISSION_VALUES.EDIT));
+                  return;
+                }
+                handleCardClick(eachData);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  if (!canAccess(PERMISSION_VALUES.EDIT)) {
+                    message.info(getPermissionMessage(PERMISSION_VALUES.EDIT));
+                    return;
+                  }
+                  handleCardClick(eachData);
+                }
+              }}
             >
               <div className={internshipLibStyles.thumbWrapper}>
                 <img
@@ -893,6 +912,10 @@ const Page = () => {
                       e.stopPropagation();
                     }}
                     onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onDoubleClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                     }}

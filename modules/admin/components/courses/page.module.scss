@@ -118,9 +118,9 @@
         color: $textPrimary;
       }
 
-      input,
-      textarea,
-      select {
+      > input,
+      > textarea,
+      > select {
         padding: 0.5rem 0.8rem;
         outline: none;
         border-radius: 0.4rem;
@@ -136,6 +136,49 @@
         &::placeholder {
           color: rgba(0, 0, 0, 0.4);
         }
+      }
+
+      :global(.ant-input-number) {
+        width: 100%;
+        border-radius: 0.4rem;
+        border-color: rgba(0, 0, 0, 0.25);
+
+        :global(.ant-input-number-input) {
+          border: none !important;
+          box-shadow: none !important;
+          outline: none !important;
+          padding: 0.4rem 0.8rem !important;
+          height: auto !important;
+        }
+      }
+
+      :global(.ant-select) {
+        width: 100%;
+
+        :global(.ant-select-selection-search-input) {
+          border: none !important;
+          box-shadow: none !important;
+          outline: none !important;
+          padding: 0 !important;
+        }
+      }
+    }
+
+    :global(.ant-input-number) {
+      :global(.ant-input-number-input) {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        padding: 0.4rem 0.8rem !important;
+      }
+    }
+
+    :global(.ant-select) {
+      :global(.ant-select-selection-search-input) {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        padding: 0 !important;
       }
     }
 
@@ -187,6 +230,15 @@
       > div:last-child {
         flex: 1;
       }
+
+      :global(.ant-select) {
+        :global(.ant-select-selection-search-input) {
+          border: none !important;
+          box-shadow: none !important;
+          outline: none !important;
+          padding: 0 !important;
+        }
+      }
     }
 
     .difficulty {
@@ -218,7 +270,7 @@
       .priceIn {
         display: flex;
         align-items: center;
-        border: 1px solid rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(0, 0, 0, 0.25);
         padding: 0.4rem 0.6rem;
         border-radius: 0.4rem;
         width: 100%;
@@ -239,10 +291,12 @@
         }
 
         input {
-          border: none;
+          border: none !important;
+          box-shadow: none !important;
+          outline: none !important;
           font-size: 1rem;
-          outline: none;
           width: 100%;
+          padding: 0 0.4rem !important;
           color: $textPrimary;
 
           &::placeholder {

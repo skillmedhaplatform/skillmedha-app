@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import {
@@ -274,7 +274,7 @@ const Template1 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
                 const level = typeof l === "object" && l !== null ? l.level : null;
                 return (
                   <div key={index}>
-                    <div className="flex justify-between text-[0.8rem] mb-1">
+                    <div className="flex items-center text-[0.8rem] mb-1">
                       <span className="text-[#1e293b] font-medium">{name}</span>
                       {level && <span className="text-[#64748b]">{level}</span>}
                     </div>

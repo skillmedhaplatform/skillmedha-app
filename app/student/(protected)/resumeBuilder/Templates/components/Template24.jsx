@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
@@ -88,8 +88,8 @@ const Template24 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
               <div className="space-y-3.5">
                 {combinedExperience.map((item, index) => (
                   <div key={index}>
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-                      <h3 className="m-0 text-[0.92rem] font-bold font-['Inter',sans-serif]">
+                    <div className="flex flex-wrap items-center gap-x-4">
+                      <h3 className="flex-1 min-w-0 m-0 text-[0.92rem] font-bold font-['Inter',sans-serif]">
                         {item?.company}
                         {item?.role ? <span className="font-normal italic"> — {item.role}</span> : ""}
                       </h3>
@@ -114,8 +114,8 @@ const Template24 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
               <SectionTitle>Education</SectionTitle>
               <div className="space-y-2">
                 {educationDetails.map((item, index) => (
-                  <div key={index} className="flex flex-wrap items-baseline justify-between gap-x-4">
-                    <h3 className="m-0 text-[0.88rem] font-bold font-['Inter',sans-serif]">
+                  <div key={index} className="flex flex-wrap items-center gap-x-4">
+                    <h3 className="flex-1 min-w-0 m-0 text-[0.88rem] font-bold font-['Inter',sans-serif]">
                       {item?.school || item?.board}
                       {item?.type ? <span className="font-normal italic"> — {item.type}</span> : ""}
                       {item?.grade ? `, ${item.grade}${item?.gradeType === "percentage" ? "%" : item?.gradeType ? "/10" : ""}` : ""}
@@ -135,8 +135,8 @@ const Template24 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
               <div className="space-y-3">
                 {projectDetails.filter((p) => p?.project).map((item, index) => (
                   <div key={index}>
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-                      <h3 className="m-0 text-[0.88rem] font-bold font-['Inter',sans-serif]">
+                    <div className="flex flex-wrap items-center gap-x-4">
+                      <h3 className="flex-1 min-w-0 m-0 text-[0.88rem] font-bold font-['Inter',sans-serif]">
                         {item.project}{item?.company ? <span className="font-normal italic"> — {item.company}</span> : ""}
                       </h3>
                       <span className="text-[0.78rem] font-['Inter',sans-serif] whitespace-nowrap text-[#333333]">

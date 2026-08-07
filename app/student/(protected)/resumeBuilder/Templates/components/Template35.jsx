@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -73,22 +73,24 @@ const S = {
   section: { marginBottom: "26px" },
   summaryText: { fontSize: "14.5px", lineHeight: 1.65, color: "#333333" },
   entryList: { display: "flex", flexDirection: "column", gap: "16px" },
-  entryHeadRow: { display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", columnGap: "16px" },
-  entryTitle: { margin: 0, fontSize: "15.5px", fontWeight: 700, color: "#1a1a1a" },
+  entryHeadRow: { display: "flex", flexWrap: "wrap", alignItems: "center", columnGap: "16px" },
+  entryTitle: { margin: 0, flex: "1 1 auto", minWidth: 0, fontSize: "15.5px", fontWeight: 700, color: "#1a1a1a" },
   entrySub: { fontWeight: 400, color: "#555555" },
-  entryDate: (accent) => ({ whiteSpace: "nowrap", fontSize: "12px", fontWeight: 700, color: accent }),
+  entryDate: (accent) => ({ flexShrink: 0, marginLeft: "auto", whiteSpace: "nowrap", fontSize: "12px", fontWeight: 700, color: accent }),
   entryDesc: { margin: "4px 0 0", fontSize: "14px", lineHeight: 1.55, color: "#333333" },
 };
 
 const getInitials = (first, last) => `${first?.[0] || ""}${last?.[0] || ""}`.toUpperCase();
 
-const Template35 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
+const Template35 = ({ resumeTemplateRef, activeSection, isGeneratingPdf, accent: accentProp, onAccentChange }) => {
   const {
     basicDetails, educationDetails, workExperience, internshipDetails, projectDetails,
     accDetails, certificates, skills, languages, links, volunteerings,
   } = useResumeTemplateData();
   const profileBase64 = useProfileImage(basicDetails?.profile);
-  const [accent, setAccent] = useState(COLOR_OPTIONS[0].value);
+  const [internalAccent, setInternalAccent] = useState(COLOR_OPTIONS[0].value);
+  const accent = accentProp ?? internalAccent;
+  const setAccent = onAccentChange ?? setInternalAccent;
 
   const profileLinks = links.filter((item) => item?.link);
   const linkIcons = [<LinkedinFilled key="li" />, <GithubOutlined key="gh" />, <GlobalOutlined key="gl" />];

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -59,23 +59,25 @@ const S = {
   skillsRow: { display: "flex", flexWrap: "wrap", gap: "8px" },
   skillPill: (accent) => ({ fontSize: "12.5px", fontWeight: 600, color: accent, backgroundColor: withAlpha(accent, 0.14), padding: "5px 12px", borderRadius: "6px" }),
   entryList: { display: "flex", flexDirection: "column", gap: "16px" },
-  entryHeadRow: { display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", columnGap: "16px" },
+  entryHeadRow: { display: "flex", flexWrap: "wrap", alignItems: "center", columnGap: "16px" },
   entryTitle: { margin: 0, fontSize: "15px", fontWeight: 700, color: "#f1f5f9" },
   entrySub: { fontWeight: 400, color: "#94a3b8" },
-  entryDate: (accent) => ({ whiteSpace: "nowrap", fontSize: "12px", fontWeight: 700, color: accent }),
+  entryDate: (accent) => ({ flexShrink: 0, marginLeft: "auto", whiteSpace: "nowrap", fontSize: "12px", fontWeight: 700, color: accent }),
   entryDesc: { margin: "4px 0 0", fontSize: "14px", lineHeight: 1.6, color: "#cbd5e1" },
   gridTwo: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" },
 };
 
 const getInitials = (first, last) => `${first?.[0] || ""}${last?.[0] || ""}`.toUpperCase();
 
-const Template39 = ({ resumeTemplateRef, activeSection, isGeneratingPdf }) => {
+const Template39 = ({ resumeTemplateRef, activeSection, isGeneratingPdf, accent: accentProp, onAccentChange }) => {
   const {
     basicDetails, educationDetails, workExperience, internshipDetails, projectDetails,
     accDetails, certificates, skills, languages, links, volunteerings,
   } = useResumeTemplateData();
   const profileBase64 = useProfileImage(basicDetails?.profile);
-  const [accent, setAccent] = useState(COLOR_OPTIONS[0].value);
+  const [internalAccent, setInternalAccent] = useState(COLOR_OPTIONS[0].value);
+  const accent = accentProp ?? internalAccent;
+  const setAccent = onAccentChange ?? setInternalAccent;
 
   const profileLinks = links.filter((item) => item?.link);
   const linkIcons = [<LinkedinFilled key="li" />, <GithubOutlined key="gh" />, <GlobalOutlined key="gl" />];

@@ -26,6 +26,7 @@ import { HiDotsVertical } from "react-icons/hi";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 
 import { usePermissions, PERMISSION_VALUES } from "@/hooks/usepermission";
+import BulkUploadModal from "@/app/admin/(protected)/practice/Practice_utils/BulkUploadModal";
 
 const { Panel } = Collapse;
 
@@ -52,6 +53,7 @@ export default function QuestionList() {
   const [pageSize, setPageSize] = useState(pageSizeFromUrl);
   const [difficultyFilter, setDifficultyFilter] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
 
   // Update URL without difficulty
   const updateURL = (page, limit) => {
@@ -122,7 +124,7 @@ export default function QuestionList() {
       return;
     }
     if (selectedQuestions.length === 0) {
-      alert("Please select questions to delete");
+      message.warning("Please select questions to delete");
       return;
     }
 
@@ -168,17 +170,17 @@ export default function QuestionList() {
 
       // Show appropriate message
       if (failCount === 0) {
-        alert(`${successCount} question(s) deleted successfully!`);
+        message.success(`${successCount} question(s) deleted successfully!`);
       } else if (successCount === 0) {
-        alert(`Failed to delete ${failCount} question(s). Please try again.`);
+        message.error(`Failed to delete ${failCount} question(s). Please try again.`);
       } else {
-        alert(
+        message.warning(
           `${successCount} question(s) deleted successfully, ${failCount} failed to delete.`
         );
       }
     } catch (error) {
       console.error("Delete operation failed:", error);
-      alert("Error occurred while deleting questions. Please try again.");
+      message.error("Error occurred while deleting questions. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -208,14 +210,14 @@ export default function QuestionList() {
         // Update local state by removing the deleted question
         setQuestions(questions.filter((q) => q._id !== questionId));
         setSelectedQuestions((prev) => prev.filter((id) => id !== questionId));
-        alert("Question deleted successfully!");
+        message.success("Question deleted successfully!");
       } else {
         const errorMessage = result.payload || "Failed to delete question";
-        alert(`Error: ${errorMessage}`);
+        message.error(`Error: ${errorMessage}`);
       }
     } catch (error) {
       console.error("Delete failed:", error);
-      alert("Error occurred while deleting the question. Please try again.");
+      message.error("Error occurred while deleting the question. Please try again.");
     }
   };
 
@@ -226,6 +228,12 @@ export default function QuestionList() {
   const onAddQuestionChange = (value) => {
     if (value === "manual") {
       handleAddQuestion();
+    } else if (value === "bulk") {
+      if (!canAccess(PERMISSION_VALUES.CREATE)) {
+        message.info(getPermissionMessage(PERMISSION_VALUES.CREATE));
+        return;
+      }
+      setBulkModalOpen(true);
     }
   };
 
@@ -498,6 +506,10 @@ export default function QuestionList() {
                   value: "manual",
                   label: "Add Manually",
                 },
+                {
+                  value: "bulk",
+                  label: "Bulk Upload",
+                },
               ]}
               disabled={
                 params?.testId === "newSkill" ||
@@ -521,69 +533,60 @@ export default function QuestionList() {
                   <Collapse bordered={false} ghost>
                     <Panel
                       header={
-                        <div>
-                          <div className={styles.questionItemHeader}>
-                            <div className={styles.questionItemHeaderLeft}>
-                              <Checkbox
-                                checked={selectedQuestions.includes(q._id)}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  handleQuestionSelect(q._id);
-                                }}
-                              />
-                              <span className={styles.questionText}>
-                                {`Question ${questionNumber}`}
-                              </span>
-                            </div>
-
-                            <div className={styles.questionItemHeaderRight}>
-                              <div>{q.questionType?.toUpperCase()}</div>
-                              <div>{q.difficulty?.toUpperCase()}</div>
-                              <Dropdown
-                                menu={{ items: getDropdownItems(q._id) }}
-                                trigger={["click"]}
-                                placement="bottomRight"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Button
-                                  type="text"
-                                  icon={<HiDotsVertical />}
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                              </Dropdown>
-                            </div>
+                        <div className={styles.questionItemHeader}>
+                          <div className={styles.questionItemHeaderLeft}>
+                            <Checkbox
+                              checked={selectedQuestions.includes(q._id)}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleQuestionSelect(q._id);
+                              }}
+                            />
+                            <span className={styles.questionNumberText}>
+                              {`${questionNumber}.`}
+                            </span>
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: parseIfJson(
+                                  q.questionContent?.question || q.question || ""
+                                ),
+                              }}
+                              className={styles.questionTextInline}
+                            />
                           </div>
 
-                          {/* Updated to use questionContent.question */}
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: parseIfJson(
-                                q.questionContent?.question || q.question || ""
-                              ),
-                            }}
-                            className={styles.question}
-                          />
-
-                          {/* Updated to use resources instead of media */}
-                          <MediaRenderer resources={q?.resources} />
-
-                          {/* Show explanation if available */}
-                          {/* {q.answer?.explanation && (
-                            <div className={styles.explanation}>
-                              <strong>Explanation:</strong>
-                              <div
-                                dangerouslySetInnerHTML={{
-                                  __html: parseIfJson(q.answer.explanation),
-                                }}
+                          <div className={styles.questionItemHeaderRight}>
+                            <div>{q.questionType?.toUpperCase()}</div>
+                            <div>{q.difficulty?.toUpperCase()}</div>
+                            <Dropdown
+                              menu={{ items: getDropdownItems(q._id) }}
+                              trigger={["click"]}
+                              placement="bottomRight"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Button
+                                type="text"
+                                icon={<HiDotsVertical />}
+                                onClick={(e) => e.stopPropagation()}
                               />
-                            </div>
-                          )} */}
+                            </Dropdown>
+                          </div>
                         </div>
                       }
                       key={q._id}
                     >
-                      {/* Updated options rendering for new schema */}
+                      <MediaRenderer resources={q?.resources} />
                       {renderOptions(q.questionContent, q.answer)}
+                      {q.answer?.explanation && (
+                        <div className={styles.explanation}>
+                          <strong>Explanation:</strong>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: parseIfJson(q.answer.explanation),
+                            }}
+                          />
+                        </div>
+                      )}
                     </Panel>
                   </Collapse>
                 </div>
@@ -610,6 +613,15 @@ export default function QuestionList() {
           </>
         )}
       </div>
+
+      <BulkUploadModal
+        open={bulkModalOpen}
+        onCancel={() => setBulkModalOpen(false)}
+        skillId={params?.testId}
+        onSuccess={() => {
+          dispatch(getSKillQuestions({ skillId: params?.testId }));
+        }}
+      />
     </div>
   );
 }

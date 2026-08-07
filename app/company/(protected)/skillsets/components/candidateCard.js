@@ -134,8 +134,8 @@ const StudentCard = ({
 
           const mmYyyyMatch = dateStr.match(/^(\d{2})\/(\d{4})$/);
           if (mmYyyyMatch) {
-            const month = parseInt(mmYyyyMatch[9]) - 1;
-            const year = parseInt(mmYyyyMatch);
+            const month = parseInt(mmYyyyMatch[1], 10) - 1;
+            const year = parseInt(mmYyyyMatch[2], 10);
             return new Date(year, month, 1);
           }
 
@@ -202,7 +202,7 @@ const StudentCard = ({
       (a, b) => (b.yearofPass || 0) - (a.yearofPass || 0)
     );
 
-    return sortedEducation;
+    return sortedEducation[0] || educationDetails[0] || null;
   };
 
   const experienceCalculation = calculateExperienceFromDates(experiences);
@@ -280,8 +280,8 @@ const StudentCard = ({
         width: width ? width : "80%",
         margin: "0 auto",
         marginBottom: "1rem",
-        border: isSelected ? "2px solid #25A3A6" : "1px solid #00000033",
-        backgroundColor: isSelected ? "#f6ffff" : "white",
+        border: isSelected ? "2px solid #1E69DA" : "1px solid #00000033",
+        backgroundColor: isSelected ? "rgba(30, 105, 218, 0.04)" : "white",
       }}
     >
       {/* Selection Checkbox */}
@@ -337,7 +337,7 @@ const StudentCard = ({
                 (e.currentTarget.style.textDecoration = "none")
               }
               style={{
-                color: "#25A3A6",
+                color: "#1E69DA",
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
@@ -359,7 +359,7 @@ const StudentCard = ({
                   level={4}
                   style={{
                     marginBottom: "0.25rem",
-                    color: "#25A3A6",
+                    color: "#1E69DA",
                     fontSize: "1.25rem",
                     textAlign: "left",
                     margin: 0,
@@ -383,7 +383,7 @@ const StudentCard = ({
                 <RiVerifiedBadgeFill
                   style={{
                     fontSize: "2rem",
-                    color: "#25A3A6",
+                    color: "#1E69DA",
                     cursor: "pointer",
                   }}
                   title="Verified"
@@ -403,7 +403,7 @@ const StudentCard = ({
                 type="link"
                 style={{
                   padding: 0,
-                  color: "#25A3A6",
+                  color: "#1E69DA",
                   fontSize: "0.875rem",
                 }}
                 onClick={showModal}
@@ -429,7 +429,7 @@ const StudentCard = ({
                 letterSpacing: "0.05em",
               }}
             >
-              {latestEducation?.gradingSystem?.toUpperCase()}
+              {(latestEducation?.gradingSystem || "Academics").toUpperCase()}
             </Text>
             <div>
               <Text style={{ fontSize: "0.875rem" }}>

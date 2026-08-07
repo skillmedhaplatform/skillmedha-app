@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 const ZoomClient = dynamic(() => import("./utils/join"), {
   ssr: false,
 });
-import { Input, Modal, Radio, Select, Space, ConfigProvider, Pagination } from "antd";
+import { Button, Input, Modal, Radio, Select, Space, ConfigProvider, Pagination } from "antd";
 import { BsCameraVideo, BsJournalBookmark } from "react-icons/bs";
 import { MdWorkOutline } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
@@ -405,7 +405,23 @@ const page = () => {
           />
         </div>
 
-        <button onClick={createMeetingButton}>Create Meeting</button>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5rem" }}>
+          <Button
+            type="primary"
+            onClick={createMeetingButton}
+            style={{
+              backgroundColor: "#1e69da",
+              borderColor: "#1e69da",
+              height: "40px",
+              fontSize: "15px",
+              fontWeight: "600",
+              borderRadius: "6px",
+              padding: "0 2rem"
+            }}
+          >
+            Create Meeting
+          </Button>
+        </div>
       </Modal>
     </>
   );
