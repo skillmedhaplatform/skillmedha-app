@@ -88,7 +88,7 @@ export const loginStudent = createAsyncThunk(
       const isNewUser = !studentData?.createdAt || new Date(studentData.createdAt).getTime() >= CUTOFF_DATE;
       const psychometricDone =
         (Array.isArray(studentData?.psychometricTestResults) &&
-        studentData.psychometricTestResults.length > 0) || !isNewUser;
+        studentData.psychometricTestResults.length > 0) || !isNewUser || (studentData?.loginCount > 1);
 
       // Set both cookies with the real verified value and special org status
       await fetch("/api/auth/session", {

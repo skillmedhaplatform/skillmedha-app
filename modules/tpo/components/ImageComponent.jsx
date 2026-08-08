@@ -6,7 +6,7 @@ import profiles from './styles/profileImage.module.scss'
 const ImageComponent = () => {
   return (
     <div className={profiles.image}>
-        <Image src={profile} height={90} width={90}/>
+        <Image src={profile} height={90} width={90} alt="Profile Image"/>
     </div>
   )
 }

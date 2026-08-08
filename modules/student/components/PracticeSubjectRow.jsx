@@ -23,10 +23,29 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
   const [currentPage, setCurrentPage] = useState(1);
   const [subtopics, setSubtopics] = useState([]);
   const [loading, setLoading] = useState(true);
-  const pageSize = pageSizeOverride || 4; // default 1 row of 4
+  const [columns, setColumns] = useState(4); // Default to 4 columns
   const studentPracResults = useSelector((state) => state.practice.studentPracResults || []);
   const studentData = useSelector((state) => state.student.student?.data);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const updateColumns = () => {
+      const width = window.innerWidth;
+      if (width >= 1920) setColumns(6);      // Extremely large monitors
+      else if (width >= 1600) setColumns(5); // Large monitors
+      else if (width >= 1024) setColumns(4); // Laptops/Desktops
+      else if (width >= 768) setColumns(2);  // Tablets
+      else setColumns(1);                    // Mobile
+    };
+    
+    updateColumns();
+    window.addEventListener('resize', updateColumns);
+    return () => window.removeEventListener('resize', updateColumns);
+  }, []);
+
+  // If activeCategory === 'All', pageSizeOverride is 4 (1 row). Otherwise 8 (2 rows).
+  const rows = pageSizeOverride === 8 ? 2 : 1;
+  const pageSize = columns * rows;
 
   useEffect(() => {
     let isMounted = true;
@@ -318,7 +337,8 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
       <AnimatePresence mode="wait">
         <motion.div 
           key={currentPage}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+          className="grid gap-4 md:gap-6"
+          style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
           initial="hidden"
           animate="visible"
           exit="exit"

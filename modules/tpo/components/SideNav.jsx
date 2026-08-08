@@ -4,7 +4,7 @@ import sideBarStyles from "@/mainLayout/styles/sidebar.module.scss";
 import { usePathname } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
 import { useDispatch, useSelector } from "react-redux";
-import { Menu, Dropdown, Skeleton } from "antd";
+import { Menu, Dropdown, Skeleton, message } from "antd";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { changeCollapse } from "@/redux/slices/sidebar";
 import {
@@ -22,10 +22,11 @@ import {
   HiOutlineDocumentText,
 } from "react-icons/hi2";
 
-const SideNav = ({ activeView, setView }) => {
+const SideNav = ({ activeView, setView, onLinkClick }) => {
   const router = useRouter();
   const pathName = usePathname();
   const dispatch = useDispatch();
+  const [messageApi, contextHolder] = message.useMessage();
   
   const isCollapsed = useSelector((s) => s.sideBar.collapse);
 
@@ -98,7 +99,10 @@ const SideNav = ({ activeView, setView }) => {
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: "inherit", textDecoration: "none", display: "block", width: "100%" }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onLinkClick) onLinkClick();
+            }}
           >
             {item.name}
           </a>
@@ -122,6 +126,18 @@ const SideNav = ({ activeView, setView }) => {
   };
 
   const handleMenuClick = ({ key }) => {
+    if (onLinkClick) onLinkClick();
+
+    if (key === "/testportal_admin") {
+      const isMobileUserAgent = typeof navigator !== "undefined" && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isSmallScreen = typeof window !== "undefined" && (window.innerWidth <= 1024 || window.screen.width <= 1024);
+      
+      if (isMobileUserAgent || isSmallScreen) {
+        messageApi.warning("This action cannot be performed on a tablet/mobile screen. Please try on a laptop or larger screen.");
+        return;
+      }
+    }
+
     if (typeof setView === "function") {
       setView(key);
       return;
@@ -165,6 +181,7 @@ const SideNav = ({ activeView, setView }) => {
     <section
       className={`${sideBarStyles.sideBarContainer} ${isCollapsed ? sideBarStyles.collapsedSidebar : sideBarStyles.expandedSidebar}`}
     >
+      {contextHolder}
       <div className={sideBarStyles.logoContainer}>
         <img
           src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"

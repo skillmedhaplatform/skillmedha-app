@@ -17,16 +17,6 @@
   flex-direction: column;
 }
 
-.tabsWrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 2.5rem;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  width: 100%;
-}
 
 .tabsRow {
   display: flex;
@@ -275,6 +265,19 @@
 }
 
 @media (max-width: 1100px) {
+  .bottomCont {
+    display: block;
+    overflow-y: auto;
+  }
+
+  .contentCont {
+    width: 100% !important;
+  }
+  
+  .previewCard {
+    display: none !important;
+  }
+
   .noticeCard {
     flex-direction: column;
     align-items: stretch;
@@ -432,12 +435,59 @@
 }
 
 .tabsWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background-color: white;
-  padding: 0 2.5rem;
+  padding: 0.75rem 2.5rem;
   width: 100%;
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   z-index: 1;
+}
+
+.leftControls {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.desktopTabs {
+  display: flex;
+  width: 100%;
+}
+
+.mobileTabs {
+  display: none;
+}
+
+.mobileTabBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 38px;
+  font-weight: 500;
+  color: #4a5568;
+  border-radius: 6px;
+  padding: 0 12px;
+}
+
+.createIcon {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .tabsWrapper {
+    padding: 0.75rem 1rem;
+  }
+  
+  .desktopTabs {
+    display: none;
+  }
+  
+  .mobileTabs {
+    display: block;
+  }
 }
 
 .tabsRow {

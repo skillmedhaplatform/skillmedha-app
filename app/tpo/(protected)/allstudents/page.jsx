@@ -264,9 +264,13 @@ export default function Page() {
               SPOC
             </span>
           </div>
+
+          <Button type="primary" onClick={showModal} className={allStudents.tabletAddBtn}>
+            + Add department
+          </Button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+        <div className={allStudents.rightControls}>
           <div className={allStudents.miniStatsContainer}>
             <div className={`${allStudents.miniStat} ${allStudents.deptsStat}`}>
               <span className={allStudents.miniStatValue}>{departmentsCount}</span>
@@ -282,7 +286,7 @@ export default function Page() {
             </div>
           </div>
 
-          <Button type="primary" onClick={showModal}>
+          <Button type="primary" onClick={showModal} className={allStudents.desktopAddBtn}>
             + Add department
           </Button>
         </div>
@@ -311,11 +315,12 @@ export default function Page() {
         onCancel={handleCancel}
         footer={null}
         style={{ marginTop: "-2rem" }}
-        width={"60%"}
+        width="60%"
+        className={allStudents.responsiveModal}
       >
         <div style={{ padding: "1rem" }}>
           <Row gutter={[16, 16]}>
-            <Col span={12}>
+            <Col xs={24} sm={24} md={12} lg={12}>
               <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>
                 Department Name <span style={{ color: "red" }}>*</span>
               </label>
@@ -326,7 +331,7 @@ export default function Page() {
                 placeholder="Enter department name"
               />
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={24} md={12} lg={12}>
               <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>
                 Name of HOD <span style={{ color: "red" }}>*</span>
               </label>
@@ -337,7 +342,7 @@ export default function Page() {
                 placeholder="Enter HOD name"
               />
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={24} md={12} lg={12}>
               <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>
                 Mobile <span style={{ color: "red" }}>*</span>
               </label>
@@ -352,7 +357,7 @@ export default function Page() {
                 <span style={{ color: "red", fontSize: "12px" }}>Must be exactly 10 digits</span>
               )}
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={24} md={12} lg={12}>
               <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>
                 Email <span style={{ color: "red" }}>*</span>
               </label>
@@ -363,7 +368,7 @@ export default function Page() {
                 placeholder="Enter email"
               />
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={24} md={12} lg={12}>
               <label style={{ fontWeight: 500, display: "block", marginBottom: "4px" }}>SPOC</label>
               <Input
                 name="spoc"
@@ -372,7 +377,7 @@ export default function Page() {
                 placeholder="Enter SPOC name"
               />
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={24} md={12} lg={12}>
               <label style={{ display: "block", marginBottom: "4px", fontWeight: 500 }}>
                 Branch Logo
               </label>

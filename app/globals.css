@@ -3,12 +3,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --banner-bg:          #1565C0;
-  --banner-height:      64px;
-  --banner-padding-x:  24px;
-  --banner-padding-y:  0px;
+  --banner-bg: #1565C0;
+  --banner-height: 64px;
+  --banner-padding-x: 24px;
+  --banner-padding-y: 0px;
   --banner-text-color: #FFFFFF;
-  --banner-font-size:  14px;
+  --banner-font-size: 14px;
 }
 
 @theme inline {
@@ -35,11 +35,16 @@
 */
 
 /* Hide main scrollbar globally to maintain clean app-like UI */
-html, body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+html,
+body {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
-html::-webkit-scrollbar, body::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari and Opera */
 }

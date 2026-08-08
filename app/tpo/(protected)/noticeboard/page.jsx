@@ -18,6 +18,7 @@ import NoticePreviewCard from "./(components)/previewCard";
 import { VscFolderActive } from "react-icons/vsc";
 import { FcExpired } from "react-icons/fc";
 import { CiSaveDown2 } from "react-icons/ci";
+import { FaCaretDown } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import {
   DeleteNotice,
@@ -202,6 +203,19 @@ const Page = () => {
     },
   ];
 
+  const tabMenuItems = noticeTabs.map((tab) => ({
+    key: tab.key,
+    label: (
+      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {tab.icon}
+        <span>{tab.name}</span>
+      </span>
+    ),
+    onClick: () => handleTabChange(tab.key),
+  }));
+
+  const activeTabDetails = noticeTabs.find(t => t.key === currentTab);
+
   return (
     <div className={styles.noticePageContainer}>
       <div className={styles.stickyHeader}>
@@ -212,24 +226,36 @@ const Page = () => {
           onActionClick={() => showDrawer(null)}
         />
         <div className={styles.tabsWrapper}>
-          <div className={styles.tabsRow}>
-            {noticeTabs.map((tab) => {
-              const isActive = currentTab === tab.key;
-              return (
-                <div
-                  key={tab.key}
-                  className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
-                  onClick={() => handleTabChange(tab.key)}
-                >
-                  {tab.icon}
-                  <span>{tab.name}</span>
-                  {isActive && <div className={styles.activeIndicator} />}
-                </div>
-              );
-            })}
+          <div className={styles.leftControls}>
+            <div className={styles.desktopTabs}>
+              <div className={styles.tabsRow}>
+                {noticeTabs.map((tab) => {
+                  const isActive = currentTab === tab.key;
+                  return (
+                    <div
+                      key={tab.key}
+                      className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
+                      onClick={() => handleTabChange(tab.key)}
+                    >
+                      {tab.icon}
+                      <span>{tab.name}</span>
+                      {isActive && <div className={styles.activeIndicator} />}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className={styles.mobileTabs}>
+              <Dropdown menu={{ items: tabMenuItems }} trigger={['click']}>
+                <Button className={styles.mobileTabBtn}>
+                  {activeTabDetails?.icon} {activeTabDetails?.name} <FaCaretDown />
+                </Button>
+              </Dropdown>
+            </div>
           </div>
-          <Button type="primary" onClick={() => showDrawer(null)}>
-            + Create Notice
+          <Button type="primary" className={styles.createBtn} onClick={() => showDrawer(null)}>
+            <span className={styles.createText}>+ Create Notice</span>
+            <span className={styles.createIcon}>+</span>
           </Button>
         </div>
       </div>

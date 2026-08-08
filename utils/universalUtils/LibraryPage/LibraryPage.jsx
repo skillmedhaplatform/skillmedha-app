@@ -179,7 +179,7 @@ const MobileLibraryPageWrapper = ({ title, items, progressById, safeItems, activ
     const isEnrolled = activeTab === "my" || inMyCourses;
     const progressVal = fetchedProgress ? (fetchedProgress.totalProgress ?? 0) : (item.progress || 0);
     const isProgressLoading = fetchedProgress?.loading;
-    
+
     return {
       ...item,
       _uiState: {
@@ -213,7 +213,7 @@ const LibraryPage = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
-const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
+  const userId = sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   // My courses data (from getAllCourses / getAllInternships)
   const items = useSelector(dataSelector);
 
@@ -233,10 +233,26 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
       return true; // fallback
     });
   }, [rawWishlistItems, idPrefix]);
-  
+
   const wishlistLoading = useSelector((state) => state.wishlist?.loading ?? false);
   const wishlistPendingIds = useSelector((state) => state.wishlist?.pendingIds ?? []);
   const [wishlistOpen, setWishlistOpen] = useState(false);
+  const [columns, setColumns] = useState(3);
+
+  useEffect(() => {
+    const updateColumns = () => {
+      const width = window.innerWidth;
+      if (width >= 1920) setColumns(5);
+      else if (width >= 1600) setColumns(4);
+      else if (width >= 1024) setColumns(3);
+      else if (width >= 640) setColumns(2);
+      else setColumns(1);
+    };
+    
+    updateColumns();
+    window.addEventListener('resize', updateColumns);
+    return () => window.removeEventListener('resize', updateColumns);
+  }, []);
 
   const wishlistIdSet = useMemo(
     () => new Set(wishlistItems.map((i) => i.courseId?._id || i.courseId)),
@@ -277,7 +293,7 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
       return true; // fallback
     });
   }, [rawCartItems, idPrefix]);
-  
+
   const cartTotalAmount = useMemo(() => {
     return cartItems.reduce((sum, item) => {
       const course = item.courseId || {};
@@ -595,12 +611,12 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
   const avgProgress =
     totalEnrolled > 0
       ? Math.round(
-          enrolledItems.reduce((acc, curr) => {
-            const fetched = progressById[curr._id];
-            const val = fetched ? fetched.totalProgress : curr.progress || 0;
-            return acc + val;
-          }, 0) / totalEnrolled
-        )
+        enrolledItems.reduce((acc, curr) => {
+          const fetched = progressById[curr._id];
+          const val = fetched ? fetched.totalProgress : curr.progress || 0;
+          return acc + val;
+        }, 0) / totalEnrolled
+      )
       : 0;
 
   const isCourse = title ? title.toLowerCase().includes("course") : false;
@@ -717,197 +733,196 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
       {/* Fixed Header Section */}
       <div className="flex flex-col w-full z-[40] bg-[#EFF5FB] shrink-0">
         {/* Banner */}
-      <div className="w-full h-[110px] lg:h-[140px] min-h-[110px] lg:min-h-[140px] flex flex-col justify-between p-4 lg:px-8 pt-6 shadow-sm rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
-        <div className="absolute inset-0 pointer-events-none z-[1]">
-          <div className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]">✕</div>
-          <div className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]">+</div>
-          <div className="absolute top-[40%] right-[50%] text-[#1E69DA] opacity-50 text-[1.1rem]">★</div>
-          <div className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]">✕</div>
-        </div>
-
-        <div className="flex items-center justify-between w-full relative z-[2]">
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="w-[56px] h-[56px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
-              {moduleName.toLowerCase().includes("internship") ? (
-                <HiOutlineBuildingOffice2 className="text-white text-3xl" />
-              ) : (
-                <HiOutlineBookOpen className="text-white text-3xl" />
-              )}
-            </div>
-            <div className="flex flex-col justify-center gap-1">
-              <h1 className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0" style={{ border: "none", marginBottom: 0 }}>
-                {title}
-              </h1>
-              <p className="hidden lg:block text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
-                Explore all available {moduleName.toLowerCase()} and{" "}
-                {moduleName.toLowerCase().includes("internship") ? "kickstart your career" : "start learning"} today.
-              </p>
-            </div>
+        <div className="w-full h-[110px] lg:h-[140px] min-h-[110px] lg:min-h-[140px] flex flex-col justify-between p-4 lg:px-8 pt-6 shadow-sm rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+          <div className="absolute inset-0 pointer-events-none z-[1]">
+            <div className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]">✕</div>
+            <div className="absolute bottom-[20%] right-[30%] text-[#1E69DA] opacity-50 text-[1.5rem]">+</div>
+            <div className="absolute top-[40%] right-[50%] text-[#1E69DA] opacity-50 text-[1.1rem]">★</div>
+            <div className="absolute bottom-[30%] right-[5%] text-[#1E69DA] opacity-60 text-[1.3rem]">✕</div>
           </div>
 
-          <div className="flex items-center gap-6 lg:gap-10 lg:mr-10">
-            {activeTab === "all" && (
-              <div className="flex flex-col items-center justify-center w-[80px]">
-                <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">
-                  {allPaginationData ? allPaginationData.totalLength : safeAllItems.length}
-                </span>
-                <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Courses</span>
+          <div className="flex items-center justify-between w-full relative z-[2]">
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="w-[56px] h-[56px] bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
+                {moduleName.toLowerCase().includes("internship") ? (
+                  <HiOutlineBuildingOffice2 className="text-white text-3xl" />
+                ) : (
+                  <HiOutlineBookOpen className="text-white text-3xl" />
+                )}
               </div>
-            )}
-            {showWishlist && activeTab !== "my" && (
-              <Badge count={wishlistItems.length} size="small" offset={[-4, 4]}>
-                <button
-                  onClick={() => setWishlistOpen(true)}
-                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group w-[80px]"
-                >
-                  <HeartOutlined className="text-white text-[24px] lg:text-[28px] leading-none group-hover:text-[#f87171] transition-colors" style={{ color: "white" }} />
-                  <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Wishlist</span>
-                </button>
-              </Badge>
-            )}
-            {showBuyNow && activeTab !== "my" && (
-              <Badge count={cartItems.length} size="small" offset={[-4, 4]}>
-                <button
-                  onClick={() => setCartOpen(true)}
-                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group w-[80px]"
-                >
-                  <ShoppingCartOutlined className="text-white text-[24px] lg:text-[28px] leading-none group-hover:text-[#5694F0] transition-colors" style={{ color: "white" }} />
-                  <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Cart</span>
-                </button>
-              </Badge>
-            )}
-            {activeTab === "my" && (
-              <div className="flex flex-col items-center justify-center w-[80px]">
-                <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">{totalEnrolled}</span>
-                <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Enrolled</span>
+              <div className="flex flex-col justify-center gap-1">
+                <h1 className="text-[24px] lg:text-[28px] font-bold text-white m-0 tracking-tight leading-none flex items-center gap-3 pb-0" style={{ border: "none", marginBottom: 0 }}>
+                  {title}
+                </h1>
+                <p className="hidden lg:block text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
+                  Explore all available {moduleName.toLowerCase()} and{" "}
+                  {moduleName.toLowerCase().includes("internship") ? "kickstart your career" : "start learning"} today.
+                </p>
               </div>
-            )}
-            {activeTab === "my" && (
-              <div className="flex flex-col items-center justify-center w-[80px]">
-                <span className="text-[24px] lg:text-[28px] font-bold leading-none bg-gradient-to-br from-[#1E69DA] to-[#5694F0] bg-clip-text text-transparent">{avgProgress}%</span>
-                <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Avg. Done</span>
-              </div>
-            )}
+            </div>
+
+            <div className="flex items-center gap-6 lg:gap-10 lg:mr-10">
+              {activeTab === "all" && (
+                <div className="flex flex-col items-center justify-center w-[80px]">
+                  <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">
+                    {allPaginationData ? allPaginationData.totalLength : safeAllItems.length}
+                  </span>
+                  <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Courses</span>
+                </div>
+              )}
+              {showWishlist && activeTab !== "my" && (
+                <Badge count={wishlistItems.length} size="small" offset={[-4, 4]}>
+                  <button
+                    onClick={() => setWishlistOpen(true)}
+                    className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group w-[80px]"
+                  >
+                    <HeartOutlined className="text-white text-[24px] lg:text-[28px] leading-none group-hover:text-[#f87171] transition-colors" style={{ color: "white" }} />
+                    <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Wishlist</span>
+                  </button>
+                </Badge>
+              )}
+              {showBuyNow && activeTab !== "my" && (
+                <Badge count={cartItems.length} size="small" offset={[-4, 4]}>
+                  <button
+                    onClick={() => setCartOpen(true)}
+                    className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group w-[80px]"
+                  >
+                    <ShoppingCartOutlined className="text-white text-[24px] lg:text-[28px] leading-none group-hover:text-[#5694F0] transition-colors" style={{ color: "white" }} />
+                    <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Cart</span>
+                  </button>
+                </Badge>
+              )}
+              {activeTab === "my" && (
+                <div className="flex flex-col items-center justify-center w-[80px]">
+                  <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">{totalEnrolled}</span>
+                  <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Enrolled</span>
+                </div>
+              )}
+              {activeTab === "my" && (
+                <div className="flex flex-col items-center justify-center w-[80px]">
+                  <span className="text-[24px] lg:text-[28px] font-bold leading-none bg-gradient-to-br from-[#1E69DA] to-[#5694F0] bg-clip-text text-transparent">{avgProgress}%</span>
+                  <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Avg. Done</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Tabs Row */}
-      <div className="w-full bg-white border-b border-[#e2e8f0] px-4 lg:px-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-sm gap-2 md:gap-0">
-        <div className="flex items-center gap-8">
-          {[
-            { id: "all", label: `All ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
-            { id: "recent", label: "Recently added", hiddenOnTablet: true },
-            ...(showWishlist ? [{ id: "wishlist", label: `Wishlist (${wishlistItems.length})` }] : []),
-            { id: "my", label: `My ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                handleClearAll();
-              }}
-              className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer ${
-                activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"
-              } ${tab.hiddenOnTablet ? "hidden lg:inline-block" : ""}`}
-            >
-              {tab.label}
-              {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1E69DA] rounded-t-md"></div>
-              )}
-            </button>
-          ))}
-        </div>
+        {/* Tabs Row */}
+        <div className="w-full bg-white border-b border-[#e2e8f0] px-4 lg:px-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-sm gap-2 md:gap-0">
+          <div className="flex items-center gap-8">
+            {[
+              { id: "all", label: `All ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
+              { id: "recent", label: "Recently added", hiddenOnTablet: true },
+              ...(showWishlist ? [{ id: "wishlist", label: `Wishlist (${wishlistItems.length})` }] : []),
+              { id: "my", label: `My ${moduleName.toLowerCase().includes("internship") ? "internships" : "courses"}` },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  handleClearAll();
+                }}
+                className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer ${activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"
+                  } ${tab.hiddenOnTablet ? "hidden lg:inline-block" : ""}`}
+              >
+                {tab.label}
+                {activeTab === tab.id && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1E69DA] rounded-t-md"></div>
+                )}
+              </button>
+            ))}
+          </div>
 
-        <div className="flex items-center gap-4 py-2 md:py-0">
-          <Input
-            id={`${idPrefix}-search`}
-            prefix={<SearchOutlined style={{ color: "#1E69DA" }} />}
-            placeholder={searchPlaceholder}
-            value={searchInput}
-            onChange={handleSearchChange}
-            allowClear
-            onClear={() => pushParams({ search: "" })}
-            className="w-[160px] rounded-[20px] shadow-sm border-[#e2e8f0] [&>input]:text-[#64748b] [&>input]:font-medium [&>input::placeholder]:text-[#94a3b8]"
-            style={{ color: "#64748b" }}
-          />
-          <Popover
-            content={
-              <div className="flex flex-col gap-3 p-2 w-[160px]">
-                <Select
-                  id={`${idPrefix}-difficulty`}
-                  placeholder="All Levels"
-                  value={urlDifficulty || undefined}
-                  onChange={handleDifficultyChange}
-                  allowClear
-                  options={difficultyOptions}
-                  className="w-full shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
-                  popupMatchSelectWidth={false}
-                />
-                <Select
-                  id={`${idPrefix}-sort`}
-                  placeholder="Sort By"
-                  value={urlSort === "default" ? undefined : urlSort}
-                  onChange={handleSortChange}
-                  allowClear
-                  options={sortOptions}
-                  className="w-full shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
-                  popupMatchSelectWidth={false}
-                />
-              </div>
-            }
-            trigger="click"
-            placement="bottomRight"
-          >
-            <Button 
-              shape="circle" 
-              icon={<FilterOutlined />} 
-              className={`flex items-center justify-center bg-white border-[#e2e8f0] text-[#64748b] shadow-sm transition-colors ${
-                (urlDifficulty || (urlSort && urlSort !== "default")) ? "text-[#1E69DA] border-[#1E69DA] bg-[#eff6ff]" : ""
-              }`}
+          <div className="flex items-center gap-4 py-2 md:py-0">
+            <Input
+              id={`${idPrefix}-search`}
+              prefix={<SearchOutlined style={{ color: "#1E69DA" }} />}
+              placeholder={searchPlaceholder}
+              value={searchInput}
+              onChange={handleSearchChange}
+              allowClear
+              onClear={() => pushParams({ search: "" })}
+              className="w-[160px] rounded-[20px] shadow-sm border-[#e2e8f0] [&>input]:text-[#64748b] [&>input]:font-medium [&>input::placeholder]:text-[#94a3b8]"
+              style={{ color: "#64748b" }}
             />
-          </Popover>
-          {hasActiveFilters && (
-            <Button type="text" danger size="middle" onClick={handleClearAll} className="font-medium hover:bg-red-50 rounded-lg px-2">
-              Clear
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Categories Pill Bar */}
-      <div className="w-full px-4 lg:px-8 py-3 bg-white border-b border-[#e2e8f0] flex items-center gap-3 overflow-x-auto no-scrollbar">
-        <button
-          onClick={() => pushParams({ category: "" })}
-          className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer ${
-            !urlCategory
-              ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
-              : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"
-          }`}
-        >
-          <span className={!urlCategory ? "text-white" : "text-[#3b82f6]"}>☷</span> All categories
-        </button>
-        {categoryOptions.map((cat) => {
-          const isActive = urlCategory === cat.value;
-          return (
-            <button
-              key={cat.value}
-              onClick={() => pushParams({ category: cat.value })}
-              className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer ${
-                isActive
-                  ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
-                  : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"
-              }`}
+            <Popover
+              content={
+                <div className="flex flex-col gap-3 p-2 w-[160px]">
+                  <Select
+                    id={`${idPrefix}-difficulty`}
+                    placeholder="All Levels"
+                    value={urlDifficulty || undefined}
+                    onChange={handleDifficultyChange}
+                    allowClear
+                    options={difficultyOptions}
+                    className="w-full shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
+                    popupMatchSelectWidth={false}
+                  />
+                  <Select
+                    id={`${idPrefix}-sort`}
+                    placeholder="Sort By"
+                    value={urlSort === "default" ? undefined : urlSort}
+                    onChange={handleSortChange}
+                    allowClear
+                    options={sortOptions}
+                    className="w-full shadow-sm rounded-[20px] [&_.ant-select-selection-item]:text-[#64748b] [&_.ant-select-selection-item]:font-medium [&_.ant-select-selection-placeholder]:text-[#94a3b8]"
+                    popupMatchSelectWidth={false}
+                  />
+                </div>
+              }
+              trigger="click"
+              placement="bottomRight"
             >
-              {cat.label}
-            </button>
-          );
-        })}
-      </div>
+              <Button
+                shape="circle"
+                icon={<FilterOutlined />}
+                className={`flex items-center justify-center bg-white border-[#e2e8f0] text-[#64748b] shadow-sm transition-colors ${(urlDifficulty || (urlSort && urlSort !== "default")) ? "text-[#1E69DA] border-[#1E69DA] bg-[#eff6ff]" : ""
+                  }`}
+              />
+            </Popover>
+            {hasActiveFilters && (
+              <Button type="text" danger size="middle" onClick={handleClearAll} className="font-medium hover:bg-red-50 rounded-lg px-2">
+                Clear
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Categories Pill Bar */}
+        <div className="w-full px-4 lg:px-8 py-3 bg-white border-b border-[#e2e8f0] flex items-center gap-3 overflow-x-auto no-scrollbar">
+          <button
+            onClick={() => pushParams({ category: "" })}
+            className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer ${!urlCategory
+                ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
+                : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"
+              }`}
+          >
+            <span className={!urlCategory ? "text-white" : "text-[#3b82f6]"}>☷</span> All categories
+          </button>
+          {categoryOptions.map((cat) => {
+            const isActive = urlCategory === cat.value;
+            return (
+              <button
+                key={cat.value}
+                onClick={() => pushParams({ category: cat.value })}
+                className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer ${isActive
+                    ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
+                    : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"
+                  }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
       </div> {/* End Fixed Header Section */}
       {/* Cards Grid (Scrollable) */}
       <div className="w-full flex-1 overflow-y-auto pt-8 pb-8 no-scrollbar">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 lg:gap-x-16 gap-y-8 p-2 px-4 lg:px-6 max-w-[1500px] mx-auto w-full">
+        <div 
+          className="grid gap-x-12 lg:gap-x-16 gap-y-8 p-2 px-4 lg:px-6 mx-auto w-full"
+          style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+        >
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
           ) : !filteredTabItems?.length ? (
@@ -930,199 +945,198 @@ const userId=sessionStorage?.studentId || '68875578d529f1c0ecf687e1'
           ) : (
             (() => {
               const displayItems = filteredTabItems;
-              
+
               return displayItems.map((item, index) => {
                 const fetchedProgress = progressById[item._id];
                 const isProgressLoading = fetchedProgress?.loading;
-                
+
                 // We use safeItems to determine true enrollment since safeItems contains "My courses"
                 const inMyCourses = safeItems.some(myCourse => myCourse._id === item._id);
                 const isEnrolled = activeTab === "my" || inMyCourses;
-                
+
                 const progressVal = fetchedProgress ? (fetchedProgress.totalProgress ?? 0) : (item.progress || 0);
 
-              const duration = item?.duration || item?.courseIncludes?.videoDuration;
-              const modulesCount = item?.sections?.length || 0;
-              const createdAtDate = item?.createdAt ? formatUpdatedDate(item.createdAt) : "";
+                const duration = item?.duration || item?.courseIncludes?.videoDuration;
+                const modulesCount = item?.sections?.length || 0;
+                const createdAtDate = item?.createdAt ? formatUpdatedDate(item.createdAt) : "";
 
-              const inWishlist = wishlistIdSet.has(item?._id);
-              const isWishlistLoading = wishlistPendingIds.includes(item?._id);
-              const inCart = cartIdSet.has(item?._id);
-              const isCartLoading = cartPendingIds.includes(item?._id);
+                const inWishlist = wishlistIdSet.has(item?._id);
+                const isWishlistLoading = wishlistPendingIds.includes(item?._id);
+                const inCart = cartIdSet.has(item?._id);
+                const isCartLoading = cartPendingIds.includes(item?._id);
 
-              let statusText = "Not started";
-              let buttonText = "Start";
-              let statusColor = "text-[#94a3b8]";
+                let statusText = "Not started";
+                let buttonText = "Start";
+                let statusColor = "text-[#94a3b8]";
 
-              if (isProgressLoading) {
-                statusText = "Loading…";
-              } else if (isEnrolled) {
-                if (progressVal > 0) {
-                  statusText = `${progressVal}% complete`;
-                  buttonText = "Continue";
-                  statusColor = "text-[#10b981]";
+                if (isProgressLoading) {
+                  statusText = "Loading…";
+                } else if (isEnrolled) {
+                  if (progressVal > 0) {
+                    statusText = `${progressVal}% complete`;
+                    buttonText = "Continue";
+                    statusColor = "text-[#10b981]";
+                  }
+                } else {
+                  buttonText = "Buy";
                 }
-              } else {
-                buttonText = "Buy";
-              }
 
-              const imageUrl =
-                item?.media?.thumbnailImage ||
-                item?.media?.coverImage ||
-                item?.thumbnail ||
-                item?.image ||
-                item?.bannerImage ||
-                item?.coverImage ||
-                item?.companyLogo ||
-                "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80";
+                const imageUrl =
+                  item?.media?.thumbnailImage ||
+                  item?.media?.coverImage ||
+                  item?.thumbnail ||
+                  item?.image ||
+                  item?.bannerImage ||
+                  item?.coverImage ||
+                  item?.companyLogo ||
+                  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80";
 
-              const cardNode = (
-                <div
-                  key={item?._id}
-                  className="group flex flex-col bg-white text-black border-[1px] border-[#cbd5e1] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-md"
-                  role="button"
-                  tabIndex={0}
-                >
-                  {/* Card Image */}
-                  <div className="relative w-full h-[170px] p-2 pb-0 bg-white">
-                    <div className="relative w-full h-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
-                      <img src={imageUrl} alt={item.title || "Thumbnail"} className="w-full h-full object-contain" />
+                const cardNode = (
+                  <div
+                    key={item?._id}
+                    className="group flex flex-col bg-white text-black border-[1px] border-[#cbd5e1] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-md"
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {/* Card Image */}
+                    <div className="relative w-full h-[170px] p-2 pb-0 bg-white">
+                      <div className="relative w-full h-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
+                        <img src={imageUrl} alt={item.title || "Thumbnail"} className="w-full h-full object-contain" />
 
-                      {isEnrolled && (
-                        <div className="absolute top-2 left-2 bg-[#022c22] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-[#047857]">
-                          <BsCheckCircleFill className="text-[#10b981] text-[10px]" />
-                          <span className="text-[#10b981] text-[11px] font-medium tracking-wide">Enrolled</span>
+                        {isEnrolled && (
+                          <div className="absolute top-2 left-2 bg-[#022c22] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-[#047857]">
+                            <BsCheckCircleFill className="text-[#10b981] text-[10px]" />
+                            <span className="text-[#10b981] text-[11px] font-medium tracking-wide">Enrolled</span>
+                          </div>
+                        )}
+                        {showWishlist && (
+                          <button
+                            onClick={(e) => handleWishlistToggle(item, e)}
+                            disabled={isWishlistLoading}
+                            aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                            className="absolute top-2 right-2 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10 cursor-pointer hover:bg-black/50 transition-colors disabled:opacity-60"
+                          >
+                            {inWishlist ? (
+                              <BsBookmarkFill className="text-[#facc15] text-[14px]" />
+                            ) : (
+                              <BsBookmark className="text-white text-[14px]" />
+                            )}
+                          </button>
+                        )}
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-0.5 bg-black/20 backdrop-blur-sm rounded-lg">
+                          <BsCodeSlash className="text-white/80 text-[12px]" />
+                          <span className="text-white/90 text-[11px] font-medium">{item.category || "General"}</span>
                         </div>
-                      )}
-                      {showWishlist && (
+                        {item.difficulty && (
+                          <div className={`absolute bottom-2 right-2 px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase backdrop-blur-sm ${item.difficulty?.toLowerCase() === "beginner" ? "bg-[#047857]/90 text-white" :
+                              item.difficulty?.toLowerCase() === "intermediate" ? "bg-[#d97706]/90 text-white" :
+                                "bg-[#dc2626]/90 text-white"
+                            }`}>
+                            {item.difficulty}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="flex flex-col p-3 flex-1">
+                      <Tooltip title={item?.title} placement="topLeft" mouseEnterDelay={0.5}>
+                        <h3 className="text-[15px] font-bold text-[#1e293b] leading-tight mb-2 line-clamp-2 min-h-[36px]">
+                          {item?.title}
+                        </h3>
+                      </Tooltip>
+
+                      <p className="text-[#64748b] text-[12px] font-medium leading-snug mb-3 line-clamp-2 min-h-[34px]">
+                        {stripHtml(item?.description)}
+                      </p>
+
+                      {/* Progress Bar */}
+                      <div className="w-full flex items-center gap-3 mb-4">
+                        <div className="flex-1 h-[8px] bg-[#f1f5f9] rounded-full overflow-hidden">
+                          {isEnrolled && (
+                            <div
+                              className="h-full bg-gradient-to-br from-[#1E69DA] to-[#5694F0] rounded-full transition-all duration-500"
+                              style={{ width: `${progressVal}%` }}
+                            />
+                          )}
+                        </div>
+                        <span className="text-[13px] font-bold text-[#64748b] min-w-[32px] text-right">
+                          {isEnrolled ? `${progressVal}%` : "0%"}
+                        </span>
+                      </div>
+
+                      {/* Meta Row */}
+                      <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] font-bold mb-4">
+                        {duration && <span className="flex items-center gap-1"><BsClock /> {duration}</span>}
+                        {duration && modulesCount > 0 && <span>•</span>}
+                        {modulesCount > 0 && <span className="flex items-center gap-1"><BsJournalBookmark /> {modulesCount} modules</span>}
+                        {createdAtDate && (duration || modulesCount > 0) && <span>•</span>}
+                        {createdAtDate && <span>{createdAtDate}</span>}
+                      </div>
+
+
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f1f5f9]">
+                        <span className={`text-[12px] font-bold flex items-center gap-1 ${statusColor}`}>
+                          {statusText}
+                        </span>
                         <button
-                          onClick={(e) => handleWishlistToggle(item, e)}
-                          disabled={isWishlistLoading}
-                          aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                          className="absolute top-2 right-2 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10 cursor-pointer hover:bg-black/50 transition-colors disabled:opacity-60"
+                          className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white text-[13px] font-medium py-1.5 px-5 rounded-[20px] border-none cursor-pointer transition-opacity flex items-center gap-1.5 shadow-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isEnrolled) {
+                              nav.push(getItemUrl(item));
+                            } else {
+                              if (!inCart) handleAddToCart(item);
+                              else setCartOpen(true);
+                            }
+                          }}
                         >
-                          {inWishlist ? (
-                            <BsBookmarkFill className="text-[#facc15] text-[14px]" />
+                          {isCartLoading && !isEnrolled ? (
+                            <><LoadingOutlined /> Adding...</>
+                          ) : buttonText === "Buy" ? (
+                            inCart ? "✓ Go to Cart" : <><LockOutlined /> Buy</>
+                          ) : buttonText === "Start" ? (
+                            "+ Start"
                           ) : (
-                            <BsBookmark className="text-white text-[14px]" />
+                            `▷ ${buttonText}`
                           )}
                         </button>
-                      )}
-                      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-0.5 bg-black/20 backdrop-blur-sm rounded-lg">
-                        <BsCodeSlash className="text-white/80 text-[12px]" />
-                        <span className="text-white/90 text-[11px] font-medium">{item.category || "General"}</span>
                       </div>
-                      {item.difficulty && (
-                        <div className={`absolute bottom-2 right-2 px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase backdrop-blur-sm ${
-                          item.difficulty?.toLowerCase() === "beginner" ? "bg-[#047857]/90 text-white" :
-                          item.difficulty?.toLowerCase() === "intermediate" ? "bg-[#d97706]/90 text-white" :
-                          "bg-[#dc2626]/90 text-white"
-                        }`}>
-                          {item.difficulty}
-                        </div>
-                      )}
                     </div>
                   </div>
+                );
 
-                  {/* Card Content */}
-                  <div className="flex flex-col p-3 flex-1">
-                    <Tooltip title={item?.title} placement="topLeft" mouseEnterDelay={0.5}>
-                      <h3 className="text-[15px] font-bold text-[#1e293b] leading-tight mb-2 line-clamp-2 min-h-[36px]">
-                        {item?.title}
-                      </h3>
-                    </Tooltip>
+                if (!showBuyNow || activeTab === "my") {
+                  return cardNode;
+                }
 
-                    <p className="text-[#64748b] text-[12px] font-medium leading-snug mb-3 line-clamp-2 min-h-[34px]">
-                      {stripHtml(item?.description)}
-                    </p>
-
-                    {/* Progress Bar */}
-                    <div className="w-full flex items-center gap-3 mb-4">
-                      <div className="flex-1 h-[8px] bg-[#f1f5f9] rounded-full overflow-hidden">
-                        {isEnrolled && (
-                          <div
-                            className="h-full bg-gradient-to-br from-[#1E69DA] to-[#5694F0] rounded-full transition-all duration-500"
-                            style={{ width: `${progressVal}%` }}
-                          />
-                        )}
-                      </div>
-                      <span className="text-[13px] font-bold text-[#64748b] min-w-[32px] text-right">
-                        {isEnrolled ? `${progressVal}%` : "0%"}
-                      </span>
-                    </div>
-
-                    {/* Meta Row */}
-                    <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] font-bold mb-4">
-                      {duration && <span className="flex items-center gap-1"><BsClock /> {duration}</span>}
-                      {duration && modulesCount > 0 && <span>•</span>}
-                      {modulesCount > 0 && <span className="flex items-center gap-1"><BsJournalBookmark /> {modulesCount} modules</span>}
-                      {createdAtDate && (duration || modulesCount > 0) && <span>•</span>}
-                      {createdAtDate && <span>{createdAtDate}</span>}
-                    </div>
-
-
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f1f5f9]">
-                      <span className={`text-[12px] font-bold flex items-center gap-1 ${statusColor}`}>
-                        {statusText}
-                      </span>
-                      <button
-                        className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white text-[13px] font-medium py-1.5 px-5 rounded-[20px] border-none cursor-pointer transition-opacity flex items-center gap-1.5 shadow-sm"
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          if (isEnrolled) {
-                            nav.push(getItemUrl(item)); 
-                          } else {
-                            if (!inCart) handleAddToCart(item);
-                            else setCartOpen(true);
-                          }
-                        }}
-                      >
-                        {isCartLoading && !isEnrolled ? (
-                          <><LoadingOutlined /> Adding...</>
-                        ) : buttonText === "Buy" ? (
-                          inCart ? "✓ Go to Cart" : <><LockOutlined /> Buy</>
-                        ) : buttonText === "Start" ? (
-                          "+ Start"
-                        ) : (
-                          `▷ ${buttonText}`
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-
-              if (!showBuyNow || activeTab === "my") {
-                return cardNode;
-              }
-
-              return (
-                <Popover
-                  key={item?._id}
-                  trigger="hover"
-                  placement="rightTop"
-                  overlayStyle={{ maxWidth: 380 }}
-                  styles={{ body: { borderRadius: 16, padding: 0, overflow: "hidden", border: "1px solid #cbd5e1", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" } }}
-                  content={
-                    <BuyNowPopoverContent
-                      item={item}
-                      onAddToWishlist={(it) => handleWishlistToggle(it)}
-                      onAddToCart={(it) => handleAddToCart(it)}
-                      isInCart={inCart}
-                      isInWishlist={inWishlist}
-                      cartLoading={isCartLoading}
-                      wishlistLoading={isWishlistLoading}
-                      isEnrolled={isEnrolled}
-                    />
-                  }
-                >
-                  {cardNode}
-                </Popover>
-              );
-            });
-          })()
+                return (
+                  <Popover
+                    key={item?._id}
+                    trigger="hover"
+                    placement="right"
+                    overlayStyle={{ maxWidth: 380 }}
+                    styles={{ body: { borderRadius: 16, padding: 0, overflow: "hidden", border: "1px solid #cbd5e1", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" } }}
+                    content={
+                      <BuyNowPopoverContent
+                        item={item}
+                        onAddToWishlist={(it) => handleWishlistToggle(it)}
+                        onAddToCart={(it) => handleAddToCart(it)}
+                        isInCart={inCart}
+                        isInWishlist={inWishlist}
+                        cartLoading={isCartLoading}
+                        wishlistLoading={isWishlistLoading}
+                        isEnrolled={isEnrolled}
+                      />
+                    }
+                  >
+                    {cardNode}
+                  </Popover>
+                );
+              });
+            })()
           )}
         </div>
 

@@ -60,17 +60,17 @@ const DashboardStats = ({ stats, router }) => (
 
 const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, onPrevClick, onCardClick }) => {
   function stripHtml(html) {
-  if (typeof html !== 'string') return '';
-  let text = html
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#34;/g, '"');
-  return text.replace(/<[^>]*>/g, '');
-}
+    if (typeof html !== 'string') return '';
+    let text = html
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&#34;/g, '"');
+    return text.replace(/<[^>]*>/g, '');
+  }
   function formatUpdatedDate(dateInput) {
     if (!dateInput) return "";
     const d = new Date(dateInput);
@@ -151,60 +151,60 @@ const RecommendedCard = ({ item, total, currentIndex, onDotClick, onNextClick, o
             </div>
 
             {total > 0 && (
-            <div className="flex justify-center items-center gap-3 mt-2" onClick={(e) => e.stopPropagation()}>
-              {total > 1 && (
-                <button
-                  className="text-[#9ca3af] hover:text-[#1E69DA] transition-colors p-1"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onPrevClick?.();
-                  }}
-                  aria-label="Previous"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                  </svg>
-                </button>
-              )}
-              <div className="flex items-center gap-2">
-                {Array.from({ length: Math.min(3, total) }).map((_, idx) => {
-                  const displayTotal = Math.min(3, total);
-                  const isActive = idx === (currentIndex % displayTotal);
-                  return (
-                    <button
-                      key={idx}
-                      className={`rounded-full transition-all duration-300 ${isActive
-                        ? 'w-[14px] h-[14px] bg-gradient-to-br from-[#1E69DA] to-[#5694F0] border-none'
-                        : 'w-[10px] h-[10px] bg-transparent border-[2px] border-[#9ca3af]'
-                        }`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onDotClick?.(idx);
-                      }}
-                      aria-label={`Go to slide ${idx + 1}`}
-                    />
-                  );
-                })}
+              <div className="flex justify-center items-center gap-3 mt-2" onClick={(e) => e.stopPropagation()}>
+                {total > 1 && (
+                  <button
+                    className="text-[#9ca3af] hover:text-[#1E69DA] transition-colors p-1"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onPrevClick?.();
+                    }}
+                    aria-label="Previous"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </button>
+                )}
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: Math.min(3, total) }).map((_, idx) => {
+                    const displayTotal = Math.min(3, total);
+                    const isActive = idx === (currentIndex % displayTotal);
+                    return (
+                      <button
+                        key={idx}
+                        className={`rounded-full transition-all duration-300 ${isActive
+                          ? 'w-[14px] h-[14px] bg-gradient-to-br from-[#1E69DA] to-[#5694F0] border-none'
+                          : 'w-[10px] h-[10px] bg-transparent border-[2px] border-[#9ca3af]'
+                          }`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onDotClick?.(idx);
+                        }}
+                        aria-label={`Go to slide ${idx + 1}`}
+                      />
+                    );
+                  })}
+                </div>
+                {total > 1 && (
+                  <button
+                    className="text-[#9ca3af] hover:text-[#1E69DA] transition-colors p-1"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onNextClick?.();
+                    }}
+                    aria-label="Next"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                )}
               </div>
-              {total > 1 && (
-                <button
-                  className="text-[#9ca3af] hover:text-[#1E69DA] transition-colors p-1"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onNextClick?.();
-                  }}
-                  aria-label="Next"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </button>
-              )}
-            </div>
-          )}
+            )}
           </div>
         </div>
       </div>
@@ -271,10 +271,10 @@ const AchievementDetailsModal = ({ isOpen, onClose, achievement }) => {
           <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
             <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">{achievement.type === 'course' ? 'Course Details' : 'Internship Details'}</h4>
             <div className="flex items-center gap-2 mb-3 text-[13px] text-[#64748b]">
-              <span className="shrink-0">⏱️</span> 
+              <span className="shrink-0">⏱️</span>
               <span>{course.duration ? `Duration: ${course.duration}` : "Completed"}</span>
             </div>
-            
+
             <h5 className="font-bold text-[#334155] text-[13px] mb-2">What you learned</h5>
             <div className="flex flex-col gap-2">
               {course.skillsToMaster?.length > 0 ? (
@@ -341,15 +341,15 @@ const AchievementDetailsModal = ({ isOpen, onClose, achievement }) => {
     >
       <div className="flex flex-col items-center justify-center p-6 pt-10 relative overflow-hidden bg-white/60 backdrop-blur-md rounded-2xl border border-white/50">
         <div className="absolute top-[-50px] w-[200px] h-[200px] bg-[#f59e0b] rounded-full blur-[80px] opacity-20"></div>
-        
+
         <div className="text-[80px] leading-none mb-4 drop-shadow-xl relative z-10 animate-bounce-slight" style={{ filter: 'drop-shadow(0px 10px 15px rgba(245, 158, 11, 0.4))' }}>
           {achievement.emoji}
         </div>
-        
+
         <h2 className="text-[24px] font-extrabold text-[#0f172a] text-center mb-1 relative z-10 w-full px-2" style={{ wordBreak: 'break-word', lineHeight: '1.2' }}>
           {achievement.title}
         </h2>
-        
+
         <div className="flex items-center gap-2 text-[13px] text-[#64748b] font-medium mb-2 relative z-10">
           <span>Earned Recently</span>
           <span>•</span>
@@ -357,12 +357,12 @@ const AchievementDetailsModal = ({ isOpen, onClose, achievement }) => {
             💰 {achievement.desc.includes('coins earned') ? achievement.desc : '+50 coins'}
           </span>
         </div>
-        
+
         <div className="w-full relative z-10 flex flex-col items-center">
           {renderContent()}
         </div>
-        
-        <Button 
+
+        <Button
           className="w-full mt-6 h-[44px] rounded-xl font-bold text-[15px] border-none text-white shadow-md shadow-[#3b82f6]/30 transition-all hover:opacity-90 hover:scale-[1.02]"
           style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' }}
           onClick={onClose}
@@ -381,7 +381,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isPracticeModalOpen, setIsPracticeModalOpen] = React.useState(false);
   const [practiceModalType, setPracticeModalType] = React.useState("Technical");
-  
+
   // Notification states
   const [unseenBadges, setUnseenBadges] = React.useState([]);
   const [selectedBadgeDetail, setSelectedBadgeDetail] = React.useState(null);
@@ -389,35 +389,35 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       setStreak(parseInt(localStorage.getItem("loginStreak") || "1", 10));
-      
+
       const loadClaimed = () => {
         let stored = studentCreds?.claimedAchievements || [];
         if (typeof window !== "undefined") {
           const userId = studentCreds?._id || "";
           const scopedKey = `claimedAchievements_${userId}`;
-          
+
           // Temporary Migration to restore lost badges
           const oldLocal = JSON.parse(localStorage.getItem("claimedAchievements") || "[]");
           let currentScoped = JSON.parse(localStorage.getItem(scopedKey) || "[]");
-          
+
           if (oldLocal.length > 0 && currentScoped.length === 0) {
-             const practiceBadges = oldLocal.filter(id => typeof id === 'string' && id.startsWith('practice_badge'));
-             if (practiceBadges.length > 0) {
-                 localStorage.setItem(scopedKey, JSON.stringify(practiceBadges));
-                 currentScoped = practiceBadges;
-             }
+            const practiceBadges = oldLocal.filter(id => typeof id === 'string' && id.startsWith('practice_badge'));
+            if (practiceBadges.length > 0) {
+              localStorage.setItem(scopedKey, JSON.stringify(practiceBadges));
+              currentScoped = practiceBadges;
+            }
           }
-          
+
           stored = [...stored, ...currentScoped];
         }
-        
+
         setClaimedAchievements(Array.from(new Set(stored)));
-        
+
         if (typeof window !== "undefined") {
           const userId = studentCreds?._id || "";
           setUnseenBadges(JSON.parse(localStorage.getItem(`unseenPracticeBadges_${userId}`) || "[]"));
         }
-        
+
         // Auto-open modal if redirected from test result page
         const autoOpen = localStorage.getItem("autoOpenBadgeModal");
         if (autoOpen) {
@@ -425,7 +425,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
             setPracticeModalType(autoOpen);
             setIsPracticeModalOpen(true);
             setSelectedBadgeDetail(null);
-            
+
             // Auto clear unseen for this type
             const userId = studentCreds?._id || "";
             const unseenKey = `unseenPracticeBadges_${userId}`;
@@ -436,10 +436,10 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
           }, 300);
         }
       };
-      
+
       loadClaimed();
       window.addEventListener("achievementClaimed", loadClaimed);
-      
+
       // Listen for notice board action URL hash clicks
       const handleHashChange = () => {
         if (window.location.hash.startsWith('#openBadges_')) {
@@ -448,13 +448,13 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
             setPracticeModalType(type);
             setIsPracticeModalOpen(true);
             setSelectedBadgeDetail(null);
-            
+
             const userId = studentCreds?._id || "";
             const unseenKey = `unseenPracticeBadges_${userId}`;
             const remaining = JSON.parse(localStorage.getItem(unseenKey) || "[]").filter(id => !id.includes(type));
             setUnseenBadges(remaining);
             localStorage.setItem(unseenKey, JSON.stringify(remaining));
-            
+
             // Clean up hash without reloading
             history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
           }
@@ -485,7 +485,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
       const delimiter = id.includes('|') ? '|' : '_';
       const parts = id.split(delimiter);
       const offset = delimiter === '_' ? 1 : 0; // if '_', 'badge' is parts[1]
-      
+
       let section = parts[1 + offset];
       if (section && section.toLowerCase() === 'nontechnical') section = 'Non-Technical';
       if (section && section.toLowerCase() === 'technical') {
@@ -499,7 +499,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
 
       return {
         id,
-        section, 
+        section,
         topic: parts[2 + offset],
         subtopic: parts[3 + offset],
         type: parts[4 + offset],
@@ -520,7 +520,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
     setPracticeModalType(type);
     setIsPracticeModalOpen(true);
     setSelectedBadgeDetail(null);
-    
+
     // Clear unseen badges for this type
     const userId = studentCreds?._id || "";
     const unseenKey = `unseenPracticeBadges_${userId}`;
@@ -546,7 +546,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
       return (
         <div className="flex flex-col animate-[smoothFadeIn_0.3s_ease-out_forwards]">
           <div className="flex justify-start mb-2">
-            <button 
+            <button
               onClick={() => setSelectedBadgeDetail(null)}
               className="text-[#3b82f6] font-semibold flex items-center gap-2 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
             >
@@ -557,7 +557,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
               Back to Badges
             </button>
           </div>
-          
+
           <div className="bg-[#f0f9ff] p-6 rounded-2xl text-center border border-[#e2e8f0]">
             <div className="inline-block relative mb-6">
               {isCoding ? (
@@ -575,27 +575,27 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
                 </div>
               )}
             </div>
-            
+
             <h2 className="text-[22px] font-extrabold text-[#1e293b] mb-2">
               {isCoding ? `${b.type} ${b.level} Badge` : `${b.type} Master Lvl ${b.level}`}
             </h2>
             <p className="text-[#475569] text-[14px] leading-relaxed mb-6">
               You've proven your expertise in <strong className="text-[#0f172a]">{b.topic} • {b.subtopic}</strong>!
             </p>
-            
-              <div className="flex-1 border-t border-[#e2e8f0] pt-4 mt-2">
-                <strong className="block text-[#1e293b] text-[15px] mb-1">{b.type} Badge Unlocked</strong>
-                <span className="text-[#64748b] text-[14px] leading-relaxed block">
-                  {isCoding 
-                    ? `Awarded for earning points in Coding Practice. You have reached the ${b.type} ${b.level} milestone!`
-                    : b.type === 'Flawless' 
-                      ? "Awarded for getting every question right in one attempt. Your flawless execution proves true mastery of this topic." 
-                      : "Awarded for scoring 100% on a topic 24 hours after mastering it. You've proven exceptional memory and recall."}
-                </span>
-              </div>
-              <div className="text-[28px] mt-4">
-                {isCoding ? '💻' : (b.type === 'Flawless' ? '🏆' : '🏅')}
-              </div>
+
+            <div className="flex-1 border-t border-[#e2e8f0] pt-4 mt-2">
+              <strong className="block text-[#1e293b] text-[15px] mb-1">{b.type} Badge Unlocked</strong>
+              <span className="text-[#64748b] text-[14px] leading-relaxed block">
+                {isCoding
+                  ? `Awarded for earning points in Coding Practice. You have reached the ${b.type} ${b.level} milestone!`
+                  : b.type === 'Flawless'
+                    ? "Awarded for getting every question right in one attempt. Your flawless execution proves true mastery of this topic."
+                    : "Awarded for scoring 100% on a topic 24 hours after mastering it. You've proven exceptional memory and recall."}
+              </span>
+            </div>
+            <div className="text-[28px] mt-4">
+              {isCoding ? '💻' : (b.type === 'Flawless' ? '🏆' : '🏅')}
+            </div>
           </div>
         </div>
       );
@@ -604,22 +604,22 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
     if (badges.length === 0) {
       return <div className="text-center py-8 text-gray-500 font-medium">No badges earned yet. Keep practicing!</div>;
     }
-    
+
     return (
       <div className="flex flex-col gap-4 animate-[smoothFadeIn_0.3s_ease-out_forwards]">
         {badges.map((b, idx) => {
           const isNew = unseenBadges.includes(b.id);
           const isCoding = b.section === "Coding";
-          
+
           let hexColor = "#CD7F32";
           if (b.type === "Silver") hexColor = "#C0C0C0";
           if (b.type === "Gold") hexColor = "#FFD700";
           if (b.type === "Platinum") hexColor = "#E5E4E2";
           if (b.type === "Diamond") hexColor = "#B9F2FF";
-          
+
           return (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className={`flex items-center justify-between p-4 rounded-xl border ${isNew ? 'border-[#3b82f6] bg-[#eff6ff]' : 'border-[#e2e8f0] bg-white'} overflow-hidden cursor-pointer transition-all hover:shadow-md hover:border-[#cbd5e1] group`}
               onClick={() => setSelectedBadgeDetail(b)}
             >
@@ -667,11 +667,11 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
   if (claimedAchievements.includes("welcome_aboard")) {
     achievementsList.push({ type: 'onboarding', id: 'welcome_aboard', emoji: "🚀", title: "Welcome Aboard", desc: "Joined the platform", status: "Earned" });
   }
-  
+
   if (claimedAchievements.includes("profile_complete")) {
     achievementsList.push({ type: 'onboarding', id: 'profile_complete', emoji: "👤", title: "Profile Complete", desc: "Profile setup finished", status: "Earned" });
   }
-  
+
   if (claimedAchievements.includes("perfect_scorer")) {
     achievementsList.push({ type: 'practice', id: 'perfect_scorer', emoji: "🎯", title: "Perfect Scorer", desc: "100% on a practice test", status: "Earned" });
   }
@@ -719,8 +719,8 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
       combinedList.push({
         score,
         el: (
-          <div 
-            key={`ach_${idx}`} 
+          <div
+            key={`ach_${idx}`}
             className="flex items-center justify-between p-3 rounded-xl border border-[#e2e8f0] bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group"
             onClick={() => {
               setSelectedAchievement(item);
@@ -753,7 +753,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
     combinedList.push({
       score: getSectionScore('Technical'),
       el: (
-        <div 
+        <div
           key="tech"
           onClick={() => openPracticeModal("Technical")}
           className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenTech ? 'border-[#3b82f6] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
@@ -776,7 +776,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
     combinedList.push({
       score: getSectionScore('Non-Technical'),
       el: (
-        <div 
+        <div
           key="non-tech"
           onClick={() => openPracticeModal("Non-Technical")}
           className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenNonTech ? 'border-[#8b5cf6] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
@@ -799,7 +799,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
     combinedList.push({
       score: getSectionScore('Coding'),
       el: (
-        <div 
+        <div
           key="coding"
           onClick={() => openPracticeModal("Coding")}
           className={`flex items-center justify-between p-3 rounded-xl border ${hasUnseenCoding ? 'border-[#f59e0b] shadow-sm' : 'border-[#e2e8f0]'} bg-[#EFF5FB] h-[72px] shrink-0 cursor-pointer hover:shadow-sm hover:border-[#cbd5e1] transition-all group relative`}
@@ -830,12 +830,12 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
       <div className="flex flex-col gap-3 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:hidden flex-1 pb-2 px-1.5 pt-1.5">
         {renderAllAchievements()}
       </div>
-      <AchievementDetailsModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        achievement={selectedAchievement} 
+      <AchievementDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        achievement={selectedAchievement}
       />
-      
+
       <Modal
         title={<span className="font-bold text-[18px] flex items-center gap-2">{practiceModalType === "Technical" ? '💻' : '🧠'} {practiceModalType} Practice Badges</span>}
         open={isPracticeModalOpen}
@@ -867,7 +867,7 @@ const resolveUserId = (studentCreds) => {
 export default function DashboardPage() {
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
   const [activeNoticeIndex, setActiveNoticeIndex] = useState(null);
-  
+
   const searchParams = useSearchParams();
   const studentCreds = useSelector((state) => state.student.student?.data);
   const [mounted, setMounted] = useState(false);
@@ -985,18 +985,18 @@ export default function DashboardPage() {
       const today = new Date().toDateString();
       let lastLogin = studentCreds?.lastLoginDate || localStorage.getItem("lastLoginDate");
       let currentStreak = studentCreds?.loginStreak || parseInt(localStorage.getItem("loginStreak") || "0", 10);
-      
+
       if (isNaN(currentStreak)) currentStreak = 1;
 
       let streakChanged = false;
-      
+
       if (lastLogin) {
         if (lastLogin !== today) {
           const lastLoginDate = new Date(lastLogin);
           const todayDate = new Date(today);
           const diffTime = todayDate.getTime() - lastLoginDate.getTime();
           const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); // Use Math.round to handle DST shifts
-          
+
           if (diffDays === 1) {
             currentStreak += 1;
             localStorage.removeItem("streakBrokenNotify");
@@ -1018,7 +1018,7 @@ export default function DashboardPage() {
       if (streakChanged) {
         localStorage.setItem("lastLoginDate", today);
         localStorage.setItem("loginStreak", currentStreak.toString());
-        
+
         if (studentCreds?._id) {
           dispatch(updateStudent({
             aboutDetails: {
@@ -1250,7 +1250,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <AnimatePresence mode="wait">
-                <motion.div 
+                <motion.div
                   key={currentPage}
                   className="flex flex-col gap-3 w-full"
                   initial={{ opacity: 0, y: 10 }}
@@ -1264,86 +1264,86 @@ export default function DashboardPage() {
                     </div>
                   ) : (
                     paginatedLearningData.map((item) => {
-                    const hasLastAccessed = item?.lastAccessedSection !== undefined && item?.lastAccessedSection !== null;
-                    const handleNavigate = () => {
-                      const basePath = item?.type === "internship" ? "/student/learning-internship" : "/student/learning-course";
-                      let url = `${basePath}?title=${item?.title?.split(" ")?.join("")}&id=${item?._id}&orgId=${item?.sourceOrgId}`;
+                      const hasLastAccessed = item?.lastAccessedSection !== undefined && item?.lastAccessedSection !== null;
+                      const handleNavigate = () => {
+                        const basePath = item?.type === "internship" ? "/student/learning-internship" : "/student/learning-course";
+                        let url = `${basePath}?title=${item?.title?.split(" ")?.join("")}&id=${item?._id}&orgId=${item?.sourceOrgId}`;
+                        if (hasLastAccessed) {
+                          url += `&section=${item.lastAccessedSection}`;
+                          if (item.lastAccessedTopic !== undefined && item.lastAccessedTopic !== null) url += `&topic=${item.lastAccessedTopic}`;
+                        }
+                        router.push(url);
+                      };
+
+                      let lastAccessedInfo = "Not started";
                       if (hasLastAccessed) {
-                        url += `&section=${item.lastAccessedSection}`;
-                        if (item.lastAccessedTopic !== undefined && item.lastAccessedTopic !== null) url += `&topic=${item.lastAccessedTopic}`;
+                        lastAccessedInfo = "In progress";
                       }
-                      router.push(url);
-                    };
 
-                    let lastAccessedInfo = "Not started";
-                    if (hasLastAccessed) {
-                      lastAccessedInfo = "In progress";
-                    }
+                      const isInternship = item?.type === "internship";
 
-                    const isInternship = item?.type === "internship";
+                      // Real progress from getOneInternsip, falling back to 0
+                      // while the per-item fetch is still in flight or hasn't
+                      // started (item.progress never actually exists on these
+                      // payloads, so that old fallback never did anything).
+                      const fetchedProgress = progressById[item._id];
+                      const progressVal = fetchedProgress?.totalProgress ?? 0;
+                      const isProgressLoading = fetchedProgress?.loading;
 
-                    // Real progress from getOneInternsip, falling back to 0
-                    // while the per-item fetch is still in flight or hasn't
-                    // started (item.progress never actually exists on these
-                    // payloads, so that old fallback never did anything).
-                    const fetchedProgress = progressById[item._id];
-                    const progressVal = fetchedProgress?.totalProgress ?? 0;
-                    const isProgressLoading = fetchedProgress?.loading;
-
-                    return (
-                      <div key={item._id} className={`flex flex-col md:flex-row items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-[12px] hover:shadow-md transition-shadow border-l-[4px] ${isInternship ? 'border-l-[#0284c7]' : 'border-l-[#24A058]'}`}>
-                        {/* Left Side: Icon & Info */}
-                        <div className="flex items-center gap-4 w-full md:w-auto">
-                          <div className={`w-[50px] h-[50px] rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${isInternship ? 'bg-[#e1f5fe]' : 'bg-[#e8f5e9]'}`}>
-                            {isInternship ? (
-                              <LaptopOutlined style={{ fontSize: '24px', color: '#0284c7' }} />
-                            ) : (
-                              <ReadOutlined style={{ fontSize: '24px', color: '#24A058' }} />
-                            )}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="font-bold text-[#1e293b] text-[15px]">{item?.title}</span>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className={`text-[11px] font-semibold px-2 py-[2px] rounded-md ${isInternship ? 'bg-[#e1f5fe] text-[#0284c7]' : 'bg-[#e8f5e9] text-[#24A058]'}`}>
-                                {isInternship ? 'Internship' : 'Course'}
-                              </span>
-                              <span className="text-[12px] text-[#64748b]">
-                                {isProgressLoading ? "Loading…" : lastAccessedInfo} · Added {new Date(item?.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                              </span>
+                      return (
+                        <div key={item._id} className={`flex flex-col md:flex-row items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-[12px] hover:shadow-md transition-shadow border-l-[4px] ${isInternship ? 'border-l-[#0284c7]' : 'border-l-[#24A058]'}`}>
+                          {/* Left Side: Icon & Info */}
+                          <div className="flex items-center gap-4 w-full md:w-auto">
+                            <div className={`w-[50px] h-[50px] rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${isInternship ? 'bg-[#e1f5fe]' : 'bg-[#e8f5e9]'}`}>
+                              {isInternship ? (
+                                <LaptopOutlined style={{ fontSize: '24px', color: '#0284c7' }} />
+                              ) : (
+                                <ReadOutlined style={{ fontSize: '24px', color: '#24A058' }} />
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-[#1e293b] text-[15px]">{item?.title}</span>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`text-[11px] font-semibold px-2 py-[2px] rounded-md ${isInternship ? 'bg-[#e1f5fe] text-[#0284c7]' : 'bg-[#e8f5e9] text-[#24A058]'}`}>
+                                  {isInternship ? 'Internship' : 'Course'}
+                                </span>
+                                <span className="text-[12px] text-[#64748b]">
+                                  {isProgressLoading ? "Loading…" : lastAccessedInfo} · Added {new Date(item?.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Right Side: Progress & Button */}
-                        <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-4 md:mt-0">
-                          <div className="flex items-center gap-2 w-[180px] justify-end">
-                            <Progress 
-                              percent={progressVal} 
-                              size="small" 
-                              showInfo={false} 
-                              strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'} 
-                              railColor="#f1f5f9"
-                              className="m-0 w-[120px]"
-                            />
-                            <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{progressVal}%</span>
+                          {/* Right Side: Progress & Button */}
+                          <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-4 md:mt-0">
+                            <div className="flex items-center gap-2 w-[180px] justify-end">
+                              <Progress
+                                percent={progressVal}
+                                size="small"
+                                showInfo={false}
+                                strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'}
+                                railColor="#f1f5f9"
+                                className="m-0 w-[120px]"
+                              />
+                              <span className="text-[12px] text-[#64748b] font-medium min-w-[30px] text-right">{progressVal}%</span>
+                            </div>
+                            <Button
+                              onClick={handleNavigate}
+                              className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                              style={{
+                                fontWeight: '600',
+                                borderRadius: '8px',
+                                padding: '4px 16px',
+                                height: '32px'
+                              }}
+                            >
+                              {hasLastAccessed ? "Continue" : "Start Learning"}
+                            </Button>
                           </div>
-                          <Button
-                            onClick={handleNavigate}
-                            className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
-                            style={{
-                              fontWeight: '600',
-                              borderRadius: '8px',
-                              padding: '4px 16px',
-                              height: '32px'
-                            }}
-                          >
-                            {hasLastAccessed ? "Continue" : "Start Learning"}
-                          </Button>
                         </div>
-                      </div>
-                  );
-                }))}
-              </motion.div>
+                      );
+                    }))}
+                </motion.div>
               </AnimatePresence>
             )}
           </div>
@@ -1364,21 +1364,40 @@ export default function DashboardPage() {
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.96, y: -10 }}
                           transition={{ duration: 0.35, ease: "easeInOut" }}
-                          className="w-full h-full"
+                          className="w-full h-full grid grid-cols-1 2xl:grid-cols-2 gap-4"
                         >
-                          <RecommendedCard
-                            item={allCoursesOnly[recCourseIndex % allCoursesOnly.length]}
-                            total={allCoursesOnly.length}
-                            currentIndex={recCourseIndex}
-                            onDotClick={setRecCourseIndex}
-                            onPrevClick={() => setRecCourseIndex(prev => prev === 0 ? allCoursesOnly.length - 1 : prev - 1)}
-                            onNextClick={() => setRecCourseIndex(prev => prev + 1)}
-                            onCardClick={(item) => {
-                              router.push(
-                                `/student/course`
-                              );
-                            }}
-                          />
+                          <div className="w-full h-full">
+                            <RecommendedCard
+                              item={allCoursesOnly[recCourseIndex % allCoursesOnly.length]}
+                              total={allCoursesOnly.length}
+                              currentIndex={recCourseIndex}
+                              onDotClick={setRecCourseIndex}
+                              onPrevClick={() => setRecCourseIndex(prev => prev === 0 ? allCoursesOnly.length - 1 : prev - 1)}
+                              onNextClick={() => setRecCourseIndex(prev => prev + 1)}
+                              onCardClick={(item) => {
+                                router.push(
+                                  `/student/course`
+                                );
+                              }}
+                            />
+                          </div>
+                          {allCoursesOnly.length > 1 && (
+                            <div className="hidden 2xl:block w-full h-full">
+                              <RecommendedCard
+                                item={allCoursesOnly[(recCourseIndex + 1) % allCoursesOnly.length]}
+                                total={allCoursesOnly.length}
+                                currentIndex={recCourseIndex}
+                                onDotClick={setRecCourseIndex}
+                                onPrevClick={() => setRecCourseIndex(prev => prev === 0 ? allCoursesOnly.length - 1 : prev - 1)}
+                                onNextClick={() => setRecCourseIndex(prev => prev + 1)}
+                                onCardClick={(item) => {
+                                  router.push(
+                                    `/student/course`
+                                  );
+                                }}
+                              />
+                            </div>
+                          )}
                         </motion.div>
                       </AnimatePresence>
                       <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
@@ -1404,21 +1423,40 @@ export default function DashboardPage() {
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.96, y: -10 }}
                           transition={{ duration: 0.35, ease: "easeInOut" }}
-                          className="w-full h-full"
+                          className="w-full h-full grid grid-cols-1 2xl:grid-cols-2 gap-4"
                         >
-                          <RecommendedCard
-                            item={allInternshipsOnly[recInternshipIndex % allInternshipsOnly.length]}
-                            total={allInternshipsOnly.length}
-                            currentIndex={recInternshipIndex}
-                            onDotClick={setRecInternshipIndex}
-                            onPrevClick={() => setRecInternshipIndex(prev => prev === 0 ? allInternshipsOnly.length - 1 : prev - 1)}
-                            onNextClick={() => setRecInternshipIndex(prev => prev + 1)}
-                            onCardClick={(item) => {
-                              router.push(
-                                `/student/internshipLibrary`                          
-                              );
-                            }}
-                          />
+                          <div className="w-full h-full">
+                            <RecommendedCard
+                              item={allInternshipsOnly[recInternshipIndex % allInternshipsOnly.length]}
+                              total={allInternshipsOnly.length}
+                              currentIndex={recInternshipIndex}
+                              onDotClick={setRecInternshipIndex}
+                              onPrevClick={() => setRecInternshipIndex(prev => prev === 0 ? allInternshipsOnly.length - 1 : prev - 1)}
+                              onNextClick={() => setRecInternshipIndex(prev => prev + 1)}
+                              onCardClick={(item) => {
+                                router.push(
+                                  `/student/internshipLibrary`
+                                );
+                              }}
+                            />
+                          </div>
+                          {allInternshipsOnly.length > 1 && (
+                            <div className="hidden 2xl:block w-full h-full">
+                              <RecommendedCard
+                                item={allInternshipsOnly[(recInternshipIndex + 1) % allInternshipsOnly.length]}
+                                total={allInternshipsOnly.length}
+                                currentIndex={recInternshipIndex}
+                                onDotClick={setRecInternshipIndex}
+                                onPrevClick={() => setRecInternshipIndex(prev => prev === 0 ? allInternshipsOnly.length - 1 : prev - 1)}
+                                onNextClick={() => setRecInternshipIndex(prev => prev + 1)}
+                                onCardClick={(item) => {
+                                  router.push(
+                                    `/student/internshipLibrary`
+                                  );
+                                }}
+                              />
+                            </div>
+                          )}
                         </motion.div>
                       </AnimatePresence>
                       <div className="w-full h-[4px] bg-[#f1f5f9] mt-4 rounded-full relative overflow-hidden shrink-0">
@@ -1447,7 +1485,7 @@ export default function DashboardPage() {
                 studentCreds={studentCreds}
               />
             </div>
-            
+
             {/* Section 2: Notice Board */}
             <div className="w-full flex flex-col relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
               <div className="w-full flex items-center justify-between mb-3 sticky top-0 bg-white z-10 shrink-0">
@@ -1468,7 +1506,7 @@ export default function DashboardPage() {
                 <CardsList type="notifications" progressById={progressById} combinedLearningData={combinedLearningData} />
               </div>
             </div>
-            
+
             {/* Section 3: Achievements */}
             <div className="w-full flex flex-col relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
               <Achievements progressById={progressById} combinedLearningData={combinedLearningData} studentCreds={studentCreds} />
@@ -1476,24 +1514,24 @@ export default function DashboardPage() {
           </div>
         </div>
 
-          <Modal
-            title="Notice Board"
-            open={isNoticeModalOpen}
-            onCancel={() => setIsNoticeModalOpen(false)}
-            footer={null}
-            width={1000}
-          >
+        <Modal
+          title="Notice Board"
+          open={isNoticeModalOpen}
+          onCancel={() => setIsNoticeModalOpen(false)}
+          footer={null}
+          width={1000}
+        >
           <div style={{ height: "70vh", overflowY: "auto" }}>
-            <CardsList 
-              type="notifications" 
-              isModal={true} 
-              progressById={progressById} 
+            <CardsList
+              type="notifications"
+              isModal={true}
+              progressById={progressById}
               combinedLearningData={combinedLearningData}
               activeNoticeIndex={activeNoticeIndex}
             />
           </div>
-          </Modal>
-        </div>
+        </Modal>
+      </div>
     </section>
   );
 }

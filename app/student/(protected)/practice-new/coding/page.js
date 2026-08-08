@@ -22,6 +22,21 @@ const CodingContributionGraph = () => {
   const [monthLabels, setMonthLabels] = useState([]);
   const [streakStats, setStreakStats] = useState({ currentStreak: 0, maxStreak: 0, activeDays: 0 });
   const [totalSimulated, setTotalSimulated] = useState(0);
+  const [rightColWidth, setRightColWidth] = useState(320);
+
+  useEffect(() => {
+    const updateLayout = () => {
+      const width = window.innerWidth;
+      if (width >= 1920) setRightColWidth(400);
+      else if (width >= 1600) setRightColWidth(360);
+      else if (width >= 1400) setRightColWidth(320);
+      else setRightColWidth(290);
+    };
+
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    return () => window.removeEventListener('resize', updateLayout);
+  }, []);
 
   useEffect(() => {
     // 1. Fetch solved history dynamically from localStorage
@@ -240,7 +255,10 @@ const CodingContributionGraph = () => {
           </div>
           
           {/* Right Side: Consistency & Streak Board */}
-          <div className="w-full xl:w-[320px] hidden xl:flex flex-col shrink-0">
+          <div 
+            className="w-full hidden xl:flex flex-col shrink-0"
+            style={{ width: `${rightColWidth}px` }}
+          >
             <div className="bg-white rounded-md border border-[#d0d7de] p-4 shadow-sm h-full flex flex-col">
               <h3 className="text-[16px] font-bold text-gray-800 mb-3 flex items-center gap-2 shrink-0">
                 <span className="text-xl">🏆</span> Consistency Board
@@ -304,11 +322,26 @@ export default function CodingPage() {
   const subjects = useSelector((s) => s.practice.subjects);
   const studentCreds = useSelector((state) => state.student.student?.data);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [activeSort, setActiveSort] = useState("Default");
-  const [mobileBlockModal, setMobileBlockModal] = useState({ visible: false });
-  console.log("Forcing recompile - modal state is initialized:", mobileBlockModal);
+  const [searchTerm, setSearchTerm] = useState("");
   const [solvedPerSubject, setSolvedPerSubject] = useState({});
+  const [mobileBlockModal, setMobileBlockModal] = useState({ visible: false });
+  const [columns, setColumns] = useState(3);
+
+  useEffect(() => {
+    const updateColumns = () => {
+      const width = window.innerWidth;
+      if (width >= 1920) setColumns(6);
+      else if (width >= 1600) setColumns(5);
+      else if (width >= 1024) setColumns(4);
+      else if (width >= 768) setColumns(2);
+      else setColumns(1);
+    };
+    
+    updateColumns();
+    window.addEventListener('resize', updateColumns);
+    return () => window.removeEventListener('resize', updateColumns);
+  }, []);
 
   const categoryTabs = [
     { name: "Non-Technical", path: "/student/practice-new/nontechnical" },
@@ -462,7 +495,8 @@ export default function CodingPage() {
             <AnimatePresence mode="wait">
               <motion.div 
                 key={searchTerm}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+              className="grid gap-4 md:gap-6"
+              style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
