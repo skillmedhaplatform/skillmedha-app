@@ -8,6 +8,12 @@
   width: 100%;
   background-color: #EFF5FB;
   padding: 2rem;
+
+  // 2rem + the container's own 2.5rem padding eats 144px total on a phone
+  // viewport before the form itself even starts.
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+  }
 }
 
 .container {
@@ -18,6 +24,10 @@
   background-color: #ffffff;
   border-radius: $borderRadiusLarge;
   box-shadow: $shadowMd;
+
+  @media (max-width: 480px) {
+    padding: 1.25rem;
+  }
 }
 
 .header {
@@ -25,6 +35,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .title {

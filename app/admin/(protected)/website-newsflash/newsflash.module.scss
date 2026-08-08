@@ -18,6 +18,10 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  // Search input (min-width 250px) + visibility toggle + add button don't
+  // fit a single row on phones; without wrap they overflow the viewport.
+  flex-wrap: wrap;
+  row-gap: 12px;
 }
 
 .tableWrapper {

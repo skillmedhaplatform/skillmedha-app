@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./sidebar.module.scss";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, Menu, App, Tooltip, Skeleton, Modal, Dropdown } from "antd";
@@ -40,7 +40,28 @@ const SideBar = ({ activeView, setView }) => {
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
+  // The sidebar only ever toggles between 270px (expanded) and 75px
+  // (collapsed) — there's no automatic breakpoint, so on tablet/mobile
+  // widths the expanded sidebar eats most of the viewport and squeezes
+  // every admin page's content into an unusably narrow strip. Follow the
+  // viewport automatically (collapse below 992px, expand back above it)
+  // UNLESS the user has explicitly clicked the toggle button, in which case
+  // their manual choice wins regardless of viewport width.
+  const userToggledRef = useRef(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 992px)");
+    const followViewport = (matches) => {
+      if (userToggledRef.current) return;
+      dispatch(changeCollapse(matches));
+    };
+    followViewport(mq.matches);
+    const handler = (e) => followViewport(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [dispatch]);
+
   const { value, loading } = useSelector((s) => s.adminAuth?.user || {});
   const userDetails = value?.user;
   const userPermissions = userDetails?.permissions || {};
@@ -221,7 +242,10 @@ const SideBar = ({ activeView, setView }) => {
           </div>
         )}
         <div
-          onClick={() => dispatch(changeCollapse(!isCollapsed))}
+          onClick={() => {
+            userToggledRef.current = true;
+            dispatch(changeCollapse(!isCollapsed));
+          }}
           style={{ cursor: 'pointer', padding: '0 8px', display: 'flex', alignItems: 'center', flexShrink: 0, marginRight: isCollapsed ? '0' : '24px', marginLeft: isCollapsed ? '0' : 'auto' }}
         >
           {isCollapsed ? <MenuUnfoldOutlined style={{ fontSize: '30px', color: '#08334C' }} /> : <MenuFoldOutlined style={{ fontSize: '24px', color: '#08334C' }} />}
