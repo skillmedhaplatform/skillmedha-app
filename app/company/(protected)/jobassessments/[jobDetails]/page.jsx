@@ -96,28 +96,30 @@ const Page = () => {
   return (
     <>
       <div className={jdStyles.container}>
-        {/* Header Banner */}
-        <PageHeader 
-          title={oneJobData?.jobTitle ? `${oneJobData.jobTitle} Insights` : "Job Assessment Insights"} 
-          subtitle="View and manage insights, applicants, and assessments" 
-        />
+        {/* Sticky Header Banner & Tabs wrapper */}
+        <div className={jdStyles.stickyHeaderWrapper}>
+          <PageHeader 
+            title={oneJobData?.jobTitle ? `${oneJobData.jobTitle} Insights` : "Job Assessment Insights"} 
+            subtitle="View and manage insights, applicants, and assessments" 
+          />
 
-        {/* Tabs */}
-        <div className={jdStyles.tabsWrapper}>
-          <div className={jdStyles.tabsRow}>
-            {options.map((opt) => {
-              const isActive = selectedTab === opt.value;
-              return (
-                <div
-                  key={opt.value}
-                  className={`${jdStyles.tabItem} ${isActive ? jdStyles.activeTab : ""}`}
-                  onClick={() => setSelectedTab(opt.value)}
-                >
-                  <span>{opt.label}</span>
-                  {isActive && <span className={jdStyles.activeIndicator} />}
-                </div>
-              );
-            })}
+          {/* Tabs */}
+          <div className={jdStyles.tabsWrapper}>
+            <div className={jdStyles.tabsRow}>
+              {options.map((opt) => {
+                const isActive = selectedTab === opt.value;
+                return (
+                  <div
+                    key={opt.value}
+                    className={`${jdStyles.tabItem} ${isActive ? jdStyles.activeTab : ""}`}
+                    onClick={() => setSelectedTab(opt.value)}
+                  >
+                    <span>{opt.label}</span>
+                    {isActive && <span className={jdStyles.activeIndicator} />}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 

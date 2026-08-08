@@ -47,8 +47,9 @@
 
 .filterGroup {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .filterLabel {
@@ -57,6 +58,7 @@
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .bodyStyles {
@@ -89,4 +91,238 @@
   align-items: center;
   border: 1px dashed #cbd5e1;
   margin-top: 1rem;
+}
+
+/* Desktop-only / Mobile-only display helper classes */
+.desktopOnly {
+  display: block;
+
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.mobileOnly {
+  display: none !important;
+
+  @media (max-width: 768px) {
+    display: block !important;
+  }
+}
+
+/* Mobile tile container styles */
+.mobileTileList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+}
+
+.studentMobileTile {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f8fafc;
+  }
+
+  .tileCheckbox {
+    width: 16px;
+    height: 16px;
+    accent-color: #2563eb;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .tileAvatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: #e0f2fe;
+    color: #0284c7;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  .tileAvatarImg {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .tileInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .tileName {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tileEmail {
+    font-size: 0.75rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .inviteButton {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    font-size: 0.75rem !important;
+    height: 28px !important;
+    padding: 0 10px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    border: none !important;
+
+    &:disabled {
+      background-color: #e2e8f0 !important;
+      color: #94a3b8 !important;
+    }
+  }
+}
+
+/* Bottom Drawer content styling */
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  font-family: sans-serif;
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+
+  .drawerAvatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #e0f2fe;
+    color: #0284c7;
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .drawerAvatarImg {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .drawerMainInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .drawerName {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .drawerEmail {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+}
+
+.drawerDetailGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detailLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.detailValue {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.detailSubText {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.actionRow {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.25rem;
+
+  button {
+    flex: 1;
+    height: 40px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+  }
+}
+
+/* Filter responsiveness for mobile */
+@media (max-width: 768px) {
+  .filterCard {
+    margin: 1rem !important;
+    padding: 1rem !important;
+    gap: 0.75rem !important;
+  }
+  .filterSec {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+  .filterGroup {
+    width: 100% !important;
+    & > div {
+      width: 100% !important;
+    }
+  }
 }
