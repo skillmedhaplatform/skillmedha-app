@@ -23,7 +23,12 @@ import PageHeader from "@/modules/tpo/components/PageHeader";
 import {
   HiOutlineSquares2X2,
   HiOutlineBriefcase,
-  HiOutlineClock
+  HiOutlineClock,
+  HiOutlineDocumentText,
+  HiOutlineQuestionMarkCircle,
+  HiOutlineCamera,
+  HiOutlineShieldCheck,
+  HiOutlineChartBar
 } from "react-icons/hi2";
 
 // Constants
@@ -31,6 +36,15 @@ const ASSESSMENT_CONFIG = {
   DEFAULT_PAGE_SIZE: 6,
   DEFAULT_PAGE_NO: 1,
 };
+
+const ICON_PALETTES = [
+  { bg: "#eff6ff", color: "#3b82f6" }, // blue
+  { bg: "#f0fdf4", color: "#22c55e" }, // green
+  { bg: "#faf5ff", color: "#a855f7" }, // purple
+  { bg: "#fef2f2", color: "#ef4444" }, // red
+  { bg: "#fff7ed", color: "#f97316" }, // orange
+  { bg: "#ecfeff", color: "#06b6d4" }, // cyan
+];
 
 const LOADING_STYLES = {
   gridColumn: "1 / -1",
@@ -48,7 +62,7 @@ const EMPTY_STYLES = {
   padding: 24,
 };
 
-const AssessmentCard = ({ job, onInsightClick, countdown }) => {
+const AssessmentCard = ({ job, onInsightClick, countdown, index = 0 }) => {
   const title = job?.jobTitle || "Untitled";
 
   const testDuration =
@@ -63,94 +77,180 @@ const AssessmentCard = ({ job, onInsightClick, countdown }) => {
     }
   };
 
+  const palette = ICON_PALETTES[index % ICON_PALETTES.length];
+
   return (
-    <div className={JaStyles.card}>
-      <div className={JaStyles.cardHeader}>
-        <p style={{ fontSize: "18px", fontWeight: "700" }}>{title}</p>
+    <>
+      {/* Desktop Card Layout */}
+      <div className={JaStyles.card}>
+        <div className={JaStyles.cardHeader}>
+          <p style={{ fontSize: "18px", fontWeight: "700" }}>{title}</p>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {countdown === "Expired" ? (
+              <Button type="default" danger>
+                Expired
+              </Button>
+            ) : countdown === "No expiry set" ? (
+              <Button type="default" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
+                Active
+              </Button>
+            ) : countdown ? (
+              <Button type="text" danger>
+                {countdown}
+              </Button>
+            ) : null}
+          </div>
+        </div>
+        <Divider style={{ margin: "4px 0" }} />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+            padding: ".5rem 0",
+          }}
+        >
+          <div>
+            <label>Test Duration : </label>
+            <strong>{testDuration}</strong>
+          </div>
+          <div>
+            <label>No of Questions : </label>
+            <strong>{job?.questionIds?.length || 0}</strong>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div>
+              <label>Live Proctoring:</label>{" "}
+              <Tag color={job?.liveProctoring === "Enable" ? "green" : "red"}>
+                {job?.liveProctoring || "Not Set"}
+              </Tag>
+            </div>
+
+            <div>
+              <label>Snapshot Technology:</label>{" "}
+              <Tag
+                color={job?.snapShotTechnology === "Enable" ? "blue" : "volcano"}
+              >
+                {job?.snapShotTechnology || "Not Set"}
+              </Tag>
+            </div>
+
+            {job?.honestRespondent && (
+              <div>
+                <label>Honest Respondent:</label>{" "}
+                <Tag>{job?.honestRespondent?.type}</Tag>
+                <Tag>Max Attempts: {job?.honestRespondent?.maxAttempts}</Tag>
+              </div>
+            )}
+          </div>
+        </div>
+        <Divider style={{ margin: "4px 0" }} />
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-end",
+            marginTop: "auto",
           }}
         >
-          {countdown === "Expired" ? (
-            <Button type="default" danger>
-              Expired
-            </Button>
-          ) : countdown === "No expiry set" ? (
-            <Button type="default" style={{ borderColor: "#22c55e", color: "#22c55e" }}>
-              Active
-            </Button>
-          ) : countdown ? (
-            <Button type="text" danger>
-              {countdown}
-            </Button>
-          ) : null}
+          <Button
+            onClick={handleInsightClick}
+            type="primary"
+            style={{ width: "8rem" }}
+            disabled={countdown === "Expired"}
+          >
+            Insights
+          </Button>
         </div>
       </div>
-      <Divider style={{ margin: "4px 0" }} />
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-          padding: ".5rem 0",
-        }}
-      >
-        <div>
-          <label>Test Duration : </label>
-          <strong>{testDuration}</strong>
-        </div>
-        <div>
-          <label>No of Questions : </label>
-          <strong>{job?.questionIds?.length || 0}</strong>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          <div>
-            <label>Live Proctoring:</label>{" "}
-            <Tag color={job?.liveProctoring === "Enable" ? "green" : "red"}>
-              {job?.liveProctoring || "Not Set"}
-            </Tag>
-          </div>
 
-          <div>
-            <label>Snapshot Technology:</label>{" "}
-            <Tag
-              color={job?.snapShotTechnology === "Enable" ? "blue" : "volcano"}
+      {/* Modern Compact Mobile Card Layout */}
+      <div className={JaStyles.mobileCard}>
+        {/* Row 1: Header (Icon + Title + Status Badge) */}
+        <div className={JaStyles.mobileCardTop}>
+          <div className={JaStyles.mobileTitleGroup}>
+            <div
+              className={JaStyles.mobileIconBadge}
+              style={{ backgroundColor: palette.bg, color: palette.color }}
             >
-              {job?.snapShotTechnology || "Not Set"}
-            </Tag>
+              <HiOutlineDocumentText />
+            </div>
+            <h3 className={JaStyles.mobileTitle}>{title}</h3>
+          </div>
+          <div className={JaStyles.mobileBadgeWrapper}>
+            {countdown === "Expired" ? (
+              <span className={`${JaStyles.mobileStatusBadge} ${JaStyles.badgeExpired}`}>
+                Expired
+              </span>
+            ) : (
+              <span className={`${JaStyles.mobileStatusBadge} ${JaStyles.badgeActive}`}>
+                Active
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Row 2: Metrics & Action */}
+        <div className={JaStyles.mobileCardContent}>
+          <div className={JaStyles.mobileMetricsInline}>
+            <span className={JaStyles.metricItem} title="Test Duration">
+              <HiOutlineClock className={JaStyles.metricIcon} />
+              <span>{testDuration}</span>
+            </span>
+
+            <span className={JaStyles.metricItem} title="Questions">
+              <HiOutlineQuestionMarkCircle className={JaStyles.metricIcon} />
+              <span>{job?.questionIds?.length || 0}</span>
+            </span>
+
+            <span
+              className={`${JaStyles.pillChip} ${
+                job?.liveProctoring === "Enable" ? JaStyles.pillGreen : JaStyles.pillRed
+              }`}
+              title="Live Proctoring"
+            >
+              <HiOutlineCamera className={JaStyles.pillIcon} />
+              <span>{job?.liveProctoring || "Disable"}</span>
+            </span>
+
+            <span
+              className={`${JaStyles.pillChip} ${
+                job?.snapShotTechnology === "Enable" ? JaStyles.pillGreen : JaStyles.pillRed
+              }`}
+              title="Snapshot Technology"
+            >
+              <HiOutlineShieldCheck className={JaStyles.pillIcon} />
+              <span>{job?.snapShotTechnology || "Disable"}</span>
+            </span>
+
+            {job?.honestRespondent && (
+              <span className={JaStyles.pillChipDefault}>
+                {job.honestRespondent.type} ({job.honestRespondent.maxAttempts})
+              </span>
+            )}
           </div>
 
-          {job?.honestRespondent && (
-            <div>
-              <label>Honest Respondent:</label>{" "}
-              <Tag>{job?.honestRespondent?.type}</Tag>
-              <Tag>Max Attempts: {job?.honestRespondent?.maxAttempts}</Tag>
-            </div>
-          )}
+          <div className={JaStyles.mobileActionContainer}>
+            <Button
+              onClick={handleInsightClick}
+              type="primary"
+              size="small"
+              icon={<HiOutlineChartBar />}
+              className={JaStyles.mobileInsightBtn}
+              disabled={countdown === "Expired"}
+            >
+              Insights
+            </Button>
+          </div>
         </div>
       </div>
-      <Divider style={{ margin: "4px 0" }} />
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          marginTop: "auto",
-        }}
-      >
-        <Button
-          onClick={handleInsightClick}
-          type="primary"
-          style={{ width: "8rem" }}
-          disabled={countdown === "Expired"}
-        >
-          Insights
-        </Button>
-      </div>
-    </div>
+    </>
   );
 };
 
@@ -320,7 +420,7 @@ export default function JobAssessments() {
 
   // ===== RENDER FUNCTIONS =====
   const bannerStats = (
-    <div style={{ display: "flex", alignItems: "center", gap: "2rem", paddingRight: "1rem" }}>
+    <div className={JaStyles.bannerStatsContainer}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         <span style={{ fontSize: "28px", fontWeight: "800", lineHeight: "1", color: "#ffffff" }}>
           {allCount}
@@ -361,12 +461,12 @@ export default function JobAssessments() {
         subtitle="Manage created assessments and view insights"
         rightSlot={bannerStats}
       />
-      <div style={{ padding: "1.5rem 1.5rem 0", display: "flex", justifyContent: "flex-end" }}>
+      <div className={JaStyles.searchContainer}>
         <Input
           prefix={<SearchOutlined />}
           placeholder="Search A Job here"
           onChange={handleSearch}
-          style={{ width: "300px", height: "40px" }}
+          className={JaStyles.searchInput}
         />
       </div>
     </div>
@@ -432,6 +532,7 @@ export default function JobAssessments() {
         job={job}
         onInsightClick={handleInsightClick}
         countdown={countdowns[originalIdx]}
+        index={originalIdx}
       />
     ));
 

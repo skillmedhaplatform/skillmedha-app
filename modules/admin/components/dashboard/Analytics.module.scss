@@ -10,6 +10,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .title {
@@ -47,6 +48,11 @@
   grid-template-columns: 1fr;
   gap: 1.25rem;
   flex: 1;
+  min-width: 0;
+}
+
+.listGroup {
+  min-width: 0;
 }
 
 .listGroup h4 {

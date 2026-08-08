@@ -119,7 +119,7 @@ export default function ResultsPage() {
           title={oneJobData?.jobTitle ? `${oneJobData.jobTitle} - ${StudentDetails?.userName || "Candidate"} Results` : "Assessment Results"}
           subtitle="View detailed assessment results and schedule interviews"
         />
-        <div style={{ padding: "0 1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div className={styles.contentWrapper}>
           <Header
             candidate={StudentDetails}
             jobData={oneJobData}
@@ -534,10 +534,14 @@ const Header = ({ candidate, jobData, onDownload, AssessmentResults }) => {
             height={"100%"}
           />
         </div>
-        <p style={{ color: "#6BA8ED", fontSize: "1.2rem", fontWeight: "800" }}>
-          {candidate?.userName || ""}
-        </p>
-        <p>{currJobStatus?.status?.toUpperCase() || "Pending"}</p>
+        <div className={styles.candidateTextInfo}>
+          <p className={styles.candidateName}>
+            {candidate?.userName || ""}
+          </p>
+          <p className={styles.candidateStatus}>
+            {currJobStatus?.status?.toUpperCase() || "Pending"}
+          </p>
+        </div>
       </div>
       <div className={styles.right}>
         <Button type="text" onClick={onDownload}>

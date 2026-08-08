@@ -135,6 +135,96 @@ const CreateCourse = ({ type = "course" }) => {
   const [toolFileListsMap, setToolFileListsMap] = useState({});
   const userCreds = useSelector((state) => state.user?.singleUser);
 
+  // Draft persistence: keeps in-progress "Create" form data across accidental
+  // refreshes/navigation until the course is actually submitted.
+  const draftKey = `${type}DraftUnsaved`;
+  const isCreatingNew = params.createInternship?.startsWith("new");
+  const [draftHydrated, setDraftHydrated] = useState(false);
+
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(draftKey);
+    } catch (e) {
+      // ignore storage errors (private browsing, disabled storage, etc.)
+    }
+  };
+
+  // Restore any unsaved draft when opening the "Create" form
+  useEffect(() => {
+    if (!isCreatingNew) return;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (draft.courseBasic) setCourseBasic(draft.courseBasic);
+        if (draft.courseArrays) setCourseArrays(draft.courseArrays);
+        if (draft.courseIncludes) setCourseIncludes(draft.courseIncludes);
+        if (draft.pricing) setPricing(draft.pricing);
+        if (draft.seo) setSeo(draft.seo);
+        if (draft.visibility) setVisibility(draft.visibility);
+        if (draft.images) setImages(draft.images);
+        if (draft.toolsList?.length) setToolsList(draft.toolsList);
+        if (draft.editorInitialContent)
+          setEditorInitialContent(draft.editorInitialContent);
+        if (draft.fileList) setFileList(draft.fileList);
+        if (draft.thumbnailFileList)
+          setThumbnailFileList(draft.thumbnailFileList);
+        if (draft.bannerFileList) setBannerFileList(draft.bannerFileList);
+        if (draft.toolFileListsMap) setToolFileListsMap(draft.toolFileListsMap);
+        message.info("Restored your unsaved draft");
+      }
+    } catch (e) {
+      console.error("Failed to restore draft", e);
+    }
+    setDraftHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Autosave the draft while the user is still filling out a new course.
+  // Skipped until hydration finishes so we never overwrite a saved draft
+  // with the pre-restore empty defaults.
+  useEffect(() => {
+    if (!isCreatingNew || !draftHydrated) return;
+    try {
+      localStorage.setItem(
+        draftKey,
+        JSON.stringify({
+          courseBasic,
+          courseArrays,
+          courseIncludes,
+          pricing,
+          seo,
+          visibility,
+          images,
+          toolsList,
+          editorInitialContent,
+          fileList,
+          thumbnailFileList,
+          bannerFileList,
+          toolFileListsMap,
+        })
+      );
+    } catch (e) {
+      console.error("Failed to save draft", e);
+    }
+  }, [
+    isCreatingNew,
+    draftHydrated,
+    courseBasic,
+    courseArrays,
+    courseIncludes,
+    pricing,
+    seo,
+    visibility,
+    images,
+    toolsList,
+    editorInitialContent,
+    fileList,
+    thumbnailFileList,
+    bannerFileList,
+    toolFileListsMap,
+  ]);
+
   // Comprehensive Course Categories
   const categoryOptions = [
     // Technology & Programming
@@ -520,9 +610,9 @@ const CreateCourse = ({ type = "course" }) => {
       const currentPrice = parseFloat(pricing.currentPrice);
       if (isNaN(originalPrice) || originalPrice < 0) {
         errors.originalPrice = "Original price must be a valid positive number";
-      } else if (originalPrice <= currentPrice) {
+      } else if (originalPrice < currentPrice) {
         errors.originalPrice =
-          "Original price should be greater than current price";
+          "Original price cannot be less than the current price";
       }
     }
 
@@ -600,13 +690,6 @@ const CreateCourse = ({ type = "course" }) => {
     if (!images.coverImage || images.coverImage === "") {
       errors.coverImage = "Cover image is required";
     }
-    const validTools = toolsList.filter(
-      (tool) => tool.name && tool.name.trim().length > 0
-    );
-    if (validTools.length < 3) {
-      errors.tools = "At least 3 tools with names are required";
-    }
-
     toolsList.forEach((tool, index) => {
       if (tool.name && tool.name.trim().length > 0) {
         if (tool.name.length < 2) {
@@ -807,28 +890,24 @@ const CreateCourse = ({ type = "course" }) => {
   };
 
   const handleRemoveTool = (index) => {
-    if (toolsList.length > 3) {
-      const newTools = toolsList.filter((_, i) => i !== index);
-      setToolsList(newTools);
+    const newTools = toolsList.filter((_, i) => i !== index);
+    setToolsList(newTools);
 
-      // Remove file list for this tool
-      const newFileListsMap = { ...toolFileListsMap };
-      delete newFileListsMap[index];
+    // Remove file list for this tool
+    const newFileListsMap = { ...toolFileListsMap };
+    delete newFileListsMap[index];
 
-      // Reindex the remaining file lists
-      const reindexedMap = {};
-      Object.keys(newFileListsMap).forEach((key) => {
-        const oldIndex = parseInt(key);
-        if (oldIndex > index) {
-          reindexedMap[oldIndex - 1] = newFileListsMap[key];
-        } else {
-          reindexedMap[key] = newFileListsMap[key];
-        }
-      });
-      setToolFileListsMap(reindexedMap);
-    } else {
-      message.warning("At least 3 tools are required");
-    }
+    // Reindex the remaining file lists
+    const reindexedMap = {};
+    Object.keys(newFileListsMap).forEach((key) => {
+      const oldIndex = parseInt(key);
+      if (oldIndex > index) {
+        reindexedMap[oldIndex - 1] = newFileListsMap[key];
+      } else {
+        reindexedMap[key] = newFileListsMap[key];
+      }
+    });
+    setToolFileListsMap(reindexedMap);
   };
 
   const handleToolNameChange = (index, value) => {
@@ -1117,6 +1196,24 @@ const CreateCourse = ({ type = "course" }) => {
   const handleSave = async () => {
     setIsValidating(true);
 
+    // Everything below is wrapped so that ANY unexpected error (bad legacy
+    // data shape, etc.) always re-enables the button and surfaces the real
+    // problem, instead of leaving Save/Update permanently stuck disabled
+    // with no visible feedback.
+    try {
+      await handleSaveInner();
+    } catch (err) {
+      console.error("Unexpected error while saving:", err);
+      message.error(
+        err?.message
+          ? `Something went wrong while saving: ${err.message}`
+          : "Something went wrong while saving. Please try again."
+      );
+      setIsValidating(false);
+    }
+  };
+
+  const handleSaveInner = async () => {
     // Validate form
     const validation = validateForm();
 
@@ -1125,15 +1222,25 @@ const CreateCourse = ({ type = "course" }) => {
       setIsValidating(false);
 
       // Show error message
-      message.error("Please fix the validation errors before saving", 5);
+      const errorCount = Object.keys(validation.errors).length;
+      message.error(
+        `Please fix ${errorCount} validation ${
+          errorCount === 1 ? "error" : "errors"
+        } before saving`,
+        6
+      );
 
-      // Scroll to first error
+      // Scroll to the first error field. If it isn't mapped to a
+      // data-field target, fall back to the error summary at the top
+      // so a failed save is never silent/invisible.
       const firstErrorKey = Object.keys(validation.errors)[0];
       const errorElement = document.querySelector(
         `[data-field="${firstErrorKey}"]`
       );
       if (errorElement) {
         errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       return;
@@ -1217,10 +1324,16 @@ const CreateCourse = ({ type = "course" }) => {
             dispatch,
             data: updates,
             message,
+            type,
           })
         )
-          .then(() => {
-            message.success(`${typeCapitalized} updated successfully`);
+          .unwrap()
+          .then((data) => {
+            if (!data?.msg) {
+              // Backend responded without confirming the update succeeded
+              setIsValidating(false);
+              return;
+            }
             setIsValidating(false);
             // Update original data ref
             originalDataRef.current = {
@@ -1230,7 +1343,6 @@ const CreateCourse = ({ type = "course" }) => {
             setValidationErrors({});
           })
           .catch((err) => {
-            message.error(`Failed to update ${type}`);
             setIsValidating(false);
           });
       } else {
@@ -1260,15 +1372,19 @@ const CreateCourse = ({ type = "course" }) => {
       };
 
       dispatch(createCourse(courseData))
-        ?.then((resp) => {
-          message.success(`${typeCapitalized} created successfully`);
-          const id = resp.payload.data.insertedId;
+        .unwrap()
+        .then((data) => {
+          const id = data?.data?.insertedId;
+          if (!id) {
+            setIsValidating(false);
+            return;
+          }
           setIsValidating(false);
           setValidationErrors({});
+          clearDraft();
           nav.replace(`/admin/${type === "workshops" ? "workshops" : type}/${id}`);
         })
         .catch((err) => {
-          message.error(`Failed to create ${type}`);
           setIsValidating(false);
         });
     }
@@ -2080,7 +2196,7 @@ const CreateCourse = ({ type = "course" }) => {
         </div>
         {/* Tools Covered with Icons */}
         <div className={internStyles.sectionHeader}>
-          Tools Covered * <small>(Min 3, Max 20)</small>
+          Tools Covered <small>(Optional, Max 20)</small>
         </div>
 
         <div data-field="tools">
@@ -2106,7 +2222,7 @@ const CreateCourse = ({ type = "course" }) => {
                     fontWeight: 500,
                   }}
                 >
-                  Tool Name {index + 1} *
+                  Tool Name {index + 1}
                 </label>
                 <Input
                   placeholder={`e.g., ${
@@ -2122,7 +2238,10 @@ const CreateCourse = ({ type = "course" }) => {
                   showCount
                   style={{
                     borderColor:
-                      validationErrors.tools && !tool.name ? "red" : undefined,
+                      tool.name && tool.name.trim().length > 0 &&
+                      tool.name.trim().length < 2
+                        ? "red"
+                        : undefined,
                   }}
                 />
               </div>
@@ -2220,13 +2339,8 @@ const CreateCourse = ({ type = "course" }) => {
                   type="text"
                   danger
                   onClick={() => handleRemoveTool(index)}
-                  disabled={toolsList.length <= 3}
                   icon={<span>🗑️</span>}
-                  title={
-                    toolsList.length <= 3
-                      ? "Minimum 3 tools required"
-                      : "Remove tool"
-                  }
+                  title="Remove tool"
                 >
                   Remove
                 </Button>

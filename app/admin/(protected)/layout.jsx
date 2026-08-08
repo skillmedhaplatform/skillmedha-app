@@ -5,6 +5,7 @@ import SideBar from "@/modules/admin/components/sidebar/sideBar";
 import UserDataLayer from "@/modules/admin/components/dal/UserDataLayer";
 import AdminBanner from "@/modules/admin/components/banner/AdminBanner";
 import AdminProgressProvider from "./AdminProgressProvider";
+import AntdAppProvider from "@/modules/admin/utils/providers";
 
 export const metadata = {
   title: "Admin Portal | SkillMedha",
@@ -13,19 +14,21 @@ export const metadata = {
 
 export default function layout({ children }) {
   return (
-    <UserDataLayer>
-      <AdminProgressProvider>
-        <div className={styles.pageContainer}>
-          <SideBar />
-          <div className={styles.rightColumn}>
-            <Header />
-            <AdminBanner />
-            <div className={styles.content}>
-              {children}
+    <AntdAppProvider>
+      <UserDataLayer>
+        <AdminProgressProvider>
+          <div className={styles.pageContainer}>
+            <SideBar />
+            <div className={styles.rightColumn}>
+              <Header />
+              <AdminBanner />
+              <div className={styles.content}>
+                {children}
+              </div>
             </div>
           </div>
-        </div>
-      </AdminProgressProvider>
-    </UserDataLayer>
+        </AdminProgressProvider>
+      </UserDataLayer>
+    </AntdAppProvider>
   );
 }

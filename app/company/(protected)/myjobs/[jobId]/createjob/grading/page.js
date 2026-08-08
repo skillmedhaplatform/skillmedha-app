@@ -4,6 +4,7 @@ import gradingStyles from "./styles/page.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { Button, Radio, message } from "antd";
+import { RightOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   getOneJobAssessment,
   updateJobAssessment,
@@ -332,10 +333,7 @@ const Page = () => {
                         handleInputChange(index, "scoreTo", e.target.value)
                       }
                     />
-                    <img
-                      src="https://res.cloudinary.com/cliqtick/image/upload/a_hflip/c_crop,w_600,h_300/v1722338593/free-black-arrow-left-icon-11375-thumb_fc3aba.png"
-                      width="24px"
-                    />
+                    <RightOutlined style={{ fontSize: "1rem", color: "#64748b", margin: "0 0.5rem" }} />
                     <input
                       type="text"
                       placeholder="Grade"
@@ -344,11 +342,10 @@ const Page = () => {
                         handleInputChange(index, "grade", e.target.value)
                       }
                     />
-                    <img
+                    <DeleteOutlined
                       className={gradingStyles.deleteButton}
                       onClick={() => handleDeleteInterval(index)}
-                      src="https://res.cloudinary.com/cliqtick/image/upload/v1718799083/sysnper/f29853d87e22f70d1cc10a3fcd7959c4_phnqgw.png"
-                      alt="delete"
+                      style={{ fontSize: "1.25rem", color: "#ff4d4f", cursor: "pointer", flexShrink: 0 }}
                     />
                   </div>
 
