@@ -32,7 +32,6 @@ const StudentData = ({ children }) => {
           })
         ).unwrap();
       } catch (error) {
-        console.error("Error fetching student details:", error);
       }
     };
 

@@ -71,14 +71,11 @@ export default function AllCandidates() {
       // Throttle requests to prevent rapid calls
       const now = Date.now();
       if (now - lastRequestTime < 1000) {
-        // 1 second throttle
-        console.log("Request throttled, too soon...");
         return;
       }
 
       // Don't load more if we've reached the end
       if (!isNewFilter && !hasMore) {
-        console.log("No more data available");
         return;
       }
 
@@ -96,7 +93,6 @@ export default function AllCandidates() {
           })
         ).unwrap();
       } catch (error) {
-        console.error("Error loading students:", error);
       } finally {
         setLoading(false);
         isRequestInProgress.current = false;
@@ -151,7 +147,6 @@ export default function AllCandidates() {
             !isRequestInProgress.current &&
             entry.intersectionRatio > 0.1
           ) {
-            console.log("Loading next page:", reduxCurrentPage + 1);
             debouncedLoadMore(reduxCurrentPage + 1, false);
           }
         },

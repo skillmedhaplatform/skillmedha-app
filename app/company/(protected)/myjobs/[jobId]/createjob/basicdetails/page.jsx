@@ -14,8 +14,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { CreateJob, UpdateJob } from "@/redux/slices/company/placementsSlice";
 import { useParams, useRouter } from "next/navigation";
-import { getSstorage } from "@/utils/universalUtils/windowMW";
-import { PlusOneOutlined } from "@mui/icons-material";
 import educationDegreeOptions from "@/utils/universalUtils/educationData";
 import dayjs from "dayjs";
 import { fetchPartnerColleges } from "@/redux/slices/company/skillMedhaData";
@@ -41,13 +39,6 @@ export default function BasicDetailsPage() {
     { educationLevel: "", minMarksPercentage: "" },
   ]);
   const USER_DETAILS = useSelector((state) => state?.user?.singleUser || null);
-  // const { value: ALLPLACEMENTS } = useSelector(
-  //   (state) => state.placement.AllPlacements
-  // );
-
-  // const companyName = ALLPLACEMENTS?.data?.find(
-  //   (p) => p?._id === id
-  // )?.companyName;
 
   const { value: ONEJOB } = useSelector((state) => state.placement?.OneJob ?? {});
   const { value: colleges, pagination: clgPagination } = useSelector(
@@ -196,7 +187,6 @@ export default function BasicDetailsPage() {
         message.error("Something went wrong. Job ID not returned.");
       }
     } catch (error) {
-      console.error("Job creation failed:", error);
       message.error("Failed to create job.");
     }
   };

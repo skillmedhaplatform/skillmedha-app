@@ -3,7 +3,7 @@ import { getLstorage } from "@/utils/universalUtils/windowMW";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { message } from "antd";
 import axios from "axios";
-import { findLast } from "lodash";
+
 
 const ZoomSlice = createSlice({
   name: "stepForm",
@@ -42,7 +42,6 @@ export const searchMeetingByTopic = createAsyncThunk("/searchMeetingByTopic" , a
     
     return data.data
   } catch (error) {
-    console.log(error)
   }
 })
 
@@ -89,7 +88,6 @@ export const getAllMeetings = createAsyncThunk(
       });
       return data.data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -105,7 +103,6 @@ export const getOneMeeting  = createAsyncThunk("/getOneMeeting" ,async(args) => 
       return data.data
   } catch (error) {
     message.error("Class Ended")
-    console.log(error)
   }
 })
 
@@ -123,7 +120,6 @@ export const updateMeeting = createAsyncThunk("/updateMeeting" , async(args) => 
     return data.data
   } catch (error) {
     message.error("Failed to update meeting")
-    console.log(error)
   }finally{
     hide()
   }

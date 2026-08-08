@@ -3,7 +3,7 @@ import { getLstorage } from "@/utils/universalUtils/windowMW";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { message } from "antd";
 import axios from "axios";
-import _ from "lodash";
+
 
 const TestsSlice = createSlice({
   name: "Tests",
@@ -77,7 +77,6 @@ export const getAllAssessments = createAsyncThunk(
 
       return data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -152,7 +151,6 @@ export const getOneAssessment = createAsyncThunk(
 
       return data.data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -181,7 +179,6 @@ export const updateAssessment = createAsyncThunk(
       return data.data;
     } catch (error) {
       message.error("Failed to update assessment");
-      console.log(error);
     } finally {
       hide();
     }
@@ -212,7 +209,6 @@ export const sendInvitiesAssessment = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to send invitations");
-      console.log(error);
     } finally {
       hide();
     }

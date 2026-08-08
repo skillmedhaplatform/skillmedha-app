@@ -3,15 +3,10 @@ import React, { useState, useEffect } from "react";
 import { Button, Upload } from "antd";
 import ImgCrop from "antd-img-crop";
 import styles from "../../layout.module.scss";
-import { useParams } from "next/navigation";
-
 import { useDispatch, useSelector } from "react-redux";
-// import { UpdateUser } from "@/redux/slices/admin/cms/userSlice";
-
 import { handleS3Upload as uploadToS3 } from "@/utils/universalUtils/s3uploads";
 import { UpdateUser } from "@/redux/slices/company/user";
 import { getLstorage } from "@/utils/universalUtils/windowMW";
-import { restUrl } from "@/utils/universalUtils/urls";
 
 export default function CompanyDetailsForm() {
   const USER_DETAILS = useSelector((state) => state?.user?.singleUser || null);

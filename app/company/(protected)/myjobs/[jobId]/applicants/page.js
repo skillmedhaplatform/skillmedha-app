@@ -3,11 +3,9 @@ import StudentCard from "@/app/company/(protected)/skillsets/components/candidat
 import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import applicantStyles from "./applicants.module.scss";
-import { DatePicker, Input, Button, Empty } from "antd";
-import dayjs from "dayjs";
+import { DatePicker, Input, Empty } from "antd";
 import {
   getAllAppliedStudents,
-  addAssessmentToStudent,
 } from "@/redux/slices/company/skillMedhaData";
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { useParams } from "next/navigation";

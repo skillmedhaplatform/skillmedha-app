@@ -8,7 +8,6 @@ import {
   Empty,
   Button,
   Tag,
-  Popover,
   Divider,
 } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
@@ -18,7 +17,6 @@ import {
   resetAllAppliedStudents,
 } from "@/redux/slices/company/skillMedhaData";
 import { useRouter } from "next/navigation";
-import { Tooltip } from "@mui/material";
 import PageHeader from "@/modules/tpo/components/PageHeader";
 import {
   HiOutlineSquares2X2,
@@ -301,7 +299,6 @@ export default function JobAssessments() {
 
   // ===== EVENT HANDLERS =====
   const handleSearch = (e) => {
-    console.log("Search:", e.target.value);
   };
 
   const handleFilterClick = (type) => {

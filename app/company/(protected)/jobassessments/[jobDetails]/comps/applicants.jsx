@@ -1,131 +1,9 @@
-// "use client";
-// import StudentCard from "@/app/company/(protected)/skillsets/components/candidateCard";
-// import React, { useEffect, useState } from "react";
-// import { useSelector } from "react-redux";
-// import applicantStyles from "./styles/applicants.module.scss";
-// import { DatePicker, Input } from "antd";
-// import dayjs from "dayjs";
-// import { getAllAppliedStudents } from "@/redux/slices/company/skillMedhaData";
-// import { useDispatch } from "react-redux";
-
-// const { RangePicker } = DatePicker;
-// const dateFormat = "YYYY/MM/DD";
-
-// const Applicants = () => {
-//   const dispatch = useDispatch();
-//   const appliedStudents = useSelector((s) => s.skillmedha.appliedStudents);
-//   const { value: { data: oneJobData } = {}, status } = useSelector(
-//     (state) => state.placement.OneJob || {}
-//   );
-
-//   const [dateRange, setDateRange] = useState(null);
-//   const [passYear, setPassYear] = useState(null);
-//   const [cgpa, setCgpa] = useState(0);
-
-//   const applyFilter = () => {
-//     const hasValidDates = dateRange && dateRange[0] && dateRange[1];
-
-//     dispatch(
-//       getAllAppliedStudents({
-//         studentIds: oneJobData?.applicants?.map((e) => e?._id),
-//         jobId: oneJobData?._id,
-//         filter: {
-//           startDate: hasValidDates ? dateRange[0].format("YYYY-MM-DD") : null,
-//           endDate: hasValidDates ? dateRange[1].format("YYYY-MM-DD") : null,
-//           yearOfPass: passYear,
-//           CGPA: cgpa && parseFloat(cgpa) > 0 ? cgpa : null,
-//         },
-//       })
-//     );
-//   };
-
-//   // Apply filters when any filter value changes
-//   useEffect(() => {
-//     if (oneJobData?.applicants?.length > 0) {
-//       applyFilter();
-//     }
-//   }, [dateRange, passYear, cgpa, oneJobData?.applicants]);
-
-//   const onChange = (date, dateString) => {
-//     setPassYear(dateString);
-//   };
-
-//   return (
-//     <div className={applicantStyles.container}>
-//       <div className={applicantStyles.headContainer}>
-//         <div className={applicantStyles.title}>{oneJobData?.jobTitle}</div>
-//         <div className={applicantStyles.filterSec}>
-//           <Input
-//             style={{ width: "10rem" }}
-//             allowClear
-//             type="number"
-//             title="CGPA"
-//             placeholder="CGPA (0-10)"
-//             max="10"
-//             value={cgpa || ""}
-//             onChange={(e) => {
-//               let val = e.target.value;
-//               if (parseFloat(val) > 10) {
-//                 val = 10;
-//               }
-//               setCgpa(val);
-//             }}
-//           />
-//           <DatePicker onChange={onChange} picker="year" />
-//           <RangePicker
-//             format={dateFormat}
-//             onChange={(dates) => {
-//               setDateRange(dates);
-//               if (dates && dates[0] && dates[1]) {
-//                 dispatch(
-//                   getAllAppliedStudents({
-//                     studentIds: oneJobData?.applicants?.map((e) => e?._id),
-//                     jobId: oneJobData?._id,
-//                     filter: {
-//                       startDate: dates[0].format("YYYY-MM-DD"),
-//                       endDate: dates[1].format("YYYY-MM-DD"),
-//                       yearOfPass: passYear,
-//                       CGPA: cgpa && parseFloat(cgpa) > 0 ? cgpa : null,
-//                     },
-//                   })
-//                 );
-//               }
-//             }}
-//             value={dateRange}
-//           />
-//         </div>
-//       </div>
-
-//       <div className={applicantStyles.bodyStyles}>
-//         {appliedStudents?.map((student, index) => {
-//           const isNearEnd = appliedStudents.length === index + 3;
-
-//           return (
-//             <StudentCard
-//               student={student}
-//               key={student?._id}
-//               width={"100%"}
-//               type="results"
-//                jobId={ oneJobData?._id}
-//               assessmentId={ oneJobData?.AssessmentId}
-//             />
-//           );
-
-//         })}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Applicants;
-
 "use client";
 import StudentCard from "@/app/company/(protected)/skillsets/components/candidateCard";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import applicantStyles from "./styles/applicants.module.scss";
 import { DatePicker, Input, Button, Checkbox, Empty } from "antd";
-import dayjs from "dayjs";
 import {
   getAllAppliedStudents,
   addAssessmentToStudent,
@@ -223,11 +101,8 @@ const Applicants = () => {
 
         // Clear selection after successful invite
         setSelectedStudentIds([]);
-      } else {
-        console.error("Failed to add assessment to students");
       }
     } catch (error) {
-      console.error("Error in bulk invite:", error);
     }
   };
 

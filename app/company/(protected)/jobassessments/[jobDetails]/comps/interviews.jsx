@@ -3,8 +3,7 @@ import { getScheduledInterviewsForJob, updateStudentAndJobStatus } from "@/redux
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Dropdown } from "antd";
-// import { ChevronRight } from "lucide-react";
+import { Dropdown } from "antd";
 import styles from "./styles/int.module.scss";
 import JobStyles from "../../../myjobs/components/myJobsStyles.module.scss";
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";

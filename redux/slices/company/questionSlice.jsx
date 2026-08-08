@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { message } from "antd";
-import { v4 as uuid } from "uuid";
-import { gqlUrl, questionUrl } from "@/utils/universalUtils/urls";
+import { questionUrl } from "@/utils/universalUtils/urls";
 import { getLstorage } from "@/utils/universalUtils/windowMW";
 
 const QuestionSlice = createSlice({
@@ -68,7 +67,6 @@ export const deleteQuestion = createAsyncThunk("/deleteQuestion" , async (args) 
       return data
   } catch (error) {
     message.success("Failed to delete questions")
-    console.log(error)
   }
 })
 

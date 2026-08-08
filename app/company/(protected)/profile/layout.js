@@ -5,7 +5,6 @@ import styles from "./layout.module.scss";
 import { useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  FaUser,
   FaCheckCircle,
 } from "react-icons/fa";
 import { BsPlus, BsX, BsStar } from "react-icons/bs";
@@ -64,7 +63,6 @@ export default function ProfileLayout({ children }) {
           totalApplicants: uniqueApplicants.size,
         });
       } catch (err) {
-        console.error("Failed to fetch jobs stats:", err);
       }
     };
     fetchStats();

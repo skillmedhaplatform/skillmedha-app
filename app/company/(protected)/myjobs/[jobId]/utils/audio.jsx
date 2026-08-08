@@ -1,9 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Upload, Button, message, Tooltip } from "antd";
-import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
 import AudioStyles from "./audio.module.scss";
-import { useDispatch } from "react-redux";
 import { uploadFileToS3 } from "@/utils/universalUtils/uploadtos3";
 
 const AudioUpload = ({ audioUrl, setAudioUrl, restUrl }) => {
@@ -77,11 +76,9 @@ const AudioUpload = ({ audioUrl, setAudioUrl, restUrl }) => {
           }
         },
         onError: (error) => {
-          console.error("Audio upload failed:", error);
         },
       });
     } catch (error) {
-      console.error("Upload error:", error);
     }
   };
 

@@ -5,7 +5,7 @@ import { FiPlusCircle } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { UpdateJob } from "@/redux/slices/company/placementsSlice";
-import { getLstorage, getSstorage } from "@/utils/universalUtils/windowMW";
+import { getSstorage } from "@/utils/universalUtils/windowMW";
 import { message } from "antd";
 
 export default function ProfileDetailsPage() {

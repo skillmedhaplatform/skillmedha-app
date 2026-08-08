@@ -18,8 +18,6 @@ import {
   HiOutlineSquares2X2,
   HiOutlineBriefcase,
   HiOutlineClipboardDocumentCheck,
-  HiOutlineUser,
-  HiOutlineQuestionMarkCircle,
   HiOutlineVideoCamera
 } from "react-icons/hi2";
 

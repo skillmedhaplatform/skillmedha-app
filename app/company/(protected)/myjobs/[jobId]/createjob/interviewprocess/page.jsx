@@ -115,12 +115,8 @@ export default function InterviewPage() {
 
     try {
       await dispatch(UpdateJob({ dispatch, payload, jobid })).unwrap();
-      console.log("Job updated successfully!");
-      // await dispatch(createJobAssessment({ jobId: jobid }));
-
       router.push(baseUrl);
     } catch (error) {
-      console.error("Failed to update job:", error);
     }
   };
 

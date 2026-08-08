@@ -44,7 +44,6 @@ const labelOptions = [
   { name: QUESTION_TYPES.SINGLE_CHOICE, icon: imgUrls.SingleChoiceIcon },
   { name: QUESTION_TYPES.MULTIPLE_CHOICE, icon: imgUrls.MultipleChoiceIcon },
   { name: QUESTION_TYPES.TRUE_FALSE, icon: imgUrls.SingleChoiceIcon },
-  // { name: QUESTION_TYPES.FILL_IN_THE_BLANKS, icon: imgUrls.SingleChoiceIcon },
   { name: QUESTION_TYPES.AUDIO, icon: imgUrls.AudioIcon },
   { name: QUESTION_TYPES.VIDEO, icon: imgUrls.VideoIcon },
 ];
@@ -396,7 +395,6 @@ const QuestionEditor = () => {
         router.replace(`/company/myjobs/${params?.jobId}/createjob/questionManager`);
       }
     } catch (e) {
-      console.error("Error:", e);
       alert("Error saving question");
     }
   };
