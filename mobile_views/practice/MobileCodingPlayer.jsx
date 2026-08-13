@@ -1,4 +1,4 @@
-"use client";
+`"use client";
 import React, { useState } from "react";
 import { Segmented, Tag, Spin, Button } from "antd";
 import { LoadingOutlined, BookOutlined, CodeOutlined, PlayCircleOutlined } from "@ant-design/icons";
