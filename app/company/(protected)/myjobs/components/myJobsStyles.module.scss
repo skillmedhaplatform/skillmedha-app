@@ -161,8 +161,11 @@
   display: flex;
   align-items: center;
   gap: 1.75rem;
-  flex: 1;
   justify-content: flex-end;
+
+  @media (max-width: 1100px) {
+    gap: 1rem;
+  }
 }
 
 .metaItem {
@@ -171,6 +174,10 @@
   align-items: center;
   gap: 0.2rem;
   min-width: 85px;
+
+  @media (max-width: 1100px) {
+    min-width: auto;
+  }
 }
 
 .metaLabel {
@@ -186,10 +193,10 @@
   font-size: 0.82rem;
   font-weight: 600;
   color: #2d3748;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cardActions {

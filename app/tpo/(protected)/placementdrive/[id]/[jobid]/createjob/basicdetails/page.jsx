@@ -584,7 +584,6 @@ export default function BasicDetailsPage() {
             }
             optionType="button"
             buttonStyle="solid"
-            style={{ width: "60%" }}
           />
         </div>
       </div>

@@ -7,12 +7,19 @@ import { debounce } from "lodash";
 import Link from "next/link";
 import BreadcrumbComponent from "@/modules/admin/components/breadcrumbs/breadcrumbs";
 import { getStudentsInDepartment } from "@/redux/slices/admin/adminOrgSlice";
-import { Table, Input, Button, Space, Tag, Spin, Divider, Tooltip, Pagination } from "antd";
+import { Table, Input, Button, Space, Tag, Spin, Divider, Tooltip, Pagination, Drawer } from "antd";
 import {
   SearchOutlined,
   ReloadOutlined,
   ThunderboltOutlined,
   RobotOutlined,
+  RightOutlined,
+  InfoCircleOutlined,
+  UserOutlined,
+  MailOutlined,
+  IdcardOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import styles from "./students.module.scss";
 
@@ -56,6 +63,10 @@ const Students = () => {
 
   // URL sync flag to prevent infinite loops
   const [isUrlSyncing, setIsUrlSyncing] = useState(false);
+
+  // Mobile/Tablet detail bottom sheet drawer state
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Select students data object from Redux
   const {
@@ -402,13 +413,13 @@ const Students = () => {
             <div className={styles.titleSection}>
               <BreadcrumbComponent customItems={breadcrumbItems} />
             </div>
-            <Space className={styles.controls}>
+            <div className={styles.controls}>
               <Input
                 placeholder="Search by name or email... (3+ chars)"
                 value={globalSearch}
                 onChange={(e) => handleGlobalSearch(e.target.value)}
-                prefix={<SearchOutlined />}
-                style={{ width: 280, borderRadius: "8px" }}
+                prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
+                className={styles.searchInput}
                 allowClear
                 onClear={handleClearSearch}
               />
@@ -417,10 +428,11 @@ const Students = () => {
                 onClick={handleRefresh}
                 loading={loading}
                 type="default"
+                className={styles.refreshBtn}
               >
                 Refresh
               </Button>
-            </Space>
+            </div>
           </div>
         </div>
       </div>
@@ -478,19 +490,39 @@ const Students = () => {
               const yearOfPassing = student.yearOfPassing || "N/A";
               const createdAt = student.createdAt ? new Date(student.createdAt).toLocaleDateString("en-IN") : "N/A";
 
+              const studentPayload = {
+                sNo,
+                fullName,
+                email,
+                enrollmentId,
+                totalTokens,
+                totalRequests,
+                yearOfPassing,
+                createdAt,
+                student
+              };
+
               return (
-                <div key={student._id || index} className={styles.questionRow}>
+                <div
+                  key={student._id || index}
+                  className={styles.questionRow}
+                  onClick={() => {
+                    setSelectedStudent(studentPayload);
+                    setIsDrawerOpen(true);
+                  }}
+                >
                   <div className={styles.rowLeft}>
                     <span className={styles.qNumber}>#{sNo}</span>
                     <div className={styles.studentInfo}>
                       <span className={styles.studentName}>{fullName}</span>
                       <span className={styles.studentSubInfo}>
-                        ID: {enrollmentId} | <a href={`mailto:${email}`}>{email}</a>
+                        ID: {enrollmentId} <span className={styles.desktopEmail}>| <a href={`mailto:${email}`} onClick={(e) => e.stopPropagation()}>{email}</a></span>
                       </span>
                     </div>
                   </div>
                   <div className={styles.rowRight}>
-                    <div className={styles.badges}>
+                    {/* Desktop full badges */}
+                    <div className={styles.desktopBadges}>
                       <Tooltip title="AI Tokens Used">
                         <span className={`${styles.badge} ${styles.tokensBadge}`}>
                           ⚡ {totalTokens.toLocaleString()}
@@ -508,11 +540,127 @@ const Students = () => {
                         Created: {createdAt}
                       </span>
                     </div>
+
+                    {/* Mobile & Tablet Compact summary and detail trigger */}
+                    <div className={styles.mobileSummary}>
+                      <span className={`${styles.badge} ${styles.yearBadge}`}>
+                        Passing: {yearOfPassing}
+                      </span>
+                      <span className={styles.viewMoreBtn}>
+                        <RightOutlined />
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
+
+          {/* Bottom Sheet Popup for Mobile/Tablet full info */}
+          <Drawer
+            title={null}
+            placement="bottom"
+            onClose={() => setIsDrawerOpen(false)}
+            open={isDrawerOpen}
+            height="auto"
+            className={styles.studentDrawer}
+            styles={{
+              body: {
+                padding: "1.25rem 1.25rem 2rem 1.25rem",
+                maxHeight: "80vh",
+                overflowY: "auto",
+                borderTopLeftRadius: "16px",
+                borderTopRightRadius: "16px",
+              },
+              content: {
+                borderTopLeftRadius: "16px",
+                borderTopRightRadius: "16px",
+              }
+            }}
+          >
+            {selectedStudent && (
+              <div className={styles.drawerDetails}>
+                {/* Pull handle indicator */}
+                <div className={styles.sheetHandle} />
+
+                {/* Header with Avatar & Name */}
+                <div className={styles.drawerHeader}>
+                  <div className={styles.avatar}>
+                    {selectedStudent.fullName.charAt(0).toUpperCase()}
+                  </div>
+                  <div className={styles.headerText}>
+                    <h3>{selectedStudent.fullName}</h3>
+                    <p>Roll / Enrollment ID: <strong>{selectedStudent.enrollmentId}</strong></p>
+                  </div>
+                </div>
+
+                <Divider style={{ margin: "14px 0" }} />
+
+                {/* Personal & Academic Details */}
+                <div className={styles.drawerSection}>
+                  <h4 className={styles.sectionHeading}>
+                    <UserOutlined /> Student Details
+                  </h4>
+                  <div className={styles.detailsGrid}>
+                    <div className={styles.detailItem}>
+                      <span className={styles.label}><MailOutlined /> Email</span>
+                      <span className={styles.value}>
+                        <a href={`mailto:${selectedStudent.email}`}>{selectedStudent.email}</a>
+                      </span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.label}><CalendarOutlined /> Passing Year</span>
+                      <span className={styles.value}>
+                        <Tag color="blue">{selectedStudent.yearOfPassing}</Tag>
+                      </span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.label}><ClockCircleOutlined /> Enrolled Date</span>
+                      <span className={styles.value}>{selectedStudent.createdAt}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Divider style={{ margin: "14px 0" }} />
+
+                {/* AI Usage Analytics */}
+                <div className={styles.drawerSection}>
+                  <h4 className={styles.sectionHeading}>
+                    <ThunderboltOutlined /> AI Usage & Activity
+                  </h4>
+                  <div className={styles.aiCardsGrid}>
+                    <div className={styles.aiStatCard}>
+                      <div className={styles.statIcon} style={{ background: "rgba(126, 34, 206, 0.1)", color: "#7e22ce" }}>
+                        <ThunderboltOutlined />
+                      </div>
+                      <div className={styles.statInfo}>
+                        <span className={styles.statVal}>{selectedStudent.totalTokens.toLocaleString()}</span>
+                        <span className={styles.statLbl}>Tokens Used</span>
+                      </div>
+                    </div>
+                    <div className={styles.aiStatCard}>
+                      <div className={styles.statIcon} style={{ background: "rgba(0, 131, 143, 0.1)", color: "#00838f" }}>
+                        <RobotOutlined />
+                      </div>
+                      <div className={styles.statInfo}>
+                        <span className={styles.statVal}>{selectedStudent.totalRequests.toLocaleString()}</span>
+                        <span className={styles.statLbl}>AI Requests</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  block
+                  type="primary"
+                  onClick={() => setIsDrawerOpen(false)}
+                  style={{ marginTop: "1.25rem", borderRadius: "8px", height: "40px", fontWeight: 600 }}
+                >
+                  Close
+                </Button>
+              </div>
+            )}
+          </Drawer>
         </>
       )}
       </div>

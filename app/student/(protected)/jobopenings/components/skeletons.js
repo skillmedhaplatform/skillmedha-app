@@ -56,7 +56,7 @@ export function JobDetailsSkeleton() {
           {JOB_DETAIL_TABS.map(({ key, label }, i) => (
             <div
               key={key}
-              className={`w-1/3 text-center rounded-[0.1rem] border border-solid border-[rgba(128,128,128,0.5)] py-2 font-extrabold cursor-pointer ${i === 0 ? "bg-[#24A058] text-white" : "bg-[#24A058]/20"}`}
+              className={`w-1/3 text-center rounded-[0.1rem] border border-solid border-[rgba(128,128,128,0.5)] py-2 font-extrabold cursor-pointer ${i === 0 ? "bg-[#1E69DA] text-white" : "bg-[#1E69DA]/20"}`}
               style={{ opacity: 0.35 }}
             >
               {label}
