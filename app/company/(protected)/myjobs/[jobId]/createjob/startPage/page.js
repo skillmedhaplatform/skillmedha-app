@@ -5,7 +5,14 @@ import formStyles from "./styles/formPage.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { Button, message } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { 
+  DeleteOutlined, 
+  UserOutlined, 
+  MailOutlined, 
+  PhoneOutlined, 
+  FileTextOutlined,
+  PlusOutlined
+} from "@ant-design/icons";
 import {
   getOneJobAssessment,
   updateJobAssessment,
@@ -58,13 +65,6 @@ const Page = () => {
     }
   }, [singleJobAssessment]);
 
-  const handleDefaultInputChange = (index, event) => {
-    const newDefaultItems = defaultItems.map((item, i) =>
-      i === index ? { ...item, label: event.target.value } : item
-    );
-    setDefaultItems(newDefaultItems);
-  };
-
   const handleAdditionalInputChange = (index, event) => {
     const newAdditionalItems = additionalItems.map((item, i) =>
       i === index ? { ...item, label: event.target.value } : item
@@ -72,8 +72,20 @@ const Page = () => {
     setAdditionalItems(newAdditionalItems);
   };
 
-  const handleDeleteItem = (index) => {
-    setAdditionalItems(additionalItems.filter((_, i) => i !== index));
+  const handleAddMoreClick = (e) => {
+    e.preventDefault();
+    setAdditionalItems([
+      ...additionalItems,
+      { label: "New Field", value: "", requires: false },
+    ]);
+  };
+
+  const handleDeleteItem = (index, type) => {
+    if (type === "default") {
+      setDefaultItems(defaultItems.filter((_, i) => i !== index));
+    } else {
+      setAdditionalItems(additionalItems.filter((_, i) => i !== index));
+    }
   };
 
   const handleMandatoryToggle = (index) => {
@@ -84,20 +96,42 @@ const Page = () => {
     );
   };
 
+  const getDefaultIcon = (label) => {
+    const norm = label.toLowerCase();
+    if (norm.includes("name")) return <UserOutlined />;
+    if (norm.includes("email")) return <MailOutlined />;
+    if (norm.includes("phone") || norm.includes("tel") || norm.includes("number")) return <PhoneOutlined />;
+    return <UserOutlined />;
+  };
+
+  const getDefaultMeta = (label) => {
+    const norm = label.toLowerCase();
+    if (norm.includes("name")) return "Text field · Required";
+    if (norm.includes("email")) return "Email field · Required";
+    if (norm.includes("phone") || norm.includes("tel") || norm.includes("number")) return "Tel field · Required";
+    return "Text field · Required";
+  };
+
   const renderDefaultItems = () => {
     return defaultItems.map((item, index) => (
-      <div key={index} className={formStyles.itemContainer}>
-        <input
-          type="text"
-          value={item.label}
-          onChange={(e) => handleDefaultInputChange(index, e)}
-          placeholder={item.label}
-          readOnly
-          className={formStyles.defaultinputs}
-        />
-        <div className={formStyles.manCon} style={{ display: "none" }}>
-          <input type="checkbox" checked={true} readOnly />
-          <label>Mandatory</label>
+      <div key={`default-${index}`} className={formStyles.itemContainer}>
+        <div className={formStyles.itemLeft}>
+          <div className={formStyles.iconWrapper}>
+            {getDefaultIcon(item.label)}
+          </div>
+          <div className={formStyles.infoWrapper}>
+            <p className={formStyles.fieldLabel}>{item.label}</p>
+            <span className={formStyles.fieldMeta}>{getDefaultMeta(item.label)}</span>
+          </div>
+        </div>
+        <div className={formStyles.itemRight}>
+          <button 
+            type="button" 
+            className={formStyles.trashBtn} 
+            onClick={() => handleDeleteItem(index, "default")}
+          >
+            <DeleteOutlined />
+          </button>
         </div>
       </div>
     ));
@@ -105,32 +139,38 @@ const Page = () => {
 
   const renderAdditionalItems = () =>
     additionalItems.map((item, index) => (
-      <div key={index} className={formStyles.itemContainer}>
-        <input
-          type="text"
-          value={
-            item.label ||
-            singleJobAssessment?.startPage?.formRequirements[index + 3]?.label
-          }
-          onChange={(e) => handleAdditionalInputChange(index, e)}
-          placeholder={item.label}
-          className={formStyles.Addinputs}
-        />
-        <div className={formStyles.manCon}>
-          <input
-            type="checkbox"
-            checked={
-              item.requires ||
-              singleJobAssessment?.startPage?.formRequirements[index + 3]
-                ?.requires
-            }
-            onChange={() => handleMandatoryToggle(index)}
-          />
-          <label htmlFor={`checkbox-${index}`}>Mandatory</label>
-          <DeleteOutlined
-            style={{ fontSize: "1.1rem", color: "#ff4d4f", cursor: "pointer" }}
-            onClick={() => handleDeleteItem(index)}
-          />
+      <div key={`additional-${index}`} className={formStyles.itemContainer}>
+        <div className={formStyles.itemLeft}>
+          <div className={formStyles.iconWrapper}>
+            <FileTextOutlined />
+          </div>
+          <div className={formStyles.infoWrapper}>
+            <input
+              type="text"
+              value={item.label}
+              onChange={(e) => handleAdditionalInputChange(index, e)}
+              placeholder="Field Label"
+              className={formStyles.fieldLabelInput}
+            />
+          </div>
+        </div>
+        <div className={formStyles.itemRight}>
+          <div className={formStyles.mandatoryCheckbox}>
+            <input
+              id={`checkbox-${index}`}
+              type="checkbox"
+              checked={item.requires}
+              onChange={() => handleMandatoryToggle(index)}
+            />
+            <label htmlFor={`checkbox-${index}`}>Required</label>
+          </div>
+          <button 
+            type="button" 
+            className={formStyles.trashBtn} 
+            onClick={() => handleDeleteItem(index, "additional")}
+          >
+            <DeleteOutlined />
+          </button>
         </div>
       </div>
     ));
@@ -159,7 +199,7 @@ const Page = () => {
 
   return (
     <div className={startStyles.container}>
-      <div className={startStyles.respTitle} style={{ color: "#25a3a6" }}>
+      <div className={startStyles.respTitle} style={{ color: "#1677ff" }}>
         Instructions to Respondents
       </div>
       <div>
@@ -180,8 +220,11 @@ const Page = () => {
       </div>
 
       <div className={startStyles.formComp}>
-        <div className={startStyles.respTitle} style={{ color: "#25a3a6" }}>
-          Test Start Form
+        <div className={startStyles.respTitle} style={{ color: "#1677ff", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+          <span>Test Start Form</span>
+          <button className={startStyles.headerAddBtn} onClick={handleAddMoreClick} style={{ fontSize: "0.9rem", padding: "0.4rem 1rem", background: "#e6f4ff", color: "#1677ff", border: "1px solid #91caff", borderRadius: "6px", cursor: "pointer", display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <PlusOutlined /> Add More
+          </button>
         </div>
         <p>
           Configure test start form and collect data to identify respondents.
@@ -194,7 +237,7 @@ const Page = () => {
       </div>
 
       <div className={startStyles.ConsetComp}>
-        <span className={startStyles.respTitle} style={{ color: "#25a3a6" }}>
+        <span className={startStyles.respTitle} style={{ color: "#1677ff" }}>
           Consent Form
         </span>
         <div className={startStyles.editorComp}>
