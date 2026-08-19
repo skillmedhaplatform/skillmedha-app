@@ -121,169 +121,153 @@ export default function InterviewPage() {
   };
 
   return (
-    <div className={styles.main}>
+    <div className={styles.timelineContainer}>
       {rounds.map((round, index) => (
-        <div className={styles.mainCont} key={round.id}>
-          <div className={styles.roundCont}>
-            <h3>Round {index + 1}</h3>
-            <div style={{ display: "flex", width: "100%" }}>
-              <div className={styles.fieldCont1}>
-                <label>Round Type</label>
-                <Select
-                  placeholder="Select Round Type"
-                  style={{ width: "50%" }}
-                  value={round.type || null}
-                  suffixIcon={<FaChevronDown />}
-                  onChange={(value) =>
-                    handleRoundChange(round.id, "type", value)
-                  }
-                  disabled={!round.isEditable}
-                  options={[
-                    { label: "Interview", value: "Interview" },
-                    { label: "Assessment", value: "Assessment" },
-                  ]}
-                />
+        <div className={styles.timelineItem} key={round.id}>
+          <div className={styles.timelineConnector}>
+            <div className={styles.timelineDot} />
+            {index < rounds.length - 1 && <div className={styles.timelineLine} />}
+          </div>
+          <div className={styles.mainCont}>
+            <div className={styles.roundCont}>
+              <h3>Round {index + 1}</h3>
+              <div className={styles.rowFlex}>
+                <div className={styles.fieldCont1}>
+                  <label>Round Type</label>
+                  <Select
+                    placeholder="Select Round Type"
+                    value={round.type || null}
+                    suffixIcon={<FaChevronDown />}
+                    onChange={(value) =>
+                      handleRoundChange(round.id, "type", value)
+                    }
+                    disabled={!round.isEditable}
+                    options={[
+                      { label: "Interview", value: "Interview" },
+                      { label: "Assessment", value: "Assessment" },
+                    ]}
+                  />
+                </div>
+                <div className={styles.fieldCont1}>
+                  <label>Mode</label>
+                  <Radio.Group
+                    value={round.mode}
+                    onChange={(e) =>
+                      handleRoundChange(round.id, "mode", e.target.value)
+                    }
+                    disabled={!round.isEditable}
+                    options={[
+                      { label: "Offline", value: "Offline" },
+                      { label: "Online", value: "Online" },
+                    ]}
+                    optionType="button"
+                    buttonStyle="solid"
+                  />
+                </div>
               </div>
-              <div className={styles.fieldCont1}>
-                <label>Mode</label>
-                <Radio.Group
-                  style={{ width: "70%" }}
-                  value={round.mode}
-                  onChange={(e) =>
-                    handleRoundChange(round.id, "mode", e.target.value)
-                  }
-                  disabled={!round.isEditable}
-                  options={[
-                    { label: "Offline", value: "Offline" },
-                    { label: "Online", value: "Online" },
-                  ]}
-                  optionType="button"
-                  buttonStyle="solid"
-                />
-              </div>
-            </div>
-            {/* {round.type === "Assessment" && round.mode === "Online" && (
+
               <div className={styles.fieldCont}>
-                <label>Assessment URL</label>
+                <label>Round Name</label>
                 <input
-                  type="url"
-                  placeholder="Enter online assessment link"
-                  value={round.link || ""}
+                  type="text"
+                  placeholder="Application"
+                  value={round.roundName}
                   onChange={(e) =>
-                    handleRoundChange(round.id, "link", e.target.value)
+                    handleRoundChange(round.id, "roundName", e.target.value)
                   }
                   disabled={!round.isEditable}
                 />
               </div>
-            )} */}
-            <div className={styles.fieldCont}>
-              <label>Round Name</label>
-              <input
-                type="text"
-                placeholder="Application"
-                value={round.roundName}
-                onChange={(e) =>
-                  handleRoundChange(round.id, "roundName", e.target.value)
-                }
-                disabled={!round.isEditable}
-              />
-            </div>
 
-            <div className={styles.fieldCont}>
-              <label>Venue</label>
-              <input
-                type="text"
-                placeholder="Auditorium"
-                value={round.venue}
-                onChange={(e) =>
-                  handleRoundChange(round.id, "venue", e.target.value)
-                }
-                disabled={!round.isEditable}
-              />
-            </div>
-
-            <div className={styles.fieldCont}>
-              <label>Schedule</label>
-              <div className={styles.scheduleInput}>
-                <RangePicker
-                  disabledDate={(current) =>
-                    current && current < dayjs().startOf("day")
+              <div className={styles.fieldCont}>
+                <label>Venue</label>
+                <input
+                  type="text"
+                  placeholder="Auditorium"
+                  value={round.venue}
+                  onChange={(e) =>
+                    handleRoundChange(round.id, "venue", e.target.value)
                   }
-                  placeholder={["Start", "End"]}
-                  variant="borderless"
-                  showTime={{
-                    format: "HH:mm",
-                    use12Hours: false,
-                    hideDisabledOptions: true,
-                    defaultValue: [
-                      dayjs("09:00", "HH:mm"),
-                      dayjs("18:00", "HH:mm"),
-                    ],
-                  }}
-                  minDate={dayjs()}
-                  format="YYYY-MM-DD HH:mm"
-                  style={{ width: "100%", padding: "0.2rem 0" }}
-                  value={
-                    round.schedule?.startDate && round.schedule?.endDate
-                      ? [
-                          dayjs(round.schedule.startDate),
-                          dayjs(round.schedule.endDate),
-                        ]
-                      : []
-                  }
-                  onChange={(dates) => {
-                    const [start, end] = dates || [];
-                    handleRoundChange(round.id, "schedule", {
-                      startDate: start ? start.toISOString() : null,
-                      endDate: end ? end.toISOString() : null,
-                    });
-                  }}
                   disabled={!round.isEditable}
                 />
               </div>
-            </div>
 
-            <div className={styles.fieldCont}>
-              <label>Description</label>
-              <textarea
-                placeholder="Description"
-                className={styles.textarea}
-                value={round.description}
-                onChange={(e) =>
-                  handleRoundChange(round.id, "description", e.target.value)
-                }
-                disabled={!round.isEditable}
-              />
-            </div>
+              <div className={styles.fieldCont}>
+                <label>Schedule</label>
+                <div className={styles.scheduleInput}>
+                  <RangePicker
+                    disabledDate={(current) =>
+                      current && current < dayjs().startOf("day")
+                    }
+                    placeholder={["Start", "End"]}
+                    variant="borderless"
+                    showTime={{
+                      format: "HH:mm",
+                      use12Hours: false,
+                      hideDisabledOptions: true,
+                      defaultValue: [
+                        dayjs("09:00", "HH:mm"),
+                        dayjs("18:00", "HH:mm"),
+                      ],
+                    }}
+                    minDate={dayjs()}
+                    format="YYYY-MM-DD HH:mm"
+                    style={{ width: "100%", padding: "0.2rem 0" }}
+                    value={
+                      round.schedule?.startDate && round.schedule?.endDate
+                        ? [
+                            dayjs(round.schedule.startDate),
+                            dayjs(round.schedule.endDate),
+                          ]
+                        : []
+                    }
+                    onChange={(dates) => {
+                      const [start, end] = dates || [];
+                      handleRoundChange(round.id, "schedule", {
+                        startDate: start ? start.toISOString() : null,
+                        endDate: end ? end.toISOString() : null,
+                      });
+                    }}
+                    disabled={!round.isEditable}
+                  />
+                </div>
+              </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                gap: "5%",
-              }}
-            >
-              <button
-                className={styles.saveBtn}
-                onClick={() => toggleEdit(round.id)}
-              >
-                {round.isEditable ? "Save" : "Edit"}
-              </button>
-              <button
-                className={styles.saveBtn}
-                onClick={() => deleteRound(round.id)}
-                disabled={rounds.length === 1}
-              >
-                Delete
-              </button>
+              <div className={styles.fieldCont}>
+                <label>Description</label>
+                <textarea
+                  placeholder="Description"
+                  className={styles.textarea}
+                  value={round.description}
+                  onChange={(e) =>
+                    handleRoundChange(round.id, "description", e.target.value)
+                  }
+                  disabled={!round.isEditable}
+                />
+              </div>
+
+              <div className={styles.roundActions}>
+                <button
+                  className={styles.saveBtn}
+                  onClick={() => toggleEdit(round.id)}
+                >
+                  {round.isEditable ? "Save" : "Edit"}
+                </button>
+                <button
+                  className={styles.deleteBtn}
+                  onClick={() => deleteRound(round.id)}
+                  disabled={rounds.length === 1}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
       ))}
 
-      <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
-        <button className={styles.saveBtn} onClick={addNewRound}>
+      <div className={styles.actionButtonsCont}>
+        <button className={styles.addRoundBtn} onClick={addNewRound}>
           + Add New Round
         </button>
         <button className={styles.saveBtn} onClick={handleSubmitAll}>

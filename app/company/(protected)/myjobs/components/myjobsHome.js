@@ -132,43 +132,67 @@ export default function MyjobsHome() {
       />
       <div style={{ padding: "2rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
         
-        {/* Title and Create Job Button Row */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#1e293b", margin: 0 }}>My Jobs</h2>
-            <p style={{ fontSize: "0.875rem", color: "#64748b", margin: 0 }}>Manage your job postings and track applicants</p>
+        {/* Controls Row (Search & Create Job Button) */}
+        <div className={JobStyles.headerRowFlex}>
+          <div className={JobStyles.actionsGroup}>
+            <Input
+              placeholder="Search job with title..."
+              prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={JobStyles.searchBoxTop}
+            />
+            <Button
+              type="primary"
+              icon={<BsPlus size={18} />}
+              className={JobStyles.createJobBtn}
+              onClick={() => {
+                navigation.push(`/company/myjobs/${params?.jobId || "Newjob"}/createjob/basicdetails`);
+              }}
+            >
+              Create Job
+            </Button>
           </div>
-          <Button
-            type="primary"
-            icon={<BsPlus size={18} />}
-            style={{
-              height: "auto",
-              padding: "0.6rem 1.5rem",
-              borderRadius: "8px",
-              fontWeight: "600",
-              backgroundColor: "#6BA8ED",
-              borderColor: "#6BA8ED",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.25rem"
-            }}
-            onClick={() => {
-              navigation.push(`/company/myjobs/${params?.jobId || "Newjob"}/createjob/basicdetails`);
-            }}
-          >
-            Create Job
-          </Button>
         </div>
 
         {/* Stats Grid */}
         <div className={JobStyles.statsGrid}>
-          <div className={JobStyles.statCard}>
+          <div 
+            className={`${JobStyles.statCard} ${JobStyles.interactiveCard} ${currTab.fetchType === "active" ? JobStyles.activeCard : ""}`}
+            onClick={() => onTabSwitch(JobOpts[0])}
+          >
             <div className={JobStyles.statIcon} style={{ backgroundColor: "rgba(107, 168, 237, 0.1)", color: "#6BA8ED" }}>
               <HiOutlineBriefcase size={22} />
             </div>
             <div className={JobStyles.statTextCont}>
               <span className={JobStyles.statValue}>{stats.activeJobs}</span>
               <span className={JobStyles.statLabel}>Active Jobs</span>
+            </div>
+          </div>
+
+          <div 
+            className={`${JobStyles.statCard} ${JobStyles.interactiveCard} ${currTab.fetchType === "expired" ? JobStyles.activeCard : ""}`}
+            onClick={() => onTabSwitch(JobOpts[1])}
+          >
+            <div className={JobStyles.statIcon} style={{ backgroundColor: "rgba(249, 115, 22, 0.1)", color: "#f97316" }}>
+              <HiOutlineCalendar size={22} />
+            </div>
+            <div className={JobStyles.statTextCont}>
+              <span className={JobStyles.statValue}>{stats.expiredJobs}</span>
+              <span className={JobStyles.statLabel}>Expired Jobs</span>
+            </div>
+          </div>
+
+          <div 
+            className={`${JobStyles.statCard} ${JobStyles.interactiveCard} ${currTab.fetchType === "pending" ? JobStyles.activeCard : ""}`}
+            onClick={() => onTabSwitch(JobOpts[2])}
+          >
+            <div className={JobStyles.statIcon} style={{ backgroundColor: "rgba(236, 72, 153, 0.1)", color: "#ec4899" }}>
+              <HiOutlineQuestionMarkCircle size={22} />
+            </div>
+            <div className={JobStyles.statTextCont}>
+              <span className={JobStyles.statValue}>{stats.savedDrafts}</span>
+              <span className={JobStyles.statLabel}>Saved Drafts</span>
             </div>
           </div>
 
@@ -181,87 +205,6 @@ export default function MyjobsHome() {
               <span className={JobStyles.statLabel}>Total Applicants</span>
             </div>
           </div>
-
-          <div className={JobStyles.statCard}>
-            <div className={JobStyles.statIcon} style={{ backgroundColor: "rgba(249, 115, 22, 0.1)", color: "#f97316" }}>
-              <HiOutlineCalendar size={22} />
-            </div>
-            <div className={JobStyles.statTextCont}>
-              <span className={JobStyles.statValue}>{stats.expiredJobs}</span>
-              <span className={JobStyles.statLabel}>Expired Jobs</span>
-            </div>
-          </div>
-
-          <div className={JobStyles.statCard}>
-            <div className={JobStyles.statIcon} style={{ backgroundColor: "rgba(236, 72, 153, 0.1)", color: "#ec4899" }}>
-              <HiOutlineQuestionMarkCircle size={22} />
-            </div>
-            <div className={JobStyles.statTextCont}>
-              <span className={JobStyles.statValue}>{stats.savedDrafts}</span>
-              <span className={JobStyles.statLabel}>Saved Drafts</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Custom Pills + Search Row */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
-          <div style={{ display: "flex", gap: "0.75rem", backgroundColor: "#f1f5f9", padding: "0.3rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-            {JobOpts.map((opt) => {
-              const isActive = currTab.fetchType === opt.fetchType;
-              const count = opt.fetchType === "active" ? stats.activeJobs : opt.fetchType === "expired" ? stats.expiredJobs : stats.savedDrafts;
-              return (
-                <button
-                  key={opt.fetchType}
-                  onClick={() => onTabSwitch(opt)}
-                  style={{
-                    border: "none",
-                    outline: "none",
-                    padding: "0.5rem 1.25rem",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    fontSize: "0.85rem",
-                    transition: "all 0.2s",
-                    backgroundColor: isActive ? "#ffffff" : "transparent",
-                    color: isActive ? "#6BA8ED" : "#64748b",
-                    boxShadow: isActive ? "0 2px 4px rgba(0,0,0,0.06)" : "none",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.5rem"
-                  }}
-                >
-                  {opt.label}
-                  <span style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: isActive ? "#eef5fb" : "#cbd5e1",
-                    color: isActive ? "#6BA8ED" : "#64748b",
-                    borderRadius: "10px",
-                    padding: "0 6px",
-                    height: "18px",
-                    fontSize: "0.7rem",
-                    fontWeight: "bold"
-                  }}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <Input
-            placeholder="Search job with title..."
-            prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: "320px",
-              borderRadius: "8px",
-              padding: "0.4rem 1rem",
-              backgroundColor: "#ffffff",
-              border: "1px solid #cbd5e1"
-            }}
-          />
         </div>
 
         <div className={JobStyles.bodyCon} style={{ height: "auto", overflow: "visible", backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #e2e8f0", padding: "1rem" }}>

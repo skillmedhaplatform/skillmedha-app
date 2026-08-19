@@ -1,12 +1,21 @@
 @use "@/utils/universalUtils/colors.module.scss" as *;
 
+.pageContainer {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .container {
   width: 100%;
-  display: "flex";
-  flex-direction: "column";
-  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 2.5rem;
   gap: 1rem;
-  height: 90vh;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 
   &::-webkit-scrollbar {
@@ -64,6 +73,24 @@
   }
 }
 
+.actionBtn {
+  background: linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%) !important;
+  border-color: transparent !important;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+}
+
+.searchBar {
+  width: 400px;
+  
+  @media (max-width: 640px) {
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 .topSectionWrapper {
   background: white;
   padding: 1rem 2.5rem;
@@ -73,19 +100,54 @@
   justify-content: space-between;
   width: 100%;
   gap: 1rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+
+  @media (max-width: 1024px) {
+    flex-wrap: wrap;
+  }
 }
 
 .leftControls {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: nowrap;
+  
+  @media (max-width: 640px) {
+    width: 100%;
+    gap: 0.5rem;
+  }
 }
 
 .rightControls {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: nowrap;
+
+  @media (max-width: 1024px) {
+    flex-wrap: wrap;
+  }
+  
+  @media (max-width: 640px) {
+    flex-wrap: nowrap;
+    width: 100%;
+    gap: 0.25rem;
+    overflow-x: auto; /* Allow scrolling if they squish too much */
+    padding-bottom: 4px;
+    
+    /* Make buttons tiny to fit 3 in a row! */
+    .actionBtn {
+      font-size: 10px;
+      padding: 0.25rem 0.5rem;
+      white-space: nowrap;
+      flex: 1;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
 }
 
 /* ===== Toolbar & View Toggle ===== */
@@ -365,13 +427,13 @@
 
 .headerCont {
   width: 100%;
-  padding: 0.25rem 0;
+  padding: 1rem 2.5rem 0 2.5rem;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 0.5rem;
   background-color: transparent;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
 
   .crumb {
     font-size: 16px;
@@ -380,9 +442,14 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+    white-space: nowrap;
 
     &:hover {
       text-decoration: underline;
+    }
+    
+    @media (max-width: 640px) {
+      font-size: 13px;
     }
   }
 
@@ -390,6 +457,13 @@
     color: #0f172a;
     font-size: 16px;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    @media (max-width: 640px) {
+      font-size: 13px;
+    }
   }
 }
 

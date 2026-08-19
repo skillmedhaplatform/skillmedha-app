@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import allStudents from "./allstudents.module.scss";
 import Search from "antd/es/input/Search";
-import { Button, message, Select } from "antd";
+import { Button, message, Select, Dropdown } from "antd";
 
 const PAGE_SIZES = [10, 25, 50, 100];
 import { useRouter } from "@bprogress/next/app";
@@ -15,7 +15,7 @@ import {
   GetOneJob,
 } from "@/redux/slices/tpo/placementsSlice";
 import JobDetailsModal from "./jobDetailsModal";
-import { FaCaretRight } from "react-icons/fa";
+import { FaCaretRight, FaFilter } from "react-icons/fa";
 
 const PlacementDetails = () => {
   const { id, jobid } = useParams();
@@ -105,6 +105,12 @@ const PlacementDetails = () => {
       .map((name) => ({ value: name, label: name })),
   ];
 
+  const filterMenuItems = profileOptions.map((opt) => ({
+    key: opt.value,
+    label: opt.label,
+    onClick: () => setSelectedProfile(opt.value)
+  }));
+
   const filteredJobs =
     (ALLJOBS?.data || []).filter((job) => {
       const search = searchTerm.toLowerCase();
@@ -138,22 +144,44 @@ const PlacementDetails = () => {
 
       <div className={allStudents.topSectionWrapper}>
         <div className={allStudents.leftControls}>
-          <Select
-            value={selectedProfile}
-            style={{ width: 300, height: 38, textAlign: "center" }}
-            onChange={(value) => setSelectedProfile(value)}
-            options={profileOptions}
-          />
+          <div className={allStudents.desktopSelect}>
+            <Select
+              value={selectedProfile}
+              style={{ width: "100%", maxWidth: 300, minWidth: 120, height: 38, textAlign: "center" }}
+              onChange={(value) => setSelectedProfile(value)}
+              options={profileOptions}
+            />
+          </div>
+          <div className={allStudents.mobileFilter}>
+            <Dropdown menu={{ items: filterMenuItems }} placement="bottomLeft" trigger={['click']}>
+              <button className={allStudents.filterBtn}>
+                <FaFilter size={16} />
+              </button>
+            </Dropdown>
+          </div>
           <Search
             placeholder="Search by profile or company name"
-            style={{ width: 300, height: 38 }}
+            style={{ width: "100%", maxWidth: 300, minWidth: 120, height: 38 }}
             allowClear
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className={allStudents.rightControls}>
-          <Button type="primary" onClick={() => router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`)}>
-            + Add New Job
+          <Button
+            type="primary"
+            className={allStudents.addJobBtn}
+            onClick={() => {
+              if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+                message.warning(
+                  "This action cannot be performed on a tablet/mobile screen. Please try on a laptop or larger screen."
+                );
+                return;
+              }
+              router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`);
+            }}
+          >
+            <span className={allStudents.addJobText}>+ Add New Job</span>
+            <span className={allStudents.addJobIcon}>+</span>
           </Button>
         </div>
       </div>
@@ -200,7 +228,7 @@ const PlacementDetails = () => {
                   className={allStudents.companyCard}
                   onClick={() => handleClick(record)}
                 >
-                  <div className={allStudents.companyInfo} style={{ minWidth: '220px' }}>
+                  <div className={allStudents.companyInfo}>
                     <span className={allStudents.companyName} style={{ fontSize: '1rem' }}>
                       {record.jobTitle || "Unnamed Role"}
                     </span>
@@ -220,7 +248,7 @@ const PlacementDetails = () => {
                           : "0 Applicants"}
                       </span>
                     </div>
-                    <div className={allStudents.metaItem}>
+                    <div className={`${allStudents.metaItem} ${allStudents.hideOnTablet}`}>
                       <span className={allStudents.metaLabel}>Application Start</span>
                       <span className={allStudents.metaValue}>
                         {isNaN(dateStart) ? record.startDate : dateStart.toLocaleDateString()}

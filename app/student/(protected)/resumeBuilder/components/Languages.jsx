@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button, Input, Select, Tooltip } from "antd";
 import { DeleteOutlined, EditOutlined, HolderOutlined, InfoCircleOutlined, PlusOutlined } from "@ant-design/icons";
-// import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const Language = ({ languages, updateLanguage, setLanguages, onNext }) => {
   const [newLanguageName, setNewLanguageName] = useState("");

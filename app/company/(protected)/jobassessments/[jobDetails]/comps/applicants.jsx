@@ -3,7 +3,8 @@ import StudentCard from "@/app/company/(protected)/skillsets/components/candidat
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import applicantStyles from "./styles/applicants.module.scss";
-import { DatePicker, Input, Button, Checkbox, Empty } from "antd";
+import { DatePicker, Input, Button, Checkbox, Empty, Drawer, Modal, Tooltip, Avatar } from "antd";
+import dayjs from "dayjs";
 import {
   getAllAppliedStudents,
   addAssessmentToStudent,
@@ -24,6 +25,119 @@ const Applicants = () => {
   const [passYear, setPassYear] = useState(null);
   const [cgpa, setCgpa] = useState(0);
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+  
+  // Drawer and Modal States for Mobile view
+  const [selectedStudentForDrawer, setSelectedStudentForDrawer] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [activeResumeUrl, setActiveResumeUrl] = useState("");
+
+  // Helper calculation functions for Candidate Details
+  const getInitials = (name = "") => {
+    if (!name) return "U";
+    const parts = name.trim().split(" ");
+    if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return (name[0] || "U").toUpperCase();
+  };
+
+  const getFullName = (s) => {
+    if (!s) return "";
+    return `${s.firstName || ""} ${s.middleName ? s.middleName + " " : ""}${s.lastName || ""}`.trim() || s.userName || "Unnamed";
+  };
+
+  const getLocation = (s) => {
+    const addr = s?.addresses;
+    if (addr?.currentAddress?.cityName && addr?.currentAddress?.stateName) {
+      return `${addr.currentAddress.cityName}, ${addr.currentAddress.stateName}`;
+    }
+    if (addr?.permanentAddress?.cityName && addr?.permanentAddress?.stateName) {
+      return `${addr.permanentAddress.cityName}, ${addr.permanentAddress.stateName}`;
+    }
+    return addr?.currentAddress?.cityName || addr?.permanentAddress?.cityName || "Not specified";
+  };
+
+  const formatGrade = (edu) => {
+    if (!edu) return "Not specified";
+    const grade = edu.grade;
+    const gradingSystem = edu.gradingSystem;
+    if (gradingSystem === "percentage") {
+      return `${grade} %`;
+    } else if (gradingSystem === "cgpa" || gradingSystem === "gpa") {
+      return `${grade} CGPA`;
+    } else if (grade < 10) {
+      return `${grade} CGPA`;
+    } else {
+      return `${grade} %`;
+    }
+  };
+
+  const getLatestEducation = (eduDetails) => {
+    if (!eduDetails || eduDetails.length === 0) return null;
+    const valid = eduDetails.filter((edu) => edu.grade && edu.grade.trim() !== "");
+    if (valid.length === 0) return null;
+    return valid.sort((a, b) => (b.yearofPass || 0) - (a.yearofPass || 0))[0] || eduDetails[0];
+  };
+
+  const calculateExperience = (exps) => {
+    const valid = exps?.filter(
+      (exp) =>
+        exp?.company?.trim() &&
+        exp?.role?.trim() &&
+        exp?.start?.trim() &&
+        exp?.end?.trim()
+    ) || [];
+
+    if (valid.length === 0) return "Fresher";
+
+    let totalMonths = 0;
+    valid.forEach((exp) => {
+      try {
+        const parseDate = (dateStr) => {
+          if (!dateStr) return null;
+          const mmYyyyMatch = dateStr.match(/^(\d{2})\/(\d{4})$/);
+          if (mmYyyyMatch) {
+            return new Date(parseInt(mmYyyyMatch[2], 10), parseInt(mmYyyyMatch[1], 10) - 1, 1);
+          }
+          return new Date(dateStr);
+        };
+        const startDate = parseDate(exp.start);
+        const endDate = parseDate(exp.end);
+        if (startDate && endDate && !isNaN(startDate) && !isNaN(endDate)) {
+          const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth()) + 1;
+          totalMonths += Math.max(0, monthsDiff);
+        }
+      } catch (e) {}
+    });
+
+    const totalYears = totalMonths / 12;
+    if (totalMonths < 1) return "Fresher";
+    if (totalMonths < 6) return `${totalMonths} months`;
+    if (totalYears < 1) return "6+ months";
+    return `${Math.floor(totalYears)}+ Years`;
+  };
+
+  const handleInviteSingle = async (studentId) => {
+    try {
+      const addAssessmentResult = await dispatch(
+        addAssessmentToStudent({
+          studentIds: [studentId],
+          jobId: oneJobData?._id,
+          assessmentId: oneJobData?.AssessmentId,
+        })
+      );
+
+      if (addAssessmentResult) {
+        await dispatch(
+          getAllAppliedStudents({
+            studentIds: oneJobData?.applicants?.map((e) => e?._id),
+            jobId: oneJobData?._id,
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error in individual invite:", error);
+    }
+  };
 
   const applyFilter = () => {
     const hasValidDates = dateRange && dateRange[0] && dateRange[1];
@@ -148,6 +262,7 @@ const Applicants = () => {
           />
           <DatePicker onChange={onChange} picker="year" />
           <RangePicker
+            popupClassName={applicantStyles.mobileRangePicker}
             format={dateFormat}
             onChange={(dates) => {
               setDateRange(dates);
@@ -210,22 +325,81 @@ const Applicants = () => {
       )}
       <div className={applicantStyles.bodyStyles}>
         {appliedStudents?.length > 0 ? (
-          currentApplicants.map((student, index) => {
-            return (
-              <StudentCard
-                student={student}
-                key={student?._id}
-                width={"100%"}
-                type="results"
-                jobId={oneJobData?._id}
-                assessmentId={oneJobData?.AssessmentId}
-                isSelected={selectedStudentIds.includes(student._id)}
-                onSelect={(checked) =>
-                  handleStudentSelect(student._id, checked)
-                }
-              />
-            );
-          })
+          <>
+            {/* Desktop View */}
+            <div className={applicantStyles.desktopOnly}>
+              {currentApplicants.map((student, index) => {
+                return (
+                  <StudentCard
+                    student={student}
+                    key={student?._id}
+                    width={"100%"}
+                    type="results"
+                    jobId={oneJobData?._id}
+                    assessmentId={oneJobData?.AssessmentId}
+                    isSelected={selectedStudentIds.includes(student._id)}
+                    onSelect={(checked) =>
+                      handleStudentSelect(student._id, checked)
+                    }
+                  />
+                );
+              })}
+            </div>
+
+            {/* Mobile View: Small tiles */}
+            <div className={`${applicantStyles.mobileOnly} ${applicantStyles.mobileTileList}`}>
+              {currentApplicants.map((student) => {
+                const sName = getFullName(student);
+                const isSingleInvited = student?.appliedJobs?.find((e) => e?.id === oneJobData?._id)?.assessments;
+
+                return (
+                  <div
+                    key={student._id}
+                    className={applicantStyles.studentMobileTile}
+                    onClick={() => {
+                      setSelectedStudentForDrawer(student);
+                      setIsDrawerOpen(true);
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      className={applicantStyles.tileCheckbox}
+                      checked={selectedStudentIds.includes(student._id)}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleStudentSelect(student._id, e.target.checked)}
+                    />
+                    {student.profile ? (
+                      <img
+                        src={student.profile}
+                        alt="avatar"
+                        className={applicantStyles.tileAvatarImg}
+                      />
+                    ) : (
+                      <div className={applicantStyles.tileAvatar}>
+                        {getInitials(sName)}
+                      </div>
+                    )}
+                    <div className={applicantStyles.tileInfo}>
+                      <span className={applicantStyles.tileName}>{sName}</span>
+                      <span className={applicantStyles.tileEmail}>{student.email || "No Email"}</span>
+                    </div>
+
+                    <Button
+                      type="primary"
+                      className={applicantStyles.inviteButton}
+                      disabled={isSingleInvited}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleInviteSingle(student._id);
+                      }}
+                    >
+                      {isSingleInvited ? "Assigned" : "Invite"}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         ) : (
           <div style={{ padding: "50px", textAlign: "center" }}>
             <Empty
@@ -236,6 +410,177 @@ const Applicants = () => {
         )}
       </div>
 
+      {/* Bottom Drawer for Mobile View */}
+      <Drawer
+        title="Applicant Details"
+        placement="bottom"
+        closable={true}
+        onClose={() => setIsDrawerOpen(false)}
+        open={isDrawerOpen}
+        height="90vh"
+        bodyStyle={{ padding: "1.25rem" }}
+        headerStyle={{ borderBottom: "1px solid #f1f5f9" }}
+        style={{ borderTopLeftRadius: "16px", borderTopRightRadius: "16px", overflow: "hidden" }}
+      >
+        {selectedStudentForDrawer && (
+          <div className={applicantStyles.drawerContent}>
+            {/* Drawer Header */}
+            <div className={applicantStyles.drawerHeader}>
+              {selectedStudentForDrawer.profile ? (
+                <img
+                  src={selectedStudentForDrawer.profile}
+                  alt="Avatar"
+                  className={applicantStyles.drawerAvatarImg}
+                />
+              ) : (
+                <div className={applicantStyles.drawerAvatar}>
+                  {getInitials(getFullName(selectedStudentForDrawer))}
+                </div>
+              )}
+              <div className={applicantStyles.drawerMainInfo}>
+                <span className={applicantStyles.drawerName}>
+                  {getFullName(selectedStudentForDrawer)}
+                </span>
+                <span className={applicantStyles.drawerEmail}>
+                  {selectedStudentForDrawer.email || "No Email"}
+                </span>
+              </div>
+            </div>
+
+            {/* Candidate details */}
+            <div className={applicantStyles.drawerDetailGrid}>
+              <div className={applicantStyles.detailItem}>
+                <span className={applicantStyles.detailLabel}>ACADEMICS</span>
+                <span className={applicantStyles.detailValue}>
+                  {formatGrade(getLatestEducation(selectedStudentForDrawer.educationDetails))}
+                </span>
+                {getLatestEducation(selectedStudentForDrawer.educationDetails) && (
+                  <span className={applicantStyles.detailSubText}>
+                    {getLatestEducation(selectedStudentForDrawer.educationDetails).degreeName || 
+                     getLatestEducation(selectedStudentForDrawer.educationDetails).type} ({getLatestEducation(selectedStudentForDrawer.educationDetails).yearofPass})
+                  </span>
+                )}
+              </div>
+
+              <div className={applicantStyles.detailItem}>
+                <span className={applicantStyles.detailLabel}>EDUCATION</span>
+                <span className={applicantStyles.detailValue}>
+                  {selectedStudentForDrawer.college?.name || 
+                   getLatestEducation(selectedStudentForDrawer.educationDetails)?.school || 
+                   "Not specified"}
+                </span>
+              </div>
+
+              <div className={applicantStyles.detailItem}>
+                <span className={applicantStyles.detailLabel}>EXPERIENCE</span>
+                <span className={applicantStyles.detailValue}>
+                  {calculateExperience(selectedStudentForDrawer.experiences)}
+                </span>
+              </div>
+
+              <div className={applicantStyles.detailItem}>
+                <span className={applicantStyles.detailLabel}>LANGUAGES</span>
+                <span className={applicantStyles.detailValue}>
+                  {selectedStudentForDrawer.languages?.length ? 
+                   selectedStudentForDrawer.languages.join(", ") : "Not specified"}
+                </span>
+              </div>
+
+              <div className={applicantStyles.detailItem}>
+                <span className={applicantStyles.detailLabel}>TECHNICAL SKILLS</span>
+                <span className={applicantStyles.detailValue}>
+                  {selectedStudentForDrawer.technical?.length ? 
+                   selectedStudentForDrawer.technical.join(", ") : "Not specified"}
+                </span>
+              </div>
+
+              <div className={applicantStyles.detailItem}>
+                <span className={applicantStyles.detailLabel}>CONTACT NUMBER</span>
+                <span className={applicantStyles.detailValue}>
+                  {selectedStudentForDrawer.phone || "Not provided"}
+                </span>
+              </div>
+
+              <div className={applicantStyles.detailItem}>
+                <span className={applicantStyles.detailLabel}>LOCATION</span>
+                <span className={applicantStyles.detailValue}>
+                  {getLocation(selectedStudentForDrawer)}
+                </span>
+              </div>
+
+              <div className={applicantStyles.detailItem}>
+                <span className={applicantStyles.detailLabel}>GRADUATION YEAR</span>
+                <span className={applicantStyles.detailValue}>
+                  {selectedStudentForDrawer.yearOfPassing || "Not specified"}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Row */}
+            <div className={applicantStyles.actionRow}>
+              <Button
+                type="default"
+                disabled={!selectedStudentForDrawer.resumeDoc || selectedStudentForDrawer.resumeDoc.length < 5}
+                onClick={() => {
+                  setActiveResumeUrl(selectedStudentForDrawer.resumeDoc);
+                  setIsPdfModalOpen(true);
+                }}
+              >
+                View Resume
+              </Button>
+              <Button
+                type="primary"
+                disabled={selectedStudentForDrawer?.appliedJobs?.find((e) => e?.id === oneJobData?._id)?.assessments}
+                onClick={() => {
+                  handleInviteSingle(selectedStudentForDrawer._id);
+                  setIsDrawerOpen(false);
+                }}
+              >
+                {selectedStudentForDrawer?.appliedJobs?.find((e) => e?.id === oneJobData?._id)?.assessments ? 
+                 "Assigned" : "Invite"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Drawer>
+
+      {/* PDF View Modal */}
+      <Modal
+        title="PDF Viewer"
+        open={isPdfModalOpen}
+        onCancel={() => {
+          setIsPdfModalOpen(false);
+          setActiveResumeUrl("");
+        }}
+        footer={null}
+        width={null}
+        style={{
+          width: "98vw",
+          maxWidth: "1000px",
+          top: "10px",
+        }}
+        bodyStyle={{
+          height: "80vh",
+          padding: 0,
+          overflow: "hidden",
+        }}
+      >
+        <div style={{ height: "100%", width: "100%" }}>
+          {activeResumeUrl ? (
+            <iframe
+              src={`${activeResumeUrl}#view=FitH`}
+              width="100%"
+              height="100%"
+              style={{ border: "none", minHeight: "70vh" }}
+              title="PDF Viewer"
+            />
+          ) : (
+            <p style={{ textAlign: "center", padding: "2rem" }}>
+              Resume not available
+            </p>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

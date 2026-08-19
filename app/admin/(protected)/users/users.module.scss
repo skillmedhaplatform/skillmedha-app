@@ -13,6 +13,21 @@
   overflow: hidden;
   background-color: #EFF5FB;
 
+  // This fixed-height shell relies on .tableWrapper's flex:1 to absorb
+  // whatever space .header/.statsGrid don't use. That works while the stat
+  // cards stay compact, but once they stack into a single column on phones
+  // (see .statsGrid below) they can take up most or all of the available
+  // height, leaving flex:1 nothing to grow into and collapsing the table to
+  // ~0px. Below this breakpoint, stop trying to fit everything into one
+  // fixed viewport and let the page flow/scroll normally instead — the
+  // outer .content area (layout.module.scss) already scrolls.
+  @media (max-width: 768px) {
+    position: static;
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+  }
+
   .header {
     @include flexBox(row, center, space-between, 0.5rem);
     margin: 0 -1.5rem 1rem -1.5rem;
@@ -70,8 +85,11 @@
       gap: 1rem;
     }
 
-    @media (max-width: 480px) {
-      grid-template-columns: repeat(2, 1fr);
+    // Each card is icon + 3 lines of descriptive text; 2 columns leaves too
+    // little width per card on real phone screens and forces mid-word
+    // wrapping, so phones get a single column instead.
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
       gap: 0.75rem;
     }
 
@@ -86,6 +104,10 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+      // Grid items default to min-width:auto, so without this the card
+      // refuses to shrink below its content's natural width at narrow grid
+      // tracks (e.g. the 2-column layout below 480px), overflowing the grid.
+      min-width: 0;
 
       &:hover {
         transform: translateY(-2px);
@@ -124,6 +146,7 @@
       .statContent {
         display: flex;
         flex-direction: column;
+        min-width: 0;
       }
 
       .statLabel {
@@ -144,6 +167,7 @@
       .statSubtitle {
         font-size: 0.75rem;
         color: #94a3b8;
+        overflow-wrap: break-word;
       }
     }
   }
@@ -165,6 +189,10 @@
     @media (max-width: 768px) {
       margin: 0 -0.5rem;
       border-radius: 0;
+      // flex:1 with the default flex-basis:0% collapses to ~0px once the
+      // parent switches to height:auto above — pin it to its natural
+      // content height instead of trying to flex-grow into nothing.
+      flex: none;
     }
   }
 

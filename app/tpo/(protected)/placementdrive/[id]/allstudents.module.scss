@@ -8,6 +8,7 @@
   background-color: transparent;
   min-height: calc(100vh - 140px);
 }
+
 .headerCont {
   width: 100%;
   padding: 0.25rem 0;
@@ -25,6 +26,7 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+
     &:hover {
       text-decoration: underline;
     }
@@ -46,13 +48,45 @@
   justify-content: space-between;
   width: 100%;
   gap: 1rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .leftControls {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex: 1;
+}
+
+.desktopSelect {
+  display: block;
+}
+
+.mobileFilter {
+  display: none;
+}
+
+.filterBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  background: #ffffff;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #6BA8ED;
+    color: #6BA8ED;
+  }
+}
+
+.addJobIcon {
+  display: none;
 }
 
 .rightControls {
@@ -60,11 +94,13 @@
   align-items: center;
   gap: 1rem;
 }
+
 .head {
   color: #6BA8ED;
   font-size: 20px;
   font-weight: 700;
 }
+
 .custom_table :global(.ant-table-thead > tr > th) {
   background-color: rgba(30, 105, 218, 0.1); // or any other color you prefer
   font-weight: bold;
@@ -191,6 +227,11 @@
   gap: 0.15rem;
   min-width: 180px;
   max-width: 220px;
+
+  @media (max-width: 1024px) {
+    min-width: 120px !important;
+    max-width: 160px;
+  }
 }
 
 .companyName {
@@ -228,6 +269,19 @@
   align-items: center;
   gap: 0.2rem;
   min-width: 85px;
+
+  @media (max-width: 1024px) {
+    min-width: 65px;
+  }
+}
+
+.hideOnTablet {
+  @media (max-width: 1024px) {
+    display: none !important;
+  }
+  @media (max-width: 640px) {
+    display: flex !important;
+  }
 }
 
 .metaLabel {
@@ -257,6 +311,66 @@
   gap: 0.4rem;
   flex-shrink: 0;
   margin-left: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .cardMeta {
+    gap: 0.4rem;
+  }
+
+  .companyCard {
+    padding: 0.75rem 0.75rem;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem;
+  }
+  .desktopSelect {
+    display: none;
+  }
+  .mobileFilter {
+    display: block;
+  }
+  .addJobText {
+    display: none;
+  }
+  .addJobIcon {
+    display: inline;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+  .addJobBtn {
+    padding: 0 12px;
+  }
+  .leftControls {
+    gap: 0.5rem;
+  }
+  .topSectionWrapper {
+    padding: 1rem 1rem;
+  }
+  .companyCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .cardMeta {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 1.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .metaItem {
+    align-items: flex-start;
+  }
+  .cardActions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
 }
 
 .actionBtn {

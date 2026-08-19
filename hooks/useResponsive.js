@@ -1,6 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 
+// Track globally if the app has hydrated to avoid SSR mismatch on first load,
+// while preventing layout flashes on subsequent client-side navigations.
+let globalMounted = false;
+
 /**
  * Unified responsive breakpoint hook.
  *
@@ -8,22 +12,25 @@ import { useState, useEffect } from "react";
  * meaning the mobile / tablet responsive layout should be used.
  *
  * Desktop layout activates at 1024px and above.
- *
- * Usage:
- *   const isMobile = useResponsive();         // default: < 1024
- *   const isSmall  = useResponsive(600);       // custom: < 600
  */
 export default function useResponsive(breakpoint = 1024) {
-  const [isResponsive, setIsResponsive] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [isResponsive, setIsResponsive] = useState(() => {
+    // Only return the actual width if we have already hydrated.
+    // This prevents hydration mismatch on the first load,
+    // but ensures immediate correct layout on client-side navigations.
+    if (globalMounted && typeof window !== "undefined") {
+      return window.innerWidth < breakpoint;
+    }
+    return false;
+  });
 
   useEffect(() => {
-    setMounted(true);
+    globalMounted = true;
     const check = () => setIsResponsive(window.innerWidth < breakpoint);
-    check();
+    check(); 
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, [breakpoint]);
 
-  return mounted ? isResponsive : false;
+  return isResponsive;
 }

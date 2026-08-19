@@ -9,6 +9,7 @@ import {
   Upload,
   Dropdown,
   message,
+  Popover,
 } from "antd";
 import Search from "antd/es/input/Search";
 import styles from "./allstudents.module.scss";
@@ -23,7 +24,8 @@ import {
 import ImgCrop from "antd-img-crop";
 import { handleS3Upload as uploadToS3 } from "@/utils/universalUtils/s3uploads";
 import { restUrl } from "@/utils/universalUtils/urls";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import { BsThreeDotsVertical, BsFilter } from "react-icons/bs";
+import { FaCaretDown } from "react-icons/fa";
 
 // ─── Helpers ────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -458,6 +460,18 @@ export default function DriveDetails() {
     },
   ];
 
+  const tabMenuItems = TABS.map((tab) => ({
+    key: tab.key,
+    label: (
+      <span>
+        {tab.label} <span style={{ color: '#805ad5', fontWeight: 600, marginLeft: 6 }}>{tabCounts[tab.key]}</span>
+      </span>
+    ),
+    onClick: () => setActiveTab(tab.key),
+  }));
+
+  const activeTabLabel = TABS.find((t) => t.key === activeTab)?.label;
+
   // ─── Render ──────────────────────────────────────────────
   return (
     <>
@@ -469,25 +483,30 @@ export default function DriveDetails() {
       />
 
       <div className={styles.topSectionWrapper}>
-        <div className={styles.tabBar} style={{ borderBottom: 'none', marginBottom: 0 }}>
-          {TABS.map((tab) => (
-            <div
-              key={tab.key}
-              className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ""}`}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-              <span className={styles.tabCount}>{tabCounts[tab.key]}</span>
-            </div>
-          ))}
+        <div className={styles.leftControls}>
+          <div className={styles.desktopTabBar} style={{ borderBottom: 'none', marginBottom: 0 }}>
+            {TABS.map((tab) => (
+              <div
+                key={tab.key}
+                className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ""}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
+                <span className={styles.tabCount}>{tabCounts[tab.key]}</span>
+              </div>
+            ))}
+          </div>
+          <div className={styles.mobileTabBar}>
+            <Dropdown menu={{ items: tabMenuItems }} trigger={['click']}>
+              <Button className={styles.mobileTabBtn}>
+                {activeTabLabel} <FaCaretDown />
+              </Button>
+            </Dropdown>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+        <div className={styles.rightControls}>
           <div className={styles.miniStatsContainer}>
-            <div className={`${styles.miniStat} ${styles.companiesStat}`}>
-              <span className={styles.miniStatValue}>{stats.companiesCount}</span>
-              <span className={styles.miniStatLabel}>Companies</span>
-            </div>
             <div className={`${styles.miniStat} ${styles.activeDrivesStat}`}>
               <span className={styles.miniStatValue}>{stats.activeDrives}</span>
               <span className={styles.miniStatLabel}>Active Drives</span>
@@ -506,8 +525,9 @@ export default function DriveDetails() {
             </div>
           </div>
 
-          <Button type="primary" onClick={handleOpenCreateModal}>
-            + Create Company
+          <Button type="primary" className={styles.createBtn} onClick={handleOpenCreateModal}>
+            <span className={styles.createText}>+ Create Company</span>
+            <span className={styles.createIcon}>+</span>
           </Button>
         </div>
       </div>
@@ -525,21 +545,58 @@ export default function DriveDetails() {
             onSearch={(value) => setSearchQuery(value)}
           />
 
-          <Select
-            className={styles.filterSelect}
-            value={statusFilter}
-            onChange={setStatusFilter}
-            options={STATUS_OPTIONS}
-            size="middle"
-          />
+          <div className={styles.desktopFilters}>
+            <Select
+              className={styles.filterSelect}
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={STATUS_OPTIONS}
+              size="middle"
+            />
 
-          <Select
-            className={styles.sortSelect}
-            value={sortBy}
-            onChange={setSortBy}
-            options={SORT_OPTIONS}
-            size="middle"
-          />
+            <Select
+              className={styles.sortSelect}
+              value={sortBy}
+              onChange={setSortBy}
+              options={SORT_OPTIONS}
+              size="middle"
+            />
+          </div>
+
+          <div className={styles.mobileFilter}>
+            <Popover
+              content={
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0.5rem 0' }}>
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#718096', marginBottom: '4px' }}>Status</div>
+                    <Select
+                      style={{ width: '100%' }}
+                      value={statusFilter}
+                      onChange={setStatusFilter}
+                      options={STATUS_OPTIONS}
+                      size="middle"
+                    />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#718096', marginBottom: '4px' }}>Sort By</div>
+                    <Select
+                      style={{ width: '100%' }}
+                      value={sortBy}
+                      onChange={setSortBy}
+                      options={SORT_OPTIONS}
+                      size="middle"
+                    />
+                  </div>
+                </div>
+              }
+              trigger="click"
+              placement="bottomRight"
+            >
+              <button className={styles.filterBtn}>
+                <BsFilter />
+              </button>
+            </Popover>
+          </div>
 
           <div className={styles.viewToggle}>
             <button
@@ -624,13 +681,13 @@ export default function DriveDetails() {
                             {formatDate(company.createdAt)}
                           </span>
                         </div>
-                        <div className={styles.metaItem}>
+                        <div className={`${styles.metaItem} ${styles.hideOnTablet}`}>
                           <span className={styles.metaLabel}>Created By</span>
                           <span className={styles.metaValue}>
                             {company.createdBy || "—"}
                           </span>
                         </div>
-                        <div className={styles.metaItem}>
+                        <div className={`${styles.metaItem} ${styles.hideOnTablet}`}>
                           <span className={styles.metaLabel}>Placed</span>
                           <span className={styles.metaValue}>{placed}</span>
                         </div>
@@ -719,7 +776,7 @@ export default function DriveDetails() {
         centered
         open={isModal}
         onCancel={() => setIsModal(false)}
-        width={"60%"}
+        width={typeof window !== "undefined" && window.innerWidth <= 640 ? "95%" : "60%"}
         footer={null}
       >
         <div className={styles.modalForm}>

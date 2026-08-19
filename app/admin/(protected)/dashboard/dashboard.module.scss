@@ -342,4 +342,9 @@
 .analyticsColumn {
   display: flex;
   flex-direction: column;
+  // Grid items default to min-width:auto, so without this they refuse to
+  // shrink below their content's natural width (e.g. a long unwrapped
+  // course name) — widening the whole grid track past the viewport instead
+  // of letting the ellipsis truncation in Analytics.module.scss apply.
+  min-width: 0;
 }

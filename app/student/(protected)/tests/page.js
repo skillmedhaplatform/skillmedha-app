@@ -46,6 +46,18 @@ export default function Tests() {
   const [lastRespondents, setLastRespondents] = useState("");
   const [codeIn, setCodeIn] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [columns, setColumns] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1920) setColumns(6);
+      else if (window.innerWidth >= 1600) setColumns(5);
+      else setColumns(0);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const nav = useRouter();
   const searchParams = useSearchParams();
@@ -284,7 +296,10 @@ export default function Tests() {
       </div>
 
       <section className="w-full flex-1 overflow-y-auto overscroll-y-none px-4 mt-8 pb-2 [&::-webkit-scrollbar]:w-[10px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#e2e8f0] [&::-webkit-scrollbar-thumb]:rounded-[20px] [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-hidden">
+        <div 
+          className={`grid gap-6 overflow-hidden ${columns === 0 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : ''}`}
+          style={columns > 0 ? { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` } : {}}
+        >
           {loading ? (
             <>
               <CardSkeleton />

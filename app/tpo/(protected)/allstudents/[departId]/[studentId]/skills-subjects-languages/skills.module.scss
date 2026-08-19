@@ -17,6 +17,8 @@
 }
 
 .about {
+  flex-wrap: wrap;
+  gap: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -28,6 +30,7 @@
     }
 
     .mark {
+    flex-wrap: wrap;
         display: flex;
         justify-content: space-between;
         gap: 1.5rem;

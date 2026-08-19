@@ -12,12 +12,39 @@
   background-color: #EFF5FB;
 }
 
+.responsiveLayout {
+  @media (max-width: 1024px) {
+    flex-direction: column;
+  }
+}
+
+.mobileSidebarWrapper {
+  display: none;
+  @media (max-width: 1024px) {
+    display: block;
+    width: 100%;
+    z-index: 100;
+  }
+}
+
+.desktopSidebarWrapper {
+  display: block;
+  @media (max-width: 1024px) {
+    display: none !important;
+  }
+}
+
+
 .rightColumn {
   display: flex;
   flex-direction: column;
   flex: 1;
   height: 100%;
   min-width: 0;
+  
+  @media (max-width: 1024px) {
+    height: calc(100vh - 64px);
+  }
 
   .content {
     background-color: #EFF5FB;

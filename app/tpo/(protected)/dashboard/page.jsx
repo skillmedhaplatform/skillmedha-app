@@ -540,6 +540,11 @@ const Page = () => {
               )}
             </div>
           </div>
+          
+          {/* Placement Rate Widget (Tablet View) */}
+          <div className={styles.tabletPlacementRate}>
+            <PlacementRateWidget total={studentsCount} placed={placedCount} />
+          </div>
         </div>
 
         {/* Charts Section */}
@@ -548,7 +553,7 @@ const Page = () => {
             <div className={styles.mainChartCol}>
               <DepartmentPlacementChart data={departmentPlacements} />
             </div>
-            <div className={styles.widgetCol}>
+            <div className={`${styles.widgetCol} ${styles.desktopPlacementRate}`}>
               <PlacementRateWidget total={studentsCount} placed={placedCount} />
             </div>
           </div>

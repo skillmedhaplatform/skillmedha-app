@@ -230,9 +230,29 @@ const AssessmentTaken = () => {
 
   const currentDataSource = dataSource || [];
 
+  const [selectedKeys, setSelectedKeys] = useState([]);
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedKeys(currentDataSource.map((item) => item.key));
+    } else {
+      setSelectedKeys([]);
+    }
+  };
+
+  const handleSelectOne = (key, checked) => {
+    if (checked) {
+      setSelectedKeys((prev) => [...prev, key]);
+    } else {
+      setSelectedKeys((prev) => prev.filter((k) => k !== key));
+    }
+  };
+
   return (
     <div className={AtStyles.container}>
-      <div className={JobStyles.statsGrid} style={{ padding: "1rem" }}>
+      {/* ================= DESKTOP VIEW ================= */}
+      {/* Desktop View Stats Grid */}
+      <div className={AtStyles.desktopOnlyGrid}>
         {/* Card 1 */}
         <div className={JobStyles.statCard}>
           <div className={JobStyles.statIcon} style={{ backgroundColor: "rgba(107, 168, 237, 0.1)", color: "#6BA8ED" }}>
@@ -276,7 +296,8 @@ const AssessmentTaken = () => {
         </div>
       </div>
 
-      <div style={{ padding: "0 1rem", marginTop: "1rem" }}>
+      {/* Desktop Candidate List */}
+      <div className={`${AtStyles.desktopOnly}`} style={{ padding: "0 1rem", marginTop: "1rem" }}>
         {dataSource?.length > 0 ? (
           <div className={JobStyles.cardsList}>
             {currentDataSource.map((item) => (
@@ -286,7 +307,11 @@ const AssessmentTaken = () => {
               >
                 {/* Checkbox and Candidate Name */}
                 <div style={{ flex: 1, minWidth: "220px", display: "flex", alignItems: "center", gap: "1rem" }}>
-                  <input type="checkbox" />
+                  <input 
+                    type="checkbox"
+                    checked={selectedKeys.includes(item.key)}
+                    onChange={(e) => handleSelectOne(item.key, e.target.checked)}
+                  />
                   <span style={{ fontWeight: "600", color: "#1e293b", fontSize: "0.95rem" }}>{item.result}</span>
                 </div>
 
@@ -354,6 +379,161 @@ const AssessmentTaken = () => {
           </div>
         ) : (
           <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>No candidates found</div>
+        )}
+      </div>
+
+      {/* ================= MOBILE VIEW ================= */}
+      {/* Mobile View Stats Grid */}
+      <div className={`${AtStyles.statsGrid} ${AtStyles.mobileOnlyGrid}`}>
+        {/* Card 1 */}
+        <div className={AtStyles.statCard}>
+          <div className={AtStyles.statTopRow}>
+            <div className={AtStyles.statIcon} style={{ backgroundColor: "rgba(107, 168, 237, 0.12)", color: "#3b82f6" }}>
+              <HiOutlineUser size={18} />
+            </div>
+            <span className={AtStyles.statValue}>{appliedStudentsWithAssesmentResults?.length || 0}</span>
+          </div>
+          <span className={AtStyles.statLabel}>Active Applicants</span>
+        </div>
+
+        {/* Card 2 */}
+        <div className={AtStyles.statCard}>
+          <div className={AtStyles.statTopRow}>
+            <div className={AtStyles.statIcon} style={{ backgroundColor: "rgba(34, 197, 94, 0.12)", color: "#22c55e" }}>
+              <HiOutlineCheckCircle size={18} />
+            </div>
+            <span className={AtStyles.statValue}>
+              {appliedStudentsWithAssesmentResults?.reduce(
+                (count, s) => (s?.jobProgress?._id ? count + 1 : count),
+                0
+              ) || 0}
+            </span>
+          </div>
+          <span className={AtStyles.statLabel}>Applicants Processed</span>
+        </div>
+
+        {/* Card 3 */}
+        <div 
+          className={AtStyles.statCard} 
+          style={{ cursor: "pointer" }} 
+          onClick={() => {
+            router.push(
+              `/company/jobassessments/${params?.jobDetails}/live_proctoring`
+            );
+          }}
+        >
+          <div className={AtStyles.statTopRow}>
+            <div className={AtStyles.statIcon} style={{ backgroundColor: "rgba(249, 115, 22, 0.12)", color: "#f97316" }}>
+              <HiOutlineVideoCamera size={18} />
+            </div>
+            <span className={AtStyles.statValueView}>View</span>
+          </div>
+          <span className={AtStyles.statLabel}>Live Proctoring</span>
+        </div>
+      </div>
+
+      {/* Mobile Select All Bar */}
+      {currentDataSource.length > 0 && (
+        <div className={`${AtStyles.selectAllBar} ${AtStyles.mobileOnlyFlex}`}>
+          <input
+            type="checkbox"
+            id="selectAllCandidates"
+            checked={selectedKeys.length === currentDataSource.length && currentDataSource.length > 0}
+            onChange={handleSelectAll}
+          />
+          <label htmlFor="selectAllCandidates">
+            SELECT ALL ({currentDataSource.length})
+          </label>
+        </div>
+      )}
+
+      {/* Mobile Candidates List */}
+      <div className={AtStyles.mobileOnly}>
+        {currentDataSource?.length > 0 ? (
+          <div className={AtStyles.cardsList}>
+            {currentDataSource.map((item) => (
+              <div key={item.key} className={AtStyles.candidateCard}>
+                {/* Top Row: Checkbox, Avatar, Name, and Ellipsis dropdown on the right */}
+                <div className={AtStyles.cardTopRow}>
+                  <div className={AtStyles.candidateMainInfo}>
+                    <input
+                      type="checkbox"
+                      checked={selectedKeys.includes(item.key)}
+                      onChange={(e) => handleSelectOne(item.key, e.target.checked)}
+                    />
+                    <div className={AtStyles.candidateAvatar}>
+                      {item.result ? item.result[0].toUpperCase() : "M"}
+                    </div>
+                    <span className={AtStyles.candidateName}>{item.result}</span>
+                  </div>
+
+                  <Dropdown
+                    menu={{
+                      items: menuItems,
+                      onClick: (e) => handleMenuClick(e, item.student?._id),
+                    }}
+                    placement="bottomRight"
+                    arrow
+                  >
+                    <EllipsisOutlined className={AtStyles.moreIcon} />
+                  </Dropdown>
+                </div>
+
+                {/* Mobile Middle Row: Status Tags side by side */}
+                <div className={AtStyles.statusTagsContainerMobile}>
+                  <div className={AtStyles.statusBlock}>
+                    <span className={AtStyles.statusHeaderLabel}>STATUS</span>
+                    {item.status === "Completed" ? (
+                      <Tag color="green">Completed</Tag>
+                    ) : (
+                      <Tag color="blue">{item.status || "Pending"}</Tag>
+                    )}
+                  </div>
+
+                  <div className={AtStyles.statusBlock}>
+                    <span className={AtStyles.statusHeaderLabel}>JOB STATUS</span>
+                    {item.jobStatus === "Shortlisted" || item.jobStatus === "approved" ? (
+                      <Tag color="green">Shortlisted</Tag>
+                    ) : item.jobStatus === "Rejected" || item.jobStatus === "rejected" ? (
+                      <Tag color="red">Rejected</Tag>
+                    ) : (
+                      <Tag color="blue">{item.jobStatus || "interview_scheduled"}</Tag>
+                    )}
+                  </div>
+                </div>
+
+                {/* Metrics Grid Row */}
+                <div className={AtStyles.metricsGrid}>
+                  <div className={AtStyles.metricCol}>
+                    <span className={AtStyles.metricLabel}>SCORE</span>
+                    <span className={AtStyles.metricValue}>{item.overAllScore || 0}</span>
+                  </div>
+                  <div className={AtStyles.metricCol}>
+                    <span className={AtStyles.metricLabel}>DURATION</span>
+                    <span className={AtStyles.metricValue}>{item.overAllTime || 0}</span>
+                  </div>
+                  <div className={AtStyles.metricCol}>
+                    <span className={AtStyles.metricLabel}>RESUME</span>
+                    <span className={AtStyles.metricValue}>
+                      {item.resume ? (
+                        <a className={AtStyles.viewLink} onClick={() => showModal(item.resume)}>
+                          View
+                        </a>
+                      ) : (
+                        <a className={AtStyles.viewLink} onClick={() => showModal(null)}>
+                          View
+                        </a>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>
+            No candidates found
+          </div>
         )}
       </div>
 

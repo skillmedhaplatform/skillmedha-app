@@ -1,10 +1,9 @@
 "use client";
 import React, { useEffect } from "react";
-import styles from "./mobileSidebar.module.scss";
-import SideBar from "@/mainLayout/sideBar";
+import styles from "./companyMobileSidebar.module.scss";
+import SideBar from "@/modules/company/components/sideBar";
 
-export default function MobileSidebarDrawer({ isOpen, onClose }) {
-  // Prevent body scroll when drawer is open
+export default function CompanyMobileSidebarDrawer({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -26,10 +25,13 @@ export default function MobileSidebarDrawer({ isOpen, onClose }) {
       />
 
       {/* Slide-in Drawer Container */}
-      <div className={`${styles.drawer} ${isOpen ? styles.open : ""}`} role="dialog" aria-modal="true">
-        {/* Drawer Content - rendering the exact same Desktop SideBar */}
+      <div
+        className={`${styles.drawer} ${isOpen ? styles.open : ""}`}
+        role="dialog"
+        aria-modal="true"
+      >
         <div className={styles.drawerContent}>
-          <SideBar onLinkClick={onClose} />
+          <SideBar isMobile={false} />
         </div>
       </div>
     </>

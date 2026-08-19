@@ -4,20 +4,18 @@ import styles from "./styles/layout.module.scss";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { GetOneJob, resetOneJob } from "@/redux/slices/company/placementsSlice";
-import { FaCaretRight } from "react-icons/fa";
 import {
   getOneJobAssessment,
   resetSingleJobAssessment,
 } from "@/redux/slices/company/skillMedhaData";
 import { Tooltip } from "antd";
 import PageHeader from "@/modules/tpo/components/PageHeader";
+
 export default function FormLayout({ children }) {
   const { jobId: jobid } = useParams();
   const path = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
-
-  const pathSegments = path?.split("/").filter((e) => e);
 
   const ONEJOB = useSelector((state) => state.placement.OneJob?.value);
 
@@ -76,102 +74,75 @@ export default function FormLayout({ children }) {
     },
   ];
 
-  const pageTitle = ONEJOB?.data?._id ? (ONEJOB?.data?.jobTitle || "Update Job") : "Create Job";
-  const pageSubtitle = ONEJOB?.data?._id ? "Manage your job details and interview process" : "Set up a new job posting";
+  const headerTitle = ONEJOB?.data?.jobTitle
+    ? `Configure: ${ONEJOB.data.jobTitle}`
+    : "Create Job";
+  const headerSubtitle =
+    "Manage basic details, profile, interview rounds, assessments and more";
 
   return (
     <>
-      <PageHeader
-        breadcrumb="My Jobs"
-        title={pageTitle}
-        subtitle={pageSubtitle}
-      />
-      
-      {/* Tabs */}
-      <div className={styles.tabsWrapper}>
-        <div className={styles.tabsRow}>
-          {routes.map((e, index) => {
-            const isActive = path === e?.path;
-            const disabled = isDisabled() || e?.disabled;
+      {/* Sticky Header Banner + Tabs */}
+      <div className={styles.stickyHeader}>
+        <PageHeader
+          breadcrumb="My Jobs"
+          title={headerTitle}
+          subtitle={headerSubtitle}
+        />
 
-            return (
-              <Tooltip
-                key={e.path}
-                title={disabled ? "Complete previous steps first" : ""}
-                placement="bottom"
-              >
-                <div
-                  className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
-                  onClick={() => {
-                    if (!disabled) router.replace(e?.path);
-                  }}
-                  style={{
-                    opacity: disabled ? 0.5 : 1,
-                    cursor: disabled ? "not-allowed" : "pointer"
-                  }}
+        {/* Tabs - Original horizontal scrollable style */}
+        <div className={styles.tabsWrapper}>
+          <div className={styles.tabsRow}>
+            {routes.map((e) => {
+              const isActive = path === e?.path;
+              const disabled = isDisabled() || e?.disabled;
+
+              return (
+                <Tooltip
+                  key={e.path}
+                  title={disabled ? "Complete previous steps first" : ""}
+                  placement="bottom"
                 >
-                  <span>{e?.name}</span>
-                  {isActive && <span className={styles.activeIndicator} />}
-                </div>
-              </Tooltip>
-            );
-          })}
+                  <div
+                    className={`${styles.tabItem} ${isActive ? styles.activeTab : ""}`}
+                    onClick={() => {
+                      if (!disabled) router.replace(e?.path);
+                    }}
+                    style={{
+                      opacity: disabled ? 0.5 : 1,
+                      cursor: disabled ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <span>{e?.name}</span>
+                    {isActive && <span className={styles.activeIndicator} />}
+                  </div>
+                </Tooltip>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       <div className={styles.mainContainer}>
-      {/* Breadcrumbs */}
-      <div className={styles.headerCont}>
-        {pathSegments.map((segment, index) => {
-          let displayName = segment;
+        {/* Back Button */}
+        <div className={styles.headerCont}>
+          <span
+            className={styles.backBtn}
+            onClick={() => router.push("/company/myjobs")}
+          >
+            ← Back to My Jobs
+          </span>
+        </div>
 
-          if (segment === "createjob")
-            displayName = ONEJOB?.data?._id ? "Update Job" : "Create Job";
-          else if (segment === "basicdetails") displayName = "Basic Details";
-          else if (segment === "profiledetails")
-            displayName = "Profile Details";
-          else if (segment === "interviewprocess")
-            displayName = "Interview Process";
-
-          const matchedJob =
-            ONEJOB?.data && ONEJOB?.data?._id === segment
-              ? ONEJOB?.data
-              : null;
-
-          if (matchedJob) {
-            displayName = `${matchedJob?.jobTitle}`;
-          }
-
-          const isLast = index === pathSegments.length - 1;
-          const pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
-
-          return (
-            <span
-              key={index}
-              className={isLast ? styles.activeCrumb : styles.crumb}
-              onClick={() => {
-                if (isLast) return;
-
-                if (index === 0 || index === 1) {
-                  router.push("/company/myjobs");
-                } else if (segment !== "job") {
-                  router.push(pathToHere);
-                }
-              }}
-            >
-              {displayName}&nbsp;
-              {index < pathSegments.length - 1 && (
-                <FaCaretRight style={{ fontSize: "24px" }} />
-              )}
-            </span>
-          );
-        })}
-      </div>
-
-      {/* Content */}
-      <div className={styles.bottomCont} style={{ width: "100%" }}>
-        <div className={styles.contentCont} style={{ width: "100%", padding: 0 }}>{children}</div>
-      </div>
+        {/* Content */}
+        <div className={styles.bottomCont} style={{ width: "100%" }}>
+          <div
+            className={styles.contentCont}
+            style={{ width: "100%", padding: 0 }}
+          >
+            {children}
+          </div>
+        </div>
       </div>
     </>
   );

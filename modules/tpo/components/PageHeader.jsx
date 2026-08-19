@@ -62,7 +62,7 @@ const PageHeader = ({
 
       <div className={styles.headerTop}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', width: '100%', position: 'relative', zIndex: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
             {!showGreeting && (
               <div style={{
                 width: '56px', height: '56px', backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -72,7 +72,7 @@ const PageHeader = ({
                 {getIcon()}
               </div>
             )}
-            <div className={styles.headerLeft} style={showGreeting ? { width: '100%', gap: '0.4rem' } : { justifyContent: 'center' }}>
+            <div className={styles.headerLeft} style={showGreeting ? { width: '100%', gap: '0.4rem' } : { flex: 1, justifyContent: 'center' }}>
               {breadcrumb && <span className={styles.breadcrumb}>{breadcrumb}</span>}
               {showGreeting ? (
                 <>
@@ -80,7 +80,7 @@ const PageHeader = ({
                     <h1 style={{ fontSize: '2.2rem', fontWeight: '800', lineHeight: '1.2' }}>Hi {userName},</h1>
                     <p className="m-0 text-[11px] lg:text-[13px] font-bold tracking-[0.5px] uppercase text-[#cbd5e1]">{currentDate}</p>
                   </div>
-                  <p className={styles.subtitle} style={{ fontSize: '1.3rem', color: '#e2e8f0', marginTop: '0.8rem', lineHeight: '1.4' }}>
+                  <p className={`${styles.subtitle} hidden md:block`} style={{ fontSize: '1.3rem', color: '#e2e8f0', marginTop: '0.8rem', lineHeight: '1.4' }}>
                     {greetingText}! Here’s an overview of today’s placement activities.
                   </p>
                 </>
@@ -92,7 +92,7 @@ const PageHeader = ({
               )}
             </div>
           </div>
-          {rightSlot && <div style={{ zIndex: 10 }}>{rightSlot}</div>}
+          {rightSlot && <div className={styles.rightSlotWrapper}>{rightSlot}</div>}
         </div>
       </div>
 

@@ -305,7 +305,7 @@ export default function NewsFlashPage() {
           onChange={(e) => setSearchText(e.target.value)}
           allowClear
         />
-        <Space align="center" size="middle">
+        <Space align="center" size="middle" wrap>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <InfoCircleOutlined style={{ color: "#64748B" }} />
