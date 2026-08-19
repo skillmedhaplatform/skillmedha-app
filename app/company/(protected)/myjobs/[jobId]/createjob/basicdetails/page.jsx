@@ -17,6 +17,7 @@ import { useParams, useRouter } from "next/navigation";
 import educationDegreeOptions from "@/utils/universalUtils/educationData";
 import dayjs from "dayjs";
 import { fetchPartnerColleges } from "@/redux/slices/company/skillMedhaData";
+import { PlusOutlined } from "@ant-design/icons";
 const { RangePicker } = DatePicker;
 export default function BasicDetailsPage() {
   const { id, jobId: jobid } = useParams();
@@ -47,8 +48,7 @@ export default function BasicDetailsPage() {
 
   const [originalDetails, setOriginalDetails] = useState(null);
 
-  const SessionJobid = getSstorage("jobid");
-  const baseUrl = `/company/myjobs/${SessionJobid || jobid}/createjob/profiledetails`;
+
   useEffect(() => {
     dispatch(fetchPartnerColleges());
   }, []);
@@ -392,7 +392,7 @@ export default function BasicDetailsPage() {
                       />
                       <Button
                         type="text"
-                        icon={<PlusOneOutlined />}
+                        icon={<PlusOutlined />}
                         onClick={addDegree}
                       >
                         Add
@@ -429,7 +429,7 @@ export default function BasicDetailsPage() {
                       />
                       <Button
                         type="text"
-                        icon={<PlusOneOutlined />}
+                        icon={<PlusOutlined />}
                         onClick={addDepartment}
                       >
                         Add
