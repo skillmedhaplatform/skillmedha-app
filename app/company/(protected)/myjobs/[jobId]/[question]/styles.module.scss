@@ -134,6 +134,41 @@
       z-index: 5;
       margin: 0;
     }
+}
+}
+
+.responsiveField {
+  width: 40%;
+}
+
+@media (max-width: 768px) {
+  .QuestionContainer {
+    width: 100% !important;
+    padding: 12px;
+  }
+  
+  .QuestionBodyFlex, .QuestionBodyFlexHead {
+    flex-direction: column;
+    gap: 8px;
+
+    .title {
+      width: 100% !important;
+      margin-bottom: 4px;
+    }
+    
+    .rightBody {
+      width: 100% !important;
+    }
+  }
+  
+  .responsiveField {
+    width: 100% !important;
+  }
+
+  .QuestionHeader {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
   }
 }
 

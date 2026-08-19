@@ -484,17 +484,13 @@ const QuestionEditor = () => {
             >
               Question Type*
             </div>
-            <div className={`${QuestionStyles.typeContent}`}>
-              {labelOptions.map((o) => (
-                <Button
-                  key={o.name}
-                  onClick={() => handleQuestionTypeChange(o.name)}
-                  type={questionType === o.name ? "primary" : "default"}
-                >
-                  <Image src={o.icon} alt={`${o.name} Icon`} />
-                  <div>{o.name}</div>
-                </Button>
-              ))}
+            <div className={`${QuestionStyles.rightBody}`}>
+              <Select
+                value={questionType}
+                onChange={handleQuestionTypeChange}
+                className={QuestionStyles.responsiveField}
+                options={labelOptions.map(o => ({ label: o.name, value: o.name }))}
+              />
             </div>
           </div>
 
@@ -534,7 +530,7 @@ const QuestionEditor = () => {
               <Select
                 placeholder="Select Difficulty"
                 allowClear
-                style={{ width: "40%" }}
+                className={QuestionStyles.responsiveField}
                 onChange={(v) => updateFormField("difficulty", v)}
                 value={singleTest?.difficulty}
                 options={DIFFICULTY_LEVELS}
@@ -550,7 +546,7 @@ const QuestionEditor = () => {
                 min={1}
                 max={100}
                 placeholder="Enter score"
-                style={{ width: "40%" }}
+                className={QuestionStyles.responsiveField}
                 value={singleTest?.score?.points || 1}
                 onChange={(v) => updateScoreField(v)}
               />
@@ -569,7 +565,7 @@ const QuestionEditor = () => {
                 tokenSeparators={[","]}
                 allowClear
                 maxTagCount="responsive"
-                style={{ width: "40%" }}
+                className={QuestionStyles.responsiveField}
                 maxCount={5}
               />
             </div>
