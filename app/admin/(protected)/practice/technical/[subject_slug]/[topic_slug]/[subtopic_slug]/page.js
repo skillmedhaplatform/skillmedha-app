@@ -262,7 +262,7 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
             </div>
             
             {isExpanded && (
-              <div style={{ padding: '16px 40px', background: '#fff', border: '1px solid #E2E8F0', borderTop: 'none', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
+              <div className={listStyles.expandedContent}>
                 <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionContent?.question) }} style={{ marginBottom: 16 }} />
                 <QuestionOptions questionContent={questionContent} answer={answer} questionType={questionType} />
               </div>
@@ -394,7 +394,7 @@ export default function QuestionsPage() {
   }
 
   return (
-    <div className={listStyles.pageContainer} style={{ padding: '24px' }}>
+    <div className={listStyles.pageContainer}>
       <div className={listStyles.topActionRow}>
         <div className={listStyles.actionsLeft} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <PracticeBreadcrumbs />

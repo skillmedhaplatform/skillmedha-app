@@ -205,8 +205,8 @@ export default function JobsTable({
           >
             {theme.icon}
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontWeight: "600", color: "#1e293b", fontSize: "0.95rem" }}>{e.jobTitle}</span>
+          <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <span style={{ fontWeight: "600", color: "#1e293b", fontSize: "0.95rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{e.jobTitle}</span>
             <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
               JOB-{e._id ? e._id.substring(e._id.length - 4).toUpperCase() : "NEW"}
             </span>
@@ -337,7 +337,7 @@ export default function JobsTable({
                 onClick={() => router.push(`/company/myjobs/${item.key}/createjob`)}
               >
                 {/* Job Title / Logo takes up left space automatically since it's already a flex container */}
-                <div style={{ flex: 1, minWidth: "220px" }}>
+                <div style={{ flex: 1, minWidth: "150px", overflow: "hidden" }}>
                   {item.jobTitle}
                 </div>
 

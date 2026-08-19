@@ -353,10 +353,7 @@ const QuestionEditorUI = () => {
         </div>
       </div>
 
-      <div
-        className={QuestionStyles.QuestionBody}
-        style={{ paddingBottom: "5rem" }}
-      >
+      <div className={QuestionStyles.QuestionBody}>
         <div className={QuestionStyles.sectionTitle}>Question Specifications</div>
         {/* Type */}
         <div className={QuestionStyles.QuestionBodyFlexHead}>

@@ -14,6 +14,8 @@ import {
   Switch,
   Tooltip,
   DatePicker,
+  Drawer,
+  Divider,
 } from "antd";
 import {
   PlusOutlined,
@@ -23,6 +25,9 @@ import {
   EditOutlined,
   InfoCircleOutlined,
   SearchOutlined,
+  RightOutlined,
+  CalendarOutlined,
+  FormOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import styles from "./newsflash.module.scss";
@@ -43,6 +48,8 @@ export default function NewsFlashPage() {
   const [editMode, setEditMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [searchText, setSearchText] = useState("");
+  const [previewNotice, setPreviewNotice] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
@@ -177,11 +184,12 @@ export default function NewsFlashPage() {
       title: "Thumbnail",
       dataIndex: "thumbnail",
       key: "thumbnail",
+      width: 85,
       render: (url) => (
         <img
           src={url || "/placeholder.svg"}
           alt="Thumbnail"
-          style={{ width: 80, height: 45, objectFit: "cover", borderRadius: 4 }}
+          style={{ width: 64, height: 38, objectFit: "cover", borderRadius: 4 }}
           onError={(e) => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = "/placeholder.svg";
@@ -193,21 +201,25 @@ export default function NewsFlashPage() {
       title: "Title",
       dataIndex: "title",
       key: "title",
-      width: "20%",
+      width: 180,
+      ellipsis: true,
+      render: (text) => <strong>{text}</strong>,
     },
     {
       title: "Description",
       dataIndex: "description",
       key: "description",
+      width: 240,
       ellipsis: true,
     },
     {
       title: "URL",
       dataIndex: "url",
       key: "url",
+      width: 85,
       render: (url) =>
         url ? (
-          <a href={url} target="_blank" rel="noopener noreferrer">
+          <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: "#1E69DA" }}>
             <LinkOutlined /> Link
           </a>
         ) : (
@@ -218,14 +230,18 @@ export default function NewsFlashPage() {
       title: "Expiry Date",
       dataIndex: "expiryDate",
       key: "expiryDate",
+      width: 110,
       render: (date) => (date ? dayjs(date).format("YYYY-MM-DD") : "-"),
     },
     {
       title: "Has Form",
       dataIndex: "hasForm",
       key: "hasForm",
+      width: 90,
+      align: "center",
       render: (hasForm, record) => (
         <Switch
+          size="small"
           checked={hasForm}
           onChange={(checked) => handleToggleHasForm(checked, record)}
         />
@@ -235,19 +251,22 @@ export default function NewsFlashPage() {
       title: "Active",
       dataIndex: "active",
       key: "active",
+      width: 90,
+      align: "center",
       render: (active, record) => {
         const isExpired = record.expiryDate && dayjs().isAfter(dayjs(record.expiryDate));
 
         if (isExpired) {
           return (
             <Tooltip title="This news has expired. Please update the Expiry Date to enable it again.">
-              <Switch checked={false} disabled />
+              <Switch size="small" checked={false} disabled />
             </Tooltip>
           );
         }
 
         return (
           <Switch
+            size="small"
             checked={active}
             onChange={(checked) => handleToggleActive(checked, record)}
           />
@@ -257,8 +276,10 @@ export default function NewsFlashPage() {
     {
       title: "Actions",
       key: "actions",
+      width: 90,
+      align: "center",
       render: (_, record) => (
-        <Space>
+        <Space size="small">
           <Tooltip title="Edit">
             <Button
               type="text"
@@ -299,31 +320,23 @@ export default function NewsFlashPage() {
       <div className={styles.titleContainer}>
         <Input
           placeholder="Search newsflash..."
-          prefix={<SearchOutlined />}
-          style={{ maxWidth: "400px", minWidth: "250px", height: "40px", borderRadius: "8px" }}
+          prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
+          className={styles.searchInput}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           allowClear
         />
-        <Space align="center" size="middle" wrap>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <InfoCircleOutlined style={{ color: "#64748B" }} />
-              <span style={{ fontSize: "14px", fontWeight: "600", color: "#475569" }}>Global Visibility</span>
-            </div>
+        <div className={styles.headerActions}>
+          <div className={styles.visibilityToggle}>
+            <InfoCircleOutlined style={{ color: "#64748B" }} />
+            <span className={styles.visibilityLabel}>Global Visibility</span>
             {globalEnabled && (
-              <span style={{ 
-                background: "#E6F4EA", 
-                color: "#137333", 
-                padding: "4px 12px", 
-                borderRadius: "16px", 
-                fontSize: "12px", 
-                fontWeight: "600" 
-              }}>
+              <span className={styles.enabledBadge}>
                 Enabled
               </span>
             )}
             <Switch
+              size="small"
               checked={globalEnabled}
               onChange={handleGlobalToggle}
               style={{ background: globalEnabled ? "#22C55E" : undefined }}
@@ -336,22 +349,235 @@ export default function NewsFlashPage() {
               closeModal(); // Ensure reset
               setIsModalOpen(true);
             }}
-            style={{ height: "40px", padding: "0 24px", borderRadius: "8px", fontWeight: "500", background: "#1E69DA" }}
+            className={styles.createBtn}
           >
             Create NewsFlash
           </Button>
-        </Space>
+        </div>
       </div>
 
+      {/* Desktop Table View */}
       <div className={styles.tableWrapper}>
         <Table
           columns={columns}
           dataSource={filteredNotices}
           rowKey="_id"
           loading={loading}
+          scroll={{ x: 960 }}
           pagination={{ pageSize: 10, position: ["bottomRight"] }}
         />
       </div>
+
+      {/* Mobile & Tablet Card List View */}
+      <div className={styles.mobileCardList}>
+        {filteredNotices.map((notice) => {
+          const isExpired = notice.expiryDate && dayjs().isAfter(dayjs(notice.expiryDate));
+          return (
+            <div
+              key={notice._id}
+              className={styles.mobileCard}
+              onClick={() => {
+                setPreviewNotice(notice);
+                setIsPreviewOpen(true);
+              }}
+            >
+              <div className={styles.cardMain}>
+                <img
+                  src={notice.thumbnail || "/placeholder.svg"}
+                  alt={notice.title}
+                  className={styles.cardThumbnail}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/placeholder.svg";
+                  }}
+                />
+                <div className={styles.cardInfo}>
+                  <h4 className={styles.cardTitle}>{notice.title}</h4>
+                  {notice.description && (
+                    <p className={styles.cardDescription}>{notice.description}</p>
+                  )}
+                  <div className={styles.cardMeta}>
+                    {notice.expiryDate && (
+                      <span className={`${styles.metaBadge} ${isExpired ? styles.expiredBadge : styles.expiryBadge}`}>
+                        <CalendarOutlined /> {dayjs(notice.expiryDate).format("DD MMM YYYY")}
+                      </span>
+                    )}
+                    {notice.hasForm && (
+                      <span className={`${styles.metaBadge} ${styles.formBadge}`}>
+                        <FormOutlined /> Form
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.cardFooter} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.statusSwitch}>
+                  <span className={styles.statusText}>{notice.active ? "Active" : "Inactive"}</span>
+                  <Switch
+                    size="small"
+                    checked={notice.active}
+                    disabled={isExpired}
+                    onChange={(checked) => handleToggleActive(checked, notice)}
+                  />
+                </div>
+                <div className={styles.cardActions}>
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => handleEdit(notice)}
+                    style={{ color: "#1E69DA" }}
+                  />
+                  <Popconfirm
+                    title="Delete this notice?"
+                    onConfirm={() => handleDelete(notice._id)}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button type="text" danger icon={<DeleteOutlined />} />
+                  </Popconfirm>
+                  <Button
+                    type="text"
+                    icon={<RightOutlined />}
+                    onClick={() => {
+                      setPreviewNotice(notice);
+                      setIsPreviewOpen(true);
+                    }}
+                    style={{ color: "#64748B" }}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Preview Bottom Sheet Drawer for Mobile/Tablet */}
+      <Drawer
+        title={null}
+        placement="bottom"
+        onClose={() => setIsPreviewOpen(false)}
+        open={isPreviewOpen}
+        height="auto"
+        className={styles.previewDrawer}
+        styles={{
+          body: {
+            padding: "1.25rem 1.25rem 2rem 1.25rem",
+            maxHeight: "85vh",
+            overflowY: "auto",
+            borderTopLeftRadius: "16px",
+            borderTopRightRadius: "16px",
+          },
+          content: {
+            borderTopLeftRadius: "16px",
+            borderTopRightRadius: "16px",
+          }
+        }}
+      >
+        {previewNotice && (
+          <div className={styles.drawerDetails}>
+            <div className={styles.sheetHandle} />
+
+            {/* Thumbnail Banner */}
+            {previewNotice.thumbnail && (
+              <div className={styles.previewThumbnailWrap}>
+                <img
+                  src={previewNotice.thumbnail}
+                  alt={previewNotice.title}
+                  className={styles.previewThumbnail}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/placeholder.svg";
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Title & Description */}
+            <div className={styles.previewHeader}>
+              <h3>{previewNotice.title}</h3>
+              {previewNotice.description && (
+                <p className={styles.previewDesc}>{previewNotice.description}</p>
+              )}
+            </div>
+
+            <Divider style={{ margin: "14px 0" }} />
+
+            {/* Info Grid */}
+            <div className={styles.previewInfoGrid}>
+              <div className={styles.previewInfoItem}>
+                <span className={styles.label}>Destination URL</span>
+                <span className={styles.value}>
+                  {previewNotice.url ? (
+                    <a href={previewNotice.url} target="_blank" rel="noopener noreferrer" style={{ color: "#1E69DA" }}>
+                      <LinkOutlined /> {previewNotice.url}
+                    </a>
+                  ) : "None"}
+                </span>
+              </div>
+              <div className={styles.previewInfoItem}>
+                <span className={styles.label}>Expiry Date</span>
+                <span className={styles.value}>
+                  {previewNotice.expiryDate ? dayjs(previewNotice.expiryDate).format("DD MMMM YYYY") : "No Expiry"}
+                </span>
+              </div>
+              <div className={styles.previewInfoItem}>
+                <span className={styles.label}>Form Attached</span>
+                <span className={styles.value}>
+                  <Switch
+                    size="small"
+                    checked={previewNotice.hasForm}
+                    onChange={(checked) => handleToggleHasForm(checked, previewNotice)}
+                  />
+                </span>
+              </div>
+              <div className={styles.previewInfoItem}>
+                <span className={styles.label}>Active Status</span>
+                <span className={styles.value}>
+                  <Switch
+                    size="small"
+                    checked={previewNotice.active}
+                    disabled={previewNotice.expiryDate && dayjs().isAfter(dayjs(previewNotice.expiryDate))}
+                    onChange={(checked) => handleToggleActive(checked, previewNotice)}
+                  />
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className={styles.drawerActionButtons}>
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={() => {
+                  setIsPreviewOpen(false);
+                  handleEdit(previewNotice);
+                }}
+                style={{ flex: 1, height: "40px", borderRadius: "8px", fontWeight: 600, background: "#1E69DA" }}
+              >
+                Edit Notice
+              </Button>
+              <Popconfirm
+                title="Delete this notice?"
+                onConfirm={() => {
+                  setIsPreviewOpen(false);
+                  handleDelete(previewNotice._id);
+                }}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  style={{ height: "40px", borderRadius: "8px" }}
+                >
+                  Delete
+                </Button>
+              </Popconfirm>
+            </div>
+          </div>
+        )}
+      </Drawer>
 
       <Modal
         title={editMode ? "Edit NewsFlash" : "Create New NewsFlash"}

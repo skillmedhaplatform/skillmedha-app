@@ -292,7 +292,7 @@ export default function Coding() {
           </div>
           
           {isExpanded && (
-            <div style={{ padding: '16px 40px', background: '#fff', border: '1px solid #E2E8F0', borderTop: 'none', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
+            <div className={listStyles.expandedContent}>
               <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionData.questionContent?.question) }} style={{ marginBottom: 16, fontWeight: 'bold' }} />
               {questionData.questionContent?.description && (
                 <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionData.questionContent?.description) }} style={{ marginBottom: 16 }} />
@@ -323,14 +323,14 @@ export default function Coding() {
     });
 
   return (
-    <div className={listStyles.pageContainer} style={{ padding: '24px' }}>
+    <div className={listStyles.pageContainer}>
       <div className={listStyles.topActionRow}>
-        <div className={listStyles.actionsLeft} style={{ display: 'flex', alignItems: 'center' }}>
+        <div className={listStyles.actionsLeft}>
           <PracticeBreadcrumbs />
           <Select
             value={filterDifficulty}
             onChange={(val) => setFilterDifficulty(val)}
-            style={{ width: 150, marginLeft: '1rem' }}
+            style={{ width: 150 }}
             options={[
               { value: 'All', label: 'All Difficulties' },
               { value: 'Easy', label: 'Easy' },
@@ -391,7 +391,9 @@ export default function Coding() {
 
       <Modal
         title={
-          editingQuestion ? "Edit Coding Question" : "Create Coding Question"
+          <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>
+            {editingQuestion ? "Edit Coding Question" : "Create Coding Question"}
+          </div>
         }
         open={open}
         onCancel={onCancel}
@@ -406,14 +408,16 @@ export default function Coding() {
         destroyOnHidden
         closable={false}
         mask={{ closable: false }}
-        width={"90%"}
+        width={"92%"}
+        style={{ top: 20, maxWidth: '850px', paddingBottom: 20 }}
+        styles={{ body: { maxHeight: '82vh', overflowY: 'auto', padding: '8px 12px' } }}
         centered
       >
         <div className={QuestionStyles.QuestionContainer}>
-          <div style={{ marginBottom: '16px' }}>
+          <div style={{ marginBottom: '12px' }}>
             <PracticeBreadcrumbs />
           </div>
-          <div className={`${QuestionStyles.QuestionBody} ${styles.pb5rem}`}>
+          <div className={QuestionStyles.QuestionBody}>
             <div className={QuestionStyles.sectionTitle}>Question Specifications</div>
             {/* Difficulty */}
             <div className={QuestionStyles.QuestionBodyFlex}>

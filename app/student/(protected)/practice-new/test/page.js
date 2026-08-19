@@ -669,32 +669,34 @@ export default function TestPage() {
 
   if (isMobile && currentQuestion && !testCompleted) {
     return (
-      <MobileQuestionPlayer
-        testTitle={testTitle}
-        currentQuestionIndex={currentQuestionIndex}
-        questions={questions}
-        currentQuestion={currentQuestion}
-        currentQuestionOptions={currentQuestionOptions}
-        isFirstQuestion={isFirstQuestion}
-        isLastQuestion={isLastQuestionIndex}
-        showExplanation={showExplanation}
-        showSubmitBtn={showSubmitBtn}
-        loading={loading}
-        aiSuggestions={aiSuggestions}
-        userSelectedAns={userSelectedAns}
-        tempSelectedAnswers={tempSelectedAnswers}
-        textAnswers={textAnswers}
-        userResponse={userResponse}
-        handlePrevious={handlePrevious}
-        handleNext={handleNext}
-        handleOptionClick={handleOptionClick}
-        handleTrueFalseClick={handleTrueFalseClick}
-        handleTextAnswerChange={handleTextAnswerChange}
-        handleSubmitAnswer={handleSubmitAnswer}
-        getOptionClass={getOptionClass}
-        getTrueFalseClass={getTrueFalseClass}
-        renderHtml={renderHtml}
-      />
+      <DeviceBlocker returnPath="back" returnText="Return to Practice">
+        <MobileQuestionPlayer
+          testTitle={testTitle}
+          currentQuestionIndex={currentQuestionIndex}
+          questions={questions}
+          currentQuestion={currentQuestion}
+          currentQuestionOptions={currentQuestionOptions}
+          isFirstQuestion={isFirstQuestion}
+          isLastQuestion={isLastQuestionIndex}
+          showExplanation={showExplanation}
+          showSubmitBtn={showSubmitBtn}
+          loading={loading}
+          aiSuggestions={aiSuggestions}
+          userSelectedAns={userSelectedAns}
+          tempSelectedAnswers={tempSelectedAnswers}
+          textAnswers={textAnswers}
+          userResponse={userResponse}
+          handlePrevious={handlePrevious}
+          handleNext={handleNext}
+          handleOptionClick={handleOptionClick}
+          handleTrueFalseClick={handleTrueFalseClick}
+          handleTextAnswerChange={handleTextAnswerChange}
+          handleSubmitAnswer={handleSubmitAnswer}
+          getOptionClass={getOptionClass}
+          getTrueFalseClass={getTrueFalseClass}
+          renderHtml={renderHtml}
+        />
+      </DeviceBlocker>
     );
   }
 

@@ -188,15 +188,15 @@
       border-radius: 12px;
       padding: 1.25rem;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.06);
       border-left: 4px solid;
       min-height: 120px;
       @include flexBox(column, flex-start, space-between, 1rem);
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
       }
 
       .cardHeader {
@@ -273,7 +273,10 @@
           font-weight: 600;
           color: #0f172a;
 
-          .icon { color: #2563eb; font-size: 1.25rem; }
+          .icon {
+            color: #2563eb;
+            font-size: 1.25rem;
+          }
         }
 
         .viewProfileBtn {
@@ -292,7 +295,10 @@
         .tableRow {
           display: flex;
           border-bottom: 1px solid #f1f5f9;
-          &:last-child { border-bottom: none; }
+
+          &:last-child {
+            border-bottom: none;
+          }
 
           .tableLabel {
             background-color: #f8fafc;
@@ -329,6 +335,7 @@
 
             .statusDot {
               @include flexBox(row, center, flex-start, 0.4rem);
+
               .dot {
                 width: 8px;
                 height: 8px;
@@ -340,23 +347,34 @@
             .contactRow {
               @include flexBox(row, center, flex-start, 0.75rem);
               flex-wrap: wrap;
-              .separator { color: #cbd5e1; }
+
+              .separator {
+                color: #cbd5e1;
+              }
             }
 
             .websiteLink {
               color: #334155;
               text-decoration: none;
               @include flexBox(row, center, flex-start, 0);
-              &:hover { color: #2563eb; }
-              
-              .exportIcon { font-size: 0.8rem; margin-left: 6px; color: #94a3b8; }
+
+              &:hover {
+                color: #2563eb;
+              }
+
+              .exportIcon {
+                font-size: 0.8rem;
+                margin-left: 6px;
+                color: #94a3b8;
+              }
             }
           }
         }
       }
     }
 
-    .aiUsageCard, .aiLimitCard {
+    .aiUsageCard,
+    .aiLimitCard {
       background: white;
       border-radius: 12px;
       padding: 1.5rem;
@@ -370,7 +388,7 @@
         display: flex;
         align-items: center;
         gap: 1rem;
-        
+
         .iconBox {
           width: 48px;
           height: 48px;
@@ -388,6 +406,7 @@
             font-weight: 600;
             color: #0f172a;
           }
+
           p {
             margin: 0;
             font-size: 0.875rem;
@@ -403,13 +422,13 @@
         flex-direction: column;
         border: 1px solid #f1f5f9;
         border-radius: 8px;
-        
+
         .usageItem {
           display: flex;
           align-items: center;
           padding: 1rem;
           border-bottom: 1px solid #f1f5f9;
-          
+
           &:last-child {
             border-bottom: none;
           }
@@ -427,12 +446,14 @@
 
           .itemText {
             flex: 1;
+
             h4 {
               margin: 0;
               font-size: 0.95rem;
               font-weight: 600;
               color: #1e293b;
             }
+
             p {
               margin: 0;
               font-size: 0.8rem;
@@ -449,6 +470,7 @@
               display: flex;
               align-items: center;
               gap: 0.5rem;
+
               .dot {
                 width: 8px;
                 height: 8px;
@@ -470,7 +492,8 @@
         font-size: 0.85rem;
         color: #3b82f6;
 
-        .footerLeft, .footerRight {
+        .footerLeft,
+        .footerRight {
           display: flex;
           align-items: center;
           gap: 0.5rem;
@@ -482,8 +505,9 @@
       .limitTopSection {
         display: flex;
         gap: 1.5rem;
-        
-        .currentUsageBox, .setLimitBox {
+
+        .currentUsageBox,
+        .setLimitBox {
           flex: 1;
         }
 
@@ -499,12 +523,14 @@
             display: flex;
             align-items: baseline;
             gap: 0.25rem;
+
             .bigNumber {
               font-size: 2.5rem;
               font-weight: 700;
               color: #2563eb;
               line-height: 1;
             }
+
             .unitText {
               font-size: 0.9rem;
               color: #64748b;
@@ -515,11 +541,11 @@
         .setLimitBox {
           display: flex;
           flex-direction: column;
-          
+
           .limitInput {
             margin-bottom: 0.5rem;
           }
-          
+
           .updateBtn {
             border-radius: 6px;
           }
@@ -541,6 +567,7 @@
           .progressText {
             font-weight: 600;
             color: #1e293b;
+
             .highlight {
               color: #2563eb;
             }
@@ -571,12 +598,14 @@
 
         .quickSetHeader {
           margin-bottom: 1rem;
+
           h4 {
             margin: 0;
             font-size: 0.95rem;
             font-weight: 600;
             color: #1e293b;
           }
+
           p {
             margin: 0;
             font-size: 0.85rem;
@@ -1096,6 +1125,7 @@
 
       &.threeColumns {
         @include charts-grid(300px, 1rem);
+
         @media (min-width: 1200px) {
           grid-template-columns: repeat(3, 1fr);
         }

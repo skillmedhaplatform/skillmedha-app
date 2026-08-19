@@ -109,6 +109,10 @@
   width: 100%;
   gap: 1rem;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    padding: 1rem 1.25rem;
+  }
 }
 
 .tabBar {
@@ -116,6 +120,15 @@
   gap: 0;
   border-bottom: 2px solid #e2e8f0;
   margin-bottom: -0.25rem;
+  overflow-x: auto;
+  max-width: 100%;
+
+  /* Hide scrollbar for a cleaner look */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .tab {

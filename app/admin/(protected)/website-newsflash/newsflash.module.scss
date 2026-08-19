@@ -1,4 +1,5 @@
 @use "@/modules/admin/styles/colors" as *;
+
 .container {
   background-color: #EFF5FB;
   height: 100%;
@@ -12,81 +13,381 @@
   justify-content: space-between;
   align-items: center;
   background-color: white;
-  padding: 16px 24px;
+  padding: 12px 24px;
   border-bottom: 1px solid #E2E8F0;
   box-shadow: $shadowSm;
   position: sticky;
   top: 0;
   z-index: 10;
-  // Search input (min-width 250px) + visibility toggle + add button don't
-  // fit a single row on phones; without wrap they overflow the viewport.
+  gap: 12px;
   flex-wrap: wrap;
-  row-gap: 12px;
+
+  @media (max-width: 768px) {
+    padding: 10px 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}
+
+.searchInput {
+  width: 320px;
+  max-width: 100%;
+  height: 38px;
+  border-radius: 8px !important;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  transition: all 0.2s ease;
+
+  &:hover, &:focus, &:focus-within {
+    border-color: #1E69DA !important;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(30, 105, 218, 0.1);
+  }
+
+  :global(.ant-input) {
+    background-color: transparent !important;
+  }
+
+  @media (max-width: 768px) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+}
+
+.visibilityToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+
+  .visibilityLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+  }
+
+  .enabledBadge {
+    background: #E6F4EA;
+    color: #137333;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+}
+
+.createBtn {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  background: #1E69DA;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .tableWrapper {
   background: white;
-  border-radius: $borderRadiusLarge;
+  border-radius: 12px;
   border: 1px solid #E2E8F0;
-  overflow: auto;
-  margin: 24px;
-  
+  overflow: hidden;
+  margin: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: block;
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
+
   :global(.ant-table) {
-    font-size: 14px;
+    font-size: 13.5px;
   }
 
   :global(.ant-table-thead) > :global(tr) > :global(th) {
     background-color: #F8FAFC;
     font-weight: 700;
-    color: #94A3B8;
-    padding: 16px 24px;
+    color: #64748B;
+    padding: 12px 16px;
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 0.5px;
     border-bottom: 1px solid #E2E8F0;
+    white-space: nowrap;
   }
 
   :global(.ant-table-tbody) > :global(tr) > :global(td) {
-    padding: 16px 24px;
+    padding: 12px 16px;
     border-bottom: 1px solid #E2E8F0;
-    color: #334155;
+    color: #1E293B;
     font-weight: 500;
+    vertical-align: middle;
   }
 
   :global(.ant-table-pagination.ant-pagination) {
-    margin: 16px 24px;
+    margin: 12px 16px;
   }
 }
 
-.searchBar {
-  margin-bottom: 16px;
+// ==================== MOBILE / TABLET CARD LIST ====================
+.mobileCardList {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 2rem 16px;
+
+  @media (max-width: 1024px) {
+    display: flex;
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px 10px 2rem 10px;
+    gap: 10px;
+  }
 }
 
-.tableFilters {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.thumbnailImage {
-  width: 80px;
-  height: 45px;
-  object-fit: cover;
-  border-radius: $borderRadius;
-}
-
-.actionBtn {
-  color: #1E69DA;
+.mobileCard {
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 12px 14px;
   cursor: pointer;
-  
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
   &:hover {
-    color: #40a9ff;
+    border-color: #1E69DA;
+    box-shadow: 0 4px 12px rgba(30, 105, 218, 0.12);
   }
-  
-  &.delete {
-    color: #ff4d4f;
-    &:hover {
-      color: #ff7875;
+
+  &:active {
+    background-color: #f8fafc;
+  }
+
+  .cardMain {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+
+    .cardThumbnail {
+      width: 72px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #f1f5f9;
+      flex-shrink: 0;
+      border: 1px solid #e2e8f0;
+    }
+
+    .cardInfo {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+
+      .cardTitle {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .cardDescription {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .cardMeta {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 2px;
+
+        .metaBadge {
+          padding: 2px 7px;
+          border-radius: 4px;
+          font-size: 0.72rem;
+          font-weight: 500;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .expiryBadge {
+          background-color: #f1f5f9;
+          color: #475569;
+        }
+
+        .expiredBadge {
+          background-color: #fef2f2;
+          color: #dc2626;
+        }
+
+        .formBadge {
+          background-color: #e0f2fe;
+          color: #0284c7;
+        }
+      }
+    }
+  }
+
+  .cardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+
+    .statusSwitch {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .statusText {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #475569;
+      }
+    }
+
+    .cardActions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
     }
   }
 }
+
+// ==================== PREVIEW BOTTOM SHEET DRAWER ====================
+.previewDrawer {
+  :global(.ant-drawer-content) {
+    border-top-left-radius: 16px !important;
+    border-top-right-radius: 16px !important;
+  }
+}
+
+.drawerDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  .sheetHandle {
+    width: 40px;
+    height: 4px;
+    background-color: #cbd5e1;
+    border-radius: 4px;
+    margin: 0 auto 0.75rem auto;
+  }
+
+  .previewThumbnailWrap {
+    width: 100%;
+    max-height: 180px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.5rem;
+
+    .previewThumbnail {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .previewHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .previewDesc {
+      font-size: 0.875rem;
+      color: #475569;
+      margin: 0;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+  }
+
+  .previewInfoGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    background-color: #f8fafc;
+    padding: 0.875rem;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+
+    .previewInfoItem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+
+      .label {
+        color: #64748b;
+        font-weight: 500;
+      }
+
+      .value {
+        color: #0f172a;
+        font-weight: 600;
+        text-align: right;
+        word-break: break-all;
+      }
+    }
+  }
+
+  .drawerActionButtons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 1rem;
+  }
+}
+
+
