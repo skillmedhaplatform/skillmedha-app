@@ -9,6 +9,7 @@ import { imgUrls } from "@/utils/universalUtils/images";
 import TextEditor from "@/utils/universalUtils/editor";
 import QuestionStyles from "./styles.module.scss";
 import { RiDeleteBinLine } from "react-icons/ri";
+import PageHeader from "@/modules/tpo/components/PageHeader";
 import {
   addQuestions,
   clearAddQuestionsState,
@@ -425,8 +426,23 @@ const QuestionEditor = () => {
   }
 
   return (
-    <>
-      <div className={QuestionStyles.QuestionContainer}>
+    <div style={{ backgroundColor: "#f8fafc", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <PageHeader
+        breadcrumb="My Jobs"
+        title={isUpdateMode ? "Update Question" : "Create New Question"}
+        subtitle="Manage question details, type, difficulty, and score"
+      />
+
+      <div style={{ padding: "16px 24px" }}>
+        <span
+          style={{ color: "#64748b", cursor: "pointer", fontWeight: 500 }}
+          onClick={() => router.replace(`/company/myjobs/${params?.jobId}/createjob/questionManager`)}
+        >
+          ← Back to Question Manager
+        </span>
+      </div>
+
+      <div className={QuestionStyles.QuestionContainer} style={{ width: '96%', margin: '0 auto', flex: 1 }}>
         <div className={QuestionStyles.QuestionHeader}>
           <div>{isUpdateMode ? "Update Question" : "Create New Question"}</div>
           <div style={{ display: "flex", gap: "12px" }}>
@@ -735,7 +751,7 @@ const QuestionEditor = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
