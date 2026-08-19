@@ -12,7 +12,7 @@ import {
   Input,
   Tooltip,
 } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, DownOutlined } from "@ant-design/icons";
 import AIQuestionModal from "./(components)/aiquestionModal";
 import SkillLibraryModal from "./(components)/skilllibraryModal";
 import {
