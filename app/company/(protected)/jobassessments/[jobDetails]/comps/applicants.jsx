@@ -148,7 +148,7 @@ const Applicants = () => {
         jobId: oneJobData?._id,
         filter: {
           startDate: hasValidDates ? dateRange[0].format("YYYY-MM-DD") : null,
-          endDate: hasValidDates ? dateRange.format("YYYY-MM-DD") : null,
+          endDate: hasValidDates ? dateRange[1].format("YYYY-MM-DD") : null,
           yearOfPass: passYear,
           CGPA: cgpa && parseFloat(cgpa) > 0 ? cgpa : null,
         },
@@ -264,23 +264,7 @@ const Applicants = () => {
           <RangePicker
             popupClassName={applicantStyles.mobileRangePicker}
             format={dateFormat}
-            onChange={(dates) => {
-              setDateRange(dates);
-              if (dates && dates[0] && dates) {
-                dispatch(
-                  getAllAppliedStudents({
-                    studentIds: oneJobData?.applicants?.map((e) => e?._id),
-                    jobId: oneJobData?._id,
-                    filter: {
-                      startDate: dates[0].format("YYYY-MM-DD"),
-                      endDate: dates.format("YYYY-MM-DD"),
-                      yearOfPass: passYear,
-                      CGPA: cgpa && parseFloat(cgpa) > 0 ? cgpa : null,
-                    },
-                  })
-                );
-              }
-            }}
+            onChange={(dates) => setDateRange(dates)}
             value={dateRange}
           />
         </div>
