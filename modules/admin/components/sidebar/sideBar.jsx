@@ -24,7 +24,7 @@ import Image from "next/image";
 import lockicon from "@/public/assets/lockicon.png";
 import { changeCollapse } from "@/redux/slices/sidebar"; 
 
-const SideBar = ({ activeView, setView }) => {
+const SideBar = ({ activeView, setView, isMobile }) => {
   const pathName = usePathname();
   const nav = useRouter();
   const searchParams = useSearchParams();
@@ -224,39 +224,43 @@ const SideBar = ({ activeView, setView }) => {
     return menuItem;
   });
 
+  const effectiveCollapsed = isMobile ? false : isCollapsed;
+
   return (
-    <section className={`${styles.sideBarContainer} ${isCollapsed ? styles.collapsedSidebar : styles.expandedSidebar}`}>
-      <div className={styles.logoContainer}>
-        <img
-          src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"
-          alt="Synsper Logo"
-          onClick={() => nav.replace("/admin/dashboard")}
-        />
-        {!isCollapsed && (
-          <div
-            className={styles.logoText}
+    <section className={`${styles.sideBarContainer} ${effectiveCollapsed ? styles.collapsedSidebar : styles.expandedSidebar}`} style={isMobile ? { width: '100%', minWidth: '100%' } : {}}>
+      {!isMobile && (
+        <div className={styles.logoContainer}>
+          <img
+            src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"
+            alt="Synsper Logo"
             onClick={() => nav.replace("/admin/dashboard")}
-            style={{ flex: 1, paddingRight: '8px' }}
+          />
+          {!effectiveCollapsed && (
+            <div
+              className={styles.logoText}
+              onClick={() => nav.replace("/admin/dashboard")}
+              style={{ flex: 1, paddingRight: '8px' }}
+            >
+              S K I L L <span> M E D H A</span>
+            </div>
+          )}
+          <div
+            onClick={() => {
+              userToggledRef.current = true;
+              dispatch(changeCollapse(!isCollapsed));
+            }}
+            style={{ cursor: 'pointer', padding: '0 8px', display: 'flex', alignItems: 'center', flexShrink: 0, marginRight: effectiveCollapsed ? '0' : '24px', marginLeft: effectiveCollapsed ? '0' : 'auto' }}
           >
-            S K I L L <span> M E D H A</span>
+            {effectiveCollapsed ? <MenuUnfoldOutlined style={{ fontSize: '30px', color: '#08334C' }} /> : <MenuFoldOutlined style={{ fontSize: '24px', color: '#08334C' }} />}
           </div>
-        )}
-        <div
-          onClick={() => {
-            userToggledRef.current = true;
-            dispatch(changeCollapse(!isCollapsed));
-          }}
-          style={{ cursor: 'pointer', padding: '0 8px', display: 'flex', alignItems: 'center', flexShrink: 0, marginRight: isCollapsed ? '0' : '24px', marginLeft: isCollapsed ? '0' : 'auto' }}
-        >
-          {isCollapsed ? <MenuUnfoldOutlined style={{ fontSize: '30px', color: '#08334C' }} /> : <MenuFoldOutlined style={{ fontSize: '24px', color: '#08334C' }} />}
         </div>
-      </div>
+      )}
 
       <div className={styles.scrolltabs}>
         <Menu
           mode="inline"
           theme="light"
-          inlineCollapsed={isCollapsed}
+          inlineCollapsed={effectiveCollapsed}
           className={styles.styledAntMenu}
           openKeys={openKeys}
           onOpenChange={handleOpenChange}
@@ -267,11 +271,11 @@ const SideBar = ({ activeView, setView }) => {
       </div>
 
       <div className={styles.bottom}>
-        <div style={{ padding: isCollapsed ? "0" : "0 1rem", display: "flex", justifyContent: "center" }}>
+        <div style={{ padding: effectiveCollapsed ? "0" : "0 1rem", display: "flex", justifyContent: "center" }}>
           {!mounted || loading ? (
             <div className={styles.profilePillSkeleton}>
               <Skeleton.Avatar active size="large" shape="circle" />
-              {!isCollapsed && (
+              {!effectiveCollapsed && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <Skeleton.Button active size="small" style={{ width: 100, height: 14 }} />
                   <Skeleton.Button active size="small" style={{ width: 140, height: 10 }} />
@@ -280,11 +284,11 @@ const SideBar = ({ activeView, setView }) => {
             </div>
           ) : (
             <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="topLeft">
-              <div className={`${styles.profilePill} ${isCollapsed ? styles.collapsedPill : ''}`}>
+              <div className={`${styles.profilePill} ${effectiveCollapsed ? styles.collapsedPill : ''}`}>
                 <div className={styles.avatar}>
                   {roleConfig?.[userDetails?.role?.toLowerCase()]?.icon || "A"}
                 </div>
-                {!isCollapsed && (
+                {!effectiveCollapsed && (
                   <div className={styles.profileInfo}>
                     <span className={styles.name}>
                       {userDetails?.fullname || userDetails?.username || "Admin"}

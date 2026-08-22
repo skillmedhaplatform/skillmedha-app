@@ -457,6 +457,7 @@ function Form() {
     }
     return "template1";
   });
+  const [templateAccent, setTemplateAccent] = useState("#1E69DA");
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [previewScale, setPreviewScale] = useState(65);
   const [previewMode, setPreviewMode] = useState("desktop");
@@ -1691,11 +1692,7 @@ function Form() {
                   <span
                     className="cursor-pointer text-[#22c55e] font-semibold text-[13px] md:text-[15px] flex items-center justify-start gap-1 hover:gap-2 transition-all mt-auto md:pt-2"
                     onClick={() => {
-                      if (isMobile) {
-                        message.warning("This feature is available only for tablet or desktop view.");
-                      } else {
-                        setStep('templates_initial');
-                      }
+                      setStep('templates_initial');
                     }}
                   >
                     Create From Scratch <span>→</span>

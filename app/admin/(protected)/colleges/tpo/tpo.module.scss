@@ -11,97 +11,163 @@
 
 .headerWrapper {
   background-color: #fff;
-  padding: 0.25rem 1.5rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.75rem;
+  }
 }
 
 .tpoHeader {
   margin-bottom: 0;
 
   .headerInfo {
-    @include flexBox(row, center, space-between, 1rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
     flex-wrap: wrap;
-    padding-top: 0;
 
-    h3 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #262626;
-      margin: 0;
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
     }
   }
 
   .controls {
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.5rem;
     flex-wrap: wrap;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+
+      .searchInput {
+        grid-column: span 2;
+        width: 100% !important;
+        min-width: 100% !important;
+      }
+
+      .sortSelect {
+        width: 100% !important;
+        min-width: 100% !important;
+      }
+
+      button {
+        width: 100% !important;
+      }
+    }
   }
 }
 
 .searchInput {
-  min-width: 250px;
-  border-radius: $borderRadius !important;
+  width: 220px;
+  border-radius: 8px !important;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  height: 38px;
+  transition: all 0.2s ease;
+
+  &:hover, &:focus, &:focus-within {
+    border-color: #1E69DA !important;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(30, 105, 218, 0.1);
+  }
 
   :global(.ant-input) {
-    border-radius: $borderRadius;
+    background-color: transparent !important;
+    font-size: 14px;
   }
 }
 
 .sortSelect {
-  min-width: 200px;
-  border-radius: $borderRadius;
+  width: 160px;
+  height: 38px;
 
   :global(.ant-select-selector) {
-    border-radius: $borderRadius !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    background-color: #f8fafc !important;
+    height: 38px !important;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+
+  &:hover :global(.ant-select-selector),
+  &:focus :global(.ant-select-selector) {
+    border-color: #1E69DA !important;
+    background-color: #ffffff !important;
   }
 }
 
 .contentScrollContainer {
   flex: 1;
   overflow-y: auto;
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   @include custom-scrollbar(#1890ff);
+
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+  }
 }
 
 .tpoGrid {
-  @include auto-grid(20rem, 1rem);
-  min-height: 50vh;
-  max-height: 65vh;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-  padding-bottom: 1rem;
-  @include custom-scrollbar();
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+  width: 100%;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 }
 
 .tpoCard {
   background: white;
-  border-radius: $borderRadiusLarge;
-  padding: 1rem;
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
   box-shadow: $shadowSm;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid #e8e8e8;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #e2e8f0;
   height: fit-content;
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: $shadowMd;
     border-color: #1E69DA;
   }
 }
 
 .cardHeader {
-  @include flexBox(column, center, center, 0.75rem);
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid $borderColor;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .avatarWrapper {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid #1E69DA;
+  border: 2.5px solid #1E69DA;
   background: $gray100;
 
   img {
@@ -114,73 +180,78 @@
 .placeholderAvatar {
   width: 100%;
   height: 100%;
-  @include flexBox(row, center, center, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(135deg, #1E69DA 0%, #1b7d7f 100%);
   color: white;
-  font-size: 2rem;
+  font-size: 1.25rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
 .userName {
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: #262626;
+  color: #1e293b;
   margin: 0;
   text-align: center;
-  line-height: 1.3;
-  word-wrap: break-word;
+  line-height: 1.2;
 }
 
 .email {
-  font-size: 0.875rem;
-  color: #8c8c8c;
+  font-size: 0.813rem;
+  color: #64748b;
   margin: 0;
   word-break: break-all;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
 .cardBody {
-  @include flexBox(column, flex-start, flex-start, 0.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .infoRow {
-  @include flexBox(row, flex-start, flex-start, 0.75rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  font-size: 0.875rem;
-  line-height: 1.5;
+  font-size: 0.813rem;
+  padding: 0.2rem 0;
 
   .label {
-    font-weight: 600;
-    color: #595959;
-    min-width: 110px;
+    font-weight: 500;
+    color: #64748b;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
+    font-size: 0.813rem;
+    flex-shrink: 0;
   }
 
   .iconWrapper {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .value {
-    color: #262626;
-    flex: 1;
+    color: #1e293b;
+    font-weight: 500;
+    text-align: right;
     word-break: break-word;
+    font-size: 0.813rem;
   }
 }
 
 .badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.15rem 0.5rem;
   background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
   color: #1E69DA;
   border-radius: $borderRadiusLarge;
@@ -229,109 +300,3 @@
   }
 }
 
-// Responsive Design
-@media (max-width: 1200px) {
-  .tpoGrid {
-    @include auto-grid(18rem, 1.25rem);
-  }
-}
-
-@media (max-width: 768px) {
-  .pageContainer {
-    padding: 0.5rem;
-  }
-
-  .tpoHeader {
-    .headerInfo {
-      @include flexBox(column, flex-start, flex-start, 1rem);
-
-      h3 {
-        font-size: 1.25rem;
-      }
-
-      .controls {
-        width: 100%;
-        flex-direction: column;
-      }
-    }
-  }
-
-  .searchInput,
-  .sortSelect {
-    width: 100% !important;
-    min-width: 100%;
-  }
-
-  .tpoGrid {
-    @include auto-grid(100%, 1rem);
-    max-height: calc(100vh - 300px);
-  }
-
-  .tpoCard {
-    padding: 1rem;
-  }
-
-  .avatarWrapper {
-    width: 70px;
-    height: 70px;
-  }
-
-  .userName {
-    font-size: 1.1rem;
-  }
-
-  .infoRow {
-    flex-direction: column;
-    gap: 0.25rem;
-
-    .label {
-      min-width: unset;
-      font-weight: 700;
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .pageContainer {
-    padding: 0.25rem;
-  }
-
-  .tpoHeader {
-    .headerInfo {
-      h3 {
-        font-size: 1.1rem;
-      }
-    }
-  }
-
-  .tpoCard {
-    padding: 0.875rem;
-    border-radius: $borderRadius;
-  }
-
-  .avatarWrapper {
-    width: 60px;
-    height: 60px;
-    border-width: 2px;
-  }
-
-  .placeholderAvatar {
-    font-size: 1.5rem;
-  }
-
-  .userName {
-    font-size: 1rem;
-  }
-
-  .email {
-    font-size: 0.8rem;
-  }
-
-  .cardBody {
-    gap: 0.5rem;
-  }
-
-  .infoRow {
-    font-size: 0.8rem;
-  }
-}

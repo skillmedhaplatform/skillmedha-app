@@ -93,7 +93,7 @@ const AdminBanner = () => {
       };
     }
     if (pathname.includes("/companies")) return { title: "Companies", icon: defaultIcon };
-    if (pathname.includes("/organisationDetails") && pathname.split("/").length >= 4) {
+    if (pathname.includes("/organisationDetails") && pathname.split("/").filter(Boolean).length >= 4) {
       // It's the job details page
       return { 
         title: "Job Details", 
@@ -108,10 +108,16 @@ const AdminBanner = () => {
     if (pathname.includes("/workshops")) return { title: "Workshops", icon: defaultIcon };
     if (pathname.includes("/website-newsflash")) return { title: "Newsflash", icon: defaultIcon };
     if (pathname.includes("/organisationDetails")) {
-      const orgName = orgStats?.organization?.orgName || "Organisation";
-      const orgType = orgStats?.organization?.orgType || "college";
-      const subtitle = orgType === "college" ? "Educational Institution Dashboard" : "Company Dashboard";
-      return { title: orgName, subtitle, icon: defaultIcon };
+      const type = searchParams.get("type");
+      const orgType = orgStats?.organization?.orgType || type || "college";
+      const isCollege = orgType === "college";
+      const orgName = orgStats?.organization?.orgName;
+      const subtitle = isCollege ? "Educational Institution Dashboard" : "Company Dashboard";
+      return { 
+        title: isCollege ? "College Details" : "Company Details", 
+        subtitle, 
+        icon: defaultIcon 
+      };
     }
 
     return { title: "Admin Panel", icon: defaultIcon };
@@ -134,7 +140,7 @@ const AdminBanner = () => {
   const stats = getSectionStats();
 
   return (
-    <div className="w-full h-auto min-h-[140px] flex justify-between items-center p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+    <div className="w-full h-auto min-h-[140px] flex justify-between items-center p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
       {/* Decorative Icons */}
       <div className="absolute inset-0 pointer-events-none z-[1]">
         <BsX className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]" />
