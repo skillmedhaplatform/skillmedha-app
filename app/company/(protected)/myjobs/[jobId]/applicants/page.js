@@ -7,7 +7,6 @@ import { DatePicker, Input, Button, Empty, Drawer, Modal } from "antd";
 import dayjs from "dayjs";
 import {
   getAllAppliedStudents,
-  addAssessmentToStudent,
 } from "@/redux/slices/company/skillMedhaData";
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { useParams } from "next/navigation";

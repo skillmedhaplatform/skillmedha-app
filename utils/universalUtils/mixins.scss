@@ -1,4 +1,4 @@
-@use "colors.module.scss" as colors;
+@use "@/utils/universalUtils/colors.module.scss" as colors;
 @mixin flexBox($direction, $aligment, $justify, $gap: 0) {
   display: flex;
   align-items: $aligment;

@@ -3,8 +3,6 @@ import { getLstorage, setSstorage } from "@/utils/universalUtils/windowMW";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// const restUrl = "http://localhost:2000";
-
 export const addSkill = createAsyncThunk(
   "skills/addSkill",
   async (skillData, { rejectWithValue }) => {
@@ -41,7 +39,6 @@ export const fetchSkills = createAsyncThunk(
       });
       return response.data.skills;
     } catch (error) {
-      console.log(error);
       if (error.response) {
         return rejectWithValue(
           error.response.data.err || "Failed to fetch skills"

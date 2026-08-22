@@ -182,14 +182,12 @@ const PositionsAndResponsibilities = () => {
       
       return "unknown";
     } catch (error) {
-      console.error("Error detecting file type:", error);
       return "unknown";
     }
   };
 
   const showModal = (docUrl, title = "Document") => {
     if (!docUrl || typeof docUrl !== 'string') {
-      console.error("Invalid document URL:", docUrl);
       return;
     }
     
@@ -236,7 +234,6 @@ const PositionsAndResponsibilities = () => {
     const customDocFiles = extractCustomDocFiles(item.customDocs);
     
     if (customDocFiles.length === 0) {
-      console.warn("No valid document URLs found");
       return;
     }
     

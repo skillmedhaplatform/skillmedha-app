@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Dropdown, Drawer } from "antd";
-// import { ChevronRight } from "lucide-react";
 import styles from "./styles/int.module.scss";
 import JobStyles from "../../../myjobs/components/myJobsStyles.module.scss";
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";

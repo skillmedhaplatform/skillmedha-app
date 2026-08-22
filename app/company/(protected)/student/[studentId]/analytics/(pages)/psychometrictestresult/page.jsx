@@ -33,7 +33,6 @@ export default function PsychometricTestResultPage({ id, isDownload }) {
       setTestResult(data.data?.attemptedData || []);
       setResultMeta(data.data);
     } catch (err) {
-      console.error("Error fetching result:", err);
       setError("Failed to fetch result.");
     } finally {
       setLoading(false);

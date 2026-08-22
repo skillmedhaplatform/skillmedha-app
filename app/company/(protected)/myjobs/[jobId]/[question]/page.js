@@ -9,6 +9,7 @@ import { imgUrls } from "@/utils/universalUtils/images";
 import TextEditor from "@/utils/universalUtils/editor";
 import QuestionStyles from "./styles.module.scss";
 import { RiDeleteBinLine } from "react-icons/ri";
+import PageHeader from "@/modules/tpo/components/PageHeader";
 import {
   addQuestions,
   clearAddQuestionsState,
@@ -44,7 +45,6 @@ const labelOptions = [
   { name: QUESTION_TYPES.SINGLE_CHOICE, icon: imgUrls.SingleChoiceIcon },
   { name: QUESTION_TYPES.MULTIPLE_CHOICE, icon: imgUrls.MultipleChoiceIcon },
   { name: QUESTION_TYPES.TRUE_FALSE, icon: imgUrls.SingleChoiceIcon },
-  // { name: QUESTION_TYPES.FILL_IN_THE_BLANKS, icon: imgUrls.SingleChoiceIcon },
   { name: QUESTION_TYPES.AUDIO, icon: imgUrls.AudioIcon },
   { name: QUESTION_TYPES.VIDEO, icon: imgUrls.VideoIcon },
 ];
@@ -396,7 +396,6 @@ const QuestionEditor = () => {
         router.replace(`/company/myjobs/${params?.jobId}/createjob/questionManager`);
       }
     } catch (e) {
-      console.error("Error:", e);
       alert("Error saving question");
     }
   };
@@ -427,8 +426,23 @@ const QuestionEditor = () => {
   }
 
   return (
-    <>
-      <div className={QuestionStyles.QuestionContainer}>
+    <div style={{ backgroundColor: "#f8fafc", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <PageHeader
+        breadcrumb="My Jobs"
+        title={isUpdateMode ? "Update Question" : "Create New Question"}
+        subtitle="Manage question details, type, difficulty, and score"
+      />
+
+      <div style={{ padding: "16px 24px" }}>
+        <span
+          style={{ color: "#64748b", cursor: "pointer", fontWeight: 500 }}
+          onClick={() => router.replace(`/company/myjobs/${params?.jobId}/createjob/questionManager`)}
+        >
+          ← Back to Question Manager
+        </span>
+      </div>
+
+      <div className={QuestionStyles.QuestionContainer} style={{ width: '96%', margin: '0 auto', flex: 1 }}>
         <div className={QuestionStyles.QuestionHeader}>
           <div>{isUpdateMode ? "Update Question" : "Create New Question"}</div>
           <div style={{ display: "flex", gap: "12px" }}>
@@ -470,17 +484,13 @@ const QuestionEditor = () => {
             >
               Question Type*
             </div>
-            <div className={`${QuestionStyles.typeContent}`}>
-              {labelOptions.map((o) => (
-                <Button
-                  key={o.name}
-                  onClick={() => handleQuestionTypeChange(o.name)}
-                  type={questionType === o.name ? "primary" : "default"}
-                >
-                  <Image src={o.icon} alt={`${o.name} Icon`} />
-                  <div>{o.name}</div>
-                </Button>
-              ))}
+            <div className={`${QuestionStyles.rightBody}`}>
+              <Select
+                value={questionType}
+                onChange={handleQuestionTypeChange}
+                className={QuestionStyles.responsiveField}
+                options={labelOptions.map(o => ({ label: o.name, value: o.name }))}
+              />
             </div>
           </div>
 
@@ -520,7 +530,7 @@ const QuestionEditor = () => {
               <Select
                 placeholder="Select Difficulty"
                 allowClear
-                style={{ width: "40%" }}
+                className={QuestionStyles.responsiveField}
                 onChange={(v) => updateFormField("difficulty", v)}
                 value={singleTest?.difficulty}
                 options={DIFFICULTY_LEVELS}
@@ -536,7 +546,7 @@ const QuestionEditor = () => {
                 min={1}
                 max={100}
                 placeholder="Enter score"
-                style={{ width: "40%" }}
+                className={QuestionStyles.responsiveField}
                 value={singleTest?.score?.points || 1}
                 onChange={(v) => updateScoreField(v)}
               />
@@ -555,7 +565,7 @@ const QuestionEditor = () => {
                 tokenSeparators={[","]}
                 allowClear
                 maxTagCount="responsive"
-                style={{ width: "40%" }}
+                className={QuestionStyles.responsiveField}
                 maxCount={5}
               />
             </div>
@@ -737,7 +747,7 @@ const QuestionEditor = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

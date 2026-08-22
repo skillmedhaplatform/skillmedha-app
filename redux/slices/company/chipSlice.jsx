@@ -1,5 +1,5 @@
 const { createSlice } = require("@reduxjs/toolkit");
-import { v4 as uuidv4,validate as uuidValidate } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 const ChipsSlice = createSlice({
     name: "ChipsData",
     initialState: {
@@ -16,7 +16,6 @@ const ChipsSlice = createSlice({
                 ...action.payload,
                 _id: chipId
             })
-            //console.log(uuidValidate("66a767ac012cd8da3be0a926"));
         },
         removeChip: (state,action) => {
             state[action.payload.keyName] = state[action.payload.keyName].filter(e => e._id !== action.payload.chipId)

@@ -235,7 +235,6 @@ const Page = () => {
         message.error("No assessment found to update");
       }
     } catch (error) {
-      console.error("Error saving grading configuration:", error);
       message.error("Failed to save grading configuration");
     }
   };

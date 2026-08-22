@@ -2,7 +2,6 @@ import { GetToken } from "@/utils/universalUtils/token";
 import { restUrl } from "@/utils/universalUtils/urls";
 import {
   getLstorage,
-  setLstorage,
   setSstorage,
 } from "@/utils/universalUtils/windowMW";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
@@ -173,7 +172,6 @@ export const GetAllJobs = createAsyncThunk(
       );
       return data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -192,7 +190,6 @@ export const GetOneJob = createAsyncThunk("/getOneJob", async (args) => {
     );
     return data;
   } catch (error) {
-    console.log(error);
   }
 });
 
@@ -221,7 +218,6 @@ export const CreateJob = createAsyncThunk(
     } catch (error) {
       hideLoading();
       message.error("Error Creating Job ");
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -252,7 +248,6 @@ export const UpdateJob = createAsyncThunk(
     } catch (error) {
       hideLoading();
       message.error("Error Updating Job ");
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -276,8 +271,6 @@ export const getJobAssessmentResultsForStudent = createAsyncThunk(
       return response.data;
     } catch (error) {
       const errMsg =
-        // error.response?.data?.message ||
-        // error.message ||
         "No progress found for this student and assessment";
 
       message.error(errMsg);

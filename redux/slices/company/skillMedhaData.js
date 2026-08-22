@@ -35,9 +35,6 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      console.error("Authentication failed");
-    }
     return Promise.reject(error);
   }
 );
@@ -199,7 +196,6 @@ export const getAllAppliedStudents = createAsyncThunk(
 
       return data.data;
     } catch (err) {
-      console.log(err);
     }
   }
 );
@@ -222,7 +218,6 @@ export const getAllAppliedStudentsWithAssesmentResults = createAsyncThunk(
 
       return data.data;
     } catch (err) {
-      console.log(err);
     }
   }
 );
@@ -250,7 +245,6 @@ export const updateStudentAndJobStatus = createAsyncThunk(
       return data.data;
     } catch (err) {
       message.error("Error while updating status");
-      console.log(err);
     } finally {
       hide();
     }
@@ -283,7 +277,6 @@ export const addAssessmentToStudent = createAsyncThunk(
       return data.data;
     } catch (err) {
       message.error("Error while assigning assessment");
-      console.log(err);
     } finally {
       hide();
     }
@@ -305,7 +298,6 @@ export const getScheduledInterviewsForJob = createAsyncThunk(
 
       return data?.students;
     } catch (err) {
-      console.log(err);
     }
   }
 );
@@ -405,7 +397,6 @@ export const getOneJobAssessment = createAsyncThunk(
 
       return data.data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -427,7 +418,6 @@ export const getAllAssessments = createAsyncThunk(
 
       return data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -453,7 +443,6 @@ export const generateAiQuestion = createAsyncThunk(
 
       return data;
     } catch (error) {
-      console.log(error);
     }
   }
 );

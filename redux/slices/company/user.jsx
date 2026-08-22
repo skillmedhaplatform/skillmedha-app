@@ -52,7 +52,6 @@ export const getOneUser = createAsyncThunk("/getOneUser", async (args) => {
 
     return { ...data.data, orgDetails: data?.orgDetails };
   } catch (error) {
-    console.log(error);
   }
 });
 
@@ -91,7 +90,6 @@ export const UpdateUser = createAsyncThunk("/UpdateUser", async (args) => {
   } catch (error) {
     hide();
     message.error("Failed to update user. Please try again.");
-    console.error("UpdateUser Error:", error);
     throw error;
   }
 });

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams, usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 import allStudents from "./allstudents.module.scss";
 import Search from "antd/es/input/Search";
 import { Button, message, Table, Select } from "antd";
@@ -48,7 +48,6 @@ const PlacementDetails = () => {
       message.success("Job details loaded successfully.");
     } catch (error) {
       hide();
-      console.error("Fetch failed", error);
       message.error("Failed to fetch job details.");
     } finally {
       hide();
@@ -62,11 +61,6 @@ const PlacementDetails = () => {
   };
 
   const columns = [
-    // {
-    //   title: "Company",
-    //   dataIndex: "companyName",
-    //   key: "companyName",
-    // },
     {
       title: "Job Title",
       dataIndex: "jobTitle",
@@ -211,7 +205,6 @@ const PlacementDetails = () => {
           scroll={{ y: 600 }}
           columns={columns}
           dataSource={filteredJobs}
-          // dataSource={ALLJOBS?.data}
           pagination={false}
           className={allStudents.custom_table}
           onRow={(record) => ({

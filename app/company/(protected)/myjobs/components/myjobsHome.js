@@ -4,7 +4,6 @@ import React, { useEffect, useState, useMemo } from "react";
 import JobsTable from "./jobsTable";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchPartnerColleges } from "@/redux/slices/company/skillMedhaData";
 import { Button, Input } from "antd";
 import "./antd.css";
 import JobStyles from "./myJobsStyles.module.scss";
@@ -102,7 +101,6 @@ export default function MyjobsHome() {
           savedDrafts: drafts,
         });
       } catch (err) {
-        console.error("Failed to fetch jobs stats:", err);
       }
     };
     fetchStats();

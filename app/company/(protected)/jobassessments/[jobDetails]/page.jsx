@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import jdStyles from "./page.module.scss";
-import { Radio } from "antd";
 import "./antd.css";
 import {
   getAllAppliedStudents,
@@ -14,11 +13,9 @@ import {
 import Applicants from "./comps/applicants";
 import AssessmentTaken from "./comps/assessmentTaken";
 import Interviews from "./comps/interviews";
-import EligibleStudents from "./comps/eligibleStudents";
 import PageHeader from "@/modules/tpo/components/PageHeader";
 
 const options = [
-  // { label: "Eligible Students", value: "Eligible Students" },
   { label: "Applicants", value: "Applicants" },
   { label: "Assessments Taken", value: "Assessments Taken" },
   { label: "Scheduled interviews", value: "Scheduled interviews" },
@@ -44,22 +41,6 @@ const Page = () => {
   // State for selected tab
   const [selectedTab, setSelectedTab] = useState("Applicants");
 
-  // useEffect(() => {
-  //   dispatch(GetOneJob({ jobid: jobDetails }));
-
-  //   if (oneJobData?.applicants?.length) {
-  //     dispatch(
-  //       getAllAppliedStudents({
-  //         studentIds: oneJobData?.applicants?.map((e) => e?._id),
-  //         jobId: oneJobData?._id,
-  //         assessmentId: oneJobData?.AssessmentId,
-  //       })
-  //     );
-  //   }
-  // }, [jobDetails]);
-  // 1️⃣ First effect → fetch job details
-  // 1️⃣ First effect → fetch job details
-  // 1️⃣ First effect → fetch job details
   useEffect(() => {
     if (jobDetails) {
       // reset before fetching new job
@@ -78,7 +59,7 @@ const Page = () => {
   // 2️⃣ Fetch applied students only when oneJobData updates successfully
   useEffect(() => {
     if (
-      status === "succeeded" && // ✅ wait for fetch to finish
+      status === "succeeded" &&
       oneJobData?._id &&
       oneJobData?.applicants?.length
     ) {
@@ -90,7 +71,7 @@ const Page = () => {
         })
       );
     }
-  }, [oneJobData, status, jobDetails, dispatch]); // ✅ depends on both
+  }, [oneJobData, status, jobDetails, dispatch]);
 
   if (!mounted) return null;
   return (
@@ -142,12 +123,6 @@ const Page = () => {
               <Interviews />
             </div>
           )}
-
-          {/* {selectedTab === "Eligible Students" && (
-            <div>
-              <EligibleStudents />
-            </div>
-          )} */}
         </div>
       </div>
     </>
@@ -155,4 +130,5 @@ const Page = () => {
 };
 
 export default Page;
+
 
