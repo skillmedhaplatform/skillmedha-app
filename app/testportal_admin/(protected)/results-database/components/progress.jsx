@@ -95,14 +95,7 @@ const ProgressComp = ({ deptId }) => {
   const [testFilter, setTestFilter] = useState("all");
   const [scoreFilter, setScoreFilter] = useState("all");
 
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
 
-  // Reset pagination when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [globalSearchText, testFilter, scoreFilter]);
 
   // Re-fetch whenever user navigates to this page
   useEffect(() => {
@@ -201,10 +194,7 @@ const ProgressComp = ({ deptId }) => {
       .filter(Boolean)
   ).size;
 
-  const handleTableChange = (pagination) => {
-    setCurrentPage(pagination.current || 1);
-    setPageSize(pagination.pageSize || 10);
-  };
+
 
   return (
     <div className={progressStyles.container}>
@@ -318,19 +308,9 @@ const ProgressComp = ({ deptId }) => {
             loading={progressDataStatus === "pending"}
             dataSource={filteredResultsList}
             rowKey="_id"
-            onChange={handleTableChange}
-            pagination={{
-              current: currentPage,
-              pageSize: pageSize,
-              total: filteredResultsList.length,
-              showSizeChanger: true,
-              pageSizeOptions: ["10", "25", "50", "100"],
-              showTotal: (filteredTotal, range) =>
-                `Showing ${range[0]}-${range[1]} of ${filteredTotal}`,
-              placement: ["bottomRight"],
-            }}
+            pagination={false}
             locale={{ emptyText: "No Results Added" }}
-            scroll={{ x: 1200 }}
+            scroll={{ x: 1200, y: "calc(100vh - 350px)" }}
           >
             {/* Test Details */}
             <Column
@@ -370,12 +350,17 @@ const ProgressComp = ({ deptId }) => {
                 const initial = fullName !== "N/A" ? fullName.charAt(0).toUpperCase() : "?";
                 const colorIdx = fullName !== "N/A" ? fullName.charCodeAt(0) % avatarColors.length : 0;
                 const avatarColor = avatarColors[colorIdx];
+                const profileImage = record?.studentDetails?.profilePic || record?.studentDetails?.profilePicture || record?.studentDetails?.profile || record?.studentData?.profilePic || record?.studentData?.profilePicture || record?.studentData?.image || record?.studentData?.profile;
 
                 return (
                   <div className={progressStyles.userCell}>
-                    <div className={progressStyles.avatar} style={{ backgroundColor: avatarColor }}>
-                      {initial}
-                    </div>
+                    {profileImage ? (
+                      <img src={profileImage} alt={fullName} className={progressStyles.avatar} style={{ objectFit: 'cover' }} />
+                    ) : (
+                      <div className={progressStyles.avatar} style={{ backgroundColor: avatarColor }}>
+                        {initial}
+                      </div>
+                    )}
                     <div className={progressStyles.userTextStack}>
                       <span className={progressStyles.nameText}>{fullName}</span>
                       <span className={progressStyles.emailText}>{record?.studentData?.Email || "N/A"}</span>

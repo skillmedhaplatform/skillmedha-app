@@ -1,5 +1,78 @@
 @use "@/utils/universalUtils/colors.module.scss" as *;
 
+.stickyHeaderWrapper {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+}
+
+.tabsWrapper {
+  background-color: white;
+  padding: 0 2.5rem;
+  width: 100%;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  z-index: 1;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}
+
+.tabsRow {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+  width: 100%;
+  overflow-x: auto;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.tabItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  white-space: nowrap;
+
+  &:hover {
+    color: #6BA8ED;
+  }
+}
+
+.activeTab {
+  color: #6BA8ED !important;
+}
+
+.activeIndicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #6BA8ED;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .mainContainer {
   display: flex;
   width: 100%;
@@ -37,73 +110,6 @@
       font-size: 14px;
       font-weight: 600;
     }
-  }
-
-  .tabsWrapper {
-    background-color: white;
-    padding: 0 2.5rem;
-    width: 100%;
-    border-bottom: 1px solid #e2e8f0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    z-index: 1;
-    margin-bottom: 1rem;
-
-    @media (max-width: 768px) {
-      padding: 0 1rem;
-    }
-  }
-
-  .tabsRow {
-    display: flex;
-    gap: 2.5rem;
-    align-items: center;
-    width: 100%;
-    overflow-x: auto;
-    
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .tabItem {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 0;
-    font-size: 0.875rem;
-    color: #64748b;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    position: relative;
-    white-space: nowrap;
-
-    &:hover {
-      color: #6BA8ED;
-    }
-  }
-
-  .activeTab {
-    color: #6BA8ED !important;
-  }
-
-  .activeIndicator {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background-color: #6BA8ED;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-  }
-
-  .disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
   }
 
   .bottomCont {

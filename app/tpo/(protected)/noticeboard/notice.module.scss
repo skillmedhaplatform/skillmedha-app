@@ -44,9 +44,9 @@
 }
 
 .activeTab {
-  color: #1d4ed8 !important;
+  color: #6BA8ED !important;
   font-weight: 600 !important;
-  background-color: #eff6ff !important;
+  background-color: transparent !important;
 }
 
 .activeIndicator {
@@ -55,7 +55,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #1d4ed8;
+  background-color: #6BA8ED;
   border-radius: 2px 2px 0 0;
 }
 

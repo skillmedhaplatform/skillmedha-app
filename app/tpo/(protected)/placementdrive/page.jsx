@@ -475,60 +475,62 @@ export default function DriveDetails() {
   // ─── Render ──────────────────────────────────────────────
   return (
     <>
-      <PageHeader
-        title="All companies"
-        subtitle="Manage recruiting companies, contacts and placement drives"
-        actionText="+ Create Company"
-        onActionClick={handleOpenCreateModal}
-      />
+      <div className={styles.stickyHeaderWrapper}>
+        <PageHeader
+          title="All companies"
+          subtitle="Manage recruiting companies, contacts and placement drives"
+          actionText="+ Create Company"
+          onActionClick={handleOpenCreateModal}
+        />
 
-      <div className={styles.topSectionWrapper}>
-        <div className={styles.leftControls}>
-          <div className={styles.desktopTabBar} style={{ borderBottom: 'none', marginBottom: 0 }}>
-            {TABS.map((tab) => (
-              <div
-                key={tab.key}
-                className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ""}`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                {tab.label}
-                <span className={styles.tabCount}>{tabCounts[tab.key]}</span>
+        <div className={styles.topSectionWrapper}>
+          <div className={styles.leftControls}>
+            <div className={styles.desktopTabBar} style={{ borderBottom: 'none', marginBottom: 0 }}>
+              {TABS.map((tab) => (
+                <div
+                  key={tab.key}
+                  className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ""}`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  {tab.label}
+                  <span className={styles.tabCount}>{tabCounts[tab.key]}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.mobileTabBar}>
+              <Dropdown menu={{ items: tabMenuItems }} trigger={['click']}>
+                <Button className={styles.mobileTabBtn}>
+                  {activeTabLabel} <FaCaretDown />
+                </Button>
+              </Dropdown>
+            </div>
+          </div>
+
+          <div className={styles.rightControls}>
+            <div className={styles.miniStatsContainer}>
+              <div className={`${styles.miniStat} ${styles.activeDrivesStat}`}>
+                <span className={styles.miniStatValue}>{stats.activeDrives}</span>
+                <span className={styles.miniStatLabel}>Active Drives</span>
               </div>
-            ))}
-          </div>
-          <div className={styles.mobileTabBar}>
-            <Dropdown menu={{ items: tabMenuItems }} trigger={['click']}>
-              <Button className={styles.mobileTabBtn}>
-                {activeTabLabel} <FaCaretDown />
-              </Button>
-            </Dropdown>
-          </div>
-        </div>
+              <div className={`${styles.miniStat} ${styles.studentsPlacedStat}`}>
+                <span className={styles.miniStatValue}>{stats.studentsPlaced}</span>
+                <span className={styles.miniStatLabel}>Students Placed</span>
+              </div>
+              <div className={`${styles.miniStat} ${styles.latestAddedStat}`}>
+                <span className={styles.miniStatValue} title={stats.latestName}>
+                  {stats.latestName.length > 12
+                    ? stats.latestName.slice(0, 12) + "…"
+                    : stats.latestName}
+                </span>
+                <span className={styles.miniStatLabel}>Latest Added</span>
+              </div>
+            </div>
 
-        <div className={styles.rightControls}>
-          <div className={styles.miniStatsContainer}>
-            <div className={`${styles.miniStat} ${styles.activeDrivesStat}`}>
-              <span className={styles.miniStatValue}>{stats.activeDrives}</span>
-              <span className={styles.miniStatLabel}>Active Drives</span>
-            </div>
-            <div className={`${styles.miniStat} ${styles.studentsPlacedStat}`}>
-              <span className={styles.miniStatValue}>{stats.studentsPlaced}</span>
-              <span className={styles.miniStatLabel}>Students Placed</span>
-            </div>
-            <div className={`${styles.miniStat} ${styles.latestAddedStat}`}>
-              <span className={styles.miniStatValue} title={stats.latestName}>
-                {stats.latestName.length > 12
-                  ? stats.latestName.slice(0, 12) + "…"
-                  : stats.latestName}
-              </span>
-              <span className={styles.miniStatLabel}>Latest Added</span>
-            </div>
+            <Button type="primary" className={styles.createBtn} onClick={handleOpenCreateModal}>
+              <span className={styles.createText}>+ Create Company</span>
+              <span className={styles.createIcon}>+</span>
+            </Button>
           </div>
-
-          <Button type="primary" className={styles.createBtn} onClick={handleOpenCreateModal}>
-            <span className={styles.createText}>+ Create Company</span>
-            <span className={styles.createIcon}>+</span>
-          </Button>
         </div>
       </div>
 

@@ -10,7 +10,15 @@
   min-height: calc(100vh - 140px);
 }
 
-/* ===== Summary Stats ===== */
+/* ===== Sticky Header Wrapper ===== */
+.stickyHeaderWrapper {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+}
+
+/* ===== Summary Stats / Tabs Bar ===== */
 .topSectionWrapper {
   background: white;
   padding: 0.5rem 1.5rem;
@@ -21,6 +29,7 @@
   box-sizing: border-box;
   gap: 1rem;
   flex-wrap: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 
   @media (max-width: 640px) {
     flex-wrap: wrap;
@@ -467,9 +476,16 @@
 }
 
 .actionBtn {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.75rem;
+  min-width: 52px;
+  height: 32px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
   font-weight: 500;
+  line-height: 1;
+  text-align: center;
   border-radius: 6px;
   cursor: pointer;
   border: 1px solid #e2e8f0;
@@ -477,6 +493,7 @@
   color: #4a5568;
   transition: all 0.15s ease;
   white-space: nowrap;
+  box-sizing: border-box;
 
   &:hover {
     background-color: #f7fafc;
@@ -855,7 +872,7 @@
   }
 }
 
-.actionBtn {
+.breadcrumbContainer {
   width: 100%;
   padding: 0.25rem 0;
   display: flex;

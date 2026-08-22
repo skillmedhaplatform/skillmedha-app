@@ -137,52 +137,54 @@ const PlacementDetails = () => {
 
   return (
     <>
-      <PageHeader
-        title={getName(id) || "Company Details"}
-        subtitle="Manage jobs and job description postings for this company"
-      />
+      <div className={allStudents.stickyHeaderWrapper}>
+        <PageHeader
+          title={getName(id) || "Company Details"}
+          subtitle="Manage jobs and job description postings for this company"
+        />
 
-      <div className={allStudents.topSectionWrapper}>
-        <div className={allStudents.leftControls}>
-          <div className={allStudents.desktopSelect}>
-            <Select
-              value={selectedProfile}
-              style={{ width: "100%", maxWidth: 300, minWidth: 120, height: 38, textAlign: "center" }}
-              onChange={(value) => setSelectedProfile(value)}
-              options={profileOptions}
+        <div className={allStudents.topSectionWrapper}>
+          <div className={allStudents.leftControls}>
+            <div className={allStudents.desktopSelect}>
+              <Select
+                value={selectedProfile}
+                style={{ width: "100%", maxWidth: 300, minWidth: 120, height: 38, textAlign: "center" }}
+                onChange={(value) => setSelectedProfile(value)}
+                options={profileOptions}
+              />
+            </div>
+            <div className={allStudents.mobileFilter}>
+              <Dropdown menu={{ items: filterMenuItems }} placement="bottomLeft" trigger={['click']}>
+                <button className={allStudents.filterBtn}>
+                  <FaFilter size={16} />
+                </button>
+              </Dropdown>
+            </div>
+            <Search
+              placeholder="Search by profile or company name"
+              style={{ width: "100%", maxWidth: 300, minWidth: 120, height: 38 }}
+              allowClear
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className={allStudents.mobileFilter}>
-            <Dropdown menu={{ items: filterMenuItems }} placement="bottomLeft" trigger={['click']}>
-              <button className={allStudents.filterBtn}>
-                <FaFilter size={16} />
-              </button>
-            </Dropdown>
+          <div className={allStudents.rightControls}>
+            <Button
+              type="primary"
+              className={allStudents.addJobBtn}
+              onClick={() => {
+                if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+                  message.warning(
+                    "This action cannot be performed on a tablet/mobile screen. Please try on a laptop or larger screen."
+                  );
+                  return;
+                }
+                router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`);
+              }}
+            >
+              <span className={allStudents.addJobText}>+ Add New Job</span>
+              <span className={allStudents.addJobIcon}>+</span>
+            </Button>
           </div>
-          <Search
-            placeholder="Search by profile or company name"
-            style={{ width: "100%", maxWidth: 300, minWidth: 120, height: 38 }}
-            allowClear
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className={allStudents.rightControls}>
-          <Button
-            type="primary"
-            className={allStudents.addJobBtn}
-            onClick={() => {
-              if (typeof window !== "undefined" && window.innerWidth <= 1024) {
-                message.warning(
-                  "This action cannot be performed on a tablet/mobile screen. Please try on a laptop or larger screen."
-                );
-                return;
-              }
-              router.push(`/tpo/placementdrive/${id}/${jobid || "job"}/createjob`);
-            }}
-          >
-            <span className={allStudents.addJobText}>+ Add New Job</span>
-            <span className={allStudents.addJobIcon}>+</span>
-          </Button>
         </div>
       </div>
 

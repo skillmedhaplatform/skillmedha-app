@@ -98,10 +98,18 @@
   }
 }
 
+/* Sticky Header Wrapper */
+.stickyHeaderWrapper {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+}
+
 /* Tabs Bar new style matching placementdrive */
 .topSectionWrapper {
   background: white;
-  padding: 1rem 2.5rem;
+  padding: 0.5rem 2.5rem;
   border-bottom: 1px solid #edf2f7;
   display: flex;
   align-items: center;
@@ -109,9 +117,10 @@
   width: 100%;
   gap: 1rem;
   flex-wrap: wrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 
   @media (max-width: 768px) {
-    padding: 1rem 1.25rem;
+    padding: 0.5rem 1.25rem;
   }
 }
 
