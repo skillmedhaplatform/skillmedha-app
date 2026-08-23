@@ -92,16 +92,14 @@ const Page = () => {
   );
 
   useEffect(() => {
+    dispatch(GetAllPlacements());
     if (studentsStatus !== "succeeded" && studentsStatus !== "loading") {
       dispatch(getAllStudents({}));
-    }
-    if (placementsStatus !== "succeeded" && placementsStatus !== "loading") {
-      dispatch(GetAllPlacements());
     }
     if (departmentStatus !== "sucess" && departmentStatus !== "loading") {
       dispatch(getAllDepartments());
     }
-  }, [dispatch, studentsStatus, placementsStatus, departmentStatus]);
+  }, [dispatch]);
 
   const studentsList = Array.isArray(StudentsLength?.data)
     ? StudentsLength.data

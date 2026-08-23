@@ -129,33 +129,35 @@ export default function JobPreviewPage() {
 
   return (
     <>
-      <PageHeader
-        title={JOBPROFILE?.jobTitle || "Job Details"}
-        subtitle={`${JOBPROFILE?.companyName || "Company"} - ${JOBPROFILE?.city || "City not specified"}, ${JOBPROFILE?.country || "Country not specified"}`}
-        actionText="Edit"
-        onActionClick={handleEditClick}
-      />
+      <div className={styles.stickyHeaderWrapper}>
+        <PageHeader
+          title={JOBPROFILE?.jobTitle || "Job Details"}
+          subtitle={`${JOBPROFILE?.companyName || "Company"} - ${JOBPROFILE?.city || "City not specified"}, ${JOBPROFILE?.country || "Country not specified"}`}
+          actionText="Edit"
+          onActionClick={handleEditClick}
+        />
 
-      <div className={styles.topSectionWrapper}>
-        <div className={styles.tabBar}>
-          {tabList.map((tab) => {
-            const isActive = activeTab === tab.key;
-            return (
-              <div
-                key={tab.key}
-                className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
-                onClick={() => handleTabChange(tab.key)}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-          <Button type="primary" onClick={handleEditClick} style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
-            Edit
-          </Button>
+        <div className={styles.topSectionWrapper}>
+          <div className={styles.tabBar}>
+            {tabList.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <div
+                  key={tab.key}
+                  className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
+                  onClick={() => handleTabChange(tab.key)}
+                >
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+            <Button type="primary" onClick={handleEditClick} style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+              Edit
+            </Button>
+          </div>
         </div>
       </div>
 

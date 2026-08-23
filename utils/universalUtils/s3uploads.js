@@ -3,16 +3,17 @@ import axios from "axios";
 import { message } from "antd";
 import { GetToken } from "./token";
 import { getLstorage } from "./windowMW";
-import { restUrl } from "./urls";
+import { restUrl as defaultRestUrl } from "./urls";
 
 export const handleS3Upload = async ({
   file,
-  restUrl,
+  restUrl: customRestUrl,
   bucketName = "skillmedha-utils",
   onUploaded = () => {},
   onSuccess = () => {},
   onError = () => {},
 }) => {
+  const targetRestUrl = customRestUrl || defaultRestUrl;
   const hideLoading = message.loading("Uploading to S3...");
   const formData = new FormData();
   formData.append("file", file, file.name);
@@ -20,7 +21,7 @@ export const handleS3Upload = async ({
   try {
     const token = GetToken();
     const res = await axios.post(
-      `${restUrl}/uploadToS3?bucketName=${bucketName}`,
+      `${targetRestUrl}/uploadToS3?bucketName=${bucketName}`,
       formData,
       {
         headers: {
@@ -30,7 +31,7 @@ export const handleS3Upload = async ({
       }
     );
 
-    const uploadedFile = res?.data?.file;
+    const uploadedFile = res?.data?.file || res?.data?.url || res?.data?.location;
     hideLoading();
     message.success("Image uploaded to S3");
     onUploaded(uploadedFile);

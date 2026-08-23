@@ -231,6 +231,25 @@
 
   // Ant Design Table Customize
   :global(.ant-table-wrapper) {
+    // SCROLLBAR STYLES
+    :global(.ant-table-body) {
+      &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      &::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: #1e69da;
+        border-radius: 4px;
+      }
+      &::-webkit-scrollbar-thumb:hover {
+        background: #1a5bbd;
+      }
+    }
+
     :global(.ant-table-thead > tr > th) {
       background-color: #f8fafc !important;
       color: #475569 !important;

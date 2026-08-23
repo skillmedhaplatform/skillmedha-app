@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { Skeleton, Empty, Input, Tooltip, Select, Pagination } from "antd";
+import { Skeleton, Empty, Input, Tooltip, Select } from "antd";
 import { 
     SearchOutlined, 
     AppstoreOutlined, 
@@ -34,13 +34,6 @@ const DepartmentCards = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("results-desc");
     const [viewMode, setViewMode] = useState("grid"); // grid or list
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(4);
-
-    // Reset to page 1 on search or sort change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, sortBy, pageSize]);
 
     useEffect(() => {
         dispatch(getAllProgress({ limit: 500 }));
@@ -158,11 +151,7 @@ const DepartmentCards = () => {
         return result;
     }, [departmentStats, searchTerm, sortBy]);
 
-    // Paginate results
-    const paginatedDepts = useMemo(() => {
-        const startIndex = (currentPage - 1) * pageSize;
-        return processedDepts.slice(startIndex, startIndex + pageSize);
-    }, [processedDepts, currentPage, pageSize]);
+
 
     const handleCardClick = (deptId) => {
         router.push(`/testportal_admin/results-database/department/${deptId}`);
@@ -316,7 +305,7 @@ const DepartmentCards = () => {
                 </div>
             ) : (
                 <div className={viewMode === "grid" ? styles.grid : styles.list}>
-                    {paginatedDepts.map((dept) => {
+                    {processedDepts.map((dept) => {
                         const isAvgPositive = parseFloat(dept.avgScore) >= 0;
                         // Score calculation for indicator bar width
                         const scoreNum = parseFloat(dept.avgScore);
@@ -412,24 +401,6 @@ const DepartmentCards = () => {
                 </div>
             )}
 
-            {/* Pagination Controls */}
-            {processedDepts.length > 0 && (
-                <div className={styles.paginationRow}>
-                    <Pagination
-                        current={currentPage}
-                        pageSize={pageSize}
-                        total={processedDepts.length}
-                        onChange={(page, size) => {
-                            setCurrentPage(page);
-                            setPageSize(size);
-                        }}
-                        pageSizeOptions={["4", "8", "12", "20", "50"]}
-                        showSizeChanger
-                        showQuickJumper
-                        showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} departments`}
-                    />
-                </div>
-            )}
         </div>
     );
 };

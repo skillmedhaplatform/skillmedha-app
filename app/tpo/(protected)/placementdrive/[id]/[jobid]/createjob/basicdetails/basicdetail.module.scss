@@ -41,7 +41,7 @@
       flex-direction: column;
       gap: 0.5rem;
     }
-    label {
+    > label {
       min-width: 25%;
       width: 18%;
       font-size: 16px;
@@ -119,26 +119,28 @@
       align-items: flex-start;
       gap: 0.5rem;
     }
-  }
-  label {
-    min-width: 25%;
-    width: 18%;
-    font-size: 16px;
-    font-weight: 600;
-    word-wrap: break-word;
 
-    @media (max-width: 768px) {
-      min-width: 100%;
-      width: 100%;
-      margin-bottom: 0.25rem;
+    > label {
+      min-width: 25%;
+      width: 18%;
+      font-size: 16px;
+      font-weight: 600;
+      word-wrap: break-word;
+
+      @media (max-width: 768px) {
+        min-width: 100%;
+        width: 100%;
+        margin-bottom: 0.25rem;
+      }
     }
   }
+
   .inpuCont {
     flex: 1;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 1rem;
     flex-wrap: wrap;
 
@@ -161,7 +163,7 @@
     }
   }
   .textarea,
-  input {
+  input:not([type="radio"]):not([type="checkbox"]) {
     flex: 1;
     padding: 0.5rem;
     border: 0;
@@ -202,6 +204,18 @@
     background-color: #eef5fb !important;
     border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
     border-radius: 5px !important;
+  }
+
+  :global(.ant-radio-button-wrapper) {
+    min-width: 60px !important;
+    width: auto !important;
+    text-align: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    height: 38px !important;
+    line-height: 1 !important;
   }
 }
 .saveBtn {

@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { handleS3Upload as uploadToS3 } from "@/utils/universalUtils/s3uploads";
 import { UpdateUser } from "@/redux/slices/company/user";
 import { getLstorage } from "@/utils/universalUtils/windowMW";
+import { restUrl } from "@/utils/universalUtils/urls";
 
 export default function CompanyDetailsForm() {
   const USER_DETAILS = useSelector((state) => state?.user?.singleUser || null);
