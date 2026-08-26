@@ -62,14 +62,13 @@ export async function GET(request) {
     const CUTOFF_DATE = new Date("2026-05-01T00:00:00Z").getTime();
     // If createdAt is missing, we assume they are a new user (due to a previous TPO single-student creation bug)
     // because all old users from before May 1, 2026 have createdAt populated by the DB migration.
-    const isNewUser = !student?.createdAt || new Date(student.createdAt).getTime() >= CUTOFF_DATE;
+    // If createdAt is missing completely, we treat them as a legacy user (isNewUser = false).
+    const isNewUser = student?.createdAt ? new Date(student.createdAt).getTime() >= CUTOFF_DATE : false;
 
     const hasTakenTest = student?.psychometricTestResults && Object.keys(student.psychometricTestResults).length > 0;
     
     // Exempt if they already took the test, if they're an old user, or if this is NOT their first login
     const ptValue = Boolean(hasTakenTest || !isNewUser || (student?.loginCount > 1));
-    
-    console.log("[DEBUG refresh/route.js] pt:", ptValue, "isNewUser:", isNewUser, "loginCount:", student?.loginCount, "testResults:", student?.psychometricTestResults);
 
     const permissionsEncrypted = await encryptSession({
       // Login already requires verification, so if getStudentCreds succeeds, they are verified

@@ -184,7 +184,7 @@ const QuestionOptions = React.memo(
 
 QuestionOptions.displayName = "QuestionOptions";
 
-const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
+const QuestionList = React.memo(({ questions, onEdit, onDelete, selectedQuestions = [], onSelect }) => {
   const { canAccess, getPermissionMessage } = usePermissions();
   const [activePanels, setActivePanels] = React.useState([]);
 
@@ -217,6 +217,12 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
           <div key={_id}>
             <div className={listStyles.questionRow}>
               <div className={listStyles.rowLeft}>
+                <Checkbox
+                  checked={selectedQuestions?.includes(_id)}
+                  onChange={(e) => onSelect && onSelect(_id, e.target.checked)}
+                  style={{ marginRight: 8 }}
+                  onClick={(e) => e.stopPropagation()}
+                />
                 <CaretRightOutlined 
                   className={`${listStyles.expandIcon} ${isExpanded ? listStyles.expanded : ""}`}
                   onClick={() => togglePanel(_id)}
@@ -239,6 +245,7 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
                 <div className={listStyles.badges}>
                   <span className={`${listStyles.badge} ${listStyles.pts}`}>{score} pts</span>
                   <span className={`${listStyles.badge} ${listStyles.type}`}>{questionType}</span>
+                  {q.difficulty && <span className={`${listStyles.badge} ${listStyles.difficulty}`} style={{ textTransform: 'capitalize' }}>{q.difficulty}</span>}
                 </div>
                 
                 <div className={listStyles.actionIcons}>
@@ -264,6 +271,27 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
             {isExpanded && (
               <div className={listStyles.expandedContent}>
                 <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionContent?.question) }} style={{ marginBottom: 16 }} />
+                
+                <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {q.difficulty && <Tag color="blue" style={{ textTransform: 'capitalize' }}>Difficulty: {q.difficulty}</Tag>}
+                  {q.concept && <Tag color="purple">Concept: {q.concept}</Tag>}
+                  {q.companyTags && q.companyTags.length > 0 && (() => {
+                    const companies = q.companyTags.map(t => t.companyName).filter(Boolean).join(', ');
+                    const exams = q.companyTags.map(t => t.examName).filter(Boolean).join(', ');
+                    const years = q.companyTags.map(t => t.year).filter(Boolean).join(', ');
+                    const sections = q.companyTags.map(t => t.sectionName).filter(Boolean).join(', ');
+                    
+                    return (
+                      <React.Fragment>
+                        {companies && <Tag color="orange">Companies: {companies}</Tag>}
+                        {exams && <Tag color="gold">Exams: {exams}</Tag>}
+                        {years && <Tag color="cyan">Years: {years}</Tag>}
+                        {sections && <Tag color="geekblue">Sections: {sections}</Tag>}
+                      </React.Fragment>
+                    );
+                  })()}
+                </div>
+
                 <QuestionOptions questionContent={questionContent} answer={answer} questionType={questionType} />
               </div>
             )}
@@ -276,7 +304,13 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete }) => {
 
 QuestionList.displayName = "QuestionList";
 
-export default function QuestionsPage() {
+export default function QuestionsPage({ 
+  subjectId: propSubjectId, 
+  topicId: propTopicId, 
+  subTopicId: propSubTopicId,
+  isEmbedded = false,
+  hideActions = false
+}) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [bulkModalOpen, setBulkModalOpen] = React.useState(false);
@@ -284,19 +318,19 @@ export default function QuestionsPage() {
   const currentPath = usePathname();
   const [filterType, setFilterType] = React.useState("All");
   const [filterPoints, setFilterPoints] = React.useState("All");
+  const [selectedQuestions, setSelectedQuestions] = React.useState([]);
 
   const { canAccess, getPermissionMessage } = usePermissions();
 
   // Destructure params with defaults
-  const {
-    subject_slug = "",
-    topic_slug = "",
-    subtopic_slug = "",
-  } = params || {};
+  const subject_slug = propSubjectId || params?.subject_slug || "";
+  const topic_slug = propTopicId || params?.topic_slug || "";
+  const subtopic_slug = propSubTopicId !== undefined ? propSubTopicId : (params?.subtopic_slug || "");
 
   // Use selector with shallow equality check
   const questions = useSelector((state) => state.adminPractice.questions);
   const loading = useSelector((state) => state.adminPractice.loading);
+  const isTopicLevel = isEmbedded || subtopic_slug === "topic-questions";
 
   const filteredQuestions = useMemo(() => {
     let result = questions || [];
@@ -308,6 +342,11 @@ export default function QuestionsPage() {
     }
     return result;
   }, [questions, filterType, filterPoints]);
+
+  // Reset selection when filters change
+  useEffect(() => {
+    setSelectedQuestions([]);
+  }, [filterType, filterPoints]);
 
   const availablePoints = useMemo(() => {
     const pointsSet = new Set((questions || []).map(q => q.scoreSettings?.pointsForCorrectAns || 0));
@@ -321,9 +360,10 @@ export default function QuestionsPage() {
         message.info(getPermissionMessage(PERMISSION_VALUES.EDIT));
         return;
       }
-      router.push(`${currentPath}/${questionId}`);
+      const basePath = isEmbedded ? `${currentPath}/topic-questions` : currentPath;
+      router.push(`${basePath}/${questionId}`);
     },
-    [router, currentPath, canAccess, getPermissionMessage]
+    [router, currentPath, isEmbedded, canAccess, getPermissionMessage]
   );
 
   const handleDelete = useCallback(
@@ -337,17 +377,48 @@ export default function QuestionsPage() {
     [dispatch, canAccess, getPermissionMessage]
   );
 
+  const handleSelect = useCallback((id, checked) => {
+    setSelectedQuestions(prev => 
+      checked ? [...prev, id] : prev.filter(qId => qId !== id)
+    );
+  }, []);
+
+  const handleSelectAll = useCallback((checked) => {
+    if (checked) {
+      setSelectedQuestions(filteredQuestions.map(q => q._id));
+    } else {
+      setSelectedQuestions([]);
+    }
+  }, [filteredQuestions]);
+
+  const handleBulkDelete = useCallback(() => {
+    if (!canAccess(PERMISSION_VALUES.DELETE)) {
+      message.info(getPermissionMessage(PERMISSION_VALUES.DELETE));
+      return;
+    }
+    const promises = selectedQuestions.map(id => dispatch(deleteQuestion(id)).unwrap());
+    Promise.all(promises)
+      .then(() => {
+        message.success(`${selectedQuestions.length} questions deleted successfully.`);
+        setSelectedQuestions([]);
+      })
+      .catch(err => {
+        message.error("Failed to delete some questions.");
+      });
+  }, [selectedQuestions, dispatch, canAccess, getPermissionMessage]);
+
   const handleAdd = useCallback(() => {
     if (!canAccess(PERMISSION_VALUES.CREATE)) {
       message.info(getPermissionMessage(PERMISSION_VALUES.CREATE));
       return;
     }
-    router.push(`${currentPath}/new-question`);
-  }, [router, currentPath, canAccess, getPermissionMessage]);
+    const basePath = isEmbedded ? `${currentPath}/topic-questions` : currentPath;
+    router.push(`${basePath}/new-question`);
+  }, [router, currentPath, isEmbedded, canAccess, getPermissionMessage]);
 
   // Optimize data fetching with error handling and loading states
   useEffect(() => {
-    if (!topic_slug || !subject_slug || !subtopic_slug) {
+    if (!topic_slug || !subject_slug || (!subtopic_slug && !isTopicLevel)) {
       console.warn("Missing required URL parameters");
       return;
     }
@@ -360,7 +431,10 @@ export default function QuestionsPage() {
           dispatch(fetchSubtopicsByTopic(topic_slug)).unwrap(),
           dispatch(fetchTopicsBySubject(subject_slug)).unwrap(),
           dispatch(fetchSubjectsByType("technical")).unwrap(),
-          dispatch(fetchQuestions({ subtopicId: subtopic_slug })).unwrap(),
+          dispatch(fetchQuestions({ 
+            subtopicId: isTopicLevel ? undefined : subtopic_slug,
+            topicId: isTopicLevel ? topic_slug : undefined 
+          })).unwrap(),
         ];
 
         await Promise.all(promises);
@@ -394,10 +468,11 @@ export default function QuestionsPage() {
   }
 
   return (
-    <div className={listStyles.pageContainer}>
-      <div className={listStyles.topActionRow}>
-        <div className={listStyles.actionsLeft} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <PracticeBreadcrumbs />
+    <div className={isEmbedded ? "" : listStyles.pageContainer} style={isEmbedded ? { marginTop: '1rem', width: '100%' } : {}}>
+      {!hideActions && (
+        <div className={listStyles.topActionRow}>
+          <div className={listStyles.actionsLeft} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            {!isEmbedded && <PracticeBreadcrumbs />}
           <Select
             value={filterType}
             onChange={(val) => setFilterType(val)}
@@ -406,6 +481,9 @@ export default function QuestionsPage() {
               { value: 'All', label: 'All Types' },
               { value: 'Single Choice', label: 'Single Choice' },
               { value: 'Multiple Choice', label: 'Multiple Choice' },
+              { value: 'True/False', label: 'True/False' },
+              { value: 'Text', label: 'Text' },
+              { value: 'Coding Question', label: 'Coding Question' },
             ]}
           />
           <Select
@@ -440,23 +518,43 @@ export default function QuestionsPage() {
           </Tooltip>
         </div>
       </div>
-
-
+      )}
 
       <BulkUploadModal
         open={bulkModalOpen}
         onCancel={() => setBulkModalOpen(false)}
         subjectId={subject_slug}
         topicId={topic_slug}
-        subTopicId={subtopic_slug}
+        subTopicId={isTopicLevel ? undefined : subtopic_slug}
         excludedTypes={["Coding Question"]}
       />
 
-      <div style={{ marginTop: "1rem" }}>
+      <div style={{ marginTop: "1rem", marginBottom: "0.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        {filteredQuestions.length > 0 && (
+          <Checkbox
+            checked={selectedQuestions.length > 0 && selectedQuestions.length === filteredQuestions.length}
+            indeterminate={selectedQuestions.length > 0 && selectedQuestions.length < filteredQuestions.length}
+            onChange={(e) => handleSelectAll(e.target.checked)}
+          >
+            Select All
+          </Checkbox>
+        )}
+        {selectedQuestions.length > 0 && (
+          <Popconfirm title={`Delete ${selectedQuestions.length} questions?`} onConfirm={handleBulkDelete}>
+            <Button danger icon={<DeleteOutlined />} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
+              Delete Selected
+            </Button>
+          </Popconfirm>
+        )}
+      </div>
+
+      <div>
         <QuestionList
           questions={filteredQuestions}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          selectedQuestions={selectedQuestions}
+          onSelect={handleSelect}
         />
       </div>
     </div>

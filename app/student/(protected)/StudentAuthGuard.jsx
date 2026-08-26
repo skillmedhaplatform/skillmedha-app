@@ -28,7 +28,7 @@ export default function StudentAuthGuard({ children, serverToken }) {
           const isSpecialOrgPayload =
             data.orgDetails?.orgId === process.env.NEXT_PUBLIC_SPECIAL_ORG_ID;
           const CUTOFF_DATE = new Date("2026-05-01T00:00:00Z").getTime();
-          const isNewUser = !data?.createdAt || new Date(data.createdAt).getTime() >= CUTOFF_DATE;
+          const isNewUser = data?.createdAt ? new Date(data.createdAt).getTime() >= CUTOFF_DATE : false;
           const psychometricDone =
             (data?.psychometricTestResults &&
             Object.keys(data.psychometricTestResults).length > 0) || !isNewUser || (data?.loginCount > 1);

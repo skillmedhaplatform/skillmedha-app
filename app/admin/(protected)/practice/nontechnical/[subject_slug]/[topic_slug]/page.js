@@ -7,6 +7,10 @@ import {
   EditOutlined,
   FolderOpenOutlined,
   InboxOutlined,
+  PlusOutlined,
+  SettingOutlined,
+  QuestionCircleOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -29,6 +33,9 @@ import {
 } from "@/redux/slices/admin/cms/practiceSlice";
 import PracticeBreadcrumbs from "@/app/admin/(protected)/practice/Practice_utils/practiceBreadcrumbs";
 import { usePermissions, PERMISSION_VALUES } from "@/hooks/usepermission";
+import QuestionsPage from "./[subtopic_slug]/page";
+
+const { Text, Title } = Typography;
 
 // Avatar color palette
 const AVATAR_COLORS = [
@@ -152,6 +159,7 @@ const SubtopicManager = () => {
         const subtopicData = {
           title: titleValue.trim(),
           topicId: topic_slug,
+          subjectId: subject_slug,
         };
 
         await dispatch(createSubtopic(subtopicData)).unwrap();
@@ -289,20 +297,27 @@ const SubtopicManager = () => {
               : ""
           }
         >
-          <span>
+          <Space>
             <Button
-              type="primary"
-              onClick={handleAdd}
-              style={{ width: "10rem" }}
-              disabled={loading || !canAccess(PERMISSION_VALUES.CREATE)}
+              onClick={() => nav.push(`/admin/practice/nontechnical/${subject_slug}/${topic_slug}/topic-questions`)}
             >
-              + Create Subtopic
+              Manage Topic Questions
             </Button>
-          </span>
+            <span>
+              <Button
+                type="primary"
+                onClick={handleAdd}
+                style={{ width: "10rem" }}
+                disabled={loading || !canAccess(PERMISSION_VALUES.CREATE)}
+              >
+                + Create Subtopic
+              </Button>
+            </span>
+          </Space>
         </Tooltip>
       </div>
 
-      <Divider style={{ margin: "0.75rem 0" }} />
+      {paginatedSubtopics.length > 0 && <Divider style={{ margin: "0.75rem 0" }} />}
 
       {paginatedSubtopics.length > 0 ? (
         <div className={styles.cardsList}>
@@ -485,32 +500,7 @@ const SubtopicManager = () => {
             );
           })}
         </div>
-      ) : (
-        <div className={styles.cardEmptyState}>
-          <InboxOutlined className={styles.cardEmptyIcon} />
-          <span className={styles.cardEmptyText}>No Subtopics Found</span>
-          <span className={styles.cardEmptySub}>
-            Start by adding your first subtopic
-          </span>
-          <Tooltip
-            title={
-              !canAccess(PERMISSION_VALUES.CREATE)
-                ? getPermissionMessage(PERMISSION_VALUES.CREATE)
-                : ""
-            }
-          >
-            <span>
-              <Button
-                type="primary"
-                onClick={handleAdd}
-                disabled={!canAccess(PERMISSION_VALUES.CREATE)}
-              >
-                + Add Subtopic
-              </Button>
-            </span>
-          </Tooltip>
-        </div>
-      )}
+      ) : null}
 
       {/* Pagination */}
       {displaySubtopics.length > 0 && (
@@ -569,6 +559,22 @@ const SubtopicManager = () => {
           </div>
         </div>
       )}
+
+      {/* Topic-level Questions */}
+      {displaySubtopics.length > 0 && <Divider style={{ margin: "2rem 0" }} />}
+      <div className={styles.sectionHeader} style={{ marginBottom: "1rem", marginTop: displaySubtopics.length === 0 ? "1rem" : "0" }}>
+        <div>
+          <Title level={4} style={{ margin: 0 }}>Topic Questions</Title>
+          <Text type="secondary">Manage questions assigned directly to this topic.</Text>
+        </div>
+      </div>
+      <QuestionsPage 
+        subjectId={subject_slug} 
+        topicId={topic_slug} 
+        subTopicId={undefined} 
+        isEmbedded={true}
+        hideActions={true}
+      />
     </div>
   );
 };

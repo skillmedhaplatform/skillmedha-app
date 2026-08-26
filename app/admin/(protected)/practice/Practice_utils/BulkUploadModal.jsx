@@ -35,6 +35,7 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
   const [validationErrors, setValidationErrors] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState(null);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const resetState = () => {
     setCurrentStep(0);
@@ -120,7 +121,7 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
         if (jsonData.length === 0) {
-          message.error("File is empty");
+          messageApi.error("File is empty");
           return;
         }
 
@@ -135,7 +136,7 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
         setCurrentStep(1);
       } catch (error) {
         console.error(error);
-        message.error("Failed to parse file. Please ensure it's a valid Excel/CSV file.");
+        messageApi.error("Failed to parse file. Please ensure it's a valid Excel/CSV file.");
       }
     };
     reader.readAsArrayBuffer(file);
@@ -144,7 +145,7 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
 
   const handleUpload = async () => {
     if (validationErrors.length > 0) {
-      message.error("Please fix validation errors before uploading");
+      messageApi.error("Please fix validation errors before uploading");
       return;
     }
 
@@ -166,11 +167,17 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
       const result = await dispatch(bulkUploadPracQuestions({ formData, params })).unwrap();
       setUploadResult(result);
       setCurrentStep(2);
-      if (subjectId) dispatch(fetchQuestions({ subjectId }));
+      if (subTopicId) {
+        dispatch(fetchQuestions({ subtopicId: subTopicId }));
+      } else if (topicId) {
+        dispatch(fetchQuestions({ topicId }));
+      } else if (subjectId) {
+        dispatch(fetchQuestions({ subjectId }));
+      }
       if (onSuccess) onSuccess();
-      message.success("Bulk upload completed!");
+      messageApi.success("Bulk upload completed!");
     } catch (error) {
-      message.error(error.message || "Upload failed");
+      messageApi.error(error.message || "Upload failed");
       setUploadResult({ success: false, error: error.message });
       setCurrentStep(2);
     } finally {
@@ -242,11 +249,11 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
           <p className="ant-upload-text" style={{ fontSize: 15, fontWeight: 600, color: "#1e293b", marginBottom: 4 }}>
             Click or drag file to this area to upload
           </p>
-          <p className="ant-upload-hint" style={{ fontSize: 13, color: "#64748b" }}>
-            Support for .xlsx and .csv files. Please use the templates provided above.
+          <div className="ant-upload-hint" style={{ fontSize: 13, color: "#64748b" }}>
+            Support for .xlsx and .csv files. Please use the templates provided below.
             {allowedType && <div>Note: Ensure all questions in the file are of type <strong>{allowedType}</strong>.</div>}
-            {excludedTypes.length > 0 && <div>Note: <strong>{excludedTypes.join(", ")}</strong> types are not allowed here.</div>}
-          </p>
+            {excludedTypes.length > 0 && <div>Note: <strong>{excludedTypes.join(", ")}</strong> types are excluded for this upload.</div>}
+          </div>
         </Dragger>
       </div>
     </div>
@@ -272,7 +279,7 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
 
       {validationErrors.length > 0 ? (
         <Alert
-          message={`Found ${validationErrors.length} Validation Errors`}
+          title={`Found ${validationErrors.length} Validation Errors`}
           description={
             <ul style={{ paddingLeft: 20, maxHeight: 100, overflowY: "auto" }}>
               {validationErrors.map((err, idx) => (
@@ -286,7 +293,7 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
         />
       ) : (
         <Alert
-          message="Validation Successful"
+          title="Validation Successful"
           description="All questions look good! Ready to upload."
           type="success"
           showIcon
@@ -297,14 +304,20 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
       <div className={styles.bulkUploadPreview}>
         <Table 
           dataSource={parsedData.slice(0, 100)} 
-          rowKey={(r, i) => i}
+          rowKey={() => Math.random()}
           pagination={false}
           size="small"
-          scroll={{ x: 1000 }}
+          scroll={{ x: 1400 }}
           columns={[
             { title: "#", render: (t, r, i) => i + 1, width: 50 },
             { title: "Type", dataIndex: "Question Type", width: 120 },
-            { title: "Question", dataIndex: "Question Text", width: 300, ellipsis: true },
+            { title: "Question", dataIndex: "Question Text", width: 250, ellipsis: true },
+            { title: "Difficulty", dataIndex: "Difficulty", width: 100 },
+            { title: "Concept", dataIndex: "Concept", width: 120, ellipsis: true },
+            { title: "Company", dataIndex: "Company Name", width: 100, ellipsis: true },
+            { title: "Exam", dataIndex: "Exam Name", width: 100, ellipsis: true },
+            { title: "Year", dataIndex: "Exam Year", width: 80 },
+            { title: "Section", dataIndex: "Section Name", width: 100, ellipsis: true },
             { title: "Points", dataIndex: "Score Points", width: 80 },
             { title: "Explanation", dataIndex: "Explanation", ellipsis: true },
           ]}
@@ -357,6 +370,7 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
       footer={null}
       destroyOnHidden
     >
+      {contextHolder}
       <Steps
         current={currentStep}
         items={[

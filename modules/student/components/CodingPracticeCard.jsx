@@ -78,8 +78,8 @@ export default function CodingPracticeCard({
                 return <Code2 size={24} strokeWidth={2.5} />;
               })()}
             </div>
-            <div>
-              <h3 className="text-[17px] font-bold text-slate-800 tracking-tight leading-tight">{title}</h3>
+            <div className="flex-1 overflow-hidden">
+              <h3 className="text-[17px] font-bold text-slate-800 tracking-tight leading-[22px] min-h-[44px] line-clamp-2">{title}</h3>
               <div className="flex items-center gap-2 mt-1.5">
                 <Tooltip title={`Based on your ${completionPercent}% completion rate`}>
                   <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md flex items-center gap-1.5 shadow-sm cursor-help transition-colors hover:bg-indigo-100">

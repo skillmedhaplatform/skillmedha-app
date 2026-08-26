@@ -85,7 +85,7 @@ export const loginStudent = createAsyncThunk(
       const verified = studentData?.verified === true;
       const isSpecialOrg = studentData?.orgDetails?.orgId === process.env.NEXT_PUBLIC_SPECIAL_ORG_ID;
       const CUTOFF_DATE = new Date("2026-05-01T00:00:00Z").getTime();
-      const isNewUser = !studentData?.createdAt || new Date(studentData.createdAt).getTime() >= CUTOFF_DATE;
+      const isNewUser = studentData?.createdAt ? new Date(studentData.createdAt).getTime() >= CUTOFF_DATE : false;
       const psychometricDone =
         (Array.isArray(studentData?.psychometricTestResults) &&
         studentData.psychometricTestResults.length > 0) || !isNewUser || (studentData?.loginCount > 1);
