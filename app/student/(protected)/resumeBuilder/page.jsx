@@ -325,6 +325,7 @@ function Form() {
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
   };
   const [loading, setLoading] = useState(false);
+  const [templateAccent, setTemplateAccent] = useState(TEMPLATE_SWATCHES[0]);
   const nav = useRouter();
   useEffect(() => {
     if (typeof self === "undefined") return;
