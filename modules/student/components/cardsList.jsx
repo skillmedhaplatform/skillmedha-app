@@ -464,10 +464,10 @@ export default function CardsList({ type, isModal = false, progressById, combine
     const filteredData = activeFilter === "All" ? activeData : activeData.filter(d => getCategory(d) === activeFilter);
 
     return (
-      <div className={`flex flex-col gap-3 [&::-webkit-scrollbar]:hidden pb-2 px-1 ${isModal ? 'h-full overflow-y-auto' : 'w-full'}`}>
+      <div className="flex flex-col gap-3 pb-6 px-1 w-full">
         {isModal && (
           <div 
-            className="flex flex-nowrap overflow-x-auto gap-2 mb-2 pb-2 [&::-webkit-scrollbar]:hidden w-full touch-pan-x" 
+            className="sticky top-0 bg-white z-10 flex flex-nowrap overflow-x-auto gap-2 py-2 mb-1 w-full touch-pan-x border-b border-[#f1f5f9]" 
             style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
@@ -510,7 +510,6 @@ export default function CardsList({ type, isModal = false, progressById, combine
                 activeKey={activeKey}
                 onChange={handleChange}
                 accordion={true}
-                expandIcon={<div>icon</div>}
                 items={[
                   {
                     key: i,
@@ -570,15 +569,15 @@ export default function CardsList({ type, isModal = false, progressById, combine
                     ),
                     children: (
                       <div
-                        className={`p-2 text-[16px] font-medium ${activeKey == i ? "active" : ""
+                        className={`p-2 text-[15px] font-medium leading-relaxed break-words whitespace-pre-wrap ${activeKey == i ? "active" : ""
                           }`}
                       >
                         {/* Message with clickable URLs */}
-                        <p
+                        <div
                           dangerouslySetInnerHTML={{
                             __html: linkifyText(e?.message || ""),
                           }}
-                          style={{ marginBottom: "16px" }}
+                          className="mb-4 break-words"
                         />
                         {(e.actionUrl || e.isAchievement) && (
                           <div style={{ marginBottom: "16px" }}>

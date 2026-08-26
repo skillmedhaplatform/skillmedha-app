@@ -1069,10 +1069,20 @@ export default function DashboardPage() {
     ];
   }, [allCourses?.summary?.totalAvailableCourses, allInternships?.summary?.totalAvailableInternships]);
 
-  // Combined and paginated learning data
+  // Combined and sorted learning data (completed items >= 100% moved to bottom)
   const combinedLearningData = useMemo(() => {
-    return [...(allCourses?.data || []), ...(allInternships?.data || [])];
-  }, [allCourses?.data, allInternships?.data]);
+    const rawList = [...(allCourses?.data || []), ...(allInternships?.data || [])];
+    return rawList.sort((a, b) => {
+      const progA = progressById[a._id]?.totalProgress ?? 0;
+      const progB = progressById[b._id]?.totalProgress ?? 0;
+      const isCompletedA = progA >= 100 ? 1 : 0;
+      const isCompletedB = progB >= 100 ? 1 : 0;
+      if (isCompletedA !== isCompletedB) {
+        return isCompletedA - isCompletedB; // 0 (uncompleted) before 1 (completed 100%)
+      }
+      return 0;
+    });
+  }, [allCourses?.data, allInternships?.data, progressById]);
 
   // Paginated learning items
   const paginatedLearningData = useMemo(() => {
@@ -1081,12 +1091,12 @@ export default function DashboardPage() {
     return combinedLearningData.slice(startIndex, endIndex);
   }, [combinedLearningData, currentPage, pageSize]);
 
-  // Fetch real per-item progress for whatever's visible on the current page.
+  // Fetch real per-item progress for enrolled items.
   // getOneInternsip only needs { id, userId } — it doesn't use orgId at all.
   useEffect(() => {
     if (!userId) return;
 
-    const itemsNeedingProgress = paginatedLearningData.filter((item) => {
+    const itemsNeedingProgress = combinedLearningData.filter((item) => {
       const itemId = item?._id;
       if (!itemId) return false;
       return !requestedIdsRef.current.has(itemId);
@@ -1137,7 +1147,7 @@ export default function DashboardPage() {
           }));
         });
     });
-  }, [paginatedLearningData, userId, dispatch]);
+  }, [combinedLearningData, userId, dispatch]);
 
   // Handle pagination change
   const handlePageChange = useCallback((page) => {
@@ -1275,20 +1285,26 @@ export default function DashboardPage() {
                         router.push(url);
                       };
 
-                      let lastAccessedInfo = "Not started";
-                      if (hasLastAccessed) {
-                        lastAccessedInfo = "In progress";
-                      }
-
-                      const isInternship = item?.type === "internship";
-
-                      // Real progress from getOneInternsip, falling back to 0
-                      // while the per-item fetch is still in flight or hasn't
-                      // started (item.progress never actually exists on these
-                      // payloads, so that old fallback never did anything).
                       const fetchedProgress = progressById[item._id];
                       const progressVal = fetchedProgress?.totalProgress ?? 0;
                       const isProgressLoading = fetchedProgress?.loading;
+                      const isCompleted = progressVal >= 100;
+
+                      let lastAccessedInfo = "Not started";
+                      if (isCompleted) {
+                        lastAccessedInfo = "Completed";
+                      } else if (hasLastAccessed || progressVal > 0) {
+                        lastAccessedInfo = "In progress";
+                      }
+
+                      let buttonText = "Start Learning";
+                      if (isCompleted) {
+                        buttonText = isInternship ? "Review Internship" : "Review Course";
+                      } else if (hasLastAccessed || progressVal > 0) {
+                        buttonText = "Continue";
+                      }
+
+                      const isInternship = item?.type === "internship";
 
                       return (
                         <div key={item._id} className={`flex flex-col md:flex-row items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-[12px] hover:shadow-md transition-shadow border-l-[4px] ${isInternship ? 'border-l-[#0284c7]' : 'border-l-[#24A058]'}`}>
@@ -1321,7 +1337,7 @@ export default function DashboardPage() {
                                 percent={progressVal}
                                 size="small"
                                 showInfo={false}
-                                strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'}
+                                strokeColor={isCompleted ? '#10b981' : (hasLastAccessed || progressVal > 0 ? '#4f46e5' : '#24A058')}
                                 railColor="#f1f5f9"
                                 className="m-0 w-[120px]"
                               />
@@ -1329,7 +1345,7 @@ export default function DashboardPage() {
                             </div>
                             <Button
                               onClick={handleNavigate}
-                              className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90"
+                              className={`!border-none !text-white hover:opacity-90 ${isCompleted ? '!bg-emerald-600' : '!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0]'}`}
                               style={{
                                 fontWeight: '600',
                                 borderRadius: '8px',
@@ -1337,7 +1353,7 @@ export default function DashboardPage() {
                                 height: '32px'
                               }}
                             >
-                              {hasLastAccessed ? "Continue" : "Start Learning"}
+                              {buttonText}
                             </Button>
                           </div>
                         </div>
@@ -1520,8 +1536,9 @@ export default function DashboardPage() {
           onCancel={() => setIsNoticeModalOpen(false)}
           footer={null}
           width={1000}
+          centered
         >
-          <div style={{ height: "70vh", overflowY: "auto" }}>
+          <div className="max-h-[75vh] overflow-y-auto pr-1 pb-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
             <CardsList
               type="notifications"
               isModal={true}
