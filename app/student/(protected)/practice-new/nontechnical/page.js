@@ -37,6 +37,7 @@ export default function NontechnicalPage() {
     { name: "Non-Technical", path: "/student/practice-new/nontechnical" },
     { name: "Technical", path: "/student/practice-new/technical" },
     { name: "Coding", path: "/student/practice-new/coding" },
+    { name: "Company-wise", path: "/student/practice-new/company-wise" },
   ];
 
   useEffect(() => {

@@ -31,7 +31,7 @@ export default function PracticeNewRedirect() {
       iconShadow: "shadow-green-200",
       buttonColor: "border-green-500 text-green-600 hover:bg-green-50",
       titleColor: "text-[#22C55E]",
-      onClick: () => message.info("Company Wise practice is coming soon!"),
+      onClick: () => router.push("/student/practice-new/company-wise"),
     },
     {
       id: "mock",

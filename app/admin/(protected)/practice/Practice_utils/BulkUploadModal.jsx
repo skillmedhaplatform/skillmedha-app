@@ -18,15 +18,18 @@ const QUESTION_TYPES = {
 };
 
 const TEMPLATES = [
-  // { name: "All Types (Combined)", file: "all_questions_template.xlsx", desc: "Contains examples of all question types" },
-  // { name: "Text Questions", file: "text_questions_template.xlsx", desc: "For open-ended questions" },
   { name: "Single Choice", file: "single_choice_template.xlsx", desc: "For radio button questions" },
   { name: "Multiple Choice", file: "multiple_choice_template.xlsx", desc: "For checkbox questions" },
   { name: "True/False", file: "true_false_template.xlsx", desc: "For boolean questions" },
   { name: "Coding Questions", file: "coding_questions_template.xlsx", desc: "For programming challenges with test cases" },
 ];
 
-export default function BulkUploadModal({ open, onCancel, subjectId, skillId, topicId, subTopicId, allowedType, excludedTypes = [], onSuccess }) {
+const COMPANY_TEMPLATES = [
+  { name: "MCQ Template", file: "mcq_template.xlsx", desc: "For standard questions (Single Choice, Multiple Choice, True/False)" },
+  { name: "Coding Template", file: "coding_template.xlsx", desc: "For programming challenges with test cases" },
+];
+
+export default function BulkUploadModal({ open, onCancel, subjectId, skillId, topicId, subTopicId, allowedType, excludedTypes = [], onSuccess, isCompanyWise = false }) {
   const dispatch = useDispatch();
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -63,15 +66,12 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
   const validateRow = (row, index) => {
     const errors = [];
     const rowNum = index + 1;
-
-    if (!row["Question Type"]) errors.push(`Row ${rowNum}: Missing 'Question Type'`);
-    if (!row["Question Text"]) errors.push(`Row ${rowNum}: Missing 'Question Text'`);
-    if (!row["Explanation"]) errors.push(`Row ${rowNum}: Missing 'Explanation'`);
-    if (!row["Score Points"] || isNaN(row["Score Points"]) || row["Score Points"] <= 0) {
-      errors.push(`Row ${rowNum}: Invalid 'Score Points'`);
-    }
-
     const type = row["Question Type"];
+
+    if (!type) {
+      errors.push(`Row ${rowNum}: Missing 'Question Type'`);
+      return errors;
+    }
 
     if (allowedType && type !== allowedType) {
       errors.push(`Row ${rowNum}: Invalid Question Type. Expected '${allowedType}', found '${type}'`);
@@ -80,31 +80,32 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
     if (excludedTypes.length > 0 && excludedTypes.includes(type)) {
       errors.push(`Row ${rowNum}: Question Type '${type}' is not allowed in this section.`);
     }
-    
-    if (type === QUESTION_TYPES.SINGLE_CHOICE || type === QUESTION_TYPES.MULTIPLE_CHOICE) {
-      const options = [row["Option 1"], row["Option 2"], row["Option 3"], row["Option 4"]].filter(o => o);
-      if (options.length < 2) errors.push(`Row ${rowNum}: At least 2 options required for ${type}`);
+
+    if (type !== QUESTION_TYPES.CODING) {
+      if (!row["Question Text"]) errors.push(`Row ${rowNum}: Missing 'Question Text'`);
+      if (!row["Explanation"]) errors.push(`Row ${rowNum}: Missing 'Explanation'`);
       
-      if (type === QUESTION_TYPES.SINGLE_CHOICE) {
-        if (!row["Correct Answer"]) errors.push(`Row ${rowNum}: Missing Correct Answer`);
-      } else {
-        if (!row["Correct Answer/Answers"] && !row["Correct Answers"]) errors.push(`Row ${rowNum}: Missing Correct Answers`);
+      if (type === QUESTION_TYPES.SINGLE_CHOICE || type === QUESTION_TYPES.MULTIPLE_CHOICE) {
+        const options = [row["Option 1"], row["Option 2"], row["Option 3"], row["Option 4"]].filter(o => o);
+        if (options.length < 2) errors.push(`Row ${rowNum}: At least 2 options required for ${type}`);
+        
+        if (type === QUESTION_TYPES.SINGLE_CHOICE) {
+          if (!row["Correct Answer"]) errors.push(`Row ${rowNum}: Missing Correct Answer`);
+        } else {
+          if (!row["Correct Answer/Answers"] && !row["Correct Answers"] && !row["Correct Answer"]) errors.push(`Row ${rowNum}: Missing Correct Answers`);
+        }
+      }
+    } else {
+      if (!row["Problem Statement"]) errors.push(`Row ${rowNum}: Missing 'Problem Statement'`);
+      if (!row["Constraints"]) errors.push(`Row ${rowNum}: Missing 'Constraints'`);
+      if (!row["Time Limit"]) errors.push(`Row ${rowNum}: Missing 'Time Limit'`);
+      if (!row["Sample Input 1"] && !row["Sample Output 1"]) {
+        errors.push(`Row ${rowNum}: At least one Sample Input/Output is required`);
       }
     }
 
-    if (type === QUESTION_TYPES.CODING) {
-      if (!row["Test Cases JSON"]) {
-        errors.push(`Row ${rowNum}: Missing Test Cases JSON`);
-      } else {
-        try {
-          const tc = JSON.parse(row["Test Cases JSON"]);
-          if (!Array.isArray(tc) || tc.length === 0) {
-            errors.push(`Row ${rowNum}: Test cases must be a non-empty array`);
-          }
-        } catch (e) {
-          errors.push(`Row ${rowNum}: Invalid JSON in Test Cases`);
-        }
-      }
+    if (!row["Score Points"] || isNaN(row["Score Points"]) || row["Score Points"] <= 0) {
+      errors.push(`Row ${rowNum}: Invalid 'Score Points'`);
     }
 
     return errors;
@@ -118,7 +119,22 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
         const workbook = XLSX.read(data, { type: "array" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        const rawJsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        // Normalize Question Types and filter out empty rows
+        const jsonData = rawJsonData
+          .filter(row => Object.keys(row).length > 0 && (row["Question Text"] || row["Problem Statement"]))
+          .map(row => {
+            if (row["Problem Statement"] && !row["Question Type"]) {
+              row["Question Type"] = "Coding Question";
+            } else if (row["Question Type"]) {
+              const t = String(row["Question Type"]).toLowerCase();
+              if (t.includes("single")) row["Question Type"] = "Single Choice";
+              else if (t.includes("multiple")) row["Question Type"] = "Multiple Choice";
+              else if (t.includes("true") || t.includes("false")) row["Question Type"] = "True/False";
+            }
+            return row;
+          });
 
         if (jsonData.length === 0) {
           messageApi.error("File is empty");
@@ -186,16 +202,25 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
   };
 
   const getFilteredTemplates = () => {
+    const sourceTemplates = isCompanyWise ? COMPANY_TEMPLATES : TEMPLATES;
+
     // If specific type is restricted, only show relevant templates
     if (allowedType === QUESTION_TYPES.CODING) {
-      return TEMPLATES.filter(t => t.name.includes("Coding"));
+      return sourceTemplates.filter(t => t.name.includes("Coding"));
     }
 
-    let filtered = TEMPLATES;
+    let filtered = sourceTemplates;
     
-    // Filter by allowedType if it's generic filtering
-    if (allowedType) {
-       filtered = filtered.filter(t => t.name.toLowerCase().includes(allowedType.toLowerCase().split(' ')[0]));
+    if (isCompanyWise) {
+      // If allowedType is provided but NOT coding, show the MCQ template
+      if (allowedType && allowedType !== QUESTION_TYPES.CODING) {
+         filtered = filtered.filter(t => t.name.includes("MCQ"));
+      }
+    } else {
+      // Filter by allowedType if it's generic filtering
+      if (allowedType) {
+         filtered = filtered.filter(t => t.name.toLowerCase().includes(allowedType.toLowerCase().split(' ')[0]));
+      }
     }
 
     // Filter by excludedTypes
@@ -311,15 +336,15 @@ export default function BulkUploadModal({ open, onCancel, subjectId, skillId, to
           columns={[
             { title: "#", render: (t, r, i) => i + 1, width: 50 },
             { title: "Type", dataIndex: "Question Type", width: 120 },
-            { title: "Question", dataIndex: "Question Text", width: 250, ellipsis: true },
+            { title: "Question", render: (_, record) => record["Question Text"] || record["Problem Statement"], width: 250, ellipsis: true },
             { title: "Difficulty", dataIndex: "Difficulty", width: 100 },
-            { title: "Concept", dataIndex: "Concept", width: 120, ellipsis: true },
-            { title: "Company", dataIndex: "Company Name", width: 100, ellipsis: true },
-            { title: "Exam", dataIndex: "Exam Name", width: 100, ellipsis: true },
-            { title: "Year", dataIndex: "Exam Year", width: 80 },
-            { title: "Section", dataIndex: "Section Name", width: 100, ellipsis: true },
+            ...(!isCompanyWise && parsedData.some(row => row["Concept"]) ? [{ title: "Concept", dataIndex: "Concept", width: 120, ellipsis: true }] : []),
+            ...(!isCompanyWise && parsedData.some(row => row["Company Name"]) ? [{ title: "Company", dataIndex: "Company Name", width: 100, ellipsis: true }] : []),
+            ...(!isCompanyWise && parsedData.some(row => row["Exam Name"]) ? [{ title: "Exam", dataIndex: "Exam Name", width: 100, ellipsis: true }] : []),
+            ...(!isCompanyWise && parsedData.some(row => row["Exam Year"]) ? [{ title: "Year", dataIndex: "Exam Year", width: 80 }] : []),
+            ...(parsedData.some(row => row["Section Name"]) ? [{ title: "Section", dataIndex: "Section Name", width: 100, ellipsis: true }] : []),
             { title: "Points", dataIndex: "Score Points", width: 80 },
-            { title: "Explanation", dataIndex: "Explanation", ellipsis: true },
+            ...(parsedData.some(row => row["Explanation"]) ? [{ title: "Explanation", dataIndex: "Explanation", ellipsis: true }] : []),
           ]}
         />
         {parsedData.length > 100 && (

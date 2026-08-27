@@ -101,6 +101,13 @@ const AdminBanner = () => {
         icon: defaultIcon 
       };
     }
+    if (pathname.includes("/practice/company-wise")) {
+      return { 
+        title: "Company-wise Tests", 
+        subtitle: "Manage test patterns and upload questions for specific companies",
+        icon: defaultIcon 
+      };
+    }
     if (pathname.includes("/practice")) return { title: "Practice Module", icon: defaultIcon };
     if (pathname.includes("/questionManager")) return { title: "Question Manager", icon: defaultIcon };
     if (pathname.includes("/liveLect")) return { title: "Live Lectures", icon: defaultIcon };

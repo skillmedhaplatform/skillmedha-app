@@ -14,11 +14,8 @@ const api = axios.create({
 });
 
 // Helper function to get auth headers
-// const getAuthHeaders = () => ({
-//   Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiI2ODc0YjllM2YwM2RjYzhlZTZhMzJlMjEiLCJlbWFpbCI6InByYXNhbm5hQGdtYWlsLmNvbSIsInVzZXJOYW1lIjoicHJhc2FubmEiLCJyb2xlIjoiIiwib3JnSWQiOiJLU3F1YXJlIiwiaWF0IjoxNzYzNzg5MTgzLCJleHAiOjE3NjYzODExODN9.w3XcLIZeT02-6VL0vVHV9q-FvZFzr3jzatC_1XqMI-A`,
-// });
 const getAuthHeaders = () => ({
-  Authorization: `Bearer ${getLstorage("jwtToken")}`,
+  Authorization: `Bearer ${getLstorage("jwtToken") || getLstorage("token")}`,
 });
 
 // --- Initial State ---
@@ -27,6 +24,7 @@ const initialState = {
   topics: [],
   subtopics: [],
   questions: [],
+  companyTests: [],
   // status can be 'idle' | 'loading' | 'succeeded' | 'failed'
   status: "idle",
   error: null,
@@ -107,6 +105,49 @@ export const deleteSubject = createAsyncThunk(
         headers: getAuthHeaders(),
       });
       return subjectId; // Return the ID to remove it from the state
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+// --- Company Tests Thunks ---
+export const fetchCompanyTests = createAsyncThunk(
+  "content/fetchCompanyTests",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/company-tests", {
+        headers: getAuthHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const createCompanyTest = createAsyncThunk(
+  "content/createCompanyTest",
+  async (testData, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/company-tests", testData, {
+        headers: getAuthHeaders(),
+      });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const deleteCompanyTest = createAsyncThunk(
+  "content/deleteCompanyTest",
+  async (testId, { rejectWithValue }) => {
+    try {
+      await api.delete(`/company-tests/${testId}`, {
+        headers: getAuthHeaders(),
+      });
+      return testId;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -486,6 +527,25 @@ const PracticeSlice = createSlice({
       .addCase(bulkUploadPracQuestions.fulfilled, (state) => {
         state.status = "succeeded";
         state.error = null;
+      })
+
+      // --- Company Tests Reducers ---
+      .addCase(fetchCompanyTests.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+        state.companyTests = action.payload.data;
+      })
+      .addCase(createCompanyTest.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+        state.companyTests.unshift(action.payload);
+      })
+      .addCase(deleteCompanyTest.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+        state.companyTests = state.companyTests.filter(
+          (t) => t._id !== action.payload
+        );
       });
 
     // --- Generic Loading/Error States ---
