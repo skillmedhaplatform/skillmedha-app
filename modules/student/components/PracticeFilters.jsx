@@ -10,6 +10,7 @@ export default function PracticeFilters({
   activeSort = "Default",
   onSortChange,
   hideCategoryProgress = false,
+  leftSlot,
 }) {
   const [activeTab, setActiveTab] = useState("All topics");
   const categoryProgressData = useSelector((state) => state.practice.categoryProgress || {});
@@ -50,6 +51,11 @@ export default function PracticeFilters({
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
           >
+            {leftSlot && (
+              <div className="shrink-0 mr-2 flex items-center border-r border-slate-200 pr-3">
+                {leftSlot}
+              </div>
+            )}
             {categories.map((cat) => (
               <button
                 key={cat}

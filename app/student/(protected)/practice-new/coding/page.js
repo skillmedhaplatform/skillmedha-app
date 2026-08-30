@@ -332,9 +332,9 @@ export default function CodingPage() {
   useEffect(() => {
     const updateColumns = () => {
       const width = window.innerWidth;
-      if (width >= 1920) setColumns(6);
-      else if (width >= 1600) setColumns(5);
-      else if (width >= 1024) setColumns(4);
+      if (width >= 1920) setColumns(5);
+      else if (width >= 1536) setColumns(4);
+      else if (width >= 1024) setColumns(3);
       else if (width >= 768) setColumns(2);
       else setColumns(1);
     };
@@ -524,7 +524,7 @@ export default function CodingPage() {
                     <Select
                       value={activeSort}
                       onChange={(value) => setActiveSort(value)}
-                      bordered={false}
+                      variant="borderless"
                       className="!text-[14px] !font-bold"
                       style={{ minWidth: 100 }}
                       options={[

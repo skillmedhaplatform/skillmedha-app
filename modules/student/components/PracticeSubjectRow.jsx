@@ -37,9 +37,9 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
   useEffect(() => {
     const updateColumns = () => {
       const width = window.innerWidth;
-      if (width >= 1920) setColumns(6);      // Extremely large monitors
-      else if (width >= 1600) setColumns(5); // Large monitors
-      else if (width >= 1024) setColumns(4); // Laptops/Desktops
+      if (width >= 1920) setColumns(5);      // Extremely large monitors
+      else if (width >= 1600) setColumns(4); // Large monitors
+      else if (width >= 1024) setColumns(3); // Laptops/Desktops
       else if (width >= 768) setColumns(2);  // Tablets
       else setColumns(1);                    // Mobile
     };
@@ -79,14 +79,14 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
                  topicId: topic._id,
                  title: topic.title,
                  topicTitle: topic.title,
-                 totalQuestions: typeof topic.totalQuestions === "number" ? topic.totalQuestions : 20
+                 totalQuestions: typeof topic.totalQuestions === "number" ? topic.totalQuestions : 0
              });
           } else {
             for (const s of subs) {
               allSubtopics.push({
                  ...s,
                  topicTitle: topic.title,
-                 totalQuestions: typeof s.totalQuestions === "number" ? s.totalQuestions : 20
+                 totalQuestions: typeof s.totalQuestions === "number" ? s.totalQuestions : 0
               });
             }
           }

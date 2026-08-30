@@ -136,12 +136,16 @@ export default function PracticeCard({
 
   return (
     <div 
-      className={`bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 relative overflow-hidden ${!loading ? 'cursor-pointer' : 'cursor-wait opacity-80'}`}
+      className={`group bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:border-slate-200 hover:-translate-y-1 relative overflow-hidden ${!loading ? 'cursor-pointer' : 'cursor-wait opacity-80'} min-h-[260px]`}
     >
-
+      {/* Decorative ambient background glow */}
+      <div 
+        className="absolute -top-12 -right-12 w-40 h-40 rounded-full blur-[50px] opacity-[0.15] transition-all duration-500 group-hover:opacity-[0.4] group-hover:scale-110 pointer-events-none z-0"
+        style={{ backgroundColor: theme.text }}
+      ></div>
 
       {/* Top Section */}
-      <div className="p-4 xl:p-5 pb-3 flex items-center gap-3 relative z-10">
+      <div className="p-5 xl:p-6 pb-2 flex items-start gap-4 relative z-10">
         {/* Icon Box */}
         <div 
           className="w-[48px] h-[48px] rounded-[14px] flex items-center justify-center shrink-0"
@@ -150,16 +154,16 @@ export default function PracticeCard({
           {React.cloneElement(getIcon(), { size: 24, strokeWidth: 1.5 })}
         </div>
         
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden mt-1">
           <Tooltip title={title} placement="top">
-            <h3 className="text-[16px] font-[800] text-[#0f172a] m-0 leading-[20px] mb-1 truncate">{title}</h3>
+            <h3 className="text-[17px] font-[800] text-slate-800 m-0 leading-[22px] mb-1.5 line-clamp-2 group-hover:text-slate-900 transition-colors">{title}</h3>
           </Tooltip>
-          <p className="text-[9px] font-bold text-slate-500 m-0 uppercase tracking-[0.1em] truncate">{subjectTitle} • {category}</p>
+          <p className="text-[10px] font-bold text-slate-400 m-0 uppercase tracking-widest truncate">{subjectTitle} • {category}</p>
         </div>
       </div>
       
       {/* Stats Section */}
-      <div className="px-1 py-4 relative z-10 grid grid-cols-3 divide-x divide-slate-200/60 border-y border-slate-50 my-2 bg-slate-50/50">
+      <div className="relative z-10 grid grid-cols-3 divide-x divide-slate-100 border border-slate-100 rounded-[16px] mx-5 my-3 bg-slate-50/50 group-hover:bg-white group-hover:shadow-[0_4px_15px_rgba(0,0,0,0.02)] group-hover:border-slate-200 transition-all duration-300 py-3">
         <div className="flex flex-col items-center justify-center">
           <span className="text-[16px] font-[900] text-[#10b981] leading-none mb-1">{easyAttempts}</span>
           <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-center leading-tight">EASY<br/>ATTEMPTS</span>
@@ -175,7 +179,7 @@ export default function PracticeCard({
       </div>
       
       {/* Progress Section (Stars) */}
-      <div className="px-4 xl:px-5 pb-5 relative z-10">
+      <div className="px-5 xl:px-6 pb-4 relative z-10">
         <div className="flex justify-between items-center gap-4">
           <div className="flex gap-2">
             <Tooltip title={`Easy Mode: ${easyPassCount} Passes`}>
@@ -220,7 +224,7 @@ export default function PracticeCard({
       </div>
       
       {/* Footer Section */}
-      <div className="px-4 xl:px-5 pb-4 xl:pb-5 flex items-center justify-between mt-auto relative z-10">
+      <div className="px-5 xl:px-6 py-4 border-t border-slate-100/80 bg-slate-50/30 flex items-center justify-between mt-auto relative z-10 group-hover:bg-slate-50/80 transition-colors">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#10b981]"></div>
           <span className="text-[12px] font-bold text-[#0f172a]">Active</span>
@@ -243,9 +247,9 @@ export default function PracticeCard({
             }}
             disabled={loading}
             style={{ backgroundColor: theme.text }}
-            className="hover:brightness-110 text-white px-4 py-2 rounded-[10px] text-[13px] font-[800] border-none cursor-pointer transition-all flex items-center gap-1.5 shadow-sm shadow-black/5"
+            className="hover:brightness-110 text-white px-5 py-2.5 rounded-xl text-[13px] font-[800] border-none cursor-pointer transition-all flex items-center gap-1.5 shadow-sm shadow-black/5 hover:shadow-md hover:-translate-y-0.5 group/btn"
           >
-            {loading ? "..." : (hasResumeState ? "Resume" : "Start")} <ArrowRight size={14} />
+            {loading ? "..." : (hasResumeState ? "Resume" : "Start")} <ArrowRight size={14} className="transition-transform group-hover/btn:translate-x-0.5" />
           </button>
         )}
       </div>

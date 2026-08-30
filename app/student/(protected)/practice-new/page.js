@@ -71,7 +71,7 @@ export default function PracticeNewRedirect() {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-[1100px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 xl:gap-12 w-full max-w-[1300px]">
           {cards.map((card) => (
             <div
               key={card.id}
