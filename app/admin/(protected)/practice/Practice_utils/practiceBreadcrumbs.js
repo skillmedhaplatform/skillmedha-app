@@ -40,6 +40,7 @@ export default function PracticeBreadcrumbs() {
 
   // Helper function to get subtopic name by ID
   const getSubtopicName = (subtopicId) => {
+    if (subtopicId === "topic-questions") return "Topic Questions";
     const subtopic = subtopics?.find((st) => st._id === subtopicId);
     return subtopic?.title || subtopicId;
   };

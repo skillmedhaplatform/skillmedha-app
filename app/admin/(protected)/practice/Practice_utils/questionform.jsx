@@ -1,7 +1,7 @@
 // QuestionEditorUI.jsx
 "use client";
 import React, { useEffect, useState } from "react";
-import { Button, InputNumber, message } from "antd";
+import { Button, InputNumber, message, Select, Input, Space, Row, Col } from "antd";
 import Image from "next/image";
 import { RiDeleteBinLine } from "react-icons/ri";
 import QuestionStyles from "./questionstyles.module.scss";
@@ -57,6 +57,8 @@ const QuestionEditorUI = () => {
   const questionId = params?.question;
   const isNewQuestion = questionId === "new-question";
   const { topic_slug, subject_slug, subtopic_slug } = params;
+  const isTopicLevel = subtopic_slug === "topic-questions";
+
   // Static initial state (later hydrate from Redux)
   const [questionType, setQuestionType] = useState(QUESTION_TYPES.TEXT);
   const [question, setQuestion] = useState("");
@@ -69,6 +71,10 @@ const QuestionEditorUI = () => {
   const [options, setOptions] = useState([{ text: "", isAnswer: false }]);
   const [trueFalseAnswer, setTrueFalseAnswer] = useState(null);
   const [fillBlanksAnswers, setFillBlanksAnswers] = useState([]);
+  
+  const [difficulty, setDifficulty] = useState("medium");
+  const [concept, setConcept] = useState("");
+  const [companyTags, setCompanyTags] = useState([]);
 
   // Local cancel handler
   const onCancel = () => {
@@ -134,6 +140,9 @@ const QuestionEditorUI = () => {
     setOptions([{ text: "", isAnswer: false }]);
     setTrueFalseAnswer(null);
     setFillBlanksAnswers([]);
+    setDifficulty("medium");
+    setConcept("");
+    setCompanyTags([]);
   };
 
   const validate = () => {
@@ -235,6 +244,11 @@ const QuestionEditorUI = () => {
         ? existing.answer.fillBlanks
         : []
     );
+
+    // New Fields
+    setDifficulty(existing?.difficulty || "medium");
+    setConcept(existing?.concept || "");
+    setCompanyTags(Array.isArray(existing?.companyTags) ? existing.companyTags : []);
   }, [questions, isNewQuestion, questionId]);
 
   // Local submit handler
@@ -299,10 +313,13 @@ const QuestionEditorUI = () => {
         scoreType: "fullScore",
         pointsForCorrectAns: scorePoints,
       },
+      difficulty,
+      concept,
+      companyTags: companyTags.filter(t => t.companyName?.trim()),
       type: "practice",
       subjectId: subject_slug,
       topicId: topic_slug,
-      subTopicId: subtopic_slug,
+      subTopicId: isTopicLevel ? undefined : subtopic_slug,
     };
     const hide = message.loading(
       isNewQuestion ? "Creating question..." : "Updating question...",
@@ -596,6 +613,111 @@ const QuestionEditorUI = () => {
             />
           </div>
         </div>
+        
+        {/* NEW FIELDS: Difficulty, Concept, Company Tags */}
+        <div className={QuestionStyles.divider} />
+        <div className={QuestionStyles.sectionTitle}>Additional Settings</div>
+        
+        <div className={QuestionStyles.QuestionBodyFlex}>
+          <div className={`${QuestionStyles.title}`}>Difficulty</div>
+          <div className={`${QuestionStyles.rightBody}`}>
+            <Select
+              value={difficulty}
+              onChange={(v) => setDifficulty(v)}
+              style={{ width: 200 }}
+              options={[
+                { value: 'easy', label: 'Easy' },
+                { value: 'medium', label: 'Medium' },
+                { value: 'hard', label: 'Hard' }
+              ]}
+            />
+          </div>
+        </div>
+
+        <div className={QuestionStyles.QuestionBodyFlex}>
+          <div className={`${QuestionStyles.title}`}>Concept</div>
+          <div className={`${QuestionStyles.rightBody}`}>
+            <Input
+              value={concept}
+              onChange={(e) => setConcept(e.target.value)}
+              placeholder="e.g. programming, logical, math"
+              style={{ width: '100%', maxWidth: 400 }}
+            />
+          </div>
+        </div>
+
+        <div className={QuestionStyles.QuestionBodyFlex}>
+          <div className={`${QuestionStyles.title}`}>Company Tags</div>
+          <div className={`${QuestionStyles.rightBody}`}>
+            {companyTags.map((tag, idx) => (
+              <div key={idx} style={{ marginBottom: 12, padding: 12, border: '1px solid #d9d9d9', borderRadius: 6, background: '#fafafa' }}>
+                <Row gutter={[12, 12]}>
+                  <Col span={11}>
+                    <Input 
+                      placeholder="Company Name (e.g. TCS)" 
+                      value={tag.companyName}
+                      onChange={(e) => {
+                        const newTags = [...companyTags];
+                        newTags[idx].companyName = e.target.value;
+                        setCompanyTags(newTags);
+                      }}
+                    />
+                  </Col>
+                  <Col span={11}>
+                    <Input 
+                      placeholder="Exam Name (e.g. NQT)" 
+                      value={tag.examName}
+                      onChange={(e) => {
+                        const newTags = [...companyTags];
+                        newTags[idx].examName = e.target.value;
+                        setCompanyTags(newTags);
+                      }}
+                    />
+                  </Col>
+                  <Col span={2}>
+                    <Button 
+                      danger 
+                      icon={<RiDeleteBinLine />} 
+                      onClick={() => {
+                        setCompanyTags(prev => prev.filter((_, i) => i !== idx));
+                      }} 
+                    />
+                  </Col>
+                  <Col span={11}>
+                    <InputNumber 
+                      placeholder="Exam Year (e.g. 2025)" 
+                      value={tag.year}
+                      onChange={(v) => {
+                        const newTags = [...companyTags];
+                        newTags[idx].year = v;
+                        setCompanyTags(newTags);
+                      }}
+                      style={{ width: '100%' }}
+                    />
+                  </Col>
+                  <Col span={11}>
+                    <Input 
+                      placeholder="Section Name (e.g. coding)" 
+                      value={tag.sectionName}
+                      onChange={(e) => {
+                        const newTags = [...companyTags];
+                        newTags[idx].sectionName = e.target.value;
+                        setCompanyTags(newTags);
+                      }}
+                    />
+                  </Col>
+                </Row>
+              </div>
+            ))}
+            <Button 
+              type="dashed" 
+              onClick={() => setCompanyTags(prev => [...prev, { companyName: '', examName: '', year: null, sectionName: '' }])}
+            >
+              + Add Company Tag
+            </Button>
+          </div>
+        </div>
+
       </div>
     </div>
   );

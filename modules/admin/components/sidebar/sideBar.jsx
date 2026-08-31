@@ -29,7 +29,7 @@ const SideBar = ({ activeView, setView, isMobile }) => {
   const nav = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   
   const isCollapsed = useSelector((s) => s.sideBar?.collapse);
   
@@ -139,7 +139,7 @@ const SideBar = ({ activeView, setView, isMobile }) => {
   };
 
   const showLogoutConfirm = () => {
-    Modal.confirm({
+    modal.confirm({
       title: "Are you sure you want to logout?",
       icon: <ExclamationCircleOutlined />,
       content: "You will be redirected to the login page.",

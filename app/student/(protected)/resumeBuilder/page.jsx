@@ -1555,219 +1555,106 @@ function Form() {
     return (
       <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-full overflow-hidden w-full">
         <StudentPageHeader title="Resume Builder" subtitle="Create your professional resume" />
-        <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-0 pt-4 md:pt-6 lg:pt-6 flex flex-col items-center justify-start relative w-full h-full">
-          <div className="z-10 flex flex-col items-center justify-evenly min-h-[95%] w-full max-w-[1600px] min-[1600px]:[zoom:1.1] min-[1920px]:[zoom:1.25]">
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-12 pt-10 flex flex-col items-center justify-start relative w-full h-full">
+          {/* Background decorative elements */}
+          <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#1E69DA]/5 to-transparent -z-10 pointer-events-none"></div>
+          <div className="absolute top-20 left-[10%] w-72 h-72 bg-[#1E69DA]/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+          <div className="absolute top-40 right-[10%] w-80 h-80 bg-purple-500/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
 
-            {/* Steps Graphic Top Section */}
-            {/* Steps Graphic Top Section */}
-            <div className="w-full max-w-[1200px] mb-4 md:mb-2 relative block mt-2">
-
-              {/* Wavy SVG Line */}
-              <div className="absolute top-[64px] md:top-[87px] left-[12.5%] right-[12.5%] h-[16px] md:h-[24px] -z-10">
-                <svg width="100%" height="100%" viewBox="0 0 100 24" preserveAspectRatio="none" className="overflow-visible">
-                  <path
-                    d="M0,24 C 16.66,24 16.66,0 33.33,0 C 50,0 50,24 66.66,24 C 83.33,24 83.33,0 100,0 C 105,0 108,-4 110,-10"
-                    fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="3 3" strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-
-              {/* Paper Plane */}
-              <div className="absolute top-[44px] md:top-[64px] right-[4%] scale-75 md:scale-100">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#818cf8" className="rotate-[-10deg]">
-                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                </svg>
-              </div>
-
-              <div className="flex justify-between items-start w-full relative">
-                {/* Step 1 */}
-                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-1 md:px-2 mt-[16px] md:mt-[24px]">
-                  <div className="w-[44px] h-[44px] md:w-[64px] md:h-[64px] rounded-full bg-white flex items-center justify-center mb-3 md:mb-4 shadow-[0_4px_20px_rgba(59,130,246,0.12)] border border-[#eff6ff] relative">
-                    <div className="w-[32px] h-[32px] md:w-[50px] md:h-[50px] rounded-full bg-[#eff6ff] flex items-center justify-center border border-[#bfdbfe]">
-                      <HiOutlineDocumentText className="text-[16px] md:text-[24px] text-[#3b82f6]" />
-                    </div>
-                    {/* Sparkles */}
-                    <svg viewBox="0 0 24 24" fill="#bfdbfe" className="w-2 h-2 md:w-3 md:h-3 absolute -top-1 -left-2"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                    <svg viewBox="0 0 24 24" fill="#bfdbfe" className="w-3 h-3 md:w-4 md:h-4 absolute top-1 -right-3"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                  </div>
-                  <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-[#3b82f6] mb-2 md:mb-4 shadow-[0_0_0_3px_#EFF5FB] md:shadow-[0_0_0_5px_#EFF5FB]"></div>
-                  <h4 className="text-[10px] md:text-[14px] font-bold text-[#0f172a] mb-1 md:mb-2">1. Create / Upload</h4>
-                  <p className="text-[9px] md:text-[12px] text-[#64748b] leading-tight max-w-[160px] hidden md:block">Start by creating a new resume or uploading your existing one.</p>
-                </div>
-
-                {/* Step 2 */}
-                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-1 md:px-2 mt-[0px]">
-                  <div className="w-[44px] h-[44px] md:w-[64px] md:h-[64px] rounded-full bg-white flex items-center justify-center mb-3 md:mb-4 shadow-[0_4px_20px_rgba(34,197,94,0.12)] border border-[#f0fdf4] relative">
-                    <div className="w-[32px] h-[32px] md:w-[50px] md:h-[50px] rounded-full bg-[#f0fdf4] flex items-center justify-center border border-[#bbf7d0]">
-                      <EditOutlined className="text-[16px] md:text-[24px] text-[#22c55e]" />
-                    </div>
-                    {/* Sparkles */}
-                    <svg viewBox="0 0 24 24" fill="#bbf7d0" className="w-3 h-3 md:w-4 md:h-4 absolute -bottom-1 -left-3"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                    <svg viewBox="0 0 24 24" fill="#bbf7d0" className="w-2 h-2 md:w-3 md:h-3 absolute top-0 -right-2"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                  </div>
-                  <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-[#22c55e] mb-2 md:mb-4 shadow-[0_0_0_3px_#EFF5FB] md:shadow-[0_0_0_5px_#EFF5FB]"></div>
-                  <h4 className="text-[10px] md:text-[14px] font-bold text-[#0f172a] mb-1 md:mb-2">2. Customize</h4>
-                  <p className="text-[9px] md:text-[12px] text-[#64748b] leading-tight max-w-[160px] hidden md:block">Personalize your resume with our easy-to-use customization tools.</p>
-                </div>
-
-                {/* Step 3 */}
-                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-1 md:px-2 mt-[16px] md:mt-[24px]">
-                  <div className="w-[44px] h-[44px] md:w-[64px] md:h-[64px] rounded-full bg-white flex items-center justify-center mb-3 md:mb-4 shadow-[0_4px_20px_rgba(168,85,247,0.12)] border border-[#faf5ff] relative">
-                    <div className="w-[32px] h-[32px] md:w-[50px] md:h-[50px] rounded-full bg-[#faf5ff] flex items-center justify-center border border-[#e9d5ff]">
-                      <StarOutlined className="text-[16px] md:text-[24px] text-[#a855f7]" />
-                    </div>
-                    {/* Sparkles */}
-                    <svg viewBox="0 0 24 24" fill="#e9d5ff" className="w-2 h-2 md:w-3 md:h-3 absolute -bottom-2 -left-1"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                    <svg viewBox="0 0 24 24" fill="#e9d5ff" className="w-3 h-3 md:w-4 md:h-4 absolute -top-2 -right-3"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                  </div>
-                  <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-[#a855f7] mb-2 md:mb-4 shadow-[0_0_0_3px_#EFF5FB] md:shadow-[0_0_0_5px_#EFF5FB]"></div>
-                  <h4 className="text-[10px] md:text-[14px] font-bold text-[#0f172a] mb-1 md:mb-2">3. Optimize</h4>
-                  <p className="text-[9px] md:text-[12px] text-[#64748b] leading-tight max-w-[160px] hidden md:block">Get AI suggestions to improve your content and stand out.</p>
-                </div>
-
-                {/* Step 4 */}
-                <div className="flex flex-col items-center text-center w-1/4 relative z-10 px-1 md:px-2 mt-[0px]">
-                  <div className="w-[44px] h-[44px] md:w-[64px] md:h-[64px] rounded-full bg-white flex items-center justify-center mb-3 md:mb-4 shadow-[0_4px_20px_rgba(249,115,22,0.12)] border border-[#fff7ed] relative">
-                    <div className="w-[32px] h-[32px] md:w-[50px] md:h-[50px] rounded-full bg-[#fff7ed] flex items-center justify-center border border-[#fed7aa]">
-                      <DownloadOutlined className="text-[16px] md:text-[24px] text-[#f59e0b]" />
-                    </div>
-                    {/* Sparkles */}
-                    <svg viewBox="0 0 24 24" fill="#fed7aa" className="w-3 h-3 md:w-4 md:h-4 absolute top-2 -left-4"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                    <svg viewBox="0 0 24 24" fill="#fed7aa" className="w-2 h-2 md:w-3 md:h-3 absolute -bottom-2 -right-1"><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" /></svg>
-                  </div>
-                  <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-[#f59e0b] mb-2 md:mb-4 shadow-[0_0_0_3px_#EFF5FB] md:shadow-[0_0_0_5px_#EFF5FB]"></div>
-                  <h4 className="text-[10px] md:text-[14px] font-bold text-[#0f172a] mb-1 md:mb-2">4. Download</h4>
-                  <p className="text-[9px] md:text-[12px] text-[#64748b] leading-tight max-w-[160px] hidden md:block">Export your resume in PDF format and land your dream job.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Header Content */}
-            <div className="flex flex-col items-center gap-0 w-full mt-0">
-              <h2
-                className="text-[28px] md:text-[32px] font-bold text-[#0f172a] mt-0 mb-0 border-none pb-0 leading-tight"
-                style={{ border: 'none' }}
+          <div className="z-10 flex flex-col items-center w-full max-w-[1200px] mt-4">
+            
+            {/* Header */}
+            <div className="text-center mb-14">
+              <h2 
+                className="text-[48px] md:text-[68px] font-[800] text-slate-800 tracking-tight mb-4 leading-tight border-none"
+                style={{ border: "none" }}
               >
-                Let's get you started
+                Build a <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1E69DA] to-purple-600">Winning Resume</span>
               </h2>
-              <p className="text-[#64748b] text-[15px] md:text-[16px] mt-1 mb-0">Choose the best way to build your resume</p>
+              <p className="text-slate-500 text-[16px] md:text-[18px] max-w-[600px] mx-auto font-medium leading-relaxed">
+                Choose how you want to start. Create from scratch, enhance an existing resume, or check your ATS score instantly.
+              </p>
             </div>
 
-            {/* Main Action Cards (Wide Horizontal Style) */}
-            <div className="flex flex-wrap justify-center gap-5 w-full max-w-[1300px] mx-auto mt-2 mb-6 px-4">
-
-              {/* Upload Resume Card */}
-              <div
-                className="bg-white rounded-2xl p-4 md:p-6 w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] flex flex-row items-center gap-4 md:gap-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-[#3b82f6] border-y border-r border-[#e2e8f0] group relative overflow-hidden text-left"
+            {/* Main Action Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full">
+              
+              {/* Create New Card */}
+              <div 
+                onClick={() => setStep('templates_initial')}
+                className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(30,105,218,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
               >
-                {/* Icon */}
-                <div className="w-[48px] h-[48px] md:w-[64px] md:h-[64px] shrink-0 rounded-full bg-[#eff6ff] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                  <CloudUploadOutlined className="text-[22px] md:text-[28px] text-[#3b82f6]" />
-                </div>
-                {/* Text Content */}
-                <div className="flex flex-col flex-1">
-                  <h3 className="text-[15px] md:text-[17px] font-bold text-[#0f172a] mb-1 md:mb-2">Upload Resume</h3>
-                  <p className="text-[#64748b] text-[11px] md:text-[13px] leading-snug md:leading-relaxed mb-2 md:mb-6">Upload your current resume and improve it with our suggestions.</p>
-                  <span
-                    className="cursor-pointer text-[#3b82f6] font-semibold text-[13px] md:text-[15px] flex items-center justify-start gap-1 hover:gap-2 transition-all mt-auto md:pt-2"
-                    onClick={() => message.info("Upload Resume coming soon!")}
-                  >
-                    Upload & Enhance <span>→</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10 flex flex-col items-center flex-1 w-full">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1E69DA] to-blue-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                    <FileAddOutlined className="text-[32px]" />
+                  </div>
+                  <h3 className="text-[22px] font-bold text-slate-800 mb-3">Create from Scratch</h3>
+                  <p className="text-slate-500 text-[15px] leading-relaxed mb-8 flex-1">
+                    Use our professional templates and step-by-step builder to craft a perfect resume in minutes.
+                  </p>
+                  <span className="inline-flex items-center justify-center w-full bg-slate-50 text-[#1E69DA] font-bold px-6 py-3.5 rounded-xl group-hover:bg-[#1E69DA] group-hover:text-white transition-colors duration-300">
+                    Get Started <span className="ml-2 text-lg leading-none">→</span>
                   </span>
                 </div>
               </div>
 
-              {/* Create Resume Card */}
-              <div
-                className="bg-white rounded-2xl p-4 md:p-6 w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] flex flex-row items-center gap-4 md:gap-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-[#22c55e] border-y border-r border-[#e2e8f0] group relative overflow-hidden text-left"
+              {/* Upload Resume Card */}
+              <div 
+                onClick={() => message.info("Upload Resume coming soon!")}
+                className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
               >
-                {/* Icon */}
-                <div className="w-[48px] h-[48px] md:w-[64px] md:h-[64px] shrink-0 rounded-full bg-[#f0fdf4] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                  <FileAddOutlined className="text-[22px] md:text-[28px] text-[#22c55e]" />
-                </div>
-                {/* Text Content */}
-                <div className="flex flex-col flex-1">
-                  <h3 className="text-[15px] md:text-[17px] font-bold text-[#0f172a] mb-1 md:mb-2">Create New</h3>
-                  <p className="text-[#64748b] text-[11px] md:text-[13px] leading-snug md:leading-relaxed mb-2 md:mb-6">Build your resume from scratch using our step-by-step builder.</p>
-                  <span
-                    className="cursor-pointer text-[#22c55e] font-semibold text-[13px] md:text-[15px] flex items-center justify-start gap-1 hover:gap-2 transition-all mt-auto md:pt-2"
-                    onClick={() => {
-                      setStep('templates_initial');
-                    }}
-                  >
-                    Create From Scratch <span>→</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10 flex flex-col items-center flex-1 w-full">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-400 flex items-center justify-center text-white shadow-lg shadow-purple-500/30 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                    <CloudUploadOutlined className="text-[32px]" />
+                  </div>
+                  <h3 className="text-[22px] font-bold text-slate-800 mb-3">Upload & Enhance</h3>
+                  <p className="text-slate-500 text-[15px] leading-relaxed mb-8 flex-1">
+                    Already have a resume? Upload it and let our AI suggest powerful improvements to make it stand out.
+                  </p>
+                  <span className="inline-flex items-center justify-center w-full bg-slate-50 text-purple-600 font-bold px-6 py-3.5 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                    Upload File <span className="ml-2 text-lg leading-none">→</span>
                   </span>
                 </div>
               </div>
 
               {/* ATS Checker Card */}
-                <div
-                  className="bg-white rounded-2xl p-4 md:p-6 w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] flex flex-row items-center gap-4 md:gap-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-[#f59e0b] border-y border-r border-[#e2e8f0] group relative overflow-hidden text-left"
-                >
-                  <div className="w-[48px] h-[48px] md:w-[64px] md:h-[64px] shrink-0 rounded-full bg-[#fffbeb] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                    <BarChartOutlined className="text-[22px] md:text-[28px] text-[#f59e0b]" />
+              <div 
+                onClick={() => setStep('ats_checker')}
+                className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10 flex flex-col items-center flex-1 w-full">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                    <BarChartOutlined className="text-[32px]" />
                   </div>
-                  <div className="flex flex-col flex-1">
-                    <h3 className="text-[15px] md:text-[17px] font-bold text-[#0f172a] mb-1 md:mb-2">ATS Checker</h3>
-                    <p className="text-[#64748b] text-[11px] md:text-[13px] leading-snug md:leading-relaxed mb-2 md:mb-6">Scan your resume against job descriptions to get your ATS score.</p>
-                    <span
-                      className="cursor-pointer text-[#f59e0b] font-semibold text-[13px] md:text-[15px] flex items-center justify-start gap-1 hover:gap-2 transition-all mt-auto md:pt-2"
-                      onClick={() => setStep('ats_checker')}
-                    >
-                      Check Score <span>→</span>
-                    </span>
-                  </div>
+                  <h3 className="text-[22px] font-bold text-slate-800 mb-3">ATS Score Check</h3>
+                  <p className="text-slate-500 text-[15px] leading-relaxed mb-8 flex-1">
+                    Scan your resume against job descriptions to ensure it passes perfectly through Applicant Tracking Systems.
+                  </p>
+                  <span className="inline-flex items-center justify-center w-full bg-slate-50 text-emerald-600 font-bold px-6 py-3.5 rounded-xl group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+                    Check Score <span className="ml-2 text-lg leading-none">→</span>
+                  </span>
                 </div>
+              </div>
 
             </div>
 
-            {/* Bottom Features Banner */}
-            <div className="bg-white rounded-2xl p-4 md:p-6 w-full shadow-sm border border-[#e2e8f0] grid grid-cols-2 lg:flex lg:flex-row items-start md:items-center justify-between gap-4 md:gap-6 lg:gap-4 max-w-[1000px] mb-4">
-              
-              {/* Feature 1 */}
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                <div className="w-[36px] h-[36px] md:w-[48px] md:h-[48px] rounded-xl bg-[#faf5ff] flex items-center justify-center border border-[#f3e8ff] shrink-0">
-                  <FileTextOutlined className="text-[16px] md:text-[20px] text-[#a855f7]" />
-                </div>
-                <div className="flex flex-col">
-                  <h4 className="text-[12px] md:text-[15px] font-bold text-[#0f172a] mb-0.5 md:mb-1">ATS Friendly</h4>
-                  <p className="text-[#64748b] text-[10px] md:text-[13px] leading-snug">Templates that pass ATS checks</p>
-                </div>
+            {/* Minimal Features List */}
+            <div className="mt-16 flex flex-wrap justify-center gap-6 md:gap-12 opacity-70 mb-8">
+              <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
+                <CheckCircleFilled className="text-emerald-500 text-[18px]" /> ATS-Friendly
               </div>
-
-              {/* Feature 2 */}
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                <div className="w-[36px] h-[36px] md:w-[48px] md:h-[48px] rounded-xl bg-[#f0fdf4] flex items-center justify-center border border-[#dcfce7] shrink-0">
-                  <StarOutlined className="text-[16px] md:text-[20px] text-[#22c55e]" />
-                </div>
-                <div className="flex flex-col">
-                  <h4 className="text-[12px] md:text-[15px] font-bold text-[#0f172a] mb-0.5 md:mb-1">Professional Templates</h4>
-                  <p className="text-[#64748b] text-[10px] md:text-[13px] leading-snug">Choose from a variety of professional designs</p>
-                </div>
+              <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
+                <CheckCircleFilled className="text-emerald-500 text-[18px]" /> 40+ Premium Templates
               </div>
-
-              {/* Feature 3 */}
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                <div className="w-[36px] h-[36px] md:w-[48px] md:h-[48px] rounded-xl bg-[#eff6ff] flex items-center justify-center border border-[#dbeafe] shrink-0">
-                  <EditOutlined className="text-[16px] md:text-[20px] text-[#3b82f6]" />
-                </div>
-                <div className="flex flex-col">
-                  <h4 className="text-[12px] md:text-[15px] font-bold text-[#0f172a] mb-0.5 md:mb-1">Easy to Customize</h4>
-                  <p className="text-[#64748b] text-[10px] md:text-[13px] leading-snug">Edit and customize your resume with ease</p>
-                </div>
+              <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
+                <CheckCircleFilled className="text-emerald-500 text-[18px]" /> AI-Powered Tips
               </div>
-
-              {/* Feature 4 */}
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                <div className="w-[36px] h-[36px] md:w-[48px] md:h-[48px] rounded-xl bg-[#fff7ed] flex items-center justify-center border border-[#ffedd5] shrink-0">
-                  <DownloadOutlined className="text-[16px] md:text-[20px] text-[#f97316]" />
-                </div>
-                <div className="flex flex-col">
-                  <h4 className="text-[12px] md:text-[15px] font-bold text-[#0f172a] mb-0.5 md:mb-1">Export & Download</h4>
-                  <p className="text-[#64748b] text-[10px] md:text-[13px] leading-snug">Download your resume in PDF format</p>
-                </div>
+              <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
+                <CheckCircleFilled className="text-emerald-500 text-[18px]" /> One-Click Export
               </div>
-
             </div>
 
           </div>

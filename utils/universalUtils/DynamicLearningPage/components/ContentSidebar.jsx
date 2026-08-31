@@ -1,6 +1,6 @@
 "use client";
 import React, { memo } from "react";
-import { Tabs, Space, Collapse, List, Button, Tooltip } from "antd";
+import { Tabs, Space, Collapse, Button, Tooltip } from "antd";
 import { FolderOpenOutlined, BulbOutlined } from "@ant-design/icons";
 import { FiChevronRight } from "react-icons/fi";
 import ChatBot from "@/universalUtils/chatBot/chatbot";
@@ -91,7 +91,7 @@ const ContentSidebar = memo(({
                 </div>
 
                 <Collapse
-                  expandIconPosition="end"
+                  expandIconPlacement="end"
                   expandIcon={({ isActive }) => (
                     <FiChevronRight
                       size={16}
@@ -131,15 +131,13 @@ const ContentSidebar = memo(({
                         </div>
                       ),
                       children: (
-                        <List
-                          dataSource={section?.topics || []}
-                          split={false}
-                          renderItem={(topic, ti) => {
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          {(section?.topics || []).map((topic, ti) => {
                             const isActiveTopic = activeKey === i && selectedTopicIndex === ti;
                             const isCompleted = isTopicCompleted(topic, completedTopics, manualTopicChecks);
 
                             return (
-                              <List.Item style={{ padding: 0, border: 0 }}>
+                              <div key={topic?._id || ti} style={{ padding: 0, border: 0 }}>
                                 <Button
                                   type="text"
                                   block
@@ -205,10 +203,10 @@ const ContentSidebar = memo(({
                                     </div>
                                   </div>
                                 </Button>
-                              </List.Item>
+                              </div>
                             );
-                          }}
-                        />
+                          })}
+                        </div>
                       ),
                     };
                   })}

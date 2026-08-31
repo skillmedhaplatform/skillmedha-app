@@ -228,7 +228,7 @@ $r-xl: 16px;
     letter-spacing: 1px;
   }
   .qText {
-    font-size: 15px;
+    font-size: 19px;
     font-weight: 500;
     color: $text;
     line-height: 1.65;
@@ -393,8 +393,7 @@ $r-xl: 16px;
 
   .dot {
     width: 100%;
-    min-height: 38px;
-    aspect-ratio: 1 / 1.15;
+    height: 46px;
     border-radius: 6px;
     font-size: 11px;
     font-weight: 700;
@@ -416,19 +415,17 @@ $r-xl: 16px;
 }
 
 .navLegend {
-  display: grid;
-  grid-template-columns: max-content max-content;
-  justify-content: center;
-  column-gap: 24px;
-  row-gap: 10px;
-  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
   padding-top: 16px;
 
   .legendItem {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 11px;
+    gap: 4px;
+    font-size: 10px;
     color: $blue2;
     font-weight: 500;
 
@@ -586,7 +583,7 @@ $r-xl: 16px;
   border-left: 3px solid $blue-xl;
 }
 .expContent {
-  font-size: 15px;
+  font-size: 18px;
   color: $blue2;
   line-height: 1.75;
 }
@@ -792,6 +789,7 @@ $r-xl: 16px;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      white-space: nowrap;
       transition: opacity 0.2s;
       
       &:hover { opacity: 0.9; }

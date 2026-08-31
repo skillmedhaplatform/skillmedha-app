@@ -237,15 +237,15 @@ const LibraryPage = ({
   const wishlistLoading = useSelector((state) => state.wishlist?.loading ?? false);
   const wishlistPendingIds = useSelector((state) => state.wishlist?.pendingIds ?? []);
   const [wishlistOpen, setWishlistOpen] = useState(false);
+  const [categorySelectOpen, setCategorySelectOpen] = useState(false);
   const [columns, setColumns] = useState(3);
 
   useEffect(() => {
     const updateColumns = () => {
       const width = window.innerWidth;
-      if (width >= 1920) setColumns(5);
-      else if (width >= 1600) setColumns(4);
-      else if (width >= 1024) setColumns(3);
-      else if (width >= 640) setColumns(2);
+      if (width >= 1920) setColumns(4);
+      else if (width >= 1280) setColumns(3);
+      else if (width >= 768) setColumns(2);
       else setColumns(1);
     };
     
@@ -823,28 +823,50 @@ const LibraryPage = ({
                   setActiveTab(tab.id);
                   handleClearAll();
                 }}
-                className={`py-3 px-1 text-[15px] font-bold transition-all relative border-none bg-transparent cursor-pointer ${activeTab === tab.id ? "text-[#1E69DA]" : "text-[#64748b] hover:text-[#334155]"
-                  } ${tab.hiddenOnTablet ? "hidden lg:inline-block" : ""}`}
+                className={`py-3 px-1 transition-all relative border-none bg-transparent cursor-pointer ${
+                  activeTab === tab.id 
+                    ? "text-[#1E69DA] text-[18px] font-[800]" 
+                    : "text-[#66768D] text-[16px] font-bold hover:text-[#334155]"
+                } ${tab.hiddenOnTablet ? "hidden lg:inline-block" : ""}`}
               >
                 {tab.label}
                 {activeTab === tab.id && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1E69DA] rounded-t-md"></div>
+                  <div className="absolute bottom-0 left-1 right-1 h-[4px] bg-[#1E69DA] rounded-t-[4px]"></div>
                 )}
               </button>
             ))}
           </div>
 
           <div className="flex items-center gap-4 py-2 md:py-0">
+            {/* Modern Category Dropdown */}
+            <div 
+              onMouseEnter={() => setCategorySelectOpen(true)}
+              onMouseLeave={() => setCategorySelectOpen(false)}
+            >
+              <Select
+                open={categorySelectOpen}
+                placeholder="All Categories"
+                value={urlCategory || undefined}
+                onChange={(val) => { pushParams({ category: val || "" }); setCategorySelectOpen(false); }}
+                allowClear
+                options={[{ label: "All Categories", value: "" }, ...categoryOptions]}
+                className="w-[170px] [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#e2e8f0] [&_.ant-select-selector]:!shadow-sm [&_.ant-select-selection-item]:!text-[#66768D] [&_.ant-select-selection-item]:!font-medium [&_.ant-select-selection-item]:!text-[15px] [&_.ant-select-selection-placeholder]:!text-[#66768D] [&_.ant-select-selection-placeholder]:!font-medium [&_.ant-select-arrow]:!text-[#66768D]"
+                popupMatchSelectWidth={false}
+                styles={{ popup: { root: { borderRadius: '12px', padding: '8px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9' } } }}
+                getPopupContainer={(triggerNode) => triggerNode.parentNode}
+              />
+            </div>
+
             <Input
               id={`${idPrefix}-search`}
-              prefix={<SearchOutlined style={{ color: "#1E69DA" }} />}
+              prefix={<SearchOutlined style={{ color: "#1E69DA", fontSize: '16px' }} />}
               placeholder={searchPlaceholder}
               value={searchInput}
               onChange={handleSearchChange}
               allowClear
               onClear={() => pushParams({ search: "" })}
-              className="w-[160px] rounded-[20px] shadow-sm border-[#e2e8f0] [&>input]:text-[#64748b] [&>input]:font-medium [&>input::placeholder]:text-[#94a3b8]"
-              style={{ color: "#64748b" }}
+              className="w-[240px] rounded-lg shadow-sm border-[#e2e8f0] px-3 py-1.5 [&_.ant-input]:!text-[#66768D] [&_.ant-input]:!font-medium [&_.ant-input::placeholder]:!text-[#66768D] [&_.ant-input::placeholder]:!font-medium"
+              style={{ color: "#66768D" }}
             />
             <Popover
               content={
@@ -889,33 +911,6 @@ const LibraryPage = ({
           </div>
         </div>
 
-        {/* Categories Pill Bar */}
-        <div className="w-full px-4 lg:px-8 py-3 bg-white border-b border-[#e2e8f0] flex items-center gap-3 overflow-x-auto no-scrollbar">
-          <button
-            onClick={() => pushParams({ category: "" })}
-            className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer ${!urlCategory
-                ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
-                : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"
-              }`}
-          >
-            <span className={!urlCategory ? "text-white" : "text-[#3b82f6]"}>☷</span> All categories
-          </button>
-          {categoryOptions.map((cat) => {
-            const isActive = urlCategory === cat.value;
-            return (
-              <button
-                key={cat.value}
-                onClick={() => pushParams({ category: cat.value })}
-                className={`shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-md text-[14px] font-medium transition-all duration-300 cursor-pointer ${isActive
-                    ? "bg-[#3b82f6] border border-transparent text-white shadow-sm hover:bg-[#2563eb]"
-                    : "bg-white border border-[#3b82f6] text-[#3b82f6] hover:bg-[#eff6ff]"
-                  }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
       </div> {/* End Fixed Header Section */}
       {/* Cards Grid (Scrollable) */}
       <div className="w-full flex-1 overflow-y-auto pt-8 pb-8 no-scrollbar">
@@ -994,44 +989,54 @@ const LibraryPage = ({
                 const cardNode = (
                   <div
                     key={item?._id}
-                    className="group flex flex-col bg-white text-black border-[1px] border-[#cbd5e1] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-md"
+                    className="group flex flex-col bg-white border border-slate-100 rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative"
                     role="button"
                     tabIndex={0}
                   >
-                    {/* Card Image */}
-                    <div className="relative w-full h-[170px] p-2 pb-0 bg-white">
-                      <div className="relative w-full h-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
-                        <img src={imageUrl} alt={item.title || "Thumbnail"} className="w-full h-full object-contain" />
+                    {/* Inner ambient glow (subtle) */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-blue-500/10 transition-colors" />
+
+                    {/* Card Image Wrapper */}
+                    <div className="relative w-full h-[180px] p-3 pb-0 z-10">
+                      <div className="relative w-full h-full rounded-[18px] overflow-hidden bg-white border border-slate-100/50 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                        <img src={imageUrl} alt={item.title || "Thumbnail"} className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" />
+                        
+                        {/* Top overlay gradient for readability */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
 
                         {isEnrolled && (
-                          <div className="absolute top-2 left-2 bg-[#022c22] backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border-[0.5px] border-[#047857]">
-                            <BsCheckCircleFill className="text-[#10b981] text-[10px]" />
-                            <span className="text-[#10b981] text-[11px] font-medium tracking-wide">Enrolled</span>
+                          <div className="absolute top-3 left-3 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/30 shadow-sm">
+                            <BsCheckCircleFill className="text-emerald-400 text-[11px]" />
+                            <span className="text-white text-[10px] font-bold tracking-wide uppercase">Enrolled</span>
                           </div>
                         )}
+                        
                         {showWishlist && (
                           <button
                             onClick={(e) => handleWishlistToggle(item, e)}
                             disabled={isWishlistLoading}
                             aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                            className="absolute top-2 right-2 bg-black/30 backdrop-blur-sm p-1.5 rounded-lg border-[0.5px] border-white/10 cursor-pointer hover:bg-black/50 transition-colors disabled:opacity-60"
+                            className="absolute top-3 right-3 bg-white/20 backdrop-blur-md p-1.5 rounded-xl border border-white/30 cursor-pointer hover:bg-white/30 transition-colors disabled:opacity-60 shadow-sm"
                           >
                             {inWishlist ? (
-                              <BsBookmarkFill className="text-[#facc15] text-[14px]" />
+                              <BsBookmarkFill className="text-yellow-400 text-[14px]" />
                             ) : (
                               <BsBookmark className="text-white text-[14px]" />
                             )}
                           </button>
                         )}
-                        <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-0.5 bg-black/20 backdrop-blur-sm rounded-lg">
-                          <BsCodeSlash className="text-white/80 text-[12px]" />
-                          <span className="text-white/90 text-[11px] font-medium">{item.category || "General"}</span>
+                        
+                        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/40 backdrop-blur-md rounded-lg border border-white/10 shadow-sm">
+                          <BsCodeSlash className="text-blue-300 text-[12px]" />
+                          <span className="text-white text-[11px] font-semibold tracking-wide">{item.category || "General"}</span>
                         </div>
+                        
                         {item.difficulty && (
-                          <div className={`absolute bottom-2 right-2 px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase backdrop-blur-sm ${item.difficulty?.toLowerCase() === "beginner" ? "bg-[#047857]/90 text-white" :
-                              item.difficulty?.toLowerCase() === "intermediate" ? "bg-[#d97706]/90 text-white" :
-                                "bg-[#dc2626]/90 text-white"
-                            }`}>
+                          <div className={`absolute bottom-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase backdrop-blur-md border border-white/10 shadow-sm ${
+                            item.difficulty?.toLowerCase() === "beginner" ? "bg-emerald-500/80 text-white" :
+                            item.difficulty?.toLowerCase() === "intermediate" ? "bg-orange-500/80 text-white" :
+                            "bg-red-500/80 text-white"
+                          }`}>
                             {item.difficulty}
                           </div>
                         )}
@@ -1039,50 +1044,61 @@ const LibraryPage = ({
                     </div>
 
                     {/* Card Content */}
-                    <div className="flex flex-col p-3 flex-1">
+                    <div className="flex flex-col p-5 flex-1 z-10">
                       <Tooltip title={item?.title} placement="topLeft" mouseEnterDelay={0.5}>
-                        <h3 className="text-[15px] font-bold text-[#1e293b] leading-tight mb-2 line-clamp-2 min-h-[36px]">
+                        <h3 className="text-[17px] font-[800] text-slate-800 leading-[22px] mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors min-h-[44px]">
                           {item?.title}
                         </h3>
                       </Tooltip>
 
-                      <p className="text-[#64748b] text-[12px] font-medium leading-snug mb-3 line-clamp-2 min-h-[34px]">
+                      <p className="text-slate-500 text-[12px] font-medium leading-relaxed mb-4 line-clamp-2 min-h-[36px]">
                         {stripHtml(item?.description)}
                       </p>
 
                       {/* Progress Bar */}
                       <div className="w-full flex items-center gap-3 mb-4">
-                        <div className="flex-1 h-[8px] bg-[#f1f5f9] rounded-full overflow-hidden">
+                        <div className="flex-1 h-[6px] bg-slate-100 rounded-full overflow-hidden shadow-inner">
                           {isEnrolled && (
                             <div
-                              className="h-full bg-gradient-to-br from-[#1E69DA] to-[#5694F0] rounded-full transition-all duration-500"
+                              className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-700 relative"
                               style={{ width: `${progressVal}%` }}
-                            />
+                            >
+                              <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                            </div>
                           )}
                         </div>
-                        <span className="text-[13px] font-bold text-[#64748b] min-w-[32px] text-right">
+                        <span className="text-[12px] font-[800] text-slate-400 min-w-[32px] text-right tracking-tight">
                           {isEnrolled ? `${progressVal}%` : "0%"}
                         </span>
                       </div>
 
-                      {/* Meta Row */}
-                      <div className="flex items-center gap-2 text-[11px] text-[#94a3b8] font-bold mb-4">
-                        {duration && <span className="flex items-center gap-1"><BsClock /> {duration}</span>}
-                        {duration && modulesCount > 0 && <span>•</span>}
-                        {modulesCount > 0 && <span className="flex items-center gap-1"><BsJournalBookmark /> {modulesCount} modules</span>}
-                        {createdAtDate && (duration || modulesCount > 0) && <span>•</span>}
-                        {createdAtDate && <span>{createdAtDate}</span>}
+                      {/* Meta Row as clean chips */}
+                      <div className="flex flex-wrap items-center gap-2 mb-4">
+                        {duration && (
+                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
+                            <BsClock className="text-blue-500/70 text-[12px]" /> {duration}
+                          </div>
+                        )}
+                        {modulesCount > 0 && (
+                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
+                            <BsJournalBookmark className="text-purple-500/70 text-[12px]" /> {modulesCount} mod
+                          </div>
+                        )}
+                        {createdAtDate && (
+                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-100 ml-auto">
+                            {createdAtDate}
+                          </div>
+                        )}
                       </div>
 
-
-
                       {/* Footer */}
-                      <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#f1f5f9]">
-                        <span className={`text-[12px] font-bold flex items-center gap-1 ${statusColor}`}>
+                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                        <span className={`text-[12px] font-bold flex items-center gap-1.5 ${isEnrolled && progressVal > 0 ? "text-emerald-500" : "text-slate-400"}`}>
+                          {isEnrolled && progressVal > 0 && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
                           {statusText}
                         </span>
                         <button
-                          className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white text-[13px] font-medium py-1.5 px-5 rounded-[20px] border-none cursor-pointer transition-opacity flex items-center gap-1.5 shadow-sm"
+                          className="group/btn bg-white hover:bg-slate-50 text-slate-700 text-[13px] font-[800] py-2 px-5 rounded-xl border border-slate-200 cursor-pointer transition-all flex items-center gap-2 shadow-sm hover:shadow hover:-translate-y-0.5 hover:text-blue-600 hover:border-blue-200"
                           onClick={(e) => {
                             e.stopPropagation();
                             if (isEnrolled) {
@@ -1096,11 +1112,11 @@ const LibraryPage = ({
                           {isCartLoading && !isEnrolled ? (
                             <><LoadingOutlined /> Adding...</>
                           ) : buttonText === "Buy" ? (
-                            inCart ? "✓ Go to Cart" : <><LockOutlined /> Buy</>
+                            inCart ? "Go to Cart" : <><LockOutlined className="text-[12px]" /> Buy</>
                           ) : buttonText === "Start" ? (
-                            "+ Start"
+                            "Start"
                           ) : (
-                            `▷ ${buttonText}`
+                            buttonText
                           )}
                         </button>
                       </div>

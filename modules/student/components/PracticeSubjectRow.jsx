@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pagination, Spin } from "antd";
+import { Pagination, Spin, Modal as AntModal, Button } from "antd";
 import PracticeCard from "./PracticeCard";
+import DifficultyModal from "./DifficultyModal";
 import { useSelector, useDispatch } from "react-redux";
-import { setCategoryProgress } from "@/redux/slices/practiceSlice";
 import { useRouter, usePathname } from "next/navigation";
 import { getLstorage } from "@/universalUtils/windowMW";
 import axios from "axios";
 import { restUrl } from "@/config/urls";
+import RulesModal from "./RulesModal";
+import { HelpCircle } from "lucide-react";
 
 const api = axios.create({
   baseURL: restUrl,
@@ -24,6 +26,10 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
   const [subtopics, setSubtopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [columns, setColumns] = useState(4); // Default to 4 columns
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+  const [levelUpData, setLevelUpData] = useState(null); // { oldLevel, newLevel }
+  const [selectedSubtopic, setSelectedSubtopic] = useState(null);
   const studentPracResults = useSelector((state) => state.practice.studentPracResults || []);
   const studentData = useSelector((state) => state.student.student?.data);
   const dispatch = useDispatch();
@@ -31,9 +37,9 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
   useEffect(() => {
     const updateColumns = () => {
       const width = window.innerWidth;
-      if (width >= 1920) setColumns(6);      // Extremely large monitors
-      else if (width >= 1600) setColumns(5); // Large monitors
-      else if (width >= 1024) setColumns(4); // Laptops/Desktops
+      if (width >= 1920) setColumns(5);      // Extremely large monitors
+      else if (width >= 1600) setColumns(4); // Large monitors
+      else if (width >= 1024) setColumns(3); // Laptops/Desktops
       else if (width >= 768) setColumns(2);  // Tablets
       else setColumns(1);                    // Mobile
     };
@@ -66,12 +72,23 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
           });
           const subs = subRes.data?.data || [];
           
-          for (const s of subs) {
-            allSubtopics.push({
-               ...s,
-               topicTitle: topic.title,
-               totalQuestions: typeof s.totalQuestions === "number" ? s.totalQuestions : 20
-            });
+          if (subs.length === 0) {
+             // If there are no subtopics, the topic itself should act as the playable level
+             allSubtopics.push({
+                 _id: null,
+                 topicId: topic._id,
+                 title: topic.title,
+                 topicTitle: topic.title,
+                 totalQuestions: typeof topic.totalQuestions === "number" ? topic.totalQuestions : 0
+             });
+          } else {
+            for (const s of subs) {
+              allSubtopics.push({
+                 ...s,
+                 topicTitle: topic.title,
+                 totalQuestions: typeof s.totalQuestions === "number" ? s.totalQuestions : 0
+              });
+            }
           }
         }
         
@@ -93,164 +110,94 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
   
   const getSubtopicStats = (subtopic) => {
     const sessions = studentPracResults.filter(
-      (session) => session.refId === subtopic._id
+      (session) => session.refId === subtopic._id || (subtopic._id === null && session.refId === subtopic.topicId)
     );
-    if (sessions.length === 0) return { progress: 0, attempts: 0, flawlessLevel: 0, recallLevel: 0, seenCount: 0, dbTotalQuestions: subtopic.totalQuestions || 0 };
+    if (sessions.length === 0) return { easyPassCount: 0, mediumPassCount: 0, hardPassCount: 0, easyAttempts: 0, mediumAttempts: 0, hardAttempts: 0, dbTotalQuestions: subtopic.totalQuestions || 0, attempts: 0 };
 
-    sessions.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-
-    const totalQuestionsLimit = Math.min(subtopic.totalQuestions || 20, 20);
-    const dbTotalQuestions = subtopic.totalQuestions || 0;
+    let easyPassCount = 0;
+    let mediumPassCount = 0;
+    let hardPassCount = 0;
     
-    let maxCorrect = 0;
-    let globalSeen = new Set();
-    let flawlessLevel = 0;
-    let recallLevel = 0;
+    let easyAttempts = 0;
+    let mediumAttempts = 0;
+    let hardAttempts = 0;
     
-    const completedSessions = sessions.filter(s => s.correctQuestionIds !== undefined || s.score !== undefined);
+    sessions.forEach(s => {
+      const diff = s.difficulty?.toLowerCase();
+      const isCompleted = s.score !== undefined;
 
-    completedSessions.forEach((s) => {
-      const correctCount = Array.isArray(s.correctQuestionIds) ? s.correctQuestionIds.length : (s.score || 0);
-      if (correctCount > maxCorrect) {
-        maxCorrect = correctCount;
+      if (isCompleted) {
+        if (diff === 'easy') easyAttempts++;
+        if (diff === 'medium') mediumAttempts++;
+        if (diff === 'hard') hardAttempts++;
       }
-      
-      let containedNewQuestions = false;
-      if (Array.isArray(s.questionsData)) {
-        s.questionsData.forEach(q => {
-          if (q && q._id && !globalSeen.has(q._id.toString())) {
-            containedNewQuestions = true;
-            globalSeen.add(q._id.toString());
-          }
-        });
-      }
-      
-      const presentedCount = Array.isArray(s.questionsData) ? s.questionsData.length : totalQuestionsLimit;
-      if (presentedCount > 0 && correctCount === presentedCount) {
-        if (containedNewQuestions) {
-          flawlessLevel += 1;
-        } else {
-          recallLevel += 1;
-        }
+
+      const scoreRatio = Array.isArray(s.questionsData) && s.questionsData.length > 0
+        ? (s.correctQuestionIds?.length || s.score || 0) / s.questionsData.length
+        : 0;
+
+      if (isCompleted && scoreRatio >= 0.7) {
+        if (diff === 'easy') easyPassCount++;
+        if (diff === 'medium') mediumPassCount++;
+        if (diff === 'hard') hardPassCount++;
       }
     });
 
-    let progress = Math.round((maxCorrect / totalQuestionsLimit) * 100);
-    if (progress > 100) progress = 100;
-
     return { 
-      progress, 
-      attempts: completedSessions.length, 
-      flawlessLevel, 
-      recallLevel, 
-      seenCount: globalSeen.size, 
-      dbTotalQuestions 
+      easyPassCount,
+      mediumPassCount,
+      hardPassCount,
+      easyAttempts,
+      mediumAttempts,
+      hardAttempts,
+      dbTotalQuestions: subtopic.totalQuestions || 0,
+      attempts: sessions.length
     };
   };
 
+  const getMasteryLevelName = (minMultiplier) => {
+    if (minMultiplier >= 5) return "Grandmaster";
+    if (minMultiplier === 4) return "Master";
+    if (minMultiplier === 3) return "Expert";
+    if (minMultiplier === 2) return "Advanced";
+    if (minMultiplier === 1) return "Intermediate";
+    return "Novice";
+  };
+
   useEffect(() => {
-    if (typeof window !== "undefined" && subtopics.length > 0) {
-      const path = window.location.pathname;
-      const isCoding = path.includes('/coding');
-      const isNonTech = path.includes('/nontechnical');
-      const sectionType = isCoding ? "Coding" : isNonTech ? "Non-Technical" : "Technical";
-
+    if (subtopics && subtopics.length > 0 && studentPracResults && subject) {
       const userId = studentData?._id || "";
-      const noticeKey = `pendingPracticeNotices_${userId}`;
-      const claimedKey = `claimedAchievements_${userId}`;
-      const unseenKey = `unseenPracticeBadges_${userId}`;
-
-      let pendingNotices = JSON.parse(localStorage.getItem(noticeKey) || "[]");
-      let claimedBadges = JSON.parse(localStorage.getItem(claimedKey) || "[]");
+      const storageKey = `mastery_levels_${userId}`;
+      const savedLevels = JSON.parse(localStorage.getItem(storageKey) || "{}");
       let hasUpdates = false;
 
-      const totalProgress = subtopics.reduce((acc, st) => {
+      subtopics.forEach(st => {
         const stats = getSubtopicStats(st);
+        const minMultiplier = Math.min(stats.easyPassCount, stats.mediumPassCount, stats.hardPassCount);
+        const currentLevel = getMasteryLevelName(minMultiplier);
         
-        // 1. Check for New Questions Notice
-        if (stats.seenCount > 0 && stats.dbTotalQuestions > stats.seenCount) {
-          const noticeId = `new_questions_${st._id}_${stats.dbTotalQuestions}`;
-          const existingNotice = pendingNotices.find(n => n.id === noticeId);
-          if (!existingNotice && !claimedBadges.includes(noticeId)) {
-            pendingNotices.push({
-              id: noticeId,
-              type: 'new_questions',
-              title: `New Questions Added!`,
-              message: `New questions have been added to ${st.title}! Take a practice test to earn a Flawless Master badge.`,
-              isClaimed: false
-            });
-            hasUpdates = true;
+        const prevLevel = savedLevels[st._id || st.topicId] || "Novice";
+        
+        // If level changed and it's an upgrade (not a fresh load where they already have it)
+        // Actually, to prevent spam on reload, we only show modal if it just updated in this session
+        // For simplicity, we just save the highest achieved level. 
+        if (currentLevel !== prevLevel && minMultiplier > 0) {
+          // Check if this is an actual new rank up during this session
+          const rankValues = { "Novice": 0, "Intermediate": 1, "Advanced": 2, "Expert": 3, "Master": 4, "Grandmaster": 5 };
+          if (rankValues[currentLevel] > rankValues[prevLevel]) {
+            // Trigger celebration
+            setLevelUpData({ subtopicTitle: st.title || st.topicTitle, newLevel: currentLevel, prevLevel });
           }
+          savedLevels[st._id || st.topicId] = currentLevel;
+          hasUpdates = true;
         }
+      });
 
-        // 2. Check for Master Badges
-        if (stats.flawlessLevel > 0 || stats.recallLevel > 0) {
-          for (let i = 1; i <= stats.flawlessLevel; i++) {
-            const badgeId = `practice_badge|${sectionType}|${st.topicTitle || subject.title}|${st.title}|Flawless|${i}`;
-            if (!claimedBadges.includes(badgeId)) {
-              claimedBadges.push(badgeId);
-              localStorage.setItem(claimedKey, JSON.stringify(claimedBadges));
-              
-              const unseen = JSON.parse(localStorage.getItem(unseenKey) || "[]");
-              if (!unseen.includes(badgeId)) {
-                unseen.push(badgeId);
-                localStorage.setItem(unseenKey, JSON.stringify(unseen));
-              }
-
-              if (!pendingNotices.find(n => n.id.includes(badgeId))) {
-                pendingNotices.push({
-                  id: `notice_${Date.now()}_${badgeId}`,
-                  type: 'badge',
-                  title: `🏆 Flawless Master: ${st.topicTitle || subject.title} - ${st.title}`,
-                  message: `You scored 100% on new questions in ${st.title}! Claim your Flawless Master badge.`,
-                  actionUrl: `#openBadges_${sectionType === 'Technical' ? 'Technical' : 'Non-Technical'}`,
-                  actionText: 'Checkout',
-                  isClaimed: false
-                });
-                hasUpdates = true;
-              }
-            }
-          }
-          
-          for (let i = 1; i <= stats.recallLevel; i++) {
-            const badgeId = `practice_badge|${sectionType}|${st.topicTitle || subject.title}|${st.title}|Recall|${i}`;
-            if (!claimedBadges.includes(badgeId)) {
-              claimedBadges.push(badgeId);
-              localStorage.setItem(claimedKey, JSON.stringify(claimedBadges));
-              
-              const unseen = JSON.parse(localStorage.getItem(unseenKey) || "[]");
-              if (!unseen.includes(badgeId)) {
-                unseen.push(badgeId);
-                localStorage.setItem(unseenKey, JSON.stringify(unseen));
-              }
-
-              if (!pendingNotices.find(n => n.id.includes(badgeId))) {
-                pendingNotices.push({
-                  id: `notice_${Date.now()}_${badgeId}`,
-                  type: 'badge',
-                  title: `🏅 Recall Master: ${st.topicTitle || subject.title} - ${st.title}`,
-                  message: `You scored 100% on practiced questions in ${st.title}! Claim your Recall Master badge.`,
-                  actionUrl: `#openBadges_${sectionType === 'Technical' ? 'Technical' : 'Non-Technical'}`,
-                  actionText: 'Checkout',
-                  isClaimed: false
-                });
-                hasUpdates = true;
-              }
-            }
-          }
-        }
-
-        return acc + stats.progress;
-      }, 0);
-      
       if (hasUpdates) {
-        localStorage.setItem("pendingPracticeNotices", JSON.stringify(pendingNotices));
+        localStorage.setItem(storageKey, JSON.stringify(savedLevels));
       }
-
-      const avgProgress = Math.round(totalProgress / subtopics.length);
-      dispatch(setCategoryProgress({ category: subject.title, progress: avgProgress }));
     }
-  }, [subtopics, studentPracResults, subject, dispatch]);
+  }, [subtopics, studentPracResults, subject, studentData]);
 
   if (loading) {
     return <div className="py-8 flex justify-center"><Spin /></div>;
@@ -277,12 +224,19 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
 
   const currentSubtopics = sortedSubtopics.slice(startIndex, startIndex + pageSize);
 
-  const handleStart = (subtopic) => {
-    // Navigate to test page with subtopic ID
+  const handleStartClick = (subtopic) => {
+    setSelectedSubtopic(subtopic);
+    setIsModalOpen(true);
+  };
+
+  const handleStartTest = (difficulty) => {
+    setIsModalOpen(false);
+    if (!selectedSubtopic) return;
+
     const isCoding = pathname.includes("/coding");
     const basePath = isCoding ? "/student/practice-new/coding/problems" : "/student/practice-new/test";
     
-    router.push(`${basePath}?subT=${subtopic._id}&t=${subtopic.topicId}&sub=${subject._id}&title=${encodeURIComponent(subtopic.title)}&subjectTitle=${encodeURIComponent(subject.title)}&type=${encodeURIComponent(subject.type || "Technical")}`);
+    router.push(`${basePath}?subT=${selectedSubtopic._id || ""}&t=${selectedSubtopic.topicId}&sub=${subject._id}&title=${encodeURIComponent(selectedSubtopic.title)}&subjectTitle=${encodeURIComponent(subject.title)}&type=${encodeURIComponent(subject.type || "Technical")}&diff=${difficulty}`);
   };
 
 
@@ -321,18 +275,39 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
       variants={rowVariants}
     >
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-[20px] font-bold text-[#071631] m-0">{subject.title}</h2>
-        {subtopics.length > pageSize && (
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={subtopics.length}
-            onChange={setCurrentPage}
-            size="small"
-            showSizeChanger={false}
-          />
-        )}
+        <h2 className="text-[20px] font-bold text-[#071631] m-0">
+          {subject.title}
+        </h2>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setIsRulesModalOpen(true)}
+            className="flex items-center gap-1.5 text-[12px] text-slate-500 font-semibold px-3 py-1.5 rounded-full hover:bg-slate-200 hover:text-slate-800 transition-colors border border-slate-200 shadow-sm bg-white"
+          >
+            <HelpCircle size={14} />
+            <span className="hidden sm:inline">Mastery Guide</span>
+          </button>
+          
+          {subtopics.length > pageSize && (
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={subtopics.length}
+              onChange={setCurrentPage}
+              size="small"
+              showSizeChanger={false}
+            />
+          )}
+        </div>
       </div>
+
+      <DifficultyModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onStart={handleStartTest}
+        refId={selectedSubtopic?._id || selectedSubtopic?.topicId}
+        type={selectedSubtopic?._id ? "subTopicId" : "topicId"}
+        subjectId={subject._id}
+      />
 
       <AnimatePresence mode="wait">
         <motion.div 
@@ -344,26 +319,65 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
           exit="exit"
           variants={cardVariants}
         >
-          {currentSubtopics.map((subtopic) => {
-            const stats = getSubtopicStats(subtopic);
+          {currentSubtopics.map((sub) => {
+            const stats = getSubtopicStats(sub);
             return (
-              <PracticeCard 
-                key={subtopic._id}
-                id={subtopic._id}
-                title={subtopic.title}
-                category={subtopic.topicTitle || subject.title}
-                totalQuestions={Math.min(subtopic.totalQuestions || 20, 20)}
-                actualTotalQuestions={subtopic.totalQuestions || 0}
+              <PracticeCard
+                key={sub._id || sub.topicId}
+                id={sub._id}
+                title={sub.title}
+                category={sub.topicTitle || subject.title}
                 attempts={stats.attempts}
-                progress={stats.progress}
-                onStart={() => handleStart(subtopic)}
+                easyPassCount={stats.easyPassCount}
+                mediumPassCount={stats.mediumPassCount}
+                hardPassCount={stats.hardPassCount}
+                easyAttempts={stats.easyAttempts}
+                mediumAttempts={stats.mediumAttempts}
+                hardAttempts={stats.hardAttempts}
                 subjectTitle={subject.title}
+                actualTotalQuestions={sub.totalQuestions}
+                onStart={() => handleStartClick(sub)}
+                loading={false}
+                disableStart={sub.totalQuestions < 15}
               />
             );
           })}
         </motion.div>
       </AnimatePresence>
-      
+
+      <RulesModal 
+        isOpen={isRulesModalOpen}
+        onClose={() => setIsRulesModalOpen(false)}
+      />
+
+      <AntModal
+        open={!!levelUpData}
+        onCancel={() => setLevelUpData(null)}
+        footer={null}
+        centered
+        className="celebration-modal"
+        width={400}
+      >
+        <div className="text-center py-6">
+          <div className="text-5xl mb-4">🎉</div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">Level Up!</h2>
+          <p className="text-slate-600 mb-4">
+            Congratulations! You have balanced your practice perfectly in <strong>{levelUpData?.subtopicTitle}</strong>.
+          </p>
+          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6">
+            <p className="text-indigo-900 font-medium">Rank Achieved:</p>
+            <p className="text-xl font-black text-indigo-600 uppercase tracking-widest">{levelUpData?.newLevel}</p>
+          </div>
+          <Button 
+            type="primary" 
+            size="large" 
+            className="w-full bg-indigo-600 font-bold"
+            onClick={() => setLevelUpData(null)}
+          >
+            Awesome!
+          </Button>
+        </div>
+      </AntModal>
     </motion.div>
   );
 }
