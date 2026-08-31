@@ -65,7 +65,10 @@ export default function ChatBot() {
         ...prev,
         {
           role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
+          content:
+            error.message === "Something went wrong"
+              ? "Sorry, I encountered an error. Please try again."
+              : error.message,
         },
       ]);
     } finally {
