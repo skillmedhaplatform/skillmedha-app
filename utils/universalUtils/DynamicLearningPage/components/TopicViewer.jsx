@@ -67,8 +67,8 @@ const TopicViewer = memo(({
 
   return (
     <div className={`${interPageStyles.bodyStylesRight} ${isExpandedView ? interPageStyles.bodyStylesRightExpanded : ""}`}
-         style={{ padding: shouldUseMediaDisplayStyle ? "0" : undefined }}>
-      
+      style={{ padding: shouldUseMediaDisplayStyle ? "0" : undefined }}>
+
       {isExpandedView ? (
         <Button
           className={interPageStyles.expandRestoreEdgeButton}

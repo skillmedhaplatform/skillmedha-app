@@ -852,7 +852,7 @@ const LibraryPage = ({
                 options={[{ label: "All Categories", value: "" }, ...categoryOptions]}
                 className="w-[170px] [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#e2e8f0] [&_.ant-select-selector]:!shadow-sm [&_.ant-select-selection-item]:!text-[#66768D] [&_.ant-select-selection-item]:!font-medium [&_.ant-select-selection-item]:!text-[15px] [&_.ant-select-selection-placeholder]:!text-[#66768D] [&_.ant-select-selection-placeholder]:!font-medium [&_.ant-select-arrow]:!text-[#66768D]"
                 popupMatchSelectWidth={false}
-                dropdownStyle={{ borderRadius: '12px', padding: '8px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9' }}
+                styles={{ popup: { root: { borderRadius: '12px', padding: '8px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9' } } }}
                 getPopupContainer={(triggerNode) => triggerNode.parentNode}
               />
             </div>

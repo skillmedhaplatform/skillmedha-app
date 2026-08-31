@@ -101,7 +101,7 @@ const NoteEditor = memo(({
             Add note
           </Button>,
         ]}
-        destroyOnClose
+        destroyOnHidden
         width={560}
         centered
       >
