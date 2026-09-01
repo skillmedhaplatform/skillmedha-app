@@ -1,4 +1,3 @@
-import { questionData } from "@/universalUtils/questionData";
 import { aiUrl } from "@/config/urls";
 import { getLstorage } from "@/universalUtils/windowMW";
 import axios from "axios";
@@ -8,12 +7,13 @@ const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
 const TestPortalSlice = createSlice({
   name: "Portal",
   initialState: {
-    questions: questionData,
+    questions: [],
     questionsData: {},
     currentQuestionId: null,
     userResponse: [],
     aiSuggestions: "",
   },
+
   reducers: {
     setQuestionsData: (state, action) => {
       state.questionsData = action.payload;
@@ -51,6 +51,9 @@ const TestPortalSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(loadMockQuestions.fulfilled, (state, action) => {
+        state.questions = action.payload;
+      })
       .addCase(postQuesToAi.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -65,6 +68,15 @@ const TestPortalSlice = createSlice({
       });
   },
 });
+
+export const loadMockQuestions = createAsyncThunk(
+  "portal/loadMockQuestions",
+  async () => {
+    const { questionData } = await import("@/universalUtils/questionData");
+    return questionData;
+  }
+);
+
 
 const token = getLstorage("token");
 export const postQuesToAi = createAsyncThunk(

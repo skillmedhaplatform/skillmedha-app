@@ -1,7 +1,8 @@
-"use client";
 import React from "react";
-import Chart from "react-apexcharts";
+import dynamic from "next/dynamic";
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import styles from "./dashboard.module.scss";
+
 
 const PlacementActivityChart = ({ data = [], offersThisMonth = 0, averageTimeToOffer = 0 }) => {
   const chartOptions = {

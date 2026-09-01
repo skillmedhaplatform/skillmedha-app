@@ -2,7 +2,9 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { message } from "antd";
 import { v4 as uuid } from "uuid";
-import { getOneTests } from "./test";
+import { getOneTests } from "./testportal_admin/slice/test";
+
+
 import { allQuestions, singleQuestion } from "@/graphql_quries/questions";
 import { gqlUrl } from "@/config/urls";
 // import { updateObject } from "../utils/updateNestedObjs";

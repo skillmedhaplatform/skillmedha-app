@@ -3,8 +3,8 @@ import { skillmedhaReducer as companySkillMedhaData } from "./slices/company/ski
 import SideBarSlice from "./slices/sidebar";
 import StepFormSlice from "./slices/stepform";
 import ChipSlice from "./slices/chipSlice";
-import TestsSlice from "./slices/test";
 import filterReducer from "./slices/searchFunctions";
+
 import questionSlice from "./slices/questionSlice";
 import practiceSlice from "./slices/practiceSlice";
 import studentSlice from "./slices/student";
@@ -60,8 +60,8 @@ export const store = configureStore({
     sideBar: SideBarSlice,
     steps: StepFormSlice,
     chipSlice: ChipSlice,
-    legacyTests: TestsSlice,
     filter: filterReducer,
+
     question: questionSlice,
     codeEditor: codeEditorSlice,
     portal: testportalSlice,
