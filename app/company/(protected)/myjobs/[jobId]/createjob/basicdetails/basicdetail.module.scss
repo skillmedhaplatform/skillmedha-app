@@ -156,17 +156,15 @@
     overflow-y: auto;
   }
 
-  :global {
-
-    .ant-select,
-    .ant-select-selector,
-    .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    :global(.ant-select),
+    :global(.ant-select-selector),
+    :global(.ant-select:not(.ant-select-customize-input) .ant-select-selector) {
       background-color: #f4f7fe !important;
       border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
       border-radius: 5px !important;
     }
 
-    .ant-picker {
+    :global(.ant-picker) {
       background-color: #f4f7fe !important;
       border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
       border-radius: 5px !important;
@@ -176,7 +174,6 @@
         border: none !important;
       }
     }
-  }
 
   .button {
     border: 0;

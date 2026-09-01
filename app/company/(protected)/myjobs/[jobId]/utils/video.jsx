@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { Upload, Button, message, Tooltip } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import videoStyles from "./video.module.scss";
-import { useDispatch } from "react-redux";
 import { uploadFileToS3 } from "@/utils/universalUtils/uploadtos3";
 
 const VideoUpload = ({ videoUrl, setVideoUrl, restUrl }) => {
@@ -86,12 +85,10 @@ const VideoUpload = ({ videoUrl, setVideoUrl, restUrl }) => {
           message.success("Video uploaded successfully!");
         },
         onError: (error) => {
-          console.error("Video upload failed:", error);
           message.error("Failed to upload video.");
         },
       });
     } catch (error) {
-      console.error("Upload error:", error);
       message.error("Failed to upload video.");
     }
   };

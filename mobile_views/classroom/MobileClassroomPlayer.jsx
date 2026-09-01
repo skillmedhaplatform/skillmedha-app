@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Progress, Popover, Button, Modal, Drawer, Tabs, Collapse, List, Tooltip, Tag, Space, App } from "antd";
+import { Progress, Popover, Button, Modal, Drawer, Tabs, Collapse, List, Tooltip, Tag, Space, App, ConfigProvider } from "antd";
 import { 
   TrophyOutlined, 
   DownOutlined, 
@@ -177,110 +177,120 @@ export default function MobileClassroomPlayer({
 
   return (
     <App>
-      <div className={styles.container}>
-        {/* 1. Header Section */}
-        <div className={styles.headerBar}>
-          <div className={styles.headerLeft}>
-            <Progress
-              type="circle"
-              percent={displayProgress}
-              size={36}
-              strokeColor={isNavigating ? "#faad14" : undefined}
-            />
-            <span className={styles.courseHeadingCompact} title={courseHeading}>
-              {courseHeading}
-            </span>
-          </div>
-
-          <div className={styles.headerRight}>
-            <Popover
-              trigger="click"
-              placement="bottomRight"
-              content={
-                <div style={{ minWidth: "16rem", padding: "0.25rem" }}>
-                  <div style={{ color: "#2c3043", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.25rem" }}>
-                    {displayCompletedCount} of {displayTotalCount} complete
-                  </div>
-                  <div style={{ color: "#6f7288", fontSize: "0.85rem" }}>
-                    Finish course to get your certificate
-                  </div>
-                </div>
-              }
-            >
-              <button type="button" className={styles.progressButtonCompact}>
-                <TrophyOutlined style={{ fontSize: "14px" }} />
-                <span>Progress</span>
-                <DownOutlined style={{ fontSize: "10px" }} />
-              </button>
-            </Popover>
-
-            <Button
-              type="default"
-              danger
-              icon={<LogoutOutlined />}
-              onClick={handleExit}
-              className={styles.exitBtnCompact}
-            >
-              Exit
-            </Button>
-          </div>
-        </div>
-
-        {/* 2. Main Content & Player */}
-        <div className={styles.mainContent}>
-          <div className={styles.playerWrapper}>
-            <div className={`${styles.playerInner} ${shouldUseWhiteBg ? styles.whiteBg : ""}`}>
-              <TopicContentRouter
-                currentTopic={currentTopic}
-                topicDetails={topicDetails}
-                orgId={orgId}
-                studentCreds={studentCreds}
-                isExpandedView={true}
-                toggleExpandedView={() => {}}
-                markTopicCompleted={markTopicCompleted}
-                setTopicDurationOverrides={setTopicDurationOverrides}
-                handleNextTopic={handleNext}
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#1E69DA",
+            colorPrimaryHover: "#5694F0",
+          },
+        }}
+      >
+        <div className={styles.container}>
+          {/* 1. Header Section */}
+          <div className={styles.headerBar}>
+            <div className={styles.headerLeft}>
+              <Progress
+                type="circle"
+                percent={displayProgress}
+                size={36}
+                strokeColor={isNavigating ? "#faad14" : "#1E69DA"}
               />
+              <span className={styles.courseHeadingCompact} title={courseHeading}>
+                {courseHeading}
+              </span>
+            </div>
+
+            <div className={styles.headerRight}>
+              <Popover
+                trigger="click"
+                placement="bottomRight"
+                content={
+                  <div style={{ minWidth: "16rem", padding: "0.25rem" }}>
+                    <div style={{ color: "#0f172a", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.25rem" }}>
+                      {displayCompletedCount} of {displayTotalCount} complete
+                    </div>
+                    <div style={{ color: "#64748b", fontSize: "0.85rem" }}>
+                      Finish course to get your certificate
+                    </div>
+                  </div>
+                }
+              >
+                <button type="button" className={styles.progressButtonCompact}>
+                  <TrophyOutlined style={{ fontSize: "14px", color: "#1E69DA" }} />
+                  <span>Progress</span>
+                  <DownOutlined style={{ fontSize: "10px" }} />
+                </button>
+              </Popover>
+
+              <Button
+                type="default"
+                danger
+                icon={<LogoutOutlined />}
+                onClick={handleExit}
+                className={styles.exitBtnCompact}
+              >
+                Exit
+              </Button>
             </div>
           </div>
 
-          {/* 3. Navigation Controls Row */}
-          <div className={styles.navigationRow}>
-            <Button onClick={handlePrev} className={styles.navBtn} icon={<LeftOutlined />}>
-              Previous
-            </Button>
-            <Button onClick={handleNext} className={styles.navBtn}>
-              Next <RightOutlined />
-            </Button>
-          </div>
+          {/* 2. Main Content & Player */}
+          <div className={styles.mainContent}>
+            <div className={styles.playerWrapper}>
+              <div className={`${styles.playerInner} ${shouldUseWhiteBg ? styles.whiteBg : ""}`}>
+                <TopicContentRouter
+                  currentTopic={currentTopic}
+                  topicDetails={topicDetails}
+                  orgId={orgId}
+                  studentCreds={studentCreds}
+                  isExpandedView={true}
+                  toggleExpandedView={() => {}}
+                  markTopicCompleted={markTopicCompleted}
+                  setTopicDurationOverrides={setTopicDurationOverrides}
+                  handleNextTopic={handleNext}
+                />
+              </div>
+            </div>
 
-          {/* 4. Drawer Toggle Bar */}
-          <div className={styles.toggleBar}>
-            <Button 
-              className={`${styles.toggleBarBtn} ${drawerActiveTab === "course-content" && isDrawerOpen ? styles.active : ""}`}
-              onClick={() => openDrawerTab("course-content")}
-              icon={<FolderOpenOutlined />}
-            >
-              Course Content
-            </Button>
-            <Button 
-              className={`${styles.toggleBarBtn} ${drawerActiveTab === "ai-assistant" && isDrawerOpen ? styles.active : ""}`}
-              onClick={() => openDrawerTab("ai-assistant")}
-              icon={<BulbOutlined />}
-            >
-              AI Assistant
-            </Button>
-          </div>
+            {/* 3. Navigation Controls Row */}
+            <div className={styles.navigationRow}>
+              <Button onClick={handlePrev} className={styles.navBtn} icon={<LeftOutlined />}>
+                Previous
+              </Button>
+              <Button onClick={handleNext} className={styles.navBtn}>
+                Next <RightOutlined />
+              </Button>
+            </div>
 
-          {/* 5. Bottom Tabs (Overview, Notes, Resources) */}
-          <div className={styles.bottomTabsWrapper}>
-            <Tabs
-              activeKey={activeContentTab}
-              onChange={setActiveContentTab}
-              items={tabsItems}
-            />
+            {/* 4. Drawer Toggle Bar */}
+            <div className={styles.toggleBar}>
+              <button
+                type="button"
+                className={`${styles.toggleBarBtn} ${drawerActiveTab === "course-content" && isDrawerOpen ? styles.active : ""}`}
+                onClick={() => openDrawerTab("course-content")}
+              >
+                <FolderOpenOutlined />
+                <span>Course Content</span>
+              </button>
+              <button
+                type="button"
+                className={`${styles.toggleBarBtn} ${drawerActiveTab === "ai-assistant" && isDrawerOpen ? styles.active : ""}`}
+                onClick={() => openDrawerTab("ai-assistant")}
+              >
+                <BulbOutlined />
+                <span>AI Assistant</span>
+              </button>
+            </div>
+
+            {/* 5. Bottom Tabs (Overview, Notes, Resources) */}
+            <div className={styles.bottomTabsWrapper}>
+              <Tabs
+                activeKey={activeContentTab}
+                onChange={setActiveContentTab}
+                items={tabsItems}
+              />
+            </div>
           </div>
-        </div>
 
         {/* Course Content / AI Assistant Drawer */}
         <Drawer
@@ -418,6 +428,7 @@ export default function MobileClassroomPlayer({
           )}
         </Drawer>
       </div>
-    </App>
+    </ConfigProvider>
+  </App>
   );
 }

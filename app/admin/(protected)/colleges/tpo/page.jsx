@@ -332,22 +332,20 @@ function Page() {
         <div className={styles.tpoHeader}>
           <div className={styles.headerInfo}>
             <BreadcrumbComponent customItems={breadcrumbItems} />
-            <Space className={styles.controls} size="middle" style={{ flexWrap: "wrap" }}>
-              <Search
+            <div className={styles.controls}>
+              <Input
                 placeholder="Search TPOs..."
                 onChange={handleSearchChange}
                 value={searchQuery}
-                prefix={<SearchOutlined />}
+                prefix={<SearchOutlined style={{ color: "#94a3b8", marginRight: "4px" }} />}
                 allowClear
                 className={styles.searchInput}
-                styles={{ input: { borderRadius: "8px" } }}
-                style={{ borderRadius: "8px" }}
               />
               <Select
                 value={sortBy}
                 onChange={handleSortChange}
                 className={styles.sortSelect}
-                style={{ borderRadius: "8px", minWidth: "200px" }}
+                style={{ borderRadius: "8px" }}
               >
                 <Option value="name-asc">Name (A-Z)</Option>
                 <Option value="name-desc">Name (Z-A)</Option>
@@ -365,12 +363,13 @@ function Page() {
                     icon={<PlusOutlined />}
                     onClick={() => setIsModalVisible(true)}
                     disabled={!canCreate}
+                    style={{ borderRadius: "8px" }}
                   >
                     Add TPO
                   </Button>
                 </span>
               </Tooltip>
-            </Space>
+            </div>
           </div>
         </div>
       </div>

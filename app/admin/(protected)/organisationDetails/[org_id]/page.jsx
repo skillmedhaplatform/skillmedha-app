@@ -314,7 +314,7 @@ const AITokenLimitCard = ({
           percent={usagePercentage}
           showInfo={false}
           strokeColor="#2563eb"
-          trailColor="#e2e8f0"
+          railColor="#e2e8f0"
           className={styles.progressBar}
         />
         <div className={styles.progressTicks}>

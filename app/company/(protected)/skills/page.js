@@ -37,7 +37,6 @@ const Page = () => {
 
       setUploadResult(data?.internships);
     } catch (err) {
-      console.error("Upload failed:", err);
     }
   };
 
@@ -58,14 +57,7 @@ const Page = () => {
           Upload Excel
         </button>
 
-        {/* {uploadResult && (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold">Uploaded Data:</h3>
-            <pre className="bg-gray-100 p-2 rounded mt-2 overflow-auto max-h-96">
-              {JSON.stringify(uploadResult, null, 2)}
-            </pre>
-          </div>
-        )} */}
+
 
         {uploadResult
           ?.filter((e) => !e.flagged)

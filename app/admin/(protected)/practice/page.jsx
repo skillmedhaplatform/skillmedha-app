@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { FaBook, FaCode, FaCog } from "react-icons/fa";
+import { FaBook, FaCode, FaCog, FaBuilding } from "react-icons/fa";
 import styles from "./PracticeCard.module.scss";
 import { PracticeCategory } from "./Practice_utils/paths";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,8 @@ function PracticeCard({ category, onClick }) {
         return <FaCode className={styles.icon} />;
       case "Technical":
         return <FaCog className={styles.icon} />;
+      case "Company-wise":
+        return <FaBuilding className={styles.icon} />;
       default:
         return <FaBook className={styles.icon} />;
     }
@@ -34,6 +36,8 @@ function PracticeCard({ category, onClick }) {
         return `${baseClass} ${styles.coding}`;
       case "Technical":
         return `${baseClass} ${styles.technical}`;
+      case "Company-wise":
+        return `${baseClass} ${styles.companyWise}`;
       default:
         return baseClass;
     }
@@ -84,11 +88,15 @@ export default function PracticePage() {
       </div>
       <div className={styles.cardContainer}>
         {PracticeCategory.map((category) => (
-          <PracticeCard
+          <div
             key={category.id}
-            category={category}
-            onClick={handleCardClick}
-          />
+            className={category.name === "Company-wise" ? styles.companyWiseWrapper : ""}
+          >
+            <PracticeCard
+              category={category}
+              onClick={handleCardClick}
+            />
+          </div>
         ))}
       </div>
     </div>

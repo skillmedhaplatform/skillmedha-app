@@ -1,15 +1,8 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-// removed duplicate
 import { useEffect, Suspense } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { message } from "antd";
-import { ConfigProvider } from "antd";
 import SideBar from "@/modules/company/components/sideBar";
 import { getLstorage } from "@/utils/universalUtils/windowMW";
-import Image from "next/image";
-import { imgUrls } from "@/utils/universalUtils/images";
-import { setSearchTerm } from "@/redux/slices/searchFunctions";
 import PageStyles from "@/app/student/page.module.scss";
 import useResponsive from "@/hooks/useResponsive";
 
@@ -19,7 +12,6 @@ export default function Home({ children }) {
   const token = getLstorage("token");
   const isMobile = useResponsive();
 
-  const dispatch = useDispatch();
 
   // useEffect(() => {
   //   if (token == undefined || token == null || token == "" || !token)
@@ -39,9 +31,6 @@ export default function Home({ children }) {
       nav.replace("/company/profile");
     }
   }, []);
-  const handleInputChange = (e) => {
-    dispatch(setSearchTerm(e.target.value));
-  };
 
   return (
     <div className={PageStyles.pageContainer} style={{ flexDirection: isMobile ? "column" : "row" }}>
@@ -57,3 +46,4 @@ export default function Home({ children }) {
     </div>
   );
 }
+

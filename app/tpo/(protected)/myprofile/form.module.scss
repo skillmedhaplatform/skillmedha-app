@@ -21,6 +21,11 @@
   padding: 1.5rem 0 3rem 0;
   z-index: 1;
 
+  @media (max-width: 639px) {
+    grid-template-columns: 1fr;
+  }
+
+
   .buttonContainer {
     grid-column: 1 / -1;
     width: 100%;
@@ -180,6 +185,10 @@
     row-gap: 1rem;
     background-color: #f8fafc;
 
+    @media (max-width: 639px) {
+      grid-template-columns: 1fr;
+    }
+
     > .formField {
       min-width: 0;
       max-width: 100%;
@@ -206,6 +215,10 @@
   grid-template-columns: 1fr 1fr;
   column-gap: 1.5rem;
   row-gap: 1rem;
+
+  @media (max-width: 639px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .ArraySubtitle {

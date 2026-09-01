@@ -6,15 +6,21 @@ export const PracticeCategory = [
     path: "/admin/practice/nontechnical",
   },
   {
+    id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    name: "Technical",
+    active: true,
+    path: "/admin/practice/technical",
+  },
+  {
     id: "c56a4180-65aa-42ec-a945-5fd21dec0538",
     name: "Coding",
     active: true,
     path: "/admin/practice/coding",
   },
   {
-    id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-    name: "Technical",
+    id: "company-wise-829f-4372-a567-c2901a1c93a1",
+    name: "Company-wise",
     active: true,
-    path: "/admin/practice/technical",
+    path: "/admin/practice/company-wise",
   },
 ];

@@ -87,7 +87,6 @@ export default function ResultsPage() {
     const element = mainRef.current;
 
     if (!element) {
-      console.error("Element not found for PDF generation");
       return;
     }
 
@@ -788,7 +787,6 @@ const ScheduleInterviewModal = ({
       form.resetFields();
       onCancel();
     } catch (error) {
-      console.error("Error scheduling interview:", error);
     } finally {
       setLoading(false);
     }

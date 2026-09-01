@@ -225,7 +225,6 @@ const Page = () => {
       await dispatch(updateJobAssessment({ time: timeData, aId }));
       router.push(`/company/myjobs/${jobid}/createjob/questionManager`);
     } catch (error) {
-      console.error("Error saving:", error);
     }
   };
 

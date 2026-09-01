@@ -14,6 +14,7 @@ import useResponsive from "@/hooks/useResponsive";
 import MobileCodingPlayer from "@/mobile_views/practice/MobileCodingPlayer";
 import pageStyles from "@/universalUtils/codeEditor/page.module.scss";
 import testStyles from "../../test/testui.module.scss";
+import { changeCollapse } from "@/redux/slices/sidebar";
 
 function CodingComponent({ questions, onRestart }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -170,6 +171,7 @@ export default function Page() {
   };
 
   useEffect(() => {
+    dispatch(changeCollapse(true));
     fetchQuestions();
   }, [subjectId, studentCreds?._id, dispatch, router, refreshTrigger]);
 

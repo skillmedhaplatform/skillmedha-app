@@ -66,7 +66,7 @@ export default function TpoMobileSidebar() {
       {/* Slide-in Drawer Container */}
       <div className={`${styles.drawer} ${isOpen ? styles.open : ""}`} role="dialog" aria-modal="true">
         <div className={styles.drawerContent}>
-          <SideNav />
+          <SideNav onLinkClick={() => setIsOpen(false)} />
         </div>
       </div>
     </>

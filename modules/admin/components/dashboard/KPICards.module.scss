@@ -1,5 +1,4 @@
 @use "@/modules/admin/styles/colors" as *;
-@use '@/modules/admin/styles/colors' as *;
 
 .kpiGrid {
   display: grid;
@@ -12,12 +11,17 @@
   }
   @media (max-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: $spacing4;
   }
-  @media (max-width: 768px) {
+  @media (max-width: 640px) {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: $spacing4;
   }
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 360px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
   }
 }
 
@@ -25,45 +29,58 @@
   background: $white;
   border: 1px solid $borderColor;
   border-radius: $borderRadiusLarge;
-  padding: $spacing5;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   gap: $spacing4;
   box-shadow: $shadowSm;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 0;
 
   &:hover {
     box-shadow: $shadowMd;
-    transform: translateY(-4px);
+    transform: translateY(-2px);
   }
 
   .iconWrapper {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     border-radius: $borderRadius;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    
+    svg {
+      width: 22px;
+      height: 22px;
+    }
   }
 
   .content {
     flex: 1;
+    min-width: 0;
+
+    .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: $textPrimary;
+      margin: 0;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     .title {
       font-size: 13px;
       color: $gray600;
-      margin: 2px 0 0 0;
+      margin: 3px 0 0 0;
       font-weight: 500;
-      line-height: 1.1;
-    }
-
-    .value {
-      font-size: 28px;
-      font-weight: 700;
-      color: $textPrimary;
-      margin: 0;
-      line-height: 1;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .subtitle {
@@ -72,6 +89,79 @@
       color: $gray500;
       margin-top: 2px;
       line-height: 1.1;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    padding: 12px 14px;
+    gap: 10px;
+    border-radius: 12px;
+
+    .iconWrapper {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .content {
+      .value {
+        font-size: 20px;
+      }
+      .title {
+        font-size: 12px;
+      }
+    }
+  }
+
+  @media (max-width: 640px) {
+    padding: 10px 12px;
+    gap: 8px;
+    border-radius: 10px;
+
+    .iconWrapper {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .content {
+      .value {
+        font-size: 17px;
+      }
+      .title {
+        font-size: 11px;
+      }
+    }
+  }
+
+  @media (max-width: 360px) {
+    padding: 8px 8px;
+    gap: 6px;
+
+    .iconWrapper {
+      width: 30px;
+      height: 30px;
+      svg {
+        width: 15px;
+        height: 15px;
+      }
+    }
+
+    .content {
+      .value {
+        font-size: 15px;
+      }
+      .title {
+        font-size: 10px;
+      }
     }
   }
 
@@ -157,8 +247,8 @@
   gap: $spacing4;
 
   .skeletonIcon {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     border-radius: $borderRadius;
     background: linear-gradient(90deg, $gray200 25%, $gray300 50%, $gray200 75%);
     background-size: 200% 100%;
@@ -200,24 +290,3 @@
   }
 }
 
-@media (max-width: $breakpointMd) {
-  .kpiGrid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: $spacing3;
-  }
-
-  .kpiCard {
-    padding: $spacing4;
-
-    .iconWrapper {
-      width: 48px;
-      height: 48px;
-    }
-
-    .content {
-      .value {
-        font-size: 24px;
-      }
-    }
-  }
-}

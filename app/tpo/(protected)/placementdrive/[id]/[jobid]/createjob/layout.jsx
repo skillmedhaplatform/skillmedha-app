@@ -62,11 +62,11 @@ export default function FormLayout({ children }) {
 
   return (
     <>
-      <PageHeader
-        title={ONEJOB?.data?.jobTitle ? `Configure ${ONEJOB?.data?.jobTitle}` : "Create Job"}
-        subtitle="Manage basic information, profile details and interview rounds"
-      />
-      <div className={styles.mainContainer}>
+      <div className={styles.stickyHeaderWrapper}>
+        <PageHeader
+          title={ONEJOB?.data?.jobTitle ? `Configure ${ONEJOB?.data?.jobTitle}` : "Create Job"}
+          subtitle="Manage basic information, profile details and interview rounds"
+        />
         <div className={styles.tabsWrapper}>
           <div className={styles.tabsRow}>
             {routes.map((e) => {
@@ -87,7 +87,8 @@ export default function FormLayout({ children }) {
             })}
           </div>
         </div>
-
+      </div>
+      <div className={styles.mainContainer}>
         <div className={styles.headerCont}>
           {pathSegments.map((segment, index) => {
             let displayName = segment;

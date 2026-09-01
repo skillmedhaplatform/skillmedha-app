@@ -72,7 +72,6 @@ const UsersComp = () => {
   ) || [];
   const bulkEmailState = useSelector((state) => state.tests.bulkEmail);
 
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
   const Students = searchedStudent.length ? searchedStudent : allStudents;
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const dispatch = useDispatch();
@@ -221,12 +220,7 @@ const UsersComp = () => {
     ],
   };
 
-  const handleTableChange = (newPagination) => {
-    setPagination({
-      current: newPagination.current,
-      pageSize: newPagination.pageSize,
-    });
-  };
+
 
   // Table Columns config (Screenshot 1 UI layout)
   const columns = [
@@ -236,8 +230,7 @@ const UsersComp = () => {
       key: "serial",
       width: 70,
       align: "center",
-      render: (_, __, idx) =>
-        (pagination.current - 1) * pagination.pageSize + idx + 1,
+      render: (_, __, idx) => idx + 1,
     },
     // Initials + Name
     {
@@ -250,12 +243,17 @@ const UsersComp = () => {
         // Deterministic background color for avatar
         const colorIndex = fullName !== "N/A" ? fullName.charCodeAt(0) % avatarColors.length : 0;
         const avatarColor = avatarColors[colorIndex];
+        const profileImage = record?.profilePicture || record?.profilePic || record?.profile || record?.image;
 
         return (
           <div className={userCompStyles.nameCell}>
-            <div className={userCompStyles.avatar} style={{ backgroundColor: avatarColor }}>
-              {initial}
-            </div>
+            {profileImage ? (
+              <img src={profileImage} alt={fullName} className={userCompStyles.avatar} style={{ objectFit: 'cover' }} />
+            ) : (
+              <div className={userCompStyles.avatar} style={{ backgroundColor: avatarColor }}>
+                {initial}
+              </div>
+            )}
             <span className={userCompStyles.nameText}>{fullName}</span>
           </div>
         );
@@ -503,23 +501,8 @@ const UsersComp = () => {
             </div>
             <div className={userCompStyles.tableHeaderRight}>
               <span className={userCompStyles.showingText}>
-                Showing {Math.min((pagination.current - 1) * pagination.pageSize + 1, filteredStudentsList.length)}–
-                {Math.min(pagination.current * pagination.pageSize, filteredStudentsList.length)} of {filteredStudentsList.length}
+                Total {filteredStudentsList.length} Students
               </span>
-              <div className={userCompStyles.pageSizeSelect}>
-                <Select
-                  value={`${pagination.pageSize} / page`}
-                  onChange={(value) => {
-                    const size = parseInt(value, 10);
-                    setPagination({ current: 1, pageSize: size });
-                  }}
-                >
-                  <Option value="5">5 / page</Option>
-                  <Option value="10">10 / page</Option>
-                  <Option value="20">20 / page</Option>
-                  <Option value="50">50 / page</Option>
-                </Select>
-              </div>
             </div>
           </div>
 
@@ -528,16 +511,10 @@ const UsersComp = () => {
             dataSource={filteredStudentsList}
             columns={columns}
             rowSelection={rowSelection}
-            pagination={{
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-              total: filteredStudentsList.length,
-              showSizeChanger: false, // hide the duplicate size changer at the bottom
-            }}
-            onChange={handleTableChange}
+            pagination={false}
             rowKey="_id"
             locale={{ emptyText: "No students found" }}
-            scroll={{ x: 1000 }}
+            scroll={{ x: 1000, y: "calc(100vh - 350px)" }}
           />
         </Card>
       </div>

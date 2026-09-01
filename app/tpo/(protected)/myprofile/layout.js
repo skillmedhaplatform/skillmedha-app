@@ -198,24 +198,26 @@ export default function ProfileLayout({ children, activeView, setView }) {
                   {designation}
                 </span>
               </div>
-              <div className={styles.metaRow}>
-                <span>{name}</span>
-                <span className={styles.divider}>•</span>
-                <span>{email}</span>
-                <span className={styles.divider}>•</span>
-                <span>{phone}</span>
-              </div>
-              
-              {/* Profile Completion Indicator */}
-              <div className={styles.completionWrapper}>
-                <span className={styles.completionLabel}>Profile completion</span>
-                <div className={styles.progressContainer}>
-                  <div
-                    className={styles.progressBar}
-                    style={{ width: `${completionPercent}%` }}
-                  />
+              <div className="hidden sm:flex flex-col gap-[0.35rem]">
+                <div className={styles.metaRow}>
+                  <span>{name}</span>
+                  <span className={styles.divider}>•</span>
+                  <span>{email}</span>
+                  <span className={styles.divider}>•</span>
+                  <span>{phone}</span>
                 </div>
-                <span className={styles.completionPercent}>{completionPercent}%</span>
+                
+                {/* Profile Completion Indicator */}
+                <div className={styles.completionWrapper}>
+                  <span className={styles.completionLabel}>Profile completion</span>
+                  <div className={styles.progressContainer}>
+                    <div
+                      className={styles.progressBar}
+                      style={{ width: `${completionPercent}%` }}
+                    />
+                  </div>
+                  <span className={styles.completionPercent}>{completionPercent}%</span>
+                </div>
               </div>
             </div>
           </div>

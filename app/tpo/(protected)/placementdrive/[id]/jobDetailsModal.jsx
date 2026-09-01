@@ -2,7 +2,6 @@
 import React, { useRef } from "react";
 import { Button, Modal, Spin } from "antd";
 import { useSelector } from "react-redux";
-import html2pdf from "html2pdf.js";
 import styles from "./allstudents.module.scss";
 
 export default function JobDetailsModal({ open, loading, onClose }) {
@@ -17,9 +16,11 @@ export default function JobDetailsModal({ open, loading, onClose }) {
     return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString();
   };
 
-  const downloadPdf = () => {
+  const downloadPdf = async () => {
     const element = contentRef.current;
     if (!element) return;
+
+    const html2pdf = (await import("html2pdf.js")).default;
 
     const opt = {
       margin: 0.5,
@@ -51,7 +52,7 @@ export default function JobDetailsModal({ open, loading, onClose }) {
         </Button>,
       ]}
       width={850}
-      bodyStyle={{ maxHeight: "75vh", overflowY: "auto", padding: "1.5rem" }}
+      styles={{ body: { maxHeight: "75vh", overflowY: "auto", padding: "1.5rem" } }}
     >
       {loading || !jobDetails ? (
         <div style={{ textAlign: "center", padding: "3rem" }}>

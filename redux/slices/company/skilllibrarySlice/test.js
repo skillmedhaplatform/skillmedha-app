@@ -1,11 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-// import { AllTests, getOneTest } from "@/app/graphql_quries/testSeries";
 import _ from "lodash";
 import { message } from "antd";
-// import { gqlUrl, testsUrl } from "@/config/urls";
-
-// import { getAllCategories } from "@/app/graphql_quries/category";
 import { setSstorage } from "@/utils/universalUtils/windowMW";
 const testsUrl = "http://localhost:3000";
 const TestsSlice = createSlice({
@@ -261,7 +257,6 @@ export const createTests = createAsyncThunk(
       return data;
     } catch (error) {
       message.error(error.message);
-      console.log(error);
     }
   }
 );

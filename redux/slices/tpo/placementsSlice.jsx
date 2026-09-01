@@ -268,6 +268,7 @@ export const CreateJob = createAsyncThunk("/createAJob", async (args) => {
       message.success("Job Created");
       setSstorage("jobid", data?.insertedId);
       await dispatch(GetOneJob({ jobid: data?.insertedId }));
+      dispatch(GetAllPlacements());
     }
     return data;
   } catch (error) {
@@ -278,7 +279,7 @@ export const CreateJob = createAsyncThunk("/createAJob", async (args) => {
 });
 export const UpdateJob = createAsyncThunk("/updateAJob", async (args) => {
   try {
-    const hideLoading = message.loading("Updatingting Job ...");
+    const hideLoading = message.loading("Updating Job ...");
     const { dispatch, jobid, payload } = args;
     const { _id, ...sanitizedPayload } = payload;
     const { data } = await axios.post(
@@ -294,6 +295,7 @@ export const UpdateJob = createAsyncThunk("/updateAJob", async (args) => {
       hideLoading();
       message.success("Job Updated");
       await dispatch(GetOneJob({ jobid }));
+      dispatch(GetAllPlacements());
     }
     return data;
   } catch (error) {

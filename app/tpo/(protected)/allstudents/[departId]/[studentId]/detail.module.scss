@@ -1,5 +1,13 @@
 @use "@/utils/universalUtils/colors.module.scss" as *;
 
+.pageContainer {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .first {
   display: flex;
   align-items: center;
@@ -31,8 +39,11 @@
 }
 
 .container {
-  height: 100%;
   width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .mainContainer {
@@ -40,14 +51,14 @@
   margin-left: 1rem;
   margin-right: 1rem;
   gap: 1rem;
-  height: 90%;
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 1rem;
 }
 
 .child1 {
   width: 20%;
-  position: sticky;
-  height: auto;
-  min-height: 60vh;
+  height: 100%;
   overflow-y: auto;
 
   &::-webkit-scrollbar {
@@ -73,7 +84,7 @@
   border-radius: 10px;
   overflow-y: auto;
   padding-bottom: 4rem;
-  height: 85vh;
+  height: 100%;
   border: 1px solid lightgray;
 
   &::-webkit-scrollbar {
@@ -95,7 +106,6 @@
 
   /* Firefox */
   scrollbar-width: thin;
-
 }
 
 .stuName {

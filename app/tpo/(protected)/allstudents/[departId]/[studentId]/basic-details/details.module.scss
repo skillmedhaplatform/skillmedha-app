@@ -25,6 +25,11 @@
   padding-bottom: 1rem;
   margin-bottom: 1rem;
 
+  @media (max-width: 1024px) {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
   &:first-of-type {
     margin-top: 0;
   }
@@ -39,6 +44,11 @@
     display: flex;
     justify-content: space-between;
     gap: 1rem;
+
+    @media (max-width: 1024px) {
+      flex-wrap: wrap;
+      width: 100%;
+    }
   }
 
   .ticks {

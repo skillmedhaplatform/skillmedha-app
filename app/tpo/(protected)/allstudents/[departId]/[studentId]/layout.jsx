@@ -24,6 +24,15 @@ const StudentLayout = ({ children }) => {
         (state) => state.singleStudentDetails.singleStudent
     );
 
+    const [departmentTitle, setDepartmentTitle] = React.useState("Department");
+
+    React.useEffect(() => {
+        const stored = getSstorage("departmentTitle");
+        if (stored) {
+            setDepartmentTitle(stored);
+        }
+    }, []);
+
     const baseUrl = `/tpo/allstudents/${params.departId}/${params.studentId}`;
 
     useEffect(() => {
@@ -51,7 +60,7 @@ const StudentLayout = ({ children }) => {
         : lastSegment.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
     return (
-        <>
+        <div className={detail.pageContainer}>
             <PageHeader
                 title={studentName}
                 subtitle={`Class of ${selectedStudent?.data?.yearOfPassing || "N/A"} - ${selectedStudent?.data?.email || ""}`}
@@ -63,7 +72,7 @@ const StudentLayout = ({ children }) => {
                     </p>
                     <span>{symbol}</span>
                     <p onClick={() => router.push(`/tpo/allstudents/${params.departId}/`)}>
-                        {getSstorage("departmentTitle") || "Department"}
+                        {departmentTitle}
                     </p>
                     <span>{symbol}</span>
                     <p style={{ color: "#0f172a", fontWeight: "600", cursor: "default" }}>
@@ -87,7 +96,7 @@ const StudentLayout = ({ children }) => {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

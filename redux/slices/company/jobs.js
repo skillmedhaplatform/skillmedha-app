@@ -1,6 +1,5 @@
 import { GetToken } from "@/utils/universalUtils/token";
-import { restUrl, studentUrl } from "@/utils/universalUtils/urls";
-import { getLstorage } from "@/utils/universalUtils/windowMW";
+import { restUrl } from "@/utils/universalUtils/urls";
 import { message } from "antd";
 import axios from "axios";
 import { getStudentCreds } from "../student";

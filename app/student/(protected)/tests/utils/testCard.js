@@ -383,116 +383,123 @@ export default function TestCard({
   }
 
   return (
-    <section className="bg-white shadow-md hover:shadow-lg transition-shadow flex flex-col cursor-pointer rounded-2xl border border-gray-200 h-full relative overflow-hidden">
+    <section className="group bg-white hover:bg-slate-50 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer rounded-2xl border border-slate-200 h-full relative overflow-hidden transform hover:-translate-y-1">
       
-      {/* Thumbnail */}
-      <div className="w-full aspect-[16/9] bg-white flex items-center justify-center shrink-0 px-3 pt-3">
-        <div className="w-full h-full rounded-xl overflow-hidden">
+      {/* Padded Thumbnail */}
+      <div className="w-full h-[160px] relative bg-transparent flex items-center justify-center shrink-0 p-3">
+        <div className="w-full h-full relative rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           {testData?.thumbnail ? (
-            <img src={testData.thumbnail} alt="thumbnail" className="w-full h-full object-cover" />
+            <img src={testData.thumbnail} alt="thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-yellow-300 to-yellow-500 flex items-center justify-center">
-              <span className="text-4xl font-extrabold text-black/50">
+            <div className="w-full h-full bg-gradient-to-br from-[#1E69DA] to-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+              <span className="text-5xl font-extrabold text-white/30 tracking-wider">
                 {testData?.title?.substring(0, 2)?.toUpperCase() || "JS"}
               </span>
             </div>
           )}
-        </div>
-      </div>
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
 
-      {/* Top Section: Title & Active Tag */}
-      <div className="flex items-center justify-between w-full px-5 pt-1 pb-2">
-        <h3 className="text-[18px] font-extrabold text-[#1a3b8b] leading-tight line-clamp-2 pr-2">
-          {isAssessment ? testData?.jobTitle : testData?.title}
-        </h3>
-        {!isAssessment && (
-          <div className="shrink-0">
-            {isExpiredStatus ? (
-              <span className="bg-red-50 text-red-600 text-[11px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
-                Expired
+          {/* Status Badge Overlaid (Top Right) */}
+          {!isAssessment && (
+            <div className="absolute top-2 right-2 z-10 shadow-sm">
+              {isExpiredStatus ? (
+                <span className="bg-red-500/90 backdrop-blur-sm text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm border border-white/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                  Expired
+                </span>
+              ) : testData?.time?.expiryDates?.expiry ? (
+                <span className="bg-black/50 backdrop-blur-sm text-white text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/20 shadow-sm">
+                  {countdowns[index]}
+                </span>
+              ) : (
+                <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-sm border border-white/20 shadow-sm ${
+                  testData?.status?.toLowerCase() === "active" ? "bg-emerald-500/90 text-white" : "bg-amber-500/90 text-white"
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full bg-white ${testData?.status?.toLowerCase() === "active" ? "animate-pulse" : ""}`}></span>
+                  {testData?.status?.charAt(0).toUpperCase() + testData?.status?.slice(1)}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Tags Overlaid (Bottom Left) */}
+          <div className="absolute bottom-2 left-2 flex flex-wrap items-center gap-1.5 z-10">
+            {testData?.category?.slice(0, 2).map((cat, i) => (
+              <span key={i} className="bg-white/20 backdrop-blur-md text-white border border-white/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                {cat.name}
               </span>
-            ) : testData?.time?.expiryDates?.expiry ? (
-              <span className="text-gray-500 text-[11px] font-bold">{countdowns[index]}</span>
-            ) : (
-              <span className={`text-[11px] font-bold px-2 py-1 rounded-full flex items-center gap-1 ${
-                testData?.status?.toLowerCase() === "active" ? "bg-green-50 text-green-600" : "bg-yellow-50 text-yellow-600"
-              }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${
-                  testData?.status?.toLowerCase() === "active" ? "bg-green-600" : "bg-yellow-600"
-                }`}></span>
-                {testData?.status?.charAt(0).toUpperCase() + testData?.status?.slice(1)}
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Tags Row */}
-      <div className="flex flex-wrap items-center gap-2 px-5 mb-4">
-        {testData?.category?.slice(0, 2).map((cat, i) => (
-          <span key={i} className="bg-[#eff4ff] text-[#1E69DA] text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-            {cat.name}
-          </span>
-        ))}
-        <span className="bg-green-50 text-green-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-          All Levels
-        </span>
-      </div>
-
-      {/* Metrics Row */}
-      <div className="flex items-center w-full px-5 pb-4">
-        <div className="flex flex-col flex-1 border-r border-gray-100 pr-2 min-w-0">
-          <span className="text-[#8c94a3] text-[10px] uppercase font-bold flex items-center gap-1 mb-1 truncate">
-            <HelpCircle className="w-3 h-3 shrink-0" /> QUESTIONS
-          </span>
-          <strong className="text-[#1a3b8b] text-[15px] font-bold leading-tight truncate">{testData?.questions?.length || 0}</strong>
-        </div>
-        <div className={`flex flex-col flex-1 px-2 min-w-0 ${!isAssessment ? 'border-r border-gray-100' : ''}`}>
-          <span className="text-[#8c94a3] text-[10px] uppercase font-bold flex items-center gap-1 mb-1 truncate">
-            <Clock className="w-3 h-3 shrink-0" /> DURATION
-          </span>
-          <strong className="text-[#1a3b8b] text-[15px] font-bold leading-tight uppercase truncate">
-            {isAssessment 
-              ? (testData?.testDurationDisplay?.hours || testData?.testDurationDisplay?.minutes ? `${String(testData?.testDurationDisplay?.hours || 0).padStart(2, '0')}H : ${String(testData?.testDurationDisplay?.minutes || 0).padStart(2, '0')}M` : "NA")
-              : (testDuration && (testDuration.val1 !== undefined || testDuration.val2 !== undefined) ? `${String(testDuration.val1 ?? 0).padStart(2, '0')}H : ${String(testDuration.val2 ?? 0).padStart(2, '0')}M` : "NA")}
-          </strong>
-        </div>
-        {!isAssessment && (
-          <div className="flex flex-col flex-1 pl-2 min-w-0">
-            <span className="text-[#8c94a3] text-[10px] uppercase font-bold flex items-center gap-1 mb-1 truncate">
-              <Star className="w-3 h-3 shrink-0" /> MARKS
+            ))}
+            <span className="bg-[#1E69DA]/80 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+              All Levels
             </span>
-            <strong className="text-[#1a3b8b] text-[15px] font-bold leading-tight truncate">{totalMarks}</strong>
-          </div>
-        )}
-      </div>
-
-      {/* Description */}
-      <div className="px-5 pt-1 pb-7 text-[14.5px] text-[#475467] leading-relaxed line-clamp-2">
-        {firstSentence}
-      </div>
-
-      {/* Footer / Actions */}
-      <div className="mt-auto flex items-center justify-between px-5 py-4 w-full border-t border-gray-100">
-        <div className="flex flex-col">
-          <div className="text-[#8c94a3] text-[11px] font-bold uppercase tracking-wider">
-            ATTEMPTS
-          </div>
-          <div className="flex flex-col mt-0.5">
-            <div className="text-[#1a3b8b] text-[15px] font-bold leading-tight">
-              {attemptsDone || 0} / {isUnlimited ? '∞' : attemptsPerRespondentValue}
-            </div>
-            <div className="text-[#8c94a3] text-[11px] font-medium mt-0.5">
-              {isUnlimited 
-                ? 'Unlimited remaining' 
-                : `${Math.max(0, maxAttemptsNum - (attemptsDone || 0))} remaining`}
-            </div>
           </div>
         </div>
-        {renderMainButton()}
       </div>
 
+      {/* Body Section */}
+      <div className="flex flex-col px-5 pb-5 pt-1 flex-1 w-full relative">
+        
+        {/* Title & Description */}
+        <div className="flex-1 mb-4">
+          <h3 className="text-[17px] font-bold text-slate-800 leading-snug line-clamp-2 mb-1.5 group-hover:text-[#1E69DA] transition-colors">
+            {isAssessment ? testData?.jobTitle : testData?.title}
+          </h3>
+          <div className="text-[13px] text-slate-500 leading-relaxed line-clamp-2">
+            {firstSentence}
+          </div>
+        </div>
+
+        {/* Compact Metrics Grid */}
+        <div className="grid grid-cols-3 gap-2 bg-slate-100/80 rounded-xl p-2.5 mb-4 border border-slate-200/50">
+          <div className="flex flex-col items-center justify-center border-r border-slate-200/80">
+            <span className="text-slate-400 text-[9px] uppercase font-bold flex items-center gap-1 mb-0.5">
+              <HelpCircle className="w-2.5 h-2.5" /> Qs
+            </span>
+            <strong className="text-slate-700 text-[13px] font-bold">{testData?.questions?.length || 0}</strong>
+          </div>
+          <div className={`flex flex-col items-center justify-center ${!isAssessment ? 'border-r border-slate-200/80' : ''}`}>
+            <span className="text-slate-400 text-[9px] uppercase font-bold flex items-center gap-1 mb-0.5">
+              <Clock className="w-2.5 h-2.5" /> Time
+            </span>
+            <strong className="text-slate-700 text-[12px] font-bold whitespace-nowrap tracking-tight">
+              {isAssessment 
+                ? (testData?.testDurationDisplay?.hours || testData?.testDurationDisplay?.minutes ? `${String(testData?.testDurationDisplay?.hours || 0).padStart(2, '0')}H ${String(testData?.testDurationDisplay?.minutes || 0).padStart(2, '0')}M` : "NA")
+                : (testDuration && (testDuration.val1 !== undefined || testDuration.val2 !== undefined) ? `${String(testDuration.val1 ?? 0).padStart(2, '0')}H ${String(testDuration.val2 ?? 0).padStart(2, '0')}M` : "NA")}
+            </strong>
+          </div>
+          {!isAssessment && (
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-slate-400 text-[9px] uppercase font-bold flex items-center gap-1 mb-0.5">
+                <Star className="w-2.5 h-2.5" /> Marks
+              </span>
+              <strong className="text-slate-700 text-[13px] font-bold">{totalMarks}</strong>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between w-full pt-1">
+          <div className="flex flex-col">
+            <div className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+              Attempts
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-800 text-[14px] font-bold">
+                {attemptsDone || 0} / {isUnlimited ? '∞' : attemptsPerRespondentValue}
+              </span>
+              <span className="bg-blue-50 text-[#1E69DA] text-[9px] font-bold px-1.5 py-0.5 rounded-md">
+                {isUnlimited ? '∞ Left' : `${Math.max(0, maxAttemptsNum - (attemptsDone || 0))} Left`}
+              </span>
+            </div>
+          </div>
+          <div className="ml-auto shrink-0">
+            {renderMainButton()}
+          </div>
+        </div>
+
+      </div>
     </section>
   );
 }

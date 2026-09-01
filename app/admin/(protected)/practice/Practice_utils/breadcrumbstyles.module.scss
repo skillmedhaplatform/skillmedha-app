@@ -4,6 +4,10 @@
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
+  // Fallback for the rare case of a max-depth path (subject > topic >
+  // subtopic) with long names still not fitting even on its own row.
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .breadcrumb {

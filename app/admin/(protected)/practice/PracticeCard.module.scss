@@ -46,12 +46,18 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
 // Card container
 .cardContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
   padding: 2rem 1rem;
+}
+
+.companyWiseWrapper {
+  @media (min-width: 1025px) {
+    grid-column: 2;
+  }
 }
 
 // Individual card styles
@@ -133,6 +139,10 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
 
   &.technical {
     background: linear-gradient(135deg, $secondary-mint 0%, #4ade80 100%);
+  }
+
+  &.companyWise {
+    background: linear-gradient(135deg, $secondary-coral 0%, #fb923c 100%);
   }
 
   &.inactive {
@@ -252,6 +262,12 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
 }
 
 // Responsive design
+@media (max-width: 1024px) {
+  .cardContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .pageWrapper {
     padding: 1rem;

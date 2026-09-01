@@ -3,7 +3,7 @@ import { internshipUrl, restUrl } from "@/utils/universalUtils/urls";
 import { getLstorage, setSstorage } from "@/utils/universalUtils/windowMW";
 import { message } from "antd";
 import axios from "axios";
-import { v4 as uuidv4, validate as uuidValidate } from "uuid";
+
 
 const InternshipSlice = createSlice({
   name: "InternshipData",
@@ -107,7 +107,6 @@ export const getAllInternShips = createAsyncThunk(
 
       return data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -130,7 +129,6 @@ export const getAllCourses = createAsyncThunk(
 
       return data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -159,7 +157,6 @@ export const createInternship = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to create internship");
-      console.log(error);
     } finally {
       hide();
     }
@@ -190,7 +187,6 @@ export const createCourse = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to create course");
-      console.log(error);
     } finally {
       hide();
     }
@@ -207,7 +203,6 @@ export const getOneInternship = createAsyncThunk(
 
       return data.data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -242,7 +237,6 @@ export const updateInternship = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("failed to update internship");
-      console.log(error);
     } finally {
       hide();
     }
@@ -264,7 +258,6 @@ export const getInternshipSections = createAsyncThunk(
 
       return data.data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -290,7 +283,6 @@ export const createSection = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to create section");
-      console.log(error);
     } finally {
       hide();
     }
@@ -318,7 +310,6 @@ export const updateSection = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to create section");
-      console.log(error);
     } finally {
       hide();
     }
@@ -335,7 +326,6 @@ export const getOneSection = createAsyncThunk(
 
       return data.data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -361,7 +351,6 @@ export const createTopic = createAsyncThunk("/createTopic", async (args) => {
     return data;
   } catch (error) {
     message.error("Failed to create topic");
-    console.log(error);
   } finally {
     hide();
   }
@@ -373,7 +362,6 @@ export const getOneTopic = createAsyncThunk("/getOneTopic", async (args) => {
 
     return data.data;
   } catch (error) {
-    console.log(error);
   }
 });
 
@@ -390,7 +378,6 @@ export const getTopicsFromSection = createAsyncThunk(
 
       return data.data;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -413,7 +400,6 @@ export const uploadToS3 = createAsyncThunk("/uploadToS3", async (args) => {
 
     return data;
   } catch (error) {
-    console.log(error);
   }
 });
 
@@ -431,7 +417,6 @@ export const updateTopic = createAsyncThunk("/updateTopic", async (args) => {
     return data
   } catch (error) {
     message.error("Failed to update topic");
-    console.log(error);
   } finally {
     hide();
   }

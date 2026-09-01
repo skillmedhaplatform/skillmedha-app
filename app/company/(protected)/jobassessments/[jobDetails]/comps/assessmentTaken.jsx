@@ -6,7 +6,7 @@ import {
   getAllAppliedStudentsWithAssesmentResults,
   updateStudentAndJobStatus,
 } from "@/redux/slices/company/skillMedhaData";
-import { Dropdown, Modal, Table, Tag } from "antd";
+import { Dropdown, Modal, Tag } from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
 import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import { useParams, useRouter } from "next/navigation";

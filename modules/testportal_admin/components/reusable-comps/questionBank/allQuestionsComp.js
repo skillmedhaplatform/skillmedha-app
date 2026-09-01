@@ -109,13 +109,10 @@ const menuItems = [
 const QuestionCard = ({ questions, index }) => {
   const [options, setOptions] = useState();
   const [activePanel, setActivePanel] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [ConfirmDeleteLoading, setConfirmDeleteLoading] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [previewQuestion, setPreviewQuestion] = useState(null);
-
-  const [itemsPerPage, setItemsPerPage] = useState(5);
   const dispatch = useDispatch();
   const selectedQuestions = useSelector((state) => state.questions.bulkEdit) || {};
   const { uploadResult, uploadStatus } = useSelector(
@@ -148,9 +145,7 @@ const QuestionCard = ({ questions, index }) => {
     }
   };
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedQtypeFilter, selectedQCategoryFilter, filteredQuestionsRedux]);
+
 
   const filteredQuestions = (questions || []).filter((question) => {
     const matchesStatus = selectedQtypeFilter
@@ -282,13 +277,7 @@ const QuestionCard = ({ questions, index }) => {
   const pathName = usePathname();
   const nav = useRouter();
 
-  const handlePageChange = (page, pageSize) => {
-    setCurrentPage(page);
-    if (pageSize && pageSize !== itemsPerPage) {
-      setItemsPerPage(pageSize);
-      setCurrentPage(1);
-    }
-  };
+
   const { token = {} } = theme?.useToken();
 
   useEffect(() => {
@@ -360,12 +349,9 @@ const QuestionCard = ({ questions, index }) => {
       </div>
     );
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
   const questionsToDisplay = filteredQuestionsRedux.length
     ? filteredQuestionsRedux
     : filteredQuestions;
-  const paginatedQuestions = questionsToDisplay.slice(startIndex, endIndex);
 
   // Dynamic calculations for Metric Cards (Image 2)
   const totalCount = questions.length;
@@ -595,10 +581,10 @@ const QuestionCard = ({ questions, index }) => {
         </div>
       ) : (
         <div className={qStyles.questions_cont}>
-          {paginatedQuestions.length > 0 ? (
+          {questionsToDisplay.length > 0 ? (
             <>
-              {paginatedQuestions.map((question, index) => {
-                const questionNumber = startIndex + index + 1;
+              {questionsToDisplay.map((question, index) => {
+                const questionNumber = index + 1;
                 const isExpanded = activePanel.includes(question._id);
                 const score = parseFloat(
                   question?.scoreSettings?.pointsForCorrectAns ||
@@ -795,15 +781,6 @@ const QuestionCard = ({ questions, index }) => {
                 );
               })}
 
-              <Pagination
-                current={currentPage}
-                pageSize={itemsPerPage}
-                total={questionsToDisplay.length}
-                onChange={handlePageChange}
-                showSizeChanger={true}
-                pageSizeOptions={["5", "10", "20", "50"]}
-                style={{ marginTop: "24px", textAlign: "center" }}
-              />
             </>
           ) : (
             <div className={qStyles.No_Questions_container}>

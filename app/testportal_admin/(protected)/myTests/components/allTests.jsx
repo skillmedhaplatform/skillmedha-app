@@ -7,7 +7,7 @@ import AllTestsStyles from "../styles/alltests.module.scss";
 import { useParams, useRouter } from "next/navigation";
 import { DeleteTest, getOneTests, getTests } from "@/redux/slices/testportal_admin/slice/test";
 import { setFormValues } from "@/redux/slices/testportal_admin/slice/stepform";
-import { Button, Checkbox, Collapse, message, Modal, Popconfirm, Tooltip, Pagination } from "antd";
+import { Button, Checkbox, Collapse, message, Modal, Popconfirm, Tooltip } from "antd";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 import { 
   QuestionCircleOutlined, 
@@ -136,19 +136,7 @@ const AllTestsComp = (props) => {
   const nav = useRouter();
   const [countdowns, setCountdowns] = useState({});
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(4); // default 4
   const [isDownloading, setIsDownloading] = useState(false);
-
-  // Reset to page 1 on test list count changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [allTests?.length]);
-
-  const paginatedTests = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return allTests.slice(startIndex, startIndex + pageSize);
-  }, [allTests, currentPage, pageSize]);
 
   // Helper to generate initials from test title
   const getInitials = (title = "") => {
@@ -446,9 +434,9 @@ const AllTestsComp = (props) => {
             <LocalCardSkeleton />
             <LocalCardSkeleton />
           </>
-        ) : paginatedTests?.length > 0 ? (
-          paginatedTests.map((test, index) => {
-            const actualIndex = (currentPage - 1) * pageSize + index;
+        ) : allTests?.length > 0 ? (
+          allTests.map((test, index) => {
+            const actualIndex = index;
             let questionNo = 1;
             const testScore =
               totalTestMarks.find((mark) => mark.id === test._id)?.score || 0;
@@ -720,23 +708,6 @@ const AllTestsComp = (props) => {
         )}
       </div>
 
-      {allTests.length > 0 && (
-        <div className={CourseStyles.paginationRow}>
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={allTests.length}
-            onChange={(page, size) => {
-              setCurrentPage(page);
-              setPageSize(size);
-            }}
-            pageSizeOptions={["4", "8", "12", "20", "50"]}
-            showSizeChanger
-            showQuickJumper
-            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} tests`}
-          />
-        </div>
-      )}
     </div>
   );
 };

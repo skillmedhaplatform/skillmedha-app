@@ -263,7 +263,7 @@ const StudentDownloader = ({
       okText="Download"
       cancelText="Close"
       centered
-      maskClosable={false}
+      mask={{ closable: false }}
       okButtonProps={{
         disabled: selectedFields.length === 0,
         loading: false,

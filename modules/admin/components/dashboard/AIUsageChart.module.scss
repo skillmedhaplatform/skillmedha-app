@@ -71,6 +71,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .chartTypeSelector {
@@ -128,6 +129,13 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
+
+  // 250px is wider than the whole content area on a phone once the sidebar
+  // takes its share — auto-fit still enforces that minimum per track and
+  // overflows instead of collapsing to a single narrower column.
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .statCard {

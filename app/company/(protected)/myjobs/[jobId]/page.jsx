@@ -8,10 +8,9 @@ import {
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./job.module.scss";
-import { GetAllPlacements, GetOneJob } from "@/redux/slices/company/placementsSlice";
-import Image from "next/image";
+import { GetOneJob } from "@/redux/slices/company/placementsSlice";
 import JobDetails from "../components/jobDetailsComp";
-import { FaCaretDown, FaCaretRight } from "react-icons/fa";
+import { FaCaretRight } from "react-icons/fa";
 import { Input } from "antd";
 import ApplicantsTable from "../components/applicantsTable";
 import { availableSkills } from "@/redux/slices/company/skillMedhaData";
@@ -50,7 +49,6 @@ export default function JobPreviewPage() {
     if (jobid && jobid !== "Newjob") {
       dispatch(GetOneJob({ jobid }));
     }
-    // dispatch(GetAllPlacements());
     dispatch(availableSkills());
   }, [dispatch, jobid]);
 
@@ -88,7 +86,6 @@ export default function JobPreviewPage() {
       setPreviewFileUrl(fileUrl);
       setIsModalOpen(true);
     } catch (error) {
-      console.error("Error viewing document:", error);
     }
   }
   const routes = [

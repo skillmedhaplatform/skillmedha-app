@@ -156,7 +156,6 @@ const StudentCard = ({
           totalMonths += Math.max(0, monthsDiff);
         }
       } catch (error) {
-        console.warn("Error parsing experience dates:", exp, error);
       }
     });
 
@@ -258,11 +257,8 @@ const StudentCard = ({
             jobId: oneJobData?._id,
           })
         );
-      } else {
-        console.error("Failed to add assessment to student");
       }
     } catch (error) {
-      console.error("Error in onInvite:", error);
     }
   };
 

@@ -21,6 +21,8 @@ import {
   Skeleton,
   Tooltip,
   message,
+  Drawer,
+  Divider,
 } from "antd";
 import {
   EditOutlined,
@@ -38,6 +40,8 @@ import {
   CrownOutlined,
   TeamOutlined,
   BankOutlined,
+  RightOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { FaShieldAlt, FaStar, FaEye } from "react-icons/fa";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -96,6 +100,10 @@ export default function User() {
 
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteModalData, setDeleteModalData] = useState(null);
+
+  // Mobile/Tablet detail bottom sheet drawer state
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Redux selectors
   const { list: USERS, loading } = useSelector((s) => s.adminAuth?.adminUsers || {});
@@ -1433,6 +1441,7 @@ export default function User() {
         ))}
       </div>
 
+      {/* Desktop Table View */}
       <div className={styles.tableWrapper}>
         <Table
           columns={columns}
@@ -1443,6 +1452,179 @@ export default function User() {
           sticky={true}
         />
       </div>
+
+      {/* Mobile & Tablet Card List View */}
+      <div className={styles.mobileUserList}>
+        {processedData.map((user) => {
+          const role = user?.role?.toLowerCase() || "viewer";
+          const roleColors = {
+            admin: "red",
+            moderator: "orange",
+            viewer: "green",
+          };
+
+          return (
+            <div
+              key={user.key || user._id || user.id}
+              className={styles.mobileUserCard}
+              onClick={() => {
+                setSelectedUser(user);
+                setIsDrawerOpen(true);
+              }}
+            >
+              <div className={styles.cardLeft}>
+                <div className={styles.mobileAvatar}>
+                  {user.name ? user.name.charAt(0).toUpperCase() : <UserOutlined />}
+                </div>
+                <div className={styles.userMeta}>
+                  <span className={styles.userNameText}>{user.name}</span>
+                  <span className={styles.userSubText}>{user.email || user.username}</span>
+                </div>
+              </div>
+              <div className={styles.cardRight}>
+                <Tag color={roleColors[role] || "blue"} style={{ margin: 0, textTransform: "uppercase", fontSize: "10px", fontWeight: 700 }}>
+                  {user.role}
+                </Tag>
+                <Tag color={user.isActive ? "success" : "default"} style={{ margin: 0, fontSize: "10px" }}>
+                  {user.isActive ? "Active" : "Inactive"}
+                </Tag>
+                <span className={styles.cardChevron}>
+                  <RightOutlined />
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* User Details Bottom Sheet Drawer for Mobile/Tablet */}
+      <Drawer
+        title={null}
+        placement="bottom"
+        onClose={() => setIsDrawerOpen(false)}
+        open={isDrawerOpen}
+        height="auto"
+        className={styles.userDrawer}
+        styles={{
+          body: {
+            padding: "1.25rem 1.25rem 2rem 1.25rem",
+            maxHeight: "85vh",
+            overflowY: "auto",
+            borderTopLeftRadius: "16px",
+            borderTopRightRadius: "16px",
+          },
+          content: {
+            borderTopLeftRadius: "16px",
+            borderTopRightRadius: "16px",
+          }
+        }}
+      >
+        {selectedUser && (
+          <div className={styles.drawerDetails}>
+            <div className={styles.sheetHandle} />
+
+            {/* Header with Avatar & Name */}
+            <div className={styles.drawerHeader}>
+              <div className={styles.avatarLarge}>
+                {selectedUser.name ? selectedUser.name.charAt(0).toUpperCase() : <UserOutlined />}
+              </div>
+              <div className={styles.headerText}>
+                <h3>{selectedUser.name}</h3>
+                <p>@{selectedUser.username || "user"}</p>
+              </div>
+              <Tag color={selectedUser.role?.toLowerCase() === "admin" ? "red" : selectedUser.role?.toLowerCase() === "moderator" ? "orange" : "green"} style={{ fontWeight: 700 }}>
+                {selectedUser.role}
+              </Tag>
+            </div>
+
+            <Divider style={{ margin: "14px 0" }} />
+
+            {/* Info Grid */}
+            <div className={styles.detailsGrid}>
+              <div className={styles.detailItem}>
+                <span className={styles.label}><MailOutlined /> Email</span>
+                <span className={styles.value}>
+                  <a href={`mailto:${selectedUser.email}`}>{selectedUser.email}</a>
+                </span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.label}><CalendarOutlined /> Created On</span>
+                <span className={styles.value}>{selectedUser.created || "N/A"}</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.label}><CheckCircleOutlined /> Status</span>
+                <span className={styles.value}>
+                  <Tag color={selectedUser.isActive ? "success" : "default"}>
+                    {selectedUser.isActive ? "Active Account" : "Inactive / Deactivated"}
+                  </Tag>
+                </span>
+              </div>
+            </div>
+
+            {/* Permissions Summary */}
+            <div className={styles.drawerSection}>
+              <h4 className={styles.sectionHeading}>
+                <SafetyOutlined /> Access & Permissions
+              </h4>
+              <div className={styles.permissionsBoxes}>
+                <div className={styles.permBox}>
+                  <span className={styles.permLabel}>General Permissions</span>
+                  <div className={styles.tagWrap}>
+                    {selectedUser.permissions?.general?.length > 0 ? (
+                      selectedUser.permissions.general.map((p) => (
+                        <Tag key={p} color="blue">{p}</Tag>
+                      ))
+                    ) : (
+                      <span className={styles.noneText}>None granted</span>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.permBox}>
+                  <span className={styles.permLabel}>Section Access</span>
+                  <div className={styles.tagWrap}>
+                    {selectedUser.permissions?.sections && Object.keys(selectedUser.permissions.sections).filter(k => selectedUser.permissions.sections[k]).length > 0 ? (
+                      Object.keys(selectedUser.permissions.sections)
+                        .filter(k => selectedUser.permissions.sections[k])
+                        .map(sec => <Tag key={sec} color="green">{sec}</Tag>)
+                    ) : (
+                      <span className={styles.noneText}>Default</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Drawer Action Buttons */}
+            <div className={styles.drawerActions}>
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                disabled={!canAccess(PERMISSION_VALUES.EDIT)}
+                onClick={() => {
+                  setIsDrawerOpen(false);
+                  handleEditUser(selectedUser);
+                }}
+                style={{ flex: 1, height: "40px", borderRadius: "8px", fontWeight: 600, background: "#1E69DA" }}
+              >
+                Edit User
+              </Button>
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                disabled={!canAccess(PERMISSION_VALUES.DELETE)}
+                onClick={() => {
+                  setIsDrawerOpen(false);
+                  setDeleteModalData(selectedUser);
+                  setDeleteModal(true);
+                }}
+                style={{ height: "40px", borderRadius: "8px" }}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        )}
+      </Drawer>
 
       <Modal
         open={isModalOpen}

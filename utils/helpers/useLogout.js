@@ -3,14 +3,15 @@ import { useDispatch } from "react-redux";
 import { useAppRouter } from "@/helpers/useAppRouter";
 import { resetStudent } from "@/redux/slices/student";
 import Cookies from "js-cookie";
-import { Modal } from "antd";
+import { App } from "antd";
 
 export const useLogout = () => {
   const dispatch = useDispatch();
   const nav = useAppRouter();
+  const { modal } = App.useApp();
 
   const handleLogout = () => {
-    Modal.confirm({
+    modal.confirm({
       title: "Are you sure you want to logout?",
       content: "You will need to login again to access your account.",
       okText: "Yes, Logout",

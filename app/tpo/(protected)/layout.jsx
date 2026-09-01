@@ -34,9 +34,14 @@ const GroupLayout = ({ children }) => {
   }, [status, dispatch]);
 
   return (
-    <div className={PageStyles.pageContainer} style={{ flexDirection: isMobile ? "column" : "row" }}>
-      {isMobile ? <TpoMobileSidebar /> : <SideNav />}
-      <div className={PageStyles.rightColumn} style={{ height: isMobile ? "calc(100vh - 64px)" : "100%" }}>
+    <div className={`${PageStyles.pageContainer} ${PageStyles.responsiveLayout}`}>
+      <div className={PageStyles.mobileSidebarWrapper}>
+        <TpoMobileSidebar />
+      </div>
+      <div className={PageStyles.desktopSidebarWrapper}>
+        <SideNav />
+      </div>
+      <div className={PageStyles.rightColumn}>
         <div className={PageStyles.content} style={{ padding: 0, backgroundColor: "#eef5fb" }}>
           {children}
         </div>

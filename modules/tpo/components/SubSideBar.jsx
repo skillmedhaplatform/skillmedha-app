@@ -20,6 +20,12 @@ const SubSideBar = ({ name, id, depart }) => {
     (state) => state.singleStudentDetails.singleStudent
   );
 
+  const studentData = selectedStudent?.data || {};
+  const profileImage = studentData.profilePicture || studentData.profilePic || studentData.profile || studentData.image;
+  const firstName = studentData.firstName || "";
+  const lastName = studentData.lastName || "";
+  const fullName = `${firstName} ${lastName}`.trim() || studentData.userName || "N/A";
+
   const handleClick = (path) => {
     router.push(`${base_url}${path}`);
   };
@@ -27,14 +33,18 @@ const SubSideBar = ({ name, id, depart }) => {
   return (
     <div className={subside.container}>
       <div className={subside.containerFirst}>
-        <ImageComponent />
+        <ImageComponent 
+          profileImage={profileImage} 
+          firstName={firstName} 
+          lastName={lastName} 
+          fullName={fullName} 
+        />
         <p>
-          {selectedStudent?.data?.userName
-            ? selectedStudent?.data?.userName?.split("")[0].toUpperCase() +
-            selectedStudent?.data?.userName?.slice(1)
-            : selectedStudent?.data?.firstName || "N/A"}
+          {studentData.userName
+            ? studentData.userName.split("")[0].toUpperCase() +
+              studentData.userName.slice(1)
+            : firstName || "N/A"}
         </p>
-        {/* <p>{selectedStudent?.data?._id || "N/A"}</p> */}
       </div>
 
       <div className={subside.buttons}>

@@ -40,6 +40,7 @@ import { getUpdatedFields } from "../../myprofile/(components)/functions";
 import { useParams, usePathname } from "next/navigation";
 import { useRouter } from "@bprogress/next/app";
 import { FaCaretRight, FaCheckCircle } from "react-icons/fa";
+import useResponsive from "@/hooks/useResponsive";
 
 import { HiOutlineEnvelope, HiOutlinePhone } from "react-icons/hi2";
 
@@ -49,17 +50,40 @@ const StudentData = () => {
   const dispatch = useDispatch();
   const path = usePathname();
   const pathSegments = path?.split("/").filter((e) => e);
+  const isMobile = useResponsive(640);
 
-  const resolveName = (segment, index) => {
-    if (segment === "allstudents") return "All Departments";
-    if (index > 0 && pathSegments[index - 1] === "allstudents") {
-      return getSstorage("departmentTitle") || "Department";
-    }
-    return segment.charAt(0).toUpperCase() + segment.slice(1);
+  const handleMobileRestrictedAction = (actionHandler) => {
+    return (e) => {
+      if (isMobile) {
+        message.warning(
+          "These actions are only done in tablet, laptop, and more than 1600px devices. Only in mobile screens you can't do these actions."
+        );
+        return;
+      }
+      if (actionHandler) actionHandler(e);
+    };
   };
 
   const { value, loading } = useSelector((state) => state.students.allStudents);
   const { value: departMent } = useSelector((state) => state.department.getAllDepartments);
+  
+  const [departmentTitle, setDepartmentTitle] = useState("Department");
+  
+  useEffect(() => {
+    const stored = getSstorage("departmentTitle");
+    if (stored) {
+      setDepartmentTitle(stored);
+    }
+  }, []);
+
+  const resolveName = (segment, index) => {
+    if (segment === "allstudents") return "All Departments";
+    if (index > 0 && pathSegments[index - 1] === "allstudents") {
+      return departmentTitle;
+    }
+    return segment.charAt(0).toUpperCase() + segment.slice(1);
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
@@ -121,22 +145,56 @@ const StudentData = () => {
     setPagination((prev) => ({ ...prev, current: 1 }));
   };
 
+  const extractId = (obj) => {
+    if (!obj) return "";
+    if (typeof obj === "string") return obj;
+    if (typeof obj === "object") {
+      if (obj.globalId) return extractId(obj.globalId);
+      if (obj._id) return extractId(obj._id);
+      if (obj.id) return extractId(obj.id);
+      if (typeof obj.toString === "function") {
+        const str = obj.toString();
+        if (str && str !== "[object Object]") return str;
+      }
+    }
+    return String(obj);
+  };
+
   const handleEdit = (student) => {
+    const s = student?.aboutDetails || student?.studentDetails || student || {};
+    const targetId =
+      extractId(student?.globalId) ||
+      extractId(student?._id) ||
+      extractId(student?.id) ||
+      extractId(student?.studentId) ||
+      extractId(s?.globalId) ||
+      extractId(s?._id) ||
+      student?.email ||
+      "editing";
+
     setOriginal(student);
     setModalType("single");
     setIsModalOpen(true);
-    let cleanPhone = (student.phone || "").replace(/\D/g, "");
+
+    const rawPhone = s.phone || student?.phone || "";
+    let cleanPhone = String(rawPhone).replace(/\D/g, "");
     if (cleanPhone.length > 10) cleanPhone = cleanPhone.slice(-10);
 
     setStudentPayload({
-      ...student,
-      phone: cleanPhone
+      firstName: s.firstName || student?.firstName || "",
+      lastName: s.lastName || student?.lastName || "",
+      userName: s.userName || s.username || student?.userName || student?.username || "",
+      email: s.email || student?.email || "",
+      phone: cleanPhone,
+      yearOfPassing: String(s.yearOfPassing || s.year || student?.yearOfPassing || student?.year || ""),
+      globalId: targetId,
+      password: ""
     });
-    setSelectedStudentId(student?._id);
+    setSelectedStudentId(targetId);
   };
 
   const handleDelete = (student) => {
-    const { globalId } = student;
+    const globalId = extractId(student?.globalId) || extractId(student?._id) || extractId(student?.id);
     Modal.confirm({
       title: "Delete Student",
       content: "Are you sure you want to delete this student? This action cannot be undone.",
@@ -253,15 +311,21 @@ const StudentData = () => {
 
     try {
       if (selectedStudentId) {
+        const targetId =
+          selectedStudentId !== "editing"
+            ? selectedStudentId
+            : extractId(globalId) || extractId(original?.globalId) || extractId(original?._id) || original?.email;
+
+        const origS = original?.aboutDetails || original?.studentDetails || original || {};
         const originalPayload = {
-          firstName: original.firstName,
-          lastName: original.lastName,
-          userName: original.userName,
-          email: original.email,
-          phone: original.phone,
-          yearOfPassing: original.yearOfPassing,
-          globalId: original.globalId,
-          _id: original.globalId
+          firstName: origS.firstName || original?.firstName || "",
+          lastName: origS.lastName || original?.lastName || "",
+          userName: origS.userName || origS.username || original?.userName || original?.username || "",
+          email: origS.email || original?.email || "",
+          phone: origS.phone || original?.phone || "",
+          yearOfPassing: String(origS.yearOfPassing || origS.year || original?.yearOfPassing || original?.year || ""),
+          globalId: targetId,
+          _id: targetId
         };
 
         const updatedInput = {
@@ -271,7 +335,7 @@ const StudentData = () => {
           email,
           phone,
           yearOfPassing,
-          globalId
+          globalId: targetId
         };
 
         const updatedPayload = getUpdatedFields(originalPayload, updatedInput);
@@ -279,7 +343,7 @@ const StudentData = () => {
         if (Object.keys(updatedPayload).length > 0) {
           await dispatch(
             updateStudent({
-              aboutDetails: { ...updatedPayload, _id: globalId, globalId },
+              aboutDetails: { ...updatedPayload, _id: targetId, globalId: targetId },
               departmentId: params?.departId
             })
           );
@@ -307,10 +371,27 @@ const StudentData = () => {
   };
 
   const handleClick = (record) => {
-    router.push(`/tpo/allstudents/${params.departId}/${record.globalId}`);
+    if (isMobile) {
+      message.warning(
+        "These actions are only done in tablet, laptop, and more than 1600px devices. Only in mobile screens you can't do these actions."
+      );
+      return;
+    }
+    const targetId = extractId(record?.globalId) || extractId(record?._id) || extractId(record?.id);
+    router.push(`/tpo/allstudents/${params.departId}/${targetId}`);
   };
 
   const showModal = (modalType) => {
+    setSelectedStudentId("");
+    setStudentPayload({
+      firstName: "",
+      lastName: "",
+      userName: "",
+      email: "",
+      phone: "",
+      password: "",
+      yearOfPassing: ""
+    });
     setModalType(modalType);
     setIsModalOpen(true);
   };
@@ -548,9 +629,9 @@ const StudentData = () => {
   const paginatedData = filteredData || [];
 
   return (
-    <>
+    <div className={students.pageContainer}>
       <PageHeader
-        title={getSstorage("departmentTitle") || "Department"}
+        title={departmentTitle}
         subtitle="Manage students registered in this department"
       />
 
@@ -558,7 +639,7 @@ const StudentData = () => {
         <div className={students.leftControls}>
           <Search
             placeholder="Search by name, email, phone, or roll no."
-            style={{ width: 400 }}
+            className={students.searchBar}
             allowClear
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
@@ -591,27 +672,26 @@ const StudentData = () => {
         {params?.departId !== "noDept" && (
           <div className={students.rightControls}>
             {selectedStudentIds.length > 0 && (
-              <Button onClick={() => setIsBulkModalOpen(true)} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+              <Button onClick={handleMobileRestrictedAction(() => setIsBulkModalOpen(true))} type="primary" className={students.actionBtn}>
                 Bulk Actions ({selectedStudentIds.length})
               </Button>
             )}
-            <Button onClick={() => showModal("bulk")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+            <Button onClick={handleMobileRestrictedAction(() => showModal("bulk"))} type="primary" className={students.actionBtn}>
               Bulk Upload Students
             </Button>
-            <Button onClick={() => showModal("single")} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+            <Button onClick={handleMobileRestrictedAction(() => showModal("single"))} type="primary" className={students.actionBtn}>
               Add Single Student
             </Button>
-            <Button onClick={openDownloadModal} type="primary" style={{ background: "linear-gradient(135deg, #6BA8ED 0%, #A3CCFA 100%)", borderColor: "transparent" }}>
+            <Button onClick={handleMobileRestrictedAction(openDownloadModal)} type="primary" className={students.actionBtn}>
               Download Students
             </Button>
           </div>
         )}
       </div>
 
-      <div className={students.container}>
-        {/* Breadcrumbs Trail */}
-        <div className={students.headerCont}>
-          {pathSegments.map((segment, index) => {
+      {/* Breadcrumbs Trail (Fixed below controls) */}
+      <div className={students.headerCont}>
+        {pathSegments.map((segment, index) => {
             const displayName = resolveName(segment, index);
             const isLast = index === pathSegments.length - 1;
             let pathToHere = "/" + pathSegments.slice(0, index + 1).join("/");
@@ -634,8 +714,10 @@ const StudentData = () => {
               </span>
             );
           })}
-        </div>
+      </div>
 
+      {/* Scrollable Main Content */}
+      <div className={students.container}>
         {/* Condition on View Mode */}
         {viewMode === "cards" ? (
           <>
@@ -664,7 +746,11 @@ const StudentData = () => {
                           onClick={(e) => e.stopPropagation()}
                         />
                         <div className={students.studentAvatar}>
-                          {getInitials(record.firstName, record.lastName) || "ST"}
+                          {(record?.profilePic || record?.profilePicture || record?.profile) ? (
+                            <img src={record?.profilePic || record?.profilePicture || record?.profile} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                          ) : (
+                            getInitials(record.firstName, record.lastName) || "ST"
+                          )}
                         </div>
                         <div className={students.studentInfo}>
                           <span className={students.studentName}>{fullName}</span>
@@ -1063,7 +1149,7 @@ const StudentData = () => {
           </Select>
         </div>
       </Modal>
-    </>
+    </div>
   );
 };
 

@@ -9,7 +9,7 @@ import { CheckCircleOutlined, ClockCircleOutlined, SendOutlined } from "@ant-des
 import CountdownTimer from "./countdowntimer";
 import { getEligibilityStatus } from "./eligibilityCheck";
 
-const PRIMARY = "#24A058";
+const PRIMARY = "#1E69DA";
 
 export default function JobDetailsHeader({
   job,

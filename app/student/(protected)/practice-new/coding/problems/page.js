@@ -249,20 +249,19 @@ export default function ProblemList() {
         />
       </div>
 
-      <div className="flex-1 flex flex-col w-full" style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px", paddingTop: "24px", overflow: "hidden" }}>
-
-        {/* Breadcrumb and Top Stats */}
-        <div className="shrink-0 z-[40] flex flex-col lg:flex-row gap-8 items-center" style={{ backgroundColor: "#F1F5F9", paddingBottom: "20px" }}>
-
-          {/* Left alignment (260px width matching sidebar) */}
+      {/* Breadcrumb and Top Stats (White bar touching banner) */}
+      <div className="w-full bg-white border-b border-[#E2E8F0] z-[40]">
+        <div className="w-full max-w-[1500px] mx-auto px-4 lg:px-8 py-3 flex flex-col lg:flex-row gap-4 lg:gap-8 items-center justify-between">
+          
+          {/* Left alignment */}
           <div className="w-full lg:w-[260px] shrink-0">
-            <a onClick={() => router.push("/student/practice-new/coding")} style={{ color: "#64748B", fontWeight: 600, fontSize: "16px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ fontSize: "18px" }}>&larr;</span> Practice
+            <a onClick={() => router.push("/student/practice-new/coding")} className="text-[#64748B] font-semibold text-[16px] cursor-pointer inline-flex items-center gap-[6px] hover:text-[#1E69DA] transition-colors">
+              <span className="text-[18px]">&larr;</span> Practice
             </a>
           </div>
 
-          {/* Right alignment (flex-1 matching problems tiles) */}
-          <div className="flex-1 w-full flex justify-between items-center h-[40px]">
+          {/* Right alignment */}
+          <div className="flex-1 w-full flex justify-between items-center">
             {/* Search */}
             <div className="flex items-center">
               <div className="relative">
@@ -270,7 +269,7 @@ export default function ProblemList() {
                 <input
                   type="text"
                   placeholder="Search questions"
-                  className="bg-white text-gray-800 placeholder-gray-400 pl-10 pr-4 py-[8px] rounded-full border border-gray-300 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[240px] text-[14px] shadow-sm"
+                  className="bg-[#F1F5F9] text-gray-800 placeholder-gray-500 pl-10 pr-4 py-[8px] rounded-full border border-transparent outline-none focus:ring-2 focus:ring-[#1E69DA] focus:bg-white transition-all w-[240px] text-[14px]"
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -281,8 +280,8 @@ export default function ProblemList() {
             </div>
 
             {/* Solved Progress Circle */}
-            <div className="flex items-center gap-2 text-[#64748B] text-[15px] font-bold pr-2 tracking-wide">
-              <div className="w-5 h-5 rounded-full border-2 border-gray-400/30 relative flex items-center justify-center overflow-hidden">
+            <div className="flex items-center gap-2 text-[#64748B] text-[15px] font-bold tracking-wide">
+              <div className="w-5 h-5 rounded-full border-2 border-gray-300 relative flex items-center justify-center overflow-hidden bg-[#F8FAFC]">
                 <div
                   className="absolute bottom-0 left-0 right-0 bg-emerald-500"
                   style={{ height: `${(solvedCount / totalQ) * 100}%` }}
@@ -292,7 +291,9 @@ export default function ProblemList() {
             </div>
           </div>
         </div>
+      </div>
 
+      <div className="flex-1 flex flex-col w-full max-w-[1500px] mx-auto px-4 lg:px-8 py-6 overflow-hidden">
         <div className="flex-1 flex flex-col lg:flex-row gap-8 items-start overflow-hidden">
 
           {/* Left Column - Sidebar Filters */}

@@ -171,14 +171,14 @@ const Page = () => {
       case "recent":
         return sorted.sort(
           (a, b) =>
-            new Date(b.updatedAt || 0).getTime() -
-            new Date(a.updatedAt || 0).getTime()
+            new Date(b.updatedAt || b.createdAt || 0).getTime() -
+            new Date(a.updatedAt || a.createdAt || 0).getTime()
         );
       case "oldest":
         return sorted.sort(
           (a, b) =>
-            new Date(a.updatedAt || 0).getTime() -
-            new Date(b.updatedAt || 0).getTime()
+            new Date(a.updatedAt || a.createdAt || 0).getTime() -
+            new Date(b.updatedAt || b.createdAt || 0).getTime()
         );
       case "modulesAsc":
         return sorted.sort(
@@ -1024,14 +1024,14 @@ const Page = () => {
                   </p>
 
                   <div className={internshipLibStyles.footer}>
-                    {eachData?.lastAssignmentUpdate || eachData?.updatedAt ? (
+                    {eachData?.updatedAt || eachData?.createdAt ? (
                       <div
                         className={internshipLibStyles.updated}
                         aria-label="Last updated"
                       >
                         Updated{" "}
                         {formatUpdatedDate?.(
-                          eachData?.lastAssignmentUpdate || eachData?.updatedAt
+                          eachData?.updatedAt || eachData?.createdAt
                         )}
                       </div>
                     ) : null}

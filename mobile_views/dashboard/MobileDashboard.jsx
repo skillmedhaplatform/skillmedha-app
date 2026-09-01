@@ -357,15 +357,26 @@ export default function MobileDashboard({
                   router.push(url);
                 };
 
-                let lastAccessedInfo = "Not started";
-                if (hasLastAccessed) {
-                  lastAccessedInfo = "In progress";
-                }
-
-                const isInternship = item?.type === "internship";
                 const fetchedProgress = progressById ? progressById[item._id] : null;
                 const progressVal = fetchedProgress?.totalProgress ?? 0;
                 const isProgressLoading = fetchedProgress?.loading;
+                const isCompleted = progressVal >= 100;
+
+                let lastAccessedInfo = "Not started";
+                if (isCompleted) {
+                  lastAccessedInfo = "Completed";
+                } else if (hasLastAccessed || progressVal > 0) {
+                  lastAccessedInfo = "In progress";
+                }
+
+                let buttonText = "Start";
+                if (isCompleted) {
+                  buttonText = "Review";
+                } else if (hasLastAccessed || progressVal > 0) {
+                  buttonText = "Continue";
+                }
+
+                const isInternship = item?.type === "internship";
 
                 return (
                   <div key={item._id} className={`flex flex-col md:flex-row md:items-center justify-between p-3 lg:p-4 bg-white border border-[#e2e8f0] rounded-[12px] hover:shadow-md transition-shadow border-l-[4px] ${isInternship ? 'border-l-[#0284c7]' : 'border-l-[#24A058]'}`}>
@@ -398,7 +409,7 @@ export default function MobileDashboard({
                           percent={progressVal} 
                           size="small" 
                           showInfo={false} 
-                          strokeColor={hasLastAccessed ? '#4f46e5' : '#24A058'} 
+                          strokeColor={isCompleted ? '#10b981' : (hasLastAccessed || progressVal > 0 ? '#4f46e5' : '#24A058')} 
                           railColor="#f1f5f9"
                           className="m-0 w-full md:w-[120px]"
                         />
@@ -406,7 +417,7 @@ export default function MobileDashboard({
                       </div>
                       <Button
                         onClick={handleNavigateDesktop}
-                        className="!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0] !border-none !text-white hover:opacity-90 shrink-0"
+                        className={`!border-none !text-white hover:opacity-90 shrink-0 ${isCompleted ? '!bg-emerald-600' : '!bg-gradient-to-br !from-[#1E69DA] !to-[#5694F0]'}`}
                         style={{
                           fontWeight: '600',
                           borderRadius: '8px',
@@ -415,7 +426,7 @@ export default function MobileDashboard({
                           fontSize: '12px'
                         }}
                       >
-                        {hasLastAccessed ? "Continue" : "Start"}
+                        {buttonText}
                       </Button>
                     </div>
                   </div>

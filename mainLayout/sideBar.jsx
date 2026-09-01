@@ -28,7 +28,7 @@ export const isProfileComplete = (student) => {
 
 import useSpecialOrg from "@/helpers/useSpecialOrg";
 
-const SideBar = ({ activeView, setView }) => {
+const SideBar = ({ activeView, setView, onLinkClick }) => {
   const isCollapsed = useSelector((s) => s.sideBar.collapse);
   const { isSpecialOrg, student, orgDetails } = useSpecialOrg();
 
@@ -211,6 +211,7 @@ const SideBar = ({ activeView, setView }) => {
   const menuItems = getMenuItems();
 
   const handleMenuClick = ({ key }) => {
+    if (onLinkClick) onLinkClick();
     if (typeof setView === "function") {
       let view = key;
       if (key.startsWith("practice|")) {

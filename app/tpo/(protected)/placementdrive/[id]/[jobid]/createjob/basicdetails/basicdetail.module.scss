@@ -36,12 +36,22 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    label {
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    > label {
       min-width: 25%;
       width: 18%;
       font-size: 16px;
       font-weight: 600;
       word-wrap: break-word;
+
+      @media (max-width: 768px) {
+        min-width: 100%;
+        width: 100%;
+      }
     }
     .courseInputmainCont {
       width: 100%;
@@ -57,6 +67,17 @@
         flex-wrap: wrap;
         gap: 1rem;
         width: 100%;
+
+        @media (max-width: 768px) {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+
+          > div, > input {
+            width: 100% !important;
+            flex: none !important;
+          }
+        }
         .deleteBtn {
           margin-left: 8px;
           background: transparent;
@@ -92,22 +113,40 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    > label {
+      min-width: 25%;
+      width: 18%;
+      font-size: 16px;
+      font-weight: 600;
+      word-wrap: break-word;
+
+      @media (max-width: 768px) {
+        min-width: 100%;
+        width: 100%;
+        margin-bottom: 0.25rem;
+      }
+    }
   }
-  label {
-    min-width: 25%;
-    width: 18%;
-    font-size: 16px;
-    font-weight: 600;
-    word-wrap: break-word;
-  }
+
   .inpuCont {
     flex: 1;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 1rem;
     flex-wrap: wrap;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
   }
 
   .inpuContbtn {
@@ -124,7 +163,7 @@
     }
   }
   .textarea,
-  input {
+  input:not([type="radio"]):not([type="checkbox"]) {
     flex: 1;
     padding: 0.5rem;
     border: 0;
@@ -165,6 +204,18 @@
     background-color: #eef5fb !important;
     border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
     border-radius: 5px !important;
+  }
+
+  :global(.ant-radio-button-wrapper) {
+    min-width: 60px !important;
+    width: auto !important;
+    text-align: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    height: 38px !important;
+    line-height: 1 !important;
   }
 }
 .saveBtn {

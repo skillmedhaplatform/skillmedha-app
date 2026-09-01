@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import TextEditor from "@/modules/testportal_admin/components/reusable-comps/editor/editor";
 import ScoreSettings from "../../components/childs/scoreSettings";
 import { Radio } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 import { setQuestionVals } from "@/redux/slices/testportal_admin/slice/questions";
 const QuestionForm = () => {
   const type = useSelector(
@@ -145,10 +146,7 @@ const QuestionForm = () => {
                   onClick={() => removeInput(index)}
                   className={MultipleStyles.removeButton}
                 >
-                  <img
-                    src="https://res.cloudinary.com/cliqtick/image/upload/v1718799083/sysnper/f29853d87e22f70d1cc10a3fcd7959c4_phnqgw.png"
-                    width="20px"
-                  />
+                  <DeleteOutlined style={{ fontSize: "16px", color: "#ff4d4f" }} />
                 </button>
               </div>
             );

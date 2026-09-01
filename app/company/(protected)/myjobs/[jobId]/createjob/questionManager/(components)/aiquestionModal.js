@@ -102,7 +102,6 @@ export default function AIQuestionModal({ open, onClose, aId }) {
       setShowForm(false);
       message.success(`Generated ${apiQuestions.length} questions`);
     } catch (err) {
-      console.error(err);
       message.error("Failed to generate questions");
     } finally {
       setLoading(false);
@@ -167,7 +166,6 @@ export default function AIQuestionModal({ open, onClose, aId }) {
       form.resetFields();
       onClose();
     } catch (err) {
-      console.error(err);
       message.error("Failed to add questions");
     } finally {
       setAddLoading(false);

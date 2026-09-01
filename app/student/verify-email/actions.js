@@ -58,8 +58,8 @@ export async function refreshSessionAndRedirect() {
       ev: student?.verified === true,
       special: student?.orgDetails?.orgId === SPECIAL_ORG_ID,
       pt:
-        Array.isArray(student?.psychometricTestResults) &&
-        student.psychometricTestResults.length > 0,
+        (Array.isArray(student?.psychometricTestResults) &&
+        student.psychometricTestResults.length > 0) || (student?.loginCount > 1) || (!student?.createdAt || new Date(student.createdAt).getTime() < new Date("2026-05-01T00:00:00Z").getTime()),
     });
 
     // Set the refreshed cookie server-side — this ALWAYS takes effect

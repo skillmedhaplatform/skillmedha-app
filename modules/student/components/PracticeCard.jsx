@@ -1,7 +1,9 @@
 import React from "react";
 import { 
   BookOpen, Calculator, Code, Database, Globe, 
-  MessageSquare, BrainCircuit, Activity, CheckCircle, ChevronRight, Binary, Puzzle, FileText, Volume2
+  MessageSquare, BrainCircuit, Activity, CheckCircle, ArrowRight, 
+  Binary, Puzzle, FileText, Volume2,
+  Box, Layers, Compass, Target, Zap, Star, Shield, Diamond, Bookmark, Hexagon, Triangle, Hash, Percent, Clock
 } from "lucide-react";
 import { Tooltip } from "antd";
 import { InfoOutlined } from "@ant-design/icons";
@@ -9,14 +11,19 @@ import { InfoOutlined } from "@ant-design/icons";
 export default function PracticeCard({
   title,
   category,
-  totalQuestions,
-  attempts = 0,
-  progress = 0,
+  attempts,
+  easyPassCount,
+  mediumPassCount,
+  hardPassCount,
+  easyAttempts = 0,
+  mediumAttempts = 0,
+  hardAttempts = 0,
   onStart,
   loading = false,
   subjectTitle = "",
   actualTotalQuestions = 0,
-  id
+  id,
+  disableStart = false
 }) {
   const [hasResumeState, setHasResumeState] = React.useState(false);
 
@@ -34,6 +41,18 @@ export default function PracticeCard({
     }
   }, [id]);
 
+  const getMasteryLevelName = () => {
+    const minMultiplier = Math.min(easyPassCount, mediumPassCount, hardPassCount);
+    if (minMultiplier >= 5) return "Grandmaster";
+    if (minMultiplier === 4) return "Master";
+    if (minMultiplier === 3) return "Expert";
+    if (minMultiplier === 2) return "Advanced";
+    if (minMultiplier === 1) return "Intermediate";
+    return "Novice";
+  };
+
+  const masteryLevel = getMasteryLevelName();
+
   // Determine color theme based on subject/title
   const getTheme = () => {
     const text = (subjectTitle + title).toLowerCase();
@@ -49,7 +68,8 @@ export default function PracticeCard({
     if (text.includes("c++") || text.includes("cpp")) return { border: "#673AB7", boxBg: "#F3E5F5", text: "#673AB7" }; // Violet
     if (text.includes("c#") || text.includes("csharp")) return { border: "#D81B60", boxBg: "#FCE4EC", text: "#D81B60" }; // Pink
     if (text.includes("c program") || text === "c") return { border: "#009688", boxBg: "#E0F2F1", text: "#009688" }; // Teal
-    if (text.includes("data") || text.includes("sql")) return { border: "#5D4037", boxBg: "#D7CCC8", text: "#5D4037" }; // Dark Brown
+    if (text.includes("data") || text.includes("sql") || text.includes("dbms") || text.includes("database")) return { border: "#5D4037", boxBg: "#D7CCC8", text: "#5D4037" }; // Dark Brown
+    if (text.includes("system") || text.includes("operating") || text.includes("os ")) return { border: "#455A64", boxBg: "#CFD8DC", text: "#455A64" }; // Blue Grey
     
     // Hash-based palette for any other subjects to ensure distinct colors (NO BLUE SHADES)
     const colors = [
@@ -76,134 +96,161 @@ export default function PracticeCard({
   const theme = getTheme();
 
   const getIcon = () => {
-    const text = (title + category + subjectTitle).toLowerCase();
-    if (text.includes("part")) return <Puzzle size={20} color={theme.text} />;
-    if (text.includes("article")) return <FileText size={20} color={theme.text} />;
-    if (text.includes("voice")) return <Volume2 size={20} color={theme.text} />;
-    if (text.includes("gramm") || text.includes("vocab") || text.includes("english")) return <BookOpen size={20} color={theme.text} />;
-    if (text.includes("quant") || text.includes("math") || text.includes("calc")) return <Calculator size={20} color={theme.text} />;
-    if (text.includes("reasoning") || text.includes("logic")) return <BrainCircuit size={20} color={theme.text} />;
+    const subject = (subjectTitle || category || title).toLowerCase();
     
-    // Coding specific icons
-    if (text.includes("data") || text.includes("sql")) return <Database size={20} color={theme.text} />;
-    if (text.includes("web") || text.includes("html") || text.includes("script")) return <Globe size={20} color={theme.text} />;
-    if (text.includes("system") || text.includes("os")) return <Binary size={20} color={theme.text} />;
+    // 1. Hardcoded specific icons for known main subjects
+    if (subject.includes("english") || subject.includes("verbal") || subject.includes("gramm")) return <BookOpen size={20} color={theme.text} />;
+    if (subject.includes("quant") || subject.includes("math") || subject.includes("aptitude")) return <Calculator size={20} color={theme.text} />;
+    if (subject.includes("reasoning") || subject.includes("logic")) return <BrainCircuit size={20} color={theme.text} />;
     
-    if (text.includes("code") || text.includes("program") || text.includes("array") || text.includes("python") || text.includes("java") || text.includes("c++") || text.includes("script")) return <Code size={20} color={theme.text} />;
+    if (subject.includes("python") || subject.includes("java") || subject.includes("c++") || subject.includes("code")) return <Code size={20} color={theme.text} />;
+    if (subject.includes("data") || subject.includes("sql") || subject.includes("dbms")) return <Database size={20} color={theme.text} />;
+    if (subject.includes("web") || subject.includes("html") || subject.includes("script")) return <Globe size={20} color={theme.text} />;
+    if (subject.includes("system") || subject.includes("os") || subject.includes("network") || subject.includes("binary")) return <Binary size={20} color={theme.text} />;
 
-    return <Activity size={20} color={theme.text} />;
+    // 2. Dynamic Hash-based assignment for ANY NEW section added by admin
+    const genericIcons = [
+      <Box size={20} color={theme.text} />, 
+      <Layers size={20} color={theme.text} />, 
+      <Compass size={20} color={theme.text} />, 
+      <Target size={20} color={theme.text} />, 
+      <Zap size={20} color={theme.text} />, 
+      <Star size={20} color={theme.text} />, 
+      <Shield size={20} color={theme.text} />, 
+      <Diamond size={20} color={theme.text} />, 
+      <Bookmark size={20} color={theme.text} />, 
+      <Hexagon size={20} color={theme.text} />, 
+      <Triangle size={20} color={theme.text} />,
+      <Hash size={20} color={theme.text} />,
+      <Percent size={20} color={theme.text} />,
+      <Clock size={20} color={theme.text} />
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < subject.length; i++) {
+      hash = subject.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % genericIcons.length;
+    return genericIcons[index];
   };
 
   return (
     <div 
-      className={`bg-white rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.06)] border border-gray-200 flex flex-col transition-all hover:shadow-[0_4px_15px_rgba(0,0,0,0.1)] relative overflow-hidden ${!loading ? 'cursor-pointer' : 'cursor-wait opacity-80'}`}
+      className={`group bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:border-slate-200 hover:-translate-y-1 relative overflow-hidden ${!loading ? 'cursor-pointer' : 'cursor-wait opacity-80'} min-h-[260px]`}
     >
-      {/* Left Colored Border */}
+      {/* Decorative ambient background glow */}
       <div 
-        className="absolute top-0 bottom-0 left-0 w-[4px]" 
-        style={{ backgroundColor: theme.border }}
-      />
+        className="absolute -top-12 -right-12 w-40 h-40 rounded-full blur-[50px] opacity-[0.15] transition-all duration-500 group-hover:opacity-[0.4] group-hover:scale-110 pointer-events-none z-0"
+        style={{ backgroundColor: theme.text }}
+      ></div>
 
-      {/* Info Tooltip */}
-      <div className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors z-10" onClick={(e) => e.stopPropagation()}>
-        <Tooltip 
-          title={
-            <div className="text-[11px] leading-tight flex flex-col gap-1.5 p-1">
-              <div><strong className="text-[#38bdf8]">Progress:</strong> Retains your highest score in a single attempt.</div>
-              <div><strong className="text-[#38bdf8]">Badges:</strong> Score 100% to earn Master badges.</div>
-              <div><strong className="text-[#38bdf8]">Level Up:</strong> Score 100% on new questions for <em className="text-white">Flawless</em> badges, or on practiced questions for <em className="text-white">Recall</em> badges!</div>
-            </div>
-          }
-          color="#0f172a"
-          placement="topRight"
-        >
-          <InfoOutlined style={{ fontSize: '16px' }} />
-        </Tooltip>
-      </div>
-      
       {/* Top Section */}
-      <div className="p-4 xl:p-6 pb-4 flex items-center gap-3 xl:gap-4">
+      <div className="p-5 xl:p-6 pb-2 flex items-start gap-4 relative z-10">
         {/* Icon Box */}
         <div 
-          className="w-[42px] h-[42px] rounded-lg flex items-center justify-center shrink-0 shadow-sm"
+          className="w-[48px] h-[48px] rounded-[14px] flex items-center justify-center shrink-0"
           style={{ backgroundColor: theme.boxBg }}
         >
-          {getIcon()}
+          {React.cloneElement(getIcon(), { size: 24, strokeWidth: 1.5 })}
         </div>
         
-        <div className="flex-1">
-          <h3 className="text-[15px] font-bold text-gray-900 m-0 leading-tight mb-1">{title}</h3>
-          <p className="text-[10px] font-bold text-gray-500 m-0 uppercase tracking-widest">{subjectTitle} • {category}</p>
+        <div className="flex-1 overflow-hidden mt-1">
+          <Tooltip title={title} placement="top">
+            <h3 className="text-[17px] font-[800] text-slate-800 m-0 leading-[22px] mb-1.5 line-clamp-2 group-hover:text-slate-900 transition-colors">{title}</h3>
+          </Tooltip>
+          <p className="text-[10px] font-bold text-slate-400 m-0 uppercase tracking-widest truncate">{subjectTitle} • {category}</p>
         </div>
       </div>
       
       {/* Stats Section */}
-      <div className="flex px-4 xl:px-6 py-2">
-        <div className="flex flex-col items-center justify-center flex-1">
-          <span className="text-[16px] font-bold text-gray-800 leading-none mb-1.5">{totalQuestions}</span>
-          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">QUESTIONS</span>
+      <div className="relative z-10 grid grid-cols-3 divide-x divide-slate-100 border border-slate-100 rounded-[16px] mx-5 my-3 bg-slate-50/50 group-hover:bg-white group-hover:shadow-[0_4px_15px_rgba(0,0,0,0.02)] group-hover:border-slate-200 transition-all duration-300 py-3">
+        <div className="flex flex-col items-center justify-center">
+          <span className="text-[16px] font-[900] text-[#10b981] leading-none mb-1">{easyAttempts}</span>
+          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-center leading-tight">EASY<br/>ATTEMPTS</span>
         </div>
-        <div className="w-[1px] bg-gray-100" />
-        <div className="flex flex-col items-center justify-center flex-1">
-          <span className="text-[16px] font-bold text-gray-800 leading-none mb-1.5">{attempts}</span>
-          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">ATTEMPTS</span>
+        <div className="flex flex-col items-center justify-center">
+          <span className="text-[16px] font-[900] text-[#eab308] leading-none mb-1">{mediumAttempts}</span>
+          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-center leading-tight">MEDIUM<br/>ATTEMPTS</span>
+        </div>
+        <div className="flex flex-col items-center justify-center">
+          <span className="text-[16px] font-[900] text-[#ef4444] leading-none mb-1">{hardAttempts}</span>
+          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-center leading-tight">HARD<br/>ATTEMPTS</span>
         </div>
       </div>
       
-      {/* Progress Section */}
-      <div className="px-4 xl:px-6 pt-4 pb-5">
-        <div className="flex justify-between items-center gap-3">
-          <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div 
-              className="h-full rounded-full transition-all duration-500" 
-              style={{ width: `${progress}%`, backgroundColor: theme.border }}
-            ></div>
+      {/* Progress Section (Stars) */}
+      <div className="px-5 xl:px-6 pb-4 relative z-10">
+        <div className="flex justify-between items-center gap-4">
+          <div className="flex gap-2">
+            <Tooltip title={`Easy Mode: ${easyPassCount} Passes`}>
+              <div className="flex items-center">
+                <Star 
+                  size={18} 
+                  fill={easyPassCount > 0 ? "#10b981" : "transparent"} 
+                  color={easyPassCount > 0 ? "#10b981" : "#cbd5e1"} 
+                  className={easyPassCount > 0 ? "drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" : ""} 
+                />
+                {easyPassCount > 0 && <span className="text-[10px] ml-1 font-bold text-[#10b981]">×{easyPassCount}</span>}
+              </div>
+            </Tooltip>
+            <Tooltip title={`Medium Mode: ${mediumPassCount} Passes`}>
+              <div className="flex items-center">
+                <Star 
+                  size={18} 
+                  fill={mediumPassCount > 0 ? "#eab308" : "transparent"} 
+                  color={mediumPassCount > 0 ? "#eab308" : "#cbd5e1"} 
+                  className={mediumPassCount > 0 ? "drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" : ""} 
+                />
+                {mediumPassCount > 0 && <span className="text-[10px] ml-1 font-bold text-[#eab308]">×{mediumPassCount}</span>}
+              </div>
+            </Tooltip>
+            <Tooltip title={`Hard Mode: ${hardPassCount} Passes`}>
+              <div className="flex items-center">
+                <Star 
+                  size={18} 
+                  fill={hardPassCount > 0 ? "#ef4444" : "transparent"} 
+                  color={hardPassCount > 0 ? "#ef4444" : "#cbd5e1"} 
+                  className={hardPassCount > 0 ? "drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" : ""} 
+                />
+                {hardPassCount > 0 && <span className="text-[10px] ml-1 font-bold text-[#ef4444]">×{hardPassCount}</span>}
+              </div>
+            </Tooltip>
           </div>
-          <span className="text-[11px] font-bold text-gray-900 min-w-[20px] text-right">{progress}%</span>
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right leading-tight">Mastery</span>
+            <span className="text-[11px] font-black text-indigo-600 uppercase tracking-wider">{masteryLevel}</span>
+          </div>
         </div>
       </div>
       
       {/* Footer Section */}
-      <div className="px-4 xl:px-6 pb-4 xl:pb-6 flex items-center justify-between mt-auto">
+      <div className="px-5 xl:px-6 py-4 border-t border-slate-100/80 bg-slate-50/30 flex items-center justify-between mt-auto relative z-10 group-hover:bg-slate-50/80 transition-colors">
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#24A058]"></div>
-          <span className="text-[11px] font-bold text-[#24A058]">Active</span>
+          <div className="w-2 h-2 rounded-full bg-[#10b981]"></div>
+          <span className="text-[12px] font-bold text-[#0f172a]">Active</span>
         </div>
         
-        {actualTotalQuestions < 20 ? (
-          <Tooltip title="Insufficient questions for this test. We will notify you once the admin adds more.">
+        {disableStart ? (
+          <Tooltip title="Insufficient questions for all difficulties. Admin needs to upload more questions.">
             <button 
               disabled
-              className="bg-gray-300 text-white px-5 py-1.5 rounded text-[13px] font-bold border-none cursor-not-allowed"
+              className="bg-slate-200 text-slate-400 px-4 py-2 rounded-[10px] text-[13px] font-bold border-none cursor-not-allowed flex items-center gap-1.5"
             >
-              Start
+              Start <ArrowRight size={14} />
             </button>
           </Tooltip>
         ) : (
-          <>
-            {progress < 100 && (
-              <button 
-                onClick={!loading ? onStart : undefined}
-                disabled={loading}
-                className="bg-gradient-to-br from-[#1E69DA] to-[#5694F0] hover:opacity-90 text-white px-5 py-1.5 rounded text-[13px] font-bold border-none cursor-pointer transition-opacity"
-              >
-                {loading ? "..." : (hasResumeState ? "Resume" : "Start")}
-              </button>
-            )}
-            {progress === 100 && (
-              <button 
-                onClick={!loading ? onStart : undefined}
-                disabled={loading}
-                className={totalQuestions <= 20 
-                  ? "bg-transparent text-[#1E69DA] p-0 text-[13px] font-bold border-none cursor-pointer hover:underline"
-                  : "bg-transparent text-[#24A058] p-0 text-[13px] font-bold border-none"
-                }
-                style={totalQuestions > 20 ? { cursor: 'default', textDecoration: 'none' } : {}}
-              >
-                {totalQuestions <= 20 ? (loading ? "..." : "Re-attempt") : "Completed"}
-              </button>
-            )}
-          </>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!loading) onStart();
+            }}
+            disabled={loading}
+            style={{ backgroundColor: theme.text }}
+            className="hover:brightness-110 text-white px-5 py-2.5 rounded-xl text-[13px] font-[800] border-none cursor-pointer transition-all flex items-center gap-1.5 shadow-sm shadow-black/5 hover:shadow-md hover:-translate-y-0.5 group/btn"
+          >
+            {loading ? "..." : (hasResumeState ? "Resume" : "Start")} <ArrowRight size={14} className="transition-transform group-hover/btn:translate-x-0.5" />
+          </button>
         )}
       </div>
     </div>

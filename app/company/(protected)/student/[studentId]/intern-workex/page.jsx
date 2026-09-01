@@ -181,14 +181,12 @@ const Basic = () => {
       
       return "unknown";
     } catch (error) {
-      console.error("Error detecting file type:", error);
       return "unknown";
     }
   };
 
   const showModal = (docUrl, title = "Document") => {
     if (!docUrl || typeof docUrl !== 'string') {
-      console.error("Invalid document URL:", docUrl);
       return;
     }
     
@@ -231,7 +229,6 @@ const Basic = () => {
     
     // If no valid documents, show error
     if (joiningUrls.length === 0 && relievingUrls.length === 0) {
-      console.warn("No valid document URLs found");
       return;
     }
     

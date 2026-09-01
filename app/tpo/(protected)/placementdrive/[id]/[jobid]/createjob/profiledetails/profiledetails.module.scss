@@ -66,7 +66,7 @@
       }
     }
     .textarea,
-    input {
+    input:not([type="radio"]):not([type="checkbox"]) {
       flex: 1;
       padding: 0.5rem;
       border: 0;

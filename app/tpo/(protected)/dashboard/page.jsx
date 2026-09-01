@@ -92,16 +92,14 @@ const Page = () => {
   );
 
   useEffect(() => {
+    dispatch(GetAllPlacements());
     if (studentsStatus !== "succeeded" && studentsStatus !== "loading") {
       dispatch(getAllStudents({}));
-    }
-    if (placementsStatus !== "succeeded" && placementsStatus !== "loading") {
-      dispatch(GetAllPlacements());
     }
     if (departmentStatus !== "sucess" && departmentStatus !== "loading") {
       dispatch(getAllDepartments());
     }
-  }, [dispatch, studentsStatus, placementsStatus, departmentStatus]);
+  }, [dispatch]);
 
   const studentsList = Array.isArray(StudentsLength?.data)
     ? StudentsLength.data
@@ -540,6 +538,11 @@ const Page = () => {
               )}
             </div>
           </div>
+          
+          {/* Placement Rate Widget (Tablet View) */}
+          <div className={styles.tabletPlacementRate}>
+            <PlacementRateWidget total={studentsCount} placed={placedCount} />
+          </div>
         </div>
 
         {/* Charts Section */}
@@ -548,7 +551,7 @@ const Page = () => {
             <div className={styles.mainChartCol}>
               <DepartmentPlacementChart data={departmentPlacements} />
             </div>
-            <div className={styles.widgetCol}>
+            <div className={`${styles.widgetCol} ${styles.desktopPlacementRate}`}>
               <PlacementRateWidget total={studentsCount} placed={placedCount} />
             </div>
           </div>

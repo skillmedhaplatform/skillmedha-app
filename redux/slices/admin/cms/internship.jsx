@@ -269,8 +269,14 @@ export const createCourse = createAsyncThunk(
       }
       return data;
     } catch (error) {
-      message.error("Failed to create course");
+      const errorMsg =
+        error?.response?.data?.err ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to create course";
+      message.error(errorMsg);
       console.log(error);
+      return rejectWithValue(errorMsg);
     } finally {
       hide();
     }
@@ -325,11 +331,11 @@ export const deleteInternship = createAsyncThunk(
 
 export const updateInternship = createAsyncThunk(
   "/updateInternship",
-  async (args) => {
+  async (args, { rejectWithValue }) => {
     const message = args.message;
     const hide = message.loading("Please wait while updating internship", 0);
     try {
-      const { id, dispatch } = args;
+      const { id, dispatch, type } = args;
       const { data } = await axios.post(
         internshipUrl + "/updateInternship/" + id,
         {
@@ -344,17 +350,24 @@ export const updateInternship = createAsyncThunk(
 
       if (data?.msg) {
         message.success("Updated Successfully");
-        dispatch(
-          getAllInternShips({
-            limit: 20,
-            cursor: null,
-          })
-        );
+        if (type === "course") {
+          dispatch(getAllCourses({ limit: 20, cursor: null }));
+        } else if (type === "workshops") {
+          dispatch(getAllWorkshops({ limit: 20, cursor: null }));
+        } else {
+          dispatch(getAllInternShips({ limit: 20, cursor: null }));
+        }
       }
       return data;
     } catch (error) {
-      message.error("failed to update internship");
+      const errorMsg =
+        error?.response?.data?.err ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "failed to update internship";
+      message.error(errorMsg);
       console.log(error);
+      return rejectWithValue(errorMsg);
     } finally {
       hide();
     }

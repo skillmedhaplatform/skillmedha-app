@@ -10,10 +10,9 @@ import {
   Dropdown,
   Select,
   Input,
-  Popover,
   Tooltip,
 } from "antd";
-import { PlusOutlined, DownOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, DownOutlined } from "@ant-design/icons";
 import AIQuestionModal from "./(components)/aiquestionModal";
 import SkillLibraryModal from "./(components)/skilllibraryModal";
 import {
@@ -281,7 +280,6 @@ export default function QuestionListPage() {
         `${selectedQuestions?.length || 0} questions removed successfully!`
       );
     } catch (error) {
-      console.error("Error removing questions:", error);
       message.error("Failed to remove questions from assessment");
     }
   };
@@ -314,7 +312,6 @@ export default function QuestionListPage() {
 
       message.success(`${questionIds.length} questions added successfully!`);
     } catch (error) {
-      console.error("Error updating assessment:", error);
       message.error("Failed to update assessment with selected questions");
     }
   };
@@ -404,8 +401,6 @@ export default function QuestionListPage() {
   // Edit handler
   const onEditQuestion = (question) => {
     router.push(`/company/myjobs/${params?.jobId}/AID_${aId}__${question?._id}`);
-    console.log("Edit question:", question);
-    message.info("Opening editor for this question in console."); // optional UX
   };
 
   // Calculate total questions and current page info

@@ -20,7 +20,6 @@ import {
   StepContent,
   StepLabel,
   Stepper,
-  Typography,
 } from "@mui/material";
 
 const { Search } = Input;
@@ -252,8 +251,6 @@ export default function ApplicantsTable({ filteredApplicants, setSearchText }) {
     },
     {
       title: "Skillmedha Id",
-      // dataIndex: "enrollementId",
-      // key: "enrollementId",
       dataIndex: "_id",
       key: "_id",
     },
