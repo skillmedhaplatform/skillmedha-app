@@ -80,7 +80,6 @@ export const getAllProgress = createAsyncThunk(
         total: totalRes.data?.data?.progressTotal || 0,
       };
     } catch (error) {
-      console.log(error);
       return { data: [], total: 0 };
     }
   }
@@ -94,9 +93,7 @@ export const getOneProgress = createAsyncThunk("/oneProgress", async (args) => {
     });
 
     return data?.data?.progresses || {};
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export { PAGE_SIZE };

@@ -45,9 +45,7 @@ export const fetchAllUniversities = createAsyncThunk(
       }));
 
       return transformedData;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -65,9 +63,7 @@ export const fetchAllColleges = createAsyncThunk(
       );
 
       return data?.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 export const { setEducation } = EducationSlice.actions;

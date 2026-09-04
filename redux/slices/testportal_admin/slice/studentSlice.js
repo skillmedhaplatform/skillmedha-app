@@ -95,9 +95,7 @@ export const getStudent = createAsyncThunk("/getOne", async (args) => {
     });
 
     return data.data.student;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 export const getBlockedStudents = createAsyncThunk(
   "/getBlockedStudents",
@@ -108,9 +106,7 @@ export const getBlockedStudents = createAsyncThunk(
         { studentId: args?.studentId }
       );
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -127,9 +123,7 @@ export const getPublicStudent = createAsyncThunk(
         variables: { id: args.id },
       });
       return randomStudent;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 export const getDepartments = createAsyncThunk("/GetDepartments", async () => {

@@ -52,9 +52,7 @@ export const GetNoticeByStatus = createAsyncThunk(
         }
       );
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -76,7 +74,6 @@ export const CreateNotice = createAsyncThunk("/CreateNotice", async (args) => {
     }
     return data;
   } catch (error) {
-    console.log(error);
     message.error("An error occurred while creating the notice.");
   }
 });
@@ -86,7 +83,6 @@ export const UpdateNotice = createAsyncThunk(
   async (args, thunkapi) => {
     const { updatedpayload, noticeId } = args;
     const { dispatch } = thunkapi;
-    console.log(args);
 
     try {
       const { data } = await axios.post(
@@ -108,9 +104,7 @@ export const UpdateNotice = createAsyncThunk(
         );
       }
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -135,7 +129,6 @@ export const PublishNotice = createAsyncThunk(
       }
       return data;
     } catch (error) {
-      console.log(error);
       message.error("An error occurred while publishing the notice.");
     }
   }
@@ -156,7 +149,6 @@ export const ExpireNotice = createAsyncThunk("/ExpireNotice", async (args) => {
     }
     return data;
   } catch (error) {
-    console.log(error);
     message.error("An error occurred while expiring the notice.");
   }
 });
@@ -180,7 +172,6 @@ export const DeleteNotice = createAsyncThunk("/DeleteNotice", async (args) => {
     }
     return data;
   } catch (error) {
-    console.log(error);
     message.error("An error occurred while deleting the notice.");
   }
 });

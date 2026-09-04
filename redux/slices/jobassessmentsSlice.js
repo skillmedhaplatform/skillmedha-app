@@ -17,7 +17,6 @@ export const fetchAssignedAssessments = createAsyncThunk(
       );
       return data;
     } catch (error) {
-      console.log(error);
       if (error.response) {
         return rejectWithValue(
           error.response.data.err || "Failed to fetch assigned assessments"
@@ -45,7 +44,6 @@ export const fetchOneAssessment = createAsyncThunk(
       );
       return data?.data;
     } catch (error) {
-      console.log(error);
       if (error.response) {
         return rejectWithValue(
           error.response.data.err || "Failed to fetch assessment"

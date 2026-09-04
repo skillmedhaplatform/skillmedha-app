@@ -107,9 +107,7 @@ export default function Page() {
     try {
       stream.getVideoTracks().forEach((track) => track.stop());
       videoRef.current.srcObject = null;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   // --- Image Upload ---
@@ -136,7 +134,6 @@ export default function Page() {
       message.error("Failed to upload image to S3");
       return null;
     } catch (error) {
-      console.log(error);
       hideLoading();
       message.error("An error occurred while uploading the image.");
       return null;

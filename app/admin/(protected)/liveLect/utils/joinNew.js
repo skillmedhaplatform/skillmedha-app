@@ -30,8 +30,6 @@ export function joinMeeting(ZoomMtg, {
         tk: registrantToken,
         zak: zakToken,
         success: (joinSuccess) => {
-          console.log("Zoom join success", joinSuccess);
-
           // optional: listen for in-meeting events
           ZoomMtg.inMeetingServiceListener("onMeetingStatus", (data) => {
             if (data.status === 3 && onMeetingEnd) {

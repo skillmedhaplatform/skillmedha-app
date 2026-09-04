@@ -667,7 +667,7 @@ _start:
       .then((content) => {
         setState(content);
       })
-      .catch((error) => console.log(error));
+      .catch(error => );
   };
 
   function readFileContent(file) {

@@ -201,7 +201,6 @@ export default function TestUI({
     proctoringServerUrl: awsUrl,
     companyOrg: testData?.companyOrgId,
     onViolation: (violation) => {
-      console.log("🚨 Proctoring violation:", violation);
       message.warning({
         content: `⚠️ ${violation.message || "Please maintain exam integrity"}`,
         duration: 5,
@@ -222,19 +221,7 @@ export default function TestUI({
   });
 
   // Debug logging
-  useEffect(() => {
-    console.log("DEBUG - Message state:", {
-      proctorMessagesCount: proctorMessages?.length || 0,
-      latestMessage: !!latestMessage,
-      latestMessageContent: latestMessage?.message,
-      connectionStatus,
-      functions: {
-        setProctoringMessages: typeof setProctoringMessages,
-        setLatestMessage: typeof setLatestMessage,
-        clearLatestMessage: typeof clearLatestMessage,
-      },
-    });
-  }, [proctorMessages, latestMessage, connectionStatus]);
+  useEffect(() => {}, [proctorMessages, latestMessage, connectionStatus]);
 
   // Auto-clear latest message after 10 seconds
   useEffect(() => {
@@ -255,7 +242,6 @@ export default function TestUI({
       !proctoringActive &&
       connectionStatus !== "connected"
     ) {
-      console.log("🎥 Auto-starting proctoring...");
       startProctoring();
     }
   }, [
@@ -596,7 +582,6 @@ export default function TestUI({
   useEffect(() => {
     return () => {
       if (proctoringActive || sessionData) {
-        console.log("🧹 Component unmounting, cleaning up proctoring...");
         stopProctoring();
       }
     };
@@ -718,7 +703,6 @@ export default function TestUI({
     };
 
     if (proctoringActive) {
-      console.log("🛑 Stopping proctoring before test submission");
       stopProctoring();
     }
     if (socket) {

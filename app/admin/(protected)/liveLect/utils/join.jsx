@@ -33,9 +33,7 @@ function ZoomClient({ meetingNumber, userName, passWord }) {
       const signature = res.signature;
       const sdkKey = res.sdkKey;
       startMeeting(signature, sdkKey);
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
 
   function startMeeting(signature, sdkKey) {
@@ -46,7 +44,6 @@ function ZoomClient({ meetingNumber, userName, passWord }) {
       patchJsMedia: true,
       leaveOnPageUnload: true,
       success: (success) => {
-        console.log(success);
         // can this be async?
         ZoomMtg.join({
           signature: signature,
@@ -61,19 +58,14 @@ function ZoomClient({ meetingNumber, userName, passWord }) {
           success: (success) => {
             ZoomMtg.focusMode({
               enable: true,
-              success: () => console.log("Focus mode on"),
+              success: () => ,
               error: (e) => console.error("focusMode error", e),
             });
-            console.log(success);
           },
-          error: (error) => {
-            console.log(error);
-          },
+          error: (error) => {},
         });
       },
-      error: (error) => {
-        console.log(error);
-      },
+      error: (error) => {},
     });
   }
 

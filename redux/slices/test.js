@@ -19,27 +19,15 @@ const TestsSlice = createSlice({
 });
 
 export const createTests = createAsyncThunk("/createTests", async (data) => {
-  try {
-    console.log(data);
-  } catch (error) {
-    console.log(error);
-  }
+  try {} catch (error) {}
 });
 
 export const getOneTests = createAsyncThunk("/getOneTests", async (data) => {
-  try {
-    console.log(data);
-  } catch (error) {
-    console.log(error);
-  }
+  try {} catch (error) {}
 });
 
 export const updateTest = createAsyncThunk("/updateTest", async (data) => {
-  try {
-    console.log(data);
-  } catch (error) {
-    console.log(error);
-  }
+  try {} catch (error) {}
 });
 
 export const { updateTestValues } = TestsSlice.actions;

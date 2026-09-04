@@ -27,7 +27,6 @@ export default function SocketComp() {
   useEffect(() => {
     if (socket) {
       socket.on("userId", (data) => {
-        console.log(data);
         setStudentId(data);
       });
     }

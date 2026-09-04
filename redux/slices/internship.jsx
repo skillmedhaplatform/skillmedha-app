@@ -101,9 +101,7 @@ export const getAllInternships = createAsyncThunk(
       );
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -124,9 +122,7 @@ export const getAllInternShipsDashBoard = createAsyncThunk(
       );
 
       return data?.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -147,9 +143,7 @@ export const getAllCoursesDashBoard = createAsyncThunk(
       );
 
       return data?.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -226,9 +220,7 @@ export const currentMeeting = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 export const updateVideoProgress = createAsyncThunk(
@@ -253,9 +245,7 @@ export const updateVideoProgress = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -281,9 +271,7 @@ export const updateLastAccessed = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -308,9 +296,7 @@ export const updateTotalProgress = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 export const getAllCoursesOnly = createAsyncThunk(
@@ -323,9 +309,7 @@ export const getAllCoursesOnly = createAsyncThunk(
         { headers: { Authorization: `Bearer ${getLstorage("token")}` } }
       );
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 export const getAllInternshipsOnly = createAsyncThunk(
@@ -338,9 +322,7 @@ export const getAllInternshipsOnly = createAsyncThunk(
         { headers: { Authorization: `Bearer ${getLstorage("token")}` } }
       );
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 export const { } = InternshipSlice.actions;
