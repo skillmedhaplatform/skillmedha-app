@@ -13,7 +13,6 @@ export const updateObject = (keyNames, newVal, object) => {
         ...object[currentKey]
     };
   }
-  console.log(remainingKeys,newVal,object[currentKey]);
-  
+
   return updateObject(remainingKeys, newVal, object[currentKey]);
 };

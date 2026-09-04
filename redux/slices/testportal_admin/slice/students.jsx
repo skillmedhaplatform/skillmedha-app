@@ -101,9 +101,7 @@ export const getAllStudents = createAsyncThunk("/allStudents", async (args) => {
     });
 
     return data?.data?.students || [];
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export const getStudent = createAsyncThunk("/getStudent", async (args) => {
@@ -116,9 +114,7 @@ export const getStudent = createAsyncThunk("/getStudent", async (args) => {
     });
 
     return data?.data?.student || {};
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export const createStudent = createAsyncThunk(
@@ -139,9 +135,7 @@ export const createStudent = createAsyncThunk(
       } else {
         message.error("Failed to create student account");
       }
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   },
 );
 
@@ -161,9 +155,7 @@ export const BlockStudent = createAsyncThunk("/BlockStudent", async (args) => {
       });
     }
     return data;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 export const UnBlockStudent = createAsyncThunk(
   "/unblockedStudents",
@@ -182,9 +174,7 @@ export const UnBlockStudent = createAsyncThunk(
         });
       }
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   },
 );
 
@@ -200,9 +190,7 @@ export const searchStudent = createAsyncThunk(
       }
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   },
 );
 

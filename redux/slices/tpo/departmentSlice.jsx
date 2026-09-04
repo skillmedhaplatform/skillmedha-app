@@ -190,9 +190,7 @@ export const getAllBatches = createAsyncThunk(
       );
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 

@@ -111,9 +111,7 @@ export const getAllInternShips = createAsyncThunk(
       );
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -126,9 +124,7 @@ export const getAllCourses = createAsyncThunk(
       });
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -141,9 +137,7 @@ export const getAllWorkshops = createAsyncThunk(
       });
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -236,7 +230,6 @@ export const createInternship = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to create internship");
-      console.log(error);
     } finally {
       hide();
     }
@@ -275,7 +268,6 @@ export const createCourse = createAsyncThunk(
         error?.message ||
         "Failed to create course";
       message.error(errorMsg);
-      console.log(error);
       return rejectWithValue(errorMsg);
     } finally {
       hide();
@@ -298,9 +290,7 @@ export const getOneInternship = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -323,9 +313,7 @@ export const deleteInternship = createAsyncThunk(
         dispatch(getAllInternShips({ limit: 50, cursor: null }));
       else dispatch(getAllCourses({ limit: 50, cursor: null }));
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -366,7 +354,6 @@ export const updateInternship = createAsyncThunk(
         error?.message ||
         "failed to update internship";
       message.error(errorMsg);
-      console.log(error);
       return rejectWithValue(errorMsg);
     } finally {
       hide();
@@ -388,9 +375,7 @@ export const getInternshipSections = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -418,7 +403,6 @@ export const createSection = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to create section");
-      console.log(error);
     } finally {
       hide();
     }
@@ -449,7 +433,6 @@ export const updateSection = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to create section");
-      console.log(error);
     } finally {
       hide();
     }
@@ -470,9 +453,7 @@ export const getOneSection = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -502,7 +483,6 @@ export const createTopic = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to create topic");
-      console.log(error);
     } finally {
       hide();
     }
@@ -521,9 +501,7 @@ export const getOneTopic = createAsyncThunk("/getOneTopic", async (args) => {
     );
 
     return data.data;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export const getTopicsFromSection = createAsyncThunk(
@@ -541,9 +519,7 @@ export const getTopicsFromSection = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -564,9 +540,7 @@ export const uploadToS3 = createAsyncThunk("/uploadToS3", async (args) => {
     );
 
     return data;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export const updateTopic = createAsyncThunk(
@@ -589,8 +563,6 @@ export const updateTopic = createAsyncThunk(
       );
 
       if (data?.msg) {
-        console.log(123);
-
         dispatch(getOneTopic({ id: tid }));
         message.success("Topic updated successfully");
       }
@@ -598,7 +570,6 @@ export const updateTopic = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to update topic");
-      console.log(error);
     } finally {
       hide();
     }

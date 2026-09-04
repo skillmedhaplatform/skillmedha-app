@@ -50,9 +50,7 @@ export const loginStudent = createAsyncThunk("/loginStudent", async (args) => {
       setLstorage("token", data?.token);
     }
     return data;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export const { saveTestResults, updateTestStatus } = studentSlice.actions;

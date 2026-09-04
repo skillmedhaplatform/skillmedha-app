@@ -289,7 +289,6 @@ export const GetOneUser = createAsyncThunk("/getOneUser", async (args) => {
     const { data } = await axios.get(`${restUrl}/getTpo`);
     return data;
   } catch (error) {
-    console.log("Failed to fetch TPO profile, using token fallback:", error);
     const token = getLstorage("token");
     if (token) {
       try {
@@ -376,7 +375,6 @@ export const createTests = createAsyncThunk(
       return data;
     } catch (error) {
       message.error(error.message);
-      console.log(error);
     }
   }
 );

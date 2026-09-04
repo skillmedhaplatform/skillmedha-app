@@ -228,9 +228,7 @@ export const saveProgress = createAsyncThunk("saveTest", async (args) => {
       deleteLstorageVal("isStarted");
       deleteSstorageVal("userIdInProgress");
     }
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export const fetchAllTestsByCategory = createAsyncThunk(

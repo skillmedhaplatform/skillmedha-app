@@ -84,7 +84,6 @@ export default function AddQuestions({
   };
   const [value, setValue] = useState(1);
   const onChange = (e) => {
-    console.log("radio checked", e.target.value);
     setValue(e.target.value);
   };
 
@@ -847,8 +846,6 @@ export default function AddQuestions({
                     min={0}
                     value={values?.scoreSettings?.PointsForEachCorrectAnswer}
                     onChange={(val) => {
-                      console.log(val);
-
                       const newvals = JSON.parse(JSON.stringify(values));
 
                       delete newvals?.scoreSettings?.pointsForCorrectAns;

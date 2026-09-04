@@ -1956,11 +1956,7 @@ function DashboardPage() {
             <CompanyDetails organization={stats?.organization} />
             <FeatureManagement
               features={stats?.organization?.features}
-              onFeatureToggle={(feature, enabled) => {
-                console.log(
-                  `${feature} is now ${enabled ? "enabled" : "disabled"}`
-                );
-              }}
+              onFeatureToggle={(feature, enabled) => {}}
               orgId={orgId}
               dispatch={dispatch}
               message={message}
@@ -1988,11 +1984,7 @@ function DashboardPage() {
             />
             <FeatureManagement
               features={stats?.organization?.features} // Pass the features object
-              onFeatureToggle={(feature, enabled) => {
-                console.log(
-                  `${feature} is now ${enabled ? "enabled" : "disabled"}`
-                );
-              }}
+              onFeatureToggle={(feature, enabled) => {}}
               orgId={orgId}
               dispatch={dispatch}
               message={message}

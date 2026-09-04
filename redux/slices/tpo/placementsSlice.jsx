@@ -101,9 +101,7 @@ export const GetAllPlacements = createAsyncThunk(
         },
       });
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -129,9 +127,7 @@ export const CreateOnePlacement = createAsyncThunk(
         dispatch(GetAllPlacements());
       }
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -159,7 +155,6 @@ export const UpdateJobProfile = createAsyncThunk(
     } catch (error) {
       hideloading();
       message.error("Failed to Update Placement Drive");
-      console.log(error);
     }
   }
 );
@@ -188,7 +183,6 @@ export const deleteJobProfile = createAsyncThunk(
     } catch (error) {
       hideloading();
       message.error("Failed to delete Placement Drive");
-      console.log(error);
       return rejectWithValue(
         error.response ? error.response.data : { message: "Unknown error" }
       );
@@ -207,9 +201,7 @@ export const GetOnePlacement = createAsyncThunk(
         },
       });
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -227,9 +219,7 @@ export const GetAllJobs = createAsyncThunk(
         }
       );
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 export const GetOneJob = createAsyncThunk("/getOneJob", async (args) => {
@@ -245,9 +235,7 @@ export const GetOneJob = createAsyncThunk("/getOneJob", async (args) => {
       }
     );
     return data;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export const CreateJob = createAsyncThunk("/createAJob", async (args) => {
@@ -274,7 +262,6 @@ export const CreateJob = createAsyncThunk("/createAJob", async (args) => {
   } catch (error) {
     hideLoading();
     message.error("Error Creating Job ");
-    console.log(error);
   }
 });
 export const UpdateJob = createAsyncThunk("/updateAJob", async (args) => {
@@ -301,7 +288,6 @@ export const UpdateJob = createAsyncThunk("/updateAJob", async (args) => {
   } catch (error) {
     hideLoading();
     message.error("Error Updating Job ");
-    console.log(error);
   }
 });
 

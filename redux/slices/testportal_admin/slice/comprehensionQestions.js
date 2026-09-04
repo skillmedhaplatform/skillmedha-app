@@ -62,9 +62,7 @@ export const saveComprehensionQuestion = createAsyncThunk(
       );
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -82,9 +80,7 @@ export const getOneComprehensionQuestion = createAsyncThunk(
       });
 
       return data.data.ComprehensionQuestion;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -104,9 +100,7 @@ export const addQuestionComprehension = createAsyncThunk(
       else message.error("Failed to Add Question");
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -128,9 +122,7 @@ export const deleteQuestionComprehension = createAsyncThunk(
       } else message.error("Failed to Delete Question");
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -149,9 +141,7 @@ export const updateComprehensionQues = createAsyncThunk(
       else message.error("Failed to update comprehension");
       load();
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -172,9 +162,7 @@ export const deleteComprehensionQues = createAsyncThunk(
       } else message.error("Failed to delete comprehension");
       load();
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 

@@ -206,7 +206,6 @@ export default function Page() {
       };
       dispatch(createZoomMeeting({ data: createMeetingPayload, dispatch }));
     } catch (error) {
-      console.log(error);
       message.error(
         error?.response?.data?.msg || error?.msg || "Failed to recreate meeting"
       );
