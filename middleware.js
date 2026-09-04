@@ -74,7 +74,7 @@ export async function middleware(request) {
 
   // ── 1. Retrieve Session Permissions ──────────────────────────────────────
   const permissionsCookie = request.cookies.get("permissions")?.value;
-  const session = token ? await decryptSession(permissionsCookie) || {} : null;
+  const session = token ? (await decryptSession(permissionsCookie)) || {} : null;
 
   // ── 2a. Permissions cookie missing / corrupt ──────────────────────────────
   if (token && !permissionsCookie && !pathname.startsWith("/api/auth/refresh")) {

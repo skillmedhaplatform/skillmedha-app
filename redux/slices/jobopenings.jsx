@@ -125,7 +125,6 @@ export const ApplyJob = createAsyncThunk("/applyJob", async (args) => {
   } catch (error) {
     hide();
     message.error("Failed to apply for the job.");
-    console.log(error);
   }
 });
 
@@ -139,10 +138,7 @@ export const GetAllNotifiocations = createAsyncThunk(
         },
       });
       return data?.data;
-    } catch (error) {
-      // message.error("Failed to apply for the job.");
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 

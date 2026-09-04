@@ -305,7 +305,6 @@ export const getAllOrgs = createAsyncThunk(
 
       return data.data?.filter((e) => e.active);
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -370,8 +369,6 @@ export const updateOrganization = createAsyncThunk(
   "auth/updateOrganization",
   async ({ orgId, updateData, type }, { rejectWithValue, dispatch }) => {
     try {
-      console.log(orgId);
-
       const { data } = await axios.post(
         `${restUrl}/updateOrganization/${orgId}`,
         updateData,
@@ -561,8 +558,6 @@ export const DeleteTPO = createAsyncThunk(
   "organisation/DeleteTPO",
   async (args, { rejectWithValue, dispatch }) => {
     try {
-      console.log(args);
-
       const { data } = await axios.delete(
         `${restUrl}/deleteTpo/${args?.tpoId}?orgId=${args?.orgId}`,
         {
@@ -575,8 +570,6 @@ export const DeleteTPO = createAsyncThunk(
       dispatch(getAllTposInOrg({ orgId: args?.orgId }));
       return data.data;
     } catch (error) {
-      console.log(error);
-
       const errorMessage =
         error.response?.data?.err || error.message || "Error creating user";
       return rejectWithValue(errorMessage);
@@ -606,7 +599,6 @@ export const DeleteHR = createAsyncThunk(
       );
       return data.data;
     } catch (error) {
-      console.log(error);
       const errorMessage =
         error.response?.data?.err || error.message || "Error deleting HR user";
       return rejectWithValue(errorMessage);

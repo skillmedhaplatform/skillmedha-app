@@ -41,7 +41,6 @@ export const fetchSkills = createAsyncThunk(
       });
       return response.data.skills;
     } catch (error) {
-      console.log(error);
       if (error.response) {
         return rejectWithValue(
           error.response.data.err || "Failed to fetch skills"

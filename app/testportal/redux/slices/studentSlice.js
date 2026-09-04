@@ -73,9 +73,7 @@ export const getStudent = createAsyncThunk("/getStudentCredss", async () => {
     // setSstorage("studentId", data?.data?._id);
 
     return data;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 export const getBlockedStudents = createAsyncThunk(
   "/getBlockedStudents",
@@ -91,9 +89,7 @@ export const getBlockedStudents = createAsyncThunk(
         },
       );
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   },
 );
 
@@ -110,9 +106,7 @@ export const getPublicStudent = createAsyncThunk(
         variables: { id: args.id },
       });
       return randomStudent;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   },
 );
 

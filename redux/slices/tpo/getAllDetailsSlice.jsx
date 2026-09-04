@@ -82,7 +82,6 @@ export const CreateStudentAccount = createAsyncThunk(
         "Failed to create account";
 
       message.error(error?.response?.data?.err);
-      console.log(error);
     } finally {
       hide();
     }

@@ -38,9 +38,7 @@ export const uploadResume = createAsyncThunk("/uploadResume", async (args) => {
     );
 
     return data;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 // export const {changeCollapse} = ResumeUploadSlice.actions;

@@ -6,9 +6,7 @@ export const encryptObject = ({ object, key }) => {
     const encryptedObject = CryptoJS.AES.encrypt(converted, key).toString();
 
     return encryptedObject;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 };
 
 export const decryptObject = (encryptedObject, key) => {
@@ -22,7 +20,5 @@ export const decryptObject = (encryptedObject, key) => {
 
       return decryptedObject;
     }
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 };

@@ -50,8 +50,71 @@ export default function NontechnicalPage() {
     }
   }, [dispatch, studentCreds?._id]);
 
+  const topicModalJSX = isTopicModalOpen && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/40 animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl w-full max-w-4xl p-8 lg:p-12 relative shadow-2xl animate-in zoom-in-95 duration-300">
+        {/* Back Button */}
+        <button 
+          onClick={() => router.push("/student/practice-new")}
+          className="absolute top-6 left-6 text-slate-400 hover:text-slate-800 hover:bg-slate-100 p-3 rounded-full transition-colors flex items-center gap-2 font-semibold"
+        >
+          <FiArrowLeft className="text-2xl" />
+          <span className="hidden sm:inline">Back</span>
+        </button>
+
+        <div className="text-center mb-12 mt-6">
+          <div className="text-3xl lg:text-4xl font-bold text-slate-800 tracking-tight mb-3">
+            Select Topic Category
+          </div>
+          <p className="text-slate-500 text-lg">
+            Choose the type of topics you'd like to practice
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <button 
+            onClick={() => {
+              setTopicModalOpen(false);
+              router.replace("/student/practice-new/nontechnical");
+            }}
+            className="group bg-[#EFF5FB] hover:bg-[#E5F0FF] p-8 rounded-2xl flex flex-col items-center text-center transition-all duration-300 border border-transparent hover:border-[#1E69DA]/30 hover:-translate-y-1 hover:shadow-lg"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-blue-500 text-white flex items-center justify-center shadow-[0_4px_14px_rgba(59,130,246,0.4)] mb-6 group-hover:scale-110 transition-transform">
+              <FiTarget className="text-3xl" />
+            </div>
+            <div className="text-xl font-bold text-slate-800 mb-2">Non-Technical</div>
+            <p className="text-sm text-slate-500">Aptitude, Reasoning & English</p>
+          </button>
+
+          <button 
+            onClick={() => router.push("/student/practice-new/technical")}
+            className="group bg-[#EFF5FB] hover:bg-indigo-50 p-8 rounded-2xl flex flex-col items-center text-center transition-all duration-300 border border-transparent hover:border-indigo-500/30 hover:-translate-y-1 hover:shadow-lg"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-[0_4px_14px_rgba(99,102,241,0.4)] mb-6 group-hover:scale-110 transition-transform">
+              <FiLayers className="text-3xl" />
+            </div>
+            <div className="text-xl font-bold text-slate-800 mb-2">Technical</div>
+            <p className="text-sm text-slate-500">Core CS subjects & theory</p>
+          </button>
+
+          <button 
+            onClick={() => router.push("/student/practice-new/coding")}
+            className="group bg-[#EFF5FB] hover:bg-emerald-50 p-8 rounded-2xl flex flex-col items-center text-center transition-all duration-300 border border-transparent hover:border-emerald-500/30 hover:-translate-y-1 hover:shadow-lg"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-[0_4px_14px_rgba(16,185,129,0.4)] mb-6 group-hover:scale-110 transition-transform">
+              <FiCode className="text-3xl" />
+            </div>
+            <div className="text-xl font-bold text-slate-800 mb-2">Coding</div>
+            <p className="text-sm text-slate-500">Programming challenges</p>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
+      <>
       <div className="flex flex-col h-full overflow-hidden bg-[#EFF5FB]">
         <div className="flex-shrink-0 bg-[#EFF5FB] shadow-sm">
           {/* Skeleton Header */}
@@ -109,6 +172,8 @@ export default function NontechnicalPage() {
           </div>
         </div>
       </div>
+      {topicModalJSX}
+      </>
     );
   }
 
@@ -212,68 +277,7 @@ export default function NontechnicalPage() {
           />
         )}
 
-      {/* Blur Overlay Modal */}
-      {isTopicModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/40 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-4xl p-8 lg:p-12 relative shadow-2xl animate-in zoom-in-95 duration-300">
-            {/* Back Button */}
-            <button 
-              onClick={() => router.push("/student/practice-new")}
-              className="absolute top-6 left-6 text-slate-400 hover:text-slate-800 hover:bg-slate-100 p-3 rounded-full transition-colors flex items-center gap-2 font-semibold"
-            >
-              <FiArrowLeft className="text-2xl" />
-              <span className="hidden sm:inline">Back</span>
-            </button>
-
-            <div className="text-center mb-12 mt-6">
-              <div className="text-3xl lg:text-4xl font-bold text-slate-800 tracking-tight mb-3">
-                Select Topic Category
-              </div>
-              <p className="text-slate-500 text-lg">
-                Choose the type of topics you'd like to practice
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <button 
-                onClick={() => {
-                  setTopicModalOpen(false);
-                  router.replace("/student/practice-new/nontechnical");
-                }}
-                className="group bg-[#EFF5FB] hover:bg-[#E5F0FF] p-8 rounded-2xl flex flex-col items-center text-center transition-all duration-300 border border-transparent hover:border-[#1E69DA]/30 hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-blue-500 text-white flex items-center justify-center shadow-[0_4px_14px_rgba(59,130,246,0.4)] mb-6 group-hover:scale-110 transition-transform">
-                  <FiTarget className="text-3xl" />
-                </div>
-                <div className="text-xl font-bold text-slate-800 mb-2">Non-Technical</div>
-                <p className="text-sm text-slate-500">Aptitude, Reasoning & English</p>
-              </button>
-
-              <button 
-                onClick={() => router.push("/student/practice-new/technical")}
-                className="group bg-[#EFF5FB] hover:bg-indigo-50 p-8 rounded-2xl flex flex-col items-center text-center transition-all duration-300 border border-transparent hover:border-indigo-500/30 hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-[0_4px_14px_rgba(99,102,241,0.4)] mb-6 group-hover:scale-110 transition-transform">
-                  <FiLayers className="text-3xl" />
-                </div>
-                <div className="text-xl font-bold text-slate-800 mb-2">Technical</div>
-                <p className="text-sm text-slate-500">Core CS subjects & theory</p>
-              </button>
-
-              <button 
-                onClick={() => router.push("/student/practice-new/coding")}
-                className="group bg-[#EFF5FB] hover:bg-emerald-50 p-8 rounded-2xl flex flex-col items-center text-center transition-all duration-300 border border-transparent hover:border-emerald-500/30 hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-[0_4px_14px_rgba(16,185,129,0.4)] mb-6 group-hover:scale-110 transition-transform">
-                  <FiCode className="text-3xl" />
-                </div>
-                <div className="text-xl font-bold text-slate-800 mb-2">Coding</div>
-                <p className="text-sm text-slate-500">Programming challenges</p>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {topicModalJSX}
       </div>
   );
 }

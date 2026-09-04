@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchCompanyTests } from "@/redux/slices/admin/cms/practiceSlice";
+import { restUrl } from "@/config/urls";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import PracticeFilters from "@/modules/student/components/PracticeFilters";
 import CompanyTestCard from "@/modules/student/components/CompanyTestCard";
@@ -17,14 +18,11 @@ export default function CompanyWisePage() {
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const { companyTests = [], status } = useSelector((state) => state.adminPractice);
+  const studentCreds = useSelector((state) => state.student.student?.data);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTest, setSelectedTest] = useState(null);
-  const [modalState, setModalState] = useState("INITIAL"); // INITIAL, FORM, RESULTS
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [nameError, setNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [modalState, setModalState] = useState("INITIAL"); // INITIAL, RESULTS
   const [pastAttempts, setPastAttempts] = useState([]);
   const [fullScreenResultIdx, setFullScreenResultIdx] = useState(null);
   const [selectedSectionFilter, setSelectedSectionFilter] = useState("All");
@@ -36,8 +34,7 @@ export default function CompanyWisePage() {
 
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token") || "";
-      const restUrl = process.env.NEXT_PUBLIC_REST_API_URL;
-      const res = await fetch(`${restUrl}/student/practice/top-scores/${test.id}`, {
+      const res = await fetch(`${restUrl}/practice/top-scores/${test.id}`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -51,34 +48,15 @@ export default function CompanyWisePage() {
   };
 
   const handleStartTestClick = () => {
-    setModalState("FORM");
+    const studentName = studentCreds?.userName || studentCreds?.fullName || "Student";
+    const studentEmail = studentCreds?.email || "student@example.com";
+    sessionStorage.setItem('current_mock_user', JSON.stringify({ name: studentName, email: studentEmail }));
+    sessionStorage.removeItem(`active_test_${selectedTest.id}`);
+    router.push(`/student/practice-new/company-wise/${selectedTest.id}`);
   };
 
   const handleViewResultClick = () => {
     setModalState("RESULTS");
-  };
-
-  const handleFormSubmit = () => {
-    setNameError("");
-    setEmailError("");
-    let isValid = true;
-    
-    if (!name || name.trim().length <= 3) {
-      setNameError("Name must be more than 3 characters long.");
-      isValid = false;
-    }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
-      setEmailError("Please enter a valid email address.");
-      isValid = false;
-    }
-
-    if (isValid) {
-      sessionStorage.setItem('current_mock_user', JSON.stringify({ name, email }));
-      sessionStorage.removeItem(`active_test_${selectedTest.id}`);
-      router.push(`/student/practice-new/company-wise/${selectedTest.id}`);
-    }
   };
 
   useEffect(() => {
@@ -173,7 +151,7 @@ export default function CompanyWisePage() {
         onCancel={() => { setIsModalOpen(false); setModalState("INITIAL"); }}
         footer={null}
         closable={modalState === "INITIAL"}
-        width={modalState === "RESULTS" ? 800 : (modalState === "FORM" ? 850 : 650)}
+        width={modalState === "RESULTS" ? 800 : 650}
         wrapClassName="backdrop-blur-sm"
         centered
         destroyOnClose
@@ -246,115 +224,7 @@ export default function CompanyWisePage() {
           </div>
         )}
 
-        {modalState === "FORM" && (
-          <div className="flex flex-col md:flex-row min-h-[480px] -mx-6 -my-6 bg-white">
-            
-            {/* Left Sidebar - Visual/Branding */}
-            <div className="hidden md:flex md:w-[320px] bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 p-8 flex-col justify-between relative overflow-hidden text-white shrink-0">
-              {/* Decorative Background Elements */}
-              <div className="absolute -top-16 -left-16 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
-              <div className="absolute bottom-10 -right-10 w-40 h-40 bg-pink-500/20 rounded-full blur-2xl"></div>
-              <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-blue-400/20 rounded-full blur-xl"></div>
-              
-              <div className="relative z-10 flex flex-col items-start">
-                <button 
-                  onClick={() => setModalState("INITIAL")}
-                  className="mb-8 w-10 h-10 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/20 text-white cursor-pointer transition-colors backdrop-blur-sm"
-                >
-                  <ArrowLeftOutlined />
-                </button>
-                <div className="bg-white/20 px-3 py-1 rounded-full text-[11px] font-bold tracking-widest uppercase mb-4 backdrop-blur-md border border-white/10">
-                  Ready to start
-                </div>
-                <h2 className="text-3xl font-bold m-0 leading-tight !border-none !pb-0 no-underline decoration-transparent">Prepare for Success.</h2>
-                <p className="text-white/80 text-sm mt-4 leading-relaxed">
-                  Enter your details to generate your personalized test session. Your progress will be saved automatically.
-                </p>
-              </div>
 
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 text-white/60 text-xs font-semibold uppercase tracking-wider">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
-                  System Ready
-                </div>
-              </div>
-            </div>
-
-            {/* Right Side - Form Container */}
-            <div className="flex-1 p-8 sm:p-10 flex flex-col justify-center relative">
-              <div className="md:hidden mb-6 flex items-center gap-3 border-b border-gray-100 pb-4">
-                <button 
-                  onClick={() => setModalState("INITIAL")}
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 cursor-pointer transition-colors"
-                >
-                  <ArrowLeftOutlined />
-                </button>
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800 m-0">Student Details</h2>
-                  <p className="text-sm text-slate-500 m-0">Enter details to begin</p>
-                </div>
-              </div>
-
-              <div className="hidden md:block mb-8">
-                <h2 className="text-2xl font-bold text-slate-800 m-0 mb-1">Student Details</h2>
-                <p className="text-slate-500 text-sm m-0">We just need a couple details to configure your exam.</p>
-              </div>
-              
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-2">
-                  <label className="font-bold text-[12px] text-slate-500 uppercase tracking-widest">
-                    Full Name
-                  </label>
-                  <Input 
-                    size="large" 
-                    placeholder="e.g. John Doe" 
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)} 
-                    status={nameError ? "error" : ""}
-                    className="rounded-xl px-4 py-3.5 bg-slate-50 border-slate-200 hover:border-indigo-400 focus:border-indigo-500 focus:bg-white transition-all text-[15px] font-medium shadow-sm"
-                    suffix={
-                      name.length > 0 ? (
-                        name.trim().length > 3 
-                          ? <CheckCircleOutlined style={{ color: '#22c55e', fontSize: '18px' }} /> 
-                          : <CloseCircleOutlined style={{ color: '#ef4444', fontSize: '18px' }} />
-                      ) : <span style={{ display: 'inline-block', width: '18px' }} />
-                    }
-                  />
-                  {nameError && <span className="text-red-500 text-xs font-medium">{nameError}</span>}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="font-bold text-[12px] text-slate-500 uppercase tracking-widest">
-                    Email Address
-                  </label>
-                  <Input 
-                    size="large" 
-                    placeholder="e.g. john@example.com" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    status={emailError ? "error" : ""}
-                    className="rounded-xl px-4 py-3.5 bg-slate-50 border-slate-200 hover:border-indigo-400 focus:border-indigo-500 focus:bg-white transition-all text-[15px] font-medium shadow-sm"
-                    suffix={
-                      email.length > 0 ? (
-                        /^\S+@\S+\.\S+$/.test(email)
-                          ? <CheckCircleOutlined style={{ color: '#22c55e', fontSize: '18px' }} /> 
-                          : <CloseCircleOutlined style={{ color: '#ef4444', fontSize: '18px' }} />
-                      ) : <span style={{ display: 'inline-block', width: '18px' }} />
-                    }
-                  />
-                  {emailError && <span className="text-red-500 text-xs font-medium">{emailError}</span>}
-                </div>
-
-                <button 
-                  onClick={handleFormSubmit}
-                  className="mt-6 w-full py-4 bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold rounded-xl transition-all shadow-[0_4px_14px_rgba(15,23,42,0.25)] hover:shadow-[0_6px_20px_rgba(15,23,42,0.4)] hover:-translate-y-0.5 border-none cursor-pointer text-[15px]"
-                >
-                  Begin Assessment
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {modalState === "RESULTS" && (
           <div className="flex flex-col py-4 h-[600px] overflow-hidden">

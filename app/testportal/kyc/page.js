@@ -50,9 +50,7 @@ export default function KYC() {
 
         tracks.forEach((track) => track.stop());
         videoRef.current.srcObject = null;
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     }
   };
 
@@ -169,7 +167,6 @@ export default function KYC() {
         message.error("Could not save your photo. Please try again.");
       }
     } catch (error) {
-      console.log(error);
       message.error("Something went wrong while saving your photo. Please try again.");
     } finally {
       setSaving(false);

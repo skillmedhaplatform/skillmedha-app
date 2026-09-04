@@ -36,9 +36,7 @@ export const getOneUser = createAsyncThunk("/getOneUser", async (args) => {
     });
 
     return data.data;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export const getAllOrgs = createAsyncThunk(
@@ -52,9 +50,7 @@ export const getAllOrgs = createAsyncThunk(
       });
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -81,7 +77,6 @@ export const assignCourseToOrgs = createAsyncThunk(
       return data;
     } catch (error) {
       hide();
-      console.log(error);
     } finally {
       hide();
     }
@@ -113,7 +108,6 @@ export const assignInternshipToOrgs = createAsyncThunk(
       return data;
     } catch (error) {
       hide();
-      console.log(error);
     } finally {
       hide();
     }

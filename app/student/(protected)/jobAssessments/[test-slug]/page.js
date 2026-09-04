@@ -319,9 +319,7 @@ export default function Page() {
     if (stream) {
       try {
         stream.getTracks().forEach((t) => t.stop());
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;

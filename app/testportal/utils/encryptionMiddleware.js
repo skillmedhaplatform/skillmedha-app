@@ -6,9 +6,7 @@ export const encryptObject = ({ object, key, name }) => {
     const encryptedObject = CryptoJS.AES.encrypt(converted, key).toString();
     sessionStorage.setItem(name, encryptedObject);
     return encryptedObject;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 };
 
 export const decryptObject = (encryptedObject, key) => {

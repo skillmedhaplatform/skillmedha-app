@@ -51,9 +51,7 @@ export const searchMeetingByTopic = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -102,9 +100,7 @@ export const getAllMeetings = createAsyncThunk(
         }
       );
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -129,7 +125,6 @@ export const getOneMeeting = createAsyncThunk(
       return data.data;
     } catch (error) {
       message.error("Class Ended");
-      console.log(error);
     }
   }
 );
@@ -157,7 +152,6 @@ export const updateMeeting = createAsyncThunk(
       return data.data;
     } catch (error) {
       message.error("Failed to update meeting");
-      console.log(error);
     } finally {
       hide();
     }

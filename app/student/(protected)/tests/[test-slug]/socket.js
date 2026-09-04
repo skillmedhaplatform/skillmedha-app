@@ -68,8 +68,6 @@ export default function SocketComp() {
       };
 
       const onTestEndedTestPortal = (data) => {
-        console.log(data);
-
         deleteSstorageVal("userIdInProgress");
         dispatch(updateTestStatus(""));
 

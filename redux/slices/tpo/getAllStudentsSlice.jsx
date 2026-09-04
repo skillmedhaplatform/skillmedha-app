@@ -88,9 +88,7 @@ export const getStudentsInDepartments = createAsyncThunk(
       );
 
       return data?.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -108,9 +106,7 @@ export const getStudentsWithoutValidDepartment = createAsyncThunk(
       );
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 export const updateStudent = createAsyncThunk(
@@ -142,7 +138,6 @@ export const updateStudent = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed update details");
-      console.log(error);
     } finally {
       hide();
     }

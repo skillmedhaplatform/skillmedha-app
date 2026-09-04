@@ -46,9 +46,7 @@ const Page = () => {
     nav.push("/admin/questionManager/newSkill");
   }, [nav, canAccess, getPermissionMessage]);
 
-  const handleLoadMore = useCallback(() => {
-    console.log("Load more skills");
-  }, []);
+  const handleLoadMore = useCallback(() => {}, []);
 
   const handleCardClick = useCallback(
     (skillId) => {

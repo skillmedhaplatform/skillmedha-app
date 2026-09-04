@@ -120,7 +120,6 @@ export default function JobDetailsDisplay() {
                 const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
                 nameMap[user._id] = fullName || user.userName || user.name || user.email || user._id;
               });
-              console.log("Fetched applicant names mapping:", nameMap);
               setApplicantNames(nameMap);
             }
           } catch (err) {

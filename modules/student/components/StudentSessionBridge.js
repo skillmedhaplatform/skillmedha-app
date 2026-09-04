@@ -18,7 +18,7 @@ export default function StudentSessionBridge({ children }) {
             // 1. Save to localStorage (Student portal uses 'token' and 'sId')
             localStorage.setItem("token", token);
             if (sId) localStorage.setItem("sId", sId);
-            
+
             // 2. Save to Cookie for server-side / middleware access
             Cookies.set("token", token, { expires: 7, path: "/" });
 
@@ -28,10 +28,8 @@ export default function StudentSessionBridge({ children }) {
             newParams.delete("sId");
             const newQuery = newParams.toString();
             const newUrl = pathname + (newQuery ? `?${newQuery}` : "");
-            
+
             window.history.replaceState({}, "", newUrl);
-            
-            console.log("[session-bridge] Student tokens synchronized successfully.");
         }
     }, [searchParams, pathname]);
 

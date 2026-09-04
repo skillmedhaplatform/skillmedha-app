@@ -316,7 +316,6 @@ const Page = () => {
     );
   };
   const handleResultsVal = ({ target: { value } }) => {
-    console.log(value);
     setHandleResults(value);
     dispatch(
       updateTestValues({

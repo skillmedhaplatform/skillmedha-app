@@ -378,12 +378,11 @@ export default function User() {
         setCompanySearch("");
       })
       .catch((info) => {
-        console.log("Validate Failed:", info);
-        if (info.errorFields && info.errorFields.length > 0) {
-          message.error("Please fill in all required fields in the Basic Info tab.");
-          setActiveTab("basicInfo");
-        }
-      });
+      if (info.errorFields && info.errorFields.length > 0) {
+        message.error("Please fill in all required fields in the Basic Info tab.");
+        setActiveTab("basicInfo");
+      }
+    });
   };
 
   const handleEditUser = (user) => {

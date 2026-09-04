@@ -451,7 +451,7 @@ export default function StudentMockTestPage() {
     let finalTop3 = [];
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token") || "";
-      const res = await fetch(`${restUrl}/student/practice/top-scores`, {
+      const res = await fetch(`${restUrl}/practice/top-scores`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ testId: id, attempt })

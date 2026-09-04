@@ -56,9 +56,7 @@ export const getAllAssessments = createAsyncThunk(
       );
 
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -86,10 +84,7 @@ export const createAssessment = createAsyncThunk(
       nav.replace("/MyAssessments/" + data?.data?.insertedId);
       return data;
     } catch (error) {
-      console.log(456);
-
       message.error("Failed to create assessment");
-      console.log(error);
     } finally {
       hide();
     }
@@ -111,9 +106,7 @@ export const getOneAssessment = createAsyncThunk(
       );
 
       return data.data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -140,7 +133,6 @@ export const updateAssessment = createAsyncThunk(
       return data.data;
     } catch (error) {
       message.error("Failed to update assessment");
-      console.log(error);
     } finally {
       hide();
     }
@@ -170,7 +162,6 @@ export const sendInvitiesAssessment = createAsyncThunk(
       return data;
     } catch (error) {
       message.error("Failed to send invitations");
-      console.log(error);
     } finally {
       hide();
     }

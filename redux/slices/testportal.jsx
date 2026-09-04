@@ -80,7 +80,6 @@ export const postQuesToAi = createAsyncThunk(
       });
       return res.data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(
         error.response?.data?.message || "Something went wrong"
       );

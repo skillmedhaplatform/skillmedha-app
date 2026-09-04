@@ -121,7 +121,7 @@ const Dictaphone = () => {
       replayEl.onloadeddata = () => {
         replayEl
           .play()
-          .then(() => console.log("Replay started"))
+          .then(() => )
           .catch((err) => console.error("Replay failed:", err));
       };
 
@@ -298,9 +298,7 @@ const Dictaphone = () => {
         setActiveTab(1);
       }
       setAiSuggestions(data);
-    } catch (error) {
-      console.log(error);
-    } finally {
+    } catch (error) {} finally {
       setWaitSubmit(false);
     }
   };

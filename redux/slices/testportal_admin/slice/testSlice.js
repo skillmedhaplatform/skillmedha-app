@@ -117,9 +117,6 @@ const testSlice = createSlice({
     },
 
     flagQuestion: (state, { payload }) => {
-      console.log("====================================");
-      console.log(state.flagged);
-      console.log("====================================");
       state.flagged.value.push(payload.questionId);
       state.flagged.value = _.uniq(state.flagged.value);
       let status = "flagged";

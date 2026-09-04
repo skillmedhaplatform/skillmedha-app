@@ -162,7 +162,6 @@ export const resendVerifyEmail = createAsyncThunk(
       );
       return data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -189,7 +188,6 @@ export const CreateStudentAccount = createAsyncThunk(
       return data;
     } catch (error) {
       message.success("failed to create account");
-      console.log(error);
     } finally {
       hide();
     }
@@ -240,8 +238,6 @@ export const getStudentCreds = createAsyncThunk(
       setSstorage("studentId", data?.data?._id);
       return data;
     } catch (error) {
-      console.log(error);
-
       // Clear local & session storage
       clearLstorageVals();
       clearSstorageVals();
@@ -272,7 +268,6 @@ export const getStudentDetails = createAsyncThunk(
 
       return data.data.singleStudent;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.message);
     }
   }
@@ -294,9 +289,7 @@ export const getStudent = createAsyncThunk("/getOne", async (args) => {
     );
 
     return data.data.student;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 });
 
 export const saveStudentNotes = createAsyncThunk(
@@ -314,7 +307,6 @@ export const saveStudentNotes = createAsyncThunk(
       );
       return data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -335,7 +327,6 @@ export const getStudentNotes = createAsyncThunk(
       );
       return data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -356,7 +347,6 @@ export const updateStudentNote = createAsyncThunk(
       );
       return data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -376,7 +366,6 @@ export const deleteStudentNote = createAsyncThunk(
       );
       return data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }

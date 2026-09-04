@@ -441,7 +441,6 @@ export const createQuestion = createAsyncThunk(
       message.success(data.msg);
       return { ...data, testTitle: args.testTitle, testId: args.testId };
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -528,7 +527,6 @@ export const updateQuestion = createAsyncThunk(
       dispatch(getOneTests({ _id: args?.testId }));
       return { ...data, testTitle: args.testTitle, testId: args.testId };
     } catch (error) {
-      console.log(error);
       message.error(error.message || "An unexpected error occurred.");
       throw error;
     }
@@ -547,9 +545,7 @@ export const ChangeQuestionOrder = createAsyncThunk(
 
       // message.success(data.msg)
       return data;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 );
 
@@ -741,9 +737,7 @@ export const searchQuestions = createAsyncThunk(
       }
 
       return data;
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
   }
 );
 export const searchQuestionsForBank = createAsyncThunk(
@@ -756,9 +750,7 @@ export const searchQuestionsForBank = createAsyncThunk(
       );
 
       return data;
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
   }
 );
 
