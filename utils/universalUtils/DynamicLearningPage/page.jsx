@@ -229,6 +229,7 @@ export default function DynamicLearningPage({ moduleType }) {
           openSectionKeys={openSectionKeys}
           handleSectionChange={handleSectionChange}
           selectedInternshipData={selectedInternshipData}
+          studentId={studentCreds?._id}
           activeKey={activeKey}
           selectedTopicIndex={selectedTopicIndex}
           getOneTopic={getOneTopic}
