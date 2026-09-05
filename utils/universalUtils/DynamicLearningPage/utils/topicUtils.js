@@ -276,3 +276,35 @@ export const getTopicTypeDurationIcon = (topic) => {
     default:       return <VideoCameraOutlined />;
   }
 };
+
+// ─── AI Assistant Course Context ──────────────────────────────────────────────
+
+/**
+ * Strips HTML tags for a plain-text AI prompt — not for rendering.
+ */
+const stripHtml = (html) =>
+  String(html || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+/**
+ * Builds a compact course-context object for the "AI Assistant" chat panel,
+ * so it can ground its answers in the actual course/topic being viewed
+ * instead of responding generically with no idea what course this is.
+ */
+export const buildCourseContext = (selectedInternshipData, activeKey, selectedTopicIndex) => {
+  const currentSection = selectedInternshipData?.sections?.[activeKey];
+  const currentTopic = currentSection?.topics?.[selectedTopicIndex];
+
+  return {
+    courseTitle: selectedInternshipData?.title || "",
+    syllabus: (selectedInternshipData?.sections || []).map((section) => ({
+      section: section?.title || "",
+      topics: (section?.topics || []).map((topic) => topic?.title).filter(Boolean),
+    })),
+    currentSection: currentSection?.title || "",
+    currentTopic: currentTopic?.title || "",
+    currentTopicSummary: stripHtml(currentTopic?.about).slice(0, 1000),
+  };
+};

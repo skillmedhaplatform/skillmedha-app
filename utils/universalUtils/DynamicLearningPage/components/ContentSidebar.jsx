@@ -6,7 +6,7 @@ import { FiChevronRight } from "react-icons/fi";
 import ChatBot from "@/universalUtils/chatBot/chatbot";
 import interPageStyles from "../page.module.scss";
 
-import { getSectionSummary, getTopicDurationLabel, isTopicCompleted, getTopicType, isLiveMeetingTopic } from "../utils/topicUtils";
+import { getSectionSummary, getTopicDurationLabel, isTopicCompleted, getTopicType, isLiveMeetingTopic, buildCourseContext } from "../utils/topicUtils";
 
 const getTopicBadges = (topic) => {
   const type = getTopicType(topic);
@@ -45,6 +45,7 @@ const ContentSidebar = memo(({
   openSectionKeys,
   handleSectionChange,
   selectedInternshipData,
+  studentId,
   activeKey,
   selectedTopicIndex,
   getOneTopic,
@@ -59,6 +60,8 @@ const ContentSidebar = memo(({
   displayCompletedCount,
   displayTotalCount,
 }) => {
+  const courseContext = buildCourseContext(selectedInternshipData, activeKey, selectedTopicIndex);
+
   return (
     <div className={`${interPageStyles.bodyStylesLeft} ${isExpandedView ? interPageStyles.bodyStylesLeftHidden : ""}`}>
       <Tabs
@@ -224,7 +227,7 @@ const ContentSidebar = memo(({
             ),
             children: (
               <div className={interPageStyles.aiAssistantTabPane}>
-                <ChatBot />
+                <ChatBot courseContext={courseContext} studentId={studentId} />
               </div>
             ),
           },

@@ -21,7 +21,7 @@ import ResourceList from "@/universalUtils/DynamicLearningPage/components/Resour
 import ChatBot from "@/universalUtils/chatBot/chatbot";
 
 import { getTopicType } from "@/universalUtils/DynamicLearningPage/utils/topicUtils";
-import { getSectionSummary, getTopicTypeDurationIcon, getTopicDurationLabel, isTopicCompleted } from "@/universalUtils/DynamicLearningPage/utils/topicUtils";
+import { getSectionSummary, getTopicTypeDurationIcon, getTopicDurationLabel, isTopicCompleted, buildCourseContext } from "@/universalUtils/DynamicLearningPage/utils/topicUtils";
 
 export default function MobileClassroomPlayer({
   selectedInternshipData,
@@ -69,6 +69,7 @@ export default function MobileClassroomPlayer({
   const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerActiveTab, setDrawerActiveTab] = useState("course-content");
+  const courseContext = buildCourseContext(selectedInternshipData, activeKey, selectedTopicIndex);
 
   useEffect(() => {
     // Prevent swipe-to-go-back gesture
@@ -423,7 +424,7 @@ export default function MobileClassroomPlayer({
             </div>
           ) : (
             <div className={styles.aiAssistantTabPane}>
-              <ChatBot />
+              <ChatBot courseContext={courseContext} studentId={studentCreds?._id} />
             </div>
           )}
         </Drawer>
