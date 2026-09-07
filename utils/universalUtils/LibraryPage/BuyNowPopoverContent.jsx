@@ -14,6 +14,7 @@ const BuyNowPopoverContent = ({
   item,
   onAddToWishlist,
   onAddToCart,
+  onBuyNow,
   isInCart = false,
   isInWishlist = false,
   cartLoading = false,
@@ -125,7 +126,9 @@ const BuyNowPopoverContent = ({
             }}
           />
 
-          {/* Add To Cart / Go To Cart toggle */}
+          {/* Add To Cart / Go To Cart toggle — icon-only here so the
+              prominent action (Buy Now) gets the space; the cart still
+              has its own drawer for anyone who wants to review before paying. */}
           <Button
             icon={
               cartLoading ? (
@@ -138,6 +141,22 @@ const BuyNowPopoverContent = ({
             }
             onClick={() => onAddToCart(item)}
             disabled={cartLoading}
+            title={isInCart ? "Go to Cart" : "Add to Cart"}
+            style={{
+              width: 42,
+              height: 38,
+              borderRadius: 10,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: isInCart ? "#16a34a" : undefined,
+              borderColor: isInCart ? "#16a34a" : undefined,
+            }}
+          />
+
+          {/* Buy Now — skips the cart entirely, straight to the payment page */}
+          <Button
+            onClick={() => onBuyNow(item)}
             type="primary"
             size="middle"
             style={{
@@ -148,11 +167,9 @@ const BuyNowPopoverContent = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: isInCart ? "#16a34a" : undefined,
-              borderColor: isInCart ? "#16a34a" : undefined,
             }}
           >
-            {isInCart ? "Go to Cart" : "Add to Cart"}
+            Buy Now
           </Button>
         </div>
       )}
