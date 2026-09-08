@@ -12,39 +12,32 @@ const VISITOR_COOKIE_OPTS = {
   maxAge: 60 * 60 * 24 * 365, // 1 year
 };
 
-// const EDUCATION_SYSTEM_PROMPT = {
-//   role: "system",
-//   content: `You are an educational AI assistant designed to help students learn effectively. Your primary objectives are:
+// Without this, the assistant has no idea what course it's embedded in and
+// falls back to generic answers even for questions like "what tools does
+// this course use" — grounding it in the actual syllabus/topic fixes that.
+const buildCourseSystemPrompt = (courseContext) => {
+  if (!courseContext?.courseTitle) {
+    return "You are a helpful AI learning assistant embedded in an online course. Keep the conversation focused on the student's studies.";
+  }
 
-// 1. EDUCATIONAL FOCUS ONLY:
-//    - Only respond to education-related queries (academics, learning, study methods, homework help, research)
-//    - Cover subjects like mathematics, science, literature, history, languages, arts, technology, and general learning
-//    - Provide step-by-step explanations that promote understanding
-//    - Encourage critical thinking through guiding questions
+  const syllabusText = (courseContext.syllabus || [])
+    .map((s) => `- ${s.section}${s.topics?.length ? `: ${s.topics.join(", ")}` : ""}`)
+    .join("\n");
 
-// 2. CONTENT RESTRICTIONS:
-//    - Refuse to discuss inappropriate, vulgar, violent, or harmful content
-//    - Do not provide answers to non-educational topics
-//    - Avoid generating offensive language or inappropriate material
-//    - Maintain a professional, respectful tone at all times
+  return `You are an AI learning assistant embedded in the course "${courseContext.courseTitle}".
 
-// 3. LEARNING APPROACH:
-//    - Guide students to discover answers rather than just providing solutions
-//    - Ask clarifying questions to understand the student's level
-//    - Provide hints and encourage active participation
-//    - Offer additional resources and study suggestions
+Course syllabus:
+${syllabusText || "(not available)"}
 
-// 4. RESPONSE FORMAT:
-//    - If asked about non-educational topics, politely redirect to educational content
-//    - For inappropriate requests, respond: "I can only help with educational topics. How can I assist you with your studies today?"
-//    - Always maintain an encouraging and supportive tone
+The student is currently viewing: ${courseContext.currentSection || "N/A"} > ${courseContext.currentTopic || "N/A"}
+${courseContext.currentTopicSummary ? `Current topic content: ${courseContext.currentTopicSummary}` : ""}
 
-// Remember: Your purpose is to facilitate learning and academic growth while maintaining appropriate content standards.`
-// };
+Answer using this course's actual syllabus and topic content above rather than generic, unrelated answers. If the exact answer isn't in the provided content, use your general knowledge but tie it back to the specific technologies/units named in the syllabus above. Keep the conversation focused on this course.`;
+};
 
 export async function POST(req) {
   try {
-    const { messages } = await req.json();
+    const { messages, courseContext, studentId } = await req.json();
 
     // Identify this browser with a long-lived anonymous cookie so the backend
     // can enforce a per-visitor daily message limit (Workers AI isn't unlimited).
@@ -62,7 +55,7 @@ export async function POST(req) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ visitorId }),
+          body: JSON.stringify({ visitorId, studentId }),
           cache: "no-store",
         }
       );
@@ -93,16 +86,10 @@ export async function POST(req) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        messages: messages.map((e, i) => {
-          if (i === messages.length - 1) {
-            return {
-              ...e,
-              content: ` ${e.content}
-"Please keep the conversation only regarding the current course or internship."`,
-            };
-          }
-          return e;
-        }),
+        messages: [
+          { role: "system", content: buildCourseSystemPrompt(courseContext) },
+          ...messages,
+        ],
         temperature: 0.7,
         max_tokens: 1000,
       }),
@@ -116,8 +103,32 @@ export async function POST(req) {
       );
     }
 
+    // Prefer the guaranteed-string field — Cloudflare's top-level
+    // `result.response` gets silently auto-parsed into an object whenever
+    // the content happens to look like JSON.
+    const rawMessage = json.result?.choices?.[0]?.message?.content;
+    const message =
+      typeof rawMessage === "string" && rawMessage
+        ? rawMessage
+        : typeof json.result?.response === "string"
+          ? json.result.response
+          : "";
+
+    // Report the real neuron cost back to the backend's shared usage
+    // tracking (this call bypasses src/shared/utils/ai.js entirely, so
+    // without this its spend would be invisible to that account-wide
+    // budget). Fire-and-forget — must never block the chat reply already
+    // computed above.
+    const neuronsUsed = json.result?.usage?.neurons || 0;
+    fetch(`${process.env.NEXT_PUBLIC_REST_URL}/ai/chatWidget/trackUsage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ neurons: neuronsUsed, visitorId, studentId }),
+      cache: "no-store",
+    }).catch((err) => console.error("Chat usage tracking failed:", err));
+
     return Response.json({
-      message: json.result?.response ?? "",
+      message,
       remaining: quota.remaining,
     });
   } catch (error) {

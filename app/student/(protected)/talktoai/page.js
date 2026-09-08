@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Input, Card, Badge, Progress } from "antd";
+import { Button, Input, Card, Badge, Progress, message } from "antd";
 import {
   ClockCircleOutlined,
   VideoCameraOutlined,
@@ -121,7 +121,6 @@ const Dictaphone = () => {
       replayEl.onloadeddata = () => {
         replayEl
           .play()
-          .then(() => )
           .catch((err) => console.error("Replay failed:", err));
       };
 
@@ -164,13 +163,22 @@ const Dictaphone = () => {
       }));
 
       if (isAudioOnly) {
-        setTranscript(response?.data?.transcription?.text || "");
+        const transcriptionError = response?.data?.transcription?.err;
+        const transcriptText = response?.data?.transcription?.text || "";
+        setTranscript(transcriptText);
         setIsProcessingAudio(false);
+        if (transcriptionError && !transcriptText) {
+          message.error(transcriptionError);
+        }
       }
     } catch (err) {
       console.error(`Upload ${isAudioOnly ? "audio" : "video"} failed`, err);
       if (isAudioOnly) {
         setIsProcessingAudio(false);
+        message.error(
+          err?.response?.data?.message ||
+            "Couldn't transcribe your recording. Please check your connection and try again."
+        );
       }
     }
   };
@@ -294,11 +302,28 @@ const Dictaphone = () => {
         },
         { headers: { Authorization: `Bearer ${getLstorage("token")}` } }
       );
+
+      // This endpoint reports its own failures with a 200 status and an
+      // `err` field in the body, so a successful axios call doesn't mean
+      // feedback actually came back.
+      if (data?.err) {
+        message.error(data.err);
+        return;
+      }
+
       if (data.report) {
         setActiveTab(1);
       }
       setAiSuggestions(data);
-    } catch (error) {} finally {
+    } catch (error) {
+      console.error("Get AI Feedback failed:", error);
+      message.error(
+        error?.response?.data?.error ||
+          error?.response?.data?.err ||
+          error?.response?.data?.message ||
+          "Couldn't get AI feedback right now. Please try again."
+      );
+    } finally {
       setWaitSubmit(false);
     }
   };
