@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect } from "react";
 import styles from "./ChatBot.module.scss";
 
-export default function ChatBot() {
+export default function ChatBot({ courseContext, studentId } = {}) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -43,6 +43,8 @@ export default function ChatBot() {
         },
         body: JSON.stringify({
           messages: newMessages,
+          courseContext,
+          studentId,
         }),
       });
 

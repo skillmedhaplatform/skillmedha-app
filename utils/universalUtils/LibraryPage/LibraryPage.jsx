@@ -336,6 +336,16 @@ const LibraryPage = ({
     }
   };
 
+  // Buy Now skips the cart entirely — straight to the payment page for
+  // just this one course, independent of whatever else is in the cart.
+  const handleBuyNow = (item, e) => {
+    e?.stopPropagation?.();
+    const courseId = item?._id;
+    if (!courseId) return;
+    const orgId = resolveOrgId(item);
+    nav.push(`/student/checkout?courseId=${courseId}${orgId ? `&orgId=${orgId}` : ""}`);
+  };
+
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("limit") || "1000", 10);
   const urlSearch = searchParams.get("search") || "";
@@ -669,6 +679,7 @@ const LibraryPage = ({
           cartIdSet={cartIdSet}
           cartPendingIds={cartPendingIds}
           onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
           totalAvailable={allPaginationData ? allPaginationData.totalLength : safeAllItems.length}
           wishlistCount={wishlistItems.length}
           cartCount={cartItems.length}
@@ -1140,6 +1151,7 @@ const LibraryPage = ({
                         item={item}
                         onAddToWishlist={(it) => handleWishlistToggle(it)}
                         onAddToCart={(it) => handleAddToCart(it)}
+                        onBuyNow={(it) => handleBuyNow(it)}
                         isInCart={inCart}
                         isInWishlist={inWishlist}
                         cartLoading={isCartLoading}
