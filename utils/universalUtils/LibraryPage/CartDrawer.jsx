@@ -5,36 +5,31 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 import { removeFromCart } from "@/redux/slices/cartSlice";
 import { formatINR } from "./helpers";
+import { restUrl } from "@/config/urls";
+import { getLstorage } from "@/universalUtils/windowMW";
 import { FiTrash2, FiShoppingCart, FiX } from "react-icons/fi";
 
 /**
  * Order / Checkout API (inlined)
  *
- * Backend routes expected:
- *  POST /orders/create-order
- *    body:  { courseIds: string[] }
- *    returns: { orderId, amount, currency, keyId }  (Razorpay order details)
+ * Backend routes (src/modules/admin/services/payment.service.js):
+ *  POST /payment/cart/createOrder
+ *    No body needed — reads the student's cart server-side (from the
+ *    `cart` collection via the JWT), so nothing here can be spoofed by
+ *    sending different courseIds/prices.
+ *    returns: { orderId, amount, currency, keyId } | { orderId: null, enrolled: true }
  *
- *  POST /orders/verify
- *    body:  { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseIds }
+ *  POST /payment/cart/verify
+ *    body:  { razorpay_order_id, razorpay_payment_id, razorpay_signature }
  *    returns: { success: boolean, enrolledCourses: [...] }
  */
-const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api",
-  withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+const authHeaders = () => ({
+  headers: { Authorization: `Bearer ${getLstorage("token")}` },
 });
 
-axiosInstance.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-const createOrderApi = (payload) => axiosInstance.post("/orders/create-order", payload);
-const verifyPaymentApi = (payload) => axiosInstance.post("/orders/verify", payload);
+const createOrderApi = () => axios.post(`${restUrl}/payment/cart/createOrder`, {}, authHeaders());
+const verifyPaymentApi = (payload) =>
+  axios.post(`${restUrl}/payment/cart/verify`, payload, authHeaders());
 
 /**
  * CartDrawer
@@ -81,14 +76,13 @@ const CartDrawer = ({ open, onClose, cartItems = [], totalAmount = 0, loading = 
 
     setCheckingOut(true);
     try {
-      const courseIds = cartItems.map((i) => i.courseId?._id || i.courseId);
-
-      // STEP 1: Create order on backend
-      const { data: order } = await createOrderApi({ courseIds });
+      // STEP 1: Create order on backend (reads the cart server-side)
+      const { data: order } = await createOrderApi();
 
       // FREE-only cart: backend may skip Razorpay and directly enroll
       if (!order?.orderId) {
         message.success("Enrollment successful!");
+        setCheckingOut(false);
         onClose();
         nav?.push("/my-learning");
         return;
@@ -98,6 +92,7 @@ const CartDrawer = ({ open, onClose, cartItems = [], totalAmount = 0, loading = 
       const loaded = await loadRazorpayScript();
       if (!loaded) {
         message.error("Unable to load payment gateway. Please try again.");
+        setCheckingOut(false);
         return;
       }
 
@@ -116,26 +111,32 @@ const CartDrawer = ({ open, onClose, cartItems = [], totalAmount = 0, loading = 
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              courseIds,
             });
             message.success("Payment successful! You're enrolled.");
             onClose();
             nav?.push("/my-learning");
           } catch (err) {
-            message.error(err?.message || "Payment verification failed");
+            message.error(err?.response?.data?.error || "Payment verification failed");
+          } finally {
+            setCheckingOut(false);
           }
         },
         modal: {
           ondismiss: () => {
             message.info("Payment cancelled");
+            setCheckingOut(false);
           },
         },
       });
 
+      rzp.on("payment.failed", () => {
+        message.error("Payment failed. Please try again.");
+        setCheckingOut(false);
+      });
+
       rzp.open();
     } catch (err) {
-      message.error(err?.message || "Failed to start checkout");
-    } finally {
+      message.error(err?.response?.data?.error || "Failed to start checkout");
       setCheckingOut(false);
     }
   };

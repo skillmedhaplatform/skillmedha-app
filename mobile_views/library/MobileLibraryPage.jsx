@@ -255,6 +255,7 @@ export default function MobileLibraryPage({
   cartIdSet,
   cartPendingIds,
   onAddToCart,
+  onBuyNow,
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [buyDrawerItem, setBuyDrawerItem] = useState(null);
@@ -717,6 +718,7 @@ export default function MobileLibraryPage({
                   setCartOpen?.(true);
                 }
               }}
+              onBuyNow={(it) => onBuyNow?.(it)}
               isInCart={cartIdSet?.has(buyDrawerItem?._id)}
               isInWishlist={wishlistIdSet?.has(buyDrawerItem?._id)}
               cartLoading={cartPendingIds?.includes(buyDrawerItem?._id)}
