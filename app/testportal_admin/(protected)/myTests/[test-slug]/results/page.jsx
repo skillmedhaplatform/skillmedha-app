@@ -16,6 +16,7 @@ export default function ResultsConfigPage() {
     const testId = params["test-slug"]?.split("_id-")[1];
     
     const SingleTest = useSelector((state) => state.tests.test);
+    const AllStudentsRaw = useSelector((state) => state.Student?.getAllStudentsAgg?.value);
     
     const [config, setConfig] = useState({
         oneTime: {
@@ -72,7 +73,8 @@ export default function ResultsConfigPage() {
             releaseMode: "Immediately",
             releaseDate: null,
             downloadAllowed: true,
-            previewAllowed: true
+            previewAllowed: true,
+            manualPublishStudents: []
         }
     });
 
@@ -160,6 +162,42 @@ export default function ResultsConfigPage() {
             <Col xs={12} md={8}><Checkbox checked={permissionsState.showFeedback} onChange={e => handler('showFeedback', e.target.checked)}>Feedback</Checkbox></Col>
         </Row>
     );
+
+    const getEligibleStudents = () => {
+        let students = Array.isArray(AllStudentsRaw) 
+            ? AllStudentsRaw 
+            : Array.isArray(AllStudentsRaw?.data) 
+            ? AllStudentsRaw.data 
+            : [];
+            
+        const access = SingleTest?.access;
+        if (!access) return students;
+
+        if (access.type === "public") {
+            return students;
+        } else if (access.type === "student") {
+            const allowedIds = Array.isArray(access.students) ? access.students : [access.students];
+            return students.filter(s => allowedIds.includes(s._id));
+        } else if (access.type === "department") {
+            const depts = Array.isArray(access.department) ? access.department : [access.department];
+            return students.filter(s => depts.includes(s.department));
+        } else if (access.type === "batch") {
+            const batches = Array.isArray(access.batch) ? access.batch : (Array.isArray(access.yearOfPassing) ? access.yearOfPassing : [access.batch]);
+            return students.filter(s => {
+               const sBatch = s.yearOfPassing || s.batch;
+               return batches.includes(String(sBatch));
+            });
+        } else if (access.type === "department_batch") {
+            const depts = Array.isArray(access.department) ? access.department : [access.department];
+            const batches = Array.isArray(access.batch) ? access.batch : (Array.isArray(access.yearOfPassing) ? access.yearOfPassing : [access.batch]);
+            return students.filter(s => {
+               const sBatch = s.yearOfPassing || s.batch;
+               return depts.includes(s.department) && batches.includes(String(sBatch));
+            });
+        }
+        
+        return students;
+    };
 
     return (
         <div className="flex flex-col gap-6" style={{ maxWidth: 900, margin: '0 auto', paddingBottom: 50 }}>
@@ -268,6 +306,23 @@ export default function ResultsConfigPage() {
                                     className="w-full" 
                                     value={config.permanent.releaseDate ? dayjs(config.permanent.releaseDate) : null}
                                     onChange={(date) => setConfig(prev => ({...prev, permanent: {...prev.permanent, releaseDate: date ? date.toISOString() : null}}))}
+                                />
+                            </Col>
+                        )}
+                        {config.permanent.releaseMode === 'Manual' && (
+                            <Col xs={24} md={12}>
+                                <Text strong className="block mb-2">Select Students</Text>
+                                <Select
+                                    mode="multiple"
+                                    placeholder="Select eligible students to publish results"
+                                    className="w-full"
+                                    value={config.permanent.manualPublishStudents || []}
+                                    onChange={(val) => setConfig(prev => ({...prev, permanent: {...prev.permanent, manualPublishStudents: val}}))}
+                                    options={getEligibleStudents().map(s => ({
+                                        label: s.email || s.name || s._id,
+                                        value: s._id
+                                    }))}
+                                    filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
                                 />
                             </Col>
                         )}

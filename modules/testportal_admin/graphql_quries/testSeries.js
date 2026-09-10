@@ -17,6 +17,7 @@ query Tests($cursor: ID, $limit: Int, $category: String, $status: String, $origi
       time
       status
       testType
+      resultsConfig
       category {
         _id
         type
@@ -102,6 +103,7 @@ export const getOneTest = `
       time
       status
       testType
+      resultsConfig
       category {
         _id
         type

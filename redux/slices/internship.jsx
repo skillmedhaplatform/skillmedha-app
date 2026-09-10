@@ -171,7 +171,7 @@ export const getAllCourses = createAsyncThunk(
     } catch (error) {
       console.error("Error in getAllCourses:", error);
       const errMsg = error.response?.data?.error || error.response?.data?.err || error.response?.data?.message || error.message || "Failed to fetch courses";
-      message.error(errMsg);
+      // message.error(errMsg); // Removed to prevent "Static function can not consume context" warning in background thunks
       return thunkAPI.rejectWithValue(errMsg);
     }
   }

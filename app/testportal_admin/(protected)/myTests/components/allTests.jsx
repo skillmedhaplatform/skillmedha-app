@@ -147,8 +147,9 @@ const AllTestsComp = (props) => {
   };
 
   // Helper to generate elegant gradient style for department/test fallback logo
-  const getGradientStyle = (title = "") => {
-    const hash = Array.from(title).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const getGradientStyle = (title) => {
+    const safeTitle = title || "";
+    const hash = Array.from(safeTitle).reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const gradients = [
         "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", // Blue
         "linear-gradient(135deg, #ea580c 0%, #f97316 100%)", // Orange/ST theme

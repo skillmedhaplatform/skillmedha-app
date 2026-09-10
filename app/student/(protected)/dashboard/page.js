@@ -843,7 +843,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
         footer={null}
         width={600}
         centered
-        bodyStyle={{ maxHeight: '70vh', overflowY: 'auto', padding: '24px 16px' }}
+        styles={{ body: { maxHeight: '70vh', overflowY: 'auto', padding: '24px 16px' } }}
         closeIcon={<span className="text-gray-400 hover:text-gray-600 text-xl">✕</span>}
       >
         {renderBadgeList(practiceModalType === "Technical" ? technicalBadges : practiceModalType === "Coding" ? codingBadges : nonTechnicalBadges)}
