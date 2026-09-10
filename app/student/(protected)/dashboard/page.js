@@ -1274,9 +1274,10 @@ export default function DashboardPage() {
                     </div>
                   ) : (
                     paginatedLearningData.map((item) => {
+                      const isInternship = item?.type === "internship";
                       const hasLastAccessed = item?.lastAccessedSection !== undefined && item?.lastAccessedSection !== null;
                       const handleNavigate = () => {
-                        const basePath = item?.type === "internship" ? "/student/learning-internship" : "/student/learning-course";
+                        const basePath = isInternship ? "/student/learning-internship" : "/student/learning-course";
                         let url = `${basePath}?title=${item?.title?.split(" ")?.join("")}&id=${item?._id}&orgId=${item?.sourceOrgId}`;
                         if (hasLastAccessed) {
                           url += `&section=${item.lastAccessedSection}`;
@@ -1303,8 +1304,6 @@ export default function DashboardPage() {
                       } else if (hasLastAccessed || progressVal > 0) {
                         buttonText = "Continue";
                       }
-
-                      const isInternship = item?.type === "internship";
 
                       return (
                         <div key={item._id} className={`flex flex-col md:flex-row items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-[12px] hover:shadow-md transition-shadow border-l-[4px] ${isInternship ? 'border-l-[#0284c7]' : 'border-l-[#24A058]'}`}>
