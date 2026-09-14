@@ -180,7 +180,7 @@ const StudentDownloader = ({
             rowObj["Education_Type"] = "";
             rowObj["Board / University"] = "";
             rowObj["School / College"] = "";
-            rowObj["Stream_Branch"] = "";
+            rowObj["Stream / Branch"] = "";
             rowObj["Grade / Percentage"] = "";
             rowObj["Year_of_Passing"] = "";
             rowObj["Hall_Ticket"] = "";
@@ -209,11 +209,10 @@ const StudentDownloader = ({
     onClose();
   };
 
-  // Updated preview data logic
   const getPreviewData = () => {
     if (!studentData || studentData.length === 0) return {};
 
-    const student = studentData[1];
+    const student = studentData[0];
     const previewObj = {};
 
     selectedFields.forEach((field) => {
@@ -224,7 +223,7 @@ const StudentDownloader = ({
           previewObj["Education_Type"] = edu.type || "[No Data]";
           previewObj["Board / University"] = edu.board || "[No Data]";
           previewObj["School / College"] = edu.school || "[No Data]";
-          previewObj["Stream_Branch"] =
+          previewObj["Stream / Branch"] =
             edu.stream || edu.degreeName || edu.department || "[No Data]";
           previewObj["Grade / Percentage"] = edu.grade || "[No Data]";
           previewObj["Year_of_Passing"] = edu.yearofPass || "[No Data]";

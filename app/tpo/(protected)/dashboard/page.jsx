@@ -13,6 +13,7 @@ import {
 import { GetAllPlacements } from "@/redux/slices/tpo/placementsSlice";
 import { getAllDepartments } from "@/redux/slices/tpo/departmentSlice";
 import PageHeader from "@/modules/tpo/components/PageHeader";
+import { TrendingUp, AlertCircle, CheckCircle, Target } from "lucide-react";
 
 const SectorPlacementChart = dynamic(() => import("./piechart"), {
   ssr: false,
@@ -25,53 +26,71 @@ const PlacementActivityChart = dynamic(() => import("./linechart"), {
 });
 
 const PlacementRateWidget = ({ total = 0, placed = 0 }) => {
-  const placementRate = total > 0 ? Math.round((placed / total) * 100) : 0;
-  const radius = 60;
-  const stroke = 8;
-  const normalizedRadius = radius - stroke * 2;
-  const circumference = normalizedRadius * 2 * Math.PI;
-  const strokeDashoffset = circumference - (placementRate / 100) * circumference;
-
-  return (
-    <div className={styles.placementRateCard}>
-      <h3 className={styles.chartTitle}>Placement rate</h3>
-      <div className={styles.circularProgressContainer}>
-        <div className={styles.svgWrapper}>
-          <svg height={radius * 2} width={radius * 2}>
-            <defs>
-              <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#6BA8ED" />
-                <stop offset="100%" stopColor="#A3CCFA" />
-              </linearGradient>
-            </defs>
-            <circle
-              stroke="#f3f3f3"
-              fill="transparent"
-              strokeWidth={stroke}
-              r={normalizedRadius}
-              cx={radius}
-              cy={radius}
-            />
-            <circle
-              stroke="url(#blueGradient)"
-              fill="transparent"
-              strokeWidth={stroke}
-              strokeDasharray={circumference + ' ' + circumference}
-              style={{ strokeDashoffset }}
-              strokeLinecap="round"
-              r={normalizedRadius}
-              cx={radius}
-              cy={radius}
-            />
-          </svg>
-          <div className={styles.circularText}>
-            <span className={styles.percentage}>{placementRate}%</span>
-            <span className={styles.subtext}>placed so far</span>
-          </div>
+  if (total === 0) {
+    return (
+      <div className={styles.placementRateCard} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        <h3 className={styles.chartTitle} style={{ margin: 0, marginBottom: "1.5rem" }}>Placement Rate</h3>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", color: "#999", fontSize: "16px", padding: "1rem" }}>
+          ❕No placement data found. Please ensure students are marked as placed in companies.
         </div>
       </div>
-      <div className={styles.targetText}>
-        {placementRate >= 80 ? "Target 80% Achieved! 🎉" : "Target: 80% by Dec 2026"}
+    );
+  }
+
+  const placementRate = total > 0 ? Math.round((placed / total) * 100) : 0;
+  
+  let statusColor = "#e11d48"; // red
+  let statusText = "Needs Attention";
+  let recommendation = "Conduct more mock interviews and focus on core technical skills.";
+  let Icon = AlertCircle;
+  
+  if (placementRate >= 80) {
+    statusColor = "#10b981"; // green
+    statusText = "Excellent";
+    recommendation = "Target higher CTC companies and leadership roles for the remaining students.";
+    Icon = CheckCircle;
+  } else if (placementRate >= 50) {
+    statusColor = "#f59e0b"; // amber/orange
+    statusText = "On Track";
+    recommendation = "Organize specialized training sessions for borderline candidates.";
+    Icon = TrendingUp;
+  }
+
+  return (
+    <div className={styles.placementRateCard} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "auto" }}>
+        <h3 className={styles.chartTitle} style={{ margin: 0 }}>Placement Rate</h3>
+        <span style={{ 
+          display: "flex", alignItems: "center", gap: "0.4rem", 
+          backgroundColor: `${statusColor}15`, color: statusColor, 
+          padding: "6px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: 700 
+        }}>
+          <Icon size={14} /> {statusText}
+        </span>
+      </div>
+      
+      <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginTop: "auto", marginBottom: "1.5rem" }}>
+        <span style={{ fontSize: "3.5rem", fontWeight: 800, color: "#1e293b", lineHeight: 1 }}>{placementRate}%</span>
+        <span style={{ fontSize: "1rem", color: "#64748b", fontWeight: 500 }}>of {total} students placed</span>
+      </div>
+      
+      <div style={{ width: "100%", backgroundColor: "#f1f5f9", borderRadius: "10px", height: "14px", overflow: "hidden", marginBottom: "auto" }}>
+        <div style={{ 
+          height: "100%", 
+          width: `${placementRate}%`, 
+          backgroundColor: statusColor,
+          borderRadius: "10px",
+          transition: "width 1s ease-in-out"
+        }} />
+      </div>
+      
+      <div style={{ backgroundColor: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0", marginTop: "auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", color: "#334155", fontWeight: 700, fontSize: "0.95rem" }}>
+          <Target size={18} color="#64748b" /> Actionable Insight
+        </div>
+        <p style={{ fontSize: "0.9rem", color: "#64748b", margin: 0, lineHeight: 1.6 }}>
+          {recommendation}
+        </p>
       </div>
     </div>
   );
@@ -396,7 +415,7 @@ const Page = () => {
       label: "Students",
       value: studentsCount,
       icon: FaUserGraduate,
-      badge: `+${studentsThisWeek} this wk`,
+      badge: `+${studentsThisWeek} this week`,
       bgColor: "#1fbb9c",
       bgLightColor: "#e8f7ee",
       iconBgColor: "rgba(31, 187, 156, 0.1)",
@@ -491,7 +510,7 @@ const Page = () => {
                   );
                 })
               ) : (
-                <div className={styles.noDataMessage}>❕No data available</div>
+                <div className={styles.noDataMessage}>❕No placement records found. Please ensure placement drives have approved students.</div>
               )}
             </div>
           </div>
@@ -517,7 +536,7 @@ const Page = () => {
                   );
                 })
               ) : (
-                <div className={styles.noDataMessage}>❕No data available</div>
+                <div className={styles.noDataMessage}>❕No CTC data available. Please update the CTC details in your placement drives.</div>
               )}
             </div>
           </div>
@@ -526,7 +545,7 @@ const Page = () => {
           <div className={styles.tableCard}>
             <h3 className={styles.chartTitle}>CTC statistics</h3>
             <div className={styles.listContent}>
-              {ctcStats && Object.keys(ctcStats).length > 0 ? (
+              {ctcStats && (ctcStats.averageCTC > 0 || ctcStats.highestCTC > 0 || ctcStats.medianCTC > 0) ? (
                 Object.entries(ctcStats).map(([key, value]) => (
                   <div className={styles.ctcRow} key={key}>
                     <span className={styles.ctcLabel}>{formatKey(key)}</span>
@@ -534,7 +553,7 @@ const Page = () => {
                   </div>
                 ))
               ) : (
-                <div className={styles.noDataMessage}>❕No data available</div>
+                <div className={styles.noDataMessage}>❕CTC statistics are unavailable because no salary data has been provided yet.</div>
               )}
             </div>
           </div>

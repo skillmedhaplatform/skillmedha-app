@@ -240,6 +240,7 @@ export const formSchemas = {
 
   tpo_support_team: {
     title: "TPO Support Team Details",
+    subtitle: "Update your TPO Support Team details below.",
     fields: [
       {
         label: "Placement Office",
@@ -335,6 +336,7 @@ export const formSchemas = {
   },
   placement_cell_mous: {
     title: "Placement Cell MOUs",
+    subtitle: "Update your Placement Cell MOUs below.",
     fields: [
       {
         label: "Company",

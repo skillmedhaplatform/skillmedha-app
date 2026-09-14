@@ -230,8 +230,12 @@ export default function JobDetailsModal({ open, loading, onClose }) {
                 <ul className={styles.ulList} style={{ fontSize: "0.95rem" }}>
                   {jobDetails.applicableCourses.map((course, idx) => (
                     <li key={idx}>
-                      {course.degree || course.course} -{" "}
-                      {course.department || course.branch || "All"}
+                      {course.degree || course.course}
+                      {course?.department && Array.isArray(course.department) && course.department.length > 0
+                        ? ` - ${course.department.join(", ")}`
+                        : (course?.department && !Array.isArray(course.department)
+                            ? ` - ${course.department}`
+                            : (course?.branch ? ` - ${course.branch}` : ""))}
                     </li>
                   ))}
                 </ul>
@@ -262,9 +266,11 @@ export default function JobDetailsModal({ open, loading, onClose }) {
                 <ul className={styles.ulList} style={{ fontSize: "0.95rem" }}>
                   {jobDetails.eligibilityCriteria.map((criteria, idx) => (
                     <li key={idx}>
-                      {criteria.educationLevel || criteria.level} - Minimum{" "}
-                      {criteria.minMarksPercentage || criteria.percentage}%
-                      marks
+                      {criteria.educationLevel || criteria.level}
+                      {criteria?.department && Array.isArray(criteria.department) && criteria.department.length > 0
+                        ? ` - ${criteria.department.join(", ")}`
+                        : (criteria?.department && !Array.isArray(criteria.department) ? ` - ${criteria.department}` : "")}
+                      {" "} - Minimum {criteria.minMarksPercentage || criteria.percentage}% marks
                     </li>
                   ))}
                 </ul>

@@ -210,7 +210,7 @@ const Basic = () => {
                 </Link> */}
                 {item?.fileUrl && (
                   <div className={educationStyles.detailRow}>
-                    <p className={educationStyles.label}>Marksheet :</p>
+                    <p className={educationStyles.label}>Document :</p>
                     <a
                       className={educationStyles.value}
                       style={{ color: "#56D2D4" }}

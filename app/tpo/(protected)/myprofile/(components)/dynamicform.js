@@ -153,24 +153,37 @@ const DynamicForm = ({ schema }) => {
     }
   };
 
-  const renderInput = ({ type, name, placeholder, required, disabled, message: errorMsg }) => (
-    <>
-      <input
-        type={type}
-        name={name}
-        value={formData[name] ?? ""}
-        required={required}
-        disabled={disabled || !isEditing}
-        onChange={(e) => handleChange(e, name, null, null, false, null, type)}
-        className={styles.inputField}
-      />
-      {type === "tel" && formData[name] && formData[name].length !== 10 && (
-        <div style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
-          {errorMsg || "Must be exactly 10 digits"}
-        </div>
-      )}
-    </>
-  );
+  const renderInput = ({ type, name, placeholder, required, disabled, message: errorMsg }) => {
+    let telError = null;
+    if (type === "tel" && formData[name]) {
+      if (formData[name].length !== 10) {
+        telError = errorMsg || "Must be exactly 10 digits";
+      } else if (!/^[6-9]/.test(formData[name])) {
+        telError = "Please enter a valid Indian mobile number (starting with 6, 7, 8, or 9).";
+      } else if (name === "alternatePhone" && formData.alternatePhone === formData.phone) {
+        telError = "Alternate phone cannot be same as primary phone";
+      }
+    }
+
+    return (
+      <>
+        <input
+          type={type}
+          name={name}
+          value={formData[name] ?? ""}
+          required={required}
+          disabled={disabled || !isEditing}
+          onChange={(e) => handleChange(e, name, null, null, false, null, type)}
+          className={styles.inputField}
+        />
+        {telError && (
+          <div style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+            {telError}
+          </div>
+        )}
+      </>
+    );
+  };
 
   const renderSelect = ({ name, options, disabled }) => (
     <Select
@@ -192,41 +205,52 @@ const DynamicForm = ({ schema }) => {
   const renderImageUpload = ({ name }) => {
     const aspectRatio = name === "tpoLogo" ? 1 : 16 / 9;
     return (
-      <div className={styles.uploadField}>
-        <ImgCrop aspect={aspectRatio}>
-          <Upload
-            listType="picture-card"
-            showUploadList={false}
-            disabled={!isEditing}
-            customRequest={({ file, onSuccess, onError }) =>
-              uploadToS3({
-                file,
-                restUrl,
-                onUploaded: (uploadedUrl) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    [name]: uploadedUrl,
-                  })),
-                onSuccess,
-                onError,
-              })
-            }
-          >
-            {formData[name] ? (
-              <img
-                src={formData[name]}
-                style={{
-                  width: 60,
-                  height: 60,
-                  objectFit: "cover",
-                  borderRadius: 4,
-                }}
-              />
-            ) : (
-              <div style={{ padding: "4px 12px" }}>+ Upload</div>
-            )}
-          </Upload>
-        </ImgCrop>
+      <div className={styles.uploadField} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <ImgCrop aspect={aspectRatio}>
+            <Upload
+              listType="picture-card"
+              showUploadList={false}
+              disabled={!isEditing}
+              customRequest={({ file, onSuccess, onError }) =>
+                uploadToS3({
+                  file,
+                  restUrl,
+                  onUploaded: (uploadedUrl) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      [name]: uploadedUrl,
+                    })),
+                  onSuccess,
+                  onError,
+                })
+              }
+            >
+              {formData[name] ? (
+                <img
+                  src={formData[name]}
+                  style={{
+                    width: 60,
+                    height: 60,
+                    objectFit: "cover",
+                    borderRadius: 4,
+                  }}
+                />
+              ) : (
+                <div style={{ padding: "4px 12px" }}>+ Upload</div>
+              )}
+            </Upload>
+          </ImgCrop>
+          {formData[name] && isEditing && (
+            <Button
+              size="small"
+              danger
+              onClick={() => setFormData((prev) => ({ ...prev, [name]: "" }))}
+            >
+              Remove Image
+            </Button>
+          )}
+        </div>
       </div>
     );
   };
@@ -376,50 +400,73 @@ const DynamicForm = ({ schema }) => {
     const aspectRatio = fieldKey === "tpoLogo" ? 1 : 16 / 9;
 
     return (
-      <div className={styles.uploadField}>
-        <ImgCrop aspect={aspectRatio}>
-          <Upload
-            listType="picture-card"
-            showUploadList={false}
-            disabled={!isEditing}
-            customRequest={({ file, onSuccess, onError }) =>
-              uploadToS3({
-                file,
-                restUrl,
-                onUploaded: (uploadedUrl) => {
-                  // Update nested array field url
-                  setFormData((prev) => {
-                    const updatedItems = [...(prev[arrayName] || [])];
-                    updatedItems[index] = {
-                      ...updatedItems[index],
-                      [fieldKey]: uploadedUrl,
-                    };
-                    return {
-                      ...prev,
-                      [arrayName]: updatedItems,
-                    };
-                  });
-                  onSuccess && onSuccess();
-                },
-                onError,
-              })
-            }
-          >
-            {currentUrl ? (
-              <img
-                src={currentUrl}
-                style={{
-                  width: 60,
-                  height: 60,
-                  objectFit: "cover",
-                  borderRadius: 4,
-                }}
-              />
-            ) : (
-              <div style={{ padding: "4px 12px" }}>+ Upload</div>
-            )}
-          </Upload>
-        </ImgCrop>
+      <div className={styles.uploadField} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <ImgCrop aspect={aspectRatio}>
+            <Upload
+              listType="picture-card"
+              showUploadList={false}
+              disabled={!isEditing}
+              customRequest={({ file, onSuccess, onError }) =>
+                uploadToS3({
+                  file,
+                  restUrl,
+                  onUploaded: (uploadedUrl) => {
+                    // Update nested array field url
+                    setFormData((prev) => {
+                      const updatedItems = [...(prev[arrayName] || [])];
+                      updatedItems[index] = {
+                        ...updatedItems[index],
+                        [fieldKey]: uploadedUrl,
+                      };
+                      return {
+                        ...prev,
+                        [arrayName]: updatedItems,
+                      };
+                    });
+                    onSuccess && onSuccess();
+                  },
+                  onError,
+                })
+              }
+            >
+              {currentUrl ? (
+                <img
+                  src={currentUrl}
+                  style={{
+                    width: 60,
+                    height: 60,
+                    objectFit: "cover",
+                    borderRadius: 4,
+                  }}
+                />
+              ) : (
+                <div style={{ padding: "4px 12px" }}>+ Upload</div>
+              )}
+            </Upload>
+          </ImgCrop>
+          {currentUrl && isEditing && (
+            <Button
+              size="small"
+              danger
+              onClick={() => {
+                setFormData((prev) => {
+                  const updatedItems = [...(prev[arrayName] || [])];
+                  updatedItems[index] = {
+                    ...updatedItems[index],
+                    [fieldKey]: "",
+                  };
+                  return {
+                    ...prev,
+                    [arrayName]: updatedItems,
+                  };
+                });
+              }}
+            >
+              Remove Image
+            </Button>
+          )}
+        </div>
       </div>
     );
   };
@@ -555,14 +602,26 @@ const DynamicForm = ({ schema }) => {
     if (!isEditing) return;
 
     let hasError = false;
+    let errorMessage = "Please ensure all phone numbers are exactly 10 digits.";
+
     schema?.fields?.forEach((field) => {
-      if (field.type === "tel" && formData[field.name] && formData[field.name].length !== 10) {
+      if (field.type === "tel" && formData[field.name]) {
+        if (formData[field.name].length !== 10) {
+          hasError = true;
+          errorMessage = `Please ensure ${field.label} is exactly 10 digits.`;
+        } else if (!/^[6-9]/.test(formData[field.name])) {
+          hasError = true;
+          errorMessage = `${field.label} must be a valid Indian mobile number (starting with 6, 7, 8, or 9).`;
+        }
+      }
+      if (field.name === "alternatePhone" && formData.alternatePhone && formData.phone && formData.alternatePhone === formData.phone) {
         hasError = true;
+        errorMessage = "Alternate phone cannot be same as primary phone.";
       }
     });
 
     if (hasError) {
-      message.error("Please ensure all phone numbers are exactly 10 digits.");
+      message.error(errorMessage);
       return;
     }
 
@@ -584,7 +643,9 @@ const DynamicForm = ({ schema }) => {
       <div className={styles.headertitleCont}>
         <div className={styles.headerLeft}>
           <h1 className={styles.formTitle}>{schema?.title}</h1>
-          <p className={styles.formSubtitle}>Update your {schema?.title?.toLowerCase()} below</p>
+          <p className={styles.formSubtitle}>
+            {schema?.subtitle || `Update your ${schema?.title?.toLowerCase()} below`}
+          </p>
         </div>
         {hasUserId && (
           <div className={styles.editButtonContainer}>

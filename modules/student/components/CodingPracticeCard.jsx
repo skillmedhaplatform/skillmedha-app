@@ -137,12 +137,12 @@ export default function CodingPracticeCard({
                 </div>
              </div>
              
-             <div className="flex items-center gap-3 mt-1 group-hover/box:scale-105 transition-transform duration-300 origin-left">
-               <div className="mt-1 drop-shadow-sm">
-                 <CodingBadge tier={currentBadge.t} level={currentBadge.l} size={40} />
-               </div>
+             <div className="flex flex-col items-center justify-center gap-2 mt-1 group-hover/box:scale-105 transition-transform duration-300">
                <div>
                  <div className="text-[14px] font-extrabold text-slate-800 leading-none">{currentBadge.t} {currentBadge.l}</div>
+               </div>
+               <div className="drop-shadow-sm">
+                 <CodingBadge tier={currentBadge.t} level={currentBadge.l} size={40} />
                </div>
              </div>
           </div>

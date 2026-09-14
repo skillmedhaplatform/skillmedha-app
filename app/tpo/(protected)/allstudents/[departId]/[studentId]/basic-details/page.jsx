@@ -223,7 +223,7 @@ const Basic = () => {
 
         <div className={details.regNumberRow}>
           <p className={details.regLabel}>Registration Number :</p>
-          <p className={details.regValue}>HGFXDCVBJHU</p>
+          <p className={details.regValue}>{selectedStudent?.data?.rollNumber || "N/A"}</p>
         </div>
 
         {/* Summary Section */}
@@ -298,7 +298,8 @@ const Basic = () => {
           }}
         />
 
-        {/* Address Section */}
+        
+        {/* Real Address Section */}
         <div className={details.about}>
           <div
             style={{
@@ -309,6 +310,107 @@ const Basic = () => {
             }}
           >
             <p className={details.head}>Address</p>
+            <div
+              style={{
+                backgroundColor: selectedStudent?.data?.addresses?.verificationType === "approved" ? "#e6f4ea" : selectedStudent?.data?.addresses?.verificationType === "resubmission" ? "#fef0db" : "#f3f4f6",
+                color: selectedStudent?.data?.addresses?.verificationType === "approved" ? "#1e8e3e" : selectedStudent?.data?.addresses?.verificationType === "resubmission" ? "#e67c00" : "#6b7280",
+                padding: "4px 12px",
+                borderRadius: "16px",
+                fontSize: "12px",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px"
+              }}
+            >
+              {selectedStudent?.data?.addresses?.verificationType === "approved" && <FaRegCheckCircle />}
+              {selectedStudent?.data?.addresses?.verificationType === "approved"
+                ? "Verified"
+                : selectedStudent?.data?.addresses?.verificationType === "resubmission"
+                ? "Asked for Resubmission"
+                : "Pending"}
+            </div>
+          </div>
+          <div className={details.mark}>
+            <Button
+              type="default"
+              style={{
+                backgroundColor: "#f4f8fb",
+                borderColor: "#6BA8ED",
+                color: "#6BA8ED",
+                fontWeight: 600,
+                borderRadius: "8px",
+                boxShadow: "none"
+              }}
+              onClick={() => approveSection("addresses")}
+              icon={<FaRegCheckCircle />}
+            >
+              Mark as Verified
+            </Button>
+            <Button
+              type="default"
+              style={{
+                backgroundColor: "#feeceb",
+                borderColor: "#fcb6b6",
+                color: "#e53e3e",
+                fontWeight: 600,
+                borderRadius: "8px",
+                boxShadow: "none"
+              }}
+              onClick={() => requestResubmission("addresses")}
+              icon={<IoMdCloseCircleOutline />}
+            >
+              Ask for Re-Submission
+            </Button>
+          </div>
+        </div>
+
+        <div className={details.aboutsidedata}>
+          <div className={details.leftSection}>
+            <div className={details.detailRow}>
+              <p className={details.label} style={{fontWeight:"bold", fontSize:"16px", marginBottom: "8px"}}>Current Address</p>
+            </div>
+            <div className={details.detailRow}>
+              <p className={details.value}>
+                {[
+                  selectedStudent?.data?.addresses?.currentAddress?.doorNo,
+                  selectedStudent?.data?.addresses?.currentAddress?.streetName,
+                  selectedStudent?.data?.addresses?.currentAddress?.cityName,
+                  selectedStudent?.data?.addresses?.currentAddress?.stateName,
+                  selectedStudent?.data?.addresses?.currentAddress?.pincode
+                ].filter(Boolean).join(", ") || "N/A"}
+              </p>
+            </div>
+          </div>
+          <div className={details.rightSection}>
+            <div className={details.detailRow}>
+              <p className={details.label} style={{fontWeight:"bold", fontSize:"16px", marginBottom: "8px"}}>Permanent Address</p>
+            </div>
+            <div className={details.detailRow}>
+              <p className={details.value}>
+                {[
+                  selectedStudent?.data?.addresses?.permanentAddress?.doorNo,
+                  selectedStudent?.data?.addresses?.permanentAddress?.streetName,
+                  selectedStudent?.data?.addresses?.permanentAddress?.cityName,
+                  selectedStudent?.data?.addresses?.permanentAddress?.stateName,
+                  selectedStudent?.data?.addresses?.permanentAddress?.pincode
+                ].filter(Boolean).join(", ") || "N/A"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Links Section */}
+        <div className={details.about}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "start",
+              alignItems: "center",
+              gap: "1rem",
+            }}
+          >
+            <p className={details.head}>Links</p>
             <div
               style={{
                 backgroundColor: selectedStudent?.data?.linksVerificationType === "approved" ? "#e6f4ea" : selectedStudent?.data?.linksVerificationType === "resubmission" ? "#fef0db" : "#f3f4f6",

@@ -66,7 +66,10 @@ export default function JobDetails({ JOBPROFILE, ALLPLACEMENTS }) {
         {JOBPROFILE?.applicableCourses?.length > 0 ? (
           JOBPROFILE?.applicableCourses?.map((course, i) => (
             <p key={i}>
-              {course?.degree} - {course?.department}
+              {course?.degree}
+              {course?.department && Array.isArray(course.department) && course.department.length > 0
+                ? ` - ${course.department.join(", ")}`
+                : (course?.department && !Array.isArray(course.department) ? ` - ${course.department}` : "")}
             </p>
           ))
         ) : (
@@ -85,6 +88,9 @@ export default function JobDetails({ JOBPROFILE, ALLPLACEMENTS }) {
             <strong key={i}>
               {criteria?.minMarksPercentage}% marks in{" "}
               {criteria?.educationLevel}
+              {criteria?.department && Array.isArray(criteria.department) && criteria.department.length > 0
+                ? ` - ${criteria.department.join(", ")}`
+                : (criteria?.department && !Array.isArray(criteria.department) ? ` - ${criteria.department}` : "")}
             </strong>
           ))}
         </div>

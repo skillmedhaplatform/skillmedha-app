@@ -163,9 +163,11 @@
     }
   }
   .textarea,
-  input:not([type="radio"]):not([type="checkbox"]) {
+  input:not([type="radio"]):not([type="checkbox"]):not([class*="ant-select"]) {
     flex: 1;
     padding: 0.5rem;
+    height: 40px;
+    box-sizing: border-box;
     border: 0;
     outline: 0;
     font-size: 16px;
@@ -204,6 +206,7 @@
     background-color: #eef5fb !important;
     border: 0.1px solid rgba(211, 211, 211, 0.35) !important;
     border-radius: 5px !important;
+    
   }
 
   :global(.ant-radio-button-wrapper) {
@@ -239,3 +242,4 @@
     opacity: 0.9;
   }
 }
+
