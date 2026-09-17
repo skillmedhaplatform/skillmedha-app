@@ -80,8 +80,8 @@ export default function TopicLayout({ children }) {
   }, [dispatch, internshipId, sectionId, topicId]);
 
   // Define navigation routes
-  const baseUrl = `/admin/course/${internshipId}/${sectionId}/${topicId}`;
-  const type = editTopic?.split("__")[1];
+  const baseUrl = `/admin/workshops/${internshipId}/${sectionId}/${topicId}`;
+  const type = editTopic?.includes("__") ? editTopic.split("__")[1] : editTopic;
   // const routes = useMemo(() => {
   //   const baseRoutes = [
   //     {

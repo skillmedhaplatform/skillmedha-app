@@ -66,3 +66,25 @@ export const parseIfJson = (val) => {
     return val;
   }
 };
+
+export const cleanTestCaseText = (val) => {
+  if (val === null || val === undefined) return "";
+  let text = typeof val === "object" ? JSON.stringify(val) : String(val);
+  text = text.replace(/^"|"$/g, "");
+  if (!/<[a-z][\s\S]*>/i.test(text) && !/&[a-z0-9]+;/i.test(text)) {
+    return text.trim();
+  }
+  text = text
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/\u00a0/g, " ");
+
+  return text.trim();
+};
