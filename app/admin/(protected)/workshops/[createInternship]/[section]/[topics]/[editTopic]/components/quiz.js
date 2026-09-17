@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useMemo, useState } from "react";
 import {
   Button,
@@ -49,7 +49,7 @@ export default function Quiz() {
 
   const [updating, setUpdating] = useState(false);
 
-  const baseUrl = `/admin/course/${internshipId}/${sectionId}/${topicId}/${editTopic}/new-question`;
+  const baseUrl = `/admin/workshops/${internshipId}/${sectionId}/${topicId}/${editTopic}/new-question`;
 
   const handleDelete = async (qId) => {
     try {
@@ -76,7 +76,7 @@ export default function Quiz() {
 
   const handleEdit = (qId) => {
     router.push(
-      `/admin/course/${internshipId}/${sectionId}/${topicId}/${editTopic}/${qId}`
+      `/admin/workshops/${internshipId}/${sectionId}/${topicId}/${editTopic}/${qId}`
     );
   };
 

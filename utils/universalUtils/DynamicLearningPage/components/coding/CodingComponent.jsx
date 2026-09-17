@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, memo } from "react";
-import { Button, Divider } from "antd";
+import { Button, Divider, Empty } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import CodingPage from "@/universalUtils/codeEditor/page";
 
@@ -11,7 +11,13 @@ import CodingPage from "@/universalUtils/codeEditor/page";
 const CodingComponent = memo(({ questions, onRunCode }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  if (!questions?.length) return null;
+  if (!questions?.length) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", width: "100%", padding: "2rem" }}>
+        <Empty description="No coding questions available for this topic" />
+      </div>
+    );
+  }
 
   const handlePrev = () => {
     if (currentIndex > 0) setCurrentIndex((prev) => prev - 1);

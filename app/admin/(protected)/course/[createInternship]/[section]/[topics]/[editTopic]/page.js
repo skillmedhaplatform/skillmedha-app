@@ -81,16 +81,20 @@ export default function Page() {
   // Redirect to overview if no editTopic param or if it's the base route
   useEffect(() => {
     if (!editTopic) {
-      router.replace(`/admin/course/${internshipId}/${sectionId}/${topicId}`);
+      router.replace(`/admin/course/${internshipId}/${sectionId}/${topicId}/topic`);
     }
   }, [editTopic, router, internshipId, sectionId, topicId]);
 
+  const currentType = editTopic?.includes("__") ? editTopic.split("__")[1] : editTopic;
+
   // Function to render the appropriate component
   const renderTabContent = () => {
-    switch (editTopic) {
+    switch (currentType) {
       case "topic":
+      case "overview":
         return <Overview />;
       case "pdf":
+      case "resources":
         return <Resources />;
       case "quiz":
         return <Quiz />;
@@ -99,7 +103,7 @@ export default function Page() {
       case "video":
         return <Video />;
       default:
-        return;
+        return <Overview />;
     }
   };
 

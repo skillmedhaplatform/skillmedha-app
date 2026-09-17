@@ -98,10 +98,19 @@ const TopicContentRouter = memo(({
       );
 
     case "coding":
+      const codingQs =
+        (Array.isArray(currentTopic?.coding) && currentTopic.coding.length > 0
+          ? currentTopic.coding
+          : Array.isArray(currentTopic?.codingQuestions) && currentTopic.codingQuestions.length > 0
+          ? currentTopic.codingQuestions
+          : Array.isArray(currentTopic?.questions) && currentTopic.questions.length > 0
+          ? currentTopic.questions
+          : currentTopic?.coding || []);
+
       return (
         <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <CodingComponent
-            questions={currentTopic?.coding}
+            questions={codingQs}
             onRunCode={() => markTopicCompleted(currentTopic, { progress: 100, totalDuration: 100 })}
           />
         </div>

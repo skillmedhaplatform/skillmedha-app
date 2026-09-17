@@ -1,6 +1,5 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { languageOptions } from "@/universalUtils/codeEditorLanguages";
-
-const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
 
 const CodeEditorSlice = createSlice({
   name: "CodeEditor",

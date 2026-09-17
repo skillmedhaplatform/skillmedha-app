@@ -12,11 +12,11 @@ import { aiUrl } from "../urls";
 import {
   addOutput,
   aiSuggestions as AIsuggestion,
-  setTestCaseResults,
+  setTestCaseResults as setReduxTestCaseResults,
   resetTestCaseResults,
   clearRunTestsRequest,
 } from "@/redux/slices/codeEditor";
-import { getLstorage, getSstorage, setSstorage } from "../windowMW";
+import { getLstorage, getSstorage, setSstorage, cleanTestCaseText } from "../windowMW";
 
 // ─── API Keys ─────────────────────────────────────────────────────────────────
 const apis = {
@@ -147,7 +147,9 @@ const Playground = ({ questionData, onTestResults }) => {
 
   // Sync testCaseResults to Redux
   useEffect(() => {
-    dispatch(setTestCaseResults(testCaseResults));
+    if (typeof setReduxTestCaseResults === "function") {
+      dispatch(setReduxTestCaseResults(testCaseResults));
+    }
   }, [testCaseResults, dispatch]);
 
   // Run tests on trigger
@@ -225,8 +227,8 @@ const Playground = ({ questionData, onTestResults }) => {
 
     const initial = tcs.map((tc, i) => ({
       index: i,
-      input: tc.input || "",
-      expectedOutput: tc.expectedOutput || "",
+      input: cleanTestCaseText(tc.input || ""),
+      expectedOutput: cleanTestCaseText(tc.expectedOutput || ""),
       actualOutput: "",
       status: "running",
     }));
@@ -242,9 +244,11 @@ const Playground = ({ questionData, onTestResults }) => {
       for (let i = 0; i < tcs.length; i++) {
         const tc = tcs[i];
         try {
-          const result = await executeCode(language_id, currentCode, tc.input || "");
+          const rawInput = cleanTestCaseText(tc.input || "");
+          const rawExpected = cleanTestCaseText(tc.expectedOutput || "");
+          const result = await executeCode(language_id, currentCode, rawInput);
           const actual = result.output.trim();
-          const expected = (tc.expectedOutput || "").trim();
+          const expected = rawExpected.trim();
           const ok = result.success && actual === expected;
           if (ok) passed++;
 
@@ -461,13 +465,13 @@ const Playground = ({ questionData, onTestResults }) => {
                           {tc.input && (
                             <div style={{ marginBottom: 4 }}>
                               <span style={{ fontSize: 10, color: "#8b949e", fontWeight: 600 }}>INPUT: </span>
-                              <code style={{ fontSize: 11, color: "#c9d1d9" }}>{tc.input}</code>
+                              <code style={{ fontSize: 11, color: "#c9d1d9" }}>{cleanTestCaseText(tc.input)}</code>
                             </div>
                           )}
                           {tc.expectedOutput && (
                             <div style={{ marginBottom: 4 }}>
                               <span style={{ fontSize: 10, color: "#8b949e", fontWeight: 600 }}>EXPECTED: </span>
-                              <code style={{ fontSize: 11, color: "#3fb950" }}>{tc.expectedOutput}</code>
+                              <code style={{ fontSize: 11, color: "#3fb950" }}>{cleanTestCaseText(tc.expectedOutput)}</code>
                             </div>
                           )}
                           {tc.actualOutput && (
