@@ -88,7 +88,7 @@ const TopicContentRouter = memo(({
 
     case "quiz":
       return (
-        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: "100%", height: "100%" }}>
           <QuizComponent
             questions={currentTopic?.quiz}
             handleNextTopic={handleNextTopic}
@@ -108,7 +108,7 @@ const TopicContentRouter = memo(({
           : currentTopic?.coding || []);
 
       return (
-        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: "100%", height: "100%" }}>
           <CodingComponent
             questions={codingQs}
             onRunCode={() => markTopicCompleted(currentTopic, { progress: 100, totalDuration: 100 })}

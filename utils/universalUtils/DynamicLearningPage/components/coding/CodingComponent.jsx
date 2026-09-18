@@ -38,46 +38,11 @@ const CodingComponent = memo(({ questions, onRunCode }) => {
         }
       }}
       style={{
-        flex: 1,
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
         width: "100%",
+        height: "100%",
       }}
     >
-      <div style={{ flex: 1, height: "100%" }}>
-        <CodingPage questionData={questions[currentIndex]} />
-      </div>
-      <Divider style={{ margin: ".5rem 0" }} />
-      <div
-        style={{
-          textAlign: "center",
-          width: "100%",
-          padding: ".5rem 1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          gap: "1rem",
-          alignSelf: "flex-end",
-        }}
-      >
-        <Button
-          type="default"
-          icon={<LeftOutlined />}
-          onClick={handlePrev}
-          disabled={currentIndex === 0}
-        >
-          Previous Question
-        </Button>
-        <Button
-          type="primary"
-          icon={<RightOutlined />}
-          onClick={handleNext}
-          disabled={currentIndex === questions.length - 1}
-        >
-          Next Question
-        </Button>
-      </div>
+      <CodingPage questionData={questions[currentIndex]} />
     </div>
   );
 });
