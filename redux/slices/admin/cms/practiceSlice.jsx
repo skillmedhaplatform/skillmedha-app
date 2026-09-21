@@ -397,10 +397,14 @@ const PracticeSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // --- Subjects Reducers ---
+      .addCase(fetchSubjects.pending, (state) => {
+      })
       .addCase(fetchSubjects.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.error = null;
         state.subjects = action.payload.data;
+      })
+      .addCase(fetchSubjectsByType.pending, (state) => {
       })
       .addCase(fetchSubjectsByType.fulfilled, (state, action) => {
         state.status = "succeeded";
@@ -432,6 +436,8 @@ const PracticeSlice = createSlice({
       })
 
       // --- Topics Reducers ---
+      .addCase(fetchTopicsBySubject.pending, (state) => {
+      })
       .addCase(fetchTopicsBySubject.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.error = null;
@@ -462,6 +468,8 @@ const PracticeSlice = createSlice({
       })
 
       // --- Subtopics Reducers ---
+      .addCase(fetchSubtopicsByTopic.pending, (state) => {
+      })
       .addCase(fetchSubtopicsByTopic.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.error = null;
@@ -494,6 +502,8 @@ const PracticeSlice = createSlice({
       })
 
       // --- Questions Reducers ---
+      .addCase(fetchQuestions.pending, (state) => {
+      })
       .addCase(fetchQuestions.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.error = null;

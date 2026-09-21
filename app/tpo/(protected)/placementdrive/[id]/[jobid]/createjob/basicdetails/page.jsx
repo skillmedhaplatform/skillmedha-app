@@ -427,12 +427,14 @@ export default function BasicDetailsPage() {
         <div className={styles.inpuCont}>
           <input
             type="date"
+            max="9999-12-31"
             value={basicDetails.startDate}
             onChange={(e) => handleInputChange("startDate", e.target.value)}
           />
           <span>-</span>
           <input
             type="date"
+            max="9999-12-31"
             value={basicDetails.endDate}
             onChange={(e) => handleInputChange("endDate", e.target.value)}
           />

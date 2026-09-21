@@ -1,11 +1,5 @@
 import axios from "axios";
 
-const apis = {
-  mi: "0384295621msheb61f4751e1b41ap10acc0jsn96fa40b5dc6d",
-};
-
-const BASE_URL = "https://compiler.skillmedha.com";
-
 const encode = (str) => {
   if (!str) return "";
   try {
@@ -31,34 +25,17 @@ const decode = (str) => {
 };
 
 export const postSubmission = async (language_id, source_code, stdin) => {
-  const res = await axios.request({
-    method: "POST",
-    url: `${BASE_URL}/submissions/`,
-    params: { base64_encoded: "true", fields: "*" },
-    headers: {
-      "Content-Type": "application/json",
-      "X-Auth-Token": "e05dac791e06052efacb1f9132323070",
-      "X-RapidAPI-Key": apis.mi,
-      "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-    },
-    data: { language_id, source_code: encode(source_code), stdin: encode(stdin) },
+  const res = await axios.post("/api/compiler/submit", {
+    language_id,
+    source_code: encode(source_code),
+    stdin: encode(stdin),
   });
   return res.data.token;
 };
 
 export const pollResult = async (token) => {
-  const opts = {
-    method: "GET",
-    url: `${BASE_URL}/submissions/${token}`,
-    params: { base64_encoded: "true", fields: "*" },
-    headers: {
-      "X-Auth-Token": "e05dac791e06052efacb1f9132323070",
-      "X-RapidAPI-Key": apis.mi,
-      "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-    },
-  };
   for (let i = 0; i < 15; i++) {
-    const res = await axios.request(opts);
+    const res = await axios.get(`/api/compiler/poll/${token}`);
     const sid = res.data?.status?.id ?? res.data?.status_id;
     if (sid > 2) return res.data;
     await new Promise((r) => setTimeout(r, 1000));

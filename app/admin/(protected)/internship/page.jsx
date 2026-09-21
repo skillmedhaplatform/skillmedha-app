@@ -882,7 +882,7 @@ const Page = () => {
                 <img
                   className={internshipLibStyles.thumb}
                   src={
-                    eachData?.media?.coverImage || eachData?.coverImage || ""
+                    eachData?.media?.coverImage || eachData?.coverImage || undefined
                   }
                   alt={eachData?.title || "Internship cover"}
                   loading="lazy"
@@ -983,15 +983,18 @@ const Page = () => {
                   )}
                 </div>
 
-                <p
-                  className={internshipLibStyles.description}
+                <Tooltip 
                   title={stripHtml?.(eachData?.description) || ""}
+                  placement="topLeft"
+                  overlayStyle={{ maxWidth: '400px' }}
                 >
-                  {(() => {
-                    const t = stripHtml?.(eachData?.description) || "";
-                    return t.slice(0, 120) + (t.length > 120 ? "…" : "");
-                  })()}
-                </p>
+                  <p className={internshipLibStyles.description}>
+                    {(() => {
+                      const t = stripHtml?.(eachData?.description) || "";
+                      return t.slice(0, 120) + (t.length > 120 ? "…" : "");
+                    })()}
+                  </p>
+                </Tooltip>
 
                 <div className={internshipLibStyles.footer}>
                   {(eachData?.lastAssignmentUpdate || eachData?.updatedAt) && (

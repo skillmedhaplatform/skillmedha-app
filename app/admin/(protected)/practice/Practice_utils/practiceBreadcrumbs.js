@@ -20,7 +20,7 @@ export default function PracticeBreadcrumbs() {
   const currPath = usePathname();
 
   // Get data from Redux to show proper names instead of IDs
-  const { subjects, topics, subtopics } = useSelector(
+  const { subjects, topics, subtopics, status } = useSelector(
     (state) => state.adminPractice || {}
   );
 
@@ -29,20 +29,20 @@ export default function PracticeBreadcrumbs() {
   // Helper function to get subject name by ID
   const getSubjectName = (subjectId) => {
     const subject = subjects?.find((s) => s._id === subjectId);
-    return subject?.title || subjectId;
+    return subject?.title || (status === "loading" ? "Loading..." : "Subject");
   };
 
   // Helper function to get topic name by ID
   const getTopicName = (topicId) => {
     const topic = topics?.find((t) => t._id === topicId);
-    return topic?.title || topicId;
+    return topic?.title || (status === "loading" ? "Loading..." : "Topic");
   };
 
   // Helper function to get subtopic name by ID
   const getSubtopicName = (subtopicId) => {
     if (subtopicId === "topic-questions") return "Topic Questions";
     const subtopic = subtopics?.find((st) => st._id === subtopicId);
-    return subtopic?.title || subtopicId;
+    return subtopic?.title || (status === "loading" ? "Loading..." : "Subtopic");
   };
 
   // Helper function to format category name for display

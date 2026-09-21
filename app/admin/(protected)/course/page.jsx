@@ -507,17 +507,37 @@ const Page = () => {
   };
 
   function stripHtml(html) {
-  if (typeof html !== 'string') return '';
-  let text = html
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#34;/g, '"');
-  return text.replace(/<[^>]*>/g, '');
-}
+    if (typeof html !== 'string') return '';
+    let text = html
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&#34;/g, '"');
+    
+    // Replace block tags with newline before stripping to ensure proper line breaks
+    text = text.replace(/<\/?(p|div|br|li|h[1-6])[^>]*>/gi, '\n');
+    text = text.replace(/<[^>]*>/g, '');
+
+    // Deduplicate repeated lines
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+    const uniqueLines = [...new Set(lines)];
+    
+    // Some descriptions have repeated sentences without line breaks (e.g., "Sentence.Sentence.Sentence.")
+    // Let's deduplicate sentences within each line.
+    const deduplicatedLines = uniqueLines.map(line => {
+      // Split by period, keeping the period (by matching it conditionally or adding it back)
+      // Since it's usually exactly repeated, we can split by "."
+      const sentences = line.split('.').map(s => s.trim()).filter(s => s);
+      const uniqueSentences = [...new Set(sentences)];
+      // Join back with ". "
+      return uniqueSentences.join('. ') + (uniqueSentences.length > 0 && line.endsWith('.') ? '.' : '');
+    });
+    
+    return deduplicatedLines.join('\n');
+  }
 
   function formatINR(value) {
     if (value === undefined || value === null) return "";
@@ -981,7 +1001,7 @@ const Page = () => {
                     )}
                     {eachData?.duration && (
                       <span className={internshipLibStyles.chip}>
-                        ⏱ {eachData.duration}
+                        ⏱ {/^\d+$/.test(String(eachData.duration).trim()) ? `${String(eachData.duration).trim()} Months` : eachData.duration}
                       </span>
                     )}
                     {eachData?.sections?.length ? (

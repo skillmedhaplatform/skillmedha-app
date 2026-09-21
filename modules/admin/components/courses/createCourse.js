@@ -1463,7 +1463,7 @@ const CreateCourse = ({ type = "course" }) => {
         {/* Validation Summary */}
         {Object.keys(validationErrors).length > 0 && (
           <Alert
-            message="Validation Errors"
+            title="Validation Errors"
             description={
               <ul style={{ marginBottom: 0, paddingLeft: "20px" }}>
                 {Object.entries(validationErrors).map(([key, error]) => (

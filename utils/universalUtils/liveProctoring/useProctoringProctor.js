@@ -197,8 +197,7 @@ const useProctoringProctor = ({
                         if (videoElement.paused && !videoElement.ended) {
                           videoElement
                             .play()
-                            .catch(e => 
-                            );
+                            .catch(e => console.error("Error playing video:", e));
                         }
                       } else {
                         console.error(

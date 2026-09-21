@@ -702,7 +702,7 @@ export default function College() {
                     )
                   }
                 >
-                  TPO ({college.tpoCount || 0})
+                  Manage TPOs
                 </Button>
                 <Button
                   type="default"
@@ -714,7 +714,7 @@ export default function College() {
                     )
                   }
                 >
-                  Departments ({college.departmentCount || 0})
+                  View Departments
                 </Button>
               </div>
             </div>
@@ -756,7 +756,7 @@ export default function College() {
             label="College Name"
             name="orgName"
             rules={[
-              { required: true, message: "Please enter College name" },
+              { required: true, message: "Please enter College name", whitespace: true },
               { min: 6, message: "Name must be at least 6 characters" },
               { max: 100, message: "Name must not exceed 100 characters" },
               {
@@ -772,8 +772,11 @@ export default function College() {
             label="Email"
             name="email"
             rules={[
-              { required: true, message: "Please enter email address" },
-              { type: "email", message: "Please enter a valid email address" },
+              { required: true, message: "Please enter email address", whitespace: true },
+              { 
+                pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                message: "Please enter a valid email address (e.g., example@domain.com)" 
+              },
             ]}
           >
             <Input placeholder="Enter email address" disabled={submitting} />
@@ -838,7 +841,7 @@ export default function College() {
           <Form.Item
             label="City"
             name="city"
-            rules={[{ required: true, message: "Please enter city name" }]}
+            rules={[{ required: true, message: "Please enter city name", whitespace: true }]}
           >
             <Input placeholder="Enter city name" disabled={submitting} />
           </Form.Item>

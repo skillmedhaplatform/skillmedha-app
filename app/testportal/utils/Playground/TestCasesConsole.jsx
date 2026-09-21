@@ -22,13 +22,7 @@ import {
 
 const { TextArea } = Input;
 
-const apis = {
-  ks: "7aeb8e5c51msh18112baa8b7c300p18ab0ajsn09826bf33308",
-  te: "10781cb80bmsh46e2798d6a46332p19663ejsn5557d9fa34d1",
-  vs: "77c854fb76mshe24f3243106be66p11a6bajsn7c9921a96d7e",
-  mi: "0384295621msheb61f4751e1b41ap10acc0jsn96fa40b5dc6d",
-};
-// TestCasesConsole Component
+import { executeCode } from "@/utils/judge0";
 const TestCasesConsole = ({
   testCases,
   updateTestCase,
@@ -365,96 +359,9 @@ _start:
 
   const dispatch = useDispatch();
 
-  // Encoding and decoding functions
-  const encode = (str) => {
-    return Buffer.from(str, "binary").toString("base64");
-  };
-
-  const decode = (str) => {
-    return Buffer.from(str, "base64").toString();
-  };
-
   // Save code function
   const saveCode = () => {
     savePlayground(folderId, playgroundId, currentCode, currentLanguage);
-  };
-
-  // Submit code with stdin to the compilation server
-  const postSubmission = async (language_id, source_code, stdin) => {
-    const options = {
-      method: "POST",
-      url: baseCompUrl + `/submissions/`,
-      params: { base64_encoded: "true", fields: "*" },
-      headers: {
-        "X-Auth-Token": "e05dac791e06052efacb1f9132323070",
-        "content-type": "application/json",
-        "Content-Type": "application/json",
-        "X-RapidAPI-Key": apis.mi,
-        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-      },
-      data: JSON.stringify({
-        language_id: language_id,
-        source_code: source_code,
-        stdin: stdin, // This is where stdin is sent
-      }),
-    };
-
-    const res = await axios.request(options);
-    return res.data.token;
-  };
-
-  // Fetch execution results
-  const getOutput = async (token) => {
-    const options = {
-      method: "GET",
-      url: baseCompUrl + `/submissions/${token}`,
-      params: { base64_encoded: "true", fields: "*" },
-      headers: {
-        "X-Auth-Token": "e05dac791e06052efacb1f9132323070",
-        "X-RapidAPI-Key": apis.mi,
-        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-      },
-    };
-
-    try {
-      let tries = 0;
-      let res;
-
-      // Poll for results (Judge0 is async)
-      while (tries < 15) {
-        // Increased tries for better reliability
-        res = await axios.request(options);
-
-        // Normalize data if Judge0 returns unwrapped
-        if (!res.data && res.source_code) {
-          res.data = res;
-        }
-
-        // Check if execution is complete (status > 2 means finished)
-        if (res.data?.status?.id > 2 || res.data?.status_id > 2) {
-          return res.data;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second
-        tries++;
-      }
-
-      return (
-        res?.data || {
-          status: { id: -1, description: "Execution timed out" },
-          stdout: "",
-          stderr: "Execution timed out after 15 attempts.",
-          compile_output: "",
-        }
-      );
-    } catch (err) {
-      return {
-        status: { id: -1, description: "Network Error" },
-        stdout: "",
-        stderr: err.message || "Unknown network error occurred",
-        compile_output: "",
-      };
-    }
   };
 
   // Get AI suggestions
@@ -480,36 +387,11 @@ _start:
       throw new Error("Unsupported language selected");
     }
 
-    const source_code = encode(currentCode);
-    const stdin = encode(input);
-
-    const token = await postSubmission(language_id, source_code, stdin);
-
-    if (!token) {
-      throw new Error("Failed to get submission token");
-    }
-
-    const res = await getOutput(token);
-
-    const status_name = res.status?.description || "Unknown Status";
-    const decoded_output = decode(res.stdout || "");
-    const decoded_compile_output = decode(res.compile_output || "");
-    const decoded_error = decode(res.stderr || "");
-
-    let final_output = "";
-    let success = false;
-
-    if (res.status_id === 3 || res.status?.id === 3) {
-      final_output = decoded_output;
-      success = true;
-    } else {
-      final_output =
-        decoded_compile_output || decoded_error || "Unknown error occurred";
-    }
+    const { output, statusName, success } = await executeCode(language_id, currentCode, input);
 
     return {
-      output: final_output,
-      status: status_name,
+      output: output,
+      status: statusName,
       success,
     };
   };
@@ -667,7 +549,7 @@ _start:
       .then((content) => {
         setState(content);
       })
-      .catch(error => );
+      .catch((error) => console.error("Error reading file:", error));
   };
 
   function readFileContent(file) {

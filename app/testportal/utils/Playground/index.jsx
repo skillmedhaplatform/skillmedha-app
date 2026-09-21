@@ -16,13 +16,7 @@ import {
 } from "@/app/testportal/redux/slices/codeEditor";
 import { aiUrl } from "../urls";
 import { getSstorage, setSstorage } from "../storageMiddleware";
-
-const apis = {
-  ks: "7aeb8e5c51msh18112baa8b7c300p18ab0ajsn09826bf33308",
-  te: "10781cb80bmsh46e2798d6a46332p19663ejsn5557d9fa34d1",
-  vs: "77c854fb76mshe24f3243106be66p11a6bajsn7c9921a96d7e",
-  mi: "0384295621msheb61f4751e1b41ap10acc0jsn96fa40b5dc6d",
-};
+import { executeCode } from "@/utils/judge0";
 
 // Store per-question data in sessionStorage
 const storeCodingQuestion = (rawData) => {
@@ -54,9 +48,6 @@ const loadEntry = (qid) => {
   }
 };
 
-const encode = (str) => Buffer.from(str ?? "", "binary").toString("base64");
-const decode = (str) => Buffer.from(str ?? "", "base64").toString();
-
 const Playground = ({ questionData }) => {
   const aiSuggestions =
     useSelector((state) => state.codeEditor.aiSuggestions) || [];
@@ -74,82 +65,7 @@ const Playground = ({ questionData }) => {
   const [currentInput, setCurrentInput] = useState("");
   const [currentOutput, setCurrentOutput] = useState("");
 
-  const baseCompUrl = `https://compiler.skillmedha.com`;
   const dispatch = useDispatch();
-
-  // Submit code with stdin to the compilation server
-  const postSubmission = async (language_id, source_code, stdin) => {
-    const options = {
-      method: "POST",
-      url: baseCompUrl + `/submissions/`,
-      params: { base64_encoded: "true", fields: "*" },
-      headers: {
-        "X-Auth-Token": "e05dac791e06052efacb1f9132323070",
-        "content-type": "application/json",
-        "Content-Type": "application/json",
-        "X-RapidAPI-Key": apis.mi,
-        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-      },
-      data: JSON.stringify({
-        language_id,
-        source_code,
-        stdin,
-      }),
-    };
-
-    const res = await axios.request(options);
-    return res.data.token;
-  };
-
-  // Fetch execution results (poll)
-  const getOutput = async (token) => {
-    const options = {
-      method: "GET",
-      url: baseCompUrl + `/submissions/${token}`,
-      params: { base64_encoded: "true", fields: "*" },
-      headers: {
-        "X-Auth-Token": "e05dac791e06052efacb1f9132323070",
-        "X-RapidAPI-Key": apis.mi,
-        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-      },
-    };
-
-    try {
-      let tries = 0;
-      let res;
-
-      while (tries < 15) {
-        res = await axios.request(options);
-
-        if (!res.data && res.source_code) {
-          res.data = res;
-        }
-
-        if (res.data?.status?.id > 2 || res.data?.status_id > 2) {
-          return res.data;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        tries++;
-      }
-
-      return (
-        res?.data || {
-          status: { id: -1, description: "Execution timed out" },
-          stdout: "",
-          stderr: "Execution timed out after 15 attempts.",
-          compile_output: "",
-        }
-      );
-    } catch (err) {
-      return {
-        status: { id: -1, description: "Network Error" },
-        stdout: "",
-        stderr: err.message || "Unknown network error occurred",
-        compile_output: "",
-      };
-    }
-  };
 
   // Get AI suggestions
   const getAiSugg = async () => {
@@ -175,36 +91,24 @@ const Playground = ({ questionData }) => {
       const language_id = languageKey?.id;
       if (!language_id) throw new Error("Unsupported language selected");
 
-      const source_code = encode(currentCode);
-      const stdin = encode(currentInput);
-
       const aiPromise = getAiSugg();
-      const token = await postSubmission(language_id, source_code, stdin);
-      if (!token) throw new Error("Failed to get submission token");
+      const [execResult, aiData] = await Promise.all([
+        executeCode(language_id, currentCode, currentInput),
+        aiPromise
+      ]);
 
-      const [res, aiData] = await Promise.all([getOutput(token), aiPromise]);
-
-      const status_name = res.status?.description || "Unknown Status";
-      const decoded_output = decode(res.stdout || "");
-      const decoded_compile_output = decode(res.compile_output || "");
-      const decoded_error = decode(res.stderr || "");
-
-      let final_output = "";
-      if (res.status_id === 3 || res.status?.id === 3) {
-        final_output = decoded_output;
+      if (execResult.success) {
         message.success("Code executed successfully!", 2);
       } else {
-        final_output =
-          decoded_compile_output || decoded_error || "Unknown error occurred";
-        message.error(`Execution failed: ${status_name}`, 3);
+        message.error(`Execution failed: ${execResult.statusName}`, 3);
       }
 
-      setCurrentOutput(`Status: ${status_name}\n\n${final_output}`);
+      setCurrentOutput(`Status: ${execResult.statusName}\n\n${execResult.output}`);
 
       storeCodingQuestion({
         questionId: questionData?._id,
         aisuggestion: aiData || aiSuggestions,
-        language_id,
+        language_id: languageId,
         languageKey,
         code: currentCode,
       });

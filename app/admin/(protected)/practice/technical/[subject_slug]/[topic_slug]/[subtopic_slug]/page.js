@@ -16,6 +16,7 @@ import {
   message,
   Input,
   Select,
+  Skeleton,
 } from "antd";
 import {
   EditOutlined,
@@ -329,11 +330,17 @@ export default function QuestionsPage({
 
   // Use selector with shallow equality check
   const questions = useSelector((state) => state.adminPractice.questions);
-  const loading = useSelector((state) => state.adminPractice.loading);
+  const loading = useSelector((state) => state.adminPractice.status === "loading");
   const isTopicLevel = isEmbedded || subtopic_slug === "topic-questions";
 
   const filteredQuestions = useMemo(() => {
     let result = questions || [];
+    
+    // Filter out subtopic questions if we are at the topic level
+    if (isTopicLevel) {
+      result = result.filter(q => !q.subTopicId);
+    }
+
     if (filterType !== "All") {
       result = result.filter(q => q.questionType === filterType);
     }
@@ -341,7 +348,7 @@ export default function QuestionsPage({
       result = result.filter(q => (q.scoreSettings?.pointsForCorrectAns || 0) === Number(filterPoints));
     }
     return result;
-  }, [questions, filterType, filterPoints]);
+  }, [questions, filterType, filterPoints, isTopicLevel]);
 
   // Reset selection when filters change
   useEffect(() => {
@@ -461,7 +468,7 @@ export default function QuestionsPage({
         </div>
         <Divider style={{ margin: "1rem 0" }} />
         <div className={styles.loadingState}>
-          <Text>Loading questions...</Text>
+          <Skeleton active paragraph={{ rows: 6 }} />
         </div>
       </div>
     );

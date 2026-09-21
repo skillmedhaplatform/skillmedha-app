@@ -14,7 +14,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { TrendingUp, Users, Briefcase, BookOpen, Calendar } from "lucide-react";
+import { TrendingUp, Users, Briefcase, BookOpen, Calendar, Award } from "lucide-react";
 import styles from "./GrowthCharts.module.scss";
 
 export default function GrowthCharts({ data, loading, onPeriodChange }) {
@@ -42,6 +42,7 @@ export default function GrowthCharts({ data, loading, onPeriodChange }) {
     { id: "students", label: "Students", icon: Users },
     { id: "jobs", label: "Jobs", icon: Briefcase },
     { id: "courses", label: "Courses", icon: BookOpen },
+    { id: "internships", label: "Internships", icon: Award },
   ];
 
   return (
@@ -276,6 +277,45 @@ export default function GrowthCharts({ data, loading, onPeriodChange }) {
                   fillOpacity={1}
                   fill="url(#colorCourses)"
                   name="Courses"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+        {/* Area Chart - Internships */}
+        {activeChart === "internships" && (
+          <div className={styles.chartCard}>
+            <h3>Internships Growth</h3>
+            <ResponsiveContainer width="100%" height={400}>
+              <AreaChart data={data.dataPoints}>
+                <defs>
+                  <linearGradient id="colorInternships" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#a78bfa" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#a78bfa" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="month"
+                  stroke="#6b7280"
+                  style={{ fontSize: "12px" }}
+                />
+                <YAxis stroke="#6b7280" style={{ fontSize: "12px" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    padding: "12px",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="internships"
+                  stroke="#a78bfa"
+                  fillOpacity={1}
+                  fill="url(#colorInternships)"
+                  name="Internships"
                 />
               </AreaChart>
             </ResponsiveContainer>
