@@ -49,7 +49,7 @@ const TitleBar = memo(({
           percent={displayProgress}
           size={45}
           strokeColor={isNavigating ? "#faad14" : "#2563eb"}
-          trailColor="#eff6ff"
+          railColor="#eff6ff"
           strokeWidth={10}
         />
         <div className={interPageStyles.courseHeading}>

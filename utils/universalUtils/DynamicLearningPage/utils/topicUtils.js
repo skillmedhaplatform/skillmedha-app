@@ -57,12 +57,15 @@ export const parseDurationToMinutes = (value) => {
  */
 export const getTopicType = (topic) => {
   const explicitType = String(topic?.type || "").toLowerCase().trim();
-  if (explicitType) return explicitType;
+  if (explicitType && explicitType !== "topic") return explicitType;
 
+  if (Array.isArray(topic?.coding) && topic.coding.length > 0) return "coding";
+  if (Array.isArray(topic?.codingQuestions) && topic.codingQuestions.length > 0) return "coding";
+  if (Array.isArray(topic?.quiz)   && topic.quiz.length   > 0) return "quiz";
   if (Array.isArray(topic?.pdf)    && topic.pdf.length    > 0) return "pdf";
   if (Array.isArray(topic?.videos) && topic.videos.length > 0) return "video";
-  if (Array.isArray(topic?.quiz)   && topic.quiz.length   > 0) return "quiz";
-  if (Array.isArray(topic?.coding) && topic.coding.length > 0) return "coding";
+
+  if (explicitType === "topic") return "topic";
 
   const title = String(topic?.title || "").toLowerCase();
   if (title.includes("pdf"))                         return "pdf";

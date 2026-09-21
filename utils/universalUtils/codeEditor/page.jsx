@@ -14,6 +14,8 @@ import { resetOutput, resetAiSuggestions } from "@/redux/slices/codeEditor";
 import PlaygroundProvider from "./context/PlaygroundContext";
 import Playground from ".";
 
+import { cleanTestCaseText } from "../windowMW";
+
 const parseIfJson = (text) => {
   try {
     return JSON.parse(text);
@@ -176,7 +178,7 @@ const CodingPage = ({ questionData }) => {
                             <div className={pageStyles.tcRow}>
                               <span className={pageStyles.tcLbl}>Input</span>
                               <span className={pageStyles.tcVal}>
-                                {parseIfJson(tc.input)}
+                                {cleanTestCaseText(parseIfJson(tc.input))}
                               </span>
                             </div>
                           )}
@@ -184,7 +186,7 @@ const CodingPage = ({ questionData }) => {
                             <div className={pageStyles.tcRow}>
                               <span className={pageStyles.tcLbl}>Expected</span>
                               <span className={pageStyles.tcVal}>
-                                {parseIfJson(tc.expectedOutput)}
+                                {cleanTestCaseText(parseIfJson(tc.expectedOutput))}
                               </span>
                             </div>
                           )}

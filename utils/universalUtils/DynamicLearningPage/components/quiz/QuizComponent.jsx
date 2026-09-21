@@ -130,9 +130,8 @@ const QuizComponent = memo(({ questions, onComplete, handleNextTopic }) => {
     return (
       <div
         style={{
-          width: "90%", height: "90%", maxWidth: "800px", padding: "24px",
-          backgroundColor: "#fff", borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          width: "100%", height: "100%", padding: "24px",
+          backgroundColor: "#fff", boxSizing: "border-box", overflowY: "auto",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}
       >
@@ -156,187 +155,189 @@ const QuizComponent = memo(({ questions, onComplete, handleNextTopic }) => {
   return (
     <div
       style={{
-        width: "90%", height: "90%", maxWidth: "800px", padding: "24px",
-        backgroundColor: "#fff", borderRadius: "12px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.1)", overflowY: "scroll",
+        width: "100%", height: "100%", padding: "1.5rem 2rem 3rem",
+        backgroundColor: "#fff", boxSizing: "border-box", overflowY: "auto",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start",
       }}
     >
-      <div style={{ marginBottom: "20px" }}>
-        <div style={{ fontSize: "14px", color: "#666", marginBottom: "8px", fontWeight: "500" }}>
-          Question {currentQuestionIndex + 1} of {questions.length} • {currentQuestion.questionType}
+      <div style={{ width: "100%", maxWidth: "850px" }}>
+        <div style={{ marginBottom: "20px" }}>
+          <div style={{ fontSize: "14px", color: "#666", marginBottom: "8px", fontWeight: "500" }}>
+            Question {currentQuestionIndex + 1} of {questions.length} • {currentQuestion.questionType}
+          </div>
+          <div
+            style={{ fontSize: "18px", fontWeight: "600", color: "#333", lineHeight: "1.5" }}
+            dangerouslySetInnerHTML={{ __html: currentQuestion.questionContent?.question?.replace(/"/g, "") }}
+          />
         </div>
-        <div
-          style={{ fontSize: "18px", fontWeight: "600", color: "#333", lineHeight: "1.5" }}
-          dangerouslySetInnerHTML={{ __html: currentQuestion.questionContent?.question?.replace(/"/g, "") }}
-        />
-      </div>
 
-      {currentQuestion.questionType === "True/False" ? (
-        <div style={{ marginBottom: "24px" }}>
-          {["True", "False"].map((option) => (
-            <div
-              key={option}
-              onClick={() => !isSubmitted && handleTrueFalse(option.toLowerCase() === "true")}
-              style={{
-                padding: "16px", margin: "8px 0",
-                border: selectedAnswers[currentQuestion.id]?.answer === (option.toLowerCase() === "true") ? "2px solid #2196f3" : "1px solid #ddd",
-                backgroundColor: selectedAnswers[currentQuestion.id]?.answer === (option.toLowerCase() === "true") ? "#e3f2fd" : "#f9f9f9",
-                borderRadius: "8px", cursor: isSubmitted ? "default" : "pointer", transition: "all 0.2s ease",
-              }}
-            >
-              <label style={{ cursor: isSubmitted ? "default" : "pointer", fontSize: "16px" }}>
-                <input
-                  type="radio"
-                  name={`question-${currentQuestion.id}`}
-                  checked={selectedAnswers[currentQuestion.id]?.answer === (option.toLowerCase() === "true")}
-                  onChange={() => { }}
-                  style={{ marginRight: "12px" }}
-                />
-                {option}
-              </label>
+        {currentQuestion.questionType === "True/False" ? (
+          <div style={{ marginBottom: "24px" }}>
+            {["True", "False"].map((option) => (
+              <div
+                key={option}
+                onClick={() => !isSubmitted && handleTrueFalse(option.toLowerCase() === "true")}
+                style={{
+                  padding: "16px", margin: "8px 0",
+                  border: selectedAnswers[currentQuestion.id]?.answer === (option.toLowerCase() === "true") ? "2px solid #2196f3" : "1px solid #ddd",
+                  backgroundColor: selectedAnswers[currentQuestion.id]?.answer === (option.toLowerCase() === "true") ? "#e3f2fd" : "#f9f9f9",
+                  borderRadius: "8px", cursor: isSubmitted ? "default" : "pointer", transition: "all 0.2s ease",
+                }}
+              >
+                <label style={{ cursor: isSubmitted ? "default" : "pointer", fontSize: "16px" }}>
+                  <input
+                    type="radio"
+                    name={`question-${currentQuestion.id}`}
+                    checked={selectedAnswers[currentQuestion.id]?.answer === (option.toLowerCase() === "true")}
+                    onChange={() => { }}
+                    style={{ marginRight: "12px" }}
+                  />
+                  {option}
+                </label>
+              </div>
+            ))}
+          </div>
+        ) : currentQuestion.questionType === "Video" ? (
+          <div style={{ marginBottom: "24px" }}>
+            <video controls style={{ width: "100%", maxHeight: "400px", borderRadius: "8px", marginBottom: "16px" }} src={currentQuestion.resources?.url}>
+              Your browser does not support the video tag.
+            </video>
+            <div style={{ marginTop: "16px" }}>
+              <label style={{ display: "block", fontWeight: "600", marginBottom: "8px", color: "#333" }}>Your Answer:</label>
+              <textarea
+                value={textAnswers[currentQuestion.id] || ""}
+                onChange={(e) => handleTextAnswerChange(e.target.value)}
+                placeholder="Type your answer here..."
+                style={{ width: "100%", minHeight: "100px", padding: "12px", border: "1px solid #ddd", borderRadius: "8px", fontSize: "14px", fontFamily: "inherit", resize: "vertical" }}
+                disabled={isSubmitted}
+              />
             </div>
-          ))}
-        </div>
-      ) : currentQuestion.questionType === "Video" ? (
-        <div style={{ marginBottom: "24px" }}>
-          <video controls style={{ width: "100%", maxHeight: "400px", borderRadius: "8px", marginBottom: "16px" }} src={currentQuestion.resources?.url}>
-            Your browser does not support the video tag.
-          </video>
-          <div style={{ marginTop: "16px" }}>
-            <label style={{ display: "block", fontWeight: "600", marginBottom: "8px", color: "#333" }}>Your Answer:</label>
-            <textarea
-              value={textAnswers[currentQuestion.id] || ""}
-              onChange={(e) => handleTextAnswerChange(e.target.value)}
-              placeholder="Type your answer here..."
-              style={{ width: "100%", minHeight: "100px", padding: "12px", border: "1px solid #ddd", borderRadius: "8px", fontSize: "14px", fontFamily: "inherit", resize: "vertical" }}
-              disabled={isSubmitted}
-            />
           </div>
-        </div>
-      ) : currentQuestion.questionType === "Audio" ? (
-        <div style={{ marginBottom: "24px" }}>
-          <audio controls style={{ width: "100%", marginBottom: "16px" }} src={currentQuestion.resources?.url}>
-            Your browser does not support the audio element.
-          </audio>
-          <div style={{ marginTop: "16px" }}>
-            <label style={{ display: "block", fontWeight: "600", marginBottom: "8px", color: "#333" }}>Your Answer:</label>
-            <textarea
-              value={textAnswers[currentQuestion.id] || ""}
-              onChange={(e) => handleTextAnswerChange(e.target.value)}
-              placeholder="Type your answer here..."
-              style={{ width: "100%", minHeight: "100px", padding: "12px", border: "1px solid #ddd", borderRadius: "8px", fontSize: "14px", fontFamily: "inherit", resize: "vertical" }}
-              disabled={isSubmitted}
-            />
-          </div>
-        </div>
-      ) : currentQuestion.questionType === "Text" ? (
-        <div style={{ marginBottom: "24px" }}>
-          <div style={{ marginTop: "16px" }}>
-            <label style={{ display: "block", fontWeight: "600", marginBottom: "8px", color: "#333" }}>Your Answer:</label>
-            <textarea
-              value={textAnswers[currentQuestion.id] || ""}
-              onChange={(e) => handleTextAnswerChange(e.target.value)}
-              placeholder="Type your detailed answer here..."
-              style={{ width: "100%", minHeight: "150px", padding: "12px", border: "1px solid #ddd", borderRadius: "8px", fontSize: "14px", fontFamily: "inherit", resize: "vertical" }}
-              disabled={isSubmitted}
-            />
-          </div>
-        </div>
-      ) : (
-        <div style={{ marginBottom: "24px" }}>
-          {questionOptions.map((optionKey) => (
-            <div
-              key={optionKey}
-              onClick={() => !isSubmitted && handleOptionSelect(optionKey, currentQuestion.questionContent[optionKey])}
-              style={{
-                ...getOptionStyle(optionKey),
-                padding: "16px", margin: "8px 0", borderRadius: "8px",
-                cursor: isSubmitted ? "default" : "pointer", transition: "all 0.2s ease",
-              }}
-            >
-              <label style={{ cursor: isSubmitted ? "default" : "pointer", fontSize: "16px", display: "flex", alignItems: "flex-start" }}>
-                <input
-                  type={currentQuestion.questionType === "Multiple Choice" ? "checkbox" : "radio"}
-                  name={currentQuestion.questionType === "Single Choice" ? `question-${currentQuestion.id}` : undefined}
-                  checked={!!selectedAnswers[currentQuestion.id]?.[optionKey]}
-                  onChange={() => { }}
-                  style={{ marginRight: "12px", marginTop: "2px" }}
-                />
-                <div dangerouslySetInnerHTML={{ __html: currentQuestion.questionContent[optionKey]?.replace(/"/g, "") }} />
-              </label>
+        ) : currentQuestion.questionType === "Audio" ? (
+          <div style={{ marginBottom: "24px" }}>
+            <audio controls style={{ width: "100%", marginBottom: "16px" }} src={currentQuestion.resources?.url}>
+              Your browser does not support the audio element.
+            </audio>
+            <div style={{ marginTop: "16px" }}>
+              <label style={{ display: "block", fontWeight: "600", marginBottom: "8px", color: "#333" }}>Your Answer:</label>
+              <textarea
+                value={textAnswers[currentQuestion.id] || ""}
+                onChange={(e) => handleTextAnswerChange(e.target.value)}
+                placeholder="Type your answer here..."
+                style={{ width: "100%", minHeight: "100px", padding: "12px", border: "1px solid #ddd", borderRadius: "8px", fontSize: "14px", fontFamily: "inherit", resize: "vertical" }}
+                disabled={isSubmitted}
+              />
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ) : currentQuestion.questionType === "Text" ? (
+          <div style={{ marginBottom: "24px" }}>
+            <div style={{ marginTop: "16px" }}>
+              <label style={{ display: "block", fontWeight: "600", marginBottom: "8px", color: "#333" }}>Your Answer:</label>
+              <textarea
+                value={textAnswers[currentQuestion.id] || ""}
+                onChange={(e) => handleTextAnswerChange(e.target.value)}
+                placeholder="Type your detailed answer here..."
+                style={{ width: "100%", minHeight: "150px", padding: "12px", border: "1px solid #ddd", borderRadius: "8px", fontSize: "14px", fontFamily: "inherit", resize: "vertical" }}
+                disabled={isSubmitted}
+              />
+            </div>
+          </div>
+        ) : (
+          <div style={{ marginBottom: "24px" }}>
+            {questionOptions.map((optionKey) => (
+              <div
+                key={optionKey}
+                onClick={() => !isSubmitted && handleOptionSelect(optionKey, currentQuestion.questionContent[optionKey])}
+                style={{
+                  ...getOptionStyle(optionKey),
+                  padding: "16px", margin: "8px 0", borderRadius: "8px",
+                  cursor: isSubmitted ? "default" : "pointer", transition: "all 0.2s ease",
+                }}
+              >
+                <label style={{ cursor: isSubmitted ? "default" : "pointer", fontSize: "16px", display: "flex", alignItems: "flex-start" }}>
+                  <input
+                    type={currentQuestion.questionType === "Multiple Choice" ? "checkbox" : "radio"}
+                    name={currentQuestion.questionType === "Single Choice" ? `question-${currentQuestion.id}` : undefined}
+                    checked={!!selectedAnswers[currentQuestion.id]?.[optionKey]}
+                    onChange={() => { }}
+                    style={{ marginRight: "12px", marginTop: "2px" }}
+                  />
+                  <div dangerouslySetInnerHTML={{ __html: currentQuestion.questionContent[optionKey]?.replace(/"/g, "") }} />
+                </label>
+              </div>
+            ))}
+          </div>
+        )}
 
-      {showExplanation && currentQuestion.answer?.explanation && (
-        <div style={{ backgroundColor: "#f0f7ff", padding: "16px", borderRadius: "8px", marginBottom: "20px", border: "1px solid #b3d9ff" }}>
-          <div style={{ fontWeight: "600", marginBottom: "8px", color: "#1976d2" }}>Explanation:</div>
-          <div style={{ color: "#333", lineHeight: "1.5" }} dangerouslySetInnerHTML={{ __html: currentQuestion.answer.explanation?.replace(/"/g, "") }} />
-        </div>
-      )}
+        {showExplanation && currentQuestion.answer?.explanation && (
+          <div style={{ backgroundColor: "#f0f7ff", padding: "16px", borderRadius: "8px", marginBottom: "20px", border: "1px solid #b3d9ff" }}>
+            <div style={{ fontWeight: "600", marginBottom: "8px", color: "#1976d2" }}>Explanation:</div>
+            <div style={{ color: "#333", lineHeight: "1.5" }} dangerouslySetInnerHTML={{ __html: currentQuestion.answer.explanation?.replace(/"/g, "") }} />
+          </div>
+        )}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #eee", paddingTop: "20px" }}>
-        <button
-          onClick={previousQuestion}
-          disabled={currentQuestionIndex === 0}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: currentQuestionIndex === 0 ? "#f5f5f5" : "#fff",
-            color: currentQuestionIndex === 0 ? "#ccc" : "#333",
-            border: "1px solid #ddd", borderRadius: "6px",
-            cursor: currentQuestionIndex === 0 ? "not-allowed" : "pointer",
-          }}
-        >
-          Previous
-        </button>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #eee", paddingTop: "20px" }}>
+          <button
+            onClick={previousQuestion}
+            disabled={currentQuestionIndex === 0}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: currentQuestionIndex === 0 ? "#f5f5f5" : "#fff",
+              color: currentQuestionIndex === 0 ? "#ccc" : "#333",
+              border: "1px solid #ddd", borderRadius: "6px",
+              cursor: currentQuestionIndex === 0 ? "not-allowed" : "pointer",
+            }}
+          >
+            Previous
+          </button>
 
-        <div style={{ display: "flex", gap: "12px" }}>
-          {!isSubmitted && !isLastQuestion && (
-            <button
-              onClick={submitAnswer}
-              disabled={!hasAnswer()}
-              style={{
-                padding: "10px 24px",
-                backgroundColor: hasAnswer() ? "#2196f3" : "#f5f5f5",
-                color: hasAnswer() ? "#fff" : "#ccc",
-                border: "none", borderRadius: "6px",
-                cursor: hasAnswer() ? "pointer" : "not-allowed",
-              }}
-            >
-              Submit Answer
-            </button>
-          )}
-          {isLastQuestion ? (
-            <button
-              onClick={submitQuiz}
-              disabled={!hasAnswer()}
-              style={{
-                padding: "10px 24px",
-                backgroundColor: hasAnswer() ? "#4caf50" : "#f5f5f5",
-                color: hasAnswer() ? "#fff" : "#ccc",
-                border: "none", borderRadius: "6px",
-                cursor: hasAnswer() ? "pointer" : "not-allowed",
-                fontWeight: "600",
-              }}
-            >
-              Submit Quiz
-            </button>
-          ) : (
-            <button
-              onClick={nextQuestion}
-              disabled={currentQuestionIndex === questions.length - 1}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: currentQuestionIndex === questions.length - 1 ? "#f5f5f5" : "#4caf50",
-                color: currentQuestionIndex === questions.length - 1 ? "#ccc" : "#fff",
-                border: "none", borderRadius: "6px",
-                cursor: currentQuestionIndex === questions.length - 1 ? "not-allowed" : "pointer",
-              }}
-            >
-              Next
-            </button>
-          )}
+          <div style={{ display: "flex", gap: "12px" }}>
+            {!isSubmitted && !isLastQuestion && (
+              <button
+                onClick={submitAnswer}
+                disabled={!hasAnswer()}
+                style={{
+                  padding: "10px 24px",
+                  backgroundColor: hasAnswer() ? "#2196f3" : "#f5f5f5",
+                  color: hasAnswer() ? "#fff" : "#ccc",
+                  border: "none", borderRadius: "6px",
+                  cursor: hasAnswer() ? "pointer" : "not-allowed",
+                }}
+              >
+                Submit Answer
+              </button>
+            )}
+            {isLastQuestion ? (
+              <button
+                onClick={submitQuiz}
+                disabled={!hasAnswer()}
+                style={{
+                  padding: "10px 24px",
+                  backgroundColor: hasAnswer() ? "#4caf50" : "#f5f5f5",
+                  color: hasAnswer() ? "#fff" : "#ccc",
+                  border: "none", borderRadius: "6px",
+                  cursor: hasAnswer() ? "pointer" : "not-allowed",
+                  fontWeight: "600",
+                }}
+              >
+                Submit Quiz
+              </button>
+            ) : (
+              <button
+                onClick={nextQuestion}
+                disabled={currentQuestionIndex === questions.length - 1}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: currentQuestionIndex === questions.length - 1 ? "#f5f5f5" : "#4caf50",
+                  color: currentQuestionIndex === questions.length - 1 ? "#ccc" : "#fff",
+                  border: "none", borderRadius: "6px",
+                  cursor: currentQuestionIndex === questions.length - 1 ? "not-allowed" : "pointer",
+                }}
+              >
+                Next
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -61,7 +61,7 @@ const TopicViewer = memo(({
 
   const currentTopicType = getTopicType(currentTopic);
   const shouldUseWhiteDisplayBg = currentTopicType === "topic";
-  const shouldUseMediaDisplayStyle = currentTopicType === "video" || currentTopicType === "pdf";
+  const shouldUseMediaDisplayStyle = currentTopicType === "video" || currentTopicType === "pdf" || currentTopicType === "quiz" || currentTopicType === "coding";
   const shouldShowSideNavButtons = Boolean(currentTopic);
   const isCompleted = currentTopic ? isTopicCompleted(currentTopic, completedTopics, manualTopicChecks) : false;
 
@@ -92,9 +92,9 @@ const TopicViewer = memo(({
           backgroundColor: shouldUseWhiteDisplayBg || shouldUseMediaDisplayStyle ? "#ffffff" : undefined,
           borderRadius: shouldUseMediaDisplayStyle ? 0 : undefined,
           padding: shouldUseMediaDisplayStyle ? "0" : undefined,
-          paddingTop: shouldUseMediaDisplayStyle ? "1.5rem" : undefined,
-          paddingLeft: shouldUseMediaDisplayStyle ? "1rem" : undefined,
-          paddingRight: shouldUseMediaDisplayStyle ? "1rem" : undefined,
+          paddingTop: (currentTopicType === "video" || currentTopicType === "pdf") ? "1.5rem" : shouldUseMediaDisplayStyle ? "0" : undefined,
+          paddingLeft: (currentTopicType === "video" || currentTopicType === "pdf") ? "1rem" : shouldUseMediaDisplayStyle ? "0" : undefined,
+          paddingRight: (currentTopicType === "video" || currentTopicType === "pdf") ? "1rem" : shouldUseMediaDisplayStyle ? "0" : undefined,
           overflow: shouldUseMediaDisplayStyle ? "hidden" : undefined,
         }}
       >
@@ -147,12 +147,24 @@ const TopicViewer = memo(({
           />
         )}
 
-        {currentTopicType === "pdf" ? (
+        {currentTopic ? (
           <div className={interPageStyles.mediaActionButtons}>
-            <Button className={interPageStyles.mediaActionButton} type="text" onClick={handleDisplayFullscreen}>
-              <span>⛶</span>
-            </Button>
-            <Button className={interPageStyles.mediaActionButton} type="text" onClick={toggleExpandedView}>
+            {currentTopicType !== "quiz" && (
+              <Button
+                className={interPageStyles.mediaActionButton}
+                type="text"
+                onClick={handleDisplayFullscreen}
+                title="Toggle Fullscreen"
+              >
+                <span>⛶</span>
+              </Button>
+            )}
+            <Button
+              className={interPageStyles.mediaActionButton}
+              type="text"
+              onClick={toggleExpandedView}
+              title={isExpandedView ? "Restore view" : "Expand view"}
+            >
               <span>{isExpandedView ? "⤡" : "⤢"}</span>
             </Button>
           </div>

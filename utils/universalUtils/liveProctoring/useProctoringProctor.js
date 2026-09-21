@@ -197,7 +197,7 @@ const useProctoringProctor = ({
                         if (videoElement.paused && !videoElement.ended) {
                           videoElement
                             .play()
-                            .catch(e => console.error("Error playing video:", e));
+                            .catch(e => console.error("Auto-play restriction:", e.message));
                         }
                       } else {
                         console.error(

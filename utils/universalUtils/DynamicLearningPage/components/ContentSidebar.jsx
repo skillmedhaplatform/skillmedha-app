@@ -19,6 +19,10 @@ const getTopicBadges = (topic) => {
     badges.push(<span key="video" className={interPageStyles.videoBadge}>Video</span>);
   } else if (type === "pdf") {
     badges.push(<span key="pdf" className={interPageStyles.pdfBadge}>PDF</span>);
+  } else if (type === "coding") {
+    badges.push(<span key="coding" className={interPageStyles.videoBadge} style={{ backgroundColor: "#e6f7ff", color: "#1890ff", borderColor: "#91d5ff" }}>Coding</span>);
+  } else if (type === "quiz") {
+    badges.push(<span key="quiz" className={interPageStyles.pdfBadge} style={{ backgroundColor: "#f9f0ff", color: "#722ed1", borderColor: "#d3adf7" }}>Quiz</span>);
   } else {
     badges.push(<span key="reading" className={interPageStyles.readingBadge}>Reading</span>);
   }

@@ -58,7 +58,7 @@ function ZoomClient({ meetingNumber, userName, passWord }) {
           success: (success) => {
             ZoomMtg.focusMode({
               enable: true,
-              success: () => ,
+              success: () => {},
               error: (e) => console.error("focusMode error", e),
             });
           },
