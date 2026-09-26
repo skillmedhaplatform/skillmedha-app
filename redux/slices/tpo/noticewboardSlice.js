@@ -56,8 +56,8 @@ export const GetNoticeByStatus = createAsyncThunk(
   }
 );
 
-export const CreateNotice = createAsyncThunk("/CreateNotice", async (args) => {
-  const { payload, dispatch } = args;
+export const CreateNotice = createAsyncThunk("/CreateNotice", async (args, thunkAPI) => {
+  const { payload } = args;
   try {
     const { data } = await axios.post(restUrl + `/createNoticeBoard`, payload, {
       headers: {
@@ -65,7 +65,7 @@ export const CreateNotice = createAsyncThunk("/CreateNotice", async (args) => {
       },
     });
     if (data?.msg) {
-      dispatch(
+      thunkAPI.dispatch(
         GetNoticeByStatus({ status: payload?.status, limit: 7, page: 1 })
       );
       message.success("Notice created successfully!");
@@ -80,9 +80,8 @@ export const CreateNotice = createAsyncThunk("/CreateNotice", async (args) => {
 
 export const UpdateNotice = createAsyncThunk(
   "/UpdateNotice",
-  async (args, thunkapi) => {
+  async (args, thunkAPI) => {
     const { updatedpayload, noticeId } = args;
-    const { dispatch } = thunkapi;
 
     try {
       const { data } = await axios.post(
@@ -95,13 +94,14 @@ export const UpdateNotice = createAsyncThunk(
         }
       );
       if (data?.msg) {
-        dispatch(
+        thunkAPI.dispatch(
           GetNoticeByStatus({
             status: updatedpayload?.status,
             limit: 7,
             page: 1,
           })
         );
+        message.success("Notice updated successfully!");
       }
       return data;
     } catch (error) {}
@@ -110,8 +110,8 @@ export const UpdateNotice = createAsyncThunk(
 
 export const PublishNotice = createAsyncThunk(
   "/PublishNotice",
-  async (args) => {
-    const { NoticeId, status = "pending", dispatch } = args;
+  async (args, thunkAPI) => {
+    const { NoticeId, status = "pending" } = args;
     try {
       const { data } = await axios.get(
         restUrl + `/setStatusActive/${NoticeId}`,
@@ -122,7 +122,8 @@ export const PublishNotice = createAsyncThunk(
         }
       );
       if (data?.msg) {
-        dispatch(GetNoticeByStatus({ status, limit: 7, page: 1 }));
+        // Fetch only the current tab to refresh the view (destination tab is fetched via useEffect when switched)
+        thunkAPI.dispatch(GetNoticeByStatus({ status, limit: 7, page: 1 }));
         message.success("Notice published successfully!");
       } else {
         message.error("Failed to publish notice.");
@@ -133,8 +134,8 @@ export const PublishNotice = createAsyncThunk(
     }
   }
 );
-export const ExpireNotice = createAsyncThunk("/ExpireNotice", async (args) => {
-  const { NoticeId, status = "active", dispatch } = args;
+export const ExpireNotice = createAsyncThunk("/ExpireNotice", async (args, thunkAPI) => {
+  const { NoticeId, status = "active" } = args;
   try {
     const { data } = await axios.get(restUrl + `/setStatusExpire/${NoticeId}`, {
       headers: {
@@ -142,7 +143,7 @@ export const ExpireNotice = createAsyncThunk("/ExpireNotice", async (args) => {
       },
     });
     if (data?.msg) {
-      dispatch(GetNoticeByStatus({ status, limit: 7, page: 1 }));
+      thunkAPI.dispatch(GetNoticeByStatus({ status, limit: 7, page: 1 }));
       message.success("Notice expired successfully!");
     } else {
       message.error("Failed to expire notice.");
@@ -153,8 +154,8 @@ export const ExpireNotice = createAsyncThunk("/ExpireNotice", async (args) => {
   }
 });
 
-export const DeleteNotice = createAsyncThunk("/DeleteNotice", async (args) => {
-  const { NoticeId, currentTab = "active", dispatch } = args;
+export const DeleteNotice = createAsyncThunk("/DeleteNotice", async (args, thunkAPI) => {
+  const { NoticeId, currentTab = "active" } = args;
   try {
     const { data } = await axios.get(
       restUrl + `/deleteNoticeBoard/${NoticeId}`,
@@ -165,7 +166,7 @@ export const DeleteNotice = createAsyncThunk("/DeleteNotice", async (args) => {
       }
     );
     if (data?.msg) {
-      dispatch(GetNoticeByStatus({ status: currentTab, limit: 7, page: 1 }));
+      thunkAPI.dispatch(GetNoticeByStatus({ status: currentTab, limit: 7, page: 1 }));
       message.success("Notice deleted successfully!");
     } else {
       message.error("Failed to delete notice.");

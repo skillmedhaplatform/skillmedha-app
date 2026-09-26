@@ -43,6 +43,8 @@ const AdminBanner = () => {
   const studentsData = useSelector((state) => state.adminOrg?.students?.value);
   const jobsData = useSelector((state) => state.adminOrg?.jobs?.pagination);
 
+  const orgsData = useSelector((state) => state.adminOrg?.orgs?.value);
+
   const getSectionContent = () => {
     if (isDashboard) {
       return {
@@ -140,6 +142,8 @@ const AdminBanner = () => {
     if (cleanPath === "/admin/course") return { count: coursesData?.length || 0, label: "COURSES" };
     if (cleanPath === "/admin/internship") return { count: internshipsData?.length || 0, label: "INTERNSHIPS" };
     if (cleanPath === "/admin/workshops") return { count: workshopsData?.length || 0, label: "WORKSHOPS" };
+    if (cleanPath === "/admin/colleges") return { count: orgsData?.length || 0, label: "COLLEGES" };
+    if (cleanPath === "/admin/companies") return { count: orgsData?.length || 0, label: "COMPANIES" };
     
     return null;
   };

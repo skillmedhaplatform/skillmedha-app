@@ -64,17 +64,25 @@ export default function BasicDetailsPage() {
       coordinatorEmail: "",
     };
 
-    const defaultCourses = [{ degree: "", department: "" }];
-    const defaultEligibility = [{ educationLevel: "", minMarksPercentage: "" }];
+    const defaultCourses = [{ degree: "", department: [] }];
+    const defaultEligibility = [{ educationLevel: "", department: [], minMarksPercentage: "" }];
 
     const jobData = ONEJOB?.data;
 
     if (jobData) {
+      const eligibilityCriteria = jobData.eligibilityCriteria?.map(e => ({
+        ...e,
+        department: Array.isArray(e.department) ? e.department : (e.department ? [e.department] : [])
+      })) || defaultEligibility;
+      
       const {
-        applicableCourses = defaultCourses,
-        eligibilityCriteria = defaultEligibility,
         ...rest
       } = jobData;
+
+      const applicableCourses = jobData.applicableCourses?.map(c => ({
+        ...c,
+        department: Array.isArray(c.department) ? c.department : (c.department ? [c.department] : [])
+      })) || defaultCourses;
 
       const updatedDetails = {
         ...defaultBasicDetails,
@@ -122,23 +130,34 @@ export default function BasicDetailsPage() {
       courses: {
         list: courses,
         setList: setCourses,
-        emptyItem: { degree: "", department: "" },
+        emptyItem: { degree: "", department: [] },
         fieldsToCheck: ["degree", "department"],
       },
       eligibility: {
         list: eligibilityCriteria,
         setList: setEligibilityCriteria,
-        emptyItem: { educationLevel: "", minMarksPercentage: "" },
-        fieldsToCheck: ["educationLevel", "minMarksPercentage"],
+        emptyItem: { educationLevel: "", department: [], minMarksPercentage: "" },
+        fieldsToCheck: ["educationLevel"],
       },
     };
     const config = typeConfigs[type];
 
     if (!config) return;
 
-    const allFilled = config.list.every((item) =>
-      config.fieldsToCheck.every((field) => item[field] !== "")
-    );
+    const allFilled = config.list.every((item) => {
+      if (type === "courses") {
+        if (item.degree === "10th (Secondary School)") {
+          return item.degree !== "";
+        }
+        return item.degree !== "" && item.department && item.department.length > 0;
+      }
+      if (type === "eligibility") {
+        const hasBasicFields = item.educationLevel !== "" && item.minMarksPercentage !== "";
+        if (item.educationLevel === "10th (Secondary School)") return hasBasicFields;
+        return hasBasicFields && item.department && item.department.length > 0;
+      }
+      return config.fieldsToCheck.every((field) => item[field] !== "");
+    });
 
     if (allFilled) {
       config.setList([...config.list, config.emptyItem]);
@@ -370,8 +389,9 @@ export default function BasicDetailsPage() {
           {courses?.map((course, index) => (
             <div className={styles.CourseInpuCont} key={index}>
               <Select
+                size="large"
                 showSearch
-                value={course?.degree}
+                value={course?.degree || undefined}
                 placeholder="Select or add degree"
                 style={{ flex: 1 }}
                 onChange={(value, option) => {
@@ -406,12 +426,16 @@ export default function BasicDetailsPage() {
                   education: item,
                 }))}
               />
+              {!(course?.degree === "10th (Secondary School)") && (
               <Select
+                mode="multiple"
+                size="large"
                 allowClear
                 showSearch
-                value={course?.department}
+                maxTagCount="responsive"
+                value={course?.department?.length > 0 ? course.department : undefined}
                 placeholder="Select or add department"
-                style={{ flex: 1 }}
+                style={{ flex: 1, minWidth: '150px' }}
                 onChange={(value) =>
                   handleArrayChange("courses", index, "department", value)
                 }
@@ -437,11 +461,17 @@ export default function BasicDetailsPage() {
                     </Space>
                   </>
                 )}
-                options={departmentOptions?.map((item) => ({
+                options={Array.from(new Set([
+                  ...(educationDegreeOptions
+                    ?.find((d) => d.label === course?.degree)
+                    ?.departments || []),
+                  ...departmentOptions
+                ])).map((item) => ({
                   label: item,
                   value: item,
                 }))}
               />
+              )}
               <button
                 className={styles.deleteBtn}
                 onClick={() => handleDeleteItem("courses", index)}
@@ -466,8 +496,9 @@ export default function BasicDetailsPage() {
           {eligibilityCriteria?.map((item, index) => (
             <div className={styles.CourseInpuCont} key={index}>
               <Select
+                size="large"
                 showSearch
-                value={item?.educationLevel}
+                value={item?.educationLevel || undefined}
                 placeholder="Select Education"
                 style={{ flex: 2 }}
                 onChange={(value) =>
@@ -478,16 +509,37 @@ export default function BasicDetailsPage() {
                     value
                   )
                 }
-                options={courses?.map((item) => ({
+                options={courses?.filter(c => c?.degree).map((item) => ({
                   label: item?.degree,
                   value: item?.degree,
                 }))}
               />
+              {!(item?.educationLevel === "10th (Secondary School)") && (
+              <Select
+                mode="multiple"
+                size="large"
+                allowClear
+                showSearch
+                maxTagCount="responsive"
+                value={item?.department?.length > 0 ? item.department : undefined}
+                placeholder="Select departments"
+                style={{ flex: 1.5, minWidth: '150px' }}
+                onChange={(value) =>
+                  handleArrayChange("eligibility", index, "department", value)
+                }
+                options={educationDegreeOptions
+                  ?.find((d) => d.label === item?.educationLevel)
+                  ?.departments?.map((dept) => ({
+                    label: dept,
+                    value: dept,
+                  })) || []}
+              />
+              )}
               <input
                 className={styles.departmentInput}
                 type="number"
                 min="0"
-                placeholder="Min. % Marks"
+                placeholder="Min. Percentage / Marks"
                 value={item?.minMarksPercentage}
                 onChange={(e) => {
                   const value = e.target.value;

@@ -7,19 +7,21 @@ const DepartmentPlacementChart = ({ data = [] }) => {
   // Early return if no valid data
   if (!data || data.length === 0) {
     return (
-      <div className={styles.columnChartCont}>
-        <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>
-          Department-wise Placement Statistics
-        </h2>
+      <div className={styles.columnChartCont} style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+        <h3 className={styles.chartTitle}>Department-wise placement statistics</h3>
         <div
           style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             textAlign: "center",
             color: "#999",
             fontSize: "16px",
             padding: "2rem",
           }}
         >
-          ❕No departments available
+          ❕No departments found. Please ensure departments are added and students are assigned to them.
         </div>
       </div>
     );
@@ -32,19 +34,21 @@ const DepartmentPlacementChart = ({ data = [] }) => {
 
   if (cleanData.length === 0) {
     return (
-      <div className={styles.columnChartCont}>
-        <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>
-          Department-wise Placement Statistics
-        </h2>
+      <div className={styles.columnChartCont} style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+        <h3 className={styles.chartTitle}>Department-wise placement statistics</h3>
         <div
           style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             textAlign: "center",
             color: "#999",
             fontSize: "16px",
             padding: "2rem",
           }}
         >
-          ❕No valid department data
+          ❕No valid department data. Please check department configurations.
         </div>
       </div>
     );

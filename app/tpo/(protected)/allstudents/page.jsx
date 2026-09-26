@@ -119,12 +119,28 @@ export default function Page() {
   const handleOk = (submitType) => {
     const { _id = "", ...rest } = inputChange;
 
-    if (!rest.title?.trim() || !rest.hodName?.trim() || !rest.mobile?.trim() || !rest.email?.trim()) {
-      return message.error("Please fill all required fields (Department Name, HOD, Mobile, Email)");
+    if (
+      !rest.title?.trim() ||
+      !rest.hodName?.trim() ||
+      !rest.mobile?.trim() ||
+      !rest.email?.trim() ||
+      !rest.spoc?.trim()
+    ) {
+      return message.error(
+        "Please fill all required fields (Department Name, HOD, Mobile, Email, SPOC)"
+      );
     }
 
-    if (rest.mobile && rest.mobile.length > 0 && rest.mobile.length !== 10) {
-      return message.error("Mobile number must be exactly 10 digits");
+    const mobileRegex = /^[6-9]\d{9}$/;
+    if (!mobileRegex.test(rest.mobile?.trim())) {
+      return message.error(
+        "Please enter a valid Indian mobile number (starting with 6, 7, 8, or 9)"
+      );
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(rest.email?.trim())) {
+      return message.error("Please enter a valid email address");
     }
 
     if (submitType === "Update") {
@@ -295,16 +311,23 @@ export default function Page() {
       <div className={allStudents.mainContent}>
         {/* Department Cards Grid */}
         <div className={allStudents.cardsList}>
-          <div className={allStudents.cards}>
-            {paginatedDepartments.map((item) => (
-              <DepartmentCard
-                key={item._id}
-                item={item}
-                studentsList={studentsList}
-                handleClick={handleDetail}
-              />
-            ))}
-          </div>
+          {paginatedDepartments.length > 0 ? (
+            <div className={allStudents.cards}>
+              {paginatedDepartments.map((item) => (
+                <DepartmentCard
+                  key={item._id}
+                  handleClick={handleDetail}
+                  item={item}
+                  studentsList={studentsList}
+                />
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", padding: "40px", color: "#888", width: "100%" }}>
+              <h3>No results found</h3>
+              <p>Try adjusting your search query or filters.</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -381,37 +404,67 @@ export default function Page() {
               <label style={{ display: "block", marginBottom: "4px", fontWeight: 500 }}>
                 Branch Logo
               </label>
-              <Upload
-                listType="picture-card"
-                showUploadList={false}
-                customRequest={({ file, onSuccess, onError }) =>
-                  uploadToS3({
-                    file,
-                    restUrl,
-                    onUploaded: (uploadedFile) =>
-                      setInputChange((prev) => ({
-                        ...prev,
-                        branchLogo: uploadedFile,
-                      })),
-                    onSuccess,
-                    onError,
-                  })
-                }
-              >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {inputChange.branchLogo ? (
                   <img
                     src={inputChange.branchLogo}
                     style={{
-                      width: "100%",
-                      height: "100%",
+                      width: "80px",
+                      height: "80px",
                       objectFit: "cover",
                       borderRadius: 4,
+                      border: "1px solid #d9d9d9"
                     }}
                   />
                 ) : (
-                  <div style={{ padding: "4px 12px" }}>+ Upload</div>
+                  <div style={{
+                    width: "80px",
+                    height: "80px",
+                    background: "#fafafa",
+                    border: "1px dashed #d9d9d9",
+                    borderRadius: 4,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#999"
+                  }}>
+                    No Logo
+                  </div>
                 )}
-              </Upload>
+                
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <Upload
+                    showUploadList={false}
+                    customRequest={({ file, onSuccess, onError }) =>
+                      uploadToS3({
+                        file,
+                        restUrl,
+                        onUploaded: (uploadedFile) =>
+                          setInputChange((prev) => ({
+                            ...prev,
+                            branchLogo: uploadedFile,
+                          })),
+                        onSuccess,
+                        onError,
+                      })
+                    }
+                  >
+                    <Button size="small" type="primary">
+                      Upload Image
+                    </Button>
+                  </Upload>
+                  
+                  {inputChange.branchLogo && (
+                    <Button
+                      size="small"
+                      danger
+                      onClick={() => setInputChange((prev) => ({ ...prev, branchLogo: "" }))}
+                    >
+                      Remove Image
+                    </Button>
+                  )}
+                </div>
+              </div>
             </Col>
           </Row>
           <div style={{ textAlign: "right", marginTop: "2rem" }}>

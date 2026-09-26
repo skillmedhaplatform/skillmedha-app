@@ -203,7 +203,7 @@ const PositionsAndResponsibilities = () => {
                 </div>
                 {item?.fileUrl && (
                   <div className={styles.detailRow}>
-                    <p className={styles.label}>Marksheet :</p>
+                    <p className={styles.label}>Document :</p>
                     <a
                       className={styles.value}
                       style={{ color: "#56D2D4" }}

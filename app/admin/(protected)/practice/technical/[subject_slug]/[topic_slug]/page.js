@@ -19,6 +19,7 @@ import {
   Tooltip,
   Select,
   Typography,
+  Skeleton,
 } from "antd";
 import {
   fetchSubtopicsByTopic,
@@ -314,9 +315,13 @@ const SubtopicManager = () => {
         </Tooltip>
       </div>
 
-      {displaySubtopics.length > 0 && <Divider style={{ margin: "0.75rem 0" }} />}
+      {displaySubtopics.length > 0 && !loading && <Divider style={{ margin: "0.75rem 0" }} />}
 
-      {paginatedSubtopics.length > 0 ? (
+      {loading ? (
+        <div style={{ padding: "2rem" }}>
+          <Skeleton active paragraph={{ rows: 4 }} />
+        </div>
+      ) : paginatedSubtopics.length > 0 ? (
         <div className={styles.cardsList}>
           {paginatedSubtopics.map((record, index) => {
             const editing = isEditing(record);
@@ -349,6 +354,7 @@ const SubtopicManager = () => {
                       onPressEnter={() => handleSave(record._id)}
                       placeholder="Enter subtopic title…"
                       autoFocus
+                      onBlur={cancel}
                       disabled={loading}
                       className={styles.inlineEditInput}
                       onClick={(e) => e.stopPropagation()}
@@ -358,6 +364,11 @@ const SubtopicManager = () => {
                       <span className={styles.itemTitle}>
                         {displayValue || "Untitled Subtopic"}
                       </span>
+                      {record.totalQuestions !== undefined && !isTemp && (
+                        <span style={{ fontSize: "12px", color: "#666", display: "block", marginTop: "2px", fontWeight: 500 }}>
+                          {record.totalQuestions} Question{record.totalQuestions !== 1 ? 's' : ''} available
+                        </span>
+                      )}
                       <span className={styles.itemSubtitle}>
                         Subtopic {subtopicNumber}
                       </span>

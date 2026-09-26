@@ -133,7 +133,10 @@ export default function JobDetails({ JOBPROFILE, ALLPLACEMENTS, activeTab = "bas
             {JOBPROFILE?.applicableCourses?.length > 0 ? (
               JOBPROFILE.applicableCourses.map((course, i) => (
                 <span key={i} className={styles.pillBadge}>
-                  {course?.degree} - {course?.department}
+                  {course?.degree}
+                  {course?.department && Array.isArray(course.department) && course.department.length > 0
+                    ? ` - ${course.department.join(", ")}`
+                    : (course?.department && !Array.isArray(course.department) ? ` - ${course.department}` : "")}
                 </span>
               ))
             ) : (
@@ -155,6 +158,9 @@ export default function JobDetails({ JOBPROFILE, ALLPLACEMENTS, activeTab = "bas
                   <span className={styles.checkIcon}><HiOutlineCheckCircle /></span>
                   <span>
                     Minimum <strong>{criteria?.minMarksPercentage}% marks</strong> in {criteria?.educationLevel}
+                    {criteria?.department && Array.isArray(criteria.department) && criteria.department.length > 0
+                      ? ` - ${criteria.department.join(", ")}`
+                      : (criteria?.department && !Array.isArray(criteria.department) ? ` - ${criteria.department}` : "")}
                   </span>
                 </div>
               ))

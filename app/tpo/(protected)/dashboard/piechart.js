@@ -20,19 +20,21 @@ const SectorPlacementChart = ({ data = [] }) => {
   // Early return if no valid data
   if (!data || data.length === 0) {
     return (
-      <div className={styles.pichartCont}>
-        <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>
-          Sector-wise Placement Breakdown
-        </h3>
+      <div className={styles.pichartCont} style={{ height: "100%", minHeight: "350px", display: "flex", flexDirection: "column" }}>
+        <h3 className={styles.chartTitle}>Sector-wise breakdown</h3>
         <div
           style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             textAlign: "center",
             color: "#999",
             fontSize: "16px",
             padding: "2rem",
           }}
         >
-          ❕No departments available
+          ❕No placement data found. Please ensure students are marked as placed in companies.
         </div>
       </div>
     );
@@ -45,35 +47,54 @@ const SectorPlacementChart = ({ data = [] }) => {
 
   if (cleanData.length === 0) {
     return (
-      <div className={styles.pichartCont}>
-        <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>
-          Sector-wise Placement Breakdown
-        </h3>
+      <div className={styles.pichartCont} style={{ height: "100%", minHeight: "350px", display: "flex", flexDirection: "column" }}>
+        <h3 className={styles.chartTitle}>Sector-wise breakdown</h3>
         <div
           style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             textAlign: "center",
             color: "#999",
             fontSize: "16px",
             padding: "2rem",
           }}
         >
-          ❕No valid placement breakdown data
+          ❕No valid placement breakdown data. Ensure students are placed in companies.
         </div>
       </div>
     );
   }
 
-  const hasSectorAndValue = cleanData.length > 0 && cleanData[0].sector !== undefined && cleanData[0].value !== undefined;
-  const mockValue = (100 / cleanData.length).toFixed(1);
-  const mockSectorData = hasSectorAndValue ? cleanData : cleanData.map((item) => ({
-    sector: item.title || item.department || "Unknown",
-    value: parseFloat(mockValue),
-  }));
+  const validSectorData = cleanData.filter(item => item.sector !== undefined && item.value !== undefined);
+
+  if (validSectorData.length === 0) {
+    return (
+      <div className={styles.pichartCont} style={{ height: "100%", minHeight: "350px", display: "flex", flexDirection: "column" }}>
+        <h3 className={styles.chartTitle}>Sector-wise breakdown</h3>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            color: "#999",
+            fontSize: "16px",
+            padding: "2rem",
+          }}
+        >
+          ❕No valid placement breakdown data. Ensure students are placed in companies.
+        </div>
+      </div>
+    );
+  }
 
   const chartOptions = {
     chart: { type: "donut" },
-    labels: mockSectorData.map((item) => String(item.sector)),
-    colors: chartColors.slice(0, mockSectorData.length),
+    labels: validSectorData.map((item) => String(item.sector)),
+    colors: chartColors.slice(0, validSectorData.length),
     legend: { show: false },
     stroke: { show: true, width: 2, colors: ["#fff"] },
     plotOptions: {
@@ -99,13 +120,13 @@ const SectorPlacementChart = ({ data = [] }) => {
     ],
   };
 
-  const chartSeries = mockSectorData.map((item) => Number(item.value));
+  const chartSeries = validSectorData.map((item) => Number(item.value));
 
   return (
-    <div className={styles.pichartCont}>
+    <div className={styles.pichartCont} style={{ height: "100%", minHeight: "350px", display: "flex", flexDirection: "column" }}>
       <h3 className={styles.chartTitle}>Sector-wise breakdown</h3>
 
-      <div className={styles.chartWrapper}>
+      <div className={styles.chartWrapper} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Chart
           options={chartOptions}
           series={chartSeries}
@@ -116,7 +137,7 @@ const SectorPlacementChart = ({ data = [] }) => {
       </div>
 
       <div className={styles.pieDetails}>
-        {mockSectorData.map((item, index) => (
+        {validSectorData.map((item, index) => (
           <div key={index} className={styles.pieItem}>
             <div className={styles.pieItemLeft}>
               <span

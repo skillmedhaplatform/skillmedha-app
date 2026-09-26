@@ -170,20 +170,27 @@ export default function Workspace() {
   else if (titleStr.includes("c++") || titleStr.includes("cpp")) defaultLang = LANGUAGE_OPTIONS.find(l => l.editorLang === "cpp") || defaultLang;
 
   const [language, setLanguage] = useState(defaultLang);
+  const sessionLangRef = useRef(null);
   const [code, setCode] = useState("");
 
   // Sync language and code when question changes or on load
   useEffect(() => {
-    if (!qId) return;
-    let initialLang = defaultLang;
-    const lastLangId = localStorage.getItem(`last_lang_${qId}`);
-    if (lastLangId) {
-      const found = LANGUAGE_OPTIONS.find(l => String(l.id) === lastLangId);
-      if (found) initialLang = found;
+    let initialLang = sessionLangRef.current || defaultLang;
+    if (qId) {
+      const lastLangId = localStorage.getItem(`prac_lang_${qId}`);
+      if (lastLangId) {
+        const found = LANGUAGE_OPTIONS.find(l => String(l.id) === lastLangId);
+        if (found) initialLang = found;
+      }
     }
     setLanguage(initialLang);
-    const saved = localStorage.getItem(`saved_code_${qId}_${initialLang.id}`);
-    setCode(saved || getStarterCode(initialLang.id));
+    sessionLangRef.current = initialLang;
+    
+    if (qId) {
+      const saved = localStorage.getItem(`prac_code_${qId}_${initialLang.id}`);
+      setCode(saved || getStarterCode(initialLang.id));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qId, defaultLang]);
   const [editorTheme, setEditorTheme] = useState("light");
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -191,9 +198,10 @@ export default function Workspace() {
   // Auto-save code on change
   useEffect(() => {
     if (qId && language && code) {
-      localStorage.setItem(`saved_code_${qId}_${language.id}`, code);
+      localStorage.setItem(`prac_code_${qId}_${language.id}`, code);
     }
-  }, [code, qId, language]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code]);
 
   // Problem State
   const [activeProblemTab, setActiveProblemTab] = useState("description");
@@ -238,7 +246,15 @@ export default function Workspace() {
 
   useEffect(() => {
     if (isSuccess) setIsSuccess(false);
-  }, [code, qId]);
+  }, [code]);
+
+  useEffect(() => {
+    setActiveProblemTab("description");
+    setActiveConsoleTab("testcases");
+    setExecutionResults(null);
+    setIsSuccess(false);
+    setSelectedSubmissionId(null);
+  }, [qId]);
 
   useEffect(() => {
     if (!qId && !subjectId) return;
@@ -486,9 +502,11 @@ export default function Workspace() {
                         key={l.id} 
                         className={`${styles.megaMenuItem} ${language.id === l.id ? styles.active : ''}`}
                         onClick={() => {
+                          setLangDropdownOpen(false);
                           setLanguage(l);
-                          if (qId) localStorage.setItem(`last_lang_${qId}`, String(l.id));
-                          const saved = localStorage.getItem(`saved_code_${qId}_${l.id}`);
+                          sessionLangRef.current = l;
+                          if (qId) localStorage.setItem(`prac_lang_${qId}`, String(l.id));
+                          const saved = localStorage.getItem(`prac_code_${qId}_${l.id}`);
                           setCode(saved || getStarterCode(l.id));
                           setLangDropdownOpen(false);
                         }}
@@ -1025,7 +1043,6 @@ export default function Workspace() {
                             const nextQ = allQuestions[currentIdx + 1];
                             const url = new URL(window.location);
                             url.searchParams.set("qId", nextQ._id);
-                            url.searchParams.set("title", nextQ.questionContent?.title || "");
                             router.push(url.pathname + url.search);
                           } else {
                             message.success("You have completed all questions in this set!");

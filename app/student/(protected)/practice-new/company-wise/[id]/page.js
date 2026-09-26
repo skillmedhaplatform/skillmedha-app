@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { fetchPracQuestions } from "@/redux/slices/practiceSlice";
 import { fetchCompanyTests } from "@/redux/slices/admin/cms/practiceSlice";
 import { restUrl } from "@/config/urls";
+import { executeCode } from "@/utils/judge0";
 
 export default function StudentMockTestPage() {
   const router = useRouter();
@@ -59,6 +60,15 @@ export default function StudentMockTestPage() {
     sessionStorage.removeItem(`active_test_${id}`);
     setShowIncompleteWarning(false);
     setShowNoResultPopup(true);
+  };
+
+  const LANGUAGE_MAP = {
+    'javascript': 93,
+    'python': 71,
+    'python3': 71,
+    'java': 62,
+    'cpp': 54,
+    'c': 50
   };
 
   const languageGroups = [
@@ -512,56 +522,66 @@ export default function StudentMockTestPage() {
       return;
     }
 
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_REST_URL}/compiler/run`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          code,
-          language,
-          testCases: testCasesToRun
-        })
-      });
-      
-      const data = await res.json();
-      
-      if (res.ok) {
-        setExecutionResults(prev => ({
-          ...prev,
-          [currentIdx]: { ...data, isSubmit }
-        }));
-        
-        const firstFailIdx = data.cases.findIndex(c => !c.passed);
-        setActiveTestCaseIdx(firstFailIdx >= 0 ? firstFailIdx : 0);
+      const languageId = LANGUAGE_MAP[language.toLowerCase()];
+      if (!languageId) {
+        throw new Error(`Language ${language} not supported yet.`);
+      }
 
-        if (isSubmit) {
-          if (data.status === 'Accepted') {
-            Modal.success({
-              title: "Success!",
-              content: "All hidden test cases passed. Moving to next question...",
-              onOk: () => {
-                if (currentIdx < questions.length - 1) {
-                  setCurrentIdx(prev => prev + 1);
-                }
+      const results = await Promise.all(
+        testCasesToRun.map(async (tc) => {
+          const res = await executeCode(languageId, code, tc.input || "");
+          
+          const actualOutput = String(res.output || "").trim();
+          const expectedOutput = String(tc.output || tc.expectedOutput || "").trim();
+          
+          const passed = res.success && actualOutput.replace(/\s+/g, '') === expectedOutput.replace(/\s+/g, '');
+
+          return {
+            input: tc.isHidden ? "Hidden Test Case" : tc.input,
+            expected: tc.isHidden ? "Hidden" : expectedOutput,
+            output: tc.isHidden ? "Hidden" : actualOutput,
+            passed,
+            isHidden: tc.isHidden,
+            status: res.success ? (passed ? "Accepted" : "Wrong Answer") : res.statusName
+          };
+        })
+      );
+
+      const allPassed = results.every(r => r.passed);
+      const data = {
+        status: allPassed ? "Accepted" : "Wrong Answer",
+        cases: results
+      };
+
+      setExecutionResults(prev => ({
+        ...prev,
+        [currentIdx]: { ...data, isSubmit }
+      }));
+      
+      const firstFailIdx = data.cases.findIndex(c => !c.passed);
+      setActiveTestCaseIdx(firstFailIdx >= 0 ? firstFailIdx : 0);
+
+      if (isSubmit) {
+        if (data.status === 'Accepted') {
+          Modal.success({
+            title: "Success!",
+            content: "All hidden test cases passed. Moving to next question...",
+            onOk: () => {
+              if (currentIdx < questions.length - 1) {
+                setCurrentIdx(prev => prev + 1);
               }
-            });
-          }
-        } else {
-          if (data.status === 'Accepted') {
-            setCanSubmitHidden(prev => ({ ...prev, [currentIdx]: true }));
-          }
+            }
+          });
         }
       } else {
-        Modal.error({ title: "Execution Error", content: data.err || "Failed to execute code." });
+        if (data.status === 'Accepted') {
+          setCanSubmitHidden(prev => ({ ...prev, [currentIdx]: true }));
+        }
       }
     } catch (err) {
       console.error(err);
-      Modal.error({ title: "Network Error", content: "Failed to connect to the compiler service." });
+      Modal.error({ title: "Execution Error", content: err.message || "Failed to connect to the compiler service." });
     } finally {
       setIsCompiling(false);
     }

@@ -122,6 +122,12 @@
       margin-top: 12px;
       width: 100%;
       @include flexBox(row, center, space-between);
+      gap: 16px;
+      flex-wrap: wrap;
+      
+      button {
+        flex: 1;
+      }
     }
 
     .cardContent {

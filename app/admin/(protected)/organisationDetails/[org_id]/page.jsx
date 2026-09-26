@@ -252,9 +252,13 @@ const AITokenLimitCard = ({
     }
   };
 
+  const configuredLimit = aiTokenLimit || 0;
+  const actualUsage = aiUsage?.totalTokens || 0;
+  const displayedUsage = configuredLimit > 0 ? Math.min(actualUsage, configuredLimit) : actualUsage;
+
   const usagePercentage =
     tokenLimit > 0
-      ? Math.min(((aiUsage?.totalTokens || 0) / tokenLimit) * 100, 100)
+      ? Math.min((displayedUsage / tokenLimit) * 100, 100)
       : 0;
 
   return (
@@ -269,11 +273,18 @@ const AITokenLimitCard = ({
         </div>
       </div>
 
+      {configuredLimit > 0 && actualUsage >= configuredLimit && (
+        <div style={{ padding: '12px 16px', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #f87171', borderRadius: '8px', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 500 }}>
+          <CloseCircleOutlined style={{ fontSize: '16px' }} />
+          <span>Token limit exceeded. Please update the token limit.</span>
+        </div>
+      )}
+
       <div className={styles.limitTopSection}>
         <div className={styles.currentUsageBox}>
           <div className={styles.label}>Current Usage</div>
           <div className={styles.usageValue}>
-            <span className={styles.bigNumber}>{(aiUsage?.totalTokens || 0).toLocaleString()}</span>
+            <span className={styles.bigNumber}>{displayedUsage.toLocaleString()}</span>
             <span className={styles.unitText}>tokens</span>
           </div>
         </div>
@@ -306,7 +317,7 @@ const AITokenLimitCard = ({
       <div className={styles.progressBox}>
         <div className={styles.progressHeader}>
           <div className={styles.progressText}>
-            Usage: <span className={styles.highlight}>{(aiUsage?.totalTokens || 0).toLocaleString()} / {tokenLimit.toLocaleString()}</span> tokens
+            Usage: <span className={styles.highlight}>{displayedUsage.toLocaleString()} / {tokenLimit.toLocaleString()}</span> tokens
           </div>
           <div className={styles.progressPercent}>{Math.round(usagePercentage)}%</div>
         </div>
@@ -333,6 +344,7 @@ const AITokenLimitCard = ({
         </div>
         <div className={styles.quickButtons}>
           {[
+            { label: '10K', value: 10000, color: '#f59e0b' },
             { label: '50K', value: 50000, color: '#2563eb' },
             { label: '100K', value: 100000, color: '#16a34a' },
             { label: '500K', value: 500000, color: '#ea580c' },
@@ -407,14 +419,14 @@ const FeatureManagement = ({
       label: "Resume Builder",
       icon: <IdcardOutlined />,
       color: "#1E69DA",
-      description: "AI-powered resume creation",
+      description: "Check resume ATS compatibility.",
     },
     {
       key: "atsResumeChecker",
       label: "ATS Resume Checker",
       icon: <IdcardOutlined />,
       color: "#1890ff",
-      description: "AI-powered resume creation",
+      description: "Check resume ATS compatibility.",
     },
     {
       key: "talktoai",
@@ -1428,7 +1440,7 @@ const ColumnChart = ({ departmentData, onDepartmentClick }) => {
           options={columnChartOptions}
           series={columnChartSeries}
           type="bar"
-          height={300}
+          height={350}
         />
       </div>
     </div>
@@ -2101,6 +2113,20 @@ function DashboardPage() {
                 </div>
               </div>
             )}
+
+            {stats?.aiUsage && (
+              <div className={styles.chartsSection}>
+                <div className={styles.sectionTitle}>
+                  <h3>AI Usage Analytics</h3>
+                </div>
+                <div className={styles.chartsGrid}>
+                  <AIUsageChart
+                    aiUsage={stats.aiUsage}
+                    monthlyChangeRate={stats.monthlyChangeRate}
+                  />
+                </div>
+              </div>
+            )}
           </>
         ) : (
           departmentData.length > 0 && (
@@ -2109,14 +2135,14 @@ function DashboardPage() {
                 <h3>Department Analytics</h3>
               </div>
 
-              <div className={`${styles.chartsGrid} ${styles.threeColumns}`}>
-                <ColumnChart
-                  departmentData={departmentData}
-                  onDepartmentClick={handleDepartmentNavigation}
-                />
+              <div className={styles.threeColumnGrid}>
                 <PieChart
                   departmentData={departmentData}
                   totalStudents={stats?.counts?.students}
+                  onDepartmentClick={handleDepartmentNavigation}
+                />
+                <ColumnChart
+                  departmentData={departmentData}
                   onDepartmentClick={handleDepartmentNavigation}
                 />
                 <HorizontalBarChart
@@ -2126,20 +2152,6 @@ function DashboardPage() {
               </div>
             </div>
           )
-        )}
-
-        {stats?.aiUsage && (
-          <div className={styles.chartsSection}>
-            <div className={styles.sectionTitle}>
-              <h3>AI Usage Analytics</h3>
-            </div>
-            <div className={styles.chartsGrid}>
-              <AIUsageChart
-                aiUsage={stats.aiUsage}
-                monthlyChangeRate={stats.monthlyChangeRate}
-              />
-            </div>
-          </div>
         )}
       </div>
     </div>

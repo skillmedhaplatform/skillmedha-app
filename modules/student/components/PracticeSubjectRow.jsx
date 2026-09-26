@@ -79,14 +79,20 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
                  topicId: topic._id,
                  title: topic.title,
                  topicTitle: topic.title,
-                 totalQuestions: typeof topic.totalQuestions === "number" ? topic.totalQuestions : 0
+                 totalQuestions: typeof topic.totalQuestions === "number" ? topic.totalQuestions : 0,
+                 easyQuestions: typeof topic.easyQuestions === "number" ? topic.easyQuestions : 0,
+                 mediumQuestions: typeof topic.mediumQuestions === "number" ? topic.mediumQuestions : 0,
+                 hardQuestions: typeof topic.hardQuestions === "number" ? topic.hardQuestions : 0
              });
           } else {
             for (const s of subs) {
               allSubtopics.push({
                  ...s,
                  topicTitle: topic.title,
-                 totalQuestions: typeof s.totalQuestions === "number" ? s.totalQuestions : 0
+                 totalQuestions: typeof s.totalQuestions === "number" ? s.totalQuestions : 0,
+                 easyQuestions: typeof s.easyQuestions === "number" ? s.easyQuestions : 0,
+                 mediumQuestions: typeof s.mediumQuestions === "number" ? s.mediumQuestions : 0,
+                 hardQuestions: typeof s.hardQuestions === "number" ? s.hardQuestions : 0
               });
             }
           }
@@ -338,7 +344,7 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
                 actualTotalQuestions={sub.totalQuestions}
                 onStart={() => handleStartClick(sub)}
                 loading={false}
-                disableStart={sub.totalQuestions < 15}
+                disableStart={sub.easyQuestions < 25 && sub.mediumQuestions < 20 && sub.hardQuestions < 15}
               />
             );
           })}

@@ -139,7 +139,10 @@ export default function JobDetailsModal({ open, loading, onClose }) {
           <ul className={styles.ulList}>
             {jobDetails?.applicableCourses?.map((course, idx) => (
               <li key={idx}>
-                {course.degree} - {course.department}
+                {course.degree}
+                {course?.department && Array.isArray(course.department) && course.department.length > 0
+                  ? ` - ${course.department.join(", ")}`
+                  : (course?.department && !Array.isArray(course.department) ? ` - ${course.department}` : "")}
               </li>
             ))}
           </ul>
@@ -150,8 +153,11 @@ export default function JobDetailsModal({ open, loading, onClose }) {
           <ul className={styles.ulList}>
             {jobDetails?.eligibilityCriteria?.map((criteria, idx) => (
               <li key={idx}>
-                {criteria.educationLevel} - Minimum{" "}
-                {criteria.minMarksPercentage}% marks
+                {criteria.educationLevel}
+                {criteria?.department && Array.isArray(criteria.department) && criteria.department.length > 0
+                  ? ` - ${criteria.department.join(", ")}`
+                  : (criteria?.department && !Array.isArray(criteria.department) ? ` - ${criteria.department}` : "")}
+                {" "} - Minimum {criteria.minMarksPercentage}% marks
               </li>
             ))}
           </ul>

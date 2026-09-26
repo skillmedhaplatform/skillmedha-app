@@ -468,7 +468,7 @@ const Students = () => {
 
       {loading ? (
         <div className={styles.loadingContainer}>
-          <Spin size="large" tip="Loading students..." />
+          <Spin size="large" description="Loading students..." />
         </div>
       ) : error ? (
         <div className={styles.errorContainer}>
@@ -562,7 +562,6 @@ const Students = () => {
             placement="bottom"
             onClose={() => setIsDrawerOpen(false)}
             open={isDrawerOpen}
-            height="auto"
             className={styles.studentDrawer}
             styles={{
               body: {
@@ -572,7 +571,7 @@ const Students = () => {
                 borderTopLeftRadius: "16px",
                 borderTopRightRadius: "16px",
               },
-              content: {
+              section: {
                 borderTopLeftRadius: "16px",
                 borderTopRightRadius: "16px",
               }

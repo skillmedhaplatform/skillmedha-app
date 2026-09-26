@@ -165,13 +165,19 @@ const Accomplishments = () => {
                 <div className={educationStyles.aboutsidedata}>
                   <p>{item.description || 'N/A'}</p>
                 </div>
-                <Link href={item.fileUrl || '#'}>
-                  <p
-                    style={{ textAlign: 'center', fontSize: '14px' }}
-                  >
-                    {item.fileUrl ? 'View Documents' : 'No Documents Available'}
-                  </p>
-                </Link>
+                {item?.fileUrl && (
+                  <div className={educationStyles.detailRow}>
+                    <p className={educationStyles.label}>Document :</p>
+                    <a
+                      className={educationStyles.value}
+                      style={{ color: "#56D2D4" }}
+                      href={item?.fileUrl}
+                      target="_blank"
+                    >
+                      Download
+                    </a>
+                  </div>
+                )}
               </div>
             )
           })

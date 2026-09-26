@@ -16,7 +16,9 @@ import {
   Row,
   Col,
   Tooltip,
-  Dropdown
+  Dropdown,
+  Checkbox,
+  Skeleton
 } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -71,6 +73,7 @@ export default function Coding() {
   };
 
   const singleTopic = useSelector((s) => s.adminPractice.questions);
+  const loading = useSelector((s) => s.adminPractice.status === "loading");
   const { subject_slug } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -78,7 +81,7 @@ export default function Coding() {
   useEffect(() => {
     dispatch(fetchSubjectsByType("coding"));
     dispatch(fetchQuestions({ subjectId: subject_slug }));
-  }, []);
+  }, [dispatch, subject_slug]);
 
   const codingQuestions = singleTopic || [];
   const filteredCodingQuestions = codingQuestions.filter(q => 
@@ -321,7 +324,11 @@ export default function Coding() {
       </div>
 
       <div style={{ marginTop: "1rem" }}>
-        {filteredCodingQuestions.length > 0 ? (
+        {loading ? (
+          <div style={{ padding: "2rem" }}>
+            <Skeleton active paragraph={{ rows: 6 }} />
+          </div>
+        ) : filteredCodingQuestions.length > 0 ? (
           <div className={listStyles.questionList}>
             {renderQuestions()}
           </div>
