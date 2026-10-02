@@ -1,9 +1,11 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { HiOutlineBriefcase } from "react-icons/hi2";
+import { Segmented } from "antd";
 
 import JobHeader from "./components/filters";
 import MainComp from "./components/mainComp";
+import ExternalJobs from "./components/ExternalJobs";
 import { useDispatch, useSelector } from "react-redux";
 import { GetAllJobs } from "@/redux/slices/jobopenings";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,6 +17,18 @@ export default function JobOpenings() {
   const dispatch = useDispatch();
   const isMobile = useResponsive();
   const searchParams = useSearchParams();
+  // Kept in the URL (?source=outside) so a refresh stays on the same tab.
+  const [jobSource, setJobSourceState] = useState(
+    searchParams.get("source") === "outside" ? "outside" : "portal"
+  );
+  const setJobSource = (value) => {
+    setJobSourceState(value);
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === "outside") params.set("source", "outside");
+    else params.delete("source");
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : "?", { scroll: false });
+  };
 
   // Metrics extraction
   const student = useSelector((state) => state.student.student?.data);
@@ -52,8 +66,28 @@ export default function JobOpenings() {
     );
   }, [page, limit, search, profileName, sort, dispatch]);
 
+  const sourceSwitch = (
+    <Segmented
+      block
+      value={jobSource}
+      onChange={setJobSource}
+      options={[
+        { label: "Portal Jobs", value: "portal" },
+        { label: "Outside Jobs", value: "outside" },
+      ]}
+      className="mb-3"
+    />
+  );
+
   if (isMobile) {
-    return <MobileJobOpenings />;
+    return (
+      <div className="flex flex-col h-full">
+        <div className="px-3 pt-3 shrink-0">{sourceSwitch}</div>
+        <div className="flex-1 overflow-hidden px-3">
+          {jobSource === "portal" ? <MobileJobOpenings /> : <ExternalJobs />}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -81,12 +115,17 @@ export default function JobOpenings() {
                 Job Openings
               </h1>
               <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
-                Find your next big opportunity and start your career journey.
+                {jobSource === "outside"
+                  ? "Real jobs from top companies' careers pages — search by role, skill and city."
+                  : "Find your next big opportunity and start your career journey."}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 lg:gap-10 lg:mr-10 relative z-10">
+          {/* These numbers are for portal jobs, so they hide on the Outside Jobs tab. */}
+          <div
+            className={`items-center gap-6 lg:gap-10 lg:mr-10 relative z-10 ${jobSource === "outside" ? "hidden" : "flex"}`}
+          >
             <div className="flex flex-col items-center justify-center min-w-[80px]">
               <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">
                 {totalJobs}
@@ -118,10 +157,19 @@ export default function JobOpenings() {
       </div>
 
       <div className="flex flex-col p-4 flex-1 overflow-hidden h-full">
-        <JobHeader />
-        <div className="flex-1 overflow-hidden h-full">
-          <MainComp />
-        </div>
+        <div className="max-w-[360px] shrink-0">{sourceSwitch}</div>
+        {jobSource === "portal" ? (
+          <>
+            <JobHeader />
+            <div className="flex-1 overflow-hidden h-full">
+              <MainComp />
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 overflow-hidden h-full">
+            <ExternalJobs />
+          </div>
+        )}
       </div>
     </div>
   );
