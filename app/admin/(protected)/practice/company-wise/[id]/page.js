@@ -13,7 +13,7 @@ import {
 } from "@ant-design/icons";
 import { useRouter, useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchQuestions, deleteQuestion } from "@/redux/slices/admin/cms/practiceSlice";
+import { fetchQuestions, deleteQuestion, bulkDeletePracQuestions } from "@/redux/slices/admin/cms/practiceSlice";
 import listStyles from "../../Practice_utils/listStyles.module.scss";
 import CompanyQuestionForm from "./CompanyQuestionForm";
 import BulkUploadModal from "../../Practice_utils/BulkUploadModal";
@@ -49,21 +49,16 @@ export default function CompanyManageQuestionsPage() {
 
   const handleBulkDelete = useCallback(async () => {
     setIsDeleting(true);
-    const promises = selectedQuestions.map(qid => dispatch(deleteQuestion(qid)).unwrap());
-    
+    const hide = message.loading(`Deleting ${selectedQuestions.length} questions...`, 0);
     try {
-      const results = await Promise.allSettled(promises);
-      const successful = results.filter(r => r.status === 'fulfilled');
-      const failed = results.filter(r => r.status === 'rejected');
-      
-      if (successful.length > 0) {
-        message.success(`${successful.length} questions deleted successfully.`);
-      }
-      if (failed.length > 0) {
-        message.error(`Failed to delete ${failed.length} questions.`);
-        console.error("Bulk delete failures:", failed);
-      }
+      const deletedIds = await dispatch(bulkDeletePracQuestions(selectedQuestions)).unwrap();
+      hide();
+      message.success(`${deletedIds.length} questions deleted successfully.`);
       setSelectedQuestions([]);
+    } catch (err) {
+      hide();
+      console.error(err);
+      message.error("Failed to delete some questions.");
     } finally {
       setIsDeleting(false);
     }
