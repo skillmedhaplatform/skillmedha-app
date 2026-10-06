@@ -297,7 +297,7 @@ export default function ProblemList() {
         <div className="flex-1 flex flex-col lg:flex-row gap-8 items-start overflow-hidden">
 
           {/* Left Column - Sidebar Filters */}
-          <div className="w-full lg:w-[260px] shrink-0 flex flex-col bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-[0_4px_20px_rgba(0,0,0,0.03)] h-full overflow-y-auto pb-12" style={{ scrollbarWidth: 'none' }}>
+          <div className="w-full lg:w-[260px] shrink-0 flex flex-col bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-[0_4px_20px_rgba(0,0,0,0.03)] h-full overflow-y-auto pb-12">
 
             {/* Status Filter */}
             <div className="pb-6 border-b border-[#E2E8F0] mb-6">
@@ -385,7 +385,7 @@ export default function ProblemList() {
           </div>
 
           {/* Right Column - Problems */}
-          <div className="flex-1 w-full h-full flex flex-col gap-5 overflow-y-auto pr-2 pb-10" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex-1 w-full h-full flex flex-col gap-5 overflow-y-auto pr-2 pb-10">
             {loading ? (
               <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
                 <Spin size="large" />

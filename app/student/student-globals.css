@@ -661,3 +661,35 @@ pre.ql-syntax+p {
    Removed to prevent text color conflicts with legacy white backgrounds 
    during migration.
 */
+
+/* ============================================
+   CUSTOM THIN THEME BLUE SCROLLBARS
+   ============================================ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1E69DA #EFF5FB;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #EFF5FB;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E69DA;
+  border-radius: 8px;
+  transition: background 0.2s ease-in-out;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #154fb3;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #0f3c8a;
+}

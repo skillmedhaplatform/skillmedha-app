@@ -126,13 +126,7 @@ export default function TestPage() {
   const isLastQuestionIndex = currentQuestionIndex === questions.length - 1;
   const isFirstQuestion = currentQuestionIndex === 0;
 
-  const calculatedScore = userResponse?.reduce((acc, r) => {
-    if (r.isCorrect) {
-      const q = questions.find(q => q._id === r.questionId);
-      return acc + (q?.scoreSettings?.pointsForCorrectAns || 1);
-    }
-    return acc;
-  }, 0) || 0;
+  const calculatedScore = userResponse?.filter(r => r.isCorrect).length || 0;
 
   const handleTestCompletion = (isQuit = false) => {
     const attemptedAll = userResponse.length === questions.length;
@@ -752,7 +746,7 @@ export default function TestPage() {
     const totalQ = questions.length;
     const attempted = userResponse.length;
     const unattempted = totalQ - attempted;
-    const totalPossibleScore = questions.reduce((acc, q) => acc + (q.scoreSettings?.pointsForCorrectAns || 1), 0);
+    const totalPossibleScore = questions.length;
     const scorePercentage = totalPossibleScore > 0 ? (calculatedScore / totalPossibleScore) * 100 : 0;
 
     return (
@@ -960,7 +954,7 @@ export default function TestPage() {
             <div className={pageStyles.scoreIcon}><TbTrophy /></div>
             <div className={pageStyles.scoreMain}>
               <div className={pageStyles.scoreLbl}>Score</div>
-              <div className={pageStyles.scoreNum}>{calculatedScore} / {questions.reduce((acc, q) => acc + (q.scoreSettings?.pointsForCorrectAns || 1), 0)}</div>
+              <div className={pageStyles.scoreNum}>{calculatedScore} / {questions.length}</div>
             </div>
             <div className={pageStyles.scoreStat}>
               <div className={pageStyles.scoreLbl}>Correct</div>
