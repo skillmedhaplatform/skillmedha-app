@@ -37,6 +37,7 @@ import listStyles from "@/app/admin/(protected)/practice/Practice_utils/listStyl
 import PracticeBreadcrumbs from "@/app/admin/(protected)/practice/Practice_utils/practiceBreadcrumbs";
 import {
   deleteQuestion,
+  bulkDeletePracQuestions,
   fetchQuestions,
   fetchSubjectsByType,
   fetchSubtopicsByTopic,
@@ -403,13 +404,17 @@ export default function QuestionsPage({
       message.info(getPermissionMessage(PERMISSION_VALUES.DELETE));
       return;
     }
-    const promises = selectedQuestions.map(id => dispatch(deleteQuestion(id)).unwrap());
-    Promise.all(promises)
-      .then(() => {
-        message.success(`${selectedQuestions.length} questions deleted successfully.`);
+    const hide = message.loading(`Deleting ${selectedQuestions.length} questions...`, 0);
+    dispatch(bulkDeletePracQuestions(selectedQuestions))
+      .unwrap()
+      .then((deletedIds) => {
+        hide();
+        message.success(`${deletedIds.length} questions deleted successfully.`);
         setSelectedQuestions([]);
       })
-      .catch(err => {
+      .catch((err) => {
+        hide();
+        console.error(err);
         message.error("Failed to delete some questions.");
       });
   }, [selectedQuestions, dispatch, canAccess, getPermissionMessage]);

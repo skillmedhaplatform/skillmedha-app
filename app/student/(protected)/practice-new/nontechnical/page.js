@@ -248,7 +248,7 @@ export default function NontechnicalPage() {
         </div>
 
         {filteredSubjects && filteredSubjects.length > 0 ? (
-        <div className={`bg-[#EFF5FB] px-4 lg:px-8 pt-0 pb-6 flex-1 ${activeCategory === "All" ? "overflow-y-auto" : "overflow-hidden"}`}>
+        <div className="bg-[#EFF5FB] px-4 lg:px-8 pt-0 pb-6 flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeCategory}

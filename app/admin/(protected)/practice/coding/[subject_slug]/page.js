@@ -50,6 +50,7 @@ import {
   fetchSubjectsByType,
   updateQuestion,
   deleteQuestion,
+  bulkDeletePracQuestions,
 } from "@/redux/slices/admin/cms/practiceSlice";
 import { parseIfJson } from "@/utils/windowMW";
 import { PERMISSION_VALUES, usePermissions } from "@/hooks/usepermission";
@@ -129,13 +130,16 @@ export default function Coding() {
       message.info(getPermissionMessage(PERMISSION_VALUES.DELETE));
       return;
     }
-    const promises = selectedQuestions.map(id => dispatch(deleteQuestion(id)).unwrap());
+    const hide = message.loading(`Deleting ${selectedQuestions.length} questions...`, 0);
     try {
-      await Promise.all(promises);
-      message.success(`${selectedQuestions.length} questions deleted successfully.`);
+      const deletedIds = await dispatch(bulkDeletePracQuestions(selectedQuestions)).unwrap();
+      hide();
+      message.success(`${deletedIds.length} questions deleted successfully.`);
       setSelectedQuestions([]);
       dispatch(fetchQuestions({ subjectId: subject_slug }));
     } catch (err) {
+      hide();
+      console.error(err);
       message.error("Failed to delete some questions.");
     }
   };
