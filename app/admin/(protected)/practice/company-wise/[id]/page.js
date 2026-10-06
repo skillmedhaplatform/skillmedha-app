@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
-import { Button, Space, Typography, Modal, message, Popconfirm, Checkbox, Tooltip } from "antd";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { Button, Space, Typography, Modal, message, Popconfirm, Checkbox, Tooltip, Pagination } from "antd";
 import { 
   ArrowLeftOutlined, 
   EditOutlined, 
@@ -20,17 +20,195 @@ import BulkUploadModal from "../../Practice_utils/BulkUploadModal";
 
 const { Title, Text } = Typography;
 
+const QuestionRow = React.memo(({ q, index, isSelected, onSelect, onDelete }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const qId = q._id || q.id;
+
+  return (
+    <div>
+      <div className={listStyles.questionRow} onClick={() => setIsExpanded(prev => !prev)} style={{ cursor: 'pointer' }}>
+        <div className={listStyles.rowLeft}>
+          <Checkbox 
+             style={{ marginRight: 8 }} 
+             checked={isSelected}
+             onClick={(e) => e.stopPropagation()}
+             onChange={(e) => onSelect && onSelect(qId, e.target.checked)} 
+          />
+          <CaretRightOutlined className={`${listStyles.expandIcon} ${isExpanded ? listStyles.expanded : ""}`} />
+          <span className={listStyles.qNumber}>{index + 1}</span>
+          <span className={listStyles.qText}>
+            {q.questionContent?.question?.substring(0, 50) || "No Question Text"}...
+          </span>
+        </div>
+        
+        <div className={listStyles.rowRight}>
+          <div className={listStyles.badges}>
+            <span className={`${listStyles.badge} ${listStyles.pts}`}>{q.scoreSettings?.pointsForCorrectAns || 1} pts</span>
+            <span className={`${listStyles.badge} ${listStyles.type}`}>{q.questionType}</span>
+            {q.difficulty && <span className={`${listStyles.badge} ${listStyles.difficulty}`}>{q.difficulty}</span>}
+          </div>
+          
+          <div className={listStyles.actions} onClick={e => e.stopPropagation()}>
+            <Tooltip title="Edit">
+              <Button type="text" icon={<EditOutlined />} />
+            </Tooltip>
+            <Popconfirm title="Delete this question?" onConfirm={() => onDelete(qId)}>
+              <Button type="text" danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </div>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className={listStyles.expandedContent} style={{ padding: '1.5rem', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+          <div style={{ marginBottom: '1rem' }}>
+            <Text strong style={{ color: '#64748b' }}>Section / Category: </Text>
+            <Text>{q.sectionName || q.concept || "N/A"}</Text>
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Question Content:</Text>
+            <Text>{q.questionContent?.question}</Text>
+          </div>
+          
+          {/* Render Options if available */}
+          {q.questionType !== 'Coding Question' && q.questionContent && (
+            <div style={{ marginBottom: '1rem' }}>
+              <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Options:</Text>
+              <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#475569' }}>
+                {q.questionContent["option 1"] && <li>A: {q.questionContent["option 1"]}</li>}
+                {q.questionContent["option 2"] && <li>B: {q.questionContent["option 2"]}</li>}
+                {q.questionContent["option 3"] && <li>C: {q.questionContent["option 3"]}</li>}
+                {q.questionContent["option 4"] && <li>D: {q.questionContent["option 4"]}</li>}
+              </ul>
+            </div>
+          )}
+
+          {/* Render Correct Answer */}
+          <div style={{ marginBottom: '1rem' }}>
+            <Text strong style={{ color: '#10b981', display: 'block', marginBottom: '0.5rem' }}>Correct Answer:</Text>
+            <Text style={{ color: '#059669' }}>
+              {q.answer?.singleChoice && Object.keys(q.answer.singleChoice).find(k => q.answer.singleChoice[k])?.replace("option", "Option")}
+              {q.answer?.multipleChoice && Object.keys(q.answer.multipleChoice).filter(k => q.answer.multipleChoice[k]).map(k => k.replace("option", "Option")).join(", ")}
+            </Text>
+          </div>
+
+          {/* Render Explanation */}
+          {q.answer?.explanation && (
+            <div style={{ marginBottom: '1rem' }}>
+              <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Explanation:</Text>
+              <Text>{q.answer.explanation}</Text>
+            </div>
+          )}
+
+          {/* Render Coding Specific Fields */}
+          {q.questionType === 'Coding Question' && (
+            <>
+              <div style={{ marginBottom: '1rem' }}>
+                <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Constraints:</Text>
+                <Text style={{ whiteSpace: 'pre-wrap' }}>{q.questionContent?.constraints || 'N/A'}</Text>
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Time Limit:</Text>
+                <Text>{q.questionContent?.timeLimit ? `${q.questionContent.timeLimit} ms` : 'N/A'}</Text>
+              </div>
+              {q.questionContent?.testCases && q.questionContent.testCases.length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Test Cases:</Text>
+                  {q.questionContent.testCases.map((tc, idx) => (
+                    <div key={idx} style={{ marginBottom: '0.5rem', background: tc.isHidden ? '#fff1f0' : '#f1f5f9', border: tc.isHidden ? '1px solid #ffa39e' : 'none', padding: '0.5rem', borderRadius: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <Text strong style={{ fontSize: '12px' }}>Input:</Text>
+                        {tc.isHidden && <span style={{ fontSize: '10px', background: '#ff4d4f', color: 'white', padding: '2px 6px', borderRadius: '10px' }}>Hidden</span>}
+                      </div>
+                      <div style={{ fontFamily: 'monospace', fontSize: '12px', marginBottom: '4px', whiteSpace: 'pre-wrap' }}>{tc.input}</div>
+                      <Text strong style={{ fontSize: '12px' }}>Output:</Text>
+                      <div style={{ fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'pre-wrap' }}>{tc.output}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
+QuestionRow.displayName = "QuestionRow";
+
+const QuestionList = React.memo(({ questions, onDelete, selectedSet = new Set(), onSelect }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [questions.length]);
+
+  if (!questions || questions.length === 0) {
+    return (
+      <div className={listStyles.emptyState} style={{ padding: '4rem', textAlign: 'center', background: '#fff', borderRadius: '12px' }}>
+        <QuestionCircleOutlined style={{ fontSize: '3rem', color: '#cbd5e1', marginBottom: '1rem' }} />
+        <Title level={4} style={{ color: '#475569', margin: '0 0 8px 0' }}>No questions found</Title>
+        <Text type="secondary">Create your first question to get started.</Text>
+      </div>
+    );
+  }
+
+  const paginatedQuestions = questions.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  return (
+    <div>
+      {paginatedQuestions.map((q, index) => {
+        const qId = q._id || q.id;
+        const absoluteIndex = (currentPage - 1) * pageSize + index;
+        return (
+          <QuestionRow
+            key={qId}
+            q={q}
+            index={absoluteIndex}
+            isSelected={selectedSet.has(qId)}
+            onSelect={onSelect}
+            onDelete={onDelete}
+          />
+        );
+      })}
+
+      {questions.length > pageSize && (
+        <div style={{ padding: '16px 24px', display: "flex", justifyContent: "flex-end" }}>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={questions.length}
+            onChange={(p, ps) => {
+              setCurrentPage(p);
+              setPageSize(ps);
+            }}
+            showSizeChanger
+            pageSizeOptions={["20", "50", "100", "200", "500"]}
+            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} questions`}
+          />
+        </div>
+      )}
+    </div>
+  );
+});
+QuestionList.displayName = "QuestionList";
+
 export default function CompanyManageQuestionsPage() {
   const router = useRouter();
   const { id } = useParams();
   
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
-  const [activePanels, setActivePanels] = useState([]);
   const dispatch = useDispatch();
   const { questions } = useSelector((state) => state.adminPractice || {});
   
-  const [selectedQuestions, setSelectedQuestions] = useState([]);
+  const [selectedSet, setSelectedSet] = useState(new Set());
+  const selectedQuestions = useMemo(() => Array.from(selectedSet), [selectedSet]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -38,14 +216,16 @@ export default function CompanyManageQuestionsPage() {
     }
   }, [dispatch, id]);
 
-  const handleDelete = (questionId) => {
+  useEffect(() => {
+    setSelectedSet(new Set());
+  }, [questions]);
+
+  const handleDelete = useCallback((questionId) => {
     dispatch(deleteQuestion(questionId))
       .unwrap()
       .then(() => message.success("Question deleted successfully"))
       .catch((err) => message.error("Failed to delete question"));
-  };
-
-  const [isDeleting, setIsDeleting] = useState(false);
+  }, [dispatch]);
 
   const handleBulkDelete = useCallback(async () => {
     setIsDeleting(true);
@@ -54,7 +234,7 @@ export default function CompanyManageQuestionsPage() {
       const deletedIds = await dispatch(bulkDeletePracQuestions(selectedQuestions)).unwrap();
       hide();
       message.success(`${deletedIds.length} questions deleted successfully.`);
-      setSelectedQuestions([]);
+      setSelectedSet(new Set());
     } catch (err) {
       hide();
       console.error(err);
@@ -64,17 +244,22 @@ export default function CompanyManageQuestionsPage() {
     }
   }, [selectedQuestions, dispatch]);
 
+  const handleSelect = useCallback((qId, checked) => {
+    setSelectedSet((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(qId);
+      else next.delete(qId);
+      return next;
+    });
+  }, []);
+
   const handleSelectAll = useCallback((checked) => {
     if (checked && questions) {
-      setSelectedQuestions(questions.map(q => q._id || q.id));
+      setSelectedSet(new Set(questions.map(q => q._id || q.id)));
     } else {
-      setSelectedQuestions([]);
+      setSelectedSet(new Set());
     }
   }, [questions]);
-
-  const togglePanel = (qid) => {
-    setActivePanels(prev => prev.includes(qid) ? prev.filter(p => p !== qid) : [...prev, qid]);
-  };
 
   return (
     <div className={listStyles.pageContainer}>
@@ -112,144 +297,26 @@ export default function CompanyManageQuestionsPage() {
         {questions && questions.length > 0 && (
           <div style={{ padding: '12px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Checkbox 
-               checked={selectedQuestions.length === questions.length}
-               indeterminate={selectedQuestions.length > 0 && selectedQuestions.length < questions.length}
+               checked={selectedSet.size > 0 && selectedSet.size === questions.length}
+               indeterminate={selectedSet.size > 0 && selectedSet.size < questions.length}
                onChange={(e) => handleSelectAll(e.target.checked)}
             >
               Select All
             </Checkbox>
-            {selectedQuestions.length > 0 && (
-              <Popconfirm title={`Delete ${selectedQuestions.length} questions?`} onConfirm={handleBulkDelete}>
+            {selectedSet.size > 0 && (
+              <Popconfirm title={`Delete ${selectedSet.size} questions?`} onConfirm={handleBulkDelete}>
                 <Button danger type="primary" size="small" loading={isDeleting}>Delete Selected</Button>
               </Popconfirm>
             )}
           </div>
         )}
-        {!questions || questions.length === 0 ? (
-          <div className={listStyles.emptyState} style={{ padding: '4rem', textAlign: 'center', background: '#fff', borderRadius: '12px' }}>
-            <QuestionCircleOutlined style={{ fontSize: '3rem', color: '#cbd5e1', marginBottom: '1rem' }} />
-            <Title level={4} style={{ color: '#475569', margin: '0 0 8px 0' }}>No questions found</Title>
-            <Text type="secondary">Create your first question to get started.</Text>
-          </div>
-        ) : (
-          questions.map((q, index) => {
-            const qId = q._id || q.id;
-            const isExpanded = activePanels.includes(qId);
-            const isSelected = selectedQuestions.includes(qId);
-            return (
-              <div key={qId}>
-                <div className={listStyles.questionRow} onClick={() => togglePanel(qId)} style={{ cursor: 'pointer' }}>
-                  <div className={listStyles.rowLeft}>
-                    <Checkbox 
-                       style={{ marginRight: 8 }} 
-                       checked={isSelected}
-                       onClick={(e) => e.stopPropagation()}
-                       onChange={(e) => {
-                         if (e.target.checked) setSelectedQuestions([...selectedQuestions, qId]);
-                         else setSelectedQuestions(selectedQuestions.filter(id => id !== qId));
-                       }} 
-                    />
-                    <CaretRightOutlined className={`${listStyles.expandIcon} ${isExpanded ? listStyles.expanded : ""}`} />
-                    <span className={listStyles.qNumber}>{index + 1}</span>
-                    <span className={listStyles.qText}>
-                      {q.questionContent?.question?.substring(0, 50) || "No Question Text"}...
-                    </span>
-                  </div>
-                  
-                  <div className={listStyles.rowRight}>
-                    <div className={listStyles.badges}>
-                      <span className={`${listStyles.badge} ${listStyles.pts}`}>{q.scoreSettings?.pointsForCorrectAns || 1} pts</span>
-                      <span className={`${listStyles.badge} ${listStyles.type}`}>{q.questionType}</span>
-                      <span className={`${listStyles.badge} ${listStyles.difficulty}`}>{q.difficulty}</span>
-                    </div>
-                    
-                    <div className={listStyles.actions} onClick={e => e.stopPropagation()}>
-                      <Tooltip title="Edit">
-                        <Button type="text" icon={<EditOutlined />} />
-                      </Tooltip>
-                      <Popconfirm title="Delete this question?" onConfirm={() => handleDelete(qId)}>
-                        <Button type="text" danger icon={<DeleteOutlined />} />
-                      </Popconfirm>
-                    </div>
-                  </div>
-                </div>
-
-                {isExpanded && (
-                  <div className={listStyles.expandedContent} style={{ padding: '1.5rem', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                    <div style={{ marginBottom: '1rem' }}>
-                      <Text strong style={{ color: '#64748b' }}>Section / Category: </Text>
-                      <Text>{q.sectionName || q.concept || "N/A"}</Text>
-                    </div>
-                    <div style={{ marginBottom: '1rem' }}>
-                      <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Question Content:</Text>
-                      <Text>{q.questionContent?.question}</Text>
-                    </div>
-                    
-                    {/* Render Options if available */}
-                    {q.questionType !== 'Coding Question' && q.questionContent && (
-                      <div style={{ marginBottom: '1rem' }}>
-                        <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Options:</Text>
-                        <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#475569' }}>
-                          {q.questionContent["option 1"] && <li>A: {q.questionContent["option 1"]}</li>}
-                          {q.questionContent["option 2"] && <li>B: {q.questionContent["option 2"]}</li>}
-                          {q.questionContent["option 3"] && <li>C: {q.questionContent["option 3"]}</li>}
-                          {q.questionContent["option 4"] && <li>D: {q.questionContent["option 4"]}</li>}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Render Correct Answer */}
-                    <div style={{ marginBottom: '1rem' }}>
-                      <Text strong style={{ color: '#10b981', display: 'block', marginBottom: '0.5rem' }}>Correct Answer:</Text>
-                      <Text style={{ color: '#059669' }}>
-                        {q.answer?.singleChoice && Object.keys(q.answer.singleChoice).find(k => q.answer.singleChoice[k])?.replace("option", "Option")}
-                        {q.answer?.multipleChoice && Object.keys(q.answer.multipleChoice).filter(k => q.answer.multipleChoice[k]).map(k => k.replace("option", "Option")).join(", ")}
-                      </Text>
-                    </div>
-
-                    {/* Render Explanation */}
-                    {q.answer?.explanation && (
-                      <div style={{ marginBottom: '1rem' }}>
-                        <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Explanation:</Text>
-                        <Text>{q.answer.explanation}</Text>
-                      </div>
-                    )}
-
-                    {/* Render Coding Specific Fields */}
-                    {q.questionType === 'Coding Question' && (
-                      <>
-                        <div style={{ marginBottom: '1rem' }}>
-                          <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Constraints:</Text>
-                          <Text style={{ whiteSpace: 'pre-wrap' }}>{q.questionContent?.constraints || 'N/A'}</Text>
-                        </div>
-                        <div style={{ marginBottom: '1rem' }}>
-                          <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Time Limit:</Text>
-                          <Text>{q.questionContent?.timeLimit ? `${q.questionContent.timeLimit} ms` : 'N/A'}</Text>
-                        </div>
-                        {q.questionContent?.testCases && q.questionContent.testCases.length > 0 && (
-                          <div style={{ marginBottom: '1rem' }}>
-                            <Text strong style={{ color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>Test Cases:</Text>
-                            {q.questionContent.testCases.map((tc, idx) => (
-                              <div key={idx} style={{ marginBottom: '0.5rem', background: tc.isHidden ? '#fff1f0' : '#f1f5f9', border: tc.isHidden ? '1px solid #ffa39e' : 'none', padding: '0.5rem', borderRadius: '4px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                  <Text strong style={{ fontSize: '12px' }}>Input:</Text>
-                                  {tc.isHidden && <span style={{ fontSize: '10px', background: '#ff4d4f', color: 'white', padding: '2px 6px', borderRadius: '10px' }}>Hidden</span>}
-                                </div>
-                                <div style={{ fontFamily: 'monospace', fontSize: '12px', marginBottom: '4px', whiteSpace: 'pre-wrap' }}>{tc.input}</div>
-                                <Text strong style={{ fontSize: '12px' }}>Output:</Text>
-                                <div style={{ fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'pre-wrap' }}>{tc.output}</div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
+        
+        <QuestionList
+          questions={questions}
+          onDelete={handleDelete}
+          selectedSet={selectedSet}
+          onSelect={handleSelect}
+        />
       </div>
 
       {/* Manual Upload Modal */}
@@ -262,7 +329,6 @@ export default function CompanyManageQuestionsPage() {
         destroyOnClose
       >
         <CompanyQuestionForm onAddQuestion={(newQ) => {
-          setQuestions([...questions, { ...newQ, points: 1 }]);
           setManualModalOpen(false);
           message.success("Question added successfully!");
         }} />
@@ -281,3 +347,4 @@ export default function CompanyManageQuestionsPage() {
     </div>
   );
 }
+

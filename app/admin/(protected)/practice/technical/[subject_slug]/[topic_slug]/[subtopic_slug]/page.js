@@ -17,6 +17,7 @@ import {
   Input,
   Select,
   Skeleton,
+  Pagination,
 } from "antd";
 import {
   EditOutlined,
@@ -186,13 +187,106 @@ const QuestionOptions = React.memo(
 
 QuestionOptions.displayName = "QuestionOptions";
 
-const QuestionList = React.memo(({ questions, onEdit, onDelete, selectedQuestions = [], onSelect }) => {
+const QuestionRow = React.memo(({ q, index, isSelected, onSelect, onEdit, onDelete }) => {
   const { canAccess, getPermissionMessage } = usePermissions();
-  const [activePanels, setActivePanels] = React.useState([]);
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const { _id, questionContent, answer, questionType, scoreSettings } = q;
+  const score = scoreSettings?.pointsForCorrectAns || 0;
 
-  const togglePanel = (id) => {
-    setActivePanels(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
-  };
+  return (
+    <div>
+      <div className={listStyles.questionRow}>
+        <div className={listStyles.rowLeft}>
+          <Checkbox
+            checked={isSelected}
+            onChange={(e) => onSelect && onSelect(_id, e.target.checked)}
+            style={{ marginRight: 8 }}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <CaretRightOutlined 
+            className={`${listStyles.expandIcon} ${isExpanded ? listStyles.expanded : ""}`}
+            onClick={() => setIsExpanded(prev => !prev)}
+          />
+          <span className={listStyles.qNumber}>{index + 1}</span>
+          <span className={listStyles.qText}>
+            {String(parseIfJson(parseIfJson(questionContent?.question)))
+              ?.replace(/<[^>]*>?/gm, '')
+              ?.replace(/&nbsp;/g, ' ')
+              ?.replace(/&amp;/g, '&')
+              ?.replace(/&lt;/g, '<')
+              ?.replace(/&gt;/g, '>')
+              ?.replace(/&quot;/g, '"')
+              ?.replace(/&#39;/g, "'")
+              ?.substring(0, 50)}...
+          </span>
+        </div>
+        
+        <div className={listStyles.rowRight}>
+          <div className={listStyles.badges}>
+            <span className={`${listStyles.badge} ${listStyles.pts}`}>{score} pts</span>
+            <span className={`${listStyles.badge} ${listStyles.type}`}>{questionType}</span>
+            {q.difficulty && <span className={`${listStyles.badge} ${listStyles.difficulty}`} style={{ textTransform: 'capitalize' }}>{q.difficulty}</span>}
+          </div>
+          
+          <div className={listStyles.actionIcons}>
+            <Tooltip title={!canAccess(PERMISSION_VALUES.EDIT) ? getPermissionMessage(PERMISSION_VALUES.EDIT) : ""}>
+              <button className={listStyles.edit} disabled={!canAccess(PERMISSION_VALUES.EDIT)} onClick={() => onEdit(_id)}>
+                <EditOutlined />
+              </button>
+            </Tooltip>
+            <Tooltip title="Copy (Coming soon)">
+              <button className={listStyles.copy}><CopyOutlined /></button>
+            </Tooltip>
+            <Tooltip title={!canAccess(PERMISSION_VALUES.DELETE) ? getPermissionMessage(PERMISSION_VALUES.DELETE) : ""}>
+              <Popconfirm title="Delete?" onConfirm={() => onDelete(_id)} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
+                <button className={listStyles.delete} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
+                  <DeleteOutlined />
+                </button>
+              </Popconfirm>
+            </Tooltip>
+          </div>
+        </div>
+      </div>
+      
+      {isExpanded && (
+        <div className={listStyles.expandedContent}>
+          <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionContent?.question) }} style={{ marginBottom: 16 }} />
+          
+          <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {q.difficulty && <Tag color="blue" style={{ textTransform: 'capitalize' }}>Difficulty: {q.difficulty}</Tag>}
+            {q.concept && <Tag color="purple">Concept: {q.concept}</Tag>}
+            {q.companyTags && q.companyTags.length > 0 && (() => {
+              const companies = q.companyTags.map(t => t.companyName).filter(Boolean).join(', ');
+              const exams = q.companyTags.map(t => t.examName).filter(Boolean).join(', ');
+              const years = q.companyTags.map(t => t.year).filter(Boolean).join(', ');
+              const sections = q.companyTags.map(t => t.sectionName).filter(Boolean).join(', ');
+              
+              return (
+                <React.Fragment>
+                  {companies && <Tag color="orange">Companies: {companies}</Tag>}
+                  {exams && <Tag color="gold">Exams: {exams}</Tag>}
+                  {years && <Tag color="cyan">Years: {years}</Tag>}
+                  {sections && <Tag color="geekblue">Sections: {sections}</Tag>}
+                </React.Fragment>
+              );
+            })()}
+          </div>
+
+          <QuestionOptions questionContent={questionContent} answer={answer} questionType={questionType} />
+        </div>
+      )}
+    </div>
+  );
+});
+QuestionRow.displayName = "QuestionRow";
+
+const QuestionList = React.memo(({ questions, onEdit, onDelete, selectedSet = new Set(), onSelect }) => {
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(50);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [questions.length]);
 
   if (!questions.length) {
     return (
@@ -208,102 +302,47 @@ const QuestionList = React.memo(({ questions, onEdit, onDelete, selectedQuestion
     );
   }
 
+  const paginatedQuestions = questions.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   return (
     <div className={listStyles.questionList}>
-      {questions.map((q, index) => {
-        const { _id, questionContent, answer, questionType, scoreSettings } = q;
-        const isExpanded = activePanels.includes(_id);
-        const score = scoreSettings?.pointsForCorrectAns || 0;
-
+      {paginatedQuestions.map((q, index) => {
+        const absoluteIndex = (currentPage - 1) * pageSize + index;
         return (
-          <div key={_id}>
-            <div className={listStyles.questionRow}>
-              <div className={listStyles.rowLeft}>
-                <Checkbox
-                  checked={selectedQuestions?.includes(_id)}
-                  onChange={(e) => onSelect && onSelect(_id, e.target.checked)}
-                  style={{ marginRight: 8 }}
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <CaretRightOutlined 
-                  className={`${listStyles.expandIcon} ${isExpanded ? listStyles.expanded : ""}`}
-                  onClick={() => togglePanel(_id)}
-                />
-                <span className={listStyles.qNumber}>{index + 1}</span>
-                <span className={listStyles.qText}>
-                  {String(parseIfJson(parseIfJson(questionContent?.question)))
-                    ?.replace(/<[^>]*>?/gm, '')
-                    ?.replace(/&nbsp;/g, ' ')
-                    ?.replace(/&amp;/g, '&')
-                    ?.replace(/&lt;/g, '<')
-                    ?.replace(/&gt;/g, '>')
-                    ?.replace(/&quot;/g, '"')
-                    ?.replace(/&#39;/g, "'")
-                    ?.substring(0, 50)}...
-                </span>
-              </div>
-              
-              <div className={listStyles.rowRight}>
-                <div className={listStyles.badges}>
-                  <span className={`${listStyles.badge} ${listStyles.pts}`}>{score} pts</span>
-                  <span className={`${listStyles.badge} ${listStyles.type}`}>{questionType}</span>
-                  {q.difficulty && <span className={`${listStyles.badge} ${listStyles.difficulty}`} style={{ textTransform: 'capitalize' }}>{q.difficulty}</span>}
-                </div>
-                
-                <div className={listStyles.actionIcons}>
-                  <Tooltip title={!canAccess(PERMISSION_VALUES.EDIT) ? getPermissionMessage(PERMISSION_VALUES.EDIT) : ""}>
-                    <button className={listStyles.edit} disabled={!canAccess(PERMISSION_VALUES.EDIT)} onClick={() => onEdit(_id)}>
-                      <EditOutlined />
-                    </button>
-                  </Tooltip>
-                  <Tooltip title="Copy (Coming soon)">
-                    <button className={listStyles.copy}><CopyOutlined /></button>
-                  </Tooltip>
-                  <Tooltip title={!canAccess(PERMISSION_VALUES.DELETE) ? getPermissionMessage(PERMISSION_VALUES.DELETE) : ""}>
-                    <Popconfirm title="Delete?" onConfirm={() => onDelete(_id)} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
-                      <button className={listStyles.delete} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
-                        <DeleteOutlined />
-                      </button>
-                    </Popconfirm>
-                  </Tooltip>
-                </div>
-              </div>
-            </div>
-            
-            {isExpanded && (
-              <div className={listStyles.expandedContent}>
-                <div dangerouslySetInnerHTML={{ __html: parseIfJson(questionContent?.question) }} style={{ marginBottom: 16 }} />
-                
-                <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {q.difficulty && <Tag color="blue" style={{ textTransform: 'capitalize' }}>Difficulty: {q.difficulty}</Tag>}
-                  {q.concept && <Tag color="purple">Concept: {q.concept}</Tag>}
-                  {q.companyTags && q.companyTags.length > 0 && (() => {
-                    const companies = q.companyTags.map(t => t.companyName).filter(Boolean).join(', ');
-                    const exams = q.companyTags.map(t => t.examName).filter(Boolean).join(', ');
-                    const years = q.companyTags.map(t => t.year).filter(Boolean).join(', ');
-                    const sections = q.companyTags.map(t => t.sectionName).filter(Boolean).join(', ');
-                    
-                    return (
-                      <React.Fragment>
-                        {companies && <Tag color="orange">Companies: {companies}</Tag>}
-                        {exams && <Tag color="gold">Exams: {exams}</Tag>}
-                        {years && <Tag color="cyan">Years: {years}</Tag>}
-                        {sections && <Tag color="geekblue">Sections: {sections}</Tag>}
-                      </React.Fragment>
-                    );
-                  })()}
-                </div>
-
-                <QuestionOptions questionContent={questionContent} answer={answer} questionType={questionType} />
-              </div>
-            )}
-          </div>
+          <QuestionRow
+            key={q._id}
+            q={q}
+            index={absoluteIndex}
+            isSelected={selectedSet.has(q._id)}
+            onSelect={onSelect}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         );
       })}
+
+      {questions.length > pageSize && (
+        <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={questions.length}
+            onChange={(p, ps) => {
+              setCurrentPage(p);
+              setPageSize(ps);
+            }}
+            showSizeChanger
+            pageSizeOptions={["20", "50", "100", "200", "500"]}
+            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} questions`}
+          />
+        </div>
+      )}
     </div>
   );
 });
-
 QuestionList.displayName = "QuestionList";
 
 export default function QuestionsPage({ 
@@ -320,7 +359,8 @@ export default function QuestionsPage({
   const currentPath = usePathname();
   const [filterType, setFilterType] = React.useState("All");
   const [filterPoints, setFilterPoints] = React.useState("All");
-  const [selectedQuestions, setSelectedQuestions] = React.useState([]);
+  const [selectedSet, setSelectedSet] = React.useState(new Set());
+  const selectedQuestions = useMemo(() => Array.from(selectedSet), [selectedSet]);
 
   const { canAccess, getPermissionMessage } = usePermissions();
 
@@ -351,10 +391,10 @@ export default function QuestionsPage({
     return result;
   }, [questions, filterType, filterPoints, isTopicLevel]);
 
-  // Reset selection when filters change
+  // Reset selection when filters change or questions change
   useEffect(() => {
-    setSelectedQuestions([]);
-  }, [filterType, filterPoints]);
+    setSelectedSet(new Set());
+  }, [filterType, filterPoints, questions]);
 
   const availablePoints = useMemo(() => {
     const pointsSet = new Set((questions || []).map(q => q.scoreSettings?.pointsForCorrectAns || 0));
@@ -386,18 +426,24 @@ export default function QuestionsPage({
   );
 
   const handleSelect = useCallback((id, checked) => {
-    setSelectedQuestions(prev => 
-      checked ? [...prev, id] : prev.filter(qId => qId !== id)
-    );
+    setSelectedSet((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
   }, []);
 
-  const handleSelectAll = useCallback((checked) => {
-    if (checked) {
-      setSelectedQuestions(filteredQuestions.map(q => q._id));
-    } else {
-      setSelectedQuestions([]);
-    }
-  }, [filteredQuestions]);
+  const handleSelectAll = useCallback(
+    (checked) => {
+      if (checked) {
+        setSelectedSet(new Set(filteredQuestions.map((q) => q._id)));
+      } else {
+        setSelectedSet(new Set());
+      }
+    },
+    [filteredQuestions]
+  );
 
   const handleBulkDelete = useCallback(() => {
     if (!canAccess(PERMISSION_VALUES.DELETE)) {
@@ -410,7 +456,7 @@ export default function QuestionsPage({
       .then((deletedIds) => {
         hide();
         message.success(`${deletedIds.length} questions deleted successfully.`);
-        setSelectedQuestions([]);
+        setSelectedSet(new Set());
       })
       .catch((err) => {
         hide();
@@ -544,15 +590,15 @@ export default function QuestionsPage({
       <div style={{ marginTop: "1rem", marginBottom: "0.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         {filteredQuestions.length > 0 && (
           <Checkbox
-            checked={selectedQuestions.length > 0 && selectedQuestions.length === filteredQuestions.length}
-            indeterminate={selectedQuestions.length > 0 && selectedQuestions.length < filteredQuestions.length}
+            checked={selectedSet.size > 0 && selectedSet.size === filteredQuestions.length}
+            indeterminate={selectedSet.size > 0 && selectedSet.size < filteredQuestions.length}
             onChange={(e) => handleSelectAll(e.target.checked)}
           >
             Select All
           </Checkbox>
         )}
-        {selectedQuestions.length > 0 && (
-          <Popconfirm title={`Delete ${selectedQuestions.length} questions?`} onConfirm={handleBulkDelete}>
+        {selectedSet.size > 0 && (
+          <Popconfirm title={`Delete ${selectedSet.size} questions?`} onConfirm={handleBulkDelete}>
             <Button danger icon={<DeleteOutlined />} disabled={!canAccess(PERMISSION_VALUES.DELETE)}>
               Delete Selected
             </Button>
@@ -565,7 +611,7 @@ export default function QuestionsPage({
           questions={filteredQuestions}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          selectedQuestions={selectedQuestions}
+          selectedSet={selectedSet}
           onSelect={handleSelect}
         />
       </div>
