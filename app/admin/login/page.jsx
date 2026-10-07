@@ -192,11 +192,26 @@ export default function LoginPage() {
               value={resetEmail}
               onChange={(e) => setResetEmail(e.target.value)}
             />
-            <button className={styles.resetBtn} onClick={() => {
+            <button className={styles.resetBtn} onClick={async () => {
               if(!resetEmail) { alert("Please enter your email."); return; }
-              alert("Reset link sent!"); 
-              setShowForgotModal(false);
-              setResetEmail("");
+              try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_STUDENT_URL || 'http://localhost:4000'}/forgotStudentPassword`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email: resetEmail.trim(), type: 'admin' })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                  alert(data.message || "Reset link sent!");
+                  setShowForgotModal(false);
+                  setResetEmail("");
+                } else {
+                  alert(data.message || "User not found.");
+                }
+              } catch (err) {
+                console.error(err);
+                alert("Something went wrong. Please try again.");
+              }
             }}>
               Send Reset Link
             </button>
