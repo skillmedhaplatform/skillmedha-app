@@ -109,18 +109,21 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
         // Check if feature is disabled
         const keys = Object.keys(orgDetails.features);
         const featureKey = keys.find(
-          (key) => key.toLowerCase() === currentSlug
+          (key) => key.toLowerCase() === matchingItem.slug.toLowerCase()
         );
 
         // Block access if feature is disabled and not in allowed list
         const allowedSlugs = ["/", "myprofile", "dashboard", "help"];
 
-        if (
-          featureKey &&
-          !orgDetails.features[featureKey] &&
-          !allowedSlugs.includes(matchingItem.slug)
-        ) {
-          router.push("/dashboard");
+        if (!allowedSlugs.includes(matchingItem.slug)) {
+          if (!featureKey) {
+             router.push("/student/dashboard");
+          } else {
+             const val = orgDetails.features[featureKey];
+             if (val === false || val === "false") {
+               router.push("/student/dashboard");
+             }
+          }
         }
       }
     }
@@ -139,12 +142,21 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
         const tab = keys.find(
           (e) => e?.toLocaleLowerCase() === title.slug.toLocaleLowerCase()
         );
-        if (
-          tab &&
-          !orgDetails.features[tab] &&
-          !["myprofile", "dashboard", "help"].includes(title.slug)
-        ) {
-          isVisible = false;
+        
+        const isCoreTab = ["myprofile", "dashboard", "help"].includes(title.slug);
+        
+        if (!isCoreTab) {
+          if (tab) {
+            const featureValue = orgDetails.features[tab];
+            // Handle both boolean false and string "false"
+            if (featureValue === false || featureValue === "false") {
+              isVisible = false;
+            }
+          } else {
+            // If feature is missing from orgDetails.features, treat it as false
+            // This matches the admin UI initialization logic
+            isVisible = false;
+          }
         }
       }
 

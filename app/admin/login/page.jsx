@@ -68,7 +68,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className={styles.logoWrap}>
           <img
-            src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"
+            src="/student-portal-logo.png"
             alt="Logo"
             className={styles.logoIcon}
           />

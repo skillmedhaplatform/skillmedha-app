@@ -42,7 +42,7 @@ export default function MobileLoginView({
       {/* HEADER / LOGO - Static flow safe for all mobile screen heights */}
       <div className="w-full flex items-center justify-between px-6 sm:px-12 py-5 border-b border-gray-100 bg-white">
         <div className="flex items-center">
-          <img src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg" alt="SkillMedha Logo" className="h-7 w-auto mr-2.5" />
+          <img src="/student-portal-logo.png" alt="SkillMedha Logo" className="h-7 w-auto mr-2.5" />
           <div className="text-xl font-extrabold tracking-tighter flex items-center text-gray-900">
             SKILLMEDHA
           </div>

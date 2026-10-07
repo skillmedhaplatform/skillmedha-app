@@ -18,7 +18,7 @@ const Header = () => {
     <div className={headerStyles.container}>
       <div className={headerStyles.icon}>
         <ImageWithFallback
-          src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"
+          src="/student-portal-logo.png"
           fallbackSrc="https://res.cloudinary.com/cliqtick/image/upload/v1718345892/sysnper/db47284929e120d0bdcc1955a52c1288_rulzfj.png"
           alt="Synsper Logo"
           onClick={() => nav.replace("/testportal_admin/myTests")}
