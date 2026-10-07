@@ -308,8 +308,8 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
       >
       <div className={sideBarStyles.logoContainer}>
         <img
-          src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"
-          alt="Synsper Logo"
+          src="/student-portal-logo.png"
+          alt="SkillMedha Logo"
           onClick={() => nav.replace(isSpecialOrg ? "/student/tests" : "/student/dashboard")}
         />
         {!isCollapsed && (
