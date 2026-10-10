@@ -38,6 +38,7 @@ const InternshipLibraryPage = () => (
     paginationSelector={selectPagination}
     allCoursesSelector={selectAllInternships}
     getItemUrl={getInternshipUrl}
+    getDetailsUrl={(internship) => `/student/internshipLibrary/${internship?._id}`}
     viewLabel="View Internship"
     searchPlaceholder="Search internships…"
     idPrefix="internship"

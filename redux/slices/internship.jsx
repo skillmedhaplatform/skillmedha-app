@@ -69,12 +69,12 @@ const InternshipSlice = createSlice({
       }
     });
     builder.addCase(getAllCoursesOnly.fulfilled, (state, { payload }) => {
-      state.allCoursesOnly = payload?.data || [];
+      state.allCoursesOnly = payload?.data || payload?.courses || (Array.isArray(payload) ? payload : []);
       state.allCoursesOnlyPagination = payload?.pagination || null;
     });
-builder.addCase(getAllInternshipsOnly.fulfilled, (state, { payload }) => {
-  state.allInternshipsOnly = payload?.data || [];
-});
+    builder.addCase(getAllInternshipsOnly.fulfilled, (state, { payload }) => {
+      state.allInternshipsOnly = payload?.data || payload?.internships || (Array.isArray(payload) ? payload : []);
+    });
   },
 });
 
