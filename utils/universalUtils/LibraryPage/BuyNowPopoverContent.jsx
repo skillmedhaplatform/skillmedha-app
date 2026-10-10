@@ -126,39 +126,12 @@ const BuyNowPopoverContent = ({
             }}
           />
 
-          {/* Add To Cart / Go To Cart toggle — icon-only here so the
-              prominent action (Buy Now) gets the space; the cart still
-              has its own drawer for anyone who wants to review before paying. */}
+          {/* Add to Cart — adds to cart */}
           <Button
-            icon={
-              cartLoading ? (
-                <LoadingOutlined />
-              ) : isInCart ? (
-                <CheckOutlined />
-              ) : (
-                <ShoppingCartOutlined />
-              )
-            }
             onClick={() => onAddToCart(item)}
-            disabled={cartLoading}
-            title={isInCart ? "Go to Cart" : "Add to Cart"}
-            style={{
-              width: 42,
-              height: 38,
-              borderRadius: 10,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: isInCart ? "#16a34a" : undefined,
-              borderColor: isInCart ? "#16a34a" : undefined,
-            }}
-          />
-
-          {/* Buy Now — skips the cart entirely, straight to the payment page */}
-          <Button
-            onClick={() => onBuyNow(item)}
             type="primary"
             size="middle"
+            disabled={cartLoading}
             style={{
               flex: 1,
               height: 38,
@@ -169,7 +142,7 @@ const BuyNowPopoverContent = ({
               justifyContent: "center",
             }}
           >
-            Buy Now
+            {isInCart ? "Go to Cart" : "Add to Cart"}
           </Button>
         </div>
       )}
@@ -193,15 +166,7 @@ const BuyNowPopoverContent = ({
       {isFree && !isPurchased && (
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
           <Button
-            icon={
-              cartLoading ? (
-                <LoadingOutlined />
-              ) : isInCart ? (
-                <CheckOutlined />
-              ) : (
-                <ShoppingCartOutlined />
-              )
-            }
+
             onClick={() => onAddToCart(item)}
             disabled={cartLoading}
             type="primary"
