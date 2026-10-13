@@ -22,6 +22,7 @@ import adminOrgReducer from "./slices/admin/adminOrgSlice";
 import adminRazorpayReducer from "./slices/admin/adminRazorpaySlice";
 import adminZoomReducer from "./slices/admin/adminZoomSlice";
 import adminPracticeReducer from "./slices/admin/cms/practiceSlice";
+import adminPracticeSetsReducer from "./slices/admin/cms/practiceSetsSlice";
 import adminInternshipReducer from "./slices/admin/cms/internship";
 import marqueeReducer from "./slices/admin/cms/marqueeSlice";
 import adminUserReducer from "./slices/admin/cms/user";
@@ -77,6 +78,7 @@ export const store = configureStore({
     adminRazorpay: adminRazorpayReducer,
     adminZoom: adminZoomReducer,
     adminPractice: adminPracticeReducer,
+    adminPracticeSets: adminPracticeSetsReducer,
     adminInternship: adminInternshipReducer,
     marquee: marqueeReducer,
     user: adminUserReducer,

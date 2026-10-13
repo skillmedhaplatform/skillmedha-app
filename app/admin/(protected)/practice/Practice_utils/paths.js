@@ -23,4 +23,16 @@ export const PracticeCategory = [
     active: true,
     path: "/admin/practice/company-wise",
   },
+  {
+    id: "practice-sets-6f1c-4a8e-9b2d-3e7a1c5d9f20",
+    name: "Practice Sets",
+    active: true,
+    path: "/admin/practice/practice-sets",
+  },
+  {
+    id: "practice-bundles-8d2e-4f1a-b6c3-7a9e2d4b1c80",
+    name: "Bundles",
+    active: true,
+    path: "/admin/practice/bundles",
+  },
 ];

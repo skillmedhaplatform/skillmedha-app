@@ -23,6 +23,10 @@ const initialState = {
   pracQuestions: {},
   studentPracResults: [],
   categoryProgress: {},
+  // Practice sets & bundles the admin published, each with this student's access
+  catalog: { sets: [], bundles: [] },
+  catalogStatus: "idle",
+  catalogError: null,
   // status can be 'idle' | 'loading' | 'succeeded' | 'failed'
   status: "idle",
   error: null,
@@ -105,6 +109,42 @@ export const fetchPracQuestions = createAsyncThunk(
       return { data: response.data };
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+// --- Practice Sets catalog (sets + bundles with this student's access) ---
+export const fetchPracticeCatalog = createAsyncThunk(
+  "studentPracticeCatalog/fetchPracticeCatalog",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/practice-catalog", {
+        headers: getAuthHeaders(),
+      });
+      return response.data?.data || { sets: [], bundles: [] };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.err || error.message);
+    }
+  }
+);
+
+// --- Start a practice set: the server picks the questions and time limit ---
+// Response matches /startPractice so the existing test player can run it.
+export const startPracticeSet = createAsyncThunk(
+  "studentPractice/startPracticeSet",
+  async (practiceSetId, { rejectWithValue }) => {
+    try {
+      const response = await api.post(
+        `/practice-sets/${practiceSetId}/start`,
+        {},
+        { headers: getAuthHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue({
+        message: error.response?.data?.err || error.message,
+        code: error.response?.data?.code || null,
+      });
     }
   }
 );
@@ -213,6 +253,26 @@ const StudentPracticeSlice = createSlice({
       })
       .addCase(getStudentPracResults.fulfilled, (state, action) => {
         state.studentPracResults = action.payload.data?.data || [];
+      })
+      .addCase(startPracticeSet.pending, (state) => {
+        state.pracQuestions = {};
+      })
+      .addCase(startPracticeSet.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+        state.pracQuestions = action.payload;
+      })
+      .addCase(fetchPracticeCatalog.pending, (state) => {
+        state.catalogStatus = "loading";
+        state.catalogError = null;
+      })
+      .addCase(fetchPracticeCatalog.fulfilled, (state, action) => {
+        state.catalogStatus = "succeeded";
+        state.catalog = action.payload;
+      })
+      .addCase(fetchPracticeCatalog.rejected, (state, action) => {
+        state.catalogStatus = "failed";
+        state.catalogError = action.payload || "Failed to load practice sets";
       });
 
     // --- Generic Loading/Error States ---

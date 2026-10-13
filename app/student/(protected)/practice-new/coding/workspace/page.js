@@ -147,6 +147,45 @@ const getStarterCode = (langId) => {
 };
 
 
+// Countdown for a timed practice set. Purely informational: when time runs
+// out the student is told, but can still finish the problem they're on.
+function SetTimer({ deadline }) {
+  const [now, setNow] = useState(() => Date.now());
+  const warnedRef = useRef(false);
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const left = Math.max(0, Math.round((deadline - now) / 1000));
+  useEffect(() => {
+    if (left === 0 && !warnedRef.current) {
+      warnedRef.current = true;
+      message.warning("Time's up for this practice set!", 5);
+    }
+  }, [left]);
+  const mm = String(Math.floor(left / 60)).padStart(2, "0");
+  const ss = String(left % 60).padStart(2, "0");
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "4px 12px",
+        borderRadius: 999,
+        fontSize: 13,
+        fontWeight: 700,
+        background: left <= 300 ? "#FEF2F2" : "#EFF6FF",
+        color: left <= 300 ? "#DC2626" : "#1D4ED8",
+      }}
+    >
+      <TbClock size={15} /> {mm}:{ss}
+    </span>
+  );
+}
+
+const PRACTICE_SETS_PATH = "/student/practice-new/practice-sets";
+
 export default function Workspace() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -157,6 +196,12 @@ export default function Workspace() {
   const qId = searchParams.get("qId");
   const subjectId = searchParams.get("subjectId");
   const title = searchParams.get("title");
+  // Practice-set mode: the server picks this attempt's coding questions (after
+  // checking the student has access) and "Next" walks through that list.
+  const practiceSetId = searchParams.get("ps");
+  const setStartedRef = useRef(false);
+  const setQuestionsRef = useRef(null);
+  const [setDeadline, setSetDeadline] = useState(null);
 
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -257,6 +302,50 @@ export default function Workspace() {
   }, [qId]);
 
   useEffect(() => {
+    if (!practiceSetId) return;
+    const pick = (list) => {
+      const found = (qId && list.find((q) => q._id === qId)) || list[0];
+      setQuestion(found || null);
+      if (found && found._id !== qId && typeof window !== "undefined") {
+        const url = new URL(window.location);
+        url.searchParams.set("qId", found._id);
+        window.history.replaceState({}, "", url);
+      }
+    };
+
+    if (setQuestionsRef.current) {
+      pick(setQuestionsRef.current);
+      return;
+    }
+    if (setStartedRef.current) return;
+    setStartedRef.current = true;
+
+    axios
+      .post(`${restUrl}/practice-sets/${practiceSetId}/start`, {}, {
+        headers: { Authorization: `Bearer ${getLstorage("token")}` },
+      })
+      .then(({ data }) => {
+        const list = data?.questionsData || [];
+        setQuestionsRef.current = list;
+        setAllQuestions(list);
+        if (data?.timeMinutes) setSetDeadline(Date.now() + data.timeMinutes * 60 * 1000);
+        if (!list.length) message.error("No questions are available in this practice set yet.");
+        else pick(list);
+      })
+      .catch((err) => {
+        if (err?.response?.data?.code === "PAYMENT_REQUIRED") {
+          message.info("Unlock this practice set to start practising");
+          router.replace(`${PRACTICE_SETS_PATH}/checkout?type=set&id=${practiceSetId}`);
+          return;
+        }
+        message.error(err?.response?.data?.err || "Couldn't start this practice set.");
+        router.replace(PRACTICE_SETS_PATH);
+      })
+      .finally(() => setLoading(false));
+  }, [practiceSetId, qId, router]);
+
+  useEffect(() => {
+    if (practiceSetId) return; // questions come from the practice set above
     if (!qId && !subjectId) return;
     const fetchQuestion = async () => {
       try {
@@ -292,7 +381,7 @@ export default function Workspace() {
       }
     };
     fetchQuestion();
-  }, [qId, subjectId]);
+  }, [qId, subjectId, practiceSetId]);
 
   const testCases = question?.questionContent?.testCases || [];
 
@@ -590,10 +679,24 @@ export default function Workspace() {
       {/* Top Navbar */}
       <div className={styles.topNavbar}>
         <div className={styles.navLeft}>
-          <button className={styles.backBtn} onClick={() => router.push(`/student/practice-new/coding/problems?subjectId=${subjectId}&title=${title}`)}>
-            <TbChevronLeft size={18} /> Problem List
-          </button>
+          {practiceSetId ? (
+            <button className={styles.backBtn} onClick={() => router.push(PRACTICE_SETS_PATH)}>
+              <TbChevronLeft size={18} /> Practice Sets
+            </button>
+          ) : (
+            <button className={styles.backBtn} onClick={() => router.push(`/student/practice-new/coding/problems?subjectId=${subjectId}&title=${title}`)}>
+              <TbChevronLeft size={18} /> Problem List
+            </button>
+          )}
         </div>
+        {practiceSetId && allQuestions.length > 0 && (
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: "auto", paddingRight: 12 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#475569" }}>
+              Question {Math.max(1, allQuestions.findIndex((q) => q._id === qId) + 1)} of {allQuestions.length}
+            </span>
+            {setDeadline && <SetTimer deadline={setDeadline} />}
+          </div>
+        )}
       </div>
 
       {/* Main Workspace Layout */}
@@ -1046,7 +1149,7 @@ export default function Workspace() {
                             router.push(url.pathname + url.search);
                           } else {
                             message.success("You have completed all questions in this set!");
-                            router.push('/student/practice-new/coding');
+                            router.push(practiceSetId ? PRACTICE_SETS_PATH : '/student/practice-new/coding');
                           }
                         }}
                       >

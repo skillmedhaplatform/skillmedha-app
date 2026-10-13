@@ -172,6 +172,34 @@ export default function PracticeBreadcrumbs() {
               };
             }
           }
+        } else if (category === "practice-sets" || category === "bundles") {
+          const label = category === "bundles" ? "Bundles" : "Practice Sets";
+          const itemId = params.setId || params.bundleId;
+
+          items.push({
+            title: itemId ? (
+              <span
+                onClick={() => router.push(`/admin/practice/${category}`)}
+                className={styles.breadcrumbLink}
+              >
+                {label}
+              </span>
+            ) : (
+              <span className={styles.breadcrumbCurrent}>{label}</span>
+            ),
+            key: `category-${category}`,
+          });
+
+          if (itemId) {
+            items.push({
+              title: (
+                <span className={styles.breadcrumbCurrent}>
+                  {itemId === "new" ? "Create" : "Edit"}
+                </span>
+              ),
+              key: `item-${itemId}`,
+            });
+          }
         }
       }
 

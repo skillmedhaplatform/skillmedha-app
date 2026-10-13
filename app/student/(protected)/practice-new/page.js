@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { App } from "antd";
-import { FiBookOpen, FiBriefcase, FiFileText, FiChevronRight } from "react-icons/fi";
+import { FiBookOpen, FiBriefcase, FiFileText, FiChevronRight, FiLayers } from "react-icons/fi";
 
 export default function PracticeNewRedirect() {
   const router = useRouter();
@@ -32,6 +32,18 @@ export default function PracticeNewRedirect() {
       buttonColor: "border-green-500 text-green-600 hover:bg-green-50",
       titleColor: "text-[#22C55E]",
       onClick: () => router.push("/student/practice-new/company-wise"),
+    },
+    {
+      id: "sets",
+      title: "Practice Sets",
+      description: "Level-wise sets and bundles with timed, exam-style questions",
+      icon: <FiLayers className="text-4xl text-white" />,
+      iconBg: "bg-[#F59E0B]",
+      iconShadow: "shadow-amber-200",
+      buttonColor: "border-amber-500 text-amber-600 hover:bg-amber-50",
+      titleColor: "text-[#D97706]",
+      buttonLabel: "Explore Sets",
+      onClick: () => router.push("/student/practice-new/practice-sets"),
     },
     {
       id: "mock",
@@ -71,7 +83,7 @@ export default function PracticeNewRedirect() {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 xl:gap-12 w-full max-w-[1300px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 xl:gap-8 w-full max-w-[1300px]">
           {cards.map((card) => (
             <div
               key={card.id}
@@ -101,7 +113,7 @@ export default function PracticeNewRedirect() {
                   ${card.buttonColor}
                 `}
               >
-                Start Practicing
+                {card.buttonLabel || "Start Practicing"}
                 <FiChevronRight className="text-xl" />
               </button>
             </div>

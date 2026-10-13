@@ -145,6 +145,14 @@ $shadow-lg: rgba(22, 119, 255, 0.2);
     background: linear-gradient(135deg, $secondary-coral 0%, #fb923c 100%);
   }
 
+  &.practiceSets {
+    background: linear-gradient(135deg, #593cc1 0%, #8b5cf6 100%);
+  }
+
+  &.bundles {
+    background: linear-gradient(135deg, #d97706 0%, #fbbf24 100%);
+  }
+
   &.inactive {
     background: linear-gradient(135deg, $gray-500 0%, $gray-300 100%);
   }
