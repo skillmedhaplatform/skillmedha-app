@@ -72,6 +72,10 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
           });
           const subs = subRes.data?.data || [];
           
+          const subtopicsTotalQuestions = subs.reduce((acc, s) => acc + (typeof s.totalQuestions === "number" ? s.totalQuestions : 0), 0);
+          const topicTotalQuestions = typeof topic.totalQuestions === "number" ? topic.totalQuestions : 0;
+          const directTopicQuestions = topicTotalQuestions - subtopicsTotalQuestions;
+
           if (subs.length === 0) {
              // If there are no subtopics, the topic itself should act as the playable level
              allSubtopics.push({
@@ -79,12 +83,25 @@ export default function PracticeSubjectRow({ subject, pageSizeOverride, activeSo
                  topicId: topic._id,
                  title: topic.title,
                  topicTitle: topic.title,
-                 totalQuestions: typeof topic.totalQuestions === "number" ? topic.totalQuestions : 0,
+                 totalQuestions: topicTotalQuestions,
                  easyQuestions: typeof topic.easyQuestions === "number" ? topic.easyQuestions : 0,
                  mediumQuestions: typeof topic.mediumQuestions === "number" ? topic.mediumQuestions : 0,
                  hardQuestions: typeof topic.hardQuestions === "number" ? topic.hardQuestions : 0
              });
           } else {
+            // If direct topic questions exist, add a Topic General card
+            if (directTopicQuestions > 0 || topicTotalQuestions > subtopicsTotalQuestions) {
+              allSubtopics.push({
+                  _id: null,
+                  topicId: topic._id,
+                  title: `${topic.title} (General)`,
+                  topicTitle: topic.title,
+                  totalQuestions: directTopicQuestions > 0 ? directTopicQuestions : topicTotalQuestions,
+                  easyQuestions: typeof topic.easyQuestions === "number" ? topic.easyQuestions : 0,
+                  mediumQuestions: typeof topic.mediumQuestions === "number" ? topic.mediumQuestions : 0,
+                  hardQuestions: typeof topic.hardQuestions === "number" ? topic.hardQuestions : 0
+              });
+            }
             for (const s of subs) {
               allSubtopics.push({
                  ...s,

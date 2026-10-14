@@ -1208,11 +1208,13 @@ export default function TestUI({
   const currentQuestionRef = useRef();
 
   const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(
-      remainingSeconds,
-    ).padStart(2, "0")}`;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) {
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
   const formatTimer = (value) => (value < 10 ? `0${value}` : value);
 
@@ -1931,7 +1933,9 @@ export default function TestUI({
                       </svg>
                       <div className={testStyles.timerCenter}>
                         <div className={testStyles.timerVal} style={{ color: (hours * 3600 + minutes * 60 + seconds) < 300 ? '#c62828' : (hours * 3600 + minutes * 60 + seconds) < 600 ? '#e65100' : '#0d47a1' }}>
-                          {minutes ? String(minutes).padStart(2, "0") : "00"}:{seconds ? String(seconds).padStart(2, "0") : "00"}
+                          {hours > 0
+                            ? `${String(hours).padStart(2, "0")}:${String(minutes || 0).padStart(2, "0")}:${String(seconds || 0).padStart(2, "0")}`
+                            : `${minutes ? String(minutes).padStart(2, "0") : "00"}:${seconds ? String(seconds).padStart(2, "0") : "00"}`}
                         </div>
                         <div className={testStyles.timerLbl}>Remaining</div>
                       </div>
