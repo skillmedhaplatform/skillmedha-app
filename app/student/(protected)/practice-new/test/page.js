@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import pageStyles from "./testui.module.scss";
 import { Button, Divider, Spin, Input, Result, message, Modal } from "antd";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
@@ -19,7 +19,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { parseIfJson } from "@/app/student/(protected)/jobAssessments/reusable_comp/jsonparse";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getStudentPracResults, fetchPracQuestions, savePracResults } from "@/redux/slices/practiceSlice";
+import { getStudentPracResults, fetchPracQuestions, savePracResults, startPracticeSet } from "@/redux/slices/practiceSlice";
 import useResponsive from "@/hooks/useResponsive";
 import MobileQuestionPlayer from "@/mobile_views/practice/MobileQuestionPlayer";
 import DeviceBlocker from "@/modules/student/components/DeviceBlocker";
@@ -53,6 +53,8 @@ export default function TestPage() {
   const topicId = topicIdRaw === "null" || topicIdRaw === "undefined" ? null : topicIdRaw;
   const subTopicIdRaw = searchParams.get("subT");
   const subTopicId = subTopicIdRaw === "null" || subTopicIdRaw === "undefined" ? null : subTopicIdRaw;
+  // Admin-configured practice set: the server decides questions, count and time.
+  const practiceSetId = searchParams.get("ps");
 
   const pracQuestions = useSelector(
     (s) => s.practice.pracQuestions?.questionsData || []
@@ -65,7 +67,7 @@ export default function TestPage() {
     let finalQuestions = [...pracQuestions];
     try {
       if (typeof window !== 'undefined') {
-        const refId = subTopicId || subjectId;
+        const refId = practiceSetId || subTopicId || subjectId;
         if (refId) {
           const savedState = localStorage.getItem(`practice_resume_${refId}`);
           if (savedState) {
@@ -91,11 +93,14 @@ export default function TestPage() {
     } catch (e) {}
     
     return finalQuestions;
-  }, [pracQuestions, subTopicId, subjectId]);
+  }, [pracQuestions, practiceSetId, subTopicId, subjectId]);
 
   const testTitle = searchParams.get("title") || searchParams.get("t");
   const subjectTitle = searchParams.get("subjectTitle") || "";
   const subjectType = searchParams.get("type") || "Technical";
+  const backPath = practiceSetId
+    ? "/student/practice-new/practice-sets"
+    : `/student/practice-new/${subjectType?.toLowerCase() === "technical" ? "technical" : "nontechnical"}`;
   const difficulty = searchParams.get("diff");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -159,7 +164,7 @@ export default function TestPage() {
              dispatch(getStudentPracResults(studentCreds._id));
            }
            localStorage.removeItem(`practice_test_${pracId}`);
-           const refId = subTopicId || topicId || subjectId;
+           const refId = practiceSetId || subTopicId || topicId || subjectId;
            localStorage.removeItem(`practice_resume_${refId}`);
            if (correctQuestionIds.length === questions.length && questions.length > 0) {
              localStorage.setItem("showLevelUpPopup", "true");
@@ -176,7 +181,7 @@ export default function TestPage() {
              dispatch(getStudentPracResults(studentCreds._id));
            }
            localStorage.removeItem(`practice_test_${pracId}`);
-           const refId = subTopicId || topicId || subjectId;
+           const refId = practiceSetId || subTopicId || topicId || subjectId;
            localStorage.removeItem(`practice_resume_${refId}`);
         });
       }
@@ -185,6 +190,7 @@ export default function TestPage() {
 
   useEffect(() => {
     dispatch(changeCollapse(true));
+    if (practiceSetId) return; // started by the practice-set effect below
     const refId = subTopicId || topicId || subjectId;
     const fetchType = subTopicId ? "subTopicId" : topicId ? "topicId" : "subjectId";
     
@@ -206,7 +212,45 @@ export default function TestPage() {
         setActiveRefId(refId);
       });
     }
-  }, [subTopicId, topicId, subjectId, difficulty, dispatch, studentCreds?._id]);
+  }, [practiceSetId, subTopicId, topicId, subjectId, difficulty, dispatch, studentCreds?._id]);
+
+  // Start an admin-configured practice set once per page load. Every start
+  // draws fresh random questions, so an old resume snapshot can't be reused.
+  const startedSetRef = useRef(null);
+  useEffect(() => {
+    if (!practiceSetId || startedSetRef.current === practiceSetId) return;
+    startedSetRef.current = practiceSetId;
+
+    dispatch(changeCollapse(true));
+    setActiveRefId(null);
+    dispatch(resetUserResponse());
+    localStorage.removeItem(`practice_resume_${practiceSetId}`);
+
+    dispatch(startPracticeSet(practiceSetId))
+      .unwrap()
+      .then((res) => {
+        // Coding questions need the code editor, not this player.
+        if (res?.practiceSet?.category === "coding") {
+          router.replace(
+            `/student/practice-new/coding/workspace?ps=${practiceSetId}&title=${encodeURIComponent(
+              res.practiceSet.subjectTitles?.[0] || res.practiceSet.title || ""
+            )}`
+          );
+          return;
+        }
+        if (res?.timeMinutes) setTimeLeft(res.timeMinutes * 60);
+        setActiveRefId(practiceSetId);
+      })
+      .catch((err) => {
+        if (err?.code === "PAYMENT_REQUIRED") {
+          message.info("Unlock this practice set to start practising");
+          router.replace(`/student/practice-new/practice-sets/checkout?type=set&id=${practiceSetId}`);
+          return;
+        }
+        message.error(err?.message || "Couldn't start this practice set");
+        router.replace("/student/practice-new/practice-sets");
+      });
+  }, [practiceSetId, dispatch, router]);
 
   // RESTORE STATE
   useEffect(() => {
@@ -700,7 +744,7 @@ export default function TestPage() {
           extra={[
             <Button
               type="primary"
-              onClick={() => router.replace(`/student/practice-new/${subjectType?.toLowerCase() === "technical" ? "technical" : "nontechnical"}`)}
+              onClick={() => router.replace(backPath)}
               key="back"
               size="large"
               style={{ backgroundColor: '#1E69DA', borderColor: '#1E69DA' }}
@@ -805,7 +849,7 @@ export default function TestPage() {
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button 
               type="primary" 
-              onClick={() => router.replace(`/student/practice-new/${subjectType?.toLowerCase() === "technical" ? "technical" : "nontechnical"}`)}
+              onClick={() => router.replace(backPath)}
               style={{ background: 'linear-gradient(to right, #22c55e, #16a34a)', border: 'none', height: '52px', borderRadius: '12px', padding: '0 24px', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '15px', fontWeight: 600, minWidth: '180px', justifyContent: 'space-between', boxShadow: '0 4px 12px rgba(34, 197, 94, 0.2)' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

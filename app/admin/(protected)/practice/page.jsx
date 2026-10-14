@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { FaBook, FaCode, FaCog, FaBuilding } from "react-icons/fa";
+import { FaBook, FaCode, FaCog, FaBuilding, FaLayerGroup, FaBoxOpen } from "react-icons/fa";
 import styles from "./PracticeCard.module.scss";
 import { PracticeCategory } from "./Practice_utils/paths";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,10 @@ function PracticeCard({ category, onClick }) {
         return <FaCog className={styles.icon} />;
       case "Company-wise":
         return <FaBuilding className={styles.icon} />;
+      case "Practice Sets":
+        return <FaLayerGroup className={styles.icon} />;
+      case "Bundles":
+        return <FaBoxOpen className={styles.icon} />;
       default:
         return <FaBook className={styles.icon} />;
     }
@@ -38,6 +42,10 @@ function PracticeCard({ category, onClick }) {
         return `${baseClass} ${styles.technical}`;
       case "Company-wise":
         return `${baseClass} ${styles.companyWise}`;
+      case "Practice Sets":
+        return `${baseClass} ${styles.practiceSets}`;
+      case "Bundles":
+        return `${baseClass} ${styles.bundles}`;
       default:
         return baseClass;
     }
@@ -88,10 +96,7 @@ export default function PracticePage() {
       </div>
       <div className={styles.cardContainer}>
         {PracticeCategory.map((category) => (
-          <div
-            key={category.id}
-            className={category.name === "Company-wise" ? styles.companyWiseWrapper : ""}
-          >
+          <div key={category.id}>
             <PracticeCard
               category={category}
               onClick={handleCardClick}
