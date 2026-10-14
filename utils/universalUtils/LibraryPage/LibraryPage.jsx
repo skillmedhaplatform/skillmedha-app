@@ -11,10 +11,11 @@ import useResponsive from "@/hooks/useResponsive";
 import MobileLibraryPage from "@/mobile_views/library/MobileLibraryPage";
 import { getOneInternsip } from "@/redux/slices/internship";
 import { getWishlist, addToWishlist, removeFromWishlist } from "@/redux/slices/wishlistSlice";
-import { getCart, addToCart } from "@/redux/slices/cartSlice";
+import { getCart, addToCart, removeFromCart } from "@/redux/slices/cartSlice";
 import WishlistDrawer from "./WishlistDrawer";
 import CartDrawer from "./CartDrawer";
 import BuyNowPopoverContent from "./BuyNowPopoverContent";
+import AddToCartModal from "./AddToCartModal";
 import PriceChip from "./PriceChip";
 
 // --- Helpers ---
@@ -202,6 +203,7 @@ const LibraryPage = ({
   allCoursesSelector,   // selector for all courses array — optional
   allPaginationSelector,
   getItemUrl,
+  getDetailsUrl,
   viewLabel = "View",
   searchPlaceholder = "Search…",
   idPrefix = "lib",
@@ -304,6 +306,8 @@ const LibraryPage = ({
   const cartLoading = useSelector((state) => state.cart?.loading ?? false);
   const cartPendingIds = useSelector((state) => state.cart?.pendingIds ?? []);
   const [cartOpen, setCartOpen] = useState(false);
+  const [addToCartModalOpen, setAddToCartModalOpen] = useState(false);
+  const [recentlyAddedItems, setRecentlyAddedItems] = useState([]);
 
   const cartIdSet = useMemo(
     () => new Set(cartItems.map((i) => i.courseId?._id || i.courseId)),
@@ -323,16 +327,49 @@ const LibraryPage = ({
     if (!courseId) return;
 
     if (cartIdSet.has(courseId)) {
-      setCartOpen(true);
+      nav.push("/student/cart?type=" + idPrefix);
       return;
     }
 
     try {
       await dispatch(addToCart(courseId)).unwrap();
       message.success("Added to cart");
-      setCartOpen(true);
+      setRecentlyAddedItems(prev => {
+        if (prev.find(i => i._id === item._id)) return prev;
+        return [...prev, item];
+      });
+      setAddToCartModalOpen(true);
     } catch (err) {
       message.error(err || "Failed to add to cart");
+    }
+  };
+
+  const handleAddAllToCart = async (itemsToAdd) => {
+    try {
+      for (const item of itemsToAdd) {
+        if (!cartIdSet.has(item._id)) {
+          await dispatch(addToCart(item._id)).unwrap();
+        }
+      }
+      message.success("All items added to cart");
+      setAddToCartModalOpen(false);
+      nav.push("/student/cart?type=" + idPrefix);
+    } catch (err) {
+      message.error(err || "Failed to add some items");
+    }
+  };
+
+  const handleRemoveFromCart = async (item) => {
+    try {
+      await dispatch(removeFromCart(item._id)).unwrap();
+      message.success("Removed from cart");
+      setRecentlyAddedItems(prev => {
+        const next = prev.filter(i => i._id !== item._id);
+        if (next.length === 0) setAddToCartModalOpen(false);
+        return next;
+      });
+    } catch (err) {
+      message.error(err || "Failed to remove from cart");
     }
   };
 
@@ -795,7 +832,7 @@ const LibraryPage = ({
               {showBuyNow && activeTab !== "my" && (
                 <Badge count={cartItems.length} size="small" offset={[-4, 4]}>
                   <button
-                    onClick={() => setCartOpen(true)}
+                    onClick={() => nav.push("/student/cart?type=" + idPrefix)}
                     className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group w-[80px]"
                   >
                     <ShoppingCartOutlined className="text-white text-[24px] lg:text-[28px] leading-none group-hover:text-[#5694F0] transition-colors" style={{ color: "white" }} />
@@ -1003,6 +1040,14 @@ const LibraryPage = ({
                     className="group flex flex-col bg-white border border-slate-100 rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative"
                     role="button"
                     tabIndex={0}
+                    onClick={() => {
+                      if (isEnrolled) {
+                        nav.push(getItemUrl(item));
+                      } else {
+                        const detailUrlFn = getDetailsUrl || getItemUrl;
+                        nav.push(detailUrlFn(item));
+                      }
+                    }}
                   >
                     {/* Inner ambient glow (subtle) */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-blue-500/10 transition-colors" />
@@ -1115,15 +1160,16 @@ const LibraryPage = ({
                             if (isEnrolled) {
                               nav.push(getItemUrl(item));
                             } else {
-                              if (!inCart) handleAddToCart(item);
-                              else setCartOpen(true);
+                              if (inCart) {
+                                nav.push("/student/cart?type=" + idPrefix);
+                              } else {
+                                handleAddToCart(item, e);
+                              }
                             }
                           }}
                         >
-                          {isCartLoading && !isEnrolled ? (
-                            <><LoadingOutlined /> Adding...</>
-                          ) : buttonText === "Buy" ? (
-                            inCart ? "Go to Cart" : <><LockOutlined className="text-[12px]" /> Buy</>
+                          {buttonText === "Buy" ? (
+                            isCartLoading ? "Adding..." : inCart ? "Go to Cart" : "Add to Cart"
                           ) : buttonText === "Start" ? (
                             "Start"
                           ) : (
@@ -1151,7 +1197,10 @@ const LibraryPage = ({
                         item={item}
                         onAddToWishlist={(it) => handleWishlistToggle(it)}
                         onAddToCart={(it) => handleAddToCart(it)}
-                        onBuyNow={(it) => handleBuyNow(it)}
+                        onBuyNow={(it) => {
+                          const detailUrlFn = getDetailsUrl || getItemUrl;
+                          nav.push(detailUrlFn(it));
+                        }}
                         isInCart={inCart}
                         isInWishlist={inWishlist}
                         cartLoading={isCartLoading}
@@ -1224,6 +1273,28 @@ const LibraryPage = ({
           totalAmount={cartTotalAmount}
           loading={cartLoading}
           nav={nav}
+        />
+      )}
+
+      {/* Add To Cart Modal */}
+      {showBuyNow && (
+        <AddToCartModal
+          open={addToCartModalOpen}
+          onClose={() => {
+            setAddToCartModalOpen(false);
+            setTimeout(() => setRecentlyAddedItems([]), 300);
+          }}
+          addedItems={recentlyAddedItems}
+          relatedItems={safeAllItems}
+          cartIdSet={cartIdSet}
+          onAddToCart={handleAddToCart}
+          onAddAllToCart={handleAddAllToCart}
+          onRemoveFromCart={handleRemoveFromCart}
+          onGoToCart={() => {
+            setAddToCartModalOpen(false);
+            setTimeout(() => setRecentlyAddedItems([]), 300);
+            nav.push("/student/cart?type=" + idPrefix);
+          }}
         />
       )}
     </div>
