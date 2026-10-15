@@ -231,8 +231,8 @@ const SideBar = ({ activeView, setView, isMobile }) => {
       {!isMobile && (
         <div className={styles.logoContainer}>
           <img
-            src="/student-portal-logo.png"
-            alt="Synsper Logo"
+            src="/skillmedha-logo.png"
+            alt="SkillMedha Logo"
             onClick={() => nav.replace("/admin/dashboard")}
           />
           {!effectiveCollapsed && (

@@ -10,11 +10,12 @@ import {
   HiOutlineSquares2X2
 } from "react-icons/hi2";
 
-export default function StudentPageHeader({ section, title, rightSlot, leftSlot, subtitle, subtitleSlot, breadcrumb }) {
+export default function StudentPageHeader({ section, title, rightSlot, leftSlot, subtitle, subtitleSlot, breadcrumb, icon }) {
   const getIcon = () => {
+    if (icon) return icon;
     const s = (typeof section === 'string' ? section : "").toLowerCase();
     const t = (typeof title === 'string' ? title : "").toLowerCase();
-    if (s.includes("practice") || t.includes("practice")) return <HiOutlineAcademicCap className="text-white text-3xl" />;
+    if (s.includes("practice") || t.includes("practice") || t.includes("checkout")) return <HiOutlineAcademicCap className="text-white text-3xl" />;
     if (s.includes("assessment") || t.includes("assessment")) return <HiOutlineClipboardDocumentCheck className="text-white text-3xl" />;
     if (s.includes("profile") || t.includes("profile")) return <HiOutlineUser className="text-white text-3xl" />;
     if (s.includes("help") || t.includes("help")) return <HiOutlineQuestionMarkCircle className="text-white text-3xl" />;

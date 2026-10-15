@@ -68,8 +68,8 @@ export default function LoginPage() {
         {/* Logo */}
         <div className={styles.logoWrap}>
           <img
-            src="/student-portal-logo.png"
-            alt="Logo"
+            src="/skillmedha-logo.png"
+            alt="SkillMedha Logo"
             className={styles.logoIcon}
           />
           <div className={styles.logoText}>SKILL<span>MEDHA</span></div>

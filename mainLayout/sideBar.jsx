@@ -320,7 +320,7 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
       >
       <div className={sideBarStyles.logoContainer}>
         <img
-          src="/student-portal-logo.png"
+          src="/skillmedha-logo.png"
           alt="SkillMedha Logo"
           onClick={() => nav.replace(isSpecialOrg ? "/student/tests" : "/student/dashboard")}
         />
