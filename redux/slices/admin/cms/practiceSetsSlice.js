@@ -24,12 +24,19 @@ export const getTopicsBySubject = async (subjectId) => {
   return data?.data || [];
 };
 
+// Company tests with their sections and per-difficulty question counts.
+export const getCompanySources = async () => {
+  const { data } = await api.get("/practice-sets/company-sources", { headers: getAuthHeaders() });
+  return data?.data || [];
+};
+
 export const getSubtopicsByTopic = async (topicId) => {
   const { data } = await api.get(`/subtopics/topic/${topicId}`, { headers: getAuthHeaders() });
   return data?.data || [];
 };
 
-// selections: [{ subjectId, topicId?, subTopicId? }] — a whole subject, a topic or a subtopic.
+// selections: [{ subjectId, topicId?, subTopicId?, section? }] — a whole subject or
+// company test, a topic, a subtopic, or a company-test section.
 export const getQuestionCount = async ({ selections, difficulty, category }) => {
   const { data } = await api.post(
     "/practice-sets/question-count",

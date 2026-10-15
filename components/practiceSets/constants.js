@@ -17,6 +17,7 @@ export const CATEGORY_OPTIONS = [
   { value: "nontechnical", label: "Non-Technical" },
   { value: "technical", label: "Technical" },
   { value: "coding", label: "Coding" },
+  { value: "company", label: "Company-wise" },
 ];
 
 // Matches the difficulty stored on each question in the question editor.
