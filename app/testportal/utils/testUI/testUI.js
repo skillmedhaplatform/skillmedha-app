@@ -1335,28 +1335,27 @@ export default function TestUI({
       setLstorage("activity", JSON.stringify(studentActivity));
       return message.error("Mobile phone detected");
     } else {
-      const { data } = await axios.post(proctoringUrl + "/comparefaces", {
-        img: imageData,
-        studentId: studentCreds?._id,
-        bucket_name: "synsper-test-series",
-      });
-      if (data) {
-        if (data?.FaceMatches) {
-          const FaceMatchesVal = data?.FaceMatches[0]?.Confidence;
-          if (FaceMatchesVal) {
-            if (FaceMatchesVal < 90) {
-              studentActivity.push({
-                event: {
-                  name: "Facial Recognition",
-                  value: "Face does not match",
-                },
-                time: new Date(),
-              });
-              setLstorage("activity", JSON.stringify(studentActivity));
-              return message.error("Face does not match");
-            }
-          }
+      try {
+        const { data } = await axios.post(proctoringUrl + "/comparefaces", {
+          img: imageData,
+          studentId: studentCreds?._id,
+          bucket_name: "skillmedha-utils",
+        });
+        const matches = data?.FaceMatches || data?.data?.FaceMatches;
+        const similarity = matches?.[0]?.Similarity ?? matches?.[0]?.Confidence;
+        if (!Array.isArray(matches) || matches.length === 0 || (similarity !== undefined && similarity < 85)) {
+          studentActivity.push({
+            event: {
+              name: "Facial Recognition",
+              value: "Face does not match KYC profile",
+            },
+            time: new Date(),
+          });
+          setLstorage("activity", JSON.stringify(studentActivity));
+          return message.error("Face does not match KYC profile");
         }
+      } catch (err) {
+        console.error("Periodic face check error:", err);
       }
     }
     setLstorage("activity", JSON.stringify(studentActivity));

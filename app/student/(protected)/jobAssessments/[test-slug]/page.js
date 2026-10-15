@@ -545,25 +545,31 @@ export default function Page() {
           {
             img: imageData,
             studentId: studentCreds?._id,
-            bucket_name: "synsper-test-series",
+            bucket_name: "skillmedha-utils",
           },
           { headers: { Authorization: `Bearer ${getLstorage("token")}` } }
         );
 
-        if (cmpData?.FaceMatches) {
-          const confidence = Array.isArray(cmpData.FaceMatches)
-            ? cmpData.FaceMatches?.Confidence
-            : undefined;
-          if (confidence && confidence < 90) {
-            setVerifying(false);
-            return message.error("Face does not match");
-          }
+        if (cmpData?.err || cmpData?.error) {
+          setVerifying(false);
+          return message.error(cmpData.err || cmpData.error || "Face verification failed");
+        }
+
+        const faceMatches = cmpData?.FaceMatches || cmpData?.data?.FaceMatches;
+        if (!Array.isArray(faceMatches) || faceMatches.length === 0) {
+          setVerifying(false);
+          return message.error("Face does not match your KYC profile");
+        }
+
+        const similarity = faceMatches[0]?.Similarity ?? faceMatches[0]?.Confidence ?? 0;
+        if (similarity < 85) {
+          setVerifying(false);
+          return message.error(`Face does not match KYC profile (${Math.round(similarity)}% match)`);
         }
       } catch (e) {
         setVerifying(false);
-        return message.error(
-          "Verification service unavailable. Please try again."
-        );
+        const errMsg = e?.response?.data?.err || e?.response?.data?.message || "Verification service unavailable. Please try again.";
+        return message.error(errMsg);
       }
     }
 
