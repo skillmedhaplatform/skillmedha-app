@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────────
 import React, { useEffect, useOptimistic, useState, useTransition } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, ConfigProvider, message, Result, Segmented, Select } from "antd";
+import { App, Button, ConfigProvider, Result, Segmented, Select } from "antd";
 import { ApplyJob, GetAllJobs } from "@/redux/slices/jobopenings";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
@@ -15,6 +15,7 @@ import JobDetailsHeader from "./JobDetailsHeader";
 import JobDetailsTabs from "./JobDetailsTabs";
 
 export default function MainComp() {
+  const { message } = App.useApp();
   // ── Redux ──────────────────────────────────────────────────
   const { jobs: JOBS, pagination = { totalDocs: 0, totalPages: 1, currentPage: 1, limit: 10 } } = useSelector(
     (state) => state.jonOpenings.allJobOpenings?.value || { jobs: [], pagination: { totalDocs: 0, totalPages: 1, currentPage: 1, limit: 10 } }

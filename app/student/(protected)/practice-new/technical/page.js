@@ -136,11 +136,11 @@ export default function TechnicalPage() {
           {/* Filters Skeleton */}
           <div className="px-4 lg:px-8 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
             <div className="flex gap-2">
-              <Skeleton.Button active shape="round" size="default" style={{ width: 100 }} />
-              <Skeleton.Button active shape="round" size="default" style={{ width: 120 }} />
-              <Skeleton.Button active shape="round" size="default" style={{ width: 90 }} />
+              <Skeleton.Button active shape="round" size="medium" style={{ width: 100 }} />
+              <Skeleton.Button active shape="round" size="medium" style={{ width: 120 }} />
+              <Skeleton.Button active shape="round" size="medium" style={{ width: 90 }} />
             </div>
-            <Skeleton.Input active size="default" style={{ width: 150 }} />
+            <Skeleton.Input active size="medium" style={{ width: 150 }} />
           </div>
         </div>
         
