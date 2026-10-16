@@ -7,6 +7,7 @@ import styles from "../../practiceStyles.module.scss";
 import PracticeBreadcrumbs from "../../Practice_utils/practiceBreadcrumbs";
 import ThumbnailUpload from "../../Practice_utils/ThumbnailUpload";
 import TopicPicker from "../../Practice_utils/TopicPicker";
+import CompanyPicker from "../../Practice_utils/CompanyPicker";
 import { PracticeSetCard, PracticeSetDetails } from "@/components/practiceSets/PracticeSetCard";
 import {
   CATEGORY_OPTIONS,
@@ -86,12 +87,13 @@ export default function PracticeSetFormPage() {
       });
   }, [dispatch, isNew, router, setId, message]);
 
-  // Only the ids matter to the server: { subjectId, topicId?, subTopicId? }.
+  // Only the ids matter to the server: { subjectId, topicId?, subTopicId?, section? }.
   const toSelections = (list) =>
-    (list || []).map(({ subjectId, topicId, subTopicId }) => ({
+    (list || []).map(({ subjectId, topicId, subTopicId, section }) => ({
       subjectId,
       ...(topicId ? { topicId } : {}),
       ...(subTopicId ? { subTopicId } : {}),
+      ...(section ? { section } : {}),
     }));
   const topicKey = JSON.stringify(toSelections(topics));
 
@@ -176,6 +178,11 @@ export default function PracticeSetFormPage() {
             initialValues={initialValues}
             onFinish={handleSubmit}
             onFinishFailed={() => message.error("Please fix the highlighted fields")}
+            // Sources belong to one category (subjects vs company tests), so
+            // switching category starts the selection over.
+            onValuesChange={(changed) => {
+              if ("category" in changed) form.setFieldValue("topics", []);
+            }}
             requiredMark="optional"
             className="flex flex-col gap-4"
           >
@@ -193,26 +200,46 @@ export default function PracticeSetFormPage() {
               <Form.Item name="thumbnail" label="Card image">
                 <ThumbnailUpload />
               </Form.Item>
-              <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
-                <Form.Item name="category" label="Category" rules={[{ required: true }]}>
-                  <Segmented options={CATEGORY_OPTIONS} />
-                </Form.Item>
-                <Form.Item name="level" label="Level" rules={[{ required: true }]}>
-                  <Select options={LEVEL_OPTIONS} />
-                </Form.Item>
-              </div>
+              <Form.Item
+                name="category"
+                label="Category"
+                rules={[{ required: true }]}
+                tooltip="Company-wise sets use the company tests from Practice → Company-wise"
+              >
+                <Segmented options={CATEGORY_OPTIONS} />
+              </Form.Item>
+              <Form.Item name="level" label="Level" rules={[{ required: true }]} className="md:max-w-[50%]">
+                <Select options={LEVEL_OPTIONS} />
+              </Form.Item>
             </Section>
 
             <Section
               step={2}
               title="Questions"
-              hint="Pick a whole subject, topics or individual subtopics from your question bank. Students get random questions from them on every attempt."
+              hint={
+                category === "company"
+                  ? "Pick a whole company test or individual sections. Students get random questions from them on every attempt."
+                  : "Pick a whole subject, topics or individual subtopics from your question bank. Students get random questions from them on every attempt."
+              }
             >
               <Form.Item
                 name="topics"
-                rules={[{ type: "array", min: 1, message: "Select a subject, topic or subtopic" }]}
+                rules={[
+                  {
+                    type: "array",
+                    min: 1,
+                    message:
+                      category === "company"
+                        ? "Select a company test or section"
+                        : "Select a subject, topic or subtopic",
+                  },
+                ]}
               >
-                <TopicPicker category={category} difficulty={difficulty} />
+                {category === "company" ? (
+                  <CompanyPicker difficulty={difficulty} />
+                ) : (
+                  <TopicPicker category={category} difficulty={difficulty} />
+                )}
               </Form.Item>
 
               <div className="mb-4 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700">
