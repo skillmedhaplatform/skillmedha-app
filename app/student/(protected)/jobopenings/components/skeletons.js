@@ -36,7 +36,7 @@ export function JobDetailsSkeleton() {
           </div>
           <div className="flex flex-col">
             {/* .jobTitle: 23px */}
-            <Skeleton.Input active size="default" style={{ width: 260, height: 23, marginBottom: 6 }} />
+            <Skeleton.Input active size="medium" style={{ width: 260, height: 23, marginBottom: 6 }} />
             {/* .subHead: 18px */}
             <Skeleton.Input active size="small" style={{ width: 180, height: 18, marginBottom: 10 }} />
             {/* Apply button: height ~42px */}

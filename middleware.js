@@ -122,10 +122,11 @@ export async function middleware(request) {
     }
   }
 
-  // ── 6. Psychometric Test Gate ─────────────────────────────────────────────
-  if (!isPsychometricExempt(pathname) && session.pt === false) {
-    return NextResponse.redirect(new URL("/student/testPortal", request.url));
-  }
+  // ── 6. Psychometric Test Gate (Disabled for all students) ─────────────────
+  // Note: Psychometric test is currently disabled for all students.
+  // if (!isPsychometricExempt(pathname) && session.pt === false) {
+  //   return NextResponse.redirect(new URL("/student/testPortal", request.url));
+  // }
 
   return NextResponse.next();
 }

@@ -67,8 +67,10 @@ export async function GET(request) {
 
     const hasTakenTest = student?.psychometricTestResults && Object.keys(student.psychometricTestResults).length > 0;
     
-    // Exempt if they already took the test, if they're an old user, or if this is NOT their first login
-    const ptValue = Boolean(hasTakenTest || !isNewUser || (student?.loginCount > 1));
+    // NOTE: Psychometric test is currently disabled for all students.
+    // To re-enable in the future, uncomment the calculation below:
+    // const ptValue = Boolean(hasTakenTest || !isNewUser || (student?.loginCount > 1));
+    const ptValue = true;
 
     const permissionsEncrypted = await encryptSession({
       // Login already requires verification, so if getStudentCreds succeeds, they are verified

@@ -32,6 +32,10 @@ function LoginForm() {
       const p = searchParams.get('portal');
       if (roleConfig[p]) setRole(p);
     }
+    const fromParam = searchParams.get('from');
+    const redirectParam = searchParams.get('redirect');
+    if (fromParam) sessionStorage.setItem('auth_from', fromParam);
+    if (redirectParam) sessionStorage.setItem('auth_redirect', redirectParam);
   }, [searchParams]);
 
   const handleSubmit = async (e) => {
@@ -45,6 +49,39 @@ function LoginForm() {
         setRole(result.resolvedRole);
         // Save the authenticated user's portal role to localStorage
         localStorage.setItem("portalRole", result.resolvedRole);
+
+        const fromParam = searchParams.get('from') || sessionStorage.getItem('auth_from');
+        const redirectParam = searchParams.get('redirect') || sessionStorage.getItem('auth_redirect');
+
+        sessionStorage.removeItem('auth_from');
+        sessionStorage.removeItem('auth_redirect');
+
+        if (result.resolvedRole === 'student') {
+          if (fromParam === 'practice' || redirectParam?.includes('practice')) {
+            const targetPath = (redirectParam && redirectParam.startsWith('/student/')) ? redirectParam : '/student/practice-new';
+            const tokenParams = result.data?.token
+              ? `${targetPath.includes('?') ? '&' : '?'}token=${encodeURIComponent(result.data.token)}&sId=${encodeURIComponent(result.data.userID || '')}`
+              : '';
+            window.location.href = `${targetPath}${tokenParams}`;
+            return;
+          }
+          if (fromParam === 'resumeBuilder' || redirectParam?.includes('resumeBuilder')) {
+            const targetPath = (redirectParam && redirectParam.startsWith('/student/')) ? redirectParam : '/student/resumeBuilder';
+            const tokenParams = result.data?.token
+              ? `${targetPath.includes('?') ? '&' : '?'}token=${encodeURIComponent(result.data.token)}&sId=${encodeURIComponent(result.data.userID || '')}`
+              : '';
+            window.location.href = `${targetPath}${tokenParams}`;
+            return;
+          }
+          if (redirectParam && redirectParam.startsWith('/student/')) {
+            const tokenParams = result.data?.token
+              ? `${redirectParam.includes('?') ? '&' : '?'}token=${encodeURIComponent(result.data.token)}&sId=${encodeURIComponent(result.data.userID || '')}`
+              : '';
+            window.location.href = `${redirectParam}${tokenParams}`;
+            return;
+          }
+        }
+
         window.location.href = result.redirectUrl || "/student/dashboard";
       }
     } catch (err) {
@@ -236,7 +273,7 @@ function LoginForm() {
               </button>
             </div>
 
-            <p className="text-gray-500 mb-8 font-medium">Enter your email address and we'll send you a link to reset your password securely.</p>
+            <p className="text-gray-500 mb-8 font-medium">Enter your email address and we&apos;ll send you a link to reset your password securely.</p>
 
             {forgotMessage.text && (
               <div className={`mb-6 p-4 rounded-2xl text-sm flex items-start font-medium animate-in fade-in slide-in-from-top-2 ${forgotMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-600 border border-red-100'}`}>

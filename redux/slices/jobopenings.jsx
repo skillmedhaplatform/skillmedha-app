@@ -1,10 +1,10 @@
 import { restUrl } from "@/config/urls";
 import axios from "axios";
 import { getStudentCreds } from "./student";
-import { message } from "antd";
+import { appMessage } from "@/utils/antdStatic";
 import { getLstorage } from "@/universalUtils/windowMW";
 
-const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const JobOpeningSlice = createSlice({
   name: "JobOpeningSlice",
@@ -105,7 +105,7 @@ export const GetAllJobs = createAsyncThunk("/getAllJobs", async (args) => {
 
 export const ApplyJob = createAsyncThunk("/applyJob", async (args) => {
   const { dispatch } = args;
-  const hide = message.loading("Applying for the job, please wait...");
+  const hide = appMessage.loading("Applying for the job, please wait...");
   try {
     const { data } = await axios.get(
       restUrl + `/applyJob?jobId=${args?.jobid}&studentId=${args?.studentId}`,
@@ -119,12 +119,12 @@ export const ApplyJob = createAsyncThunk("/applyJob", async (args) => {
       dispatch(GetAllJobs({ fetchType: "initial" }));
       dispatch(getStudentCreds());
       hide();
-      message.success(data?.msg || "Applied successfully");
+      appMessage.success(data?.msg || "Applied successfully");
     }
     return data;
   } catch (error) {
     hide();
-    message.error("Failed to apply for the job.");
+    appMessage.error("Failed to apply for the job.");
   }
 });
 

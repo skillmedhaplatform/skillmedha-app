@@ -53,7 +53,7 @@ export async function POST(request) {
     const permissionsEncrypted = await encryptSession({
       ev: verified === true,
       special: isSpecialOrg === true,
-      pt: psychometricDone === true,
+      pt: true, // Psychometric test disabled for all students
     });
 
     const response = NextResponse.json({ success: true }, { headers: getCorsHeaders(request) });
@@ -69,11 +69,11 @@ export async function POST(request) {
 // ── PATCH — update ev only ────────────────────────────────────────────────────
 export async function PATCH(request) {
   try {
-    const { verified, isSpecialOrg, psychometricDone } = await request.json();
+    const { verified, isSpecialOrg } = await request.json();
     const permissionsEncrypted = await encryptSession({
       ev: verified === true,
       special: isSpecialOrg === true,
-      pt: psychometricDone === true,
+      pt: true, // Psychometric test disabled for all students
     });
 
     const response = NextResponse.json({ success: true }, { headers: getCorsHeaders(request) });
