@@ -53,8 +53,6 @@ export default function StudentMockTestPage() {
   
   const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
   const [showNoResultPopup, setShowNoResultPopup] = useState(false);
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [celebrationRank, setCelebrationRank] = useState(null); // 1, 2, or 3
 
   const handleEndTestWithoutResult = () => {
     sessionStorage.removeItem(`active_test_${id}`);
@@ -469,12 +467,6 @@ export default function StudentMockTestPage() {
       const data = await res.json();
       if (data && data.data) {
         finalTop3 = data.data;
-        // Check if new attempt is in top 3
-        const rank = finalTop3.findIndex(a => a.id === attempt.id);
-        if (rank !== -1) {
-          setCelebrationRank(rank + 1);
-          setShowCelebration(true);
-        }
       }
     } catch (e) {
       console.error("Error saving top score", e);
@@ -666,7 +658,7 @@ export default function StudentMockTestPage() {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-gray-50 gap-4">
         <Title level={4}>No questions found for this test.</Title>
-        <Button type="primary" onClick={() => router.push('/student/practice-new/company-wise')}>Go Back</Button>
+        <Button type="primary" onClick={() => router.push('/student/practice-new?category=company-wise')}>Go Back</Button>
       </div>
     );
   }
@@ -713,7 +705,7 @@ export default function StudentMockTestPage() {
             <Button 
               type="text" 
               icon={<ArrowLeftOutlined />} 
-              onClick={() => router.push('/student/practice-new/company-wise')} 
+              onClick={() => router.push('/student/practice-new?category=company-wise')} 
               className="flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded-full w-10 h-10 border-none shadow-inner shrink-0"
             />
             <div>
@@ -1385,7 +1377,7 @@ export default function StudentMockTestPage() {
               <button 
                 onClick={() => {
                   setShowNoResultPopup(false);
-                  router.push('/student/practice-new/company-wise');
+                  router.push('/student/practice-new?category=company-wise');
                 }}
                 className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
               >
@@ -1396,32 +1388,7 @@ export default function StudentMockTestPage() {
         </div>
       )}
 
-      {showCelebration && (
-        <div className="fixed inset-0 z-[6000] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="relative bg-gradient-to-b from-indigo-500 to-purple-700 w-full max-w-lg rounded-3xl shadow-2xl p-10 flex flex-col items-center text-center overflow-hidden">
-            {/* Background elements */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-30 pointer-events-none">
-                <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-300 rounded-full blur-2xl animate-bounce"></div>
-                <div className="absolute bottom-10 right-10 w-32 h-32 bg-pink-400 rounded-full blur-3xl animate-pulse"></div>
-            </div>
-            <div className="z-10 bg-white/20 p-4 rounded-full backdrop-blur-md mb-6 border border-white/30 shadow-[0_0_40px_rgba(255,255,255,0.4)] animate-[bounce_1s_ease-in-out_infinite]">
-               <span className="text-6xl">🏆</span>
-            </div>
-            <h2 className="z-10 text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
-              Amazing Work!
-            </h2>
-            <p className="z-10 text-purple-100 text-lg mb-8 max-w-sm">
-              You just achieved the <strong className="text-yellow-300 text-xl mx-1">{celebrationRank === 1 ? "Highest" : celebrationRank === 2 ? "2nd Highest" : "3rd Highest"} Score</strong> in this test!
-            </p>
-            <button 
-              onClick={() => setShowCelebration(false)}
-              className="z-10 px-8 py-4 bg-white text-purple-700 hover:bg-purple-50 font-bold rounded-full transition-transform hover:scale-105 shadow-xl cursor-pointer"
-            >
-              Awesome!
-            </button>
-          </div>
-        </div>
-      )}
+
 
       {showSubmitConfirm && (
         <div className="fixed inset-0 z-[5000] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
@@ -1475,7 +1442,7 @@ export default function StudentMockTestPage() {
                 View Results
               </button>
               <button 
-                onClick={() => router.push('/student/practice-new/company-wise')}
+                onClick={() => router.push('/student/practice-new?category=company-wise')}
                 className="w-full py-3.5 bg-transparent hover:bg-slate-50 text-slate-500 font-semibold rounded-xl transition-colors cursor-pointer border-2 border-transparent hover:border-slate-200"
               >
                 Return to Dashboard

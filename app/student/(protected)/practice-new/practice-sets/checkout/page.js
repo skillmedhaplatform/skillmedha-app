@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { App, Button, Result, Spin } from "antd";
-import { FiArrowLeft, FiBookOpen, FiCheck, FiClock, FiLock, FiShield, FiTarget, FiLayers } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiBookOpen,
+  FiCheck,
+  FiClock,
+  FiLock,
+  FiShield,
+  FiTarget,
+  FiLayers,
+} from "react-icons/fi";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { restUrl } from "@/config/urls";
 import { getLstorage } from "@/universalUtils/windowMW";
@@ -18,8 +27,15 @@ import {
   formatPrice,
   levelLabel,
 } from "@/components/practiceSets/constants";
-import { PRACTICE_SETS_PATH, formatDate, testUrl } from "@/components/practiceSets/studentAccess";
 import { loadRazorpayScript } from "@/utils/loadRazorpay";
+import {
+  PRACTICE_SETS_PATH,
+  accessTag,
+  checkoutUrl,
+  formatDate,
+  isOwned,
+  testUrl,
+} from "@/components/practiceSets/studentAccess";
 
 const ITEM_TYPES = { set: "practiceSet", bundle: "practiceBundle" };
 
@@ -48,6 +64,7 @@ export default function PracticeCheckoutPage() {
   const id = searchParams.get("id");
   const isBundle = type === "bundle";
 
+  const contentScrollRef = useRef(null);
   const studentCreds = useSelector((state) => state.student.student?.data);
   const { catalog, catalogStatus, catalogError } = useSelector((state) => state.practice);
   const [paying, setPaying] = useState(false);
@@ -59,6 +76,43 @@ export default function PracticeCheckoutPage() {
 
   const item = (isBundle ? catalog?.bundles : catalog?.sets)?.find((x) => x._id === id);
   const goBack = () => router.push(PRACTICE_SETS_PATH);
+
+  const remainingCards = useMemo(() => {
+    const list = [];
+    (catalog?.sets || []).forEach((s) => {
+      if (s._id !== id) {
+        list.push({ item: s, isBundle: false });
+      }
+    });
+    (catalog?.bundles || []).forEach((b) => {
+      if (b._id !== id) {
+        list.push({ item: b, isBundle: true });
+      }
+    });
+    return list;
+  }, [catalog, id]);
+
+  const handleCardClick = (cardItem, cardIsBundle) => {
+    if (cardIsBundle) {
+      if (cardItem.access?.unlocked) {
+        router.push(PRACTICE_SETS_PATH);
+      } else {
+        router.push(checkoutUrl("bundle", cardItem._id));
+      }
+      return;
+    }
+    if (cardItem.access?.unlocked) {
+      router.push(testUrl(cardItem));
+    } else {
+      router.push(checkoutUrl("set", cardItem._id));
+    }
+  };
+
+  const handleTopWheel = (e) => {
+    if (contentScrollRef.current) {
+      contentScrollRef.current.scrollTop += e.deltaY;
+    }
+  };
 
   const handlePay = async () => {
     if (!item || paying) return;
@@ -131,28 +185,53 @@ export default function PracticeCheckoutPage() {
     }
   };
 
-  const header = (
-    <StudentPageHeader
-      section="practice"
-      title="Checkout"
-      subtitle={isBundle ? "Unlock every practice set in this bundle" : "Unlock this practice set"}
-      leftSlot={
-        <button
-          type="button"
-          onClick={goBack}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-          aria-label="Back to Practice Sets"
-        >
-          <FiArrowLeft />
-        </button>
-      }
-    />
-  );
-
   const wrap = (content) => (
-    <div className="flex h-full flex-col overflow-y-auto bg-[#EFF5FB]">
-      {header}
-      <div className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-8 lg:px-8">{content}</div>
+    <div className="absolute inset-0 flex flex-col overflow-hidden bg-[#F6F8FB]">
+      {/* Pinned Top Container: Banner + White Bar (remains fixed on scroll) */}
+      <div
+        className="shrink-0 z-20 shadow-[0_4px_16px_-4px_rgba(15,23,42,0.04)]"
+        onWheel={handleTopWheel}
+      >
+        {/* Banner */}
+        <StudentPageHeader
+          title="Checkout"
+          subtitle={isBundle ? "Unlock every practice set in this bundle" : "Unlock this practice set"}
+        />
+
+        {/* White Section Directly Below Banner */}
+        <div className="border-b border-slate-200/80 bg-white/95 backdrop-blur">
+          <div className="mx-auto flex w-full max-w-[1400px] items-center gap-3 px-4 py-2.5 lg:px-8">
+            <button
+              type="button"
+              onClick={goBack}
+              className="flex items-center justify-center text-slate-600 hover:text-[#1D6AE5] transition-colors cursor-pointer p-1"
+              aria-label="Back to Practice Sets"
+            >
+              <FiArrowLeft className="text-lg" />
+            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={goBack}
+                className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-500 hover:text-[#1D6AE5] transition-colors cursor-pointer"
+              >
+                Practice
+              </button>
+              <span className="text-slate-300 text-xs">/</span>
+              <span className="text-xs font-semibold text-slate-700">
+                Checkout
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Scrollable Main Page Content and Practice Cards */}
+      <div ref={contentScrollRef} className="flex-1 overflow-y-auto min-h-0">
+        <div className="mx-auto w-full max-w-[1400px] px-4 py-8 lg:px-8">
+          {content}
+        </div>
+      </div>
     </div>
   );
 
@@ -228,17 +307,26 @@ export default function PracticeCheckoutPage() {
   const minutes = isBundle ? item.summary?.totalMinutes : item.timeMinutes;
 
   return wrap(
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="flex flex-col gap-5">
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-          <div className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Order summary</div>
-          <div className="flex flex-col gap-5 sm:flex-row">
+    <div>
+      {/* Main Checkout Section: Order Summary & Price Details */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        {/* Order Summary with Full Details & Card Preview Restored */}
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm">
+          <div className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Order summary
+          </div>
+          <div className="flex flex-col gap-6 sm:flex-row items-start">
+            {/* Left side: Practice Card */}
             <div className="w-full shrink-0 sm:w-[240px]">
               <PracticeSetCard item={item} isBundle={isBundle} />
             </div>
+
+            {/* Right side: Details & Perks */}
             <div className="flex-1">
               <div className="text-lg font-bold text-slate-900">{item.title}</div>
-              {item.description && <p className="mt-1 text-sm text-slate-500">{item.description}</p>}
+              {item.description && (
+                <p className="mt-1 text-sm text-slate-500">{item.description}</p>
+              )}
               <ul className="mt-4 flex flex-col gap-2.5">
                 <Perk icon={<FiBookOpen />}>
                   {questions} questions{isBundle ? " across all sets" : " per attempt"}
@@ -258,11 +346,33 @@ export default function PracticeCheckoutPage() {
               </ul>
             </div>
           </div>
-        </div>
 
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-          {isBundle ? (
-            <>
+          {/* Topics Covered: Cleanly aligned directly below inside the Order Summary card */}
+          {!isBundle && (
+            <div className="mt-6 border-t border-slate-100 pt-5">
+              <div className="mb-2.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                Topics covered
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(item.topics || []).length > 0 ? (
+                  item.topics.map((t) => (
+                    <span
+                      key={t.topicId || t._id || t.topicTitle}
+                      className="rounded-full bg-blue-50 border border-blue-100 px-3 py-1 text-xs font-semibold text-blue-700"
+                    >
+                      {t.topicTitle}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-slate-400">No specific topics listed</span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* For bundles: practice sets included */}
+          {isBundle && (item.sets || []).length > 0 && (
+            <div className="mt-5 border-t border-slate-100 pt-4">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
                 <FiLayers className="text-amber-500" /> {item.sets?.length || 0} practice sets included
               </div>
@@ -281,63 +391,98 @@ export default function PracticeCheckoutPage() {
                   </li>
                 ))}
               </ul>
-            </>
-          ) : (
-            <>
-              <div className="mb-3 text-sm font-semibold text-slate-800">Topics covered</div>
-              <div className="flex flex-wrap gap-2">
-                {(item.topics || []).map((t) => (
-                  <span key={t.topicId} className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                    {t.topicTitle}
-                  </span>
-                ))}
-              </div>
-            </>
+            </div>
           )}
+        </div>
+
+        {/* Price Details */}
+        <div className="h-fit rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:sticky lg:top-6">
+          <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Price details</div>
+          <div className="mt-4 flex flex-col gap-2.5 text-sm">
+            {mrp > price && (
+              <div className="flex justify-between text-slate-600">
+                <span>Price</span>
+                <span className="line-through">{formatPrice(mrp)}</span>
+              </div>
+            )}
+            {discount > 0 && (
+              <div className="flex justify-between text-emerald-600">
+                <span>Discount</span>
+                <span>− {formatPrice(discount)}</span>
+              </div>
+            )}
+            {isBundle && item.summary?.savings > 0 && (
+              <div className="flex justify-between text-emerald-600">
+                <span>vs. buying separately</span>
+                <span>Save {formatPrice(item.summary.savings)}</span>
+              </div>
+            )}
+            <div className="mt-2 flex justify-between border-t border-slate-100 pt-3 text-base font-bold text-slate-900">
+              <span>Total</span>
+              <span>{formatPrice(price)}</span>
+            </div>
+          </div>
+          <Button
+            type="primary"
+            size="large"
+            block
+            loading={paying}
+            onClick={handlePay}
+            icon={<FiLock />}
+            className="!mt-6 !h-[50px] !rounded-xl !font-semibold"
+          >
+            Pay {formatPrice(price)}
+          </Button>
+          <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+            <FiShield /> Secure payment via Razorpay
+          </div>
         </div>
       </div>
 
-      <div className="h-fit rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:sticky lg:top-6">
-        <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Price details</div>
-        <div className="mt-4 flex flex-col gap-2.5 text-sm">
-          {mrp > price && (
-            <div className="flex justify-between text-slate-600">
-              <span>Price</span>
-              <span className="line-through">{formatPrice(mrp)}</span>
+      {/* Remaining Practice Cards displayed below Order Summary */}
+      {remainingCards.length > 0 && (
+        <div className="mt-10 pt-8 border-t border-slate-200/80">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3
+                className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 !border-none !border-b-0 !pb-0 !mb-0"
+                style={{ border: "none", borderBottom: "none", paddingBottom: 0, marginBottom: 0 }}
+              >
+                Remaining Practice Sets
+              </h3>
+              <p className="mt-1 text-xs sm:text-sm font-medium text-slate-500">
+                Explore more practice sets to test and improve your skills
+              </p>
             </div>
-          )}
-          {discount > 0 && (
-            <div className="flex justify-between text-emerald-600">
-              <span>Discount</span>
-              <span>− {formatPrice(discount)}</span>
-            </div>
-          )}
-          {isBundle && item.summary?.savings > 0 && (
-            <div className="flex justify-between text-emerald-600">
-              <span>vs. buying separately</span>
-              <span>Save {formatPrice(item.summary.savings)}</span>
-            </div>
-          )}
-          <div className="mt-2 flex justify-between border-t border-slate-100 pt-3 text-base font-bold text-slate-900">
-            <span>Total</span>
-            <span>{formatPrice(price)}</span>
+            <Button
+              onClick={() => router.push(PRACTICE_SETS_PATH)}
+              className="!text-xs !font-semibold text-blue-600 hover:!text-blue-700 !rounded-lg"
+            >
+              View all practice sets
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {remainingCards.map(({ item: cardItem, isBundle: cardIsBundle }) => (
+              <div key={`${cardIsBundle ? "b" : "s"}-${cardItem._id}`} className="h-full">
+                <PracticeSetCard
+                  item={cardItem}
+                  isBundle={cardIsBundle}
+                  owned={cardIsBundle ? !!cardItem.access?.unlocked : isOwned(cardItem.access)}
+                  accessTag={
+                    cardIsBundle
+                      ? cardItem.access?.unlocked
+                        ? "Purchased"
+                        : null
+                      : accessTag(cardItem.access)
+                  }
+                  onClick={() => handleCardClick(cardItem, cardIsBundle)}
+                />
+              </div>
+            ))}
           </div>
         </div>
-        <Button
-          type="primary"
-          size="large"
-          block
-          loading={paying}
-          onClick={handlePay}
-          icon={<FiLock />}
-          className="!mt-6 !h-[50px] !rounded-xl !font-semibold"
-        >
-          Pay {formatPrice(price)}
-        </Button>
-        <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-400">
-          <FiShield /> Secure payment via Razorpay
-        </div>
-      </div>
+      )}
     </div>
   );
 }

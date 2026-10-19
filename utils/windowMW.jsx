@@ -5,7 +5,6 @@ import {
   HiOutlineUsers,
   HiOutlineBookOpen,
   HiOutlinePresentationChartBar,
-  HiOutlineNewspaper,
   HiOutlineBriefcase,
   HiOutlineClipboardDocumentCheck,
   HiOutlineLightBulb,
@@ -110,9 +109,9 @@ export const sideBarTitles = [
     icon: <HiOutlinePresentationChartBar size={22} />,
   },
   {
-    name: "Website NewsFlash",
-    path: "/admin/website-newsflash",
-    icon: <HiOutlineNewspaper size={22} />,
+    name: "Website",
+    path: "/admin/website",
+    icon: <HiOutlineGlobeAlt size={22} />,
   },
   {
     name: "Internship Library",

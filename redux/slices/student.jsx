@@ -15,11 +15,10 @@ import {
   clearLstorageVals,
   clearSstorageVals,
 } from "@/universalUtils/windowMW";
-import { message } from "antd";
+import { appMessage } from "@/utils/antdStatic";
 import axios from "axios";
 import { resetTests } from "./assessmentsSlice/testSlice";
-
-const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const studentSlice = createSlice({
   name: "Student",
@@ -86,9 +85,9 @@ export const loginStudent = createAsyncThunk(
       const isSpecialOrg = studentData?.orgDetails?.orgId === process.env.NEXT_PUBLIC_SPECIAL_ORG_ID;
       const CUTOFF_DATE = new Date("2026-05-01T00:00:00Z").getTime();
       const isNewUser = studentData?.createdAt ? new Date(studentData.createdAt).getTime() >= CUTOFF_DATE : false;
-      const psychometricDone =
-        (Array.isArray(studentData?.psychometricTestResults) &&
-        studentData.psychometricTestResults.length > 0) || !isNewUser || (studentData?.loginCount > 1);
+      // Psychometric test is disabled for all students for now:
+      // const psychometricDone = (Array.isArray(studentData?.psychometricTestResults) && studentData.psychometricTestResults.length > 0) || !isNewUser || (studentData?.loginCount > 1);
+      const psychometricDone = true;
 
       // Set both cookies with the real verified value and special org status
       await fetch("/api/auth/session", {
@@ -197,10 +196,11 @@ export const CreateStudentAccount = createAsyncThunk(
 export const updateStudent = createAsyncThunk(
   "/updateStudent",
   async (args) => {
-    const hide = message.loading("Please wait while updating details", 0);
-    const { dispatch } = args;
+    const isSilent = Boolean(args?.silent);
+    const hide = isSilent ? () => {} : appMessage.loading("Please wait while updating details", 0);
+    const { dispatch } = args || {};
 
-    const { _id = "", email, ...payload } = args.aboutDetails;
+    const { _id = "", email, ...payload } = args?.aboutDetails || {};
 
     try {
       const { data } = await axios.post(
@@ -212,13 +212,13 @@ export const updateStudent = createAsyncThunk(
           },
         }
       );
-      if (data) {
-        message.success("Student updated successfully");
+      if (data && !isSilent) {
+        appMessage.success("Student updated successfully");
         // dispatch(getStudentCreds());
       }
       return data;
     } catch (error) {
-      message.error("Failed update details");
+      if (!isSilent) appMessage.error("Failed update details");
     } finally {
       hide();
     }

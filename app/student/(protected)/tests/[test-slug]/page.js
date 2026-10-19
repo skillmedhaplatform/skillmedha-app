@@ -178,21 +178,33 @@ export default function Page() {
         {
           img: imageData,
           studentId: studentCreds?._id,
-          bucket_name: "synsper-test-series",
+          bucket_name: "skillmedha-utils",
         },
         { headers: authHeaders }
       );
 
-      const confidence = compareData?.FaceMatches?.[0]?.Confidence;
-      if (confidence !== undefined && confidence < 90) {
-        message.error("Face does not match");
+      if (compareData?.err || compareData?.error) {
+        message.error(compareData.err || compareData.error || "Face verification failed");
+        return false;
+      }
+
+      const faceMatches = compareData?.FaceMatches || compareData?.data?.FaceMatches;
+      if (!Array.isArray(faceMatches) || faceMatches.length === 0) {
+        message.error("Face does not match your KYC profile");
+        return false;
+      }
+
+      const similarity = faceMatches[0]?.Similarity ?? faceMatches[0]?.Confidence ?? 0;
+      if (similarity < 85) {
+        message.error(`Face does not match KYC profile (${Math.round(similarity)}% match)`);
         return false;
       }
 
       return true;
     } catch (error) {
       console.error("Proctoring verification failed:", error);
-      message.error("Verification server error. Please check your network and try again.");
+      const errMsg = error?.response?.data?.err || error?.response?.data?.message || "Verification server error. Please check your network and try again.";
+      message.error(errMsg);
       return false;
     }
   };
@@ -396,8 +408,12 @@ export default function Page() {
   };
 
   const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = seconds % 60;
+    if (hours > 0) {
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+    }
     return `${String(minutes).padStart(2, "0")}:${String(
       remainingSeconds
     ).padStart(2, "0")}`;

@@ -28,12 +28,9 @@ export default function Quiz({
   const nav = useRouter();
 
   useEffect(() => {
-
-    if (!token || token == "null" || token == "undefined" || token == "") {
-      clearLstorageVals();
-      nav.replace("/login");
-    }
-  }, [token, studentCreds?._id]);
+    // Psychometric test is currently disabled for all students
+    nav.replace("/student/dashboard");
+  }, [nav]);
 
   const [qs, setQs] = useState(questions);
   const [currentIndex, setCurrentIndex] = useState(0);

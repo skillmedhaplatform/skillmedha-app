@@ -47,7 +47,9 @@
 
     img {
       height: 28px;
-      width: auto;
+      width: 28px;
+      object-fit: contain;
+      flex-shrink: 0;
     }
 
     .logoText {

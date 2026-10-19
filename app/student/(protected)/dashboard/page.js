@@ -1027,7 +1027,8 @@ export default function DashboardPage() {
               loginStreak: currentStreak,
               lastLoginDate: today
             },
-            dispatch
+            dispatch,
+            silent: true
           }));
         }
       }

@@ -142,11 +142,11 @@ export default function NontechnicalPage() {
           {/* Filters Skeleton */}
           <div className="px-4 lg:px-8 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
             <div className="flex gap-2">
-              <Skeleton.Button active shape="round" size="default" style={{ width: 100 }} />
-              <Skeleton.Button active shape="round" size="default" style={{ width: 120 }} />
-              <Skeleton.Button active shape="round" size="default" style={{ width: 90 }} />
+              <Skeleton.Button active shape="round" size="medium" style={{ width: 100 }} />
+              <Skeleton.Button active shape="round" size="medium" style={{ width: 120 }} />
+              <Skeleton.Button active shape="round" size="medium" style={{ width: 90 }} />
             </div>
-            <Skeleton.Input active size="default" style={{ width: 150 }} />
+            <Skeleton.Input active size="medium" style={{ width: 150 }} />
           </div>
         </div>
         
@@ -248,7 +248,7 @@ export default function NontechnicalPage() {
         </div>
 
         {filteredSubjects && filteredSubjects.length > 0 ? (
-        <div className={`bg-[#EFF5FB] px-4 lg:px-8 pt-0 pb-6 flex-1 ${activeCategory === "All" ? "overflow-y-auto" : "overflow-hidden"}`}>
+        <div className="bg-[#EFF5FB] px-4 lg:px-8 pt-0 pb-6 flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeCategory}

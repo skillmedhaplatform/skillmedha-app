@@ -371,6 +371,26 @@ export const bulkUploadPracQuestions = createAsyncThunk(
   }
 );
 
+export const bulkDeletePracQuestions = createAsyncThunk(
+  "content/bulkDeletePracQuestions",
+  async (questionIds, { rejectWithValue }) => {
+    try {
+      const chunkSize = 500;
+      for (let i = 0; i < questionIds.length; i += chunkSize) {
+        const chunk = questionIds.slice(i, i + chunkSize);
+        await api.post(
+          "/bulkDeletePracQuestions",
+          { questionIds: chunk },
+          { headers: getAuthHeaders() }
+        );
+      }
+      return questionIds;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 // =================================================================
 // --- THE SLICE ---
 // =================================================================
@@ -537,6 +557,12 @@ const PracticeSlice = createSlice({
       .addCase(bulkUploadPracQuestions.fulfilled, (state) => {
         state.status = "succeeded";
         state.error = null;
+      })
+      .addCase(bulkDeletePracQuestions.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+        const deletedSet = new Set(action.payload);
+        state.questions = state.questions.filter((q) => !deletedSet.has(q._id));
       })
 
       // --- Company Tests Reducers ---

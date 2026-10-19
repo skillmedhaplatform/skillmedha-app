@@ -43,6 +43,7 @@ const CourseLibraryPage = () => (
     allCoursesSelector={selectAllCourses}
     allPaginationSelector={selectAllPagination}
     getItemUrl={getCourseUrl}
+    getDetailsUrl={(course) => `/student/course/${course?._id}`}
     viewLabel="View Course"
     searchPlaceholder="Search courses…"
     idPrefix="course"

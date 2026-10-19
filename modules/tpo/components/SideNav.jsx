@@ -184,8 +184,8 @@ const SideNav = ({ activeView, setView, onLinkClick }) => {
       {contextHolder}
       <div className={sideBarStyles.logoContainer}>
         <img
-          src="https://res.cloudinary.com/dug3awue8/image/upload/v1744626297/icon_dtclq9.svg"
-          alt="Synsper Logo"
+          src="/skillmedha-logo.png"
+          alt="SkillMedha Logo"
           onClick={() => router.replace("/tpo/dashboard")}
           style={{ cursor: "pointer" }}
         />
