@@ -54,10 +54,10 @@ export const authorizeResumeTemplate = async (templateKey) => {
 };
 
 export const createResumeOrder = async ({ itemType, itemId }) =>
-  call("post", "/payment/catalog/createOrder", { data: { itemType, itemId } });
+  call("post", "/payment/resume/createOrder", { data: { itemType, itemId } });
 
 export const verifyResumePayment = async (response) =>
-  call("post", "/payment/catalog/verify", {
+  call("post", "/payment/resume/verify", {
     data: {
       razorpay_order_id: response.razorpay_order_id,
       razorpay_payment_id: response.razorpay_payment_id,
