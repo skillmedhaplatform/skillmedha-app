@@ -30,9 +30,7 @@ import {
   CloudUploadOutlined,
   FileAddOutlined,
   StarOutlined,
-  EditOutlined,
   DownloadOutlined,
-  FilterOutlined,
   BarChartOutlined,
   ArrowLeftOutlined,
   CloseOutlined,
@@ -56,9 +54,9 @@ import {
   HeartOutlined,
   AppstoreOutlined,
   PlusCircleOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { restUrl } from "@/config/urls";
@@ -71,198 +69,17 @@ import CertificateDetails from "./components/certificateDetails";
 import useResponsive from "@/hooks/useResponsive";
 import MobileResumeBuilder from "@/mobile_views/resumeBuilder/MobileResumeBuilder";
 import ATSCheckerSection from "./components/ATSCheckerSection";
-const Template1 = dynamic(() => import("./Templates/components/Template3"), {
-  ssr: false,
-});
-const Template2 = dynamic(() => import("./Templates/components/Template2"), {
-  ssr: false,
-});
-const Template3 = dynamic(() => import("./Templates/components/Template1"), {
-  ssr: false,
-});
-const Template4 = dynamic(() => import("./Templates/components/Template4"), {
-  ssr: false,
-});
-const Template5 = dynamic(() => import("./Templates/components/Template5"), {
-  ssr: false,
-});
-const Template6 = dynamic(() => import("./Templates/components/Template6"), {
-  ssr: false,
-});
-const Template7 = dynamic(() => import("./Templates/components/Template7"), {
-  ssr: false,
-});
-const Template8 = dynamic(() => import("./Templates/components/Template8"), {
-  ssr: false,
-}); const Template9 = dynamic(() => import("./Templates/components/Template9"), {
-  ssr: false,
-});
-const Template10 = dynamic(() => import("./Templates/components/Template10"), {
-  ssr: false,
-}); const Template11 = dynamic(() => import("./Templates/components/Template11"), {
-  ssr: false,
-}); const Template12 = dynamic(() => import("./Templates/components/Template12"), {
-  ssr: false,
-}); const Template13 = dynamic(() => import("./Templates/components/Template13"), {
-  ssr: false,
-}); const Template14 = dynamic(() => import("./Templates/components/Template14"), {
-  ssr: false,
-}); const Template15 = dynamic(() => import("./Templates/components/Template15"), {
-  ssr: false,
-}); const Template16 = dynamic(() => import("./Templates/components/Template16"), {
-  ssr: false,
-}); const Template17 = dynamic(() => import("./Templates/components/Template17"), {
-  ssr: false,
-}); const Template18 = dynamic(() => import("./Templates/components/Template18"), {
-  ssr: false,
-}); const Template19 = dynamic(() => import("./Templates/components/Template19"), {
-  ssr: false,
-}); const Template20 = dynamic(() => import("./Templates/components/Template20"), {
-  ssr: false,
-});
-const Template21 = dynamic(() => import("./Templates/components/Template21"), {
-  ssr: false,
-});
-const Template22 = dynamic(() => import("./Templates/components/Template22"), {
-  ssr: false,
-});
-const Template23 = dynamic(() => import("./Templates/components/Template23"), {
-  ssr: false,
-});
-const Template24 = dynamic(() => import("./Templates/components/Template24"), {
-  ssr: false,
-});
-const Template25 = dynamic(() => import("./Templates/components/Template25"), {
-  ssr: false,
-});
-const Template26 = dynamic(() => import("./Templates/components/Template26"), {
-  ssr: false,
-});
-const Template27 = dynamic(() => import("./Templates/components/Template27"), {
-  ssr: false,
-});
-const Template28 = dynamic(() => import("./Templates/components/Template28"), {
-  ssr: false,
-});
-const Template29 = dynamic(() => import("./Templates/components/Template29"), {
-  ssr: false,
-});
-const Template30 = dynamic(() => import("./Templates/components/Template30"), {
-  ssr: false,
-});
-const Template31 = dynamic(() => import("./Templates/components/Template31"), {
-  ssr: false,
-});
-const Template32 = dynamic(() => import("./Templates/components/Template32"), {
-  ssr: false,
-});
-const Template33 = dynamic(() => import("./Templates/components/Template33"), {
-  ssr: false,
-});
-const Template34 = dynamic(() => import("./Templates/components/Template34"), {
-  ssr: false,
-});
-const Template35 = dynamic(() => import("./Templates/components/Template35"), {
-  ssr: false,
-});
-const Template36 = dynamic(() => import("./Templates/components/Template36"), {
-  ssr: false,
-});
-const Template37 = dynamic(() => import("./Templates/components/Template37"), {
-  ssr: false,
-});
-const Template38 = dynamic(() => import("./Templates/components/Template38"), {
-  ssr: false,
-});
-const Template39 = dynamic(() => import("./Templates/components/Template39"), {
-  ssr: false,
-});
-const Template40 = dynamic(() => import("./Templates/components/Template40"), {
-  ssr: false,
-});
+import { TEMPLATE_OPTIONS, templateComponents, getTemplateCategory } from "./Templates/registry";
+import useTemplateAccess from "./Templates/useTemplateAccess";
+import TemplateGallery from "./Templates/TemplateGallery";
+import TemplateLockModal from "@/components/resumeTemplates/TemplateLockModal";
+import { formatPrice, resumeCheckoutUrl } from "@/components/resumeTemplates/access";
+const Template1 = templateComponents.template1;
 const TEMPLATE_SWATCHES = [
   "#1E69DA", "#e8447a", "#1C8A63", "#9c6ade", "#d97706", "#0f6f66", "#be185d", "#4f46e5",
 ];
 const swatchFor = (index) => TEMPLATE_SWATCHES[index % TEMPLATE_SWATCHES.length];
 
-const TEMPLATE_OPTIONS = [
-  {
-    id: "template1",
-    label: "Template1",
-    // description: "Clean single-column layout for freshers, internships, and campus hiring.",
-  },
-  {
-    id: "template2",
-    label: "Template2",
-    // description: "Balanced layout for internships, placements, and early-career roles.",
-  },
-  {
-    id: "template3",
-    label: "Template3",
-    // description: "Refined sidebar layout for students and experienced professionals.",
-  },
-  {
-    id: "template4",
-    label: "Template4",
-    // description: "Compact recruiter-friendly format for job portals and screenings.",
-  },
-  {
-    id: "template5",
-    label: "Template5",
-    // description: "Polished two-column resume for experienced candidates and leadership roles.",
-  },
-  {
-    id: "template6",
-    label: "Template6",
-    // description: "Modern minimalist design with clean typography.",
-  },
-  {
-    id: "template7",
-    label: "Template7",
-    // description: "Creative accent layout with colorful section headers.",
-  },
-  {
-    id: "template8",
-    label: "Template8",
-    // description: "Creative accent layout with colorful section headers.",
-  },
-  {
-    id: "template9",
-    label: "Template9",
-    // description: "Creative accent layout with colorful section headers.",
-  },
-  { id: "template10", label: "Template10" },
-  { id: "template11", label: "Template11" },
-  { id: "template12", label: "Template12" },
-  { id: "template13", label: "Template13" },
-  { id: "template14", label: "Template14" },
-  { id: "template15", label: "Template15" },
-  { id: "template16", label: "Template16" },
-  { id: "template17", label: "Template17" },
-  { id: "template18", label: "Template18" },
-  { id: "template19", label: "Template19" },
-  { id: "template20", label: "Template20" },
-  { id: "template21", label: "Template21" },
-  { id: "template22", label: "Template22" },
-  { id: "template23", label: "Template23" },
-  { id: "template24", label: "Template24" },
-  { id: "template25", label: "Template25" },
-  { id: "template26", label: "Template26" },
-  { id: "template27", label: "Template27" },
-  { id: "template28", label: "Template28" },
-  { id: "template29", label: "Template29" },
-  { id: "template30", label: "Template30" },
-  { id: "template31", label: "Template31" },
-  { id: "template32", label: "Template32" },
-  { id: "template33", label: "Template33" },
-  { id: "template34", label: "Template34" },
-  { id: "template35", label: "Template35" },
-  { id: "template36", label: "Template36" },
-  { id: "template37", label: "Template37" },
-  { id: "template38", label: "Template38" },
-  { id: "template39", label: "Template39" },
-  { id: "template40", label: "Template40" },
-];
 // const html2pdf = dynamic(() => import("html2pdf.js"), {
 //   ssr: false,
 // });
@@ -304,26 +121,6 @@ const AccordionSection = ({ title, icon, isExpanded, onToggle, onRemove, childre
 };
 
 function Form() {
-  const scrollContainerRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
-  const handleMouseDown = (e) => {
-    if (!scrollContainerRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-    setScrollLeft(scrollContainerRef.current.scrollLeft);
-  };
-  const handleMouseLeave = () => setIsDragging(false);
-  const handleMouseUp = () => setIsDragging(false);
-  const handleMouseMove = (e) => {
-    if (!isDragging || !scrollContainerRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  };
   const [loading, setLoading] = useState(false);
   const nav = useRouter();
   useEffect(() => {
@@ -459,10 +256,46 @@ function Form() {
   });
   const [templateAccent, setTemplateAccent] = useState("#1E69DA");
   const [previewTemplate, setPreviewTemplate] = useState(null);
+
+  // Admin-configured access: which templates this student may see and use.
+  const templateAccess = useTemplateAccess();
+  const visibleTemplates = templateAccess.options(TEMPLATE_OPTIONS);
+  const [lockedTemplate, setLockedTemplate] = useState(null);
+
+  // Switch template only if the student has it; otherwise offer to unlock it.
+  const chooseTemplate = (key) => {
+    if (templateAccess.isLocked(key)) {
+      setLockedTemplate(key);
+      return false;
+    }
+    setSelectedTemplate(key);
+    return true;
+  };
+
+  // The server has the final say before a resume is downloaded or submitted.
+  const ensureTemplateAllowed = async () => {
+    const result = await templateAccess.ensureAllowed(selectedTemplate);
+    if (result.allowed) return true;
+    if (result.code === "PAYMENT_REQUIRED" || result.code === "NOT_AVAILABLE") {
+      setLockedTemplate(selectedTemplate);
+    } else {
+      message.error(result.message || "Couldn't check access to this template.");
+    }
+    return false;
+  };
+
+  const lockModal = lockedTemplate ? (
+    <TemplateLockModal
+      templateKey={lockedTemplate}
+      meta={templateAccess.metaOf(lockedTemplate)}
+      label={TEMPLATE_OPTIONS.find((t) => t.id === lockedTemplate)?.label}
+      bundles={templateAccess.bundles}
+      onClose={() => setLockedTemplate(null)}
+    />
+  ) : null;
   const [previewScale, setPreviewScale] = useState(65);
   const [previewMode, setPreviewMode] = useState("desktop");
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("All Templates");
   const [step, setStep] = useState(() => {
     if (typeof window !== "undefined") {
       return sessionStorage.getItem("resumeBuilderStep") || "landing";
@@ -482,6 +315,43 @@ function Form() {
       localStorage.setItem('resumeBuilder_lastTemplate', selectedTemplate);
     }
   }, [selectedTemplate]);
+
+  // A remembered template may since have become paid or hidden — fall back to
+  // the first template the student can use.
+  useEffect(() => {
+    if (templateAccess.status !== "ready" || !templateAccess.isLocked(selectedTemplate)) return;
+    const firstOpen = templateAccess
+      .options(TEMPLATE_OPTIONS)
+      .find((t) => !templateAccess.isLocked(t.id));
+    if (firstOpen) setSelectedTemplate(firstOpen.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [templateAccess.status, templateAccess.isLocked, selectedTemplate]);
+
+  // The editor only works with templates the student may use. Whatever route
+  // led here (draft, refresh, remembered template, expired purchase), ask the
+  // server; if it says no, offer to unlock and move to a usable template.
+  useEffect(() => {
+    if (step !== "editor" || !selectedTemplate) return undefined;
+    let cancelled = false;
+    templateAccess.ensureAllowed(selectedTemplate).then((result) => {
+      if (cancelled || result.allowed) return;
+      const locked = selectedTemplate;
+      const fallback =
+        templateAccess.status === "ready" &&
+        templateAccess.options(TEMPLATE_OPTIONS).find((t) => t.id !== locked && !templateAccess.isLocked(t.id));
+      if (fallback) {
+        setSelectedTemplate(fallback.id);
+        message.info(`That template is locked — switched to ${fallback.label}. Unlock it to use it.`);
+      } else {
+        setStep("templates_initial");
+      }
+      setLockedTemplate(locked);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, selectedTemplate, templateAccess.status]);
 
   // Removed step persistence to always show landing page on section open
 
@@ -1270,6 +1140,7 @@ function Form() {
   //   }
   // };
   const processSubmit = async () => {
+    if (!(await ensureTemplateAllowed())) return false;
     setIsSubmitting(true);
     try {
       const combinedExperiences = [
@@ -1314,6 +1185,7 @@ function Form() {
   };
 
   const handleSubmit = async () => {
+    if (!(await ensureTemplateAllowed())) return;
     setShowSubmitModal(true);
   };
 
@@ -1325,57 +1197,6 @@ function Form() {
 
   const [leftTab, setLeftTab] = useState("details");
 
-  const getTemplateCategory = (id) => {
-    const num = parseInt(id.replace("template", ""), 10);
-    if (isNaN(num)) return "Modern";
-    if (num % 4 === 1) return "Modern";
-    if (num % 4 === 2) return "Minimal";
-    if (num % 4 === 3) return "Professional";
-    return "Creative";
-  };
-  const templateComponents = {
-    template1: Template1,
-    template2: Template2,
-    template3: Template3,
-    template4: Template4,
-    template5: Template5,
-    template6: Template6,
-    template7: Template7,
-    template8: Template8,
-    template9: Template9,
-    template10: Template10,
-    template11: Template11,
-    template12: Template12,
-    template13: Template13,
-    template14: Template14,
-    template15: Template15,
-    template16: Template16,
-    template17: Template17,
-    template18: Template18,
-    template19: Template19,
-    template20: Template20,
-    template21: Template21,
-    template22: Template22,
-    template23: Template23,
-    template24: Template24,
-    template25: Template25,
-    template26: Template26,
-    template27: Template27,
-    template28: Template28,
-    template29: Template29,
-    template30: Template30,
-    template31: Template31,
-    template32: Template32,
-    template33: Template33,
-    template34: Template34,
-    template35: Template35,
-    template36: Template36,
-    template37: Template37,
-    template38: Template38,
-    template39: Template39,
-    template40: Template40,
-
-  };
 
   const SelectedTemplateComponent =
     templateComponents[selectedTemplate] || Template1;
@@ -1439,6 +1260,7 @@ function Form() {
   const completionPercentage = calculateProfileCompletion();
 
   const handleDownloadResume = async () => {
+    if (!(await ensureTemplateAllowed())) return;
     setIsGeneratingPdf(true);
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -1710,14 +1532,15 @@ function Form() {
           updateLanguage={updateLanguage}
           addLanguage={addLanguage}
           removeLanguage={removeLanguage}
-          templateOptions={TEMPLATE_OPTIONS}
+          templateOptions={visibleTemplates}
           selectedTemplate={selectedTemplate}
-          setSelectedTemplate={setSelectedTemplate}
+          setSelectedTemplate={chooseTemplate}
           SelectedTemplate={SelectedTemplateComponent}
           activeSection={activeSection}
           isGeneratingPdf={isGeneratingPdf}
         />
         {hiddenExportTemplate}
+        {lockModal}
       </>
     );
   }
@@ -1725,10 +1548,6 @@ function Form() {
 
 
   if (step === 'templates_initial') {
-    const filteredTemplates = activeCategory === 'All Templates'
-      ? TEMPLATE_OPTIONS
-      : TEMPLATE_OPTIONS.filter(t => getTemplateCategory(t.id) === activeCategory);
-
     return (
       <div className="flex flex-col gap-0 relative bg-[#F8FAFC] h-[calc(100vh-70px)] overflow-hidden">
         <StudentPageHeader
@@ -1736,98 +1555,25 @@ function Form() {
           subtitle="Pick a design that fits your style and make it yours"
         />
 
-        {/* Categories Bar */}
-        <div className="bg-white border-b border-[#e2e8f0] px-4 md:px-8 py-3 flex items-center shadow-sm z-10 shrink-0 gap-6">
-          <button
-            onClick={() => setStep('landing')}
-            className="flex items-center gap-2 text-[#475569] hover:text-[#3b82f6] transition-colors text-[14px] font-medium bg-transparent border-none shadow-none shrink-0 cursor-pointer p-0"
-          >
-            <ArrowLeftOutlined /> Back
-          </button>
-
-          <div
-            ref={scrollContainerRef}
-            onMouseDown={handleMouseDown}
-            onMouseLeave={handleMouseLeave}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
-            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-            className="flex items-center gap-2 overflow-x-auto flex-1 min-w-0 pb-1 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#94a3b8]"
-          >
-            {["All Templates", "Modern", "Minimal", "Professional", "Creative"].map(cat => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
-                className={`px-4 py-1.5 rounded-full text-[14px] whitespace-nowrap transition-colors ${activeCategory === cat
-                    ? "text-[#3b82f6] bg-[#eff6ff] font-semibold"
-                    : "text-[#64748b] hover:text-[#0f172a] font-medium"
-                  }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => {
-                const hasDrafts = Object.keys(localStorage).some(k => k.startsWith('resumeDraft_'));
-                if (hasDrafts) {
-                  setStep('continue_editing');
-                } else {
-                  message.info("No saved drafts found. Please create a new resume.");
-                }
-              }}
-              className="flex items-center gap-2 text-[#a855f7] bg-[#faf5ff] hover:bg-[#f3e8ff] px-4 py-1.5 rounded-md transition-colors text-[14px] font-semibold border border-[#e9d5ff]"
-            >
-              <EditOutlined /> Continue Editing
-            </button>
-            <button className="flex items-center gap-2 text-[#475569] hover:bg-[#f1f5f9] px-3 py-1.5 rounded-md transition-colors text-[14px] font-medium border border-[#e2e8f0]">
-              <FilterOutlined /> Filter
-            </button>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-8 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#cbd5e1] hover:[&::-webkit-scrollbar-thumb]:bg-[#94a3b8]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 min-[1600px]:grid-cols-5 min-[1920px]:grid-cols-6 gap-8 w-full mx-auto pb-10">
-            {filteredTemplates.map((template, index) => (
-              <div
-                key={template.id}
-                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer border border-[#e2e8f0] hover:border-[#1E69DA] group flex flex-col"
-                onClick={() => {
-                  setPreviewTemplate(template.id);
-                }}
-              >
-                <div className="h-[340px] bg-white w-full flex items-center justify-center border-b border-[#e2e8f0] overflow-hidden relative">
-                  <div className="absolute inset-0 scale-[0.42] origin-top-left w-[238%] h-[238%] pointer-events-none opacity-90 group-hover:opacity-100 transition-opacity">
-                    <div className="w-full h-full p-8 bg-white shadow-[0_0_15px_rgba(0,0,0,0.05)] border border-[#f1f5f9]">
-                      {(() => {
-                        const Tmp = templateComponents[template.id] || Template1;
-                        return (
-                          <PreviewContext.Provider value={true}>
-                            <Tmp />
-                          </PreviewContext.Provider>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 flex items-center justify-between">
-                  <span className="font-semibold text-[#334155]">{template.label}</span>
-                  <div className="flex items-center gap-3">
-                    {["template3", "template4", "template6", "template8", "template10"].includes(template.id) && (
-                      <span className="bg-[#dcfce7] text-[#16a34a] text-[11px] font-bold px-2 py-0.5 rounded-md">New</span>
-                    )}
-                    <div
-                      className={`w-[18px] h-[18px] rounded-full border-[1.5px] ${template.id === 'template1' ? 'border-[#3b82f6] border-[5px]' : 'border-[#cbd5e1]'}`}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <TemplateGallery
+          templates={visibleTemplates}
+          access={templateAccess}
+          onBack={() => setStep('landing')}
+          onContinueEditing={() => {
+            const hasDrafts = Object.keys(localStorage).some(k => k.startsWith('resumeDraft_'));
+            if (hasDrafts) {
+              setStep('continue_editing');
+            } else {
+              message.info("No saved drafts found. Please create a new resume.");
+            }
+          }}
+          onPreview={(id) => setPreviewTemplate(id)}
+          onUse={(id) => {
+            // chooseTemplate opens the unlock dialog for locked templates.
+            if (chooseTemplate(id)) setStep('editor');
+          }}
+          onBuyBundle={(id) => nav.push(resumeCheckoutUrl("bundle", id))}
+        />
 
         {/* Preview Modal */}
         {previewTemplate && (() => {
@@ -1846,6 +1592,21 @@ function Form() {
               return { name: label, category, desc: "A bold and creative design to make your resume stand out from the crowd with unique accents.", highlights: ["Bold typography", "Creative layout", "Memorable design", "Portfolio ready"], bestFor: ["Designers", "Marketers", "Creative Professionals"] };
             }
           })();
+          // Each template's own description first, then anything the admin changed.
+          const previewDefaults = TEMPLATE_OPTIONS.find((t) => t.id === previewTemplate);
+          if (previewDefaults?.description) {
+            info.desc = previewDefaults.description;
+            info.bestFor = previewDefaults.bestFor;
+            info.highlights = previewDefaults.features;
+          }
+          const previewMeta = templateAccess.metaOf(previewTemplate);
+          if (previewMeta) {
+            info.name = previewMeta.name || info.name;
+            info.category = previewMeta.category || info.category;
+            if (previewMeta.description) info.desc = previewMeta.description;
+            if (previewMeta.bestFor?.length) info.bestFor = previewMeta.bestFor;
+          }
+          const previewLocked = templateAccess.isLocked(previewTemplate);
 
           return (
             <>
@@ -1953,13 +1714,27 @@ function Form() {
                       <div className="flex flex-col gap-3">
                         <Button
                           onClick={() => {
+                            if (previewLocked) {
+                              setPreviewTemplate(null);
+                              setLockedTemplate(previewTemplate);
+                              return;
+                            }
                             setSelectedTemplate(previewTemplate);
                             setStep('editor');
                             setPreviewTemplate(null);
                           }}
                           className="!bg-[#1E69DA] hover:!bg-[#1554b3] !text-white !border-none !rounded-lg !w-full !h-[42px] font-semibold shadow-md transition-all text-[14px] flex items-center justify-center gap-2"
                         >
-                          <FileTextOutlined /> Continue with this template
+                          {previewLocked ? (
+                            <>
+                              <LockOutlined /> Unlock this template
+                              {previewMeta?.access === "premium" ? ` · ${formatPrice(previewMeta.price)}` : ""}
+                            </>
+                          ) : (
+                            <>
+                              <FileTextOutlined /> Continue with this template
+                            </>
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -2001,6 +1776,7 @@ function Form() {
             </>
           );
         })()}
+        {lockModal}
       </div>
     );
   }
@@ -2038,8 +1814,7 @@ function Form() {
                 key={template.id}
                 className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer border border-[#e2e8f0] hover:border-[#1E69DA] group flex flex-col"
                 onClick={() => {
-                  setSelectedTemplate(template.id);
-                  setStep('editor');
+                  if (chooseTemplate(template.id)) setStep('editor');
                 }}
               >
                 <div className="h-[340px] bg-white w-full flex items-center justify-center border-b border-[#e2e8f0] overflow-hidden relative">
@@ -2059,9 +1834,15 @@ function Form() {
                 <div className="p-4 flex items-center justify-between">
                   <span className="font-semibold text-[#334155]">{template.label} - Draft</span>
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`w-[18px] h-[18px] rounded-full border-[1.5px] border-[#cbd5e1]`}
-                    />
+                    {templateAccess.isLocked(template.id) ? (
+                      <span className="bg-[#fef3c7] text-[#b45309] text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <LockOutlined /> Locked
+                      </span>
+                    ) : (
+                      <div
+                        className={`w-[18px] h-[18px] rounded-full border-[1.5px] border-[#cbd5e1]`}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -2072,6 +1853,7 @@ function Form() {
             )}
           </div>
         </div>
+        {lockModal}
       </div>
     );
   }
@@ -2364,14 +2146,15 @@ function Form() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 min-[1600px]:grid-cols-3 gap-4">
-                {TEMPLATE_OPTIONS.map((template, index) => {
+                {visibleTemplates.map((template, index) => {
                   const isActive = selectedTemplate === template.id;
+                  const locked = templateAccess.isLocked(template.id);
                   const swatch = swatchFor(index);
                   return (
                     <div
                       key={template.id}
                       className={`bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer border group flex flex-col ${isActive ? "border-[#1E69DA] ring-2 ring-[#1E69DA]/20" : "border-[#e2e8f0] hover:border-[#1E69DA]"}`}
-                      onClick={() => setSelectedTemplate(template.id)}
+                      onClick={() => chooseTemplate(template.id)}
                     >
                       <div className="h-40 bg-[#f8fafc] w-full flex items-center justify-center border-b border-[#e2e8f0] overflow-hidden relative">
                         <div className="absolute inset-0 scale-[0.2] origin-top-left w-[500%] h-[500%] pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity bg-white">
@@ -2384,7 +2167,10 @@ function Form() {
                         </div>
                       </div>
                       <div className="p-3 flex items-center justify-between">
-                        <span className={`font-semibold text-[13px] ${isActive ? "text-[#1E69DA]" : "text-[#334155]"}`}>{template.label}</span>
+                        <span className={`font-semibold text-[13px] truncate ${isActive ? "text-[#1E69DA]" : "text-[#334155]"}`}>
+                          {locked && <LockOutlined className="mr-1 text-[#d97706]" />}
+                          {template.label}
+                        </span>
                         <div
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: swatch }}
@@ -2409,7 +2195,7 @@ function Form() {
                     <EyeOutlined /> Live Preview
                   </span>
                   <span className="text-[11px] font-medium text-[#94a3b8]">
-                    {TEMPLATE_OPTIONS.find((t) => t.id === selectedTemplate)?.label || "Template"}
+                    {visibleTemplates.find((t) => t.id === selectedTemplate)?.label || "Template"}
                   </span>
                 </div>
                 <ResumeEditorContext.Provider
@@ -2444,6 +2230,7 @@ function Form() {
         </div>
       </div>
       {hiddenExportTemplate}
+      {lockModal}
 
       {/* Submit Modal */}
       <Modal

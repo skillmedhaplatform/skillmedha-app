@@ -27,6 +27,7 @@ import {
   formatPrice,
   levelLabel,
 } from "@/components/practiceSets/constants";
+import { loadRazorpayScript } from "@/utils/loadRazorpay";
 import {
   PRACTICE_SETS_PATH,
   accessTag,
@@ -41,19 +42,6 @@ const ITEM_TYPES = { set: "practiceSet", bundle: "practiceBundle" };
 const authHeaders = () => ({
   headers: { Authorization: `Bearer ${getLstorage("token")}` },
 });
-
-const loadRazorpayScript = () =>
-  new Promise((resolve) => {
-    if (typeof window !== "undefined" && window.Razorpay) {
-      resolve(true);
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
 
 const validityLabel = (days) =>
   Number(days) > 0 ? `${days} days access from today` : "Lifetime access";
