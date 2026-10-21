@@ -212,24 +212,17 @@ export function calculateProfileCompletion(student) {
     suggestions.push("Add a professional summary about yourself");
   }
 
-  // 10. Applied Jobs / Tests (10%)
+  // 10. Applied Jobs / Assessments (10%)
   total += 10;
   const hasAppliedJobs = student?.appliedJobs?.length > 0;
   const hasTests = student?.psychometricTestResults?.length > 0;
 
-  if (hasAppliedJobs && hasTests) {
+  if (hasAppliedJobs || hasTests) {
     score += 10;
     fieldDetails.activity = { status: "complete", score: 10 };
-  } else if (hasAppliedJobs || hasTests) {
-    score += 6;
-    fieldDetails.activity = { status: "partial", score: 6 };
-    if (!hasTests)
-      suggestions.push("Take psychometric tests to improve your profile");
-    if (!hasAppliedJobs)
-      suggestions.push("Start applying for jobs relevant to your skills");
   } else {
     fieldDetails.activity = { status: "incomplete", score: 0 };
-    suggestions.push("Apply for jobs and take assessment tests");
+    suggestions.push("Start applying for jobs and internships relevant to your skills");
   }
 
   // Calculate final percentage

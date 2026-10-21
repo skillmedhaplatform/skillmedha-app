@@ -8,37 +8,116 @@ import MainComp from "./components/mainComp";
 import ExternalJobs from "./components/ExternalJobs";
 import { useDispatch, useSelector } from "react-redux";
 import { GetAllJobs } from "@/redux/slices/jobopenings";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import useResponsive from "@/hooks/useResponsive";
 import MobileJobOpenings from "@/mobile_views/jobopenings/MobileJobOpenings";
 
 export default function JobOpenings() {
-  const router = useRouter();
   const dispatch = useDispatch();
   const isMobile = useResponsive();
   const searchParams = useSearchParams();
-  // Kept in the URL (?source=outside) so a refresh stays on the same tab.
-  const [jobSource, setJobSourceState] = useState(
-    searchParams.get("source") === "outside" ? "outside" : "portal"
-  );
-  const setJobSource = (value) => {
-    setJobSourceState(value);
-    const params = new URLSearchParams(searchParams.toString());
-    if (value === "outside") params.set("source", "outside");
-    else params.delete("source");
-    const qs = params.toString();
-    router.replace(qs ? `?${qs}` : "?", { scroll: false });
-  };
 
-  // Metrics extraction
-  const student = useSelector((state) => state.student.student?.data);
+  // Metrics extraction & student profile
+  const rawStudent = useSelector((state) => state.student?.student);
+  const student = rawStudent?.data || rawStudent;
   const totalApplied = student?.appliedJobs?.length || 0;
-  
+
+  const websiteOrgId =
+    process.env.NEXT_PUBLIC_WEBSITE_SIGNUP_ORG_ID || "skill_6ac4752625eb3163c9fed418";
+
+  // Check token orgId synchronously as a fast fallback while Redux state is hydrating
+  let tokenOrgId = "";
+  if (typeof window !== "undefined") {
+    try {
+      const token = window.localStorage.getItem("token");
+      if (token) {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        tokenOrgId = payload?.orgId || "";
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const isWebsiteUser = Boolean(
+    student?.signupSource === "website" ||
+    student?.signupSource === "practice" ||
+    student?.orgDetails?.orgId === websiteOrgId ||
+    student?.orgId === websiteOrgId ||
+    tokenOrgId === websiteOrgId
+  );
+
   const { pagination, jobs } = useSelector(
     (state) => state.jonOpenings?.allJobOpenings?.value || {}
   );
   const totalJobs = pagination?.totalDocs || 0;
-  
+  // totalTenantJobs counts local jobs + assigned jobs + placements posted by the associated TPO
+  const totalTenantJobs =
+    pagination?.totalTenantJobs !== undefined
+      ? pagination.totalTenantJobs
+      : (pagination?.totalDocs || 0);
+  const hasPortalJobs = totalTenantJobs > 0;
+
+  // Kept in the URL (?source=outside) so a refresh stays on the same tab.
+  // For website users without explicit query param, default to outside jobs.
+  const [jobSource, setJobSourceState] = useState(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const urlSource = sp.get("source");
+      if (urlSource === "outside") return "outside";
+      if (urlSource === "portal") return "portal";
+      try {
+        const token = window.localStorage.getItem("token");
+        if (token) {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          const wOrgId =
+            process.env.NEXT_PUBLIC_WEBSITE_SIGNUP_ORG_ID || "skill_6ac4752625eb3163c9fed418";
+          if (payload?.orgId === wOrgId) {
+            return "outside";
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return searchParams.get("source") === "outside" ? "outside" : "portal";
+  });
+
+  const setJobSource = (value) => {
+    setJobSourceState(value);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (value === "outside") params.set("source", "outside");
+      else params.delete("source");
+      const qs = params.toString();
+      const newUrl = qs ? `?${qs}` : window.location.pathname;
+      window.history.replaceState(null, "", newUrl);
+    }
+  };
+
+  // If website user and no portal jobs have been posted by the TPO, enforce "outside" mode
+  useEffect(() => {
+    if (isWebsiteUser) {
+      if (!hasPortalJobs) {
+        if (jobSource !== "outside") {
+          setJobSourceState("outside");
+        }
+        if (typeof window !== "undefined") {
+          const sp = new URLSearchParams(window.location.search);
+          if (sp.get("source") === "portal") {
+            sp.set("source", "outside");
+            const qs = sp.toString();
+            window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+          }
+        }
+      }
+    }
+  }, [isWebsiteUser, hasPortalJobs, jobSource]);
+
+  // When a website user has no portal jobs from their TPO, hide the portal jobs section entirely and display only outside jobs.
+  const showSourceSwitch = !isWebsiteUser || hasPortalJobs;
+  const effectiveJobSource = isWebsiteUser && !hasPortalJobs ? "outside" : jobSource;
+
   const todayCount = (jobs || []).filter(job => {
     if (!job?.createdAt) return false;
     const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -69,7 +148,7 @@ export default function JobOpenings() {
   const sourceSwitch = (
     <Segmented
       block
-      value={jobSource}
+      value={effectiveJobSource}
       onChange={setJobSource}
       options={[
         { label: "Portal Jobs", value: "portal" },
@@ -82,9 +161,9 @@ export default function JobOpenings() {
   if (isMobile) {
     return (
       <div className="flex flex-col h-full">
-        <div className="px-3 pt-3 shrink-0">{sourceSwitch}</div>
+        {showSourceSwitch && <div className="px-3 pt-3 shrink-0">{sourceSwitch}</div>}
         <div className="flex-1 overflow-hidden px-3">
-          {jobSource === "portal" ? <MobileJobOpenings /> : <ExternalJobs />}
+          {effectiveJobSource === "portal" ? <MobileJobOpenings /> : <ExternalJobs />}
         </div>
       </div>
     );
@@ -115,7 +194,7 @@ export default function JobOpenings() {
                 Job Openings
               </h1>
               <p className="text-white/90 text-[14px] lg:text-[15px] m-0 leading-tight" style={{ marginTop: 0 }}>
-                {jobSource === "outside"
+                {effectiveJobSource === "outside"
                   ? "Real jobs from top companies' careers pages — search by role, skill and city."
                   : "Find your next big opportunity and start your career journey."}
               </p>
@@ -124,7 +203,7 @@ export default function JobOpenings() {
 
           {/* These numbers are for portal jobs, so they hide on the Outside Jobs tab. */}
           <div
-            className={`items-center gap-6 lg:gap-10 lg:mr-10 relative z-10 ${jobSource === "outside" ? "hidden" : "flex"}`}
+            className={`items-center gap-6 lg:gap-10 lg:mr-10 relative z-10 ${effectiveJobSource === "outside" ? "hidden" : "flex"}`}
           >
             <div className="flex flex-col items-center justify-center min-w-[80px]">
               <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">
@@ -157,8 +236,8 @@ export default function JobOpenings() {
       </div>
 
       <div className="flex flex-col p-4 flex-1 overflow-hidden h-full">
-        <div className="max-w-[360px] shrink-0">{sourceSwitch}</div>
-        {jobSource === "portal" ? (
+        {showSourceSwitch && <div className="max-w-[360px] shrink-0">{sourceSwitch}</div>}
+        {effectiveJobSource === "portal" ? (
           <>
             <JobHeader />
             <div className="flex-1 overflow-hidden h-full">

@@ -30,8 +30,13 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
 
-  // ── 0. Portal Route Protection ───────────────────────────────────────────
-  if (pathname.endsWith(".xlsx") || pathname.endsWith(".csv")) {
+  // ── 0. Static assets bypass ──────────────────────────────────────────────
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname === "/favicon.ico" ||
+    /\.(png|jpg|jpeg|gif|webp|svg|ico|css|js|woff|woff2|ttf|eot|xlsx|csv|pdf|html|json)$/i.test(pathname)
+  ) {
     return NextResponse.next();
   }
 
@@ -117,14 +122,17 @@ export async function middleware(request) {
     }
   }
 
-  // ── 6. Psychometric Test Gate ─────────────────────────────────────────────
-  if (!isPsychometricExempt(pathname) && session.pt === false) {
-    return NextResponse.redirect(new URL("/student/testPortal", request.url));
-  }
+  // ── 6. Psychometric Test Gate (Disabled for all students) ─────────────────
+  // Note: Psychometric test is currently disabled for all students.
+  // if (!isPsychometricExempt(pathname) && session.pt === false) {
+  //   return NextResponse.redirect(new URL("/student/testPortal", request.url));
+  // }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|woff|woff2|ttf|eot|xlsx|csv|pdf|html|json)$).*)",
+  ],
 };

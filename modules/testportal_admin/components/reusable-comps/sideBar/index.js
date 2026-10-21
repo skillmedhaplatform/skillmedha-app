@@ -96,8 +96,8 @@ const SideBar = ({ activeView, setView }) => {
     >
       <div className={sideBarStyles.logoContainer}>
         <img
-          src="/student-portal-logo.png"
-          alt="Synsper Logo"
+          src="/skillmedha-logo.png"
+          alt="SkillMedha Logo"
           onClick={() => router.replace(`${basePath}/myTests`)}
           style={{ cursor: "pointer" }}
         />

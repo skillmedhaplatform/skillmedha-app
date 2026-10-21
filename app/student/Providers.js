@@ -32,11 +32,14 @@ const antdTheme = {
   },
 };
 
+import { AntdStaticBridge } from "@/utils/antdStatic";
+
 export default function Providers({ children }) {
   return (
     <StoreProvider>
       <ConfigProvider theme={antdTheme}>
         <AntdApp>
+          <AntdStaticBridge />
           <Suspense fallback={<p>Loading</p>}>
             <AppRouterCacheProvider options={{ enableCssLayer: true }}>
               <ProgressProvider

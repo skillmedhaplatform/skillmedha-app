@@ -47,7 +47,7 @@ export default function TpoMobileSidebar() {
         
         <div className={styles.logo} onClick={handleLogoClick}>
           <img
-            src="/student-portal-logo.png"
+            src="/skillmedha-logo.png"
             alt="SkillMedha Logo"
           />
           <div className={styles.logoText}>

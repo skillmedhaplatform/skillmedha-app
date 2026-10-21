@@ -57,6 +57,20 @@ const AdminBanner = () => {
     const matchedItem = sideBarTitles.find(item => pathname.includes(item.path));
     const defaultIcon = matchedItem ? React.cloneElement(matchedItem.icon, { size: "1.2em", className: "opacity-90" }) : null;
 
+    if (pathname.startsWith("/admin/website-newsflash")) {
+      return { title: "Website NewsFlash", icon: defaultIcon };
+    }
+    if (pathname.startsWith("/admin/website")) {
+      const section = searchParams?.get("section");
+      if (section === "practice") {
+        return { title: "Practice Sets & Bundles Data Management", icon: defaultIcon };
+      }
+      if (section === "newsflash") {
+        return { title: "Website NewsFlash", icon: defaultIcon };
+      }
+      return { title: "Website Content & Data Management", icon: defaultIcon };
+    }
+
     if (pathname.includes("/course")) return { title: "Course Management", icon: defaultIcon };
     if (pathname.includes("/users")) return { title: "User Management", icon: defaultIcon };
     if (pathname.includes("/internship")) return { title: "Internships", icon: defaultIcon };
@@ -115,7 +129,6 @@ const AdminBanner = () => {
     if (pathname.includes("/liveLect")) return { title: "Live Lectures", icon: defaultIcon };
     if (pathname.includes("/payment")) return { title: "Payments", icon: defaultIcon };
     if (pathname.includes("/workshops")) return { title: "Workshops", icon: defaultIcon };
-    if (pathname.includes("/website-newsflash")) return { title: "Newsflash", icon: defaultIcon };
     if (pathname.includes("/organisationDetails")) {
       const type = searchParams.get("type");
       const orgType = orgStats?.organization?.orgType || type || "college";

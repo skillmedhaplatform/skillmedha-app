@@ -18,9 +18,9 @@ const Header = () => {
     <div className={headerStyles.container}>
       <div className={headerStyles.icon}>
         <ImageWithFallback
-          src="/student-portal-logo.png"
+          src="/skillmedha-logo.png"
           fallbackSrc="https://res.cloudinary.com/cliqtick/image/upload/v1718345892/sysnper/db47284929e120d0bdcc1955a52c1288_rulzfj.png"
-          alt="Synsper Logo"
+          alt="SkillMedha Logo"
           onClick={() => nav.replace("/testportal_admin/myTests")}
           style={{
             cursor: "pointer",

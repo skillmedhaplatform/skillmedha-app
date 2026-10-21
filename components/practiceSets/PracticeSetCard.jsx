@@ -10,6 +10,7 @@ import {
   FiCode,
   FiCpu,
   FiPieChart,
+  FiBriefcase,
 } from "react-icons/fi";
 import {
   categoryLabel,
@@ -37,13 +38,37 @@ const FALLBACK_ART = {
   technical: { bg: "from-[#065F46] via-[#0D9488] to-[#34D399]", Icon: FiCpu },
   coding: { bg: "from-[#0F172A] via-[#312E81] to-[#6366F1]", Icon: FiCode },
   bundle: { bg: "from-[#9A3412] via-[#EA580C] to-[#FBBF24]", Icon: FiLayers },
+  company: { bg: "from-[#3B0764] via-[#6D28D9] to-[#A78BFA]", Icon: FiBriefcase },
 };
+
+// Company sets use the company's own colour and initials (set under
+// Practice → Company-wise) so each company is recognisable at a glance.
+function companyBrandOf(item) {
+  if (item.companyBrand) return item.companyBrand;
+  const title = (item.topics || []).find((t) => t.subjectTitle)?.subjectTitle;
+  return title ? { title, initials: title.slice(0, 2).toUpperCase(), color: "" } : null;
+}
 
 function CardArt({ item, isBundle }) {
   const key = isBundle ? "bundle" : item.category;
   const { bg, Icon } = FALLBACK_ART[key] || FALLBACK_ART.nontechnical;
+  const brand = !isBundle && item.category === "company" ? companyBrandOf(item) : null;
   return (
-    <div className={`relative h-full w-full overflow-hidden bg-gradient-to-br ${bg}`}>
+    <div
+      className={`relative h-full w-full overflow-hidden bg-gradient-to-br ${bg}`}
+      style={
+        brand?.color
+          ? { backgroundImage: `linear-gradient(135deg, ${brand.color}, ${brand.color}cc 55%, #0f172a)` }
+          : undefined
+      }
+    >
+      {brand?.initials && (
+        <div className="absolute right-4 top-1/2 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-2xl bg-white/95 text-[20px] font-black tracking-tight shadow-lg transition-transform duration-500 group-hover:scale-110"
+          style={{ color: brand.color || "#6D28D9" }}
+        >
+          {brand.initials}
+        </div>
+      )}
       <div
         className="absolute inset-0 opacity-25"
         style={{
@@ -53,7 +78,9 @@ function CardArt({ item, isBundle }) {
       />
       <div className="absolute -right-8 -top-10 h-36 w-36 rounded-full bg-white/15 blur-[2px]" />
       <div className="absolute -bottom-12 -left-6 h-32 w-32 rounded-full bg-black/15" />
-      <Icon className="absolute bottom-3 right-4 text-[64px] text-white/25 transition-transform duration-500 group-hover:scale-110" />
+      {!brand?.initials && (
+        <Icon className="absolute bottom-3 right-4 text-[64px] text-white/25 transition-transform duration-500 group-hover:scale-110" />
+      )}
       <div className="absolute bottom-3 left-4 right-20 line-clamp-2 text-[13px] font-extrabold leading-tight text-white/90 drop-shadow">
         {item.title}
       </div>

@@ -17,8 +17,8 @@ export default function LoginNavbar() {
       /> */}
       <div className={loginstyles.icon}>
         <img
-          src="/student-portal-logo.png"
-          alt="Synsper Logo"
+          src="/skillmedha-logo.png"
+          alt="SkillMedha Logo"
           onClick={() => nav.replace("/")}
           style={{
             cursor: "pointer",

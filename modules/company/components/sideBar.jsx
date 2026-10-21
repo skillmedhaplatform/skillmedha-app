@@ -165,8 +165,8 @@ const SideBar = ({ activeView, setView, isMobile }) => {
     >
       <div className={sideBarStyles.logoContainer}>
         <img
-          src="/student-portal-logo.png"
-          alt="Synsper Logo"
+          src="/skillmedha-logo.png"
+          alt="SkillMedha Logo"
           onClick={() => nav.replace("/company/profile")}
           style={{ cursor: "pointer" }}
         />
