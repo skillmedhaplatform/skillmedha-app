@@ -10,7 +10,7 @@ import {
   HiOutlineLightBulb,
   HiOutlineVideoCamera,
   HiOutlineCreditCard,
-  HiOutlineGlobeAlt,
+  HiOutlineDocumentText,
 } from "react-icons/hi2";
 
 export const setSstorage = (name, val) => {
@@ -122,6 +122,11 @@ export const sideBarTitles = [
     name: "Practice Questions",
     path: "/admin/practice",
     icon: <HiOutlineClipboardDocumentCheck size={22} />,
+  },
+  {
+    name: "Resume Templates",
+    path: "/admin/resume-templates",
+    icon: <HiOutlineDocumentText size={22} />,
   },
   {
     name: "Skill Library",
