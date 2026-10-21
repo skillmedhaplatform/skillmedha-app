@@ -63,6 +63,17 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
       )
     },
     { type: "divider" },
+    {
+      key: "visit-website",
+      label: (
+        <a
+          href={`${process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:8080"}/`}
+          style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "500", color: "#2563eb" }}
+        >
+          <span>🌐</span> Visit Website
+        </a>
+      )
+    },
     ...(!isSpecialOrg ? [{
       key: "profile",
       label: "View More Info",
@@ -356,6 +367,39 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
       </div>
 
       <div className={sideBarStyles.bottom}>
+        <div style={{ padding: isCollapsed ? "0 0.5rem 0.5rem" : "0 1rem 0.6rem", display: "flex", justifyContent: "center" }}>
+          <a
+            href={`${process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:8080"}/`}
+            title="Visit Website"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: isCollapsed ? "center" : "flex-start",
+              gap: "8px",
+              padding: isCollapsed ? "8px" : "8px 14px",
+              width: "100%",
+              borderRadius: "10px",
+              backgroundColor: "#f8fafc",
+              border: "1px solid #e2e8f0",
+              color: "#1e40af",
+              fontSize: "0.85rem",
+              fontWeight: "600",
+              textDecoration: "none",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#eff6ff";
+              e.currentTarget.style.borderColor = "#93c5fd";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#f8fafc";
+              e.currentTarget.style.borderColor = "#e2e8f0";
+            }}
+          >
+            <span style={{ fontSize: "1rem" }}>🌐</span>
+            {!isCollapsed && <span>Visit Website</span>}
+          </a>
+        </div>
         <div style={{ padding: isCollapsed ? "0" : "0 1rem", display: "flex", justifyContent: "center" }}>
           {isLoadingUser ? (
             <div className={sideBarStyles.profilePillSkeleton}>

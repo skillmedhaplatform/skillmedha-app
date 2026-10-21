@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchCompanyTests } from "@/redux/slices/admin/cms/practiceSlice";
+import { fetchPracticeCatalog } from "@/redux/slices/practiceSlice";
 import { restUrl } from "@/config/urls";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import PracticeFilters from "@/modules/student/components/PracticeFilters";
@@ -17,7 +18,7 @@ export default function CompanyWisePage() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
-  const { companyTests = [], status } = useSelector((state) => state.adminPractice);
+  const { catalog, catalogStatus } = useSelector((state) => state.practice);
   const studentCreds = useSelector((state) => state.student.student?.data);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,7 +53,8 @@ export default function CompanyWisePage() {
     const studentEmail = studentCreds?.email || "student@example.com";
     sessionStorage.setItem('current_mock_user', JSON.stringify({ name: studentName, email: studentEmail }));
     sessionStorage.removeItem(`active_test_${selectedTest.id}`);
-    router.push(`/student/practice-new/company-wise/${selectedTest.id}`);
+    const duration = selectedTest.timeLimit || selectedTest.timeMinutes || 60;
+    router.push(`/student/practice-new/company-wise/${selectedTest.id}?duration=${duration}`);
   };
 
   const handleViewResultClick = () => {
@@ -60,7 +62,7 @@ export default function CompanyWisePage() {
   };
 
   useEffect(() => {
-    dispatch(fetchCompanyTests());
+    dispatch(fetchPracticeCatalog());
   }, [dispatch]);
 
   const categoryTabs = [
@@ -70,32 +72,48 @@ export default function CompanyWisePage() {
     { name: "Company-wise", path: "/student/practice-new/company-wise" },
   ];
 
+  const companyPracticeSets = (catalog?.sets || []).filter((s) => s.category === "company");
+
   const renderCompanyTests = () => {
-    return companyTests.map((t) => {
+    return companyPracticeSets.map((s) => {
       // Extract main categories (e.g. "Technical" from "Technical - Java") and deduplicate
-      const uniqueMainCategories = [...new Set(
-        (t.sections || []).map(sec => sec.split(" - ")[0].trim())
-      )];
+      const uniqueMainCategories = [
+        ...new Set(
+          (s.topics || []).map((sec) =>
+            (sec.topicTitle || sec.section || "General").split(" - ")[0].trim()
+          )
+        ),
+      ];
 
       return {
-        id: t._id,
-        name: t.title,
-        initials: t.initials,
-        color: t.color,
-        hiringType: t.hiringType,
-        patternName: t.patternName,
-        sections: uniqueMainCategories,
-        timeLimit: t.timeLimit || 0,
-        questionCount: t.questionCount || 0,
+        id: s._id,
+        _id: s._id,
+        name: s.title,
+        title: s.title,
+        thumbnail: s.thumbnail,
+        initials: (s.title || "CO").slice(0, 2).toUpperCase(),
+        color: "#6D28D9",
+        hiringType: s.level ? s.level.charAt(0).toUpperCase() + s.level.slice(1) : "Mass Recruiter",
+        level: s.level,
+        patternName: s.description || "",
+        sections: uniqueMainCategories.length ? uniqueMainCategories : ["General"],
+        timeLimit: s.timeMinutes || 60,
+        timeMinutes: s.timeMinutes || 60,
+        questionCount: s.questionCount || 0,
+        plan: s.plan || "free",
+        price: s.price || 0,
+        mrp: s.mrp || 0,
+        access: s.access || { unlocked: true, reason: "free" },
+        rawSet: s,
       };
     });
   };
 
   const displayedTests = renderCompanyTests();
-  const companyNames = [...new Set(displayedTests.map(t => t.name))];
+  const companyNames = [...new Set(displayedTests.map((t) => t.name))];
   const filterCategories = ["All", ...companyNames];
 
-  const filteredTests = displayedTests.filter(test => {
+  const filteredTests = displayedTests.filter((test) => {
     if (activeCategory === "All") return true;
     if (test.hiringType && test.hiringType.toLowerCase() === activeCategory.toLowerCase()) return true;
     if (test.name === activeCategory) return true;
@@ -128,15 +146,39 @@ export default function CompanyWisePage() {
       <div className="flex-1 px-4 lg:px-8 py-8">
         <div className="max-w-[1400px] mx-auto">
 
-          {status === 'loading' ? (
-            <div className="text-center py-10 text-gray-500">Loading company tests...</div>
+          {catalogStatus === 'loading' && !companyPracticeSets.length ? (
+            <div className="text-center py-10 text-gray-500">Loading company practice sets...</div>
+          ) : filteredTests.length === 0 ? (
+            <div className="text-center py-10 text-gray-500">No company practice sets available</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredTests.map((test) => (
                 <div key={test.id} className="h-full">
                   <CompanyTestCard
                     companyData={test}
                     onStartTest={() => handleCardClick(test)}
+                    onViewResults={async (testItem) => {
+                      setSelectedTest(testItem);
+                      setModalState("RESULTS");
+                      setPastAttempts([]);
+                      setIsModalOpen(true);
+                      const testId = testItem.id || testItem._id;
+                      const token = typeof window !== "undefined" ? (localStorage.getItem("token") || sessionStorage.getItem("token") || "") : "";
+                      if (token && testId) {
+                        try {
+                          const res = await fetch(`${restUrl}/practice/top-scores/${testId}`, {
+                            method: 'GET',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                          });
+                          const data = await res.json();
+                          if (data && data.data) {
+                            setPastAttempts(data.data);
+                          }
+                        } catch (e) {
+                          console.error(e);
+                        }
+                      }
+                    }}
                   />
                 </div>
               ))}

@@ -53,11 +53,16 @@ export default function AdminWebsitePage() {
       ? "practice"
       : sectionParam === "newsflash"
       ? "newsflash"
+      : sectionParam === "company-tests"
+      ? "company-tests"
       : null;
 
   const [loading, setLoading] = useState(true);
   const [updatingMode, setUpdatingMode] = useState(false);
   const [seeding, setSeeding] = useState(false);
+
+  const [updatingCompanyMode, setUpdatingCompanyMode] = useState(false);
+  const [seedingCompany, setSeedingCompany] = useState(false);
 
   // Practice Config State
   const [config, setConfig] = useState({
@@ -74,6 +79,19 @@ export default function AdminWebsitePage() {
   const [staticSets, setStaticSets] = useState([]);
   const [dynamicSets, setDynamicSets] = useState([]);
   const [loadingDynamic, setLoadingDynamic] = useState(false);
+
+  // Company Mock Tests State
+  const [companyConfig, setCompanyConfig] = useState({
+    mode: "static",
+    staticCount: 0,
+    dynamicCount: 0,
+    publishedSetsCount: 0,
+    lastUpdated: null,
+    updatedBy: null
+  });
+  const [staticCompanyTests, setStaticCompanyTests] = useState([]);
+  const [dynamicCompanyTests, setDynamicCompanyTests] = useState([]);
+  const [loadingDynamicCompany, setLoadingDynamicCompany] = useState(false);
 
   // Marquee state for NewsFlash overview card
   const marqueeState = useSelector((state) => state.marquee) || {};
@@ -151,11 +169,87 @@ export default function AdminWebsitePage() {
     }
   }, [getHeaders]);
 
+  // Fetch Company Config
+  const fetchCompanyConfig = useCallback(async () => {
+    try {
+      const res = await fetch(`${restUrl}/admin/website/company-config`, {
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setCompanyConfig(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching company website config:", err);
+    }
+  }, [getHeaders]);
+
+  // Fetch Static Company Tests
+  const fetchStaticCompanyTests = useCallback(async () => {
+    try {
+      const res = await fetch(`${restUrl}/admin/website/static-company-tests`, {
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setStaticCompanyTests(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching static company tests:", err);
+    }
+  }, [getHeaders]);
+
+  // Fetch Dynamic Company Preview
+  const fetchDynamicCompanyPreview = useCallback(async () => {
+    setLoadingDynamicCompany(true);
+    try {
+      const res = await fetch(`${restUrl}/admin/website/dynamic-company-preview`, {
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setDynamicCompanyTests(data.data);
+        setCompanyConfig((prev) => ({
+          ...prev,
+          dynamicCount: data.data.length
+        }));
+      } else {
+        const fallbackRes = await fetch(`${restUrl}/public/website/company-exams?mode=dynamic`);
+        const fallbackData = await fallbackRes.json();
+        if (fallbackData.success && Array.isArray(fallbackData.data)) {
+          setDynamicCompanyTests(fallbackData.data);
+          setCompanyConfig((prev) => ({
+            ...prev,
+            dynamicCount: fallbackData.data.length
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching dynamic company preview:", err);
+    } finally {
+      setLoadingDynamicCompany(false);
+    }
+  }, [getHeaders]);
+
   const loadAll = useCallback(async () => {
     setLoading(true);
-    await Promise.all([fetchConfig(), fetchStaticSets(), fetchDynamicPreview()]);
+    await Promise.all([
+      fetchConfig(),
+      fetchStaticSets(),
+      fetchDynamicPreview(),
+      fetchCompanyConfig(),
+      fetchStaticCompanyTests(),
+      fetchDynamicCompanyPreview()
+    ]);
     setLoading(false);
-  }, [fetchConfig, fetchStaticSets, fetchDynamicPreview]);
+  }, [
+    fetchConfig,
+    fetchStaticSets,
+    fetchDynamicPreview,
+    fetchCompanyConfig,
+    fetchStaticCompanyTests,
+    fetchDynamicCompanyPreview
+  ]);
 
   useEffect(() => {
     loadAll();
@@ -174,7 +268,7 @@ export default function AdminWebsitePage() {
     }
   };
 
-  // Toggle Mode Handler
+  // Toggle Mode Handler (Practice)
   const handleToggleMode = async (checked) => {
     const newMode = checked ? "dynamic" : "static";
     setUpdatingMode(true);
@@ -198,7 +292,35 @@ export default function AdminWebsitePage() {
     }
   };
 
-  // Re-seed Default Static Data
+  // Toggle Mode Handler (Company)
+  const handleToggleCompanyMode = async (checked) => {
+    const newMode = checked ? "dynamic" : "static";
+    setUpdatingCompanyMode(true);
+    try {
+      const res = await fetch(`${restUrl}/admin/website/company-mode`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ mode: newMode })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success(data.msg || `Company mock tests mode updated to ${newMode.toUpperCase()}`);
+        setCompanyConfig((prev) => ({
+          ...prev,
+          mode: newMode,
+          lastUpdated: new Date().toISOString()
+        }));
+      } else {
+        message.error(data.err || "Failed to update company mode");
+      }
+    } catch (err) {
+      message.error(err.message || "Network error updating company mode");
+    } finally {
+      setUpdatingCompanyMode(false);
+    }
+  };
+
+  // Re-seed Default Static Data (Practice)
   const handleSeedStaticData = async () => {
     setSeeding(true);
     try {
@@ -220,7 +342,30 @@ export default function AdminWebsitePage() {
     }
   };
 
+  // Re-seed Default Static Data (Company)
+  const handleSeedCompanyData = async () => {
+    setSeedingCompany(true);
+    try {
+      const res = await fetch(`${restUrl}/admin/website/seed-static-company`, {
+        method: "POST",
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success(data.msg || "Default static company mock tests seeded successfully!");
+        await Promise.all([fetchCompanyConfig(), fetchStaticCompanyTests()]);
+      } else {
+        message.error(data.err || "Failed to seed default company mock tests");
+      }
+    } catch (err) {
+      message.error(err.message || "Network error seeding company mock tests");
+    } finally {
+      setSeedingCompany(false);
+    }
+  };
+
   const isDynamic = config.mode === "dynamic";
+  const isCompanyDynamic = companyConfig.mode === "dynamic";
 
   // Table Columns for Practice Sets (Static & Dynamic)
   const columns = [
@@ -321,6 +466,108 @@ export default function AdminWebsitePage() {
     }
   ];
 
+  // Table Columns for Company Mock Tests (Static & Dynamic)
+  const companyColumns = [
+    {
+      title: "Order",
+      dataIndex: "order",
+      key: "order",
+      width: 75,
+      align: "center",
+      render: (v, _, index) => (
+        <span className="font-bold text-slate-400">#{v !== undefined ? v : index + 1}</span>
+      )
+    },
+    {
+      title: "Test Title",
+      dataIndex: "title",
+      key: "title",
+      render: (text, record) => (
+        <div>
+          <div className="font-bold text-slate-800">{text}</div>
+          <div className="text-xs text-slate-400">ID: {record.id || record._id}</div>
+        </div>
+      )
+    },
+    {
+      title: "Company",
+      dataIndex: "company",
+      key: "company",
+      width: 130,
+      render: (comp, record) => {
+        const name = comp || (record.title ? record.title.split(" ")[0] : "Company");
+        return <Tag color="purple">{name}</Tag>;
+      }
+    },
+    {
+      title: "Level",
+      dataIndex: "level",
+      key: "level",
+      width: 120,
+      render: (lvl, record) => {
+        if (record.isBundle || lvl === "Bundle") {
+          return <Tag color="gold">BUNDLE</Tag>;
+        }
+        return <Tag color="default">{lvl || "Intermediate"}</Tag>;
+      }
+    },
+    {
+      title: "Questions",
+      dataIndex: "questionsCount",
+      key: "questionsCount",
+      width: 110,
+      align: "center",
+      render: (count, record) => (
+        <span className="font-semibold text-slate-700">
+          {count || record.questionCount || 0} Qs
+        </span>
+      )
+    },
+    {
+      title: "Duration",
+      dataIndex: "duration",
+      key: "duration",
+      width: 120,
+      render: (dur, record) => (
+        <span className="text-slate-600">
+          {dur || (record.timeMinutes ? `${record.timeMinutes} mins` : "45 mins")}
+        </span>
+      )
+    },
+    {
+      title: "Price",
+      key: "price",
+      width: 120,
+      render: (_, record) => {
+        if (record.isFree || Number(record.price) === 0) {
+          return <span className="font-bold text-emerald-600">FREE</span>;
+        }
+        return (
+          <div>
+            <span className="font-bold text-blue-600">₹{record.price}</span>
+            {record.originalPrice > record.price && (
+              <span className="ml-1 text-xs text-slate-400 line-through">
+                ₹{record.originalPrice}
+              </span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      width: 110,
+      align: "center",
+      render: (status) => (
+        <Tag color={status === "published" || status === "active" ? "success" : "default"}>
+          {(status || "active").toUpperCase()}
+        </Tag>
+      )
+    }
+  ];
+
   // List of configurable website sections
   const websiteSections = [
     {
@@ -379,12 +626,17 @@ export default function AdminWebsitePage() {
       key: "company-tests",
       title: "Company Mock Tests",
       icon: <BankOutlined className="text-2xl text-purple-600" />,
-      activeMode: "dynamic",
+      activeMode: isCompanyDynamic ? "dynamic" : "static",
       description:
-        "Manage real-time company exam patterns and test listings displayed on the website.",
-      status: "Coming Soon",
-      isReady: false,
-      accentColor: "border-slate-200 bg-white/70"
+        "Manage whether the website displays static company tests from the website.companyExams collection or live dynamic company practice sets.",
+      staticCount: companyConfig.staticCount,
+      dynamicCount: dynamicCompanyTests.length > 0 ? dynamicCompanyTests.length : (companyConfig.dynamicCount || 0),
+      status: "Active",
+      isReady: true,
+      badgeText: isCompanyDynamic ? "Dynamic Mode" : "Static Mode",
+      badgeColor: isCompanyDynamic ? "purple" : "blue",
+      subInfo: `${companyConfig.staticCount} Static • ${dynamicCompanyTests.length > 0 ? dynamicCompanyTests.length : (companyConfig.dynamicCount || 0)} Dynamic`,
+      accentColor: "border-purple-200 hover:border-purple-400 bg-white"
     }
   ];
 
@@ -417,6 +669,35 @@ export default function AdminWebsitePage() {
                 {/* 2. The text */}
                 <span className="text-sm font-medium text-slate-600">
                   Configure whether the website displays static database sets or live dynamic tenant catalog sets.
+                </span>
+              </div>
+
+              {/* 3. A Refresh button */}
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={loadAll}
+                loading={loading}
+                className="rounded-lg shadow-sm font-medium border-slate-200 text-slate-700 hover:text-blue-600 hover:border-blue-400 shrink-0 self-start md:self-auto flex items-center gap-1.5"
+              >
+                Refresh
+              </Button>
+            </>
+          ) : selectedSection === "company-tests" ? (
+            /* Company Mock Tests View Header */
+            <>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                {/* 1. ← Back to Sections */}
+                <Button
+                  icon={<ArrowLeftOutlined />}
+                  onClick={handleBackToOverview}
+                  className="rounded-lg shadow-sm font-semibold text-slate-700 hover:text-blue-600 border-slate-300 flex items-center gap-1.5"
+                >
+                  Back to Sections
+                </Button>
+
+                {/* 2. The text */}
+                <span className="text-sm font-medium text-slate-600">
+                  Configure whether the website displays static database company tests or live dynamic company practice sets.
                 </span>
               </div>
 
@@ -481,7 +762,7 @@ export default function AdminWebsitePage() {
 
       {/* ── MAIN CONTENT CONTAINER ── */}
       <div className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
-        {loading && selectedSection === "practice" ? (
+        {loading && (selectedSection === "practice" || selectedSection === "company-tests") ? (
           <div className="flex justify-center items-center py-24">
             <Spin size="large" tip="Loading website configuration..." />
           </div>
@@ -678,6 +959,208 @@ export default function AdminWebsitePage() {
                           pagination={{ pageSize: 8 }}
                           bordered
                           loading={loadingDynamic}
+                          className="rounded-lg overflow-hidden border border-slate-200"
+                        />
+                      </div>
+                    )
+                  }
+                ]}
+              />
+            </Card>
+          </div>
+        ) : selectedSection === "company-tests" ? (
+          /* ════════════════════════════════════════════════════════════════
+             COMPANY MOCK TESTS SECTION MANAGEMENT VIEW (Detail View)
+             ════════════════════════════════════════════════════════════════ */
+          <div className="space-y-6">
+            {/* Main Control Card */}
+            <Card
+              className="shadow-sm border-slate-200 rounded-2xl overflow-hidden"
+              styles={{ body: { padding: "28px" } }}
+            >
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="space-y-3 max-w-2xl">
+                  <div className="flex items-center gap-3">
+                    <span className="text-base font-extrabold text-slate-800">
+                      Company Mock Tests Data Source:
+                    </span>
+                    <Badge
+                      status={isCompanyDynamic ? "processing" : "default"}
+                      color={isCompanyDynamic ? "#7C3AED" : "#0284C7"}
+                      text={
+                        <span className="font-bold text-sm tracking-wide">
+                          {isCompanyDynamic ? "DYNAMIC MODE ACTIVE" : "STATIC MODE ACTIVE"}
+                        </span>
+                      }
+                      className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-full"
+                    />
+                  </div>
+
+                  <p className="text-slate-600 leading-relaxed text-sm">
+                    {isCompanyDynamic ? (
+                      <span>
+                        The website is currently displaying <strong>live dynamic Company Mock Tests & Exam Bundles</strong>{" "}
+                        created in the Admin Portal across tenant databases. Cards automatically render in the{" "}
+                        <strong>Real-Time Company-wise Exam Pattern</strong> section and redirect to the Student Portal.
+                      </span>
+                    ) : (
+                      <span>
+                        The website is currently displaying <strong>curated static Company Exam Patterns</strong>{" "}
+                        retrieved dynamically from the <code>website.companyExams</code> database collection.
+                      </span>
+                    )}
+                  </p>
+
+                  {companyConfig.lastUpdated && (
+                    <div className="text-xs text-slate-400 flex items-center gap-1.5 pt-1">
+                      <InfoCircleOutlined /> Last mode change:{" "}
+                      <strong>{new Date(companyConfig.lastUpdated).toLocaleString()}</strong>
+                    </div>
+                  )}
+                </div>
+
+                {/* Interactive Toggle Control */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col items-center sm:items-end justify-center gap-3 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`text-sm font-bold transition-colors ${
+                        !isCompanyDynamic ? "text-blue-600" : "text-slate-400"
+                      }`}
+                    >
+                      Static Mode
+                    </span>
+                    <Switch
+                      checked={isCompanyDynamic}
+                      onChange={handleToggleCompanyMode}
+                      loading={updatingCompanyMode}
+                      className={isCompanyDynamic ? "!bg-purple-600" : "!bg-sky-600"}
+                    />
+                    <span
+                      className={`text-sm font-bold transition-colors ${
+                        isCompanyDynamic ? "text-purple-600" : "text-slate-400"
+                      }`}
+                    >
+                      Dynamic Mode
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-400 text-center sm:text-right">
+                    Toggle switch to change data source instantly
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100">
+                <div className="bg-sky-50/60 p-4 rounded-xl border border-sky-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-sky-700">
+                    Static Database Tests
+                  </div>
+                  <div className="text-2xl font-black text-sky-900 mt-1">
+                    {companyConfig.staticCount}{" "}
+                    <span className="text-xs font-medium text-sky-600">in website.companyExams</span>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50/60 p-4 rounded-xl border border-purple-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-purple-700">
+                    Dynamic Published Tests
+                  </div>
+                  <div className="text-2xl font-black text-purple-900 mt-1">
+                    {dynamicCompanyTests.length > 0 ? dynamicCompanyTests.length : (companyConfig.dynamicCount || 0)}{" "}
+                    <span className="text-xs font-medium text-purple-600">published items</span>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                    Database Status
+                  </div>
+                  <div className="text-2xl font-black text-emerald-900 mt-1 flex items-center gap-2">
+                    <CheckCircleOutlined className="text-emerald-500 text-xl" /> Connected
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Database Content Tabs */}
+            <Card className="shadow-sm border-slate-200 rounded-2xl">
+              <Tabs
+                defaultActiveKey="static"
+                items={[
+                  {
+                    key: "static",
+                    label: (
+                      <span className="flex items-center gap-2">
+                        <DatabaseOutlined /> Static Company Tests Collection (<code>website.companyExams</code>)
+                      </span>
+                    ),
+                    children: (
+                      <div className="space-y-4 pt-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <Paragraph className="!mb-0 text-slate-500 text-sm">
+                            These are the company exam tests currently stored in MongoDB under{" "}
+                            <code>website.companyExams</code>. Served to website visitors when Static Mode is active.
+                          </Paragraph>
+
+                          <Popconfirm
+                            title="Re-seed Default Static Data?"
+                            description="This will reset the website.companyExams collection to the default 5 curated company exam tests."
+                            onConfirm={handleSeedCompanyData}
+                            okText="Yes, Re-seed"
+                            cancelText="Cancel"
+                            okButtonProps={{ loading: seedingCompany }}
+                          >
+                            <Button
+                              icon={<CloudSyncOutlined />}
+                              loading={seedingCompany}
+                              className="shrink-0 border-purple-500 text-purple-600 hover:bg-purple-50"
+                            >
+                              Sync / Re-seed Default Static Data
+                            </Button>
+                          </Popconfirm>
+                        </div>
+
+                        <Table
+                          dataSource={staticCompanyTests}
+                          columns={companyColumns}
+                          rowKey={(record) => record.id || record._id}
+                          pagination={false}
+                          bordered
+                          className="rounded-lg overflow-hidden border border-slate-200"
+                        />
+                      </div>
+                    )
+                  },
+                  {
+                    key: "dynamic",
+                    label: (
+                      <span className="flex items-center gap-2">
+                        <ThunderboltOutlined /> Dynamic Catalog Preview ({dynamicCompanyTests.length})
+                      </span>
+                    ),
+                    children: (
+                      <div className="space-y-4 pt-2">
+                        <div className="flex items-center justify-between">
+                          <Paragraph className="!mb-0 text-slate-500 text-sm">
+                            Live published company practice sets and exam bundles created in the Admin Portal across tenant databases. Displayed on the website when Dynamic Mode is active.
+                          </Paragraph>
+                          <Button
+                            size="small"
+                            icon={<EyeOutlined />}
+                            onClick={fetchDynamicCompanyPreview}
+                            loading={loadingDynamicCompany}
+                          >
+                            Refresh Preview
+                          </Button>
+                        </div>
+
+                        <Table
+                          dataSource={dynamicCompanyTests}
+                          columns={companyColumns}
+                          rowKey={(record) => record.id || record._id}
+                          pagination={{ pageSize: 8 }}
+                          bordered
+                          loading={loadingDynamicCompany}
                           className="rounded-lg overflow-hidden border border-slate-200"
                         />
                       </div>

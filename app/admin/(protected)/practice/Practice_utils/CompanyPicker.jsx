@@ -7,8 +7,8 @@ import { getCompanySources } from "@/redux/slices/admin/cms/practiceSetsSlice";
 // list of question sources:
 //   { subjectId: companyTestId, scope: "company" }                 whole company test
 //   { subjectId: companyTestId, section: "Aptitude", scope: "section" }  one section
-// each with display titles. Counts follow `difficulty` and exclude coding
-// questions (company sets run in the multiple-choice player).
+// each with display titles. Counts follow `difficulty` and include all
+// test sections (multiple-choice and coding questions).
 
 const scopeOf = (sel) => sel.scope || (sel.section ? "section" : "company");
 
@@ -137,9 +137,6 @@ export default function CompanyPicker({ value = [], onChange, difficulty = "mixe
               description="No questions uploaded for this company yet"
             />
           )}
-          <div className="mt-2 text-[11px] text-slate-400">
-            Coding questions aren&apos;t included — company sets run in the multiple-choice test player.
-          </div>
         </div>
       )}
 

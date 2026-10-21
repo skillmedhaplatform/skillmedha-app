@@ -47,6 +47,12 @@ export default function MobileLoginView({
             SKILL<span className="text-[#1E69DA]">MEDHA</span>
           </div>
         </div>
+        <a
+          href={`${process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:8080"}/`}
+          className="text-xs font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 border border-brand-200/60 rounded-full px-3 py-1 transition-all"
+        >
+          ← Visit Website
+        </a>
       </div>
 
       {/* CONTENT AREA */}

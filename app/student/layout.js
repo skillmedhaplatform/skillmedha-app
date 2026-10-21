@@ -3,6 +3,7 @@ import { Nunito } from "next/font/google";
 import Providers from "./Providers";
 import { Suspense } from "react";
 import StudentSessionBridge from "@/modules/student/components/StudentSessionBridge";
+import StudentPortalBackGuard from "@/modules/student/components/StudentPortalBackGuard";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -19,7 +20,9 @@ export default function StudentLayout({ children }) {
       <Providers>
         <Suspense fallback={null}>
           <StudentSessionBridge>
-            {children}
+            <StudentPortalBackGuard>
+              {children}
+            </StudentPortalBackGuard>
           </StudentSessionBridge>
         </Suspense>
       </Providers>
