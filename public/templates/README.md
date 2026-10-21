@@ -24,7 +24,11 @@ Template for multiple choice (checkbox) questions.
 
 Template for true/false questions.
 
-### 6. **coding_questions_template.xlsx**
+### 6. **coding_template.xlsx**
+
+Template for coding questions with input/output test cases (used in Company-wise Practice and Coding Practice).
+
+### 7. **coding_questions_template.xlsx**
 
 Template for coding questions with test cases.
 
