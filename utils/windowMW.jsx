@@ -11,6 +11,7 @@ import {
   HiOutlineVideoCamera,
   HiOutlineCreditCard,
   HiOutlineDocumentText,
+  HiOutlineGlobeAlt,
 } from "react-icons/hi2";
 
 export const setSstorage = (name, val) => {

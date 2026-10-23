@@ -35,18 +35,6 @@ export default function ZoomClient({ meetingId, orgId, currentTopic }) {
 
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    if (meetingId) {
-      dispatch(currentMeeting({ id: meetingId, orgId }))?.then(({ payload }) => {
-        setMeetingData((prev) => ({
-          ...prev,
-          meetingNumber: Number(payload?.meetingDetails?.id),
-          passWord: payload?.meetingDetails?.password,
-        }));
-      });
-    }
-  }, [meetingId, orgId, dispatch]);
-
   const updateProgressDebouncedRef = useRef(null);
 
   useEffect(() => {
