@@ -1,12 +1,47 @@
 "use client";
 import React, { memo } from "react";
-import { Empty } from "antd";
-import ZoomClient from "@/app/student/(protected)/zoom/client/page";
+import dynamic from "next/dynamic";
+import { Empty, Spin } from "antd";
 
 import NormalVideoPlayer from "./NormalVideoPlayer";
-import PdfReader from "./PdfReader";
-import QuizComponent from "../quiz/QuizComponent";
-import CodingComponent from "../coding/CodingComponent";
+
+// Dynamically import heavy viewers (Zoom SDK, Monaco editor, PDF.js, Quiz)
+// so the initial course learning bundle compiles and loads in ~1s instead of 40s+
+const ZoomClient = dynamic(() => import("@/app/student/(protected)/zoom/client/page"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+      <Spin size="large" tip="Loading live session..." />
+    </div>
+  ),
+});
+
+const PdfReader = dynamic(() => import("./PdfReader"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+      <Spin size="large" tip="Loading document..." />
+    </div>
+  ),
+});
+
+const QuizComponent = dynamic(() => import("../quiz/QuizComponent"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+      <Spin size="large" tip="Loading quiz..." />
+    </div>
+  ),
+});
+
+const CodingComponent = dynamic(() => import("../coding/CodingComponent"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", width: "100%" }}>
+      <Spin size="large" tip="Loading code editor..." />
+    </div>
+  ),
+});
 
 import { getTopicType } from "../../utils/topicUtils";
 import { getFirstVideoSource, getFirstPdfSource, getSavedVideoProgress } from "../../utils/videoUtils";

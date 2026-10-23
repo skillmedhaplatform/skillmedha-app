@@ -74,8 +74,15 @@ export const useDurationResolver = ({ selectedInternshipData }) => {
       }
     };
 
-    run();
-    return () => { isCancelled = true; };
+    // Defer duration probing so initial page transition and player mount are instantaneous
+    const timer = setTimeout(() => {
+      if (!isCancelled) run();
+    }, 1000);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedInternshipData]);
 
