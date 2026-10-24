@@ -47,7 +47,7 @@ export default function TemplateConfigDrawer({ template, categories, bundles, ca
   return (
     <Drawer
       open
-      width={560}
+      size={560}
       onClose={onClose}
       title={`${template.name} · ${template.key}`}
       destroyOnHidden
@@ -59,16 +59,23 @@ export default function TemplateConfigDrawer({ template, categories, bundles, ca
         )
       }
     >
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setShowFull(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setShowFull(true);
+          }
+        }}
         className="group relative mb-2 block w-full cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 p-0"
       >
         <TemplateThumb templateKey={template.key} previewImage={previewImage} height={300} scale={0.36} />
         <span className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 transition-opacity group-hover:opacity-100">
           <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-800 shadow">View full template</span>
         </span>
-      </button>
+      </div>
       <Button block className="!mb-5" onClick={() => setShowFull(true)}>
         View full template
       </Button>

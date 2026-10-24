@@ -55,6 +55,10 @@ export default function AdminWebsitePage() {
       ? "newsflash"
       : sectionParam === "company-tests"
       ? "company-tests"
+      : sectionParam === "courses"
+      ? "courses"
+      : sectionParam === "internships"
+      ? "internships"
       : null;
 
   const [loading, setLoading] = useState(true);
@@ -63,6 +67,12 @@ export default function AdminWebsitePage() {
 
   const [updatingCompanyMode, setUpdatingCompanyMode] = useState(false);
   const [seedingCompany, setSeedingCompany] = useState(false);
+
+  const [updatingCoursesMode, setUpdatingCoursesMode] = useState(false);
+  const [seedingCourses, setSeedingCourses] = useState(false);
+
+  const [updatingInternshipsMode, setUpdatingInternshipsMode] = useState(false);
+  const [seedingInternships, setSeedingInternships] = useState(false);
 
   // Practice Config State
   const [config, setConfig] = useState({
@@ -92,6 +102,32 @@ export default function AdminWebsitePage() {
   const [staticCompanyTests, setStaticCompanyTests] = useState([]);
   const [dynamicCompanyTests, setDynamicCompanyTests] = useState([]);
   const [loadingDynamicCompany, setLoadingDynamicCompany] = useState(false);
+
+  // Courses Library State
+  const [coursesConfig, setCoursesConfig] = useState({
+    mode: "static",
+    staticCount: 0,
+    dynamicCount: 0,
+    publishedSetsCount: 0,
+    lastUpdated: null,
+    updatedBy: null
+  });
+  const [staticCourses, setStaticCourses] = useState([]);
+  const [dynamicCourses, setDynamicCourses] = useState([]);
+  const [loadingDynamicCourses, setLoadingDynamicCourses] = useState(false);
+
+  // Internship Opportunities State
+  const [internshipsConfig, setInternshipsConfig] = useState({
+    mode: "static",
+    staticCount: 0,
+    dynamicCount: 0,
+    publishedSetsCount: 0,
+    lastUpdated: null,
+    updatedBy: null
+  });
+  const [staticInternships, setStaticInternships] = useState([]);
+  const [dynamicInternships, setDynamicInternships] = useState([]);
+  const [loadingDynamicInternships, setLoadingDynamicInternships] = useState(false);
 
   // Marquee state for NewsFlash overview card
   const marqueeState = useSelector((state) => state.marquee) || {};
@@ -231,6 +267,130 @@ export default function AdminWebsitePage() {
     }
   }, [getHeaders]);
 
+  // Fetch Courses Config
+  const fetchCoursesConfig = useCallback(async () => {
+    try {
+      const res = await fetch(`${restUrl}/admin/website/courses-config`, {
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setCoursesConfig(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching courses website config:", err);
+    }
+  }, [getHeaders]);
+
+  // Fetch Static Courses
+  const fetchStaticCourses = useCallback(async () => {
+    try {
+      const res = await fetch(`${restUrl}/admin/website/static-courses`, {
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setStaticCourses(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching static courses:", err);
+    }
+  }, [getHeaders]);
+
+  // Fetch Dynamic Courses Preview
+  const fetchDynamicCoursesPreview = useCallback(async () => {
+    setLoadingDynamicCourses(true);
+    try {
+      const res = await fetch(`${restUrl}/admin/website/dynamic-courses-preview`, {
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setDynamicCourses(data.data);
+        setCoursesConfig((prev) => ({
+          ...prev,
+          dynamicCount: data.data.length
+        }));
+      } else {
+        const fallbackRes = await fetch(`${restUrl}/public/website/courses?mode=dynamic`);
+        const fallbackData = await fallbackRes.json();
+        if (fallbackData.success && Array.isArray(fallbackData.data)) {
+          setDynamicCourses(fallbackData.data);
+          setCoursesConfig((prev) => ({
+            ...prev,
+            dynamicCount: fallbackData.data.length
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching dynamic courses preview:", err);
+    } finally {
+      setLoadingDynamicCourses(false);
+    }
+  }, [getHeaders]);
+
+  // Fetch Internships Config
+  const fetchInternshipsConfig = useCallback(async () => {
+    try {
+      const res = await fetch(`${restUrl}/admin/website/internships-config`, {
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setInternshipsConfig(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching internships website config:", err);
+    }
+  }, [getHeaders]);
+
+  // Fetch Static Internships
+  const fetchStaticInternships = useCallback(async () => {
+    try {
+      const res = await fetch(`${restUrl}/admin/website/static-internships`, {
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setStaticInternships(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching static internships:", err);
+    }
+  }, [getHeaders]);
+
+  // Fetch Dynamic Internships Preview
+  const fetchDynamicInternshipsPreview = useCallback(async () => {
+    setLoadingDynamicInternships(true);
+    try {
+      const res = await fetch(`${restUrl}/admin/website/dynamic-internships-preview`, {
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setDynamicInternships(data.data);
+        setInternshipsConfig((prev) => ({
+          ...prev,
+          dynamicCount: data.data.length
+        }));
+      } else {
+        const fallbackRes = await fetch(`${restUrl}/public/website/internships?mode=dynamic`);
+        const fallbackData = await fallbackRes.json();
+        if (fallbackData.success && Array.isArray(fallbackData.data)) {
+          setDynamicInternships(fallbackData.data);
+          setInternshipsConfig((prev) => ({
+            ...prev,
+            dynamicCount: fallbackData.data.length
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching dynamic internships preview:", err);
+    } finally {
+      setLoadingDynamicInternships(false);
+    }
+  }, [getHeaders]);
+
   const loadAll = useCallback(async () => {
     setLoading(true);
     await Promise.all([
@@ -239,7 +399,13 @@ export default function AdminWebsitePage() {
       fetchDynamicPreview(),
       fetchCompanyConfig(),
       fetchStaticCompanyTests(),
-      fetchDynamicCompanyPreview()
+      fetchDynamicCompanyPreview(),
+      fetchCoursesConfig(),
+      fetchStaticCourses(),
+      fetchDynamicCoursesPreview(),
+      fetchInternshipsConfig(),
+      fetchStaticInternships(),
+      fetchDynamicInternshipsPreview()
     ]);
     setLoading(false);
   }, [
@@ -248,7 +414,13 @@ export default function AdminWebsitePage() {
     fetchDynamicPreview,
     fetchCompanyConfig,
     fetchStaticCompanyTests,
-    fetchDynamicCompanyPreview
+    fetchDynamicCompanyPreview,
+    fetchCoursesConfig,
+    fetchStaticCourses,
+    fetchDynamicCoursesPreview,
+    fetchInternshipsConfig,
+    fetchStaticInternships,
+    fetchDynamicInternshipsPreview
   ]);
 
   useEffect(() => {
@@ -364,8 +536,110 @@ export default function AdminWebsitePage() {
     }
   };
 
+  // Toggle Mode Handler (Courses)
+  const handleToggleCoursesMode = async (checked) => {
+    const newMode = checked ? "dynamic" : "static";
+    setUpdatingCoursesMode(true);
+    try {
+      const res = await fetch(`${restUrl}/admin/website/courses-mode`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ mode: newMode })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success(data.msg || `Courses library mode updated to ${newMode.toUpperCase()}`);
+        setCoursesConfig((prev) => ({
+          ...prev,
+          mode: newMode,
+          lastUpdated: new Date().toISOString()
+        }));
+      } else {
+        message.error(data.err || "Failed to update courses mode");
+      }
+    } catch (err) {
+      message.error(err.message || "Network error updating courses mode");
+    } finally {
+      setUpdatingCoursesMode(false);
+    }
+  };
+
+  // Re-seed Default Static Data (Courses)
+  const handleSeedCoursesData = async () => {
+    setSeedingCourses(true);
+    try {
+      const res = await fetch(`${restUrl}/admin/website/seed-static-courses`, {
+        method: "POST",
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success(data.msg || "Default static courses seeded successfully!");
+        await Promise.all([fetchCoursesConfig(), fetchStaticCourses()]);
+      } else {
+        message.error(data.err || "Failed to seed default static courses");
+      }
+    } catch (err) {
+      message.error(err.message || "Network error seeding static courses");
+    } finally {
+      setSeedingCourses(false);
+    }
+  };
+
+  // Toggle Mode Handler (Internships)
+  const handleToggleInternshipsMode = async (checked) => {
+    const newMode = checked ? "dynamic" : "static";
+    setUpdatingInternshipsMode(true);
+    try {
+      const res = await fetch(`${restUrl}/admin/website/internships-mode`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ mode: newMode })
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success(data.msg || `Internship opportunities mode updated to ${newMode.toUpperCase()}`);
+        setInternshipsConfig((prev) => ({
+          ...prev,
+          mode: newMode,
+          lastUpdated: new Date().toISOString()
+        }));
+      } else {
+        message.error(data.err || "Failed to update internships mode");
+      }
+    } catch (err) {
+      message.error(err.message || "Network error updating internships mode");
+    } finally {
+      setUpdatingInternshipsMode(false);
+    }
+  };
+
+  // Re-seed Default Static Data (Internships)
+  const handleSeedInternshipsData = async () => {
+    setSeedingInternships(true);
+    try {
+      const res = await fetch(`${restUrl}/admin/website/seed-static-internships`, {
+        method: "POST",
+        headers: getHeaders()
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success(data.msg || "Default static internships seeded successfully!");
+        await Promise.all([fetchInternshipsConfig(), fetchStaticInternships()]);
+      } else {
+        message.error(data.err || "Failed to seed default static internships");
+      }
+    } catch (err) {
+      message.error(err.message || "Network error seeding static internships");
+    } finally {
+      setSeedingInternships(false);
+    }
+  };
+
   const isDynamic = config.mode === "dynamic";
   const isCompanyDynamic = companyConfig.mode === "dynamic";
+  const isCoursesDynamic = coursesConfig.mode === "dynamic";
+  const isInternshipsDynamic = internshipsConfig.mode === "dynamic";
 
   // Table Columns for Practice Sets (Static & Dynamic)
   const columns = [
@@ -568,6 +842,206 @@ export default function AdminWebsitePage() {
     }
   ];
 
+  // Table Columns for Courses (Static & Dynamic)
+  const courseColumns = [
+    {
+      title: "Order",
+      dataIndex: "order",
+      key: "order",
+      width: 75,
+      align: "center",
+      render: (v, _, index) => (
+        <span className="font-bold text-slate-400">#{v !== undefined ? v : index + 1}</span>
+      )
+    },
+    {
+      title: "Course Title",
+      dataIndex: "title",
+      key: "title",
+      render: (text, record) => (
+        <div>
+          <div className="font-bold text-slate-800">{text}</div>
+          <div className="text-xs text-slate-400">
+            ID: {record.id || record._id} {record.instructor ? `• ${record.instructor}` : ""}
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Category",
+      dataIndex: "category",
+      key: "category",
+      width: 140,
+      render: (cat) => {
+        const color =
+          cat === "Development"
+            ? "cyan"
+            : cat === "Data Science" || cat === "Data Science & AI"
+            ? "purple"
+            : cat === "Design"
+            ? "emerald"
+            : cat === "Cloud"
+            ? "blue"
+            : "orange";
+        return <Tag color={color}>{cat || "General"}</Tag>;
+      }
+    },
+    {
+      title: "Level",
+      dataIndex: "level",
+      key: "level",
+      width: 130,
+      render: (lvl) => <Tag color="default">{lvl || "All Levels"}</Tag>
+    },
+    {
+      title: "Rating",
+      key: "rating",
+      width: 120,
+      align: "center",
+      render: (_, record) => (
+        <span className="font-semibold text-amber-600">
+          ★ {record.rating || 4.8} <span className="text-xs text-slate-400 font-normal">({record.reviews || 0})</span>
+        </span>
+      )
+    },
+    {
+      title: "Duration",
+      key: "duration",
+      width: 120,
+      render: (_, record) => (
+        <span className="text-slate-600">
+          {record.totalDuration || (record.weeks ? `${record.weeks} weeks` : "8 weeks")}
+        </span>
+      )
+    },
+    {
+      title: "Price",
+      key: "price",
+      width: 120,
+      render: (_, record) => {
+        if (record.isFree || Number(record.price) === 0) {
+          return <span className="font-bold text-emerald-600">FREE</span>;
+        }
+        return (
+          <div>
+            <span className="font-bold text-blue-600">₹{record.price}</span>
+            {record.originalPrice > record.price && (
+              <span className="ml-1 text-xs text-slate-400 line-through">
+                ₹{record.originalPrice}
+              </span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      width: 110,
+      align: "center",
+      render: (status) => (
+        <Tag color={status === "published" || status === "active" ? "success" : "default"}>
+          {(status || "active").toUpperCase()}
+        </Tag>
+      )
+    }
+  ];
+
+  // Table Columns for Internships (Static & Dynamic)
+  const internshipColumns = [
+    {
+      title: "Order",
+      dataIndex: "order",
+      key: "order",
+      width: 75,
+      align: "center",
+      render: (v, _, index) => (
+        <span className="font-bold text-slate-400">#{v !== undefined ? v : index + 1}</span>
+      )
+    },
+    {
+      title: "Internship Title",
+      dataIndex: "title",
+      key: "title",
+      render: (text, record) => (
+        <div>
+          <div className="font-bold text-slate-800">{text}</div>
+          <div className="text-xs text-slate-400">ID: {record.id || record._id}</div>
+        </div>
+      )
+    },
+    {
+      title: "Domain",
+      dataIndex: "domain",
+      key: "domain",
+      width: 130,
+      render: (domain) => {
+        const color =
+          domain === "Tech"
+            ? "blue"
+            : domain === "Management"
+            ? "orange"
+            : domain === "Design"
+            ? "magenta"
+            : "purple";
+        return <Tag color={color}>{domain || "Tech"}</Tag>;
+      }
+    },
+    {
+      title: "Duration",
+      dataIndex: "duration",
+      key: "duration",
+      width: 110,
+      render: (dur) => <span className="text-slate-600">{dur || "3 Months"}</span>
+    },
+    {
+      title: "Schedule & Timing",
+      key: "timing",
+      width: 220,
+      render: (_, record) => (
+        <div>
+          <div className="font-medium text-slate-700">{record.schedule || "Evening"}</div>
+          <div className="text-xs text-slate-400">{record.timing || "Mon - Fri | 06:00 PM - 08:00 PM"}</div>
+        </div>
+      )
+    },
+    {
+      title: "Start Date",
+      dataIndex: "startDate",
+      key: "startDate",
+      width: 130,
+      render: (date) => <span className="font-medium text-slate-700">{date || "Upcoming"}</span>
+    },
+    {
+      title: "Price",
+      key: "price",
+      width: 120,
+      render: (_, record) => (
+        <div>
+          <span className="font-bold text-blue-600">₹{record.price}</span>
+          {record.originalPrice > record.price && (
+            <span className="ml-1 text-xs text-slate-400 line-through">
+              ₹{record.originalPrice}
+            </span>
+          )}
+        </div>
+      )
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      width: 110,
+      align: "center",
+      render: (status) => (
+        <Tag color={status === "published" || status === "active" ? "success" : "default"}>
+          {(status || "active").toUpperCase()}
+        </Tag>
+      )
+    }
+  ];
+
   // List of configurable website sections
   const websiteSections = [
     {
@@ -604,23 +1078,33 @@ export default function AdminWebsitePage() {
       key: "courses",
       title: "Courses Library",
       icon: <ReadOutlined className="text-2xl text-emerald-600" />,
-      activeMode: "static",
+      activeMode: isCoursesDynamic ? "dynamic" : "static",
       description:
-        "Configure curated static course listings versus dynamic tenant courses catalog displayed on the website.",
-      status: "Coming Soon",
-      isReady: false,
-      accentColor: "border-slate-200 bg-white/70"
+        "Configure curated static course listings versus live platform courses catalog displayed on the website.",
+      staticCount: coursesConfig.staticCount,
+      dynamicCount: dynamicCourses.length > 0 ? dynamicCourses.length : (coursesConfig.dynamicCount || 0),
+      status: "Active",
+      isReady: true,
+      badgeText: isCoursesDynamic ? "Dynamic Mode" : "Static Mode",
+      badgeColor: isCoursesDynamic ? "purple" : "blue",
+      subInfo: `${coursesConfig.staticCount} Static • ${dynamicCourses.length > 0 ? dynamicCourses.length : (coursesConfig.dynamicCount || 0)} Dynamic`,
+      accentColor: "border-emerald-200 hover:border-emerald-400 bg-white"
     },
     {
       key: "internships",
       title: "Internship Opportunities",
       icon: <CarryOutOutlined className="text-2xl text-amber-600" />,
-      activeMode: "static",
+      activeMode: isInternshipsDynamic ? "dynamic" : "static",
       description:
-        "Switch between static featured internships and live applicant internship opportunities.",
-      status: "Coming Soon",
-      isReady: false,
-      accentColor: "border-slate-200 bg-white/70"
+        "Switch between static featured internships and live platform internship opportunities.",
+      staticCount: internshipsConfig.staticCount,
+      dynamicCount: dynamicInternships.length > 0 ? dynamicInternships.length : (internshipsConfig.dynamicCount || 0),
+      status: "Active",
+      isReady: true,
+      badgeText: isInternshipsDynamic ? "Dynamic Mode" : "Static Mode",
+      badgeColor: isInternshipsDynamic ? "purple" : "blue",
+      subInfo: `${internshipsConfig.staticCount} Static • ${dynamicInternships.length > 0 ? dynamicInternships.length : (internshipsConfig.dynamicCount || 0)} Dynamic`,
+      accentColor: "border-amber-200 hover:border-amber-400 bg-white"
     },
     {
       key: "company-tests",
@@ -711,6 +1195,64 @@ export default function AdminWebsitePage() {
                 Refresh
               </Button>
             </>
+          ) : selectedSection === "courses" ? (
+            /* Courses Library View Header */
+            <>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                {/* 1. ← Back to Sections */}
+                <Button
+                  icon={<ArrowLeftOutlined />}
+                  onClick={handleBackToOverview}
+                  className="rounded-lg shadow-sm font-semibold text-slate-700 hover:text-blue-600 border-slate-300 flex items-center gap-1.5"
+                >
+                  Back to Sections
+                </Button>
+
+                {/* 2. The text */}
+                <span className="text-sm font-medium text-slate-600">
+                  Configure whether the website displays static courses or live platform courses.
+                </span>
+              </div>
+
+              {/* 3. A Refresh button */}
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={loadAll}
+                loading={loading}
+                className="rounded-lg shadow-sm font-medium border-slate-200 text-slate-700 hover:text-blue-600 hover:border-blue-400 shrink-0 self-start md:self-auto flex items-center gap-1.5"
+              >
+                Refresh
+              </Button>
+            </>
+          ) : selectedSection === "internships" ? (
+            /* Internship Opportunities View Header */
+            <>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                {/* 1. ← Back to Sections */}
+                <Button
+                  icon={<ArrowLeftOutlined />}
+                  onClick={handleBackToOverview}
+                  className="rounded-lg shadow-sm font-semibold text-slate-700 hover:text-blue-600 border-slate-300 flex items-center gap-1.5"
+                >
+                  Back to Sections
+                </Button>
+
+                {/* 2. The text */}
+                <span className="text-sm font-medium text-slate-600">
+                  Configure whether the website displays static internships or live platform internships.
+                </span>
+              </div>
+
+              {/* 3. A Refresh button */}
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={loadAll}
+                loading={loading}
+                className="rounded-lg shadow-sm font-medium border-slate-200 text-slate-700 hover:text-blue-600 hover:border-blue-400 shrink-0 self-start md:self-auto flex items-center gap-1.5"
+              >
+                Refresh
+              </Button>
+            </>
           ) : selectedSection === "newsflash" ? (
             /* NewsFlash View Header */
             <>
@@ -762,7 +1304,7 @@ export default function AdminWebsitePage() {
 
       {/* ── MAIN CONTENT CONTAINER ── */}
       <div className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
-        {loading && (selectedSection === "practice" || selectedSection === "company-tests") ? (
+        {loading && (selectedSection === "practice" || selectedSection === "company-tests" || selectedSection === "courses" || selectedSection === "internships") ? (
           <div className="flex justify-center items-center py-24">
             <Spin size="large" tip="Loading website configuration..." />
           </div>
@@ -1161,6 +1703,416 @@ export default function AdminWebsitePage() {
                           pagination={{ pageSize: 8 }}
                           bordered
                           loading={loadingDynamicCompany}
+                          className="rounded-lg overflow-hidden border border-slate-200"
+                        />
+                      </div>
+                    )
+                  }
+                ]}
+              />
+            </Card>
+          </div>
+        ) : selectedSection === "courses" ? (
+          /* ════════════════════════════════════════════════════════════════
+             COURSES LIBRARY MANAGEMENT VIEW (Detail View)
+             ════════════════════════════════════════════════════════════════ */
+          <div className="space-y-6">
+            {/* Main Control Card */}
+            <Card
+              className="shadow-sm border-slate-200 rounded-2xl overflow-hidden"
+              styles={{ body: { padding: "28px" } }}
+            >
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="space-y-3 max-w-2xl">
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 flex items-center gap-1.5">
+                      <ReadOutlined /> Courses Library Data Source
+                    </span>
+
+                    <Tag
+                      color={isCoursesDynamic ? "purple" : "blue"}
+                      className="text-xs px-2.5 py-0.5 rounded-full font-bold uppercase"
+                    >
+                      {isCoursesDynamic ? "Live Dynamic Mode" : "Static Database Mode"}
+                    </Tag>
+                  </div>
+
+                  <h3 className="text-xl font-black text-slate-800">
+                    Switch Between Static & Dynamic Courses
+                  </h3>
+
+                  <Paragraph className="!mb-0 text-slate-500 text-sm leading-relaxed">
+                    Choose whether the public website courses page displays curated static courses or dynamic courses from the live platform catalog.
+                  </Paragraph>
+
+                  {coursesConfig.lastUpdated && (
+                    <div className="text-xs text-slate-400 flex items-center gap-1.5 pt-1">
+                      <InfoCircleOutlined /> Last mode update:{" "}
+                      <span className="font-semibold text-slate-600">
+                        {new Date(coursesConfig.lastUpdated).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Big Interactive Toggle Switch */}
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center justify-center gap-3 shrink-0 sm:min-w-[280px]">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Active Website Source
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`text-sm font-bold transition-colors ${
+                        !isCoursesDynamic ? "text-blue-600" : "text-slate-400"
+                      }`}
+                    >
+                      STATIC
+                    </span>
+
+                    <Switch
+                      checked={isCoursesDynamic}
+                      onChange={handleToggleCoursesMode}
+                      loading={updatingCoursesMode}
+                      checkedChildren="Dynamic"
+                      unCheckedChildren="Static"
+                      className="bg-slate-300"
+                    />
+
+                    <span
+                      className={`text-sm font-bold transition-colors ${
+                        isCoursesDynamic ? "text-purple-600" : "text-slate-400"
+                      }`}
+                    >
+                      DYNAMIC
+                    </span>
+                  </div>
+
+                  <div className="text-[11px] text-center text-slate-400 max-w-[210px] leading-tight mt-1">
+                    {isCoursesDynamic
+                      ? "Website visitors see live courses catalog from database."
+                      : "Website visitors see curated static courses."}
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100">
+                <div className="bg-sky-50/60 p-4 rounded-xl border border-sky-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-sky-700">
+                    Static Database Courses
+                  </div>
+                  <div className="text-2xl font-black text-sky-900 mt-1">
+                    {coursesConfig.staticCount}{" "}
+                    <span className="text-xs font-medium text-sky-600">curated items</span>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50/60 p-4 rounded-xl border border-purple-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-purple-700">
+                    Dynamic Published Courses
+                  </div>
+                  <div className="text-2xl font-black text-purple-900 mt-1">
+                    {dynamicCourses.length > 0 ? dynamicCourses.length : (coursesConfig.dynamicCount || 0)}{" "}
+                    <span className="text-xs font-medium text-purple-600">published items</span>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                    Database Status
+                  </div>
+                  <div className="text-2xl font-black text-emerald-900 mt-1 flex items-center gap-2">
+                    <CheckCircleOutlined className="text-emerald-500 text-xl" /> Connected
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Database Content Tabs */}
+            <Card className="shadow-sm border-slate-200 rounded-2xl">
+              <Tabs
+                defaultActiveKey="static"
+                items={[
+                  {
+                    key: "static",
+                    label: (
+                      <span className="flex items-center gap-2">
+                        <DatabaseOutlined /> Static Courses Collection (<code>website.courses</code>)
+                      </span>
+                    ),
+                    children: (
+                      <div className="space-y-4 pt-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <Paragraph className="!mb-0 text-slate-500 text-sm">
+                            These are the courses currently stored in MongoDB under{" "}
+                            <code>website.courses</code>. Served to website visitors when Static Mode is active.
+                          </Paragraph>
+
+                          <Popconfirm
+                            title="Re-seed Default Static Data?"
+                            description="This will reset the website.courses collection to the default 9 curated courses."
+                            onConfirm={handleSeedCoursesData}
+                            okText="Yes, Re-seed"
+                            cancelText="Cancel"
+                            okButtonProps={{ loading: seedingCourses }}
+                          >
+                            <Button
+                              icon={<CloudSyncOutlined />}
+                              loading={seedingCourses}
+                              className="shrink-0 border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                            >
+                              Sync / Re-seed Default Static Data
+                            </Button>
+                          </Popconfirm>
+                        </div>
+
+                        <Table
+                          dataSource={staticCourses}
+                          columns={courseColumns}
+                          rowKey={(record) => record.id || record._id}
+                          pagination={false}
+                          bordered
+                          className="rounded-lg overflow-hidden border border-slate-200"
+                        />
+                      </div>
+                    )
+                  },
+                  {
+                    key: "dynamic",
+                    label: (
+                      <span className="flex items-center gap-2">
+                        <ThunderboltOutlined /> Dynamic Catalog Preview ({dynamicCourses.length})
+                      </span>
+                    ),
+                    children: (
+                      <div className="space-y-4 pt-2">
+                        <div className="flex items-center justify-between">
+                          <Paragraph className="!mb-0 text-slate-500 text-sm">
+                            Live platform courses created in the Admin Portal across database collections. Displayed on the website when Dynamic Mode is active.
+                          </Paragraph>
+                          <Button
+                            size="small"
+                            icon={<EyeOutlined />}
+                            onClick={fetchDynamicCoursesPreview}
+                            loading={loadingDynamicCourses}
+                          >
+                            Refresh Preview
+                          </Button>
+                        </div>
+
+                        <Table
+                          dataSource={dynamicCourses}
+                          columns={courseColumns}
+                          rowKey={(record) => record.id || record._id}
+                          pagination={{ pageSize: 8 }}
+                          bordered
+                          loading={loadingDynamicCourses}
+                          className="rounded-lg overflow-hidden border border-slate-200"
+                        />
+                      </div>
+                    )
+                  }
+                ]}
+              />
+            </Card>
+          </div>
+        ) : selectedSection === "internships" ? (
+          /* ════════════════════════════════════════════════════════════════
+             INTERNSHIP OPPORTUNITIES MANAGEMENT VIEW (Detail View)
+             ════════════════════════════════════════════════════════════════ */
+          <div className="space-y-6">
+            {/* Main Control Card */}
+            <Card
+              className="shadow-sm border-slate-200 rounded-2xl overflow-hidden"
+              styles={{ body: { padding: "28px" } }}
+            >
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="space-y-3 max-w-2xl">
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 flex items-center gap-1.5">
+                      <CarryOutOutlined /> Internship Opportunities Data Source
+                    </span>
+
+                    <Tag
+                      color={isInternshipsDynamic ? "purple" : "blue"}
+                      className="text-xs px-2.5 py-0.5 rounded-full font-bold uppercase"
+                    >
+                      {isInternshipsDynamic ? "Live Dynamic Mode" : "Static Database Mode"}
+                    </Tag>
+                  </div>
+
+                  <h3 className="text-xl font-black text-slate-800">
+                    Switch Between Static & Dynamic Internships
+                  </h3>
+
+                  <Paragraph className="!mb-0 text-slate-500 text-sm leading-relaxed">
+                    Choose whether the public website internships page displays curated static internships or dynamic opportunities from the live platform.
+                  </Paragraph>
+
+                  {internshipsConfig.lastUpdated && (
+                    <div className="text-xs text-slate-400 flex items-center gap-1.5 pt-1">
+                      <InfoCircleOutlined /> Last mode update:{" "}
+                      <span className="font-semibold text-slate-600">
+                        {new Date(internshipsConfig.lastUpdated).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Big Interactive Toggle Switch */}
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center justify-center gap-3 shrink-0 sm:min-w-[280px]">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Active Website Source
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`text-sm font-bold transition-colors ${
+                        !isInternshipsDynamic ? "text-blue-600" : "text-slate-400"
+                      }`}
+                    >
+                      STATIC
+                    </span>
+
+                    <Switch
+                      checked={isInternshipsDynamic}
+                      onChange={handleToggleInternshipsMode}
+                      loading={updatingInternshipsMode}
+                      checkedChildren="Dynamic"
+                      unCheckedChildren="Static"
+                      className="bg-slate-300"
+                    />
+
+                    <span
+                      className={`text-sm font-bold transition-colors ${
+                        isInternshipsDynamic ? "text-purple-600" : "text-slate-400"
+                      }`}
+                    >
+                      DYNAMIC
+                    </span>
+                  </div>
+
+                  <div className="text-[11px] text-center text-slate-400 max-w-[210px] leading-tight mt-1">
+                    {isInternshipsDynamic
+                      ? "Website visitors see live internship opportunities from platform."
+                      : "Website visitors see curated static internships."}
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100">
+                <div className="bg-sky-50/60 p-4 rounded-xl border border-sky-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-sky-700">
+                    Static Database Internships
+                  </div>
+                  <div className="text-2xl font-black text-sky-900 mt-1">
+                    {internshipsConfig.staticCount}{" "}
+                    <span className="text-xs font-medium text-sky-600">curated items</span>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50/60 p-4 rounded-xl border border-purple-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-purple-700">
+                    Dynamic Published Internships
+                  </div>
+                  <div className="text-2xl font-black text-purple-900 mt-1">
+                    {dynamicInternships.length > 0 ? dynamicInternships.length : (internshipsConfig.dynamicCount || 0)}{" "}
+                    <span className="text-xs font-medium text-purple-600">published items</span>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                    Database Status
+                  </div>
+                  <div className="text-2xl font-black text-emerald-900 mt-1 flex items-center gap-2">
+                    <CheckCircleOutlined className="text-emerald-500 text-xl" /> Connected
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Database Content Tabs */}
+            <Card className="shadow-sm border-slate-200 rounded-2xl">
+              <Tabs
+                defaultActiveKey="static"
+                items={[
+                  {
+                    key: "static",
+                    label: (
+                      <span className="flex items-center gap-2">
+                        <DatabaseOutlined /> Static Internships Collection (<code>website.internships</code>)
+                      </span>
+                    ),
+                    children: (
+                      <div className="space-y-4 pt-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <Paragraph className="!mb-0 text-slate-500 text-sm">
+                            These are the internships currently stored in MongoDB under{" "}
+                            <code>website.internships</code>. Served to website visitors when Static Mode is active.
+                          </Paragraph>
+
+                          <Popconfirm
+                            title="Re-seed Default Static Data?"
+                            description="This will reset the website.internships collection to the default 4 curated internships."
+                            onConfirm={handleSeedInternshipsData}
+                            okText="Yes, Re-seed"
+                            cancelText="Cancel"
+                            okButtonProps={{ loading: seedingInternships }}
+                          >
+                            <Button
+                              icon={<CloudSyncOutlined />}
+                              loading={seedingInternships}
+                              className="shrink-0 border-amber-500 text-amber-600 hover:bg-amber-50"
+                            >
+                              Sync / Re-seed Default Static Data
+                            </Button>
+                          </Popconfirm>
+                        </div>
+
+                        <Table
+                          dataSource={staticInternships}
+                          columns={internshipColumns}
+                          rowKey={(record) => record.id || record._id}
+                          pagination={false}
+                          bordered
+                          className="rounded-lg overflow-hidden border border-slate-200"
+                        />
+                      </div>
+                    )
+                  },
+                  {
+                    key: "dynamic",
+                    label: (
+                      <span className="flex items-center gap-2">
+                        <ThunderboltOutlined /> Dynamic Catalog Preview ({dynamicInternships.length})
+                      </span>
+                    ),
+                    children: (
+                      <div className="space-y-4 pt-2">
+                        <div className="flex items-center justify-between">
+                          <Paragraph className="!mb-0 text-slate-500 text-sm">
+                            Live platform internships created in the Admin Portal across database collections. Displayed on the website when Dynamic Mode is active.
+                          </Paragraph>
+                          <Button
+                            size="small"
+                            icon={<EyeOutlined />}
+                            onClick={fetchDynamicInternshipsPreview}
+                            loading={loadingDynamicInternships}
+                          >
+                            Refresh Preview
+                          </Button>
+                        </div>
+
+                        <Table
+                          dataSource={dynamicInternships}
+                          columns={internshipColumns}
+                          rowKey={(record) => record.id || record._id}
+                          pagination={{ pageSize: 8 }}
+                          bordered
+                          loading={loadingDynamicInternships}
                           className="rounded-lg overflow-hidden border border-slate-200"
                         />
                       </div>
