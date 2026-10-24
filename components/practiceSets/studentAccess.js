@@ -39,19 +39,30 @@ export const isOwned = (access) => access?.reason === "purchased" || access?.rea
 
 // Coding sets open in the code editor workspace (its `title` param picks the
 // default language, so pass the subject name, e.g. "Python"); every other set
-// runs in the multiple-choice test player.
+// runs in the multiple-choice / company test player.
 export const testUrl = (set) => {
-  if (set.category === "coding") {
+  const durationMin = Number(set.timeMinutes || set.timeLimit || 30);
+
+  // Company-wise sets run in the dedicated Company-wise Test page with Monaco editor & sections
+  if (set.category === "company" || set.category === "company-wise") {
+    return `/student/practice-new/company-wise/${set._id || set.id}?duration=${durationMin}`;
+  }
+
+  const isCodingOnly = set.category === "coding";
+
+  if (isCodingOnly) {
     const subjectTitle = (set.topics || []).find((t) => t.subjectTitle)?.subjectTitle;
     return `/student/practice-new/coding/workspace?${new URLSearchParams({
       ps: set._id,
       title: subjectTitle || set.title,
+      duration: String(durationMin),
     }).toString()}`;
   }
   return `/student/practice-new/test?${new URLSearchParams({
     ps: set._id,
     title: set.title,
     type: categoryLabel(set.category) || "Practice",
+    duration: String(durationMin),
   }).toString()}`;
 };
 

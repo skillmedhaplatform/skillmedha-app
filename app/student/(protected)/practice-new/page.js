@@ -15,11 +15,10 @@ import {
 import { FaCrown } from "react-icons/fa6";
 import useResponsive from "@/hooks/useResponsive";
 import { fetchPracticeCatalog } from "@/redux/slices/practiceSlice";
-import { fetchCompanyTests } from "@/redux/slices/admin/cms/practiceSlice";
+import { restUrl } from "@/config/urls";
 import { PracticeSetCard, PracticeSetDetails } from "@/components/practiceSets/PracticeSetCard";
-import CompanyTestCard from "@/modules/student/components/CompanyTestCard";
-import CompanyAssessmentModal from "@/modules/student/components/CompanyAssessmentModal";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
+import CompanyAssessmentModal from "@/modules/student/components/CompanyAssessmentModal";
 import {
   DIFFICULTY_OPTIONS,
   LEVEL_OPTIONS,
@@ -61,7 +60,7 @@ const getCategoryHeading = (cat, focusBundle) => {
     case "coding":
       return "Coding Practice Sets";
     case "company-wise":
-      return "Company-wise Practice Tests";
+      return "Company-wise Practice Sets";
     case "my-purchases":
       return "My Purchased Practice Sets";
     default:
@@ -104,24 +103,6 @@ const PLAN_BUTTONS = [
   },
 ];
 
-const getCategoryCountLabel = (cat, count) => {
-  const plural = count === 1 ? "" : "s";
-  switch (cat) {
-    case "technical":
-      return `Technical practice set${plural} found`;
-    case "nontechnical":
-      return `Non-Technical practice set${plural} found`;
-    case "coding":
-      return `Coding practice set${plural} found`;
-    case "company-wise":
-      return `Company-wise practice test${plural} found`;
-    case "my-purchases":
-      return `Purchased practice set${plural} found`;
-    default:
-      return `practice set${plural} found`;
-  }
-};
-
 const EMPTY_FILTERS = { plan: undefined, level: undefined, difficulty: undefined };
 
 const matchesText = (text, query) => String(text || "").toLowerCase().includes(query);
@@ -129,7 +110,8 @@ const matchesText = (text, query) => String(text || "").toLowerCase().includes(q
 const setMatches = (set, { query, category, filters, focusIds }) => {
   if (focusIds && !focusIds.has(set._id)) return false;
   if (category === "my-purchases" && !isOwned(set.access)) return false;
-  if (category !== "all" && category !== "my-purchases" && set.category !== category) return false;
+  const targetCategory = category === "company-wise" ? "company" : category;
+  if (category !== "all" && category !== "my-purchases" && set.category !== targetCategory) return false;
   if (filters.plan && filters.plan !== "all") {
     if (filters.plan === "bundle") return false;
     if (filters.plan !== set.plan) return false;
@@ -145,7 +127,8 @@ const setMatches = (set, { query, category, filters, focusIds }) => {
 
 const bundleMatches = (bundle, { query, category, filters }) => {
   if (category === "my-purchases" && !bundle.access?.unlocked) return false;
-  if (category !== "all" && category !== "my-purchases" && !(bundle.summary?.categories || []).includes(category)) return false;
+  const targetCategory = category === "company-wise" ? "company" : category;
+  if (category !== "all" && category !== "my-purchases" && !(bundle.summary?.categories || []).includes(targetCategory)) return false;
   if (filters.plan && filters.plan !== "all") {
     if (filters.plan !== "bundle") return false;
   }
@@ -160,13 +143,50 @@ const bundleMatches = (bundle, { query, category, filters }) => {
   return true;
 };
 
-function CatalogCard({ item, isBundle, isMobile, onAction }) {
+function CatalogCard({ item, isBundle, isMobile, onAction, onViewResults }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [hasCompletedTest, setHasCompletedTest] = useState(Boolean(item.hasCompletedTest));
   const access = item.access || {};
   const owned = isBundle ? !!access.unlocked : isOwned(access);
   const tag = isBundle ? (access.unlocked ? "Purchased" : null) : accessTag(access);
   const note = isBundle ? (access.unlocked ? accessNote({ ...access, reason: "purchased" }) : null) : accessNote(access);
   const label = isBundle ? bundleActionLabel(item) : setActionLabel(item);
+
+  const isCompany = !isBundle && (item.category === "company" || item.category === "company-wise");
+
+  useEffect(() => {
+    if (item.hasCompletedTest !== undefined) {
+      setHasCompletedTest(Boolean(item.hasCompletedTest));
+      return;
+    }
+    const testId = item._id || item.id;
+    if (isCompany && testId && open) {
+      const token = typeof window !== "undefined" ? (localStorage.getItem("token") || sessionStorage.getItem("token") || "") : "";
+      if (token) {
+        fetch(`${restUrl}/practice/top-scores/${testId}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data && data.data && data.data.length > 0) {
+              setHasCompletedTest(true);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [item.hasCompletedTest, isCompany, item._id, item.id, open]);
+
+  const handleViewResults = () => {
+    if (onViewResults) {
+      onViewResults(item);
+    } else {
+      const testId = item._id || item.id;
+      router.push(`/student/practice-new/company-wise/${testId}?viewResult=true`);
+    }
+  };
 
   return (
     <Popover
@@ -195,6 +215,8 @@ function CatalogCard({ item, isBundle, isMobile, onAction }) {
             note={note}
             actionLabel={label}
             onAction={() => onAction(item, isBundle)}
+            hasCompletedTest={hasCompletedTest}
+            onViewResults={handleViewResults}
           />
         </div>
       }
@@ -221,8 +243,7 @@ function PracticeCatalogInner() {
   const isMobile = useResponsive();
 
   const { catalog, catalogStatus, catalogError } = useSelector((state) => state.practice);
-  const { companyTests = [], status: companyStatus } = useSelector((state) => state.adminPractice);
-  const studentCreds = useSelector((state) => state.student.student?.data);
+  const studentCreds = useSelector((state) => state.student?.student?.data);
 
   const initialCat = searchParams?.get("category") || "all";
   const [search, setSearch] = useState("");
@@ -230,6 +251,8 @@ function PracticeCatalogInner() {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [focusBundle, setFocusBundle] = useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [selectedCompanyTest, setSelectedCompanyTest] = useState(null);
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const searchContainerRef = useRef(null);
 
   useEffect(() => {
@@ -250,55 +273,12 @@ function PracticeCatalogInner() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Company test modal state
-  const [selectedCompanyTest, setSelectedCompanyTest] = useState(null);
-  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
-
   useEffect(() => {
     dispatch(fetchPracticeCatalog());
-    dispatch(fetchCompanyTests());
   }, [dispatch]);
 
   const sets = useMemo(() => catalog?.sets || [], [catalog]);
   const bundles = useMemo(() => catalog?.bundles || [], [catalog]);
-
-  // Formatted company tests
-  const formattedCompanyTests = useMemo(() => {
-    return companyTests.map((t) => {
-      const uniqueMainCategories = [
-        ...new Set((t.sections || []).map((sec) => (sec || "").split(" - ")[0].trim())),
-      ];
-
-      return {
-        id: t._id,
-        name: t.title,
-        title: t.title,
-        initials: t.initials,
-        color: t.color,
-        hiringType: t.hiringType,
-        patternName: t.patternName,
-        sections: uniqueMainCategories,
-        timeLimit: t.timeLimit || 0,
-        questionCount: t.questionCount || 0,
-      };
-    });
-  }, [companyTests]);
-
-  const filteredCompanyTests = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    const plan = filters.plan;
-    return formattedCompanyTests.filter((test) => {
-      if (plan && plan !== "all") {
-        if (plan === "premium" || plan === "bundle") return false;
-      }
-      if (!q) return true;
-      if (matchesText(test.name, q)) return true;
-      if (matchesText(test.hiringType, q)) return true;
-      if (matchesText(test.patternName, q)) return true;
-      if ((test.sections || []).some((sec) => matchesText(sec, q))) return true;
-      return false;
-    });
-  }, [formattedCompanyTests, search, filters.plan]);
 
   // Dynamic search suggestions while the user types
   const searchSuggestions = useMemo(() => {
@@ -308,7 +288,7 @@ function PracticeCatalogInner() {
     const list = [];
     const seen = new Set();
 
-    // 1. Practice sets
+    // 1. Practice sets (including company-wise sets created in admin)
     sets.forEach((s) => {
       const inTitle = matchesText(s.title, q);
       const matchedTopic = (s.topics || []).find((t) => matchesText(t.topicTitle, q));
@@ -318,12 +298,12 @@ function PracticeCatalogInner() {
           seen.add(titleKey);
           list.push({
             id: `set-${s._id}`,
-            type: "practice",
+            type: s.category === "company" ? "company" : "practice",
             title: s.title,
-            category: s.category || "Technical",
-            subtitle: `${s.questionsCount || 30} Qs • ${s.duration || "60 mins"} • ${s.level || "Intermediate"}`,
+            category: s.category === "company" ? "Company-wise" : s.category || "Technical",
+            subtitle: `${s.questionCount || 30} Qs • ${s.timeMinutes ? `${s.timeMinutes} mins` : "30 mins"} • ${s.level || "Intermediate"}`,
             matchedTopic: matchedTopic?.topicTitle,
-            targetCategory: s.category || "all",
+            targetCategory: s.category === "company" ? "company-wise" : s.category || "all",
           });
         }
       }
@@ -347,30 +327,8 @@ function PracticeCatalogInner() {
       }
     });
 
-    // 3. Company tests
-    formattedCompanyTests.forEach((ct) => {
-      const inName = matchesText(ct.name, q);
-      const inPattern = matchesText(ct.patternName, q);
-      const inHiring = matchesText(ct.hiringType, q);
-      const matchedSec = (ct.sections || []).find((sec) => matchesText(sec, q));
-      if (inName || inPattern || inHiring || matchedSec) {
-        const titleKey = ct.name.toLowerCase();
-        if (!seen.has(titleKey)) {
-          seen.add(titleKey);
-          list.push({
-            id: `company-${ct.id}`,
-            type: "company",
-            title: ct.name,
-            category: "Company-wise",
-            subtitle: `${ct.sections?.length || 1} sections • ${ct.timeLimit ? `${ct.timeLimit} mins` : "Mock Test"}`,
-            targetCategory: "company-wise",
-          });
-        }
-      }
-    });
-
     return list.slice(0, 7);
-  }, [search, sets, bundles, formattedCompanyTests]);
+  }, [search, sets, bundles]);
 
   // Popular search topics for initial focus / empty query
   const popularTopics = useMemo(() => {
@@ -415,7 +373,6 @@ function PracticeCatalogInner() {
   };
 
   const items = useMemo(() => {
-    if (category === "company-wise") return [];
     const ctx = {
       query: search.trim().toLowerCase(),
       category,
@@ -431,24 +388,6 @@ function PracticeCatalogInner() {
   }, [sets, bundles, search, category, filters, focusBundle]);
 
   const planCounts = useMemo(() => {
-    if (category === "company-wise") {
-      const q = search.trim().toLowerCase();
-      const baseFiltered = formattedCompanyTests.filter((test) => {
-        if (!q) return true;
-        if (matchesText(test.name, q)) return true;
-        if (matchesText(test.hiringType, q)) return true;
-        if (matchesText(test.patternName, q)) return true;
-        if ((test.sections || []).some((sec) => matchesText(sec, q))) return true;
-        return false;
-      });
-      return {
-        all: baseFiltered.length,
-        free: baseFiltered.length,
-        premium: 0,
-        bundle: 0,
-      };
-    }
-
     const baseCtx = {
       query: search.trim().toLowerCase(),
       category,
@@ -470,7 +409,7 @@ function PracticeCatalogInner() {
       premium: premiumCount,
       bundle: bundleCount,
     };
-  }, [category, search, sets, bundles, formattedCompanyTests, filters.level, filters.difficulty, focusBundle]);
+  }, [category, search, sets, bundles, filters, focusBundle]);
 
   const activePlan = filters.plan || "all";
 
@@ -490,10 +429,7 @@ function PracticeCatalogInner() {
   };
 
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
-  const hasAnyFilter =
-    category === "company-wise"
-      ? !!search.trim() || !!(filters.plan && filters.plan !== "all")
-      : activeFilterCount > 0 || search.trim() || category !== "all";
+  const hasAnyFilter = activeFilterCount > 0 || !!search.trim() || category !== "all";
 
   const clearAll = () => {
     setSearch("");
@@ -520,11 +456,6 @@ function PracticeCatalogInner() {
     } else {
       router.push(checkoutUrl("set", item._id));
     }
-  };
-
-  const handleCompanyCardClick = (test) => {
-    setSelectedCompanyTest(test);
-    setIsCompanyModalOpen(true);
   };
 
   const filterPanel = (
@@ -569,76 +500,9 @@ function PracticeCatalogInner() {
   );
 
   const renderBody = () => {
-    // ── Company-Wise View ──
-    if (category === "company-wise") {
-      if (companyStatus === "loading" && !companyTests.length) {
-        return (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="overflow-hidden rounded-2xl bg-white p-6 shadow-sm border border-slate-100">
-                <Skeleton active paragraph={{ rows: 4 }} />
-              </div>
-            ))}
-          </div>
-        );
-      }
+    const isLoading = catalogStatus === "loading" && !sets.length && !bundles.length;
 
-      if (!filteredCompanyTests.length) {
-        return (
-          <Empty
-            className="py-16"
-            description={
-              filters.plan === "premium"
-                ? "No premium company-wise practice cards available"
-                : filters.plan === "bundle"
-                ? "No bundles available for company-wise practice"
-                : search
-                ? "No company-wise practice cards match your search"
-                : "No company-wise practice cards available"
-            }
-          >
-            {(search || (filters.plan && filters.plan !== "all")) && (
-              <Button onClick={() => { setSearch(""); setFilters((f) => ({ ...f, plan: undefined })); }}>
-                Show all company tests
-              </Button>
-            )}
-          </Empty>
-        );
-      }
-
-      return (
-        <motion.div
-          layout="position"
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        >
-          <AnimatePresence mode="popLayout" initial={false}>
-            {filteredCompanyTests.map((test, index) => (
-              <motion.div
-                layout
-                key={test.id}
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{
-                  duration: 0.24,
-                  ease: "easeOut",
-                  delay: Math.min(index * 0.02, 0.12),
-                }}
-                className="h-full"
-              >
-                <CompanyTestCard
-                  companyData={test}
-                  onStartTest={() => handleCompanyCardClick(test)}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-      );
-    }
-
-    // ── Practice Sets & Bundles View ──
-    if (catalogStatus === "loading" && !sets.length && !bundles.length) {
+    if (isLoading) {
       return (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -653,7 +517,7 @@ function PracticeCatalogInner() {
       );
     }
 
-    if (catalogStatus === "failed") {
+    if (catalogStatus === "failed" && !sets.length) {
       return (
         <Result
           status="warning"
@@ -708,7 +572,7 @@ function PracticeCatalogInner() {
           {items.map(({ item, isBundle }, index) => (
             <motion.div
               layout
-              key={`${isBundle ? "b" : "s"}-${item._id}`}
+              key={`${isBundle ? "b" : "s"}-${item._id || item.id}`}
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
@@ -724,6 +588,10 @@ function PracticeCatalogInner() {
                 isBundle={isBundle}
                 isMobile={isMobile}
                 onAction={handleAction}
+                onViewResults={(testItem) => {
+                  setSelectedCompanyTest(testItem);
+                  setIsCompanyModalOpen(true);
+                }}
               />
             </motion.div>
           ))}
@@ -911,10 +779,7 @@ function PracticeCatalogInner() {
                   {getCategoryHeading(category, focusBundle)}
                 </h2>
                 <span className="inline-flex items-center justify-center text-xs sm:text-sm font-bold text-slate-600 bg-slate-200/70 border border-slate-300/60 px-2.5 py-1 rounded-full leading-tight">
-                  {category === "company-wise" ? filteredCompanyTests.length : items.length}{" "}
-                  {category === "company-wise"
-                    ? `Practice Test${filteredCompanyTests.length === 1 ? "" : "s"}`
-                    : `Practice Set${items.length === 1 ? "" : "s"}`}
+                  {items.length} Practice Set{items.length === 1 ? "" : "s"}
                 </span>
                 {filters.plan && filters.plan !== "all" && (
                   <span className="inline-flex items-center gap-1 font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md text-xs leading-tight">
@@ -977,7 +842,6 @@ function PracticeCatalogInner() {
         </div>
       </div>
 
-      {/* Company Assessment Modal */}
       <CompanyAssessmentModal
         open={isCompanyModalOpen}
         test={selectedCompanyTest}
@@ -987,6 +851,7 @@ function PracticeCatalogInner() {
         }}
         studentCreds={studentCreds}
         router={router}
+        initialState="RESULTS"
       />
     </div>
   );

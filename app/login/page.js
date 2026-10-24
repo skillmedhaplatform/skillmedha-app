@@ -36,6 +36,16 @@ function LoginForm() {
     const redirectParam = searchParams.get('redirect');
     if (fromParam) sessionStorage.setItem('auth_from', fromParam);
     if (redirectParam) sessionStorage.setItem('auth_redirect', redirectParam);
+
+    // Auto-redirect if student is already authenticated
+    if (typeof window !== "undefined") {
+      const existingToken = localStorage.getItem("token");
+      const portalRole = localStorage.getItem("portalRole");
+      if (existingToken && portalRole === "student") {
+        const target = (redirectParam && redirectParam.startsWith("/student/")) ? redirectParam : "/student/dashboard";
+        window.location.replace(target);
+      }
+    }
   }, [searchParams]);
 
   const handleSubmit = async (e) => {
@@ -62,7 +72,7 @@ function LoginForm() {
             const tokenParams = result.data?.token
               ? `${targetPath.includes('?') ? '&' : '?'}token=${encodeURIComponent(result.data.token)}&sId=${encodeURIComponent(result.data.userID || '')}`
               : '';
-            window.location.href = `${targetPath}${tokenParams}`;
+            window.location.replace(`${targetPath}${tokenParams}`);
             return;
           }
           if (fromParam === 'resumeBuilder' || redirectParam?.includes('resumeBuilder')) {
@@ -70,19 +80,19 @@ function LoginForm() {
             const tokenParams = result.data?.token
               ? `${targetPath.includes('?') ? '&' : '?'}token=${encodeURIComponent(result.data.token)}&sId=${encodeURIComponent(result.data.userID || '')}`
               : '';
-            window.location.href = `${targetPath}${tokenParams}`;
+            window.location.replace(`${targetPath}${tokenParams}`);
             return;
           }
           if (redirectParam && redirectParam.startsWith('/student/')) {
             const tokenParams = result.data?.token
               ? `${redirectParam.includes('?') ? '&' : '?'}token=${encodeURIComponent(result.data.token)}&sId=${encodeURIComponent(result.data.userID || '')}`
               : '';
-            window.location.href = `${redirectParam}${tokenParams}`;
+            window.location.replace(`${redirectParam}${tokenParams}`);
             return;
           }
         }
 
-        window.location.href = result.redirectUrl || "/student/dashboard";
+        window.location.replace(result.redirectUrl || "/student/dashboard");
       }
     } catch (err) {
       setError(err.message || 'Authentication failed. Please try again.');
@@ -155,11 +165,19 @@ function LoginForm() {
 
       {/* LEFT COLUMN - FORM */}
       <div className="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-16 md:px-24 py-12 relative bg-white z-10 shadow-[20px_0_40px_-15px_rgba(0,0,0,0.05)]">
-        <div className="absolute top-8 left-8 sm:left-16 md:left-24 flex items-center">
-          <img src="/skillmedha-logo.png" alt="SkillMedha Logo" className="h-8 w-auto mr-3 hover:scale-105 transition-transform cursor-pointer" />
-          <div className="text-2xl font-extrabold tracking-tighter flex items-center text-gray-900 cursor-pointer">
-            SKILL<span className="text-[#1E69DA]">MEDHA</span>
+        <div className="absolute top-8 left-8 sm:left-16 md:left-24 right-8 sm:right-16 md:right-24 flex items-center justify-between">
+          <div className="flex items-center">
+            <img src="/skillmedha-logo.png" alt="SkillMedha Logo" className="h-8 w-auto mr-3 hover:scale-105 transition-transform cursor-pointer" />
+            <div className="text-2xl font-extrabold tracking-tighter flex items-center text-gray-900 cursor-pointer">
+              SKILL<span className="text-[#1E69DA]">MEDHA</span>
+            </div>
           </div>
+          <a
+            href={`${process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:8080"}/`}
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100/70 border border-brand-200/60 rounded-full px-3.5 py-1.5 transition-all shadow-xs"
+          >
+            ← Visit Website
+          </a>
         </div>
 
         <div className="w-full max-w-md mx-auto mt-16 sm:mt-12 lg:mt-0">

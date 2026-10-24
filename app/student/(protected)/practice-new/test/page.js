@@ -118,13 +118,37 @@ export default function TestPage() {
   const [activeRefId, setActiveRefId] = useState(null);
   const [tempSelectedAnswers, setTempSelectedAnswers] = useState({});
   const [textAnswers, setTextAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(30 * 60);
+
+  const urlDuration = searchParams.get("duration") || searchParams.get("timeMinutes") || searchParams.get("time");
+  const initialDuration = useMemo(() => {
+    const d = Number(urlDuration);
+    return (d && !isNaN(d) && d > 0) ? d * 60 : 30 * 60;
+  }, [urlDuration]);
+
+  const [timeLeft, setTimeLeft] = useState(initialDuration);
+
+  useEffect(() => {
+    if (urlDuration) {
+      const d = Number(urlDuration);
+      if (d && !isNaN(d) && d > 0) {
+        setTimeLeft(d * 60);
+      }
+    }
+  }, [urlDuration]);
 
   const testportalState = useSelector((state) => state.portal || {});
   const { userResponse = [], aiSuggestions = "" } = testportalState;
   const pracQuestionsData = useSelector(
     (s) => s.practice.pracQuestions || {}
   );
+
+  useEffect(() => {
+    const tm = Number(pracQuestionsData?.timeMinutes || pracQuestionsData?.data?.timeMinutes);
+    if (tm && !isNaN(tm) && tm > 0) {
+      setTimeLeft(tm * 60);
+    }
+  }, [pracQuestionsData]);
+
   const pracId = pracQuestionsData?.data?.insertedId;
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -230,15 +254,24 @@ export default function TestPage() {
       .unwrap()
       .then((res) => {
         // Coding questions need the code editor, not this player.
-        if (res?.practiceSet?.category === "coding") {
+        const isAllCoding =
+          res?.practiceSet?.category === "coding" ||
+          (res?.questionsData?.length > 0 &&
+            res.questionsData.every((q) => q.questionType === "Coding Question"));
+
+        if (isAllCoding) {
+          const durationForCoding = Number(res?.practiceSet?.timeMinutes || res?.timeMinutes || urlDuration || 30);
           router.replace(
             `/student/practice-new/coding/workspace?ps=${practiceSetId}&title=${encodeURIComponent(
-              res.practiceSet.subjectTitles?.[0] || res.practiceSet.title || ""
-            )}`
+              res?.practiceSet?.subjectTitles?.[0] || res?.practiceSet?.title || ""
+            )}&duration=${durationForCoding}`
           );
           return;
         }
-        if (res?.timeMinutes) setTimeLeft(res.timeMinutes * 60);
+        const durationFromRes = Number(res?.timeMinutes || res?.data?.timeMinutes || res?.practiceSet?.timeMinutes);
+        if (durationFromRes && !isNaN(durationFromRes) && durationFromRes > 0) {
+          setTimeLeft(durationFromRes * 60);
+        }
         setActiveRefId(practiceSetId);
       })
       .catch((err) => {
@@ -873,7 +906,7 @@ export default function TestPage() {
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f0fdf4', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
               <TbSparkles size={18} />
             </div>
-            Keep practicing! <span style={{ color: '#16a34a', fontWeight: 600 }}>You're getting better every day.</span>
+            Keep practicing! <span style={{ color: '#16a34a', fontWeight: 600 }}>You&apos;re getting better every day.</span>
           </div>
         </div>
       </div>

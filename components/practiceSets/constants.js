@@ -36,8 +36,9 @@ export const STATUS_OPTIONS = [
 const labelFrom = (options, value) => options.find((o) => o.value === value)?.label || "";
 
 export const planLabel = (value) => (value === "bundle" ? "Bundle" : labelFrom(PLAN_OPTIONS, value));
-export const levelLabel = (value) => labelFrom(LEVEL_OPTIONS, value);
-export const categoryLabel = (value) => labelFrom(CATEGORY_OPTIONS, value);
+export const levelLabel = (value) => labelFrom(LEVEL_OPTIONS, value) || value || "";
+export const categoryLabel = (value) =>
+  value === "company-wise" ? "Company-wise" : labelFrom(CATEGORY_OPTIONS, value);
 export const difficultyLabel = (value) =>
   value === "mixed" || !value ? "Mixed" : labelFrom(DIFFICULTY_OPTIONS, value);
 

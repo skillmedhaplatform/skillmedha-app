@@ -29,14 +29,17 @@ export const useLogout = () => {
         } catch (e) {
           console.error(e);
         }
-        // 4. Remove client-side cookie (non-HTTP-only fallback)
-        Cookies.remove("token");
-        // 5. router.refresh() forces Next.js to re-run middleware with the
-        //    now-deleted cookie, then replace to /login. Without this, the soft
-        //    navigation can race against the cookie deletion and middleware
-        //    bounces the user back to /dashboard or /tests.
-        nav.refresh();
-        window.location.href = "/login?portal=student";
+        // 4. Remove client-side cookies
+        const isProd = typeof window !== "undefined" && window.location.hostname.includes("skillmedha.com");
+        const domainOpts = isProd ? { domain: ".skillmedha.com", path: "/" } : { path: "/" };
+        Cookies.remove("token", domainOpts);
+        Cookies.remove("sm_student_session", domainOpts);
+        Cookies.remove("token", { path: "/" });
+        Cookies.remove("sm_student_session", { path: "/" });
+
+        // 5. Automatically redirect to the public website instead of the login page
+        const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:8080";
+        window.location.href = `${websiteUrl}/`;
       },
     });
   };

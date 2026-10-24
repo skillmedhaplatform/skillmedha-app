@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { getOneInternsip, getAllCoursesOnly } from "@/redux/slices/internship";
 import { message, Spin, Popover } from "antd";
 import BuyNowPopoverContent from "@/universalUtils/LibraryPage/BuyNowPopoverContent";
+import ShareModal from "@/components/shared/ShareModal";
 import {
   Clock,
   PlayCircle,
@@ -35,6 +36,13 @@ export default function CourseDetailsPage() {
   const [showAllDescription, setShowAllDescription] = useState(false);
   const [showAllLearning, setShowAllLearning] = useState(false);
   const [relatedItems, setRelatedItems] = useState([]);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [couponStatus, setCouponStatus] = useState("idle");
+  const [couponInput, setCouponInput] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [availableCoupon, setAvailableCoupon] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState("");
+  const [appliedDiscountAmount, setAppliedDiscountAmount] = useState(0);
   const toolsRef = useRef(null);
 
   useEffect(() => {
@@ -114,16 +122,136 @@ export default function CourseDetailsPage() {
     course?.bannerImage ||
     "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80";
 
+  const itemSlug = course?.slug || (course?.title ? course.title.toLowerCase().replace(/[^a-z0-9]/g, "") : params.id);
+
+  const handleCheckCoupon = async () => {
+    if (couponStatus === "has_coupon") return;
+    setCouponStatus("checking");
+    setCouponError("");
+    try {
+      const restUrl = process.env.NEXT_PUBLIC_REST_URL || "http://localhost:4000";
+      const checkUrl = `${restUrl}/api/public/website/courses/${itemSlug || params.id}/coupon`;
+      const res = await fetch(checkUrl);
+      let data = null;
+      if (res.ok) {
+        data = await res.json();
+      }
+
+      if (data && data.hasCoupon && data.couponCode) {
+        setAvailableCoupon(data.couponCode);
+        setAppliedDiscountAmount(Number(data.couponDiscount || 0));
+        setCouponStatus("has_coupon");
+      } else if (course?.pricing?.couponCode && course.pricing.couponCode.trim().length > 0) {
+        setAvailableCoupon(course.pricing.couponCode.trim());
+        setAppliedDiscountAmount(Number(course.pricing.couponDiscount || 0));
+        setCouponStatus("has_coupon");
+      } else if (course?.couponCode && course.couponCode.trim().length > 0) {
+        setAvailableCoupon(course.couponCode.trim());
+        setAppliedDiscountAmount(Number(course.couponDiscount || 0));
+        setCouponStatus("has_coupon");
+      } else {
+        setCouponStatus("no_coupons");
+      }
+    } catch {
+      if (course?.pricing?.couponCode && course.pricing.couponCode.trim().length > 0) {
+        setAvailableCoupon(course.pricing.couponCode.trim());
+        setAppliedDiscountAmount(Number(course.pricing.couponDiscount || 0));
+        setCouponStatus("has_coupon");
+      } else if (course?.couponCode && course.couponCode.trim().length > 0) {
+        setAvailableCoupon(course.couponCode.trim());
+        setAppliedDiscountAmount(Number(course.couponDiscount || 0));
+        setCouponStatus("has_coupon");
+      } else {
+        setCouponStatus("no_coupons");
+      }
+    }
+  };
+
+  const handleApplyCoupon = (e) => {
+    e?.preventDefault();
+    if (!couponInput.trim()) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+    const entered = couponInput.trim().toUpperCase();
+    if (availableCoupon && entered !== availableCoupon.trim().toUpperCase()) {
+      setCouponError("Invalid coupon code. Please try again.");
+      return;
+    }
+    setCouponError("");
+    setAppliedCoupon(entered);
+    setCouponStatus("applied");
+    message.success(`Coupon "${entered}" applied successfully!`);
+  };
+
   const handleBuyNow = () => {
     const courseId = course?._id;
     if (!courseId) return;
     const orgId = course?.sourceOrgId;
-    router.push(`/student/checkout?courseId=${courseId}${orgId ? `&orgId=${orgId}` : ""}`);
+    const couponQuery = appliedCoupon ? `&coupon=${encodeURIComponent(appliedCoupon)}` : "";
+    router.push(`/student/checkout?courseId=${courseId}${orgId ? `&orgId=${orgId}` : ""}${couponQuery}`);
   };
 
   const visibleSections = showAllCurriculum ? course?.sections : course?.sections?.slice(0, 6);
   const visibleLearning = showAllLearning ? course?.learningPoints : course?.learningPoints?.slice(0, 6);
   const breadcrumb = [course.category || "Course", course.difficulty || "All Levels", course.title].filter(Boolean);
+
+  // Dynamic Pricing Calculation
+  const parsePrice = (v) => {
+    if (v === undefined || v === null || v === "") return NaN;
+    if (typeof v === "number") return v;
+    const cleaned = String(v).replace(/[^0-9.]/g, "");
+    return cleaned ? Number(cleaned) : NaN;
+  };
+
+  const rawFinalPrice = parsePrice(course?.pricing?.finalPrice);
+  const rawCurrentPrice = parsePrice(course?.pricing?.currentPrice);
+  const rawTopPrice = parsePrice(course?.price);
+
+  let currentPrice = 0;
+  if (!isNaN(rawFinalPrice) && rawFinalPrice >= 0) {
+    currentPrice = rawFinalPrice;
+  } else if (!isNaN(rawCurrentPrice) && rawCurrentPrice >= 0) {
+    currentPrice = rawCurrentPrice;
+  } else if (!isNaN(rawTopPrice) && rawTopPrice >= 0) {
+    currentPrice = rawTopPrice;
+  }
+
+  const rawOrigPrice = parsePrice(course?.pricing?.originalPrice);
+  const rawTopOrigPrice = parsePrice(course?.originalPrice);
+
+  let originalPrice = 0;
+  if (!isNaN(rawOrigPrice) && rawOrigPrice > 0) {
+    originalPrice = rawOrigPrice;
+  } else if (!isNaN(rawTopOrigPrice) && rawTopOrigPrice > 0) {
+    originalPrice = rawTopOrigPrice;
+  } else if (!isNaN(rawCurrentPrice) && rawCurrentPrice > currentPrice) {
+    originalPrice = rawCurrentPrice;
+  } else if (!isNaN(rawTopPrice) && rawTopPrice > currentPrice) {
+    originalPrice = rawTopPrice;
+  } else if (currentPrice > 0) {
+    originalPrice = Math.round(currentPrice * 1.5);
+  }
+
+  const isFree = Boolean(
+    course?.isFree ||
+    course?.pricing?.type === "free" ||
+    course?.badge === "FREE" ||
+    (currentPrice === 0 && (!course?.price || course?.price === "Free" || course?.price === "free" || course?.pricing?.currentPrice === "0"))
+  );
+
+  let effectiveCurrentPrice = currentPrice;
+  if (appliedCoupon && appliedDiscountAmount > 0) {
+    effectiveCurrentPrice = Math.max(0, effectiveCurrentPrice - appliedDiscountAmount);
+  }
+
+  let discountPercent = 0;
+  const explicitDiscount = parsePrice(course?.discount) || parsePrice(course?.pricing?.discount);
+  if (!isNaN(explicitDiscount) && explicitDiscount > 0) {
+    discountPercent = Math.round(explicitDiscount);
+  } else if (originalPrice > effectiveCurrentPrice && originalPrice > 0) {
+    discountPercent = Math.round(((originalPrice - effectiveCurrentPrice) / originalPrice) * 100);
+  }
 
   return (
     <div className="absolute inset-0 bg-[#f8fafc] w-full flex flex-col overflow-hidden">
@@ -470,26 +598,31 @@ export default function CourseDetailsPage() {
                     className="w-full h-full object-cover rounded-lg border-[3px] border-white shadow-sm"
                   />
                 </div>
-                <div className="p-6">
-                  <div className="flex items-baseline gap-3 mb-6">
+                <div className="p-5">
+                  <div className="flex items-baseline gap-3 mb-4">
                     <span className="text-3xl font-bold text-slate-900 leading-none">
-                      {course?.pricing?.finalPrice ? `₹${course.pricing.finalPrice}` : course?.price ? `₹${course.price}` : "Free"}
+                      {isFree ? "Free" : `₹${effectiveCurrentPrice.toLocaleString("en-IN")}`}
                     </span>
-                    {course?.pricing?.finalPrice && course?.price && (
+                    {originalPrice > effectiveCurrentPrice && (
                       <span className="text-lg text-slate-400 line-through font-medium leading-none">
-                        ₹{course.price}
+                        ₹{originalPrice.toLocaleString("en-IN")}
+                      </span>
+                    )}
+                    {discountPercent > 0 && (
+                      <span className="text-sm font-semibold text-slate-900 leading-none">
+                        {discountPercent}% off
                       </span>
                     )}
                   </div>
                   
                   <button 
                     onClick={handleBuyNow}
-                    className="w-full py-3.5 px-6 bg-[#0056D2] hover:bg-[#004bb8] text-white text-[16px] font-bold rounded-lg transition-colors shadow-sm mb-6"
+                    className="w-full py-2.5 px-5 bg-[#0056D2] hover:bg-[#004bb8] text-white text-[15px] font-bold rounded-lg transition-colors shadow-sm mb-4"
                   >
                     Buy Course
                   </button>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {course.duration && (
                       <div className="flex items-center justify-between text-[14px]">
                         <div className="flex items-center gap-2 text-slate-600">
@@ -523,6 +656,75 @@ export default function CourseDetailsPage() {
                         </div>
                         <span className="font-semibold text-slate-800">Included</span>
                       </div>
+                    )}
+                  </div>
+
+                  {/* Share / Apply Coupon Footer Area */}
+                  <div className="border-t border-slate-200 pt-3.5 mt-4">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <button
+                        type="button"
+                        onClick={() => setIsShareModalOpen(true)}
+                        className="text-[#0056D2] hover:underline cursor-pointer"
+                      >
+                        Share
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCheckCoupon}
+                        className="text-[#0056D2] hover:underline cursor-pointer"
+                      >
+                        Apply Coupon
+                      </button>
+                    </div>
+
+                    {/* Checking state */}
+                    {couponStatus === "checking" && (
+                      <p className="text-center text-xs text-slate-400 mt-2 animate-pulse">
+                        Checking available coupons...
+                      </p>
+                    )}
+
+                    {/* No coupons available message */}
+                    {couponStatus === "no_coupons" && (
+                      <p className="text-center text-xs font-semibold text-red-500 mt-2">
+                        There are no coupons available.
+                      </p>
+                    )}
+
+                    {/* Valid coupon input and button */}
+                    {couponStatus === "has_coupon" && (
+                      <div className="mt-3 space-y-1.5">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Enter coupon code"
+                            value={couponInput}
+                            onChange={(e) => {
+                              setCouponInput(e.target.value.toUpperCase());
+                              setCouponError("");
+                            }}
+                            className="flex-1 uppercase rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleApplyCoupon}
+                            className="rounded-lg bg-[#0056D2] hover:bg-[#004bb8] px-3 py-1.5 text-xs font-semibold text-white transition-colors shrink-0 cursor-pointer"
+                          >
+                            Apply Coupon
+                          </button>
+                        </div>
+                        {couponError && (
+                          <p className="text-red-500 text-[11px] font-medium">{couponError}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Applied state */}
+                    {couponStatus === "applied" && (
+                      <p className="text-center text-xs font-semibold text-emerald-600 mt-2">
+                        Coupon applied!
+                      </p>
                     )}
                   </div>
                 </div>
@@ -609,6 +811,15 @@ export default function CourseDetailsPage() {
             display: none;
         }
       `}} />
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        title={course?.title}
+        courseId={course?._id}
+        slug={itemSlug}
+        type="course"
+      />
     </div>
   );
 }

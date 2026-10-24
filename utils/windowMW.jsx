@@ -5,6 +5,7 @@ import {
   HiOutlineUsers,
   HiOutlineBookOpen,
   HiOutlinePresentationChartBar,
+  HiOutlineGlobeAlt,
   HiOutlineBriefcase,
   HiOutlineClipboardDocumentCheck,
   HiOutlineLightBulb,

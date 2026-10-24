@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Radio, Typography, Divider, Modal, Space, Checkbox, Spin, Avatar, Select, Dropdown } from "antd";
 import { ClockCircleOutlined, LeftOutlined, RightOutlined, ExclamationCircleOutlined, CodeOutlined, SendOutlined, BookOutlined, DeleteOutlined, FlagOutlined, UpOutlined, InfoCircleOutlined, AimOutlined, PlayCircleOutlined, DownOutlined, CheckOutlined, CheckCircleOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import Editor from "@monaco-editor/react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import * as ReactResizablePanels from "react-resizable-panels";
 
@@ -14,7 +14,7 @@ const PanelResizeHandle = ReactResizablePanels?.PanelResizeHandle || ReactResiza
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 import { useDispatch } from "react-redux";
-import { fetchPracQuestions } from "@/redux/slices/practiceSlice";
+import { fetchPracQuestions, fetchPracticeCatalog, startPracticeSet } from "@/redux/slices/practiceSlice";
 import { fetchCompanyTests } from "@/redux/slices/admin/cms/practiceSlice";
 import { restUrl } from "@/config/urls";
 import { executeCode } from "@/utils/judge0";
@@ -22,8 +22,13 @@ import { executeCode } from "@/utils/judge0";
 export default function StudentMockTestPage() {
   const router = useRouter();
   const { id } = useParams();
+  const searchParams = useSearchParams();
+  const urlDuration = searchParams ? (searchParams.get("duration") || searchParams.get("timeMinutes")) : null;
+  const isViewResult = searchParams ? (searchParams.get("viewResult") === "true" || searchParams.get("results") === "true") : false;
   const dispatch = useDispatch();
   const [modal, contextHolder] = Modal.useModal();
+
+  const [allPastAttempts, setAllPastAttempts] = useState([]);
 
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +48,7 @@ export default function StudentMockTestPage() {
   
   const [showResultView, setShowResultView] = useState(false);
   const [currentAttempt, setCurrentAttempt] = useState(null);
+  const [selectedAttemptIdx, setSelectedAttemptIdx] = useState(null);
   const [selectedSectionFilter, setSelectedSectionFilter] = useState("All");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -108,8 +114,10 @@ export default function StudentMockTestPage() {
   const [canSubmitHidden, setCanSubmitHidden] = useState({}); // Tracks if public cases passed
 
   const { companyTests = [] } = useSelector((state) => state.adminPractice);
+  const { catalog } = useSelector((state) => state.practice);
+  const practiceSet = (catalog?.sets || []).find((t) => t._id === id);
   const companyTest = companyTests.find(t => t._id === id);
-  const testTitle = companyTest ? companyTest.companyName || companyTest.title : "Mock";
+  const testTitle = practiceSet ? practiceSet.title : (companyTest ? companyTest.companyName || companyTest.title : "TCS Assessment Test");
 
   const studentCreds = useSelector((state) => state.student.student?.data);
 
@@ -117,10 +125,43 @@ export default function StudentMockTestPage() {
     if (companyTests.length === 0) {
       dispatch(fetchCompanyTests());
     }
-  }, [companyTests.length, dispatch]);
+    if (!catalog?.sets?.length) {
+      dispatch(fetchPracticeCatalog());
+    }
+  }, [companyTests.length, catalog?.sets?.length, dispatch]);
 
   useEffect(() => {
-    if (id) {
+    if (id && isViewResult) {
+      setLoading(true);
+      const token = typeof window !== 'undefined' ? (localStorage.getItem("token") || sessionStorage.getItem("token") || "") : "";
+      fetch(`${restUrl}/practice/top-scores/${id}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.data && data.data.length > 0) {
+            setAllPastAttempts(data.data);
+            setSelectedAttemptIdx(null);
+            setShowResultView(true);
+          } else {
+            modal.warning({
+              title: "No Results Found",
+              content: "You haven't completed this assessment yet.",
+              onOk: () => router.push("/student/practice-new?category=company-wise"),
+            });
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load test results:", err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+      return;
+    }
+
+    if (id && !isViewResult) {
       // Check if we have an active session for this test in sessionStorage
       const sessionKey = `active_test_${id}`;
       const cachedSessionStr = sessionStorage.getItem(sessionKey);
@@ -150,136 +191,154 @@ export default function StudentMockTestPage() {
       }
 
       setLoading(true);
-      dispatch(fetchPracQuestions({ refId: id, type: "subjectId", userId: studentCreds?._id, limit: 500 }))
-        .then((res) => {
-          const apiResponse = res.payload?.data || {};
-          const fetchedData = apiResponse.questionsData || [];
-          const actualArray = Array.isArray(fetchedData) ? fetchedData : [];
 
-          // Map backend structure to UI structure
-          const mappedQuestions = actualArray.map((q, idx) => {
-            const qType = q.questionType?.toLowerCase() || "";
-            let mappedType = "Single Choice";
-            if (qType.includes("coding")) mappedType = "Coding";
-            else if (qType.includes("multiple")) mappedType = "Multiple Choice";
-            else if (qType.includes("true")) mappedType = "True/False";
+      const processActualQuestions = (actualArray, resolvedDuration) => {
+        // Map backend structure to UI structure
+        const mappedQuestions = actualArray.map((q, idx) => {
+          const qType = q.questionType?.toLowerCase() || "";
+          let mappedType = "Single Choice";
+          if (qType.includes("coding")) mappedType = "Coding";
+          else if (qType.includes("multiple")) mappedType = "Multiple Choice";
+          else if (qType.includes("true")) mappedType = "True/False";
 
-            const content = q.questionContent || {};
+          const content = q.questionContent || {};
 
-            const options = [];
-            if (content["option 1"]) options.push(content["option 1"]);
-            if (content["option 2"]) options.push(content["option 2"]);
-            if (content["option 3"]) options.push(content["option 3"]);
-            if (content["option 4"]) options.push(content["option 4"]);
-            
-            // Shuffle options
-            for (let i = options.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [options[i], options[j]] = [options[j], options[i]];
-            }
-
-            let desc = "";
-            let questionText = content.question || q.questionText || "Question text not provided";
-
-            let constraintsData = "";
-            let sampleIn = "";
-            let sampleOut = "";
-
-            if (mappedType === "Coding") {
-              desc = q.problemStatement || content.problemStatement || questionText || "";
-              constraintsData = q.constraints || content.constraints || "";
-              sampleIn = q.sampleInput || content.sampleInput || "";
-              sampleOut = q.sampleOutput || content.sampleOutput || "";
-              if (!questionText || questionText === "Question text not provided") {
-                questionText = desc;
-              }
-            }
-
-            let rawSection = q.sectionName || q.subjectName || "General";
-            let mainCategory = rawSection.split(" - ")[0].trim();
-
-            let extractedCorrectAnswer = "";
-            let rawAnswer = content.correctAnswer || content.answer || q.correctAnswer || q.answer;
-            if (rawAnswer) {
-              if (typeof rawAnswer === 'object' && !Array.isArray(rawAnswer)) {
-                if (rawAnswer.singleChoice) {
-                  const selectedKey = Object.keys(rawAnswer.singleChoice).find(k => rawAnswer.singleChoice[k] === true);
-                  extractedCorrectAnswer = selectedKey ? (content[selectedKey] || selectedKey) : "";
-                } else if (rawAnswer.multipleChoice) {
-                  extractedCorrectAnswer = Object.keys(rawAnswer.multipleChoice)
-                    .filter(k => rawAnswer.multipleChoice[k] === true)
-                    .map(k => content[k] || k);
-                } else {
-                  extractedCorrectAnswer = JSON.stringify(rawAnswer);
-                }
-              } else {
-                extractedCorrectAnswer = rawAnswer;
-              }
-            }
-
-            return {
-              id: q._id || `q${idx}`,
-              type: mappedType,
-              question: questionText,
-              options: options,
-              section: mainCategory,
-              description: content.description || desc,
-              constraints: constraintsData,
-              sampleInput: sampleIn,
-              sampleOutput: sampleOut,
-              testCases: content.testCases || [],
-              correctAnswer: extractedCorrectAnswer,
-              explanation: content.explanation || q.explanation || "",
-              raw: q
-            };
-          });
-
-          const sectionMap = {};
-          mappedQuestions.forEach(q => {
-            if (!sectionMap[q.section]) sectionMap[q.section] = [];
-            sectionMap[q.section].push(q);
-          });
-
-          const groupedQuestions = [];
-
-          const allSections = Object.keys(sectionMap);
-          const nonCodingSections = allSections.filter(s => s.toLowerCase() !== "coding");
-          const codingSections = allSections.filter(s => s.toLowerCase() === "coding");
-
-          [...nonCodingSections, ...codingSections].forEach(sec => {
-            sectionMap[sec].forEach((q, i) => {
-              q.categoryDisplayIdx = i + 1;
-            });
-            groupedQuestions.push(...sectionMap[sec]);
-          });
-
-          setQuestions(groupedQuestions);
-          if (groupedQuestions.length > 0) {
-            setActiveSection(groupedQuestions[0].section);
+          const options = [];
+          if (content["option 1"]) options.push(content["option 1"]);
+          if (content["option 2"]) options.push(content["option 2"]);
+          if (content["option 3"]) options.push(content["option 3"]);
+          if (content["option 4"]) options.push(content["option 4"]);
+          
+          // Shuffle options
+          for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
           }
 
-          const initialActiveSection = groupedQuestions.length > 0 ? groupedQuestions[0].section : "";
-          const calculatedTimeLeft = companyTest?.timeLimit ? companyTest.timeLimit * 60 : 7200;
-          setTimeLeft(calculatedTimeLeft);
-          
-          sessionStorage.setItem(`active_test_${id}`, JSON.stringify({
-            questions: groupedQuestions,
-            answers: {},
-            visited: { 0: true },
-            markedForReview: {},
-            currentIdx: 0,
-            activeSection: initialActiveSection,
-            codeValues: {},
-            editorLanguages: {},
-            canSubmitHidden: {},
-            executionResults: {}
-          }));
-        })
-        .finally(() => {
-          setLoading(false);
+          let desc = "";
+          let questionText = content.question || q.questionText || "Question text not provided";
+
+          let constraintsData = "";
+          let sampleIn = "";
+          let sampleOut = "";
+
+          if (mappedType === "Coding") {
+            desc = q.problemStatement || content.problemStatement || questionText || "";
+            constraintsData = q.constraints || content.constraints || "";
+            sampleIn = q.sampleInput || content.sampleInput || "";
+            sampleOut = q.sampleOutput || content.sampleOutput || "";
+            if (!questionText || questionText === "Question text not provided") {
+              questionText = desc;
+            }
+          }
+
+          let rawSection = q.sectionName || q.subjectName || "General";
+          let mainCategory = rawSection.split(" - ")[0].trim();
+
+          let extractedCorrectAnswer = "";
+          let rawAnswer = content.correctAnswer || content.answer || q.correctAnswer || q.answer;
+          if (rawAnswer) {
+            if (typeof rawAnswer === 'object' && !Array.isArray(rawAnswer)) {
+              if (rawAnswer.singleChoice) {
+                const selectedKey = Object.keys(rawAnswer.singleChoice).find(k => rawAnswer.singleChoice[k] === true);
+                extractedCorrectAnswer = selectedKey ? (content[selectedKey] || selectedKey) : "";
+              } else if (rawAnswer.multipleChoice) {
+                extractedCorrectAnswer = Object.keys(rawAnswer.multipleChoice)
+                  .filter(k => rawAnswer.multipleChoice[k] === true)
+                  .map(k => content[k] || k);
+              } else {
+                extractedCorrectAnswer = JSON.stringify(rawAnswer);
+              }
+            } else {
+              extractedCorrectAnswer = rawAnswer;
+            }
+          }
+
+          return {
+            id: q._id || `q${idx}`,
+            type: mappedType,
+            question: questionText,
+            options: options,
+            section: mainCategory,
+            description: content.description || desc,
+            constraints: constraintsData,
+            sampleInput: sampleIn,
+            sampleOutput: sampleOut,
+            testCases: content.testCases || [],
+            correctAnswer: extractedCorrectAnswer,
+            explanation: content.explanation || q.explanation || "",
+            raw: q
+          };
         });
+
+        const sectionMap = {};
+        mappedQuestions.forEach(q => {
+          if (!sectionMap[q.section]) sectionMap[q.section] = [];
+          sectionMap[q.section].push(q);
+        });
+
+        const groupedQuestions = [];
+
+        const allSections = Object.keys(sectionMap);
+        const nonCodingSections = allSections.filter(s => s.toLowerCase() !== "coding");
+        const codingSections = allSections.filter(s => s.toLowerCase() === "coding");
+
+        [...nonCodingSections, ...codingSections].forEach(sec => {
+          sectionMap[sec].forEach((q, i) => {
+            q.categoryDisplayIdx = i + 1;
+          });
+          groupedQuestions.push(...sectionMap[sec]);
+        });
+
+        setQuestions(groupedQuestions);
+        if (groupedQuestions.length > 0) {
+          setActiveSection(groupedQuestions[0].section);
+        }
+
+        const initialActiveSection = groupedQuestions.length > 0 ? groupedQuestions[0].section : "";
+        const finalMin = Number(resolvedDuration || practiceSet?.timeMinutes || urlDuration || companyTest?.timeLimit || 120);
+        const calculatedTimeLeft = finalMin * 60;
+        setTimeLeft(calculatedTimeLeft);
+        
+        sessionStorage.setItem(`active_test_${id}`, JSON.stringify({
+          questions: groupedQuestions,
+          answers: {},
+          visited: { 0: true },
+          markedForReview: {},
+          currentIdx: 0,
+          activeSection: initialActiveSection,
+          codeValues: {},
+          editorLanguages: {},
+          canSubmitHidden: {},
+          executionResults: {}
+        }));
+      };
+
+      const loadQuestions = async () => {
+        try {
+          const setRes = await dispatch(startPracticeSet(id)).unwrap().catch(() => null);
+          if (setRes && setRes.questionsData && setRes.questionsData.length > 0) {
+            processActualQuestions(setRes.questionsData, setRes.timeMinutes || practiceSet?.timeMinutes);
+            return;
+          }
+        } catch (e) {}
+
+        dispatch(fetchPracQuestions({ refId: id, type: "subjectId", userId: studentCreds?._id, limit: 500 }))
+          .then((res) => {
+            const apiResponse = res.payload?.data || {};
+            const fetchedData = apiResponse.questionsData || [];
+            processActualQuestions(Array.isArray(fetchedData) ? fetchedData : [], companyTest?.timeLimit);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      };
+
+      loadQuestions().finally(() => {
+        setLoading(false);
+      });
     }
-  }, [id, dispatch, companyTests.length]);
+  }, [id, dispatch, companyTests.length, practiceSet, urlDuration, isViewResult]);
 
   useEffect(() => {
     if (questions.length > 0) {
@@ -315,7 +374,9 @@ export default function StudentMockTestPage() {
   }, []);
 
   useEffect(() => {
-    if (companyTest && companyTest.timeLimit) {
+    if (isViewResult) return;
+    const duration = practiceSet?.timeMinutes || urlDuration || companyTest?.timeLimit;
+    if (duration) {
       const sessionKey = `active_test_${id}`;
       const cachedSessionStr = sessionStorage.getItem(sessionKey);
       if (cachedSessionStr) {
@@ -326,16 +387,17 @@ export default function StudentMockTestPage() {
           }
         } catch (e) {}
       }
-      setTimeLeft(companyTest.timeLimit * 60);
+      setTimeLeft(Number(duration) * 60);
     }
-  }, [companyTest, id]);
+  }, [practiceSet, companyTest, urlDuration, id, isViewResult]);
 
   useEffect(() => {
+    if (isViewResult) return;
     const timer = setInterval(() => {
       setTimeLeft(prev => prev > 0 ? prev - 1 : 0);
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isViewResult]);
 
   const formatTime = (seconds) => {
     const h = Math.floor(seconds / 3600);
@@ -654,15 +716,105 @@ export default function StudentMockTestPage() {
     );
   }
 
-  if (questions.length === 0) {
+  // 1. In View Results mode with no attempt chosen yet: Show list of attempted tests
+  if (showResultView && isViewResult && selectedAttemptIdx === null && allPastAttempts.length > 0) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-gray-50 gap-4">
-        <Title level={4}>No questions found for this test.</Title>
-        <Button type="primary" onClick={() => router.push('/student/practice-new?category=company-wise')}>Go Back</Button>
+      <div className="min-h-screen bg-[#F6F8FB] flex flex-col font-sans">
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+          <div className="flex items-center gap-4">
+            <Button
+              type="text"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => router.push('/student/practice-new?category=company-wise')}
+              className="flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded-full w-10 h-10 border-none shadow-inner"
+              title="Back to Practice"
+            />
+            <div>
+              <h1 className="text-xl font-black text-slate-800 m-0 tracking-tight">
+                {testTitle} - Past Attempted Tests
+              </h1>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest m-0 mt-0.5">
+                Select an attempt from the list below to view detailed results
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={() => router.push('/student/practice-new?category=company-wise')}
+            className="rounded-xl font-bold text-slate-600"
+          >
+            Back to Practice
+          </Button>
+        </div>
+
+        <div className="max-w-4xl w-full mx-auto p-6 md:p-8 flex flex-col gap-6">
+          <div className="text-[12px] font-bold text-slate-400 uppercase tracking-widest px-1">
+            Attempt History ({allPastAttempts.length})
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            {allPastAttempts.map((attempt, arrIdx) => {
+              const totalQuestions = attempt.qaPairs?.length || 0;
+              const correctCount = attempt.qaPairs?.filter((qa) => qa.isCorrect).length || 0;
+              const percentage = totalQuestions
+                ? Math.round((correctCount / totalQuestions) * 100)
+                : (attempt.score ?? 0);
+
+              return (
+                <div
+                  key={attempt.id || arrIdx}
+                  onClick={() => {
+                    setCurrentAttempt(attempt);
+                    setSelectedAttemptIdx(arrIdx);
+                    setSelectedSectionFilter("All");
+                  }}
+                  className="bg-white border border-gray-200 rounded-2xl p-6 transition-all duration-300 shadow-sm hover:border-indigo-400 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] cursor-pointer flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-black text-xl shadow-inner group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                      {arrIdx + 1}
+                    </div>
+                    <div>
+                      <div className="font-extrabold text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">
+                        Attempt {arrIdx + 1}
+                      </div>
+                      <div className="text-sm text-slate-500 font-medium">
+                        Submitted on {new Date(attempt.timestamp).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-right">
+                      <div className="text-2xl font-black text-slate-800 tracking-tight">
+                        {correctCount}{" "}
+                        <span className="text-sm text-slate-400 font-semibold">
+                          / {totalQuestions} Qs
+                        </span>
+                      </div>
+                      <div
+                        className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${
+                          percentage >= 70
+                            ? "text-emerald-500"
+                            : percentage >= 40
+                            ? "text-amber-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {percentage}% Score
+                      </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-indigo-50 text-indigo-600 group-hover:translate-x-1 transition-transform">
+                      <RightOutlined className="text-[16px]" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     );
   }
 
+  // 2. Full detailed results view for selected attempt
   if (showResultView && currentAttempt) {
     const totalQuestions = currentAttempt.qaPairs.length;
     const correctCount = currentAttempt.qaPairs.filter(qa => qa.isCorrect).length;
@@ -705,8 +857,15 @@ export default function StudentMockTestPage() {
             <Button 
               type="text" 
               icon={<ArrowLeftOutlined />} 
-              onClick={() => router.push('/student/practice-new?category=company-wise')} 
+              onClick={() => {
+                if (isViewResult && allPastAttempts.length > 0) {
+                  setSelectedAttemptIdx(null);
+                } else {
+                  router.push('/student/practice-new?category=company-wise');
+                }
+              }} 
               className="flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded-full w-10 h-10 border-none shadow-inner shrink-0"
+              title={isViewResult && allPastAttempts.length > 0 ? "Back to Attempts List" : "Back to Practice"}
             />
             <div>
               <h1 className="text-xl font-black text-slate-800 m-0 tracking-tight flex items-center gap-2 border-none pb-0">
@@ -735,6 +894,30 @@ export default function StudentMockTestPage() {
                   {selectedSectionFilter === "All" ? "All Sections" : selectedSectionFilter} <DownOutlined className="text-[10px]" />
                 </button>
               </Dropdown>
+
+              {allPastAttempts.length > 1 && (
+                <Dropdown
+                  menu={{
+                    items: allPastAttempts.map((att, idx) => ({
+                      key: String(idx),
+                      label: `Attempt ${idx + 1} (${att.score ?? 0}%) - ${new Date(att.timestamp).toLocaleDateString()}`
+                    })),
+                    onClick: (e) => {
+                      const selected = allPastAttempts[Number(e.key)];
+                      if (selected) {
+                        setCurrentAttempt(selected);
+                        setSelectedSectionFilter("All");
+                      }
+                    }
+                  }}
+                  trigger={['hover']}
+                  placement="bottom"
+                >
+                  <button className="px-4 py-2 rounded-full font-bold text-[13px] bg-white text-slate-700 border border-slate-200 flex items-center gap-2 shadow-sm transition-all hover:bg-slate-50 cursor-pointer outline-none whitespace-nowrap">
+                    Attempt {allPastAttempts.indexOf(currentAttempt) + 1} of {allPastAttempts.length} <DownOutlined className="text-[10px]" />
+                  </button>
+                </Dropdown>
+              )}
             </div>
 
             <div className="hidden xl:block w-px h-8 bg-slate-200 shrink-0"></div>
@@ -906,6 +1089,16 @@ export default function StudentMockTestPage() {
                 })()}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // 3. Exam / Test-Taking View: Only show "No questions found" if actually attempting test
+  if (questions.length === 0) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-gray-50 gap-4">
+        <Title level={4}>No questions found for this test.</Title>
+        <Button type="primary" onClick={() => router.push('/student/practice-new?category=company-wise')}>Go Back</Button>
       </div>
     );
   }
@@ -1435,6 +1628,8 @@ export default function StudentMockTestPage() {
                 onClick={() => {
                   setShowSubmitSuccess(false);
                   setCurrentAttempt(pendingAttempt);
+                  setAllPastAttempts((prev) => [pendingAttempt, ...prev.filter((p) => p !== pendingAttempt)]);
+                  setSelectedAttemptIdx(0);
                   setShowResultView(true);
                 }}
                 className="w-full py-4 bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold rounded-xl transition-shadow shadow-[0_4px_14px_rgba(15,23,42,0.25)] hover:shadow-[0_6px_20px_rgba(15,23,42,0.3)] cursor-pointer border-none"

@@ -199,9 +199,13 @@ export default function Workspace() {
   // Practice-set mode: the server picks this attempt's coding questions (after
   // checking the student has access) and "Next" walks through that list.
   const practiceSetId = searchParams.get("ps");
+  const urlDuration = searchParams.get("duration") || searchParams.get("timeMinutes");
   const setStartedRef = useRef(false);
   const setQuestionsRef = useRef(null);
-  const [setDeadline, setSetDeadline] = useState(null);
+  const [setDeadline, setSetDeadline] = useState(() => {
+    const d = Number(urlDuration);
+    return (d && !isNaN(d) && d > 0) ? Date.now() + d * 60 * 1000 : null;
+  });
 
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -328,7 +332,10 @@ export default function Workspace() {
         const list = data?.questionsData || [];
         setQuestionsRef.current = list;
         setAllQuestions(list);
-        if (data?.timeMinutes) setSetDeadline(Date.now() + data.timeMinutes * 60 * 1000);
+        const durationMin = Number(data?.timeMinutes || data?.data?.timeMinutes || data?.practiceSet?.timeMinutes || urlDuration);
+        if (durationMin && !isNaN(durationMin) && durationMin > 0) {
+          setSetDeadline(Date.now() + durationMin * 60 * 1000);
+        }
         if (!list.length) message.error("No questions are available in this practice set yet.");
         else pick(list);
       })

@@ -37,12 +37,22 @@ function TemplatePicker({ value = [], onChange, templates, disabled }) {
         {shown.map((t) => {
           const isOn = selected.has(t.key);
           return (
-            <button
+            <div
               key={t.key}
-              type="button"
-              disabled={disabled}
-              onClick={() => toggle(t.key)}
+              role="button"
+              tabIndex={disabled ? -1 : 0}
+              onClick={() => {
+                if (!disabled) toggle(t.key);
+              }}
+              onKeyDown={(e) => {
+                if (!disabled && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault();
+                  toggle(t.key);
+                }
+              }}
               className={`overflow-hidden rounded-md border bg-white text-left transition-all ${
+                disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+              } ${
                 isOn ? "border-blue-500 ring-2 ring-blue-500/30" : "border-slate-200 hover:border-blue-300"
               }`}
             >
@@ -51,7 +61,7 @@ function TemplatePicker({ value = [], onChange, templates, disabled }) {
                 <Checkbox checked={isOn} disabled={disabled} />
                 <span className="truncate text-[11px] font-medium text-slate-700">{t.name}</span>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>
@@ -90,7 +100,7 @@ export default function BundleDrawer({ bundle, templates, canEdit, onClose, onSa
   return (
     <Drawer
       open
-      width={640}
+      size={640}
       onClose={onClose}
       title={isNew ? "Create bundle" : `Edit · ${bundle.title}`}
       destroyOnHidden
