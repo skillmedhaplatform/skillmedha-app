@@ -9,6 +9,9 @@ import { restUrl } from "@/config/urls";
 import { getLstorage } from "@/universalUtils/windowMW";
 import { FiTrash2, FiShoppingCart, FiX } from "react-icons/fi";
 
+import { getStudentCreds } from "@/redux/slices/student";
+import { getAllCourses, getAllInternships } from "@/redux/slices/internship";
+
 /**
  * Order / Checkout API (inlined)
  *
@@ -74,6 +77,15 @@ const CartDrawer = ({ open, onClose, cartItems = [], totalAmount = 0, loading = 
   const handleCheckout = async () => {
     if (!cartItems.length) return;
 
+    const firstItem = cartItems[0]?.courseId;
+    const purchasedId = firstItem?._id || (typeof firstItem === "string" ? firstItem : null);
+    const itemType = firstItem?.type?.toLowerCase() || "course";
+    const getRedirectUrl = (resolvedId) => {
+      const id = resolvedId || purchasedId;
+      if (!id) return itemType === "internship" ? "/student/internshipLibrary" : "/student/course";
+      return itemType === "internship" ? `/student/internshipLibrary/${id}` : `/student/course/${id}`;
+    };
+
     setCheckingOut(true);
     try {
       // STEP 1: Create order on backend (reads the cart server-side)
@@ -84,7 +96,14 @@ const CartDrawer = ({ open, onClose, cartItems = [], totalAmount = 0, loading = 
         message.success("Enrollment successful!");
         setCheckingOut(false);
         onClose();
-        nav?.push("/my-learning");
+        dispatch(getStudentCreds());
+        if (itemType === "internship") {
+          dispatch(getAllInternships());
+        } else {
+          dispatch(getAllCourses());
+        }
+        const targetId = order?.courseIds?.[0] || purchasedId;
+        nav?.push(getRedirectUrl(targetId));
         return;
       }
 
@@ -107,14 +126,21 @@ const CartDrawer = ({ open, onClose, cartItems = [], totalAmount = 0, loading = 
         theme: { color: "#1E69DA" },
         handler: async (response) => {
           try {
-            await verifyPaymentApi({
+            const { data } = await verifyPaymentApi({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
             message.success("Payment successful! You're enrolled.");
             onClose();
-            nav?.push("/my-learning");
+            dispatch(getStudentCreds());
+            if (itemType === "internship") {
+              dispatch(getAllInternships());
+            } else {
+              dispatch(getAllCourses());
+            }
+            const targetId = data?.enrolledCourses?.[0] || purchasedId;
+            nav?.push(getRedirectUrl(targetId));
           } catch (err) {
             message.error(err?.response?.data?.error || "Payment verification failed");
           } finally {

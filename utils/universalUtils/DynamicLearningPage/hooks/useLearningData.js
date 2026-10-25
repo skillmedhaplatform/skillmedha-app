@@ -18,6 +18,7 @@ const selectTotalCount       = (state) => state.internship.serverTotalCount;
 
 import { useDispatch } from "react-redux";
 import { getOneInternsip } from "@/redux/slices/internship";
+import { getStudentCreds } from "@/redux/slices/student";
 
 /**
  * useLearningData
@@ -42,10 +43,17 @@ export const useLearningData = (setTopicDetails) => {
 
   const dispatch = useDispatch();
 
-  // Fetch all internship data on mount when credentials are ready
+  // Ensure student credentials exist
   useEffect(() => {
-    if (studentCreds?._id && internshipId && orgId) {
-      dispatch(getOneInternsip({ id: internshipId, orgId, userId: studentCreds._id }));
+    if (!studentCreds?._id) {
+      dispatch(getStudentCreds());
+    }
+  }, [studentCreds?._id, dispatch]);
+
+  // Fetch course/internship learning data on mount or when id/user changes
+  useEffect(() => {
+    if (internshipId) {
+      dispatch(getOneInternsip({ id: internshipId, orgId: orgId || undefined, userId: studentCreds?._id }));
     }
   }, [studentCreds?._id, internshipId, orgId, dispatch]);
 

@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useSearchParams } from "next/navigation";
 import { Button, Spin, message } from "antd";
+import { getStudentCreds } from "@/redux/slices/student";
+import { getAllCourses, getAllInternships } from "@/redux/slices/internship";
 import {
   LockOutlined,
   SafetyCertificateOutlined,
@@ -60,6 +62,7 @@ const authHeaders = () => ({
 
 export default function CheckoutPage() {
   const nav = useAppRouter();
+  const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const courseId = searchParams.get("courseId");
   const orgId = searchParams.get("orgId");
@@ -125,6 +128,11 @@ export default function CheckoutPage() {
     if (!course?._id || paying) return;
     setPaying(true);
 
+    const courseType = course?.type?.toLowerCase() === "internship" ? "internship" : "course";
+    const coursePageUrl = courseType === "internship"
+      ? `/student/internshipLibrary/${course._id}`
+      : `/student/course/${course._id}`;
+
     try {
       const { data: order } = await axios.post(
         `${restUrl}/payment/buyNow/createOrder`,
@@ -135,7 +143,13 @@ export default function CheckoutPage() {
       // Free course — backend enrolls directly, no Razorpay needed.
       if (order?.enrolled) {
         message.success("Enrollment successful!");
-        nav.push("/my-learning");
+        dispatch(getStudentCreds());
+        if (courseType === "internship") {
+          dispatch(getAllInternships());
+        } else {
+          dispatch(getAllCourses());
+        }
+        nav.push(coursePageUrl);
         return;
       }
 
@@ -166,7 +180,13 @@ export default function CheckoutPage() {
               authHeaders()
             );
             message.success("Payment successful! You're enrolled.");
-            nav.push("/my-learning");
+            dispatch(getStudentCreds());
+            if (courseType === "internship") {
+              dispatch(getAllInternships());
+            } else {
+              dispatch(getAllCourses());
+            }
+            nav.push(coursePageUrl);
           } catch (err) {
             message.error(
               err?.response?.data?.error || "Payment verification failed. Please contact support."

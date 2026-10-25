@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { getOneInternsip, getAllInternshipsOnly } from "@/redux/slices/internship";
+import { useDispatch, useSelector } from "react-redux";
+import { getOneInternsip, getAllInternshipsOnly, getAllInternships } from "@/redux/slices/internship";
+import { getStudentCreds } from "@/redux/slices/student";
 import { message, Spin, Popover } from "antd";
 import BuyNowPopoverContent from "@/universalUtils/LibraryPage/BuyNowPopoverContent";
 import ShareModal from "@/components/shared/ShareModal";
@@ -29,8 +30,12 @@ export default function InternshipDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
+  const student = useSelector((state) => state.student?.student?.data || state.student?.student);
+  const enrolledInternships = useSelector((state) => state.internship?.allInternships?.data || state.internship?.allInternships || []);
+
   const [internship, setInternship] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [expandedSection, setExpandedSection] = useState(-1);
   const [showAllCurriculum, setShowAllCurriculum] = useState(false);
   const [showAllDescription, setShowAllDescription] = useState(false);
@@ -45,12 +50,40 @@ export default function InternshipDetailsPage() {
   const [appliedDiscountAmount, setAppliedDiscountAmount] = useState(0);
   const toolsRef = useRef(null);
 
+  const isEnrolled = React.useMemo(() => {
+    if (!params?.id) return false;
+    const internshipId = String(params.id);
+    const inEnrolledData = (student?.enrolledData || []).some(
+      (e) => (String(e.refId) === internshipId || String(e._id) === internshipId) && e.active !== false
+    );
+    const inSubscriptions = (student?.subscriptions || []).some(
+      (s) => String(s) === internshipId
+    );
+    const inEnrolledInternships = (Array.isArray(enrolledInternships) ? enrolledInternships : []).some(
+      (c) => String(c._id) === internshipId
+    );
+    return inEnrolledData || inSubscriptions || inEnrolledInternships;
+  }, [params?.id, student, enrolledInternships]);
+
+  const internshipUrl = React.useMemo(() => {
+    if (!internship?._id) return "";
+    const title = internship?.title?.split(" ")?.join("");
+    return `/student/learning-internship?title=${title}&id=${internship._id}&orgId=${internship?.sourceOrgId || ""}`;
+  }, [internship]);
+
+  // Pre-warm / prefetch the learning route as soon as internship details and enrollment are ready
   useEffect(() => {
-    if (params?.id) {
-      fetchInternshipDetails();
-      fetchRelatedItems();
+    if (internshipUrl && isEnrolled) {
+      router.prefetch(internshipUrl);
     }
-  }, [params?.id]);
+  }, [internshipUrl, isEnrolled, router]);
+
+  useEffect(() => {
+    if (!student?._id) {
+      dispatch(getStudentCreds());
+    }
+    dispatch(getAllInternships());
+  }, [dispatch, student?._id]);
 
   const fetchInternshipDetails = async () => {
     try {
@@ -79,8 +112,15 @@ export default function InternshipDetailsPage() {
       } else if (Array.isArray(res.payload)) {
         setRelatedItems(res.payload.filter((c) => c._id !== params.id));
       }
-    } catch (e) {}
+    } catch {}
   };
+
+  useEffect(() => {
+    if (params?.id) {
+      fetchInternshipDetails();
+      fetchRelatedItems();
+    }
+  }, [params?.id]);
 
   const relatedRef = useRef(null);
   const scrollRelated = (dir) => {
@@ -190,6 +230,12 @@ export default function InternshipDetailsPage() {
     const orgId = internship?.sourceOrgId;
     const couponQuery = appliedCoupon ? `&coupon=${encodeURIComponent(appliedCoupon)}` : "";
     router.push(`/student/checkout?courseId=${internshipId}${orgId ? `&orgId=${orgId}` : ""}${couponQuery}`);
+  };
+
+  const handleGoToInternship = () => {
+    if (!internshipUrl || isNavigating) return;
+    setIsNavigating(true);
+    router.push(internshipUrl);
   };
 
   const visibleSections = showAllCurriculum ? internship?.sections : internship?.sections?.slice(0, 6);
@@ -611,15 +657,47 @@ export default function InternshipDetailsPage() {
                     {discountPercent > 0 && (
                       <span className="text-sm font-semibold text-slate-900 leading-none">
                         {discountPercent}% off
+                  {isEnrolled ? (
+                    <div className="flex items-center gap-2 mb-6">
+                      <span className="bg-emerald-100 text-emerald-800 font-bold px-3.5 py-1.5 rounded-full text-[13px] flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4 text-emerald-600" /> You are enrolled in this internship
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-baseline gap-3 mb-6">
+                      <span className="text-3xl font-bold text-slate-900 leading-none">
+                        {internship?.pricing?.finalPrice ? `₹${internship.pricing.finalPrice}` : internship?.price ? `₹${internship.price}` : "Free"}
+                      </span>
+                      {internship?.pricing?.finalPrice && internship?.price && (
+                        <span className="text-lg text-slate-400 line-through font-medium leading-none">
+                          ₹{internship.price}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   
                   <button 
-                    onClick={handleBuyNow}
-                    className="w-full py-3.5 px-6 bg-[#0056D2] hover:bg-[#004bb8] text-white text-[16px] font-bold rounded-lg transition-colors shadow-sm mb-6"
+                    onClick={isEnrolled ? handleGoToInternship : handleBuyNow}
+                    disabled={isNavigating}
+                    className={`w-full py-3.5 px-6 ${
+                      isEnrolled 
+                        ? (isNavigating ? "bg-emerald-700 opacity-90 cursor-wait" : "bg-emerald-600 hover:bg-emerald-700 cursor-pointer")
+                        : "bg-[#0056D2] hover:bg-[#004bb8] cursor-pointer"
+                    } text-white text-[16px] font-bold rounded-lg transition-colors shadow-sm mb-6 flex items-center justify-center gap-2`}
                   >
-                    Buy Internship
+                    {isEnrolled ? (
+                      isNavigating ? (
+                        <>
+                          <Spin size="small" /> Opening Internship...
+                        </>
+                      ) : (
+                        <>
+                          <PlayCircle className="w-5 h-5" /> Start Learning
+                        </>
+                      )
+                    ) : (
+                      "Buy Internship"
+                    )}
                   </button>
                   
                   <div className="space-y-4">
