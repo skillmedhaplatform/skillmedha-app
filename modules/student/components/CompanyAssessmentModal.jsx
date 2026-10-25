@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Modal, Button, Dropdown } from "antd";
+import { Modal, Button, Dropdown, Spin } from "antd";
 import {
   ArrowLeftOutlined,
   ClockCircleOutlined,
@@ -9,6 +9,7 @@ import {
   CheckCircleOutlined,
   DownOutlined,
   InfoCircleOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import { restUrl } from "@/config/urls";
 
@@ -18,15 +19,18 @@ export default function CompanyAssessmentModal({
   onClose,
   studentCreds,
   router,
+  initialState = "INITIAL",
 }) {
-  const [modalState, setModalState] = useState("INITIAL"); // INITIAL, RESULTS
+  const [modalState, setModalState] = useState(initialState || "INITIAL"); // INITIAL, RESULTS
   const [pastAttempts, setPastAttempts] = useState([]);
+  const [loadingAttempts, setLoadingAttempts] = useState(false);
   const [fullScreenResultIdx, setFullScreenResultIdx] = useState(null);
   const [selectedSectionFilter, setSelectedSectionFilter] = useState("All");
 
   useEffect(() => {
-    if (open && test?.id) {
-      setModalState("INITIAL");
+    const testId = test?._id || test?.id;
+    if (open && testId) {
+      setModalState(initialState || "INITIAL");
       setPastAttempts([]);
       setFullScreenResultIdx(null);
       setSelectedSectionFilter("All");
@@ -36,7 +40,8 @@ export default function CompanyAssessmentModal({
           ? localStorage.getItem("token") || sessionStorage.getItem("token") || ""
           : "";
       if (token) {
-        fetch(`${restUrl}/practice/top-scores/${test.id}`, {
+        setLoadingAttempts(true);
+        fetch(`${restUrl}/practice/top-scores/${testId}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -46,24 +51,31 @@ export default function CompanyAssessmentModal({
               setPastAttempts(data.data);
             }
           })
-          .catch((e) => console.error(e));
+          .catch((e) => console.error(e))
+          .finally(() => {
+            setLoadingAttempts(false);
+          });
       }
     }
-  }, [open, test?.id]);
+  }, [open, test?._id, test?.id, initialState]);
 
   if (!test) return null;
+
+  const testTitle = test.title || test.name || "Assessment";
 
   const handleStartTestClick = () => {
     const studentName = studentCreds?.userName || studentCreds?.fullName || "Student";
     const studentEmail = studentCreds?.email || "student@example.com";
+    const testId = test._id || test.id;
     if (typeof window !== "undefined") {
       sessionStorage.setItem(
         "current_mock_user",
         JSON.stringify({ name: studentName, email: studentEmail })
       );
-      sessionStorage.removeItem(`active_test_${test.id}`);
+      sessionStorage.removeItem(`active_test_${testId}`);
     }
-    router.push(`/student/practice-new/company-wise/${test.id}`);
+    const duration = test.timeLimit || test.timeMinutes || 60;
+    router.push(`/student/practice-new/company-wise/${testId}?duration=${duration}`);
   };
 
   const handleClose = () => {
@@ -78,7 +90,7 @@ export default function CompanyAssessmentModal({
         open={open && fullScreenResultIdx === null}
         onCancel={handleClose}
         footer={null}
-        closable={modalState === "INITIAL"}
+        closable={true}
         width={modalState === "RESULTS" ? 800 : 650}
         wrapClassName="backdrop-blur-sm"
         centered
@@ -87,7 +99,7 @@ export default function CompanyAssessmentModal({
         {modalState === "INITIAL" && (
           <div className="flex flex-col gap-6 py-4 px-2">
             <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">
-              {test.name} Assessment
+              {testTitle} Assessment
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Start Test Card */}
@@ -164,13 +176,28 @@ export default function CompanyAssessmentModal({
               <Button
                 type="text"
                 icon={<ArrowLeftOutlined />}
-                onClick={() => setModalState("INITIAL")}
+                onClick={() => {
+                  if (initialState === "RESULTS") {
+                    handleClose();
+                  } else {
+                    setModalState("INITIAL");
+                  }
+                }}
               />
-              <h2 className="text-xl font-bold text-slate-800 m-0">Past Results</h2>
+              <h2 className="text-xl font-bold text-slate-800 m-0">{testTitle} - Past Results</h2>
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-6">
-              {pastAttempts.length > 0 && (
+              {loadingAttempts ? (
+                <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                  <Spin size="default" />
+                  <p className="mt-3 text-sm text-slate-400 font-medium">Loading attempts...</p>
+                </div>
+              ) : pastAttempts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                  <p className="font-semibold text-base">No attempts found for this test.</p>
+                </div>
+              ) : (
                 <>
                   <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-[-8px]">
                     Top 3 Attempts
@@ -309,7 +336,7 @@ export default function CompanyAssessmentModal({
       </Modal>
 
       {/* Full Screen Results Overlay */}
-      {fullScreenResultIdx !== null && pastAttempts[fullScreenResultIdx] && (() => {
+      {open && fullScreenResultIdx !== null && pastAttempts[fullScreenResultIdx] && (() => {
         const attempt = pastAttempts[fullScreenResultIdx];
         const qaPairs = attempt.qaPairs || [];
         const totalQuestions = qaPairs.length;
@@ -396,7 +423,7 @@ export default function CompanyAssessmentModal({
                 />
                 <div>
                   <h1 className="text-xl font-black text-slate-800 m-0 tracking-tight flex items-center gap-2 border-none pb-0">
-                    {test.name || "Assessment"}
+                    {testTitle}
                   </h1>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest m-0 mt-0.5 whitespace-nowrap">
                     Attempt {fullScreenResultIdx + 1} &bull;{" "}
@@ -503,6 +530,13 @@ export default function CompanyAssessmentModal({
                     {percentage}% Score
                   </div>
                 </div>
+                <Button
+                  type="text"
+                  icon={<CloseOutlined />}
+                  onClick={handleClose}
+                  className="flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded-full w-10 h-10 border-none shadow-inner shrink-0"
+                  title="Close Results"
+                />
               </div>
             </div>
 

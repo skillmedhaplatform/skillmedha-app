@@ -242,11 +242,18 @@ export default function TemplatesTab({ templates, bundles, loading, onSaved }) {
                   Hidden
                 </span>
               )}
-              <button
-                type="button"
+              <div
+                role="button"
+                tabIndex={0}
                 title="View the full template"
-                className={`group/thumb relative border-b border-slate-100 text-left ${t.visibility === "hidden" ? "opacity-60" : ""}`}
+                className={`group/thumb relative border-b border-slate-100 text-left cursor-pointer ${t.visibility === "hidden" ? "opacity-60" : ""}`}
                 onClick={() => openPreview(t.key)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openPreview(t.key);
+                  }
+                }}
               >
                 <TemplateThumb templateKey={t.key} previewImage={t.previewImage} height={200} scale={0.27} />
                 <span className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 transition-opacity group-hover/thumb:opacity-100">
@@ -254,7 +261,7 @@ export default function TemplatesTab({ templates, bundles, loading, onSaved }) {
                     <EyeOutlined /> View full template
                   </span>
                 </span>
-              </button>
+              </div>
               <div className="flex flex-1 flex-col gap-2 p-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
@@ -315,14 +322,21 @@ export default function TemplatesTab({ templates, bundles, loading, onSaved }) {
       width: 300,
       render: (_, t) => (
         <div className="flex items-center gap-3">
-          <button
-            type="button"
+          <div
+            role="button"
+            tabIndex={0}
             title="View the full template"
             onClick={() => openPreview(t.key)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openPreview(t.key);
+              }
+            }}
             className="w-[52px] shrink-0 cursor-zoom-in overflow-hidden rounded border border-slate-200 p-0 hover:border-blue-400"
           >
             <TemplateThumb templateKey={t.key} previewImage={t.previewImage} height={68} scale={0.07} />
-          </button>
+          </div>
           <div className="min-w-0">
             <Typography.Text
               strong

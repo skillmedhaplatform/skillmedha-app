@@ -59,6 +59,17 @@ export async function POST(request) {
     const response = NextResponse.json({ success: true }, { headers: getCorsHeaders(request) });
     response.cookies.set("token", token, TOKEN_OPTS);
     response.cookies.set("permissions", permissionsEncrypted, PERMISSIONS_OPTS);
+
+    const isProd = process.env.NODE_ENV === "production";
+    response.cookies.set("sm_student_session", "true", {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      ...(isProd ? { domain: ".skillmedha.com" } : {}),
+    });
+
     return response;
   } catch (error) {
     console.error("[session POST]", error);
@@ -88,7 +99,13 @@ export async function PATCH(request) {
 // ── DELETE — logout ───────────────────────────────────────────────────────────
 export async function DELETE(request) {
   const response = NextResponse.json({ success: true }, { headers: getCorsHeaders(request) });
-  response.cookies.delete("token");
-  response.cookies.delete("permissions");
+  const isProd = process.env.NODE_ENV === "production";
+  const delOpts = {
+    path: "/",
+    ...(isProd ? { domain: ".skillmedha.com" } : {}),
+  };
+  response.cookies.delete("token", delOpts);
+  response.cookies.delete("permissions", delOpts);
+  response.cookies.delete("sm_student_session", delOpts);
   return response;
 }

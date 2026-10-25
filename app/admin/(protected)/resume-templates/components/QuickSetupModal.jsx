@@ -96,9 +96,31 @@ export default function QuickSetupModal({ templates, onClose, onSaved }) {
                   </button>
                 ))}
               </div>
-              <div className="flex gap-3">
-                <InputNumber addonBefore="Price ₹" min={1} precision={0} value={price} onChange={setPrice} />
-                <InputNumber addonBefore="Original ₹" min={1} precision={0} value={mrp} onChange={setMrp} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="mb-1 text-[12px] font-medium text-slate-600">Price</div>
+                  <InputNumber
+                    prefix="₹"
+                    min={1}
+                    precision={0}
+                    value={price}
+                    onChange={setPrice}
+                    className="w-full"
+                    placeholder="Price"
+                  />
+                </div>
+                <div>
+                  <div className="mb-1 text-[12px] font-medium text-slate-600">Original price</div>
+                  <InputNumber
+                    prefix="₹"
+                    min={1}
+                    precision={0}
+                    value={mrp}
+                    onChange={setMrp}
+                    className="w-full"
+                    placeholder="Original price"
+                  />
+                </div>
               </div>
               {mrp && mrp < price && <div className="text-[12px] text-red-500">Original price must be at least the price.</div>}
             </div>

@@ -119,8 +119,9 @@ function Price({ isFree, owned, mrp, price }) {
 
 const cardStats = (item, isBundle) => ({
   plan: isBundle ? "bundle" : item.plan || "free",
-  questions: (isBundle ? item.summary?.totalQuestions : item.questionCount) || 0,
-  minutes: isBundle ? item.summary?.totalMinutes : item.timeMinutes,
+  questions:
+    (isBundle ? item.summary?.totalQuestions : (item.questionCount ?? item.questionsCount)) || 0,
+  minutes: isBundle ? item.summary?.totalMinutes : (item.timeMinutes ?? item.timeLimit ?? item.duration),
 });
 
 /**
@@ -143,26 +144,37 @@ export function PracticeSetCard({ item, isBundle = false, owned = false, accessT
           : "shadow-[0_2px_8px_rgba(15,23,42,0.06)] ring-slate-200/70 hover:-translate-y-1 hover:shadow-[0_20px_40px_-14px_rgba(15,23,42,0.35)] hover:ring-blue-200"
       } ${onClick ? "cursor-pointer" : ""}`}
     >
-      <div className="relative aspect-[2/1] w-full shrink-0 overflow-hidden">
+      <div className="relative aspect-[2/1] w-full shrink-0 overflow-hidden bg-slate-900 flex items-center justify-center">
         {item.thumbnail ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.thumbnail}
-            alt={item.title || "Practice set"}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          <>
+            {/* Ambient blurred backdrop to seamlessly fill any aspect-ratio letterboxing */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={item.thumbnail}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full object-cover blur-md opacity-40 scale-110 pointer-events-none"
+            />
+            {/* Main uploaded image fully visible without cropping */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={item.thumbnail}
+              alt={item.title || "Practice set"}
+              className="relative z-[1] h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+            />
+          </>
         ) : (
           <CardArt item={item} isBundle={isBundle} />
         )}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/25 to-transparent" />
-        <PlanBadge plan={plan} className="absolute left-3 top-3 shadow-md" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/25 to-transparent z-[2]" />
+        <PlanBadge plan={plan} className="absolute left-3 top-3 shadow-md z-10" />
         {categoryTag && (
-          <span className="absolute right-3 top-3 rounded-md bg-[#0B1220]/85 px-2 py-[3px] text-[10.5px] font-semibold text-white backdrop-blur-sm">
+          <span className="absolute right-3 top-3 rounded-md bg-[#0B1220]/85 px-2 py-[3px] text-[10.5px] font-semibold text-white backdrop-blur-sm z-10">
             {categoryTag}
           </span>
         )}
         {accessTag && (
-          <span className="absolute bottom-2.5 left-3 flex max-w-[85%] items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-[3px] text-[10px] font-bold text-white shadow-md">
+          <span className="absolute bottom-2.5 left-3 flex max-w-[85%] items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-[3px] text-[10px] font-bold text-white shadow-md z-10">
             <FiCheck className="shrink-0" strokeWidth={3} /> <span className="truncate">{accessTag}</span>
           </span>
         )}
@@ -233,6 +245,8 @@ export function PracticeSetDetails({
   note,
   actionLoading = false,
   plain = false,
+  hasCompletedTest = false,
+  onViewResults,
 }) {
   const { plan, questions, minutes } = cardStats(item, isBundle);
   const topicTitles = isBundle
@@ -334,6 +348,20 @@ export function PracticeSetDetails({
       >
         {actionLoading ? "Please wait…" : actionLabel || ACTION_LABEL[plan]}
       </button>
+
+      {/* View Results option for Company-wise tests when completed */}
+      {!isBundle && (item.category === "company" || item.category === "company-wise" || item.type === "company") && Boolean(hasCompletedTest) && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewResults?.();
+          }}
+          className="mt-2.5 h-10 w-full rounded-lg text-[13px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200/90 transition-all hover:-translate-y-px flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+        >
+          View Results
+        </button>
+      )}
     </div>
   );
 }
