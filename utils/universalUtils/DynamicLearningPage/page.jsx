@@ -17,6 +17,7 @@ import TopicViewer from "./components/TopicViewer";
 
 import useResponsive from "@/hooks/useResponsive";
 import MobileClassroomPlayer from "@/mobile_views/classroom/MobileClassroomPlayer";
+import LearningSkeleton from "@/app/student/(learning)/loading";
 
 export default function DynamicLearningPage({ moduleType }) {
   const isMobile = useResponsive();
@@ -127,7 +128,9 @@ export default function DynamicLearningPage({ moduleType }) {
     }
   }, [currentTopic?._id, activeContentTab, fetchNote]);
 
-  if (!mounted || !selectedInternshipData) return null;
+  if (!mounted || !selectedInternshipData) {
+    return <LearningSkeleton />;
+  }
 
   const toggleExpandedView = () => setIsExpandedView((prev) => !prev);
   const courseHeading = selectedInternshipData?.title || selectedTitle;

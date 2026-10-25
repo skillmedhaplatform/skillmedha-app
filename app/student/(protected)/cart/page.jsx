@@ -16,6 +16,8 @@ import axios from "axios";
 import { restUrl } from "@/config/urls";
 import { getLstorage } from "@/universalUtils/windowMW";
 
+import { getStudentCreds } from "@/redux/slices/student";
+
 // Checkout APIs
 const authHeaders = () => ({
   headers: { Authorization: `Bearer ${getLstorage("token")}` },
@@ -119,6 +121,16 @@ export default function CartPage() {
   const handleCheckout = async () => {
     if (!cartItems.length) return;
     
+    // Remember the purchased course to redirect to its page after checkout
+    const firstCourseItem = cartItems[0]?.courseId;
+    const purchasedId = firstCourseItem?._id || (typeof firstCourseItem === "string" ? firstCourseItem : null);
+    const itemType = firstCourseItem?.type?.toLowerCase() || typeParam || "course";
+    const getRedirectUrl = (resolvedId) => {
+      const id = resolvedId || purchasedId;
+      if (!id) return typeParam === "internship" ? "/student/internshipLibrary" : "/student/course";
+      return itemType === "internship" ? `/student/internshipLibrary/${id}` : `/student/course/${id}`;
+    };
+
     setCheckingOut(true);
     try {
       const { data: order } = await createOrderApi();
@@ -126,7 +138,15 @@ export default function CartPage() {
       if (!order?.orderId) {
         message.success("Enrollment successful!");
         setCheckingOut(false);
-        nav.push("/student/my-learning");
+        dispatch(getCart());
+        dispatch(getStudentCreds());
+        if (itemType === "internship") {
+          dispatch(getAllInternships());
+        } else {
+          dispatch(getAllCourses());
+        }
+        const targetId = order?.courseIds?.[0] || purchasedId;
+        nav.push(getRedirectUrl(targetId));
         return;
       }
 
@@ -155,7 +175,14 @@ export default function CartPage() {
             if (data?.success) {
               message.success({ content: "Payment verified successfully!", key: "payment" });
               dispatch(getCart());
-              nav.push("/student/my-learning");
+              dispatch(getStudentCreds());
+              if (itemType === "internship") {
+                dispatch(getAllInternships());
+              } else {
+                dispatch(getAllCourses());
+              }
+              const targetId = data?.enrolledCourses?.[0] || purchasedId;
+              nav.push(getRedirectUrl(targetId));
             } else {
               message.error({ content: "Payment verification failed.", key: "payment" });
             }
@@ -222,7 +249,7 @@ export default function CartPage() {
                 
                 const imageUrl = course?.media?.thumbnailImage || course?.media?.coverImage || course?.bannerImage || course?.image || "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80";
                 const price = item.discountedPrice ?? item.price ?? course?.pricing?.finalPrice ?? course?.pricing?.currentPrice ?? course?.price ?? 0;
-                const originalPrice = Number(course?.pricing?.originalPrice) || Number(course?.price) || 0;
+                const originalPrice = Number(course?.pricing?.originalPrice) || Number(course?.price) || Number(item.price) || 0;
                 
                 const rating = course?.rating || (4 + Math.random() * 0.9).toFixed(1);
                 const reviews = course?.reviews || Math.floor(Math.random() * 5000 + 500);
