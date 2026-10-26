@@ -25,23 +25,40 @@ const PERMISSIONS_OPTS = {
  *
  * On failure (invalid/deleted account): wipes token + permissions and goes to /login.
  */
+function getPublicOrigin(request) {
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  const proto = request.headers.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
+  if (host && !host.includes("localhost")) {
+    return `${proto}://${host}`;
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("localhost")) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  return new URL(request.url).origin;
+}
+
 export async function GET(request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const publicOrigin = getPublicOrigin(request);
+  const isJson = searchParams.get("json") === "true";
 
   // Sanitise returnTo — only allow relative paths to prevent open redirect
-  const rawReturn = searchParams.get("returnTo") || "/dashboard";
-  const returnTo = rawReturn.startsWith("/") ? rawReturn : "/dashboard";
+  const rawReturn = searchParams.get("returnTo") || "/student/dashboard";
+  const returnTo = (rawReturn.startsWith("/") && rawReturn !== "/dashboard") ? rawReturn : "/student/dashboard";
 
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
-  // No token at all → just go to login
+  // No token at all → return 401 for json requests or redirect to login for browser navigation
   if (!token) {
-    return NextResponse.redirect(new URL("/login", origin));
+    if (isJson) {
+      return NextResponse.json({ success: false, error: "No token" }, { status: 401 });
+    }
+    return NextResponse.redirect(new URL("/login", publicOrigin));
   }
 
   try {
-    const fetchUrl = studentUrl.replace('localhost', '127.0.0.1');
+    const fetchUrl = (studentUrl || "http://localhost:4000").replace('localhost', '127.0.0.1');
     const res = await fetch(`${fetchUrl}/getStudentCreds`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -49,7 +66,13 @@ export async function GET(request) {
 
     if (!res.ok) {
       // Token is invalid or account deleted — wipe everything
-      const response = NextResponse.redirect(new URL("/login", origin));
+      if (isJson) {
+        const response = NextResponse.json({ success: false, error: "Invalid token" }, { status: 401 });
+        response.cookies.delete("token");
+        response.cookies.delete("permissions");
+        return response;
+      }
+      const response = NextResponse.redirect(new URL("/login", publicOrigin));
       response.cookies.delete("token");
       response.cookies.delete("permissions");
       return response;
@@ -79,10 +102,9 @@ export async function GET(request) {
       pt: ptValue,
     });
 
-    const isJson = searchParams.get("json") === "true";
     const response = isJson
       ? NextResponse.json({ success: true })
-      : NextResponse.redirect(new URL(returnTo, origin));
+      : NextResponse.redirect(new URL(returnTo, publicOrigin));
     response.cookies.set("permissions", permissionsEncrypted, PERMISSIONS_OPTS);
     return response;
   } catch (error) {
@@ -90,20 +112,19 @@ export async function GET(request) {
     // Don't delete the token — could be a transient backend error.
     // Set a safe fallback permissions cookie so the user isn't stuck in a loop.
     // They'll get re-validated on the next refresh cycle.
-    const isJson = searchParams.get("json") === "true";
     try {
       // Set ev: true in fallback perms so a backend timeout doesn't falsely claim unverified
       const fallbackPerms = await encryptSession({ ev: true, special: false, pt: true });
       const response = isJson
         ? NextResponse.json({ success: true, fallback: true })
-        : NextResponse.redirect(new URL(returnTo, origin));
+        : NextResponse.redirect(new URL(returnTo, publicOrigin));
       response.cookies.set("permissions", fallbackPerms, PERMISSIONS_OPTS);
       return response;
     } catch {
       // If even encryption fails, just let the user through
       return isJson
         ? NextResponse.json({ error: "encryption_failed" }, { status: 500 })
-        : NextResponse.redirect(new URL(returnTo, origin));
+        : NextResponse.redirect(new URL(returnTo, publicOrigin));
     }
   }
 }

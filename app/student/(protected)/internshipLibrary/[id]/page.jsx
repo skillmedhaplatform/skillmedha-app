@@ -11,7 +11,6 @@ import ShareModal from "@/components/shared/ShareModal";
 import {
   Clock,
   PlayCircle,
-  BookOpen,
   CheckCircle,
   Tv,
   Download,
@@ -353,7 +352,7 @@ export default function InternshipDetailsPage() {
               {/* 1. What You'll Learn (Website design) */}
               {internship?.learningPoints?.length > 0 && (
                 <div className="border border-slate-200 rounded-lg p-6 lg:p-8 mb-10 shadow-sm relative overflow-hidden">
-                  <h2 className="text-xl font-bold text-slate-800 mb-6">What you'll learn</h2>
+                  <h2 className="text-xl font-bold text-slate-800 mb-6">What you&apos;ll learn</h2>
                   <div className="relative">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                       {visibleLearning.map((item, i) => (
@@ -645,18 +644,6 @@ export default function InternshipDetailsPage() {
                   />
                 </div>
                 <div className="p-6">
-                  <div className="flex items-baseline gap-3 mb-6">
-                    <span className="text-3xl font-bold text-slate-900 leading-none">
-                      {isFree ? "Free" : `₹${effectiveCurrentPrice.toLocaleString("en-IN")}`}
-                    </span>
-                    {originalPrice > effectiveCurrentPrice && (
-                      <span className="text-lg text-slate-400 line-through font-medium leading-none">
-                        ₹{originalPrice.toLocaleString("en-IN")}
-                      </span>
-                    )}
-                    {discountPercent > 0 && (
-                      <span className="text-sm font-semibold text-slate-900 leading-none">
-                        {discountPercent}% off
                   {isEnrolled ? (
                     <div className="flex items-center gap-2 mb-6">
                       <span className="bg-emerald-100 text-emerald-800 font-bold px-3.5 py-1.5 rounded-full text-[13px] flex items-center gap-1.5">
@@ -666,11 +653,16 @@ export default function InternshipDetailsPage() {
                   ) : (
                     <div className="flex items-baseline gap-3 mb-6">
                       <span className="text-3xl font-bold text-slate-900 leading-none">
-                        {internship?.pricing?.finalPrice ? `₹${internship.pricing.finalPrice}` : internship?.price ? `₹${internship.price}` : "Free"}
+                        {isFree ? "Free" : `₹${effectiveCurrentPrice.toLocaleString("en-IN")}`}
                       </span>
-                      {internship?.pricing?.finalPrice && internship?.price && (
+                      {originalPrice > effectiveCurrentPrice && (
                         <span className="text-lg text-slate-400 line-through font-medium leading-none">
-                          ₹{internship.price}
+                          ₹{originalPrice.toLocaleString("en-IN")}
+                        </span>
+                      )}
+                      {discountPercent > 0 && (
+                        <span className="text-sm font-semibold text-slate-900 leading-none">
+                          {discountPercent}% off
                         </span>
                       )}
                     </div>
