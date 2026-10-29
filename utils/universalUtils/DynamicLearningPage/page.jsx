@@ -18,6 +18,7 @@ import TopicViewer from "./components/TopicViewer";
 import useResponsive from "@/hooks/useResponsive";
 import MobileClassroomPlayer from "@/mobile_views/classroom/MobileClassroomPlayer";
 import LearningSkeleton from "@/app/student/(learning)/loading";
+import CourseLockedScreen from "@/components/courseAccess/CourseLockedScreen";
 
 export default function DynamicLearningPage({ moduleType }) {
   const isMobile = useResponsive();
@@ -47,6 +48,7 @@ export default function DynamicLearningPage({ moduleType }) {
     orgId,
     selectedTitle,
     getOneTopic,
+    courseAccess,
   } = useLearningData(setTopicDetails);
 
   // 2. Duration overrides
@@ -130,6 +132,12 @@ export default function DynamicLearningPage({ moduleType }) {
 
   if (!mounted || !selectedInternshipData) {
     return <LearningSkeleton />;
+  }
+
+  // Course the student hasn't unlocked: the server sent the curriculum without
+  // lesson content, so show what's inside and how to unlock it.
+  if (courseAccess && !courseAccess.unlocked) {
+    return <CourseLockedScreen course={selectedInternshipData} access={courseAccess} />;
   }
 
   const toggleExpandedView = () => setIsExpandedView((prev) => !prev);

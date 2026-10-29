@@ -17,6 +17,9 @@ import CartDrawer from "./CartDrawer";
 import BuyNowPopoverContent from "./BuyNowPopoverContent";
 import AddToCartModal from "./AddToCartModal";
 import PriceChip from "./PriceChip";
+import CourseAccessBadge from "@/components/courseAccess/CourseAccessBadge";
+import CourseBundlesStrip from "@/components/courseAccess/CourseBundlesStrip";
+import { courseCardState, courseBundleCheckoutUrl, formatPrice, useCourseAccess } from "@/components/courseAccess/access";
 
 // --- Helpers ---
 const stripHtml = (html) => {
@@ -172,12 +175,12 @@ const InfoContent = ({ item }) => {
   );
 };
 
-const MobileLibraryPageWrapper = ({ title, items, progressById, safeItems, activeTab, ...props }) => {
+const MobileLibraryPageWrapper = ({ title, items, progressById, safeItems, activeTab, unlockedIds, ...props }) => {
   // Enrich items with UI state (enrollment, progress) so mobile view can render cards correctly
   const enrichedItems = items?.map((item) => {
     const fetchedProgress = progressById?.[item._id];
     const inMyCourses = safeItems?.some((myCourse) => myCourse._id === item._id);
-    const isEnrolled = activeTab === "my" || inMyCourses;
+    const isEnrolled = activeTab === "my" || inMyCourses || !!unlockedIds?.has(String(item._id));
     const progressVal = fetchedProgress ? (fetchedProgress.totalProgress ?? 0) : (item.progress || 0);
     const isProgressLoading = fetchedProgress?.loading;
 
@@ -210,8 +213,27 @@ const LibraryPage = ({
   renderMetaChips,
   showWishlist = false,  // NEW: toggle to enable/disable wishlist (favorites) feature
   showBuyNow = false,    // NEW: toggle to enable/disable Cart / Buy Now feature
+  courseAccess = false,  // admin-configured Free / Premium / Bundle-only access (courses only)
 }) => {
   const nav = useAppRouter();
+  const access = useCourseAccess(courseAccess);
+  const accessFor = (item) => (courseAccess ? courseCardState(access.byId.get(String(item?._id))) : { kind: null });
+  const bundlesRef = useRef(null);
+  const [highlightBundle, setHighlightBundle] = useState(null);
+  const [bundleScrollTick, setBundleScrollTick] = useState(0);
+  useEffect(() => {
+    if (bundleScrollTick) bundlesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [bundleScrollTick]);
+  // Bundle-only course: one bundle → straight to its checkout, several → show them.
+  const openBundlesFor = (bundles) => {
+    if (bundles?.length === 1) {
+      nav.push(courseBundleCheckoutUrl(bundles[0]._id));
+      return;
+    }
+    setActiveTab("all");
+    setHighlightBundle(bundles?.[0]?._id || null);
+    setBundleScrollTick((t) => t + 1);
+  };
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
@@ -494,7 +516,14 @@ const LibraryPage = ({
 
   // safeAllItems = all courses from getAllCoursesOnly API: response is { data: [...], hasNext: bool }
   // allItems in redux is already payload.data (array) after slice handles it
-  const safeAllItems = Array.isArray(allItems) ? allItems : [];
+  // Courses the admin hid are left out unless the student already has them.
+  const safeAllItems = (Array.isArray(allItems) ? allItems : []).filter(
+    (item) => !courseAccess || access.byId.get(String(item?._id))?.visible !== false
+  );
+  const unlockedIds = useMemo(
+    () => new Set([...access.byId.values()].filter((c) => c.entitlement?.unlocked).map((c) => String(c.courseId))),
+    [access.byId]
+  );
 
   // Tab filtering:
   // "all"       → show all courses from getAllCoursesOnly API
@@ -724,6 +753,7 @@ const LibraryPage = ({
           setCartOpen={setCartOpen}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          unlockedIds={courseAccess ? unlockedIds : undefined}
         />
 
         {/* Course Info Modal */}
@@ -962,6 +992,14 @@ const LibraryPage = ({
       </div> {/* End Fixed Header Section */}
       {/* Cards Grid (Scrollable) */}
       <div className="w-full flex-1 overflow-y-auto pt-8 pb-8 no-scrollbar">
+        {courseAccess && activeTab === "all" && !loading && (
+          <CourseBundlesStrip
+            ref={bundlesRef}
+            bundles={access.bundles}
+            highlightId={highlightBundle}
+            onOpen={(url) => nav.push(url)}
+          />
+        )}
         <div 
           className="grid gap-x-12 lg:gap-x-16 gap-y-8 p-2 px-4 lg:px-6 mx-auto w-full"
           style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
@@ -995,7 +1033,11 @@ const LibraryPage = ({
 
                 // We use safeItems to determine true enrollment since safeItems contains "My courses"
                 const inMyCourses = safeItems.some(myCourse => myCourse._id === item._id);
-                const isEnrolled = activeTab === "my" || inMyCourses;
+                // Admin access: free and already-unlocked courses open directly;
+                // bundle-only courses point to their bundles.
+                const accessState = accessFor(item);
+                const isEnrolled = activeTab === "my" || inMyCourses || accessState.kind === "owned" || accessState.kind === "free";
+                const isBundleOnly = accessState.kind === "bundle";
 
                 const progressVal = fetchedProgress ? (fetchedProgress.totalProgress ?? 0) : (item.progress || 0);
 
@@ -1020,6 +1062,9 @@ const LibraryPage = ({
                     buttonText = "Continue";
                     statusColor = "text-[#10b981]";
                   }
+                } else if (isBundleOnly) {
+                  statusText = "Available in a bundle";
+                  buttonText = "Bundle";
                 } else {
                   buttonText = "Buy";
                 }
@@ -1060,12 +1105,18 @@ const LibraryPage = ({
                         {/* Top overlay gradient for readability */}
                         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
 
-                        {isEnrolled && (
+                        {isEnrolled && accessState.kind === "free" && !inMyCourses ? (
+                          <CourseAccessBadge kind="free" className="absolute top-3 left-3" />
+                        ) : isEnrolled ? (
                           <div className="absolute top-3 left-3 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/30 shadow-sm">
                             <BsCheckCircleFill className="text-emerald-400 text-[11px]" />
                             <span className="text-white text-[10px] font-bold tracking-wide uppercase">Enrolled</span>
                           </div>
-                        )}
+                        ) : isBundleOnly ? (
+                          <CourseAccessBadge kind="bundle" className="absolute top-3 left-3" />
+                        ) : accessState.kind === "premium" && accessState.price > 0 ? (
+                          <CourseAccessBadge kind="premium" label={formatPrice(accessState.price)} className="absolute top-3 left-3" />
+                        ) : null}
                         
                         {showWishlist && (
                           <button
@@ -1159,6 +1210,8 @@ const LibraryPage = ({
                             e.stopPropagation();
                             if (isEnrolled) {
                               nav.push(getItemUrl(item));
+                            } else if (isBundleOnly) {
+                              openBundlesFor(accessState.bundles);
                             } else {
                               if (inCart) {
                                 nav.push("/student/cart?type=" + idPrefix);
@@ -1168,7 +1221,9 @@ const LibraryPage = ({
                             }
                           }}
                         >
-                          {buttonText === "Buy" ? (
+                          {buttonText === "Bundle" ? (
+                            accessState.bundles?.length ? "View Bundle" : "Bundle only"
+                          ) : buttonText === "Buy" ? (
                             isCartLoading ? "Adding..." : inCart ? "Go to Cart" : "Add to Cart"
                           ) : buttonText === "Start" ? (
                             "Start"
@@ -1181,7 +1236,8 @@ const LibraryPage = ({
                   </div>
                 );
 
-                if (!showBuyNow || activeTab === "my") {
+                // Free and bundle-only courses can't go through Cart / Buy Now.
+                if (!showBuyNow || activeTab === "my" || isBundleOnly || (accessState.kind === "free" && !inMyCourses)) {
                   return cardNode;
                 }
 

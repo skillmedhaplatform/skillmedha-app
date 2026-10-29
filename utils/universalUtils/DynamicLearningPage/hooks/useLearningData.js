@@ -15,6 +15,7 @@ const selectCompletedIds     = (state) => state.internship.completedTopicIds;
 const selectTotalProgress    = (state) => state.internship.serverTotalProgress;
 const selectCompletedCount   = (state) => state.internship.serverCompletedCount;
 const selectTotalCount       = (state) => state.internship.serverTotalCount;
+const selectCourseAccess     = (state) => state.internship.courseAccess;
 
 import { useDispatch } from "react-redux";
 import { getOneInternsip } from "@/redux/slices/internship";
@@ -36,6 +37,7 @@ export const useLearningData = (setTopicDetails) => {
   const serverTotalProgress    = useSelector(selectTotalProgress);
   const serverCompletedCount   = useSelector(selectCompletedCount);
   const serverTotalCount       = useSelector(selectTotalCount);
+  const courseAccess           = useSelector(selectCourseAccess);
 
   const internshipId  = params.get("id")    || "";
   const orgId         = params.get("orgId") || "";
@@ -82,5 +84,6 @@ export const useLearningData = (setTopicDetails) => {
     orgId,
     selectedTitle,
     getOneTopic,
+    courseAccess,
   };
 };

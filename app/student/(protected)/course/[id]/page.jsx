@@ -8,6 +8,7 @@ import { getStudentCreds } from "@/redux/slices/student";
 import { message, Spin, Popover } from "antd";
 import BuyNowPopoverContent from "@/universalUtils/LibraryPage/BuyNowPopoverContent";
 import ShareModal from "@/components/shared/ShareModal";
+import { courseBundleCheckoutUrl, formatPrice } from "@/components/courseAccess/access";
 import {
   Clock,
   PlayCircle,
@@ -48,6 +49,8 @@ export default function CourseDetailsPage() {
   const [availableCoupon, setAvailableCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState("");
   const [appliedDiscountAmount, setAppliedDiscountAmount] = useState(0);
+  // Admin-configured access for this course, sent by the server with the details.
+  const [courseAccess, setCourseAccess] = useState(null);
   const toolsRef = useRef(null);
 
   const isEnrolled = React.useMemo(() => {
@@ -62,8 +65,9 @@ export default function CourseDetailsPage() {
     const inEnrolledCourses = (Array.isArray(enrolledCourses) ? enrolledCourses : []).some(
       (c) => String(c._id) === courseId
     );
-    return inEnrolledData || inSubscriptions || inEnrolledCourses;
-  }, [params?.id, student, enrolledCourses]);
+    return inEnrolledData || inSubscriptions || inEnrolledCourses || !!courseAccess?.unlocked;
+  }, [params?.id, student, enrolledCourses, courseAccess]);
+  const isBundleOnly = !isEnrolled && courseAccess?.access === "bundle";
 
   const courseUrl = React.useMemo(() => {
     if (!course?._id) return "";
@@ -89,6 +93,7 @@ export default function CourseDetailsPage() {
     try {
       setLoading(true);
       const res = await dispatch(getOneInternsip({ id: params.id }));
+      setCourseAccess(res.payload?.access || null);
       if (res.payload?.data) {
         setCourse(res.payload.data);
       } else if (res.payload && !res.payload.data) {
@@ -232,6 +237,12 @@ export default function CourseDetailsPage() {
     router.push(`/student/checkout?courseId=${courseId}${orgId ? `&orgId=${orgId}` : ""}${couponQuery}`);
   };
 
+  // Bundle-only course: one bundle → its checkout, several → the library's bundles.
+  const handleViewBundle = () => {
+    const bundles = courseAccess?.bundles || [];
+    router.push(bundles.length === 1 ? courseBundleCheckoutUrl(bundles[0]._id) : "/student/course");
+  };
+
   const handleGoToCourse = () => {
     if (!courseUrl || isNavigating) return;
     setIsNavigating(true);
@@ -280,6 +291,7 @@ export default function CourseDetailsPage() {
   }
 
   const isFree = Boolean(
+    courseAccess?.access === "free" ||
     course?.isFree ||
     course?.pricing?.type === "free" ||
     course?.badge === "FREE" ||
@@ -661,7 +673,8 @@ export default function CourseDetailsPage() {
                   {isEnrolled ? (
                     <div className="flex items-center gap-2 mb-6">
                       <span className="bg-emerald-100 text-emerald-800 font-bold px-3.5 py-1.5 rounded-full text-[13px] flex items-center gap-1.5">
-                        <CheckCircle className="w-4 h-4 text-emerald-600" /> You are enrolled in this course
+                        <CheckCircle className="w-4 h-4 text-emerald-600" />{" "}
+                        {courseAccess?.reason === "free" ? "Free course — start anytime" : courseAccess?.reason === "assigned" ? "Assigned by your college" : "You are enrolled in this course"}
                       </span>
                     </div>
                   ) : (
@@ -678,7 +691,7 @@ export default function CourseDetailsPage() {
                   )}
                   
                   <button 
-                    onClick={isEnrolled ? handleGoToCourse : handleBuyNow}
+                    onClick={isEnrolled ? handleGoToCourse : isBundleOnly ? handleViewBundle : handleBuyNow}
                     disabled={isNavigating}
                     className={`w-full py-3.5 px-6 ${
                       isEnrolled 
@@ -696,10 +709,30 @@ export default function CourseDetailsPage() {
                           <PlayCircle className="w-5 h-5" /> Start Learning
                         </>
                       )
+                    ) : isBundleOnly ? (
+                      "View Bundle"
+                    ) : isFree ? (
+                      "Enroll for Free"
                     ) : (
                       "Buy Course"
                     )}
                   </button>
+                  {isBundleOnly && (
+                    <div className="mb-6 -mt-3 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2.5 text-[13px] text-violet-800">
+                      <div className="font-semibold">This course is available only in a bundle</div>
+                      {(courseAccess?.bundles || []).map((b) => (
+                        <button
+                          key={b._id}
+                          type="button"
+                          onClick={() => router.push(courseBundleCheckoutUrl(b._id))}
+                          className="mt-1.5 flex w-full cursor-pointer items-center justify-between rounded-md border-none bg-white px-2.5 py-1.5 text-left text-[13px] font-medium text-violet-900 hover:bg-violet-100"
+                        >
+                          <span className="truncate">{b.title}</span>
+                          <span className="shrink-0 font-bold">{formatPrice(b.price)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   
                   <div className="space-y-3">
                     {course.duration && (
