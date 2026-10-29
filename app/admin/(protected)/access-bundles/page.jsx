@@ -1,6 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { App, Tabs } from "antd";
+import { Alert, App, Tabs } from "antd";
 import { adminFetchCourseBundles, adminFetchCourseConfigs, adminFetchCourseStats } from "@/services/courseAccessApi";
 import CoursesTab from "./components/CoursesTab";
 import CourseBundlesTab from "./components/CourseBundlesTab";
@@ -9,7 +9,8 @@ const formatPrice = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}
 
 // Admin → Course Access & Bundles. Every course (not internships) is listed.
 // A course never configured here keeps its old behaviour: Premium at its
-// editor price, or Free when that price is ₹0. Courses a college assigned to
+// price, or Free when that price is ₹0. Prices edited here are written to the
+// course itself, so the course editor and checkout always agree. Courses a college assigned to
 // its students always stay unlocked for those students.
 export default function CourseAccessAdminPage() {
   const { message } = App.useApp();
@@ -53,13 +54,26 @@ export default function CourseAccessAdminPage() {
     ];
   }, [courses, stats]);
 
+  // The API adds basePrice to every row; without it the server is running
+  // older code and would ignore price changes.
+  const apiOutdated = !loading && courses.length > 0 && courses.every((c) => c.basePrice === undefined);
+
   return (
     <div className="flex w-full flex-col gap-4 px-4 py-5 lg:px-6">
+      {apiOutdated && (
+        <Alert
+          type="warning"
+          showIcon
+          message="The API server is running older code — price changes won't be saved."
+          description="Restart the API (npm start in the API folder), then refresh this page."
+        />
+      )}
       <div>
         <div className="text-[20px] font-bold text-slate-900">Course Access & Bundles</div>
         <div className="text-[13px] text-slate-500">
-          Choose which courses are free, paid or sold only in bundles, hide courses from students, and create course
-          bundles. Prices come from the course editor; college-assigned courses always stay unlocked.
+          Set each course&apos;s price and whether it is free, paid or sold only in bundles, hide courses from students,
+          and create course bundles. Prices saved here update the course editor too; college-assigned courses always
+          stay unlocked.
         </div>
       </div>
 

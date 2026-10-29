@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux";
 import { Pagination, Tooltip, Button, Select, Input, Modal, Tag, Row, Col, message, Badge, Popover } from "antd";
 import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined, HeartOutlined, ShoppingCartOutlined, LockOutlined, LoadingOutlined, FilterOutlined } from "@ant-design/icons";
-import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase } from "react-icons/bs";
+import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase, BsStarFill } from "react-icons/bs";
 import { HiOutlineBuildingOffice2, HiOutlineBookOpen } from "react-icons/hi2";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useAppRouter } from "@/helpers/useAppRouter";
@@ -538,8 +538,13 @@ const LibraryPage = ({
       pool.sort((a, b) => {
         const aEnrolled = safeItems.some(myCourse => myCourse._id === a._id);
         const bEnrolled = safeItems.some(myCourse => myCourse._id === b._id);
-        if (aEnrolled === bEnrolled) return 0;
-        return aEnrolled ? 1 : -1; // Unenrolled (false) goes before Enrolled (true)
+        if (aEnrolled !== bEnrolled) return aEnrolled ? 1 : -1; // Unenrolled (false) goes before Enrolled (true)
+        if (!courseAccess) return 0;
+        // Admin-configured: featured courses first, then the admin's order.
+        const aInfo = access.byId.get(String(a._id));
+        const bInfo = access.byId.get(String(b._id));
+        if (!!aInfo?.featured !== !!bInfo?.featured) return aInfo?.featured ? -1 : 1;
+        return (aInfo?.order ?? 100) - (bInfo?.order ?? 100);
       });
     } else if (activeTab === "my") {
       pool = [...safeItems];
@@ -1184,6 +1189,11 @@ const LibraryPage = ({
                         {duration && (
                           <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
                             <BsClock className="text-blue-500/70 text-[12px]" /> {duration}
+                          </div>
+                        )}
+                        {courseAccess && access.byId.get(String(item._id))?.featured && (
+                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-wider border border-amber-100">
+                            <BsStarFill className="text-amber-400 text-[11px]" /> Featured
                           </div>
                         )}
                         {modulesCount > 0 && (

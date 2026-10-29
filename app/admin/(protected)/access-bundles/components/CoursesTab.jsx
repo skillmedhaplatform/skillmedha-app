@@ -1,8 +1,10 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { App, Button, Input, InputNumber, Segmented, Select, Space, Switch, Table, Tag, Tooltip } from "antd";
-import { SearchOutlined, StarFilled } from "@ant-design/icons";
+import { App, Button, Input, InputNumber, Popover, Segmented, Select, Space, Switch, Table, Tag, Tooltip } from "antd";
+import { EditOutlined, SearchOutlined, StarFilled } from "@ant-design/icons";
 import { adminSaveCourseConfig, adminSaveCourseConfigsBulk } from "@/services/courseAccessApi";
+import CoursePricePicker from "./CoursePricePicker";
+import CourseEditDrawer from "./CourseEditDrawer";
 
 const formatPrice = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
 
@@ -36,6 +38,27 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
   const [selected, setSelected] = useState([]);
   const [savingId, setSavingId] = useState(null);
   const [bulkSaving, setBulkSaving] = useState(false);
+  // Course open in the edit drawer (with any access pre-selected, e.g. Premium
+  // picked for a course that has no price yet).
+  const [editing, setEditing] = useState(null);
+  const [drawerSaving, setDrawerSaving] = useState(false);
+  const [bulkPriceOpen, setBulkPriceOpen] = useState(false);
+
+  // Drawer save: one request for access, price, coupon and library settings,
+  // then reload so the table shows exactly what the server stored.
+  const saveFromDrawer = async (course, body) => {
+    setDrawerSaving(true);
+    try {
+      await adminSaveCourseConfig(course.courseId, body);
+      message.success(`${course.title}: saved`);
+      setEditing(null);
+      onChanged();
+    } catch (err) {
+      message.error(err.message || "Couldn't save");
+    } finally {
+      setDrawerSaving(false);
+    }
+  };
 
   const rows = useMemo(() => {
     const s = search.trim().toLowerCase();
@@ -49,11 +72,13 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
     });
   }, [courses, search, filter]);
 
-  // Saves one course right away, updating the row optimistically.
+  // Quick inline changes (access, visible, featured, order) save right away,
+  // updating the row optimistically.
   const saveOne = async (course, changes) => {
     const next = configOf(course, changes);
     if (next.access === "premium" && !(course.price > 0)) {
-      message.warning("This course has no price in the course editor — set a price there first, or make it Free.");
+      // A paid course needs a price — finish in the drawer.
+      setEditing({ ...course, access: "premium" });
       return;
     }
     if (next.access === "bundle" && !course.bundles?.length) {
@@ -72,6 +97,26 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
     }
   };
 
+  // Same price for every selected course (each course's coupon still applies).
+  const applyBulkPrice = async ({ price, mrp }) => {
+    const list = courses
+      .filter((c) => selected.includes(c.courseId))
+      .map((c) => ({ courseId: c.courseId, title: c.title, ...configOf(c), price, mrp }));
+    if (!list.length) return;
+    setBulkSaving(true);
+    try {
+      const res = await adminSaveCourseConfigsBulk(list);
+      message.success(res?.msg || "Prices saved");
+      setBulkPriceOpen(false);
+      setSelected([]);
+      onChanged();
+    } catch (err) {
+      message.error(err.message || "Couldn't save prices");
+    } finally {
+      setBulkSaving(false);
+    }
+  };
+
   const applyBulk = (changes, label) => {
     const targets = courses.filter((c) => selected.includes(c.courseId));
     if (!targets.length) return;
@@ -79,7 +124,7 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
     modal.confirm({
       title: `${label} for ${targets.length} course${targets.length === 1 ? "" : "s"}?`,
       content: unpriced.length
-        ? `${unpriced.length} of them have no price in the course editor and will be skipped.`
+        ? `${unpriced.length} of them have no price yet and will be skipped — use "Set price" for them.`
         : "Students who already own these courses keep their access.",
       okText: "Apply",
       onOk: async () => {
@@ -112,10 +157,14 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
             {c.thumbnail && <img src={c.thumbnail} alt="" className="h-full w-full object-cover" />}
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5 font-semibold text-slate-800">
+            <button
+              type="button"
+              onClick={() => setEditing(c)}
+              className="flex cursor-pointer items-center gap-1.5 border-none bg-transparent p-0 text-left font-semibold text-slate-800 hover:text-blue-600"
+            >
               {c.featured && <StarFilled className="text-amber-400" />}
               <span className="line-clamp-1">{c.title}</span>
-            </div>
+            </button>
             <div className="text-[12px] text-slate-400">
               {[c.category, c.difficulty, c.collegeCount ? `${c.collegeCount} college${c.collegeCount === 1 ? "" : "s"}` : null]
                 .filter(Boolean)
@@ -127,14 +176,33 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
       ),
     },
     {
-      title: "Editor price",
+      title: <Tooltip title="What students pay. Saved on the course, so the course editor shows the same price.">Price</Tooltip>,
       key: "price",
-      width: 130,
+      width: 170,
       render: (_, c) => (
-        <div>
-          <div className="font-semibold text-slate-800">{c.price > 0 ? formatPrice(c.price) : "₹0"}</div>
-          {c.mrp > c.price && <div className="text-[12px] text-slate-400 line-through">{formatPrice(c.mrp)}</div>}
-        </div>
+          <button
+            type="button"
+            onClick={() => setEditing(c)}
+            className="group flex cursor-pointer flex-col items-start border-none bg-transparent p-0 text-left"
+          >
+            <span className="flex items-center gap-1.5">
+              <span className={`font-semibold ${c.access === "free" ? "text-emerald-600" : "text-slate-800"}`}>
+                {c.access === "free" ? "Free" : c.price > 0 ? formatPrice(c.price) : "No price"}
+              </span>
+              <EditOutlined className="text-[12px] text-slate-300 group-hover:text-blue-600" />
+            </span>
+            {c.access !== "free" && c.mrp > c.price && (
+              <span className="text-[12px] text-slate-400 line-through">{formatPrice(c.mrp)}</span>
+            )}
+            {c.access === "free" && c.price > 0 && (
+              <span className="text-[11px] text-slate-400">{formatPrice(c.price)} when paid</span>
+            )}
+            {c.access !== "free" && c.couponDiscount > 0 && (
+              <span className="text-[11px] text-slate-400">
+                after {c.couponCode || "coupon"} −{formatPrice(c.couponDiscount)}
+              </span>
+            )}
+          </button>
       ),
     },
     {
@@ -168,7 +236,7 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
       ),
     },
     {
-      title: "Featured",
+      title: <Tooltip title="Featured courses get a ★ Featured tag and are listed first in the student Course Library">Featured</Tooltip>,
       key: "featured",
       width: 90,
       render: (_, c) => (
@@ -176,7 +244,7 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
       ),
     },
     {
-      title: <Tooltip title="Lower numbers show first">Order</Tooltip>,
+      title: <Tooltip title="Position in the student Course Library — lower numbers show first (after featured courses)">Order</Tooltip>,
       key: "order",
       width: 100,
       render: (_, c) => (
@@ -235,6 +303,18 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
               Make {o.label}
             </Button>
           ))}
+          <Popover
+            trigger="click"
+            open={bulkPriceOpen}
+            onOpenChange={setBulkPriceOpen}
+            title={`Set the same price for ${selected.length} course${selected.length === 1 ? "" : "s"}`}
+            destroyOnHidden
+            content={<CoursePricePicker busy={bulkSaving} applyLabel="Save prices" onApply={applyBulkPrice} />}
+          >
+            <Button size="small" type="primary" ghost>
+              Set price
+            </Button>
+          </Popover>
           <Button size="small" loading={bulkSaving} onClick={() => applyBulk({ visibility: "hidden" }, "Hide")}>
             Hide
           </Button>
@@ -258,9 +338,17 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
         rowClassName={(c) => (c.visibility === "hidden" ? "opacity-60" : "")}
         locale={{ emptyText: "No courses match" }}
       />
+      <CourseEditDrawer
+        open={!!editing}
+        course={editing}
+        saving={drawerSaving}
+        onClose={() => setEditing(null)}
+        onSave={saveFromDrawer}
+      />
       <div className="text-[12px] text-slate-400">
+        Click a course name or price to edit everything about it ·{" "}
         <Tag color={ACCESS_COLOR.free}>Free</Tag> anyone can learn ·
-        <Tag color={ACCESS_COLOR.premium} className="!ml-2">Premium</Tag> buy at the editor price (or in a bundle) ·
+        <Tag color={ACCESS_COLOR.premium} className="!ml-2">Premium</Tag> buy at its price (or in a bundle) ·
         <Tag color={ACCESS_COLOR.bundle} className="!ml-2">Bundle only</Tag> can be bought only in a bundle
       </div>
     </div>
