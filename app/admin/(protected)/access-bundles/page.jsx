@@ -1,6 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, App, Tabs } from "antd";
+import { Alert, App, Button, Tabs } from "antd";
 import { adminFetchCourseBundles, adminFetchCourseConfigs, adminFetchCourseStats } from "@/services/courseAccessApi";
 import CoursesTab from "./components/CoursesTab";
 import CourseBundlesTab from "./components/CourseBundlesTab";
@@ -19,6 +19,7 @@ export default function CourseAccessAdminPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("courses");
+  const [setupFilterTick, setSetupFilterTick] = useState(0);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -44,7 +45,7 @@ export default function CourseAccessAdminPage() {
       { label: "Free", value: count((c) => c.access === "free" && c.visibility === "published"), tone: "text-emerald-600" },
       { label: "Premium", value: count((c) => c.access === "premium" && c.visibility === "published"), tone: "text-amber-600" },
       { label: "Bundle only", value: count((c) => c.access === "bundle" && c.visibility === "published"), tone: "text-violet-600" },
-      { label: "Hidden", value: count((c) => c.visibility === "hidden"), tone: "text-slate-500" },
+      { label: "Hidden", value: count((c) => c.visibility === "hidden" && !c.needsSetup), tone: "text-slate-500" },
       { label: "Live bundles", value: stats?.bundles?.active ?? 0, tone: "text-blue-600" },
       {
         label: "Bundle sales",
@@ -57,6 +58,7 @@ export default function CourseAccessAdminPage() {
   // The API adds basePrice to every row; without it the server is running
   // older code and would ignore price changes.
   const apiOutdated = !loading && courses.length > 0 && courses.every((c) => c.basePrice === undefined);
+  const needsSetup = courses.filter((c) => c.needsSetup).length;
 
   return (
     <div className="flex w-full flex-col gap-4 px-4 py-5 lg:px-6">
@@ -66,6 +68,26 @@ export default function CourseAccessAdminPage() {
           showIcon
           message="The API server is running older code — price changes won't be saved."
           description="Restart the API (npm start in the API folder), then refresh this page."
+        />
+      )}
+      {needsSetup > 0 && (
+        <Alert
+          type="info"
+          showIcon
+          message={`${needsSetup} new course${needsSetup === 1 ? "" : "s"} need${needsSetup === 1 ? "s" : ""} setup`}
+          description="New courses stay hidden from students until you choose Free / Premium / Bundle only and set a price."
+          action={
+            <Button
+              size="small"
+              type="primary"
+              onClick={() => {
+                setTab("courses");
+                setSetupFilterTick((t) => t + 1);
+              }}
+            >
+              Show them
+            </Button>
+          }
         />
       )}
       <div>
@@ -93,7 +115,15 @@ export default function CourseAccessAdminPage() {
           {
             key: "courses",
             label: `Courses (${courses.length})`,
-            children: <CoursesTab courses={courses} loading={loading} onChanged={reload} setCourses={setCourses} />,
+            children: (
+              <CoursesTab
+                courses={courses}
+                loading={loading}
+                onChanged={reload}
+                setCourses={setCourses}
+                filterRequest={setupFilterTick}
+              />
+            ),
           },
           {
             key: "bundles",

@@ -17,6 +17,7 @@ const ACCESS_COLOR = { free: "green", premium: "gold", bundle: "purple" };
 
 const FILTERS = [
   { value: "all", label: "All" },
+  { value: "setup", label: "Needs setup" },
   { value: "free", label: "Free" },
   { value: "premium", label: "Premium" },
   { value: "bundle", label: "Bundle only" },
@@ -31,10 +32,16 @@ const configOf = (course, changes = {}) => ({
   ...changes,
 });
 
-export default function CoursesTab({ courses, loading, onChanged, setCourses }) {
+export default function CoursesTab({ courses, loading, onChanged, setCourses, filterRequest }) {
   const { message, modal } = App.useApp();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  // The page banner can ask to show only the courses that need setup.
+  const [seenRequest, setSeenRequest] = useState(filterRequest);
+  if (filterRequest !== seenRequest) {
+    setSeenRequest(filterRequest);
+    if (filterRequest) setFilter("setup");
+  }
   const [selected, setSelected] = useState([]);
   const [savingId, setSavingId] = useState(null);
   const [bulkSaving, setBulkSaving] = useState(false);
@@ -66,7 +73,8 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
       if (s && !String(c.title || "").toLowerCase().includes(s) && !String(c.category || "").toLowerCase().includes(s)) {
         return false;
       }
-      if (filter === "hidden") return c.visibility === "hidden";
+      if (filter === "setup") return c.needsSetup;
+      if (filter === "hidden") return c.visibility === "hidden" && !c.needsSetup;
       if (filter !== "all") return c.access === filter && c.visibility === "published";
       return true;
     });
@@ -75,6 +83,11 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
   // Quick inline changes (access, visible, featured, order) save right away,
   // updating the row optimistically.
   const saveOne = async (course, changes) => {
+    if (course.needsSetup) {
+      // A new course goes live in one step: access, price and Visible together.
+      setEditing({ ...course, ...changes, visibility: "published" });
+      return;
+    }
     const next = configOf(course, changes);
     if (next.access === "premium" && !(course.price > 0)) {
       // A paid course needs a price — finish in the drawer.
@@ -169,7 +182,11 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
               {[c.category, c.difficulty, c.collegeCount ? `${c.collegeCount} college${c.collegeCount === 1 ? "" : "s"}` : null]
                 .filter(Boolean)
                 .join(" · ")}
-              {c.isDefault && <span className="ml-1.5 text-slate-300">(not configured yet)</span>}
+              {c.needsSetup && (
+                <Tag color="orange" className="!ml-1.5">
+                  Needs setup — hidden from students
+                </Tag>
+              )}
             </div>
           </div>
         </div>
@@ -187,7 +204,7 @@ export default function CoursesTab({ courses, loading, onChanged, setCourses }) 
           >
             <span className="flex items-center gap-1.5">
               <span className={`font-semibold ${c.access === "free" ? "text-emerald-600" : "text-slate-800"}`}>
-                {c.access === "free" ? "Free" : c.price > 0 ? formatPrice(c.price) : "No price"}
+                {c.needsSetup ? "Set price" : c.access === "free" ? "Free" : c.price > 0 ? formatPrice(c.price) : "No price"}
               </span>
               <EditOutlined className="text-[12px] text-slate-300 group-hover:text-blue-600" />
             </span>
