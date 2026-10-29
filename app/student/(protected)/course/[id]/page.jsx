@@ -8,7 +8,7 @@ import { getStudentCreds } from "@/redux/slices/student";
 import { message, Spin, Popover } from "antd";
 import BuyNowPopoverContent from "@/universalUtils/LibraryPage/BuyNowPopoverContent";
 import ShareModal from "@/components/shared/ShareModal";
-import { courseBundleCheckoutUrl, formatPrice } from "@/components/courseAccess/access";
+import { accessValidity, courseBundleCheckoutUrl, expiringIn, expiryText, formatPrice } from "@/components/courseAccess/access";
 import {
   Clock,
   PlayCircle,
@@ -365,7 +365,7 @@ export default function CourseDetailsPage() {
               {/* 1. What You'll Learn (Website design) */}
               {course?.learningPoints?.length > 0 && (
                 <div className="border border-slate-200 rounded-lg p-6 lg:p-8 mb-10 shadow-sm relative overflow-hidden">
-                  <h2 className="text-xl font-bold text-slate-800 mb-6">What you'll learn</h2>
+                  <h2 className="text-xl font-bold text-slate-800 mb-6">What you&apos;ll learn</h2>
                   <div className="relative">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                       {visibleLearning.map((item, i) => (
@@ -656,35 +656,27 @@ export default function CourseDetailsPage() {
                     className="w-full h-full object-cover rounded-lg border-[3px] border-white shadow-sm"
                   />
                 </div>
-                <div className="p-5">
-                  <div className="flex items-baseline gap-3 mb-4">
-                    <span className="text-3xl font-bold text-slate-900 leading-none">
-                      {isFree ? "Free" : `₹${effectiveCurrentPrice.toLocaleString("en-IN")}`}
-                    </span>
-                    {originalPrice > effectiveCurrentPrice && (
-                      <span className="text-lg text-slate-400 line-through font-medium leading-none">
-                        ₹{originalPrice.toLocaleString("en-IN")}
-                      </span>
-                    )}
-                    {discountPercent > 0 && (
-                      <span className="text-sm font-semibold text-slate-900 leading-none">
-                        {discountPercent}% off
                 <div className="p-6">
                   {isEnrolled ? (
                     <div className="flex items-center gap-2 mb-6">
                       <span className="bg-emerald-100 text-emerald-800 font-bold px-3.5 py-1.5 rounded-full text-[13px] flex items-center gap-1.5">
                         <CheckCircle className="w-4 h-4 text-emerald-600" />{" "}
-                        {courseAccess?.reason === "free" ? "Free course — start anytime" : courseAccess?.reason === "assigned" ? "Assigned by your college" : "You are enrolled in this course"}
+                        {courseAccess?.reason === "free" ? "Free course — start anytime" : courseAccess?.reason === "assigned" ? "Assigned by your college" : courseAccess?.reason === "bundle" ? `Unlocked via ${courseAccess?.bundleTitle || "your bundle"}` : "You are enrolled in this course"}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-baseline gap-3 mb-6">
                       <span className="text-3xl font-bold text-slate-900 leading-none">
-                        {course?.pricing?.finalPrice ? `₹${course.pricing.finalPrice}` : course?.price ? `₹${course.price}` : "Free"}
+                        {isFree ? "Free" : `₹${effectiveCurrentPrice.toLocaleString("en-IN")}`}
                       </span>
-                      {course?.pricing?.finalPrice && course?.price && (
+                      {!isFree && originalPrice > effectiveCurrentPrice && (
                         <span className="text-lg text-slate-400 line-through font-medium leading-none">
-                          ₹{course.price}
+                          ₹{originalPrice.toLocaleString("en-IN")}
+                        </span>
+                      )}
+                      {!isFree && discountPercent > 0 && (
+                        <span className="text-sm font-semibold text-emerald-600 leading-none">
+                          {discountPercent}% off
                         </span>
                       )}
                     </div>
@@ -717,6 +709,17 @@ export default function CourseDetailsPage() {
                       "Buy Course"
                     )}
                   </button>
+                  {isEnrolled && courseAccess?.expiresAt && (
+                    <div
+                      className={`mb-6 -mt-3 rounded-lg px-3 py-2 text-[13px] ${
+                        expiringIn(courseAccess.expiresAt) ? "border border-red-200 bg-red-50 text-red-700" : "bg-slate-50 text-slate-600"
+                      }`}
+                    >
+                      {expiringIn(courseAccess.expiresAt)
+                        ? `${expiryText(expiringIn(courseAccess.expiresAt))} — finish the lessons you need before then.`
+                        : accessValidity(courseAccess.expiresAt)}
+                    </div>
+                  )}
                   {isBundleOnly && (
                     <div className="mb-6 -mt-3 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2.5 text-[13px] text-violet-800">
                       <div className="font-semibold">This course is available only in a bundle</div>

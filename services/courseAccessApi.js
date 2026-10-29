@@ -41,6 +41,9 @@ const adminCall = request(adminToken);
 /** { courses: [{ courseId, access, visible, entitlement, bundles, ... }], bundles: [...] } */
 export const fetchCourseCatalog = async () => (await call("get", "/course-catalog")).data;
 
+/** The student's own course and bundle purchases, newest first. */
+export const fetchMyCoursePurchases = async () => (await call("get", "/my-course-purchases")).data;
+
 export const createCourseBundleOrder = async (bundleId) =>
   call("post", "/payment/course/createOrder", { data: { bundleId } });
 

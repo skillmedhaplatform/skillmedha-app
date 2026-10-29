@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux";
 import { Pagination, Tooltip, Button, Select, Input, Modal, Tag, Row, Col, message, Badge, Popover } from "antd";
 import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined, HeartOutlined, ShoppingCartOutlined, LockOutlined, LoadingOutlined, FilterOutlined } from "@ant-design/icons";
-import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase, BsStarFill } from "react-icons/bs";
+import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase, BsStarFill, BsHourglassSplit, BsReceipt } from "react-icons/bs";
 import { HiOutlineBuildingOffice2, HiOutlineBookOpen } from "react-icons/hi2";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useAppRouter } from "@/helpers/useAppRouter";
@@ -19,7 +19,17 @@ import AddToCartModal from "./AddToCartModal";
 import PriceChip from "./PriceChip";
 import CourseAccessBadge from "@/components/courseAccess/CourseAccessBadge";
 import CourseBundlesStrip from "@/components/courseAccess/CourseBundlesStrip";
-import { courseCardState, courseBundleCheckoutUrl, formatPrice, useCourseAccess } from "@/components/courseAccess/access";
+import {
+  ACCESS_FILTERS,
+  MY_PURCHASES_PATH,
+  accessLabel,
+  courseCardState,
+  courseBundleCheckoutUrl,
+  expiringIn,
+  expiryText,
+  matchesAccessFilter,
+  useCourseAccess,
+} from "@/components/courseAccess/access";
 
 // --- Helpers ---
 const stripHtml = (html) => {
@@ -220,6 +230,7 @@ const LibraryPage = ({
   const accessFor = (item) => (courseAccess ? courseCardState(access.byId.get(String(item?._id))) : { kind: null });
   const bundlesRef = useRef(null);
   const [highlightBundle, setHighlightBundle] = useState(null);
+  const [accessFilter, setAccessFilter] = useState("all");
   const [bundleScrollTick, setBundleScrollTick] = useState(0);
   useEffect(() => {
     if (bundleScrollTick) bundlesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -569,6 +580,9 @@ const LibraryPage = ({
     if (urlDifficulty) {
       pool = pool.filter((item) => item.difficulty === urlDifficulty);
     }
+    if (courseAccess && activeTab !== "my" && accessFilter !== "all") {
+      pool = pool.filter((item) => matchesAccessFilter(access.byId.get(String(item?._id)), accessFilter));
+    }
 
     // Apply Sorting
     if (urlSort !== "default") {
@@ -875,6 +889,15 @@ const LibraryPage = ({
                   </button>
                 </Badge>
               )}
+              {courseAccess && (
+                <button
+                  onClick={() => nav.push(MY_PURCHASES_PATH)}
+                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group w-[80px]"
+                >
+                  <BsReceipt className="text-white text-[24px] lg:text-[28px] leading-none group-hover:text-[#5694F0] transition-colors" />
+                  <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Purchases</span>
+                </button>
+              )}
               {activeTab === "my" && (
                 <div className="flex flex-col items-center justify-center w-[80px]">
                   <span className="text-[24px] lg:text-[28px] font-bold text-white leading-none">{totalEnrolled}</span>
@@ -1005,6 +1028,29 @@ const LibraryPage = ({
             onOpen={(url) => nav.push(url)}
           />
         )}
+        {courseAccess && activeTab !== "my" && !loading && (
+          <div className="mx-auto mb-5 flex w-full flex-wrap items-center gap-2 px-4 lg:px-8">
+            {ACCESS_FILTERS.map((f) => {
+              const count = safeAllItems.filter((item) => matchesAccessFilter(access.byId.get(String(item?._id)), f.value)).length;
+              const active = accessFilter === f.value;
+              return (
+                <button
+                  key={f.value}
+                  type="button"
+                  onClick={() => setAccessFilter(f.value)}
+                  className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[13px] font-bold transition-colors ${
+                    active
+                      ? "border-[#1E69DA] bg-[#1E69DA] text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-600"
+                  }`}
+                >
+                  {f.label}
+                  <span className={`ml-1.5 text-[11px] ${active ? "text-white/80" : "text-slate-400"}`}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
         <div 
           className="grid gap-x-12 lg:gap-x-16 gap-y-8 p-2 px-4 lg:px-6 mx-auto w-full"
           style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
@@ -1119,8 +1165,6 @@ const LibraryPage = ({
                           </div>
                         ) : isBundleOnly ? (
                           <CourseAccessBadge kind="bundle" className="absolute top-3 left-3" />
-                        ) : accessState.kind === "premium" && accessState.price > 0 ? (
-                          <CourseAccessBadge kind="premium" label={formatPrice(accessState.price)} className="absolute top-3 left-3" />
                         ) : null}
                         
                         {showWishlist && (
@@ -1191,6 +1235,31 @@ const LibraryPage = ({
                             <BsClock className="text-blue-500/70 text-[12px]" /> {duration}
                           </div>
                         )}
+                        {(() => {
+                          if (!courseAccess) return null;
+                          const info = access.byId.get(String(item._id));
+                          const label = accessLabel(info);
+                          const daysLeft = expiringIn(info?.entitlement?.expiresAt);
+                          const tones = {
+                            green: "bg-emerald-50 text-emerald-700 border-emerald-100",
+                            amber: "bg-amber-50 text-amber-700 border-amber-100",
+                            violet: "bg-violet-50 text-violet-700 border-violet-100",
+                          };
+                          return (
+                            <>
+                              {label && (
+                                <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border max-w-full truncate ${tones[label.tone] || ""}`}>
+                                  {label.text}
+                                </div>
+                              )}
+                              {daysLeft && (
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wider border border-red-100">
+                                  <BsHourglassSplit className="text-[11px]" /> {expiryText(daysLeft)}
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                         {courseAccess && access.byId.get(String(item._id))?.featured && (
                           <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-wider border border-amber-100">
                             <BsStarFill className="text-amber-400 text-[11px]" /> Featured
