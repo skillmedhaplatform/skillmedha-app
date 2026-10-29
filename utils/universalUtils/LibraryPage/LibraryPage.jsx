@@ -1156,7 +1156,7 @@ const LibraryPage = ({
                         {/* Top overlay gradient for readability */}
                         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
 
-                        {isEnrolled && accessState.kind === "free" && !inMyCourses ? (
+                        {accessState.kind === "free" ? (
                           <CourseAccessBadge kind="free" className="absolute top-3 left-3" />
                         ) : isEnrolled ? (
                           <div className="absolute top-3 left-3 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/30 shadow-sm">
@@ -1316,7 +1316,7 @@ const LibraryPage = ({
                 );
 
                 // Free and bundle-only courses can't go through Cart / Buy Now.
-                if (!showBuyNow || activeTab === "my" || isBundleOnly || (accessState.kind === "free" && !inMyCourses)) {
+                if (!showBuyNow || activeTab === "my" || isBundleOnly || accessState.kind === "free") {
                   return cardNode;
                 }
 

@@ -661,7 +661,7 @@ export default function CourseDetailsPage() {
                     <div className="flex items-center gap-2 mb-6">
                       <span className="bg-emerald-100 text-emerald-800 font-bold px-3.5 py-1.5 rounded-full text-[13px] flex items-center gap-1.5">
                         <CheckCircle className="w-4 h-4 text-emerald-600" />{" "}
-                        {courseAccess?.reason === "free" ? "Free course — start anytime" : courseAccess?.reason === "assigned" ? "Assigned by your college" : courseAccess?.reason === "bundle" ? `Unlocked via ${courseAccess?.bundleTitle || "your bundle"}` : "You are enrolled in this course"}
+                        {courseAccess?.reason === "free" || courseAccess?.reason === "assigned" ? "Free course — start anytime" : courseAccess?.reason === "bundle" ? `Unlocked via ${courseAccess?.bundleTitle || "your bundle"}` : "You are enrolled in this course"}
                       </span>
                     </div>
                   ) : (

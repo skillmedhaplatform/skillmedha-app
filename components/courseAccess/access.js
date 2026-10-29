@@ -36,7 +36,8 @@ export const accessLabel = (info) => {
   if (!info) return null;
   const e = info.entitlement || {};
   if (e.unlocked) {
-    if (e.reason === "assigned") return { text: "Assigned by your college", tone: "green" };
+    // College-assigned courses are simply free for the student.
+    if (e.reason === "assigned") return { text: "Free", tone: "green" };
     if (e.reason === "free") return { text: "Free", tone: "green" };
     if (e.reason === "bundle") return { text: e.bundleTitle ? `Via ${e.bundleTitle}` : "Via bundle", tone: "green" };
     return { text: "Purchased", tone: "green" };
@@ -63,7 +64,7 @@ export const matchesAccessFilter = (info, filter) => {
   if (!info) return false;
   const unlocked = !!info.entitlement?.unlocked;
   if (filter === "unlocked") return unlocked;
-  if (filter === "free") return info.access === "free";
+  if (filter === "free") return info.access === "free" || info.entitlement?.reason === "assigned";
   if (filter === "paid") return info.access === "premium" && !unlocked;
   if (filter === "bundle") return info.access === "bundle" && !unlocked;
   return true;
@@ -76,7 +77,8 @@ export const matchesAccessFilter = (info, filter) => {
 export const courseCardState = (info) => {
   if (!info) return { kind: null };
   if (info.entitlement?.unlocked) {
-    return { kind: info.entitlement.reason === "free" ? "free" : "owned", reason: info.entitlement.reason };
+    const isFree = info.entitlement.reason === "free" || info.entitlement.reason === "assigned";
+    return { kind: isFree ? "free" : "owned", reason: info.entitlement.reason };
   }
   if (info.access === "bundle") return { kind: "bundle", bundles: info.bundles || [] };
   if (info.access === "free") return { kind: "free" };
