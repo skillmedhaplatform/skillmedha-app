@@ -69,11 +69,13 @@ import CertificateDetails from "./components/certificateDetails";
 import useResponsive from "@/hooks/useResponsive";
 import MobileResumeBuilder from "@/mobile_views/resumeBuilder/MobileResumeBuilder";
 import ATSCheckerSection from "./components/ATSCheckerSection";
-import { TEMPLATE_OPTIONS, templateComponents, getTemplateCategory } from "./Templates/registry";
+import { TEMPLATE_OPTIONS, templateComponents, getTemplateCategory, templateSupportsPhoto } from "./Templates/registry";
 import useTemplateAccess from "./Templates/useTemplateAccess";
 import TemplateGallery from "./Templates/TemplateGallery";
 import TemplateLockModal from "@/components/resumeTemplates/TemplateLockModal";
 import { formatPrice, resumeCheckoutUrl } from "@/components/resumeTemplates/access";
+import ResumeUploadModal from "./components/ResumeUploadModal";
+import ResumePhotoUploadModal from "./components/ResumePhotoUploadModal";
 const Template1 = templateComponents.template1;
 const TEMPLATE_SWATCHES = [
   "#1E69DA", "#e8447a", "#1C8A63", "#9c6ade", "#d97706", "#0f6f66", "#be185d", "#4f46e5",
@@ -359,6 +361,187 @@ function Form() {
   // Modal states
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showDownloadWarningModal, setShowDownloadWarningModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [postUploadNextStep, setPostUploadNextStep] = useState(null);
+  const importedResumePayloadRef = useRef(null);
+
+  const handleSelectTemplateFromInitial = (id) => {
+    if (templateAccess.isLocked(id)) {
+      setLockedTemplate(id);
+      return;
+    }
+
+    // Persist imported resume payload to the selected template draft if available
+    if (importedResumePayloadRef.current) {
+      try {
+        localStorage.setItem(`resumeDraft_${id}`, JSON.stringify(importedResumePayloadRef.current));
+      } catch (e) {
+        console.warn("Could not save imported draft for template:", id, e);
+      }
+    }
+
+    setSelectedTemplate(id);
+
+    // If template supports photo and user has not uploaded one, prompt for photo
+    const hasPhoto = templateSupportsPhoto(id);
+    const hasExistingPhoto = Boolean(
+      importedResumePayloadRef.current?.basicDetails?.profile || basicDetails?.profile
+    );
+
+    if (hasPhoto && !hasExistingPhoto) {
+      setPostUploadNextStep("editor");
+      setShowPhotoModal(true);
+    } else {
+      setStep("editor");
+    }
+  };
+
+  const handleParsedResumeSuccess = (parsedData) => {
+    if (!parsedData) return;
+
+    if (parsedData.basicDetails) {
+      setBasicDetails((prev) => ({
+        ...prev,
+        ...parsedData.basicDetails,
+        professionalSummary: getSummary(parsedData.basicDetails.professionalSummary || prev.professionalSummary),
+      }));
+    }
+
+    if (Array.isArray(parsedData.educationDetails) && parsedData.educationDetails.length > 0) {
+      setEducationDetails(parsedData.educationDetails);
+    }
+
+    if (Array.isArray(parsedData.experienceDetails) && parsedData.experienceDetails.length > 0) {
+      setExperienceDetails(parsedData.experienceDetails);
+    }
+
+    if (Array.isArray(parsedData.internships) && parsedData.internships.length > 0) {
+      setInternshipDetails(parsedData.internships);
+    }
+
+    if (Array.isArray(parsedData.projectDetails) && parsedData.projectDetails.length > 0) {
+      setProjectDetails(parsedData.projectDetails);
+    }
+
+    if (Array.isArray(parsedData.skills) && parsedData.skills.length > 0) {
+      setSkills(parsedData.skills);
+    }
+
+    if (Array.isArray(parsedData.languages) && parsedData.languages.length > 0) {
+      setLanguages(parsedData.languages);
+    }
+
+    if (Array.isArray(parsedData.links) && parsedData.links.length > 0) {
+      setLinks(parsedData.links);
+    }
+
+    if (Array.isArray(parsedData.certificates) && parsedData.certificates.length > 0) {
+      setCertificates(parsedData.certificates);
+    }
+
+    if (Array.isArray(parsedData.accomplishments) && parsedData.accomplishments.length > 0) {
+      setAccDetails(parsedData.accomplishments);
+    }
+
+    if (Array.isArray(parsedData.volunteerings) && parsedData.volunteerings.length > 0) {
+      setVolunteerings(parsedData.volunteerings);
+    }
+
+    if (Array.isArray(parsedData.visibleOptionalSections) && parsedData.visibleOptionalSections.length > 0) {
+      setVisibleOptionalSections(parsedData.visibleOptionalSections);
+    }
+
+    const draftKey = `resumeDraft_${selectedTemplate}`;
+    const draftPayload = {
+      basicDetails: parsedData.basicDetails,
+      educationDetails: parsedData.educationDetails,
+      experienceDetails: parsedData.experienceDetails,
+      internships: parsedData.internships,
+      projectDetails: parsedData.projectDetails,
+      accDetails: parsedData.accomplishments,
+      skills: parsedData.skills,
+      languages: parsedData.languages,
+      links: parsedData.links,
+      certificates: parsedData.certificates,
+      volunteerings: parsedData.volunteerings,
+      visibleOptionalSections: parsedData.visibleOptionalSections || [],
+    };
+    importedResumePayloadRef.current = draftPayload;
+
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(draftPayload));
+    } catch (e) {
+      console.warn("Could not save parsed resume to draft:", e);
+    }
+
+    if (step === "landing") {
+      message.success("Resume data imported! Select a template to view and edit.");
+      setStep("templates_initial");
+    } else {
+      // In editor mode, template is already active
+      const hasPhoto = templateSupportsPhoto(selectedTemplate);
+      const existingPhoto = parsedData.basicDetails?.profile || basicDetails?.profile;
+
+      if (hasPhoto && !existingPhoto) {
+        setPostUploadNextStep(null);
+        setShowPhotoModal(true);
+      } else {
+        message.success("Resume data imported successfully!");
+      }
+    }
+  };
+
+  const handleSavePhotoModal = (photoDataUrl) => {
+    updateBasicDetail("profile", photoDataUrl);
+
+    if (importedResumePayloadRef.current) {
+      if (!importedResumePayloadRef.current.basicDetails) {
+        importedResumePayloadRef.current.basicDetails = {};
+      }
+      importedResumePayloadRef.current.basicDetails.profile = photoDataUrl;
+    }
+
+    try {
+      const draftKey = `resumeDraft_${selectedTemplate}`;
+      const existingDraft = JSON.parse(localStorage.getItem(draftKey) || "{}");
+      if (!existingDraft.basicDetails) existingDraft.basicDetails = {};
+      existingDraft.basicDetails.profile = photoDataUrl;
+      localStorage.setItem(draftKey, JSON.stringify(existingDraft));
+    } catch (e) {
+      console.warn("Could not save photo to draft:", e);
+    }
+
+    message.success("Profile photo uploaded successfully!");
+    setShowPhotoModal(false);
+
+    if (postUploadNextStep) {
+      setStep(postUploadNextStep);
+      setPostUploadNextStep(null);
+    }
+  };
+
+  const handleClosePhotoModal = () => {
+    setShowPhotoModal(false);
+    message.info("You can add your photo anytime in the Personal Details section.");
+
+    if (postUploadNextStep) {
+      setStep(postUploadNextStep);
+      setPostUploadNextStep(null);
+    }
+  };
+
+  const photoUploadModal = (
+    <ResumePhotoUploadModal
+      isOpen={showPhotoModal}
+      onClose={handleClosePhotoModal}
+      onSavePhoto={handleSavePhotoModal}
+      templateName={
+        TEMPLATE_OPTIONS.find((t) => t.id === selectedTemplate)?.label || "Selected Template"
+      }
+      initialPhoto={basicDetails?.profile}
+    />
+  );
 
   // Handler updates for basic details
   const updateBasicDetail = (field, value) => {
@@ -1375,113 +1558,123 @@ function Form() {
 
   if (step === 'landing') {
     return (
-      <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-full overflow-hidden w-full">
-        <StudentPageHeader title="Resume Builder" subtitle="Create your professional resume" />
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-12 pt-10 flex flex-col items-center justify-start relative w-full h-full">
-          {/* Background decorative elements */}
-          <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#1E69DA]/5 to-transparent -z-10 pointer-events-none"></div>
-          <div className="absolute top-20 left-[10%] w-72 h-72 bg-[#1E69DA]/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
-          <div className="absolute top-40 right-[10%] w-80 h-80 bg-purple-500/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+      <>
+        <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-full overflow-hidden w-full">
+          <StudentPageHeader title="Resume Builder" subtitle="Create your professional resume" />
+          <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-12 pt-10 flex flex-col items-center justify-start relative w-full h-full">
+            {/* Background decorative elements */}
+            <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#1E69DA]/5 to-transparent -z-10 pointer-events-none"></div>
+            <div className="absolute top-20 left-[10%] w-72 h-72 bg-[#1E69DA]/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+            <div className="absolute top-40 right-[10%] w-80 h-80 bg-purple-500/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
 
-          <div className="z-10 flex flex-col items-center w-full max-w-[1200px] mt-4">
-            
-            {/* Header */}
-            <div className="text-center mb-14">
-              <h2 
-                className="text-[48px] md:text-[68px] font-[800] text-slate-800 tracking-tight mb-4 leading-tight border-none"
-                style={{ border: "none" }}
-              >
-                Build a <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1E69DA] to-purple-600">Winning Resume</span>
-              </h2>
-              <p className="text-slate-500 text-[16px] md:text-[18px] max-w-[600px] mx-auto font-medium leading-relaxed">
-                Choose how you want to start. Create from scratch, enhance an existing resume, or check your ATS score instantly.
-              </p>
-            </div>
-
-            {/* Main Action Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full">
+            <div className="z-10 flex flex-col items-center w-full max-w-[1200px] mt-4">
               
-              {/* Create New Card */}
-              <div 
-                onClick={() => setStep('templates_initial')}
-                className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(30,105,218,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative z-10 flex flex-col items-center flex-1 w-full">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1E69DA] to-blue-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                    <FileAddOutlined className="text-[32px]" />
-                  </div>
-                  <h3 className="text-[22px] font-bold text-slate-800 mb-3">Create from Scratch</h3>
-                  <p className="text-slate-500 text-[15px] leading-relaxed mb-8 flex-1">
-                    Use our professional templates and step-by-step builder to craft a perfect resume in minutes.
-                  </p>
-                  <span className="inline-flex items-center justify-center w-full bg-slate-50 text-[#1E69DA] font-bold px-6 py-3.5 rounded-xl group-hover:bg-[#1E69DA] group-hover:text-white transition-colors duration-300">
-                    Get Started <span className="ml-2 text-lg leading-none">→</span>
-                  </span>
-                </div>
+              {/* Header */}
+              <div className="text-center mb-14">
+                <h2 
+                  className="text-[48px] md:text-[68px] font-[800] text-slate-800 tracking-tight mb-4 leading-tight border-none"
+                  style={{ border: "none" }}
+                >
+                  Build a <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1E69DA] to-purple-600">Winning Resume</span>
+                </h2>
+                <p className="text-slate-500 text-[16px] md:text-[18px] max-w-[600px] mx-auto font-medium leading-relaxed">
+                  Choose how you want to start. Create from scratch, enhance an existing resume, or check your ATS score instantly.
+                </p>
               </div>
 
-              {/* Upload Resume Card */}
-              <div 
-                onClick={() => message.info("Upload Resume coming soon!")}
-                className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative z-10 flex flex-col items-center flex-1 w-full">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-400 flex items-center justify-center text-white shadow-lg shadow-purple-500/30 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                    <CloudUploadOutlined className="text-[32px]" />
+              {/* Main Action Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full">
+                
+                {/* Create New Card */}
+                <div 
+                  onClick={() => setStep('templates_initial')}
+                  className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(30,105,218,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative z-10 flex flex-col items-center flex-1 w-full">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1E69DA] to-blue-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                      <FileAddOutlined className="text-[32px]" />
+                    </div>
+                    <h3 className="text-[22px] font-bold text-slate-800 mb-3">Create from Scratch</h3>
+                    <p className="text-slate-500 text-[15px] leading-relaxed mb-8 flex-1">
+                      Use our professional templates and step-by-step builder to craft a perfect resume in minutes.
+                    </p>
+                    <span className="inline-flex items-center justify-center w-full bg-slate-50 text-[#1E69DA] font-bold px-6 py-3.5 rounded-xl group-hover:bg-[#1E69DA] group-hover:text-white transition-colors duration-300">
+                      Get Started <span className="inline-block ml-2 text-lg leading-none transition-transform duration-300 group-hover:translate-x-1">→</span>
+                    </span>
                   </div>
-                  <h3 className="text-[22px] font-bold text-slate-800 mb-3">Upload & Enhance</h3>
-                  <p className="text-slate-500 text-[15px] leading-relaxed mb-8 flex-1">
-                    Already have a resume? Upload it and let our AI suggest powerful improvements to make it stand out.
-                  </p>
-                  <span className="inline-flex items-center justify-center w-full bg-slate-50 text-purple-600 font-bold px-6 py-3.5 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
-                    Upload File <span className="ml-2 text-lg leading-none">→</span>
-                  </span>
                 </div>
+
+                {/* Upload Resume Card */}
+                <div 
+                  onClick={() => setShowUploadModal(true)}
+                  className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative z-10 flex flex-col items-center flex-1 w-full">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-400 flex items-center justify-center text-white shadow-lg shadow-purple-500/30 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                      <CloudUploadOutlined className="text-[32px]" />
+                    </div>
+                    <h3 className="text-[22px] font-bold text-slate-800 mb-3">Upload & Enhance</h3>
+                    <p className="text-slate-500 text-[15px] leading-relaxed mb-8 flex-1">
+                      Already have a resume? Upload it and let our AI suggest powerful improvements to make it stand out.
+                    </p>
+                    <span className="inline-flex items-center justify-center w-full bg-slate-50 text-purple-600 font-bold px-6 py-3.5 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                      Upload File <span className="inline-block ml-2 text-lg leading-none transition-transform duration-300 group-hover:translate-x-1">→</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* ATS Checker Card */}
+                <div 
+                  onClick={() => setStep('ats_checker')}
+                  className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative z-10 flex flex-col items-center flex-1 w-full">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                      <BarChartOutlined className="text-[32px]" />
+                    </div>
+                    <h3 className="text-[22px] font-bold text-slate-800 mb-3">ATS Score Check</h3>
+                    <p className="text-slate-500 text-[15px] leading-relaxed mb-8 flex-1">
+                      Scan your resume against job descriptions to ensure it passes perfectly through Applicant Tracking Systems.
+                    </p>
+                    <span className="inline-flex items-center justify-center w-full bg-slate-50 text-emerald-600 font-bold px-6 py-3.5 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                      Check Score <span className="inline-block ml-2 text-lg leading-none transition-transform duration-300 group-hover:translate-x-1">→</span>
+                    </span>
+                  </div>
+                </div>
+
               </div>
 
-              {/* ATS Checker Card */}
-              <div 
-                onClick={() => setStep('ats_checker')}
-                className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative z-10 flex flex-col items-center flex-1 w-full">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                    <BarChartOutlined className="text-[32px]" />
-                  </div>
-                  <h3 className="text-[22px] font-bold text-slate-800 mb-3">ATS Score Check</h3>
-                  <p className="text-slate-500 text-[15px] leading-relaxed mb-8 flex-1">
-                    Scan your resume against job descriptions to ensure it passes perfectly through Applicant Tracking Systems.
-                  </p>
-                  <span className="inline-flex items-center justify-center w-full bg-slate-50 text-emerald-600 font-bold px-6 py-3.5 rounded-xl group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
-                    Check Score <span className="ml-2 text-lg leading-none">→</span>
-                  </span>
+              {/* Minimal Features List */}
+              <div className="mt-16 flex flex-wrap justify-center gap-6 md:gap-12 opacity-70 mb-8">
+                <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
+                  <CheckCircleFilled className="text-emerald-500 text-[18px]" /> ATS-Friendly
+                </div>
+                <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
+                  <CheckCircleFilled className="text-emerald-500 text-[18px]" /> 40+ Premium Templates
+                </div>
+                <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
+                  <CheckCircleFilled className="text-emerald-500 text-[18px]" /> AI-Powered Tips
+                </div>
+                <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
+                  <CheckCircleFilled className="text-emerald-500 text-[18px]" /> One-Click Export
                 </div>
               </div>
 
             </div>
-
-            {/* Minimal Features List */}
-            <div className="mt-16 flex flex-wrap justify-center gap-6 md:gap-12 opacity-70 mb-8">
-              <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
-                <CheckCircleFilled className="text-emerald-500 text-[18px]" /> ATS-Friendly
-              </div>
-              <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
-                <CheckCircleFilled className="text-emerald-500 text-[18px]" /> 40+ Premium Templates
-              </div>
-              <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
-                <CheckCircleFilled className="text-emerald-500 text-[18px]" /> AI-Powered Tips
-              </div>
-              <div className="flex items-center gap-2.5 font-bold text-slate-500 text-[14px] md:text-[15px]">
-                <CheckCircleFilled className="text-emerald-500 text-[18px]" /> One-Click Export
-              </div>
-            </div>
-
           </div>
         </div>
-      </div>
+
+        {/* Upload & Scan Resume Modal */}
+        <ResumeUploadModal
+          isOpen={showUploadModal}
+          onClose={() => setShowUploadModal(false)}
+          onParsedSuccess={handleParsedResumeSuccess}
+        />
+        {photoUploadModal}
+      </>
     );
   }
 
@@ -1568,10 +1761,7 @@ function Form() {
             }
           }}
           onPreview={(id) => setPreviewTemplate(id)}
-          onUse={(id) => {
-            // chooseTemplate opens the unlock dialog for locked templates.
-            if (chooseTemplate(id)) setStep('editor');
-          }}
+          onUse={(id) => handleSelectTemplateFromInitial(id)}
           onBuyBundle={(id) => nav.push(resumeCheckoutUrl("bundle", id))}
         />
 
@@ -1719,8 +1909,7 @@ function Form() {
                               setLockedTemplate(previewTemplate);
                               return;
                             }
-                            setSelectedTemplate(previewTemplate);
-                            setStep('editor');
+                            handleSelectTemplateFromInitial(previewTemplate);
                             setPreviewTemplate(null);
                           }}
                           className="!bg-[#1E69DA] hover:!bg-[#1554b3] !text-white !border-none !rounded-lg !w-full !h-[42px] font-semibold shadow-md transition-all text-[14px] flex items-center justify-center gap-2"
@@ -1777,6 +1966,7 @@ function Form() {
           );
         })()}
         {lockModal}
+        {photoUploadModal}
       </div>
     );
   }
@@ -1892,6 +2082,13 @@ function Form() {
 
 
             <div className="flex items-center flex-wrap justify-end gap-3 z-10">
+              <Button
+                icon={<CloudUploadOutlined />}
+                onClick={() => setShowUploadModal(true)}
+                className="!bg-white/10 !text-white !border-white/20 hover:!bg-white/20 hover:!text-white transition-all"
+              >
+                Upload Resume
+              </Button>
               <Button onClick={handleSubmit} loading={isSubmitting} className="!bg-[#1E69DA] !text-white !border !border-[#1E69DA] hover:!bg-[#1754B4] hover:!border-[#1754B4] focus:!bg-[#1754B4] focus:!border-[#1754B4] transition-all">
                 Submit
               </Button>
@@ -2274,6 +2471,14 @@ function Form() {
       >
         <p>You have made changes since your last download. These new edits will <strong>not</strong> reflect in the downloaded resume. You must download the resume again to see the latest changes.</p>
       </Modal>
+
+      {/* Upload & Scan Resume Modal */}
+      <ResumeUploadModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onParsedSuccess={handleParsedResumeSuccess}
+      />
+      {photoUploadModal}
     </>
   );
 }
