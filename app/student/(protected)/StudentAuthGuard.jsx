@@ -55,10 +55,11 @@ export default function StudentAuthGuard({ children, serverToken }) {
         nav.replace("/student/tests");
       }
     } else {
-      if (currPath === "/") {
-        nav.replace("/dashboard");
+      if (currPath === "/" || currPath === "/dashboard") {
+        nav.replace("/student/dashboard");
       }
     }
+
   }, [currPath, isSpecialOrg, nav]);
 
   if (!serverToken) return null;

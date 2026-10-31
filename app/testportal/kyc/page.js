@@ -181,7 +181,7 @@ export default function KYC() {
   const handleCloseFromModal = () => {
     setShowSuccessModal(false);
     if (typeof window !== "undefined") {
-      window.location.replace("https://skillmedha-app.gentletree-181f5836.southindia.azurecontainerapps.io/login");
+      window.location.replace(process.env.NEXT_PUBLIC_LOGIN_APP_URL || "/login");
     }
   };
   return (

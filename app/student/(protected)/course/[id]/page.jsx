@@ -11,7 +11,6 @@ import ShareModal from "@/components/shared/ShareModal";
 import {
   Clock,
   PlayCircle,
-  BookOpen,
   CheckCircle,
   Tv,
   Download,
@@ -353,7 +352,7 @@ export default function CourseDetailsPage() {
               {/* 1. What You'll Learn (Website design) */}
               {course?.learningPoints?.length > 0 && (
                 <div className="border border-slate-200 rounded-lg p-6 lg:p-8 mb-10 shadow-sm relative overflow-hidden">
-                  <h2 className="text-xl font-bold text-slate-800 mb-6">What you'll learn</h2>
+                  <h2 className="text-xl font-bold text-slate-800 mb-6">What you&apos;ll learn</h2>
                   <div className="relative">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                       {visibleLearning.map((item, i) => (
@@ -644,19 +643,6 @@ export default function CourseDetailsPage() {
                     className="w-full h-full object-cover rounded-lg border-[3px] border-white shadow-sm"
                   />
                 </div>
-                <div className="p-5">
-                  <div className="flex items-baseline gap-3 mb-4">
-                    <span className="text-3xl font-bold text-slate-900 leading-none">
-                      {isFree ? "Free" : `₹${effectiveCurrentPrice.toLocaleString("en-IN")}`}
-                    </span>
-                    {originalPrice > effectiveCurrentPrice && (
-                      <span className="text-lg text-slate-400 line-through font-medium leading-none">
-                        ₹{originalPrice.toLocaleString("en-IN")}
-                      </span>
-                    )}
-                    {discountPercent > 0 && (
-                      <span className="text-sm font-semibold text-slate-900 leading-none">
-                        {discountPercent}% off
                 <div className="p-6">
                   {isEnrolled ? (
                     <div className="flex items-center gap-2 mb-6">
@@ -667,11 +653,16 @@ export default function CourseDetailsPage() {
                   ) : (
                     <div className="flex items-baseline gap-3 mb-6">
                       <span className="text-3xl font-bold text-slate-900 leading-none">
-                        {course?.pricing?.finalPrice ? `₹${course.pricing.finalPrice}` : course?.price ? `₹${course.price}` : "Free"}
+                        {isFree ? "Free" : `₹${effectiveCurrentPrice.toLocaleString("en-IN")}`}
                       </span>
-                      {course?.pricing?.finalPrice && course?.price && (
+                      {originalPrice > effectiveCurrentPrice && (
                         <span className="text-lg text-slate-400 line-through font-medium leading-none">
-                          ₹{course.price}
+                          ₹{originalPrice.toLocaleString("en-IN")}
+                        </span>
+                      )}
+                      {discountPercent > 0 && (
+                        <span className="text-sm font-semibold text-slate-900 leading-none">
+                          {discountPercent}% off
                         </span>
                       )}
                     </div>

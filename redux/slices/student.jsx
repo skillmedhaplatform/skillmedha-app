@@ -105,8 +105,9 @@ export const loginStudent = createAsyncThunk(
       if (isSpecialOrg) {
         nav.replace("/student/tests");
       } else {
-        nav.replace("/dashboard");
+        nav.replace("/student/dashboard");
       }
+
       return data;
     } catch (error) {
       message.destroy();
