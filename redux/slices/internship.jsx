@@ -44,6 +44,8 @@ const InternshipSlice = createSlice({
     });
     builder.addCase(getOneInternsip.fulfilled, (state, { payload }) => {
       state.singleInternship = payload?.data || payload;
+      // Admin-configured course access (null when no gate applies).
+      state.courseAccess = payload?.access ?? null;
 
       // ── Last-accessed position ────────────────────────────────────────
       if (payload?.lastAccessed) {

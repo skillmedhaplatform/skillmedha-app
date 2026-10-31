@@ -11,6 +11,7 @@ import {
   HiOutlineVideoCamera,
   HiOutlineCreditCard,
   HiOutlineDocumentText,
+  HiOutlineTag,
 } from "react-icons/hi2";
 
 export const setSstorage = (name, val) => {
@@ -102,6 +103,11 @@ export const sideBarTitles = [
     name: "Course Library",
     path: "/admin/course",
     icon: <HiOutlineBookOpen size={22} />,
+  },
+  {
+    name: "Course Access & Bundles",
+    path: "/admin/access-bundles",
+    icon: <HiOutlineTag size={22} />,
   },
   {
     name: "Workshops",

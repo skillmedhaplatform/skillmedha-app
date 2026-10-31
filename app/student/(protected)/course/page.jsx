@@ -49,6 +49,7 @@ const CourseLibraryPage = () => (
     idPrefix="course"
     renderMetaChips={renderCourseMetaChips}
     showBuyNow={true}
+    courseAccess={true}
     showWishlist={true}
   />
 );

@@ -56,6 +56,11 @@ const CreateCourse = ({ type = "course" }) => {
 
   // Get capitalized type for UI display
   const typeCapitalized = capitalize(type);
+  // Course prices, coupons and Free/Paid/Bundle access are managed only in
+  // Admin → Course Access & Bundles. This editor never reads or writes them
+  // for courses, so saving content can't change a configured price.
+  // Internships and workshops still set their price here.
+  const managesPricing = type !== "course";
 
   // Basic course info
   const [courseBasic, setCourseBasic] = useState({
@@ -594,7 +599,9 @@ const CreateCourse = ({ type = "course" }) => {
     }
 
     // Pricing Validation
-    if (!pricing.currentPrice || pricing.currentPrice === "") {
+    if (!managesPricing) {
+      // Course pricing lives in Course Access & Bundles.
+    } else if (!pricing.currentPrice || pricing.currentPrice === "") {
       errors.currentPrice = "Current price is required";
     } else {
       const currentPrice = parseFloat(pricing.currentPrice);
@@ -605,7 +612,7 @@ const CreateCourse = ({ type = "course" }) => {
       }
     }
 
-    if (pricing.originalPrice) {
+    if (managesPricing && pricing.originalPrice) {
       const originalPrice = parseFloat(pricing.originalPrice);
       const currentPrice = parseFloat(pricing.currentPrice);
       if (isNaN(originalPrice) || originalPrice < 0) {
@@ -616,7 +623,7 @@ const CreateCourse = ({ type = "course" }) => {
       }
     }
 
-    if (pricing.couponDiscount) {
+    if (managesPricing && pricing.couponDiscount) {
       const discount = parseFloat(pricing.couponDiscount);
       const currentPrice = parseFloat(pricing.currentPrice);
       if (isNaN(discount) || discount < 0) {
@@ -627,7 +634,7 @@ const CreateCourse = ({ type = "course" }) => {
       }
     }
 
-    if (pricing.couponCode && pricing.couponCode.length > 0) {
+    if (managesPricing && pricing.couponCode && pricing.couponCode.length > 0) {
       if (pricing.couponCode.length < 3) {
         errors.couponCode = "Coupon code must be at least 3 characters";
       } else if (pricing.couponCode.length > 50) {
@@ -1287,7 +1294,7 @@ const CreateCourse = ({ type = "course" }) => {
           parseFloat(pricing.currentPrice || 0) -
           parseFloat(pricing.couponDiscount || 0),
       };
-      if (hasChanged(originalDataRef.current.pricing, pricingWithFinal)) {
+      if (managesPricing && hasChanged(originalDataRef.current.pricing, pricingWithFinal)) {
         updates.pricing = pricingWithFinal;
       }
 
@@ -1355,12 +1362,16 @@ const CreateCourse = ({ type = "course" }) => {
         ...courseBasic,
         ...courseArrays,
         courseIncludes,
-        pricing: {
-          ...pricing,
-          finalPrice:
-            parseFloat(pricing.currentPrice || 0) -
-            parseFloat(pricing.couponDiscount || 0),
-        },
+        ...(managesPricing
+          ? {
+              pricing: {
+                ...pricing,
+                finalPrice:
+                  parseFloat(pricing.currentPrice || 0) -
+                  parseFloat(pricing.couponDiscount || 0),
+              },
+            }
+          : {}),
         media: images,
         seoMetadata: {
           ...seo,
@@ -1915,6 +1926,27 @@ const CreateCourse = ({ type = "course" }) => {
         {/* Pricing Section */}
         <div className={internStyles.sectionHeader}>Pricing</div>
 
+        {!managesPricing ? (
+          <div
+            style={{
+              padding: "12px 16px",
+              borderRadius: 10,
+              background: "#eff6ff",
+              border: "1px solid #bfdbfe",
+              color: "#1e3a8a",
+              fontSize: 13,
+              marginBottom: 16,
+            }}
+          >
+            Price, coupon and Free / Paid / Bundle access for courses are set in{" "}
+            <a href="/admin/access-bundles" style={{ fontWeight: 600 }}>
+              Course Access &amp; Bundles
+            </a>
+            . A new course stays hidden from students until you set it up there.
+          </div>
+        ) : (
+        <>
+
         <div className={internStyles.formRow}>
           <div className={internStyles.formField} data-field="currentPrice">
             <label>Current Price *</label>
@@ -2020,6 +2052,8 @@ const CreateCourse = ({ type = "course" }) => {
               )}
             </Tag>
           </div>
+        )}
+        </>
         )}
 
         {/* Media Section */}

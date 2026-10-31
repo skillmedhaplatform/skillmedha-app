@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux";
 import { Pagination, Tooltip, Button, Select, Input, Modal, Tag, Row, Col, message, Badge, Popover } from "antd";
 import { SearchOutlined, InfoCircleOutlined, CheckCircleOutlined, HeartOutlined, ShoppingCartOutlined, LockOutlined, LoadingOutlined, FilterOutlined } from "@ant-design/icons";
-import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase } from "react-icons/bs";
+import { BsBookmark, BsBookmarkFill, BsCheckCircleFill, BsCodeSlash, BsBarChartFill, BsCpuFill, BsBook, BsClock, BsJournalBookmark, BsBriefcase, BsStarFill, BsHourglassSplit, BsReceipt } from "react-icons/bs";
 import { HiOutlineBuildingOffice2, HiOutlineBookOpen } from "react-icons/hi2";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useAppRouter } from "@/helpers/useAppRouter";
@@ -17,6 +17,19 @@ import CartDrawer from "./CartDrawer";
 import BuyNowPopoverContent from "./BuyNowPopoverContent";
 import AddToCartModal from "./AddToCartModal";
 import PriceChip from "./PriceChip";
+import CourseAccessBadge from "@/components/courseAccess/CourseAccessBadge";
+import CourseBundlesStrip from "@/components/courseAccess/CourseBundlesStrip";
+import {
+  ACCESS_FILTERS,
+  MY_PURCHASES_PATH,
+  accessLabel,
+  courseCardState,
+  courseBundleCheckoutUrl,
+  expiringIn,
+  expiryText,
+  matchesAccessFilter,
+  useCourseAccess,
+} from "@/components/courseAccess/access";
 
 // --- Helpers ---
 const stripHtml = (html) => {
@@ -172,12 +185,12 @@ const InfoContent = ({ item }) => {
   );
 };
 
-const MobileLibraryPageWrapper = ({ title, items, progressById, safeItems, activeTab, ...props }) => {
+const MobileLibraryPageWrapper = ({ title, items, progressById, safeItems, activeTab, unlockedIds, ...props }) => {
   // Enrich items with UI state (enrollment, progress) so mobile view can render cards correctly
   const enrichedItems = items?.map((item) => {
     const fetchedProgress = progressById?.[item._id];
     const inMyCourses = safeItems?.some((myCourse) => myCourse._id === item._id);
-    const isEnrolled = activeTab === "my" || inMyCourses;
+    const isEnrolled = activeTab === "my" || inMyCourses || !!unlockedIds?.has(String(item._id));
     const progressVal = fetchedProgress ? (fetchedProgress.totalProgress ?? 0) : (item.progress || 0);
     const isProgressLoading = fetchedProgress?.loading;
 
@@ -210,8 +223,28 @@ const LibraryPage = ({
   renderMetaChips,
   showWishlist = false,  // NEW: toggle to enable/disable wishlist (favorites) feature
   showBuyNow = false,    // NEW: toggle to enable/disable Cart / Buy Now feature
+  courseAccess = false,  // admin-configured Free / Premium / Bundle-only access (courses only)
 }) => {
   const nav = useAppRouter();
+  const access = useCourseAccess(courseAccess);
+  const accessFor = (item) => (courseAccess ? courseCardState(access.byId.get(String(item?._id))) : { kind: null });
+  const bundlesRef = useRef(null);
+  const [highlightBundle, setHighlightBundle] = useState(null);
+  const [accessFilter, setAccessFilter] = useState("all");
+  const [bundleScrollTick, setBundleScrollTick] = useState(0);
+  useEffect(() => {
+    if (bundleScrollTick) bundlesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [bundleScrollTick]);
+  // Bundle-only course: one bundle → straight to its checkout, several → show them.
+  const openBundlesFor = (bundles) => {
+    if (bundles?.length === 1) {
+      nav.push(courseBundleCheckoutUrl(bundles[0]._id));
+      return;
+    }
+    setActiveTab("all");
+    setHighlightBundle(bundles?.[0]?._id || null);
+    setBundleScrollTick((t) => t + 1);
+  };
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
@@ -494,7 +527,14 @@ const LibraryPage = ({
 
   // safeAllItems = all courses from getAllCoursesOnly API: response is { data: [...], hasNext: bool }
   // allItems in redux is already payload.data (array) after slice handles it
-  const safeAllItems = Array.isArray(allItems) ? allItems : [];
+  // Courses the admin hid are left out unless the student already has them.
+  const safeAllItems = (Array.isArray(allItems) ? allItems : []).filter(
+    (item) => !courseAccess || access.byId.get(String(item?._id))?.visible !== false
+  );
+  const unlockedIds = useMemo(
+    () => new Set([...access.byId.values()].filter((c) => c.entitlement?.unlocked).map((c) => String(c.courseId))),
+    [access.byId]
+  );
 
   // Tab filtering:
   // "all"       → show all courses from getAllCoursesOnly API
@@ -509,8 +549,13 @@ const LibraryPage = ({
       pool.sort((a, b) => {
         const aEnrolled = safeItems.some(myCourse => myCourse._id === a._id);
         const bEnrolled = safeItems.some(myCourse => myCourse._id === b._id);
-        if (aEnrolled === bEnrolled) return 0;
-        return aEnrolled ? 1 : -1; // Unenrolled (false) goes before Enrolled (true)
+        if (aEnrolled !== bEnrolled) return aEnrolled ? 1 : -1; // Unenrolled (false) goes before Enrolled (true)
+        if (!courseAccess) return 0;
+        // Admin-configured: featured courses first, then the admin's order.
+        const aInfo = access.byId.get(String(a._id));
+        const bInfo = access.byId.get(String(b._id));
+        if (!!aInfo?.featured !== !!bInfo?.featured) return aInfo?.featured ? -1 : 1;
+        return (aInfo?.order ?? 100) - (bInfo?.order ?? 100);
       });
     } else if (activeTab === "my") {
       pool = [...safeItems];
@@ -534,6 +579,9 @@ const LibraryPage = ({
     }
     if (urlDifficulty) {
       pool = pool.filter((item) => item.difficulty === urlDifficulty);
+    }
+    if (courseAccess && activeTab !== "my" && accessFilter !== "all") {
+      pool = pool.filter((item) => matchesAccessFilter(access.byId.get(String(item?._id)), accessFilter));
     }
 
     // Apply Sorting
@@ -724,6 +772,7 @@ const LibraryPage = ({
           setCartOpen={setCartOpen}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          unlockedIds={courseAccess ? unlockedIds : undefined}
         />
 
         {/* Course Info Modal */}
@@ -839,6 +888,15 @@ const LibraryPage = ({
                     <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Cart</span>
                   </button>
                 </Badge>
+              )}
+              {courseAccess && (
+                <button
+                  onClick={() => nav.push(MY_PURCHASES_PATH)}
+                  className="flex flex-col items-center justify-center bg-transparent border-none cursor-pointer group w-[80px]"
+                >
+                  <BsReceipt className="text-white text-[24px] lg:text-[28px] leading-none group-hover:text-[#5694F0] transition-colors" />
+                  <span className="text-[12px] text-[#94a3b8] font-bold tracking-wider uppercase mt-1.5 text-center">Purchases</span>
+                </button>
               )}
               {activeTab === "my" && (
                 <div className="flex flex-col items-center justify-center w-[80px]">
@@ -962,6 +1020,37 @@ const LibraryPage = ({
       </div> {/* End Fixed Header Section */}
       {/* Cards Grid (Scrollable) */}
       <div className="w-full flex-1 overflow-y-auto pt-8 pb-8 no-scrollbar">
+        {courseAccess && activeTab === "all" && !loading && (
+          <CourseBundlesStrip
+            ref={bundlesRef}
+            bundles={access.bundles}
+            highlightId={highlightBundle}
+            onOpen={(url) => nav.push(url)}
+          />
+        )}
+        {courseAccess && activeTab !== "my" && !loading && (
+          <div className="mx-auto mb-5 flex w-full flex-wrap items-center gap-2 px-4 lg:px-8">
+            {ACCESS_FILTERS.map((f) => {
+              const count = safeAllItems.filter((item) => matchesAccessFilter(access.byId.get(String(item?._id)), f.value)).length;
+              const active = accessFilter === f.value;
+              return (
+                <button
+                  key={f.value}
+                  type="button"
+                  onClick={() => setAccessFilter(f.value)}
+                  className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[13px] font-bold transition-colors ${
+                    active
+                      ? "border-[#1E69DA] bg-[#1E69DA] text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-600"
+                  }`}
+                >
+                  {f.label}
+                  <span className={`ml-1.5 text-[11px] ${active ? "text-white/80" : "text-slate-400"}`}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
         <div 
           className="grid gap-x-12 lg:gap-x-16 gap-y-8 p-2 px-4 lg:px-6 mx-auto w-full"
           style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
@@ -995,7 +1084,11 @@ const LibraryPage = ({
 
                 // We use safeItems to determine true enrollment since safeItems contains "My courses"
                 const inMyCourses = safeItems.some(myCourse => myCourse._id === item._id);
-                const isEnrolled = activeTab === "my" || inMyCourses;
+                // Admin access: free and already-unlocked courses open directly;
+                // bundle-only courses point to their bundles.
+                const accessState = accessFor(item);
+                const isEnrolled = activeTab === "my" || inMyCourses || accessState.kind === "owned" || accessState.kind === "free";
+                const isBundleOnly = accessState.kind === "bundle";
 
                 const progressVal = fetchedProgress ? (fetchedProgress.totalProgress ?? 0) : (item.progress || 0);
 
@@ -1020,6 +1113,9 @@ const LibraryPage = ({
                     buttonText = "Continue";
                     statusColor = "text-[#10b981]";
                   }
+                } else if (isBundleOnly) {
+                  statusText = "Available in a bundle";
+                  buttonText = "Bundle";
                 } else {
                   buttonText = "Buy";
                 }
@@ -1060,12 +1156,16 @@ const LibraryPage = ({
                         {/* Top overlay gradient for readability */}
                         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
 
-                        {isEnrolled && (
+                        {accessState.kind === "free" ? (
+                          <CourseAccessBadge kind="free" className="absolute top-3 left-3" />
+                        ) : isEnrolled ? (
                           <div className="absolute top-3 left-3 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/30 shadow-sm">
                             <BsCheckCircleFill className="text-emerald-400 text-[11px]" />
                             <span className="text-white text-[10px] font-bold tracking-wide uppercase">Enrolled</span>
                           </div>
-                        )}
+                        ) : isBundleOnly ? (
+                          <CourseAccessBadge kind="bundle" className="absolute top-3 left-3" />
+                        ) : null}
                         
                         {showWishlist && (
                           <button
@@ -1135,6 +1235,36 @@ const LibraryPage = ({
                             <BsClock className="text-blue-500/70 text-[12px]" /> {duration}
                           </div>
                         )}
+                        {(() => {
+                          if (!courseAccess) return null;
+                          const info = access.byId.get(String(item._id));
+                          const label = accessLabel(info);
+                          const daysLeft = expiringIn(info?.entitlement?.expiresAt);
+                          const tones = {
+                            green: "bg-emerald-50 text-emerald-700 border-emerald-100",
+                            amber: "bg-amber-50 text-amber-700 border-amber-100",
+                            violet: "bg-violet-50 text-violet-700 border-violet-100",
+                          };
+                          return (
+                            <>
+                              {label && (
+                                <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border max-w-full truncate ${tones[label.tone] || ""}`}>
+                                  {label.text}
+                                </div>
+                              )}
+                              {daysLeft && (
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wider border border-red-100">
+                                  <BsHourglassSplit className="text-[11px]" /> {expiryText(daysLeft)}
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                        {courseAccess && access.byId.get(String(item._id))?.featured && (
+                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-wider border border-amber-100">
+                            <BsStarFill className="text-amber-400 text-[11px]" /> Featured
+                          </div>
+                        )}
                         {modulesCount > 0 && (
                           <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
                             <BsJournalBookmark className="text-purple-500/70 text-[12px]" /> {modulesCount} mod
@@ -1159,6 +1289,8 @@ const LibraryPage = ({
                             e.stopPropagation();
                             if (isEnrolled) {
                               nav.push(getItemUrl(item));
+                            } else if (isBundleOnly) {
+                              openBundlesFor(accessState.bundles);
                             } else {
                               if (inCart) {
                                 nav.push("/student/cart?type=" + idPrefix);
@@ -1168,7 +1300,9 @@ const LibraryPage = ({
                             }
                           }}
                         >
-                          {buttonText === "Buy" ? (
+                          {buttonText === "Bundle" ? (
+                            accessState.bundles?.length ? "View Bundle" : "Bundle only"
+                          ) : buttonText === "Buy" ? (
                             isCartLoading ? "Adding..." : inCart ? "Go to Cart" : "Add to Cart"
                           ) : buttonText === "Start" ? (
                             "Start"
@@ -1181,7 +1315,8 @@ const LibraryPage = ({
                   </div>
                 );
 
-                if (!showBuyNow || activeTab === "my") {
+                // Free and bundle-only courses can't go through Cart / Buy Now.
+                if (!showBuyNow || activeTab === "my" || isBundleOnly || accessState.kind === "free") {
                   return cardNode;
                 }
 
