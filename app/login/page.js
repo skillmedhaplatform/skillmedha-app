@@ -41,6 +41,16 @@ function LoginForm() {
     if (typeof window !== "undefined") {
       const existingToken = localStorage.getItem("token");
       const portalRole = localStorage.getItem("portalRole");
+      const hasCallbackUrl = searchParams.get('callbackUrl');
+
+      // If server rejected session and redirected with callbackUrl, clear expired credentials to break redirect loop
+      if (hasCallbackUrl) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("portalRole");
+        localStorage.removeItem("sId");
+        return;
+      }
+
       if (existingToken && portalRole === "student") {
         const target = (redirectParam && redirectParam.startsWith("/student/")) ? redirectParam : "/student/dashboard";
         window.location.replace(target);

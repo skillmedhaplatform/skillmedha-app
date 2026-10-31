@@ -758,6 +758,9 @@ export const TEMPLATE_OPTIONS = [
 export const getTemplateCategory = (id) =>
   TEMPLATE_OPTIONS.find((t) => t.id === id)?.category || "Modern";
 
+export const templateSupportsPhoto = (id) =>
+  Boolean(TEMPLATE_OPTIONS.find((t) => t.id === id)?.photo);
+
 export const templateComponents = {
   template1: Template1,
   template2: Template2,

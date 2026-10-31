@@ -11,5 +11,6 @@ export default async function RootPage() {
 
   // Authenticated users are handled by (protected)/layout.js
   // which redirects to /tests or /profile/basic-details based on org type
-  redirect("/dashboard");
+  redirect("/student/dashboard");
 }
+

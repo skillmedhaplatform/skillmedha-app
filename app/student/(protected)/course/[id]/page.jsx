@@ -12,7 +12,6 @@ import { accessValidity, courseBundleCheckoutUrl, expiringIn, expiryText, format
 import {
   Clock,
   PlayCircle,
-  BookOpen,
   CheckCircle,
   Tv,
   Download,
@@ -675,7 +674,8 @@ export default function CourseDetailsPage() {
                         </span>
                       )}
                       {!isFree && discountPercent > 0 && (
-                        <span className="text-sm font-semibold text-emerald-600 leading-none">
+                        <span className="text-sm font-semibold text-slate-900 leading-none">
+
                           {discountPercent}% off
                         </span>
                       )}
