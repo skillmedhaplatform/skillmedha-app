@@ -10,6 +10,7 @@ import { fetchCourseCatalog } from "@/services/courseAccessApi";
 export const formatPrice = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
 
 export const courseBundleCheckoutUrl = (bundleId) => `/student/course-bundles/checkout?bundleId=${bundleId}`;
+export const courseBundleDetailsUrl = (bundleId) => `/student/course-bundles/${bundleId}`;
 
 export const accessValidity = (expiresAt) =>
   expiresAt
@@ -55,7 +56,7 @@ export const ACCESS_FILTERS = [
   { value: "all", label: "All" },
   { value: "free", label: "Free" },
   { value: "paid", label: "Paid" },
-  { value: "bundle", label: "Bundle only" },
+  { value: "bundle", label: "Bundle" },
   { value: "unlocked", label: "Unlocked" },
 ];
 

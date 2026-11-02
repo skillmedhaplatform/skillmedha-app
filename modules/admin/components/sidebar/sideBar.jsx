@@ -90,6 +90,8 @@ const SideBar = ({ activeView, setView, isMobile }) => {
   };
 
   const hasPermission = (path) => {
+    // Before mounting on the client or while auth is loading, avoid disabling items to prevent SSR hydration mismatch
+    if (!mounted || loading) return true;
     const permissionKey = pathToPermissionMap[path];
     if (!permissionKey) return true;
     return userPermissions[permissionKey] === true;

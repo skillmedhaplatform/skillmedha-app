@@ -250,7 +250,6 @@ export default function CourseDetailsPage() {
 
   const visibleSections = showAllCurriculum ? course?.sections : course?.sections?.slice(0, 6);
   const visibleLearning = showAllLearning ? course?.learningPoints : course?.learningPoints?.slice(0, 6);
-  const breadcrumb = [course.category || "Course", course.difficulty || "All Levels", course.title].filter(Boolean);
 
   // Dynamic Pricing Calculation
   const parsePrice = (v) => {
@@ -316,15 +315,6 @@ export default function CourseDetailsPage() {
       <section className="w-full min-h-[110px] lg:min-h-[140px] flex flex-col justify-center px-4 lg:px-8 bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden py-4 lg:py-5">
         <div className="max-w-[1400px] mx-auto w-full relative z-10 flex flex-col gap-1.5 lg:gap-2">
           
-          <div className="flex flex-wrap items-center gap-1.5 text-[11px] lg:text-[12px] text-white/60">
-            {breadcrumb.map((crumb, i) => (
-              <span key={i} className="flex items-center gap-1.5">
-                {i > 0 && <span>›</span>}
-                <span className="font-medium text-white/80">{crumb}</span>
-              </span>
-            ))}
-          </div>
-
           <div className="text-[20px] lg:text-[26px] font-bold text-white m-0 tracking-tight leading-snug">
             {course.title || "N/A"}
           </div>

@@ -18,15 +18,16 @@ import BuyNowPopoverContent from "./BuyNowPopoverContent";
 import AddToCartModal from "./AddToCartModal";
 import PriceChip from "./PriceChip";
 import CourseAccessBadge from "@/components/courseAccess/CourseAccessBadge";
-import CourseBundlesStrip from "@/components/courseAccess/CourseBundlesStrip";
+import { StudentBundleCard } from "@/components/courseAccess/CourseBundlesStrip";
 import {
   ACCESS_FILTERS,
   MY_PURCHASES_PATH,
   accessLabel,
   courseCardState,
-  courseBundleCheckoutUrl,
+  courseBundleDetailsUrl,
   expiringIn,
   expiryText,
+  formatPrice,
   matchesAccessFilter,
   useCourseAccess,
 } from "@/components/courseAccess/access";
@@ -235,15 +236,14 @@ const LibraryPage = ({
   useEffect(() => {
     if (bundleScrollTick) bundlesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [bundleScrollTick]);
-  // Bundle-only course: one bundle → straight to its checkout, several → show them.
+  // Bundle-only course: one bundle → straight to its details, several → show them.
   const openBundlesFor = (bundles) => {
     if (bundles?.length === 1) {
-      nav.push(courseBundleCheckoutUrl(bundles[0]._id));
+      nav.push(courseBundleDetailsUrl(bundles[0]._id));
       return;
     }
     setActiveTab("all");
-    setHighlightBundle(bundles?.[0]?._id || null);
-    setBundleScrollTick((t) => t + 1);
+    setAccessFilter("bundle");
   };
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -581,6 +581,9 @@ const LibraryPage = ({
       pool = pool.filter((item) => item.difficulty === urlDifficulty);
     }
     if (courseAccess && activeTab !== "my" && accessFilter !== "all") {
+      if (accessFilter === "bundle") {
+        return [];
+      }
       pool = pool.filter((item) => matchesAccessFilter(access.byId.get(String(item?._id)), accessFilter));
     }
 
@@ -607,6 +610,17 @@ const LibraryPage = ({
 
     return pool;
   })();
+
+  const displayedBundles = useMemo(() => {
+    if (!courseAccess || activeTab !== "all") return [];
+    if (accessFilter !== "all" && accessFilter !== "bundle") return [];
+    let list = access.bundles || [];
+    if (urlSearch) {
+      const s = urlSearch.toLowerCase();
+      list = list.filter((b) => b.title?.toLowerCase().includes(s) || b.description?.toLowerCase().includes(s));
+    }
+    return list;
+  }, [courseAccess, activeTab, accessFilter, access.bundles, urlSearch]);
 
   // NEW: helper to resolve the org id for a given course item.
   // "My courses" payloads carry sourceOrgId; "all courses" payloads only have
@@ -1020,18 +1034,17 @@ const LibraryPage = ({
       </div> {/* End Fixed Header Section */}
       {/* Cards Grid (Scrollable) */}
       <div className="w-full flex-1 overflow-y-auto pt-8 pb-8 no-scrollbar">
-        {courseAccess && activeTab === "all" && !loading && (
-          <CourseBundlesStrip
-            ref={bundlesRef}
-            bundles={access.bundles}
-            highlightId={highlightBundle}
-            onOpen={(url) => nav.push(url)}
-          />
-        )}
         {courseAccess && activeTab !== "my" && !loading && (
           <div className="mx-auto mb-5 flex w-full flex-wrap items-center gap-2 px-4 lg:px-8">
             {ACCESS_FILTERS.map((f) => {
-              const count = safeAllItems.filter((item) => matchesAccessFilter(access.byId.get(String(item?._id)), f.value)).length;
+              let count = 0;
+              if (f.value === "all") {
+                count = safeAllItems.length + (access.bundles?.length || 0);
+              } else if (f.value === "bundle") {
+                count = access.bundles?.length || 0;
+              } else {
+                count = safeAllItems.filter((item) => matchesAccessFilter(access.byId.get(String(item?._id)), f.value)).length;
+              }
               const active = accessFilter === f.value;
               return (
                 <button
@@ -1057,7 +1070,7 @@ const LibraryPage = ({
         >
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
-          ) : !filteredTabItems?.length ? (
+          ) : (!filteredTabItems?.length && !displayedBundles?.length) ? (
             <div className="col-span-full flex flex-col items-center justify-center gap-2 py-20 px-4 text-[#8ea2b5] text-base text-center w-full">
               <span style={{ fontSize: "2.5rem" }}>{activeTab === "wishlist" ? "❤️" : "🔍"}</span>
               <span>
@@ -1075,8 +1088,18 @@ const LibraryPage = ({
               )}
             </div>
           ) : (
-            (() => {
-              const displayItems = filteredTabItems;
+            <>
+              {displayedBundles.map((bundle) => (
+                <StudentBundleCard
+                  key={bundle._id}
+                  bundle={bundle}
+                  className="w-full h-full"
+                  highlighted={highlightBundle && String(highlightBundle) === String(bundle._id)}
+                  onOpen={(url) => nav.push(url)}
+                />
+              ))}
+              {(() => {
+                const displayItems = filteredTabItems;
 
               return displayItems.map((item, index) => {
                 const fetchedProgress = progressById[item._id];
@@ -1089,6 +1112,9 @@ const LibraryPage = ({
                 const accessState = accessFor(item);
                 const isEnrolled = activeTab === "my" || inMyCourses || accessState.kind === "owned" || accessState.kind === "free";
                 const isBundleOnly = accessState.kind === "bundle";
+                const coursePrice = Number(accessState.price ?? item?.pricing?.finalPrice ?? item?.pricing?.currentPrice ?? item?.price ?? 0);
+                const courseMrp = Number(accessState.mrp ?? item?.pricing?.originalPrice ?? item?.mrp ?? 0);
+                const isFreeCourse = accessState.kind === "free" || (coursePrice === 0 && !isBundleOnly);
 
                 const progressVal = fetchedProgress ? (fetchedProgress.totalProgress ?? 0) : (item.progress || 0);
 
@@ -1101,20 +1127,13 @@ const LibraryPage = ({
                 const inCart = cartIdSet.has(item?._id);
                 const isCartLoading = cartPendingIds.includes(item?._id);
 
-                let statusText = "Not started";
                 let buttonText = "Start";
-                let statusColor = "text-[#94a3b8]";
 
-                if (isProgressLoading) {
-                  statusText = "Loading…";
-                } else if (isEnrolled) {
+                if (isEnrolled) {
                   if (progressVal > 0) {
-                    statusText = `${progressVal}% complete`;
                     buttonText = "Continue";
-                    statusColor = "text-[#10b981]";
                   }
                 } else if (isBundleOnly) {
-                  statusText = "Available in a bundle";
                   buttonText = "Bundle";
                 } else {
                   buttonText = "Buy";
@@ -1133,7 +1152,7 @@ const LibraryPage = ({
                 const cardNode = (
                   <div
                     key={item?._id}
-                    className="group flex flex-col bg-white border border-slate-100 rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative"
+                    className="group flex flex-col bg-white border border-slate-100 hover:border-blue-300 rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative h-full"
                     role="button"
                     tabIndex={0}
                     onClick={() => {
@@ -1278,11 +1297,57 @@ const LibraryPage = ({
                       </div>
 
                       {/* Footer */}
-                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
-                        <span className={`text-[12px] font-bold flex items-center gap-1.5 ${isEnrolled && progressVal > 0 ? "text-emerald-500" : "text-slate-400"}`}>
-                          {isEnrolled && progressVal > 0 && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
-                          {statusText}
-                        </span>
+                      <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100">
+                        <div>
+                          {isEnrolled ? (
+                            <span className={`text-[12px] font-bold flex items-center gap-1.5 ${progressVal > 0 ? "text-emerald-500" : "text-emerald-600 font-extrabold text-[14px]"}`}>
+                              {progressVal > 0 ? (
+                                <>
+                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  {progressVal}% complete
+                                </>
+                              ) : (
+                                <>
+                                  <BsCheckCircleFill className="text-emerald-500 text-[13px]" /> Enrolled
+                                </>
+                              )}
+                            </span>
+                          ) : isBundleOnly ? (
+                            <div>
+                              <div className="text-[15px] font-extrabold text-slate-900 tracking-tight">
+                                Bundle only
+                              </div>
+                              <div className="text-[11px] text-slate-400">
+                                Available in bundle
+                              </div>
+                            </div>
+                          ) : isFreeCourse ? (
+                            <div>
+                              <div className="text-[19px] font-extrabold text-emerald-600 tracking-tight">
+                                Free
+                              </div>
+                              <div className="text-[11px] text-slate-400">
+                                Lifetime access
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="text-[19px] font-extrabold text-slate-900 tracking-tight">
+                                  {formatPrice(coursePrice)}
+                                </span>
+                                {courseMrp > coursePrice && (
+                                  <span className="text-[12px] text-slate-400 line-through">
+                                    {formatPrice(courseMrp)}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-slate-400">
+                                Lifetime access
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         <button
                           className="group/btn bg-white hover:bg-slate-50 text-slate-700 text-[13px] font-[800] py-2 px-5 rounded-xl border border-slate-200 cursor-pointer transition-all flex items-center gap-2 shadow-sm hover:shadow hover:-translate-y-0.5 hover:text-blue-600 hover:border-blue-200"
                           onClick={(e) => {
@@ -1348,8 +1413,9 @@ const LibraryPage = ({
                   </Popover>
                 );
               });
-            })()
-          )}
+            })()}
+          </>
+        )}
         </div>
 
         {/* Pagination Removed */}
