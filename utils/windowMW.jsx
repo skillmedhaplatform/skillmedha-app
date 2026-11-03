@@ -11,6 +11,7 @@ import {
   HiOutlineVideoCamera,
   HiOutlineCreditCard,
   HiOutlineDocumentText,
+  HiOutlineGlobeAlt,
   HiOutlineTag,
 } from "react-icons/hi2";
 

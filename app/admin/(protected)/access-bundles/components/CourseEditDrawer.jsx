@@ -87,7 +87,7 @@ export default function CourseEditDrawer({ course, open, saving, onClose, onSave
     <Drawer
       open={open}
       onClose={onClose}
-      width={520}
+      size={520}
       destroyOnHidden
       title={
         <div className="flex items-center gap-3">
