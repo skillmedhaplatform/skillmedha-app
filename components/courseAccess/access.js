@@ -41,6 +41,7 @@ export const accessLabel = (info) => {
     if (e.reason === "assigned") return { text: "Free", tone: "green" };
     if (e.reason === "free") return { text: "Free", tone: "green" };
     if (e.reason === "bundle") return { text: e.bundleTitle ? `Via ${e.bundleTitle}` : "Via bundle", tone: "green" };
+    if (e.reason === "plan") return { text: `On your ${e.planName || "plan"}`, tone: "green" };
     return { text: "Purchased", tone: "green" };
   }
   if (info.access === "bundle") {
@@ -48,6 +49,7 @@ export const accessLabel = (info) => {
     return { text: b ? `In ${b.title} · ${formatPrice(b.price)}` : "Bundle only", tone: "violet" };
   }
   if (info.access === "free") return { text: "Free", tone: "green" };
+  if (info.upgradePlan && !(info.price > 0)) return { text: `In ${info.upgradePlan.name}`, tone: "violet" };
   return { text: info.price > 0 ? formatPrice(info.price) : "Paid", tone: "amber" };
 };
 
@@ -81,9 +83,9 @@ export const courseCardState = (info) => {
     const isFree = info.entitlement.reason === "free" || info.entitlement.reason === "assigned";
     return { kind: isFree ? "free" : "owned", reason: info.entitlement.reason };
   }
-  if (info.access === "bundle") return { kind: "bundle", bundles: info.bundles || [] };
+  if (info.access === "bundle") return { kind: "bundle", bundles: info.bundles || [], upgradePlan: info.upgradePlan };
   if (info.access === "free") return { kind: "free" };
-  return { kind: "premium", price: info.price, mrp: info.mrp };
+  return { kind: "premium", price: info.price, mrp: info.mrp, upgradePlan: info.upgradePlan };
 };
 
 /** Loads the student's course access catalogue once. */

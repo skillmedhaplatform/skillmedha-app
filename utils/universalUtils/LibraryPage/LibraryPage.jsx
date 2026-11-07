@@ -19,6 +19,7 @@ import AddToCartModal from "./AddToCartModal";
 import PriceChip from "./PriceChip";
 import CourseAccessBadge from "@/components/courseAccess/CourseAccessBadge";
 import { StudentBundleCard } from "@/components/courseAccess/CourseBundlesStrip";
+import PlansBanner from "@/components/membership/PlansBanner";
 import {
   ACCESS_FILTERS,
   MY_PURCHASES_PATH,
@@ -736,6 +737,7 @@ const LibraryPage = ({
   if (isMobile) {
     return (
       <>
+        {courseAccess && <PlansBanner className="mx-4 mt-3" />}
         <MobileLibraryPageWrapper
           title={title}
           viewLabel={viewLabel}
@@ -1034,6 +1036,7 @@ const LibraryPage = ({
       </div> {/* End Fixed Header Section */}
       {/* Cards Grid (Scrollable) */}
       <div className="w-full flex-1 overflow-y-auto pt-8 pb-8 no-scrollbar">
+        {courseAccess && <PlansBanner className="mx-4 mb-5 lg:mx-8" />}
         {courseAccess && activeTab !== "my" && !loading && (
           <div className="mx-auto mb-5 flex w-full flex-wrap items-center gap-2 px-4 lg:px-8">
             {ACCESS_FILTERS.map((f) => {
@@ -1182,6 +1185,8 @@ const LibraryPage = ({
                             <BsCheckCircleFill className="text-emerald-400 text-[11px]" />
                             <span className="text-white text-[10px] font-bold tracking-wide uppercase">Enrolled</span>
                           </div>
+                        ) : accessState.upgradePlan ? (
+                          <CourseAccessBadge kind="premium" label={`In ${accessState.upgradePlan.name}`} className="absolute top-3 left-3" />
                         ) : isBundleOnly ? (
                           <CourseAccessBadge kind="bundle" className="absolute top-3 left-3" />
                         ) : null}

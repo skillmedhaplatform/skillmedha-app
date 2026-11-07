@@ -1,6 +1,6 @@
 // Student-side wording and links for a practice set / bundle, driven by the
 // `access` object the practice catalog API returns with every item:
-//   { unlocked, reason: "free" | "purchased" | "bundle" | "locked", expiresAt, bundleTitle? }
+//   { unlocked, reason: "free" | "purchased" | "bundle" | "plan" | "locked", expiresAt, bundleTitle?, planName?, upgradePlan? }
 
 import { categoryLabel } from "./constants";
 
@@ -23,6 +23,7 @@ export const bundleActionLabel = (bundle) =>
 export const accessTag = (access) => {
   if (access?.reason === "purchased") return "Purchased";
   if (access?.reason === "bundle") return "In your bundle";
+  if (access?.reason === "plan") return `On your ${access.planName || "plan"}`;
   return null;
 };
 
@@ -32,6 +33,8 @@ export const accessNote = (access) => {
   if (access?.reason === "bundle") {
     return `Included in ${access.bundleTitle || "your bundle"} · ${validityText(access.expiresAt)}`;
   }
+  if (access?.reason === "plan") return `Included in your ${access.planName || "plan"} · ${validityText(access.expiresAt)}`;
+  if (access?.upgradePlan) return `Also included in the ${access.upgradePlan.name} plan`;
   return null;
 };
 
