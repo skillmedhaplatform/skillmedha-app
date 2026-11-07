@@ -30,7 +30,7 @@ import { useAppRouter } from "@/helpers/useAppRouter";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import CodingBadge from "@/modules/student/components/CodingBadge";
-import { ReadOutlined, LaptopOutlined } from "@ant-design/icons";
+import { ReadOutlined, LaptopOutlined, CompassOutlined } from "@ant-design/icons";
 import CardsList from "@/modules/student/components/cardsList";
 import MobileDashboard from "@/mobile_views/dashboard/MobileDashboard";
 import useResponsive from "@/hooks/useResponsive";
@@ -312,7 +312,7 @@ const AchievementDetailsModal = ({ isOpen, onClose, achievement }) => {
           <div className="bg-[#f8fafc] rounded-xl p-4 mt-4 border border-[#e2e8f0] text-left w-full">
             <h4 className="font-bold text-[#1e293b] text-[15px] mb-2">Consistency is Key!</h4>
             <p className="text-[13px] text-[#64748b] leading-relaxed">
-              You've logged in for {achievement.streak || 30} consecutive days. Keep up the great work and continue building your skills every day!
+              You&apos;ve logged in for {achievement.streak || 30} consecutive days. Keep up the great work and continue building your skills every day!
             </p>
           </div>
         );
@@ -580,7 +580,7 @@ const Achievements = ({ progressById, combinedLearningData, studentCreds }) => {
               {isCoding ? `${b.type} ${b.level} Badge` : `${b.type} Master Lvl ${b.level}`}
             </h2>
             <p className="text-[#475569] text-[14px] leading-relaxed mb-6">
-              You've proven your expertise in <strong className="text-[#0f172a]">{b.topic} • {b.subtopic}</strong>!
+              You&apos;ve proven your expertise in <strong className="text-[#0f172a]">{b.topic} • {b.subtopic}</strong>!
             </p>
 
             <div className="flex-1 border-t border-[#e2e8f0] pt-4 mt-2">
@@ -1196,7 +1196,10 @@ export default function DashboardPage() {
   return (
     <section className="w-full h-full flex flex-col items-stretch lg:pt-0 bg-[#EFF5FB]">
       {/* Welcome Section - Top Full Width */}
-      <div className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]">
+      <div
+        data-tour="dashboard-banner"
+        className="w-full h-[140px] min-h-[140px] flex flex-col justify-center items-start gap-2 p-4 lg:px-8 lg:py-6 border-b-[1px] border-white/10 shadow-sm rounded-2xl lg:rounded-none bg-gradient-to-br from-[#071631] to-[#10254c] text-white shrink-0 relative overflow-hidden z-[2]"
+      >
         {/* Decorative Icons matching TPO Portal */}
         <div className="absolute inset-0 pointer-events-none z-[1]">
           <BsX className="absolute top-[20%] right-[10%] text-[#1E69DA] opacity-60 text-[1.2rem]" />
@@ -1220,7 +1223,25 @@ export default function DashboardPage() {
             })}
           </div>
         </div>
-        <p className="text-[18px] lg:text-[32px] font-bold text-white m-0 tracking-tight relative z-[2]">{greeting}</p>
+
+        <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 relative z-[2] mt-0.5">
+          <p className="text-[18px] lg:text-[30px] font-bold text-white m-0 tracking-tight leading-tight">
+            {greeting}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("open-dashboard-guide"));
+              }
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+            title="View Dashboard Guide"
+          >
+            <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+            <span>View Dashboard Guide</span>
+          </button>
+        </div>
       </div>
 
       <div className="w-full flex-1 flex flex-col lg:flex-row items-stretch overflow-hidden relative">
@@ -1232,7 +1253,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Continue Learning Section with Pagination */}
-          <div className="w-full rounded-2xl bg-white py-4 px-4 lg:px-6 shadow-sm border border-[#e2e8f0]">
+          <div
+            data-tour="dashboard-continue-learning"
+            className="w-full rounded-2xl bg-white py-4 px-4 lg:px-6 shadow-sm border border-[#e2e8f0]"
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="text-[18px] lg:text-[22px] font-extrabold">
                 <span>Continue Learning</span>
@@ -1365,7 +1389,10 @@ export default function DashboardPage() {
           </div>
           {/* Grouped Recommended Section */}
           {(allCoursesOnly?.length > 0 || allInternshipsOnly?.length > 0) && (
-            <div className="w-full rounded-2xl bg-white p-4 lg:p-6 mt-4 flex flex-col items-center">
+            <div
+              data-tour="dashboard-recommended"
+              className="w-full rounded-2xl bg-white p-4 lg:p-6 mt-4 flex flex-col items-center"
+            >
               <div className="w-full flex flex-col md:flex-row gap-6 md:gap-0 items-stretch">
                 {allCoursesOnly?.length > 0 && (
                   <div className="flex-1 flex flex-col items-center border-b md:border-b-0 pb-6 md:pb-0 md:pr-6 md:border-r border-[#e2e8f0]">
@@ -1494,7 +1521,7 @@ export default function DashboardPage() {
         <div className="hidden lg:flex w-[280px] xl:w-[320px] h-full flex-col overflow-hidden bg-white border-l-[1px] border-[#e2e8f0] px-4 pt-0 pb-2 shrink-0 z-10 shadow-sm relative">
           <div className="w-full flex flex-col flex-1 h-full min-h-0">
             {/* Section 1: Overall Performance */}
-            <div className="w-full shrink-0 pt-0 pb-3">
+            <div className="w-full shrink-0 pt-0 pb-3" data-tour="dashboard-overall-performance">
               <ProfileSection
                 profileValues={profileValues}
                 router={router}
@@ -1503,7 +1530,10 @@ export default function DashboardPage() {
             </div>
 
             {/* Section 2: Notice Board */}
-            <div className="w-full flex flex-col relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1">
+            <div
+              data-tour="dashboard-noticeboard"
+              className="w-full flex flex-col relative border-t border-[#f1f5f9] pt-2 min-h-0 flex-1"
+            >
               <div className="w-full flex items-center justify-between mb-3 sticky top-0 bg-white z-10 shrink-0">
                 <h3 className="m-0 font-extrabold text-[#0f172a] text-[18px]">Notice Board</h3>
                 <svg width="0" height="0" className="absolute">

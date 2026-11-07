@@ -10,7 +10,7 @@ import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import PracticeFilters from "@/modules/student/components/PracticeFilters";
 import CompanyTestCard from "@/modules/student/components/CompanyTestCard";
 import { Skeleton, Modal, Input, Button, Dropdown } from "antd";
-import { PlayCircleOutlined, LineChartOutlined, ArrowLeftOutlined, ClockCircleOutlined, QuestionCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, DownOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { PlayCircleOutlined, LineChartOutlined, ArrowLeftOutlined, ClockCircleOutlined, QuestionCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, DownOutlined, InfoCircleOutlined, CompassOutlined } from "@ant-design/icons";
 
 export default function CompanyWisePage() {
   const dispatch = useDispatch();
@@ -126,21 +126,41 @@ export default function CompanyWisePage() {
         <StudentPageHeader
           title="Train for the company that's hiring you"
           subtitle="Pattern, sections and question mix match the real drive"
-        />
-        <PracticeFilters
-          categories={filterCategories}
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-          leftSlot={
-            <button 
-              onClick={() => router.push('/student/practice-new')}
-              className="group flex items-center gap-2 px-3 py-1.5 bg-transparent rounded-lg text-[13px] font-bold text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all duration-300 cursor-pointer"
-            >
-              <ArrowLeftOutlined className="transition-transform duration-300 group-hover:-translate-x-0.5" />
-              Back
-            </button>
+          rightSlot={
+            <div className="relative z-10">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open-practice-company-guide"));
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+                title="Explore Company-Wise Practice"
+              >
+                <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+                <span>Explore Company-Wise Practice</span>
+              </button>
+            </div>
           }
         />
+        <div>
+          <PracticeFilters
+            categoriesDataTour="practice-company-categories"
+            categories={filterCategories}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+            leftSlot={
+              <button 
+                onClick={() => router.push('/student/practice-new')}
+                className="group flex items-center gap-2 px-3 py-1.5 bg-transparent rounded-lg text-[13px] font-bold text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all duration-300 cursor-pointer"
+              >
+                <ArrowLeftOutlined className="transition-transform duration-300 group-hover:-translate-x-0.5" />
+                Back
+              </button>
+            }
+          />
+        </div>
       </div>
 
       <div className="flex-1 px-4 lg:px-8 py-8">

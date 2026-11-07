@@ -55,6 +55,7 @@ import {
   AppstoreOutlined,
   PlusCircleOutlined,
   LockOutlined,
+  CompassOutlined,
 } from "@ant-design/icons";
 
 import { useRouter } from "next/navigation";
@@ -317,6 +318,25 @@ function Form() {
       localStorage.setItem('resumeBuilder_lastTemplate', selectedTemplate);
     }
   }, [selectedTemplate]);
+
+  // Ensure landing step is active when opening any resume onboarding tour
+  useEffect(() => {
+    const handleSwitchToLanding = () => {
+      setStep("landing");
+    };
+
+    window.addEventListener("open-resume-guide", handleSwitchToLanding);
+    window.addEventListener("open-resume-scratch-guide", handleSwitchToLanding);
+    window.addEventListener("open-resume-upload-guide", handleSwitchToLanding);
+    window.addEventListener("open-resume-ats-guide", handleSwitchToLanding);
+
+    return () => {
+      window.removeEventListener("open-resume-guide", handleSwitchToLanding);
+      window.removeEventListener("open-resume-scratch-guide", handleSwitchToLanding);
+      window.removeEventListener("open-resume-upload-guide", handleSwitchToLanding);
+      window.removeEventListener("open-resume-ats-guide", handleSwitchToLanding);
+    };
+  }, []);
 
   // A remembered template may since have become paid or hidden — fall back to
   // the first template the student can use.
@@ -1560,7 +1580,27 @@ function Form() {
     return (
       <>
         <div className="flex flex-col gap-0 relative bg-[#EFF5FB] h-full overflow-hidden w-full">
-          <StudentPageHeader title="Resume Builder" subtitle="Create your professional resume" />
+          <StudentPageHeader 
+            title="Resume Builder" 
+            subtitle="Create your professional resume" 
+            rightSlot={
+              <div className="relative z-10">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("open-resume-guide"));
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+                  title="Explore Resume Guide"
+                >
+                  <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+                  <span>Explore Resume Guide</span>
+                </button>
+              </div>
+            }
+          />
           <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-12 pt-10 flex flex-col items-center justify-start relative w-full h-full">
             {/* Background decorative elements */}
             <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#1E69DA]/5 to-transparent -z-10 pointer-events-none"></div>
@@ -1587,6 +1627,7 @@ function Form() {
                 
                 {/* Create New Card */}
                 <div 
+                  data-tour="resume-scratch-card"
                   onClick={() => setStep('templates_initial')}
                   className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(30,105,218,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
                 >
@@ -1607,6 +1648,7 @@ function Form() {
 
                 {/* Upload Resume Card */}
                 <div 
+                  data-tour="resume-upload-card"
                   onClick={() => setShowUploadModal(true)}
                   className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
                 >
@@ -1627,6 +1669,7 @@ function Form() {
 
                 {/* ATS Checker Card */}
                 <div 
+                  data-tour="resume-ats-card"
                   onClick={() => setStep('ats_checker')}
                   className="group relative bg-white rounded-[24px] p-8 md:p-10 cursor-pointer border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col items-center text-center"
                 >
@@ -1746,6 +1789,23 @@ function Form() {
         <StudentPageHeader
           title="Choose a Template"
           subtitle="Pick a design that fits your style and make it yours"
+          rightSlot={
+            <div className="relative z-10">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open-resume-guide"));
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+                title="Explore Resume Guide"
+              >
+                <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+                <span>Explore Resume Guide</span>
+              </button>
+            </div>
+          }
         />
 
         <TemplateGallery
@@ -2082,6 +2142,19 @@ function Form() {
 
 
             <div className="flex items-center flex-wrap justify-end gap-3 z-10">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open-resume-guide"));
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0 h-[32px]"
+                title="Explore Resume Guide"
+              >
+                <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+                <span>Explore Resume Guide</span>
+              </button>
               <Button
                 icon={<CloudUploadOutlined />}
                 onClick={() => setShowUploadModal(true)}

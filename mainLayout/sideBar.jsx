@@ -371,6 +371,7 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
           <a
             href={`${process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:8080"}/`}
             title="Visit Website"
+            data-tour="sidebar-visit-website"
             style={{
               display: "flex",
               alignItems: "center",

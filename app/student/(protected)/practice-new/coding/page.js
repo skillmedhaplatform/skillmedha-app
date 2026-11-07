@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 import { FiArrowLeft, FiTarget, FiLayers, FiCode } from "react-icons/fi";
+import { CompassOutlined } from "@ant-design/icons";
 import {
   fetchSubjectsByType,
   getStudentPracResults,
@@ -384,7 +385,7 @@ export default function CodingPage() {
             Select Topic Category
           </div>
           <p className="text-slate-500 text-lg">
-            Choose the type of topics you'd like to practice
+            Choose the type of topics you&apos;d like to practice
           </p>
         </div>
 
@@ -500,18 +501,34 @@ export default function CodingPage() {
   const totalQuestions = subjects?.reduce((acc, curr) => acc + (curr.totalQuestions || 0), 0) || 0;
 
   const RightStats = (
-    <div className="hidden sm:flex items-center gap-6 lg:gap-10 text-white mr-2 lg:mr-8">
-      <div className="flex flex-col items-center">
-        <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalTopics}</span>
-        <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">TOPICS</span>
-      </div>
-      <div className="flex flex-col items-center">
-        <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalQuestions}</span>
-        <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">QUESTIONS</span>
-      </div>
-      <div className="flex flex-col items-center">
-        <span className="text-[24px] lg:text-[28px] font-bold leading-none bg-gradient-to-br from-[#1E69DA] to-[#5694F0] bg-clip-text text-transparent">0%</span>
-        <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">DONE</span>
+    <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 text-white mr-2 lg:mr-8">
+      <button
+        type="button"
+        onClick={() => {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("open-practice-coding-guide"));
+          }
+        }}
+        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+        title="Explore Coding Practice"
+      >
+        <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+        <span>Explore Coding Practice</span>
+      </button>
+
+      <div className="hidden sm:flex items-center gap-6 lg:gap-10">
+        <div className="flex flex-col items-center">
+          <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalTopics}</span>
+          <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">TOPICS</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-[24px] lg:text-[28px] font-bold leading-none">{totalQuestions}</span>
+          <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">QUESTIONS</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-[24px] lg:text-[28px] font-bold leading-none bg-gradient-to-br from-[#1E69DA] to-[#5694F0] bg-clip-text text-transparent">0%</span>
+          <span className="text-[10px] text-white/70 tracking-widest uppercase mt-1">DONE</span>
+        </div>
       </div>
     </div>
   );
@@ -673,7 +690,7 @@ export default function CodingPage() {
       >
         <div className="text-slate-600 mt-4 leading-relaxed">
           <p className="mb-4">
-            You can view the coding problems on this mobile device by switching your browser to <strong>"Desktop Site"</strong> or <strong>"Desktop Mode"</strong>.
+            You can view the coding problems on this mobile device by switching your browser to <strong>&ldquo;Desktop Site&rdquo;</strong> or <strong>&ldquo;Desktop Mode&rdquo;</strong>.
           </p>
           <p className="mb-4">
             However, please note that you <strong>cannot attempt or write code</strong> on a mobile or tablet device.

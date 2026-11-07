@@ -16,7 +16,9 @@ import {
   FileTextOutlined,
   BulbOutlined,
   StarOutlined,
+  CompassOutlined,
 } from "@ant-design/icons";
+import { SAMPLE_TALKTOAI_DATA } from "@/modules/student/components/onboarding/onboardingConfig";
 import { useUserMedia } from "@/helpers/useUserMedia";
 import { formatTime } from "@/helpers/formatVideoTime";
 import axios from "axios";
@@ -71,7 +73,7 @@ const Dictaphone = () => {
     "Do you prefer working independently or in a team?",
   ];
 
-  const [quesNo, setQuesNo] = useState(
+  const [quesNo, setQuesNo] = useState(() =>
     Math.floor(Math.random() * questions.length)
   );
   const [addQuesFlag, setAddQuesFlag] = useState(false);
@@ -86,6 +88,47 @@ const Dictaphone = () => {
     report: null,
     relevance: null,
   });
+
+  const [isTourStopActive, setIsTourStopActive] = useState(false);
+  const [tourSampleActive, setTourSampleActive] = useState(false);
+
+  useEffect(() => {
+    const handleTourStep = (e) => {
+      const { stepId } = e.detail || {};
+      if (stepId === "step-talktoai-stop-recording") {
+        setIsTourStopActive(true);
+        setTourSampleActive(false);
+      } else if (stepId === "step-talktoai-your-answer") {
+        setIsTourStopActive(false);
+        setTourSampleActive(true);
+        setActiveTab(0);
+      } else if (stepId === "step-talktoai-ai-report") {
+        setIsTourStopActive(false);
+        setTourSampleActive(true);
+        setActiveTab(1);
+      } else if (stepId === "step-talktoai-suggestions") {
+        setIsTourStopActive(false);
+        setTourSampleActive(true);
+        setActiveTab(2);
+      } else {
+        setIsTourStopActive(false);
+        setTourSampleActive(false);
+      }
+    };
+
+    const handleTourEnd = () => {
+      setIsTourStopActive(false);
+      setTourSampleActive(false);
+    };
+
+    window.addEventListener("talktoai-tour-step", handleTourStep);
+    window.addEventListener("talktoai-tour-end", handleTourEnd);
+
+    return () => {
+      window.removeEventListener("talktoai-tour-step", handleTourStep);
+      window.removeEventListener("talktoai-tour-end", handleTourEnd);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isReplaying && stream) {
@@ -427,6 +470,22 @@ const Dictaphone = () => {
               </p>
             </div>
           </div>
+
+          <div className="relative z-10">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("open-talktoai-guide"));
+                }
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+              title="Explore Talk to AI"
+            >
+              <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+              <span>Explore Talk to AI</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -435,6 +494,7 @@ const Dictaphone = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-[1.5rem] lg:gap-6 w-full h-full">
             {/* Left Panel - Video Recording */}
             <Card
+              data-tour="talktoai-start-recording"
               className="bg-white rounded-2xl shadow-md border border-[#e2e8f0] overflow-hidden [&_.ant-card-body]:p-6 [&_.ant-card-body]:flex-1 [&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:min-h-0 flex flex-col h-full"
               variant="borderless"
             >
@@ -524,11 +584,17 @@ const Dictaphone = () => {
                 </Button>
 
                 <Button
+                  data-tour="talktoai-stop-button"
                   danger
                   icon={<StopOutlined />}
                   onClick={handleStopRec}
-                  disabled={!listening}
+                  disabled={!isTourStopActive && !listening}
                   size="large"
+                  className={
+                    isTourStopActive
+                      ? "!bg-[#ff4d4f] !text-white !border-[#ff4d4f] !opacity-100 !shadow-lg animate-pulse"
+                      : ""
+                  }
                 >
                   Stop
                 </Button>
@@ -560,6 +626,7 @@ const Dictaphone = () => {
             <div className="flex flex-col gap-4 h-full min-h-0">
               {/* Question Card */}
               <Card
+                data-tour="talktoai-questions"
                 title={
                   <div className="flex items-center gap-2 text-[1.1rem] font-semibold text-[#1E69DA] [&_.anticon]:text-[1.2rem]">
                     <QuestionCircleOutlined />
@@ -616,6 +683,13 @@ const Dictaphone = () => {
 
               {/* Results Card */}
               <Card
+                data-tour={
+                  activeTab === 0
+                    ? "talktoai-your-answer"
+                    : activeTab === 1
+                    ? "talktoai-ai-report"
+                    : "talktoai-suggestions"
+                }
                 className="bg-white rounded-2xl shadow-md border border-[#e2e8f0] flex-1 flex flex-col min-h-0 [&_.ant-card-body]:p-0 [&_.ant-card-body]:flex-1 [&_.ant-card-body]:flex [&_.ant-card-body]:flex-col [&_.ant-card-body]:min-h-0"
                 variant="borderless"
               >
@@ -630,16 +704,16 @@ const Dictaphone = () => {
                   </div>
                   <div
                     className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent whitespace-nowrap flex-nowrap shrink-0 min-w-fit [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${activeTab === 1 ? "!bg-white !text-[#1E69DA] !border-[#1E69DA]" : ""
-                      } ${!aiSuggestions.report ? "opacity-50 cursor-not-allowed hover:!bg-[#f8fafc] hover:!text-[#64748b]" : ""}`}
-                    onClick={() => aiSuggestions.report && setActiveTab(1)}
+                      } ${!aiSuggestions.report && !tourSampleActive ? "opacity-50 cursor-not-allowed hover:!bg-[#f8fafc] hover:!text-[#64748b]" : ""}`}
+                    onClick={() => (aiSuggestions.report || tourSampleActive) && setActiveTab(1)}
                   >
                     <StarOutlined />
                     <span>AI Report</span>
                   </div>
                   <div
                     className={`flex-1 p-4 flex items-center justify-center gap-2 cursor-pointer font-semibold text-[#64748b] bg-[#f8fafc] transition-all duration-300 border-b-[3px] border-transparent whitespace-nowrap flex-nowrap shrink-0 min-w-fit [&_.anticon]:text-[1.1rem] hover:bg-[#f1f5f9] hover:text-[#1E69DA] ${activeTab === 2 ? "!bg-white !text-[#1E69DA] !border-[#1E69DA]" : ""
-                      } ${!aiSuggestions.report ? "opacity-50 cursor-not-allowed hover:!bg-[#f8fafc] hover:!text-[#64748b]" : ""}`}
-                    onClick={() => aiSuggestions.report && setActiveTab(2)}
+                      } ${!aiSuggestions.report && !tourSampleActive ? "opacity-50 cursor-not-allowed hover:!bg-[#f8fafc] hover:!text-[#64748b]" : ""}`}
+                    onClick={() => (aiSuggestions.report || tourSampleActive) && setActiveTab(2)}
                   >
                     <BulbOutlined />
                     <span>Suggestions</span>
@@ -656,6 +730,11 @@ const Dictaphone = () => {
                         </div>
                       ) : transcript ? (
                         <p>{transcript}</p>
+                      ) : tourSampleActive ? (
+                        <div className="p-4 bg-[#f8fafc] rounded-xl border border-blue-100 animate-[smoothFadeIn_0.3s_ease-out]">
+                          <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#1E69DA] block mb-2">Sample Recorded Transcript</span>
+                          <p className="text-[1rem] leading-[1.7] text-[#334155]">{SAMPLE_TALKTOAI_DATA.transcript}</p>
+                        </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center gap-4 h-[200px] text-[#94a3b8] text-center [&_.anticon]:text-5xl [&_.anticon]:opacity-50 [&_p]:m-0 [&_p]:text-[1rem]">
                           <AudioOutlined />
@@ -671,58 +750,60 @@ const Dictaphone = () => {
                       dangerouslySetInnerHTML={{
                         __html:
                           aiSuggestions.report ||
-                          "<p>Complete your recording and submit for AI analysis</p>",
+                          (tourSampleActive
+                            ? SAMPLE_TALKTOAI_DATA.reportHtml
+                            : "<p>Complete your recording and submit for AI analysis</p>"),
                       }}
                     />
                   )}
 
                   {activeTab === 2 && (
                     <div className="">
-                      {aiSuggestions.relevance && (
-                        <div className="mb-8 p-4 bg-[#f8fafc] rounded-lg border-l-4 border-[#1E69DA] [&_h4]:m-0 [&_h4]:mb-3 [&_h4]:text-[#1e293b] [&_h4]:text-[1.1rem] [&_h4]:font-semibold [&_div]:text-[#475569] [&_div]:leading-[1.6]">
+                      {(aiSuggestions.relevance || (tourSampleActive && SAMPLE_TALKTOAI_DATA.suggestions.relevance)) && (
+                        <div className="mb-6 p-4 bg-[#f8fafc] rounded-lg border-l-4 border-[#1E69DA] [&_h4]:m-0 [&_h4]:mb-2 [&_h4]:text-[#1e293b] [&_h4]:text-[1.05rem] [&_h4]:font-semibold [&_div]:text-[#475569] [&_div]:leading-[1.6]">
                           <h4>📊 Relevance Analysis</h4>
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: aiSuggestions.relevance,
+                              __html: aiSuggestions.relevance || SAMPLE_TALKTOAI_DATA.suggestions.relevance,
                             }}
                           />
                         </div>
                       )}
 
-                      {aiSuggestions.grammarAndSpellingCheck && (
-                        <div className="mb-8 p-4 bg-[#f8fafc] rounded-lg border-l-4 border-[#1E69DA] [&_h4]:m-0 [&_h4]:mb-3 [&_h4]:text-[#1e293b] [&_h4]:text-[1.1rem] [&_h4]:font-semibold [&_div]:text-[#475569] [&_div]:leading-[1.6]">
+                      {(aiSuggestions.grammarAndSpellingCheck || (tourSampleActive && SAMPLE_TALKTOAI_DATA.suggestions.grammar)) && (
+                        <div className="mb-6 p-4 bg-[#f8fafc] rounded-lg border-l-4 border-[#1E69DA] [&_h4]:m-0 [&_h4]:mb-2 [&_h4]:text-[#1e293b] [&_h4]:text-[1.05rem] [&_h4]:font-semibold [&_div]:text-[#475569] [&_div]:leading-[1.6]">
                           <h4>✏️ Grammar & Language</h4>
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: aiSuggestions.grammarAndSpellingCheck,
+                              __html: aiSuggestions.grammarAndSpellingCheck || SAMPLE_TALKTOAI_DATA.suggestions.grammar,
                             }}
                           />
                         </div>
                       )}
 
-                      {aiSuggestions.clarityAndStyleSuggestions && (
-                        <div className="mb-8 p-4 bg-[#f8fafc] rounded-lg border-l-4 border-[#1E69DA] [&_h4]:m-0 [&_h4]:mb-3 [&_h4]:text-[#1e293b] [&_h4]:text-[1.1rem] [&_h4]:font-semibold [&_div]:text-[#475569] [&_div]:leading-[1.6]">
+                      {(aiSuggestions.clarityAndStyleSuggestions || (tourSampleActive && SAMPLE_TALKTOAI_DATA.suggestions.clarity)) && (
+                        <div className="mb-6 p-4 bg-[#f8fafc] rounded-lg border-l-4 border-[#1E69DA] [&_h4]:m-0 [&_h4]:mb-2 [&_h4]:text-[#1e293b] [&_h4]:text-[1.05rem] [&_h4]:font-semibold [&_div]:text-[#475569] [&_div]:leading-[1.6]">
                           <h4>💡 Clarity & Style</h4>
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: aiSuggestions.clarityAndStyleSuggestions,
+                              __html: aiSuggestions.clarityAndStyleSuggestions || SAMPLE_TALKTOAI_DATA.suggestions.clarity,
                             }}
                           />
                         </div>
                       )}
 
-                      {aiSuggestions.positiveFeedback && (
-                        <div className="mb-8 p-4 bg-[#f8fafc] rounded-lg border-l-4 border-[#1E69DA] [&_h4]:m-0 [&_h4]:mb-3 [&_h4]:text-[#1e293b] [&_h4]:text-[1.1rem] [&_h4]:font-semibold [&_div]:text-[#475569] [&_div]:leading-[1.6]">
+                      {(aiSuggestions.positiveFeedback || (tourSampleActive && SAMPLE_TALKTOAI_DATA.suggestions.positive)) && (
+                        <div className="mb-6 p-4 bg-[#f8fafc] rounded-lg border-l-4 border-[#1E69DA] [&_h4]:m-0 [&_h4]:mb-2 [&_h4]:text-[#1e293b] [&_h4]:text-[1.05rem] [&_h4]:font-semibold [&_div]:text-[#475569] [&_div]:leading-[1.6]">
                           <h4>⭐ Positive Highlights</h4>
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: aiSuggestions.positiveFeedback,
+                              __html: aiSuggestions.positiveFeedback || SAMPLE_TALKTOAI_DATA.suggestions.positive,
                             }}
                           />
                         </div>
                       )}
 
-                      {!aiSuggestions.report && (
+                      {!aiSuggestions.report && !tourSampleActive && (
                         <div className="flex flex-col items-center justify-center gap-4 h-[200px] text-[#94a3b8] text-center [&_.anticon]:text-5xl [&_.anticon]:opacity-50 [&_p]:m-0 [&_p]:text-[1rem]">
                           <BulbOutlined />
                           <p>AI suggestions will appear here after analysis</p>
