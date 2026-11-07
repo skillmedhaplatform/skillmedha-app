@@ -14,6 +14,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 import { Button } from "antd";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
+import OnboardingTour from "@/modules/student/components/onboarding/OnboardingTour";
 
 const theme = createTheme({
   palette: {
@@ -42,6 +43,7 @@ export default function StudentShell({ children }) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <OnboardingTour />
       <div className={PageStyles.pageContainer} style={{ flexDirection: (mounted ? isMobileState : false) ? "column" : "row" }}>
         {(mounted ? isMobileState : false) ? <MobileSidebar /> : <SideBar />}
         <div className={PageStyles.rightColumn} style={{ height: (mounted ? isMobileState : false) ? "calc(100dvh - 64px)" : "100%" }}>

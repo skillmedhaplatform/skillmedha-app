@@ -13,6 +13,7 @@ import {
 import PracticeFilters from "@/modules/student/components/PracticeFilters";
 import PracticeSubjectRow from "@/modules/student/components/PracticeSubjectRow";
 import { Divider, Result, Spin, Tooltip, message, Skeleton } from "antd";
+import { CompassOutlined } from "@ant-design/icons";
 import styles from "@/mobile_views/practice/mobilePracticeLayout.module.scss";
 
 export default function TechnicalPage() {
@@ -26,6 +27,17 @@ export default function TechnicalPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeSort, setActiveSort] = useState("Default");
   const [isTopicModalOpen, setTopicModalOpen] = useState(false);
+  const [tourStepIndex, setTourStepIndex] = useState(0);
+
+  useEffect(() => {
+    const handleStatus = (e) => {
+      if (e.detail?.stepIndex !== undefined) {
+        setTourStepIndex(e.detail.stepIndex);
+      }
+    };
+    window.addEventListener("onboarding-tour-status", handleStatus);
+    return () => window.removeEventListener("onboarding-tour-status", handleStatus);
+  }, []);
 
   const categoryTabs = [
     { name: "Non-Technical", path: "/student/practice-new/nontechnical" },
@@ -61,7 +73,7 @@ export default function TechnicalPage() {
             Select Topic Category
           </div>
           <p className="text-slate-500 text-lg">
-            Choose the type of topics you'd like to practice
+            Choose the type of topics you&apos;d like to practice
           </p>
         </div>
 
@@ -227,7 +239,24 @@ export default function TechnicalPage() {
               </div>
             }
             subtitleSlot={null}
-            rightSlot={RightStats}
+            rightSlot={
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("open-practice-tech-guide"));
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+                  title="Explore Technical Practice"
+                >
+                  <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+                  <span>Explore Technical Practice</span>
+                </button>
+                {RightStats}
+              </div>
+            }
           />
           
           <PracticeFilters 
@@ -251,12 +280,22 @@ export default function TechnicalPage() {
               className="w-full pb-5"
             >
               {filteredSubjects.map((subject, index) => (
-                <PracticeSubjectRow 
-                  key={subject._id || index} 
-                  subject={subject} 
-                  pageSizeOverride={activeCategory === "All" ? 4 : 8}
-                  activeSort={activeSort}
-                />
+                <div
+                  key={subject._id || index}
+                  data-tour={
+                    index === 0
+                      ? tourStepIndex === 0
+                        ? "practice-cards-overview"
+                        : "practice-premium-card"
+                      : undefined
+                  }
+                >
+                  <PracticeSubjectRow 
+                    subject={subject} 
+                    pageSizeOverride={activeCategory === "All" ? 4 : 8}
+                    activeSort={activeSort}
+                  />
+                </div>
               ))}
             </motion.div>
           </AnimatePresence>

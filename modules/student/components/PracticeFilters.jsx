@@ -11,6 +11,7 @@ export default function PracticeFilters({
   onSortChange,
   hideCategoryProgress = false,
   leftSlot,
+  categoriesDataTour,
 }) {
   const [activeTab, setActiveTab] = useState("All topics");
   const categoryProgressData = useSelector((state) => state.practice.categoryProgress || {});
@@ -44,6 +45,7 @@ export default function PracticeFilters({
         <div className="flex flex-row justify-between items-center gap-2 md:gap-4 w-full">
           <div 
             ref={scrollRef}
+            data-tour={categoriesDataTour}
             className="flex items-center gap-2 md:gap-3 overflow-x-auto pb-1 flex-1 cursor-grab active:cursor-grabbing select-none"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onMouseDown={handleMouseDown}

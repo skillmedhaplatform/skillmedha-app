@@ -6,6 +6,7 @@ import {
   BarChartOutlined,
   HistoryOutlined,
   ArrowLeftOutlined,
+  CompassOutlined,
 } from "@ant-design/icons";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
 
@@ -92,14 +93,29 @@ const ATSCheckerSection = ({ onBack }) => {
         title="ATS Resume Checker"
         subtitle="AI-powered analysis to optimize your resume for Applicant Tracking Systems."
         rightSlot={
-          currentAnalysis && (
-            <Button
-              onClick={() => dispatch(setShowFeedbackModal(true))}
-              className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all"
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("open-resume-ats-guide"));
+                }
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+              title="Explore ATS Guide"
             >
-              Give Feedback
-            </Button>
-          )
+              <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+              <span>Explore ATS Guide</span>
+            </button>
+            {currentAnalysis && (
+              <Button
+                onClick={() => dispatch(setShowFeedbackModal(true))}
+                className="!bg-transparent !text-white !border !border-[#1E69DA] hover:!bg-gradient-to-br hover:!from-[#1E69DA] hover:!to-[#5694F0] hover:!text-white hover:!border-transparent focus:!bg-gradient-to-br focus:!from-[#1E69DA] focus:!to-[#5694F0] focus:!text-white focus:!border-transparent transition-all"
+              >
+                Give Feedback
+              </Button>
+            )}
+          </div>
         }
       />
 

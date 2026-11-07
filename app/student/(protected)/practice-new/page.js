@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { App, Badge, Button, Empty, Input, Popover, Result, Select, Skeleton } from "antd";
+import { CompassOutlined } from "@ant-design/icons";
 import { FiSearch, FiSliders, FiX, FiLayers } from "react-icons/fi";
 import {
   HiOutlineAcademicCap,
@@ -143,7 +144,16 @@ const bundleMatches = (bundle, { query, category, filters }) => {
   return true;
 };
 
-function CatalogCard({ item, isBundle, isMobile, onAction, onViewResults }) {
+function CatalogCard({
+  item,
+  isBundle,
+  isMobile,
+  onAction,
+  onViewResults,
+  isTourActive = false,
+  isCodingStep2Target = false,
+  isCompanyStep2Target = false,
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [hasCompletedTest, setHasCompletedTest] = useState(Boolean(item.hasCompletedTest));
@@ -154,6 +164,15 @@ function CatalogCard({ item, isBundle, isMobile, onAction, onViewResults }) {
   const label = isBundle ? bundleActionLabel(item) : setActionLabel(item);
 
   const isCompany = !isBundle && (item.category === "company" || item.category === "company-wise");
+
+  // Keep popover open if it's the Coding or Company Step 2 target; otherwise close if a tour is active
+  useEffect(() => {
+    if (isCodingStep2Target || isCompanyStep2Target) {
+      setOpen(true);
+    } else if (isTourActive) {
+      setOpen(false);
+    }
+  }, [isCodingStep2Target, isCompanyStep2Target, isTourActive]);
 
   useEffect(() => {
     if (item.hasCompletedTest !== undefined) {
@@ -188,17 +207,39 @@ function CatalogCard({ item, isBundle, isMobile, onAction, onViewResults }) {
     }
   };
 
+  const handleOpenChange = (nextOpen) => {
+    // If ANY onboarding tour is active, block hover from opening unexpected popovers
+    if (isTourActive) {
+      if (isCodingStep2Target || isCompanyStep2Target) {
+        setOpen(true);
+      }
+      return;
+    }
+    setOpen(nextOpen);
+  };
+
   return (
     <Popover
-      trigger={isMobile ? "click" : "hover"}
+      trigger={isMobile ? "click" : isTourActive ? "click" : "hover"}
       placement={isMobile ? "bottom" : "rightTop"}
       mouseEnterDelay={0.12}
       mouseLeaveDelay={0.15}
       arrow={false}
       destroyOnHidden
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
+      overlayInnerStyle={{
+        padding: 0,
+        borderRadius: 14,
+        overflow: "hidden",
+        boxShadow: "0 22px 50px -12px rgba(15, 23, 42, 0.35)",
+      }}
       styles={{
+        body: {
+          padding: 0,
+          borderRadius: 14,
+          overflow: "hidden",
+        },
         container: {
           padding: 0,
           borderRadius: 14,
@@ -207,7 +248,16 @@ function CatalogCard({ item, isBundle, isMobile, onAction, onViewResults }) {
         },
       }}
       content={
-        <div className="w-[268px] max-w-[85vw]">
+        <div
+          data-tour={
+            isCodingStep2Target
+              ? "coding-card-popover"
+              : isCompanyStep2Target
+              ? "company-card-popover"
+              : undefined
+          }
+          className="w-[268px] max-w-[85vw]"
+        >
           <PracticeSetDetails
             item={item}
             isBundle={isBundle}
@@ -254,6 +304,37 @@ function PracticeCatalogInner() {
   const [selectedCompanyTest, setSelectedCompanyTest] = useState(null);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const searchContainerRef = useRef(null);
+
+  const [tourStatus, setTourStatus] = useState({
+    isActive: false,
+    activeGuide: null,
+    stepIndex: 0,
+  });
+
+  useEffect(() => {
+    const handleStatus = (e) => {
+      if (e?.detail) {
+        setTourStatus(e.detail);
+      }
+    };
+    const handleOpenCoding = () => {
+      setCategory("coding");
+      setFocusBundle(null);
+    };
+    const handleOpenCompany = () => {
+      setCategory("company-wise");
+      setFocusBundle(null);
+    };
+
+    window.addEventListener("onboarding-tour-status", handleStatus);
+    window.addEventListener("open-practice-coding-guide", handleOpenCoding);
+    window.addEventListener("open-practice-company-guide", handleOpenCompany);
+    return () => {
+      window.removeEventListener("onboarding-tour-status", handleStatus);
+      window.removeEventListener("open-practice-coding-guide", handleOpenCoding);
+      window.removeEventListener("open-practice-company-guide", handleOpenCompany);
+    };
+  }, []);
 
   useEffect(() => {
     const cat = searchParams?.get("category");
@@ -592,6 +673,19 @@ function PracticeCatalogInner() {
                   setSelectedCompanyTest(testItem);
                   setIsCompanyModalOpen(true);
                 }}
+                isTourActive={tourStatus.isActive}
+                isCodingStep2Target={
+                  tourStatus.isActive &&
+                  tourStatus.activeGuide === "practice-coding" &&
+                  tourStatus.stepIndex === 1 &&
+                  index === 0
+                }
+                isCompanyStep2Target={
+                  tourStatus.isActive &&
+                  tourStatus.activeGuide === "practice-company" &&
+                  tourStatus.stepIndex === 1 &&
+                  index === 0
+                }
               />
             </motion.div>
           ))}
@@ -608,6 +702,53 @@ function PracticeCatalogInner() {
         <StudentPageHeader
           title="Explore Practice Sets"
           subtitle="Prepare for top companies with real-time exam patterns and level-wise practice"
+          rightSlot={
+            <div className="relative z-10">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    const evt =
+                      category === "technical"
+                        ? "open-practice-tech-guide"
+                        : category === "nontechnical"
+                        ? "open-practice-nontech-guide"
+                        : category === "coding"
+                        ? "open-practice-coding-guide"
+                        : category === "company-wise"
+                        ? "open-practice-company-guide"
+                        : "open-practice-all-guide";
+                    window.dispatchEvent(new CustomEvent(evt));
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/20 text-white text-[12px] font-semibold transition-all shadow-sm cursor-pointer shrink-0"
+                title={
+                  category === "technical"
+                    ? "Explore Technical Practice"
+                    : category === "nontechnical"
+                    ? "Explore Non-Technical Practice"
+                    : category === "coding"
+                    ? "Explore Coding Practice"
+                    : category === "company-wise"
+                    ? "Explore Company-Wise Practice"
+                    : "Explore Practice Guide"
+                }
+              >
+                <CompassOutlined className="text-[#60A5FA] text-[14px]" />
+                <span>
+                  {category === "technical"
+                    ? "Explore Technical Practice"
+                    : category === "nontechnical"
+                    ? "Explore Non-Technical Practice"
+                    : category === "coding"
+                    ? "Explore Coding Practice"
+                    : category === "company-wise"
+                    ? "Explore Company-Wise Practice"
+                    : "Explore Practice Guide"}
+                </span>
+              </button>
+            </div>
+          }
         />
 
         {/* Filter & Search Bar */}
@@ -800,7 +941,16 @@ function PracticeCatalogInner() {
             </div>
 
             {/* Modern Practice Set Filter Buttons: All, Free, Premium, Bundle */}
-            <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto py-1.5 [&::-webkit-scrollbar]:hidden">
+            <div
+              data-tour={
+                tourStatus.activeGuide === "practice-coding" || category === "coding"
+                  ? "practice-coding-categories"
+                  : tourStatus.activeGuide === "practice-company" || category === "company-wise"
+                  ? "practice-company-categories"
+                  : "practice-cards-overview"
+              }
+              className="w-fit inline-flex max-w-full items-center gap-2 sm:gap-2.5 overflow-x-auto py-1.5 [&::-webkit-scrollbar]:hidden"
+            >
               {PLAN_BUTTONS.map((btn) => {
                 const isActive = activePlan === btn.value;
                 const count = planCounts[btn.value] ?? 0;
@@ -809,6 +959,7 @@ function PracticeCatalogInner() {
                 return (
                   <button
                     key={btn.value}
+                    data-tour={btn.value === "premium" ? "practice-premium-card" : undefined}
                     type="button"
                     onClick={() => handlePlanClick(btn.value)}
                     className={`group relative flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none active:scale-95 shrink-0 border ${
