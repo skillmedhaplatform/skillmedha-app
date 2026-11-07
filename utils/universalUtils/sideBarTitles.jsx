@@ -9,6 +9,7 @@ import {
   HiOutlineClipboardDocumentCheck,
   HiOutlineQuestionMarkCircle,
   HiOutlineTrophy,
+  HiOutlineSparkles,
 } from "react-icons/hi2";
 
 export const sideBarTitles = [
@@ -55,6 +56,12 @@ export const sideBarTitles = [
     slug: "courseslibrary",
     path: "/student/course",
     icon: <HiOutlineBookOpen size={22} />,
+  },
+  {
+    name: "Plans",
+    slug: "plans",
+    path: "/student/plans",
+    icon: <HiOutlineSparkles size={22} />,
   },
   {
     name: "My Assessments",

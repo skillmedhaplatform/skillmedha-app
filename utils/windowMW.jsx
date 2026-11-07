@@ -13,6 +13,7 @@ import {
   HiOutlineDocumentText,
   HiOutlineGlobeAlt,
   HiOutlineTag,
+  HiOutlineSparkles,
 } from "react-icons/hi2";
 
 export const setSstorage = (name, val) => {
@@ -109,6 +110,11 @@ export const sideBarTitles = [
     name: "Course Access & Bundles",
     path: "/admin/access-bundles",
     icon: <HiOutlineTag size={22} />,
+  },
+  {
+    name: "Plans & Membership",
+    path: "/admin/membership-plans",
+    icon: <HiOutlineSparkles size={22} />,
   },
   {
     name: "Workshops",

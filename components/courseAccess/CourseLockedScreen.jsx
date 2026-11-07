@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import { FiArrowLeft, FiLayers, FiLock, FiPlayCircle } from "react-icons/fi";
 import { courseBundleCheckoutUrl, formatPrice } from "./access";
+import { PLANS_PATH, planOfferText } from "@/components/membership/plans";
 
 // Shown in the lesson player instead of the lessons when the server says the
 // student hasn't unlocked this course. The curriculum (titles only — the
@@ -57,6 +58,11 @@ export default function CourseLockedScreen({ course, access }) {
               ) : (
                 <Button type="primary" size="large" onClick={() => router.push(detailsUrl)}>
                   {access?.price > 0 ? `Enroll for ${formatPrice(access.price)}` : "View course"}
+                </Button>
+              )}
+              {access?.upgradePlan && (
+                <Button size="large" onClick={() => router.push(PLANS_PATH)}>
+                  {planOfferText(access.upgradePlan)}
                 </Button>
               )}
               {!bundleOnly && bundles.length > 0 && (

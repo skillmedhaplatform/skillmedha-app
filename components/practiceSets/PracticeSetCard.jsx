@@ -173,6 +173,11 @@ export function PracticeSetCard({ item, isBundle = false, owned = false, accessT
             {categoryTag}
           </span>
         )}
+        {!accessTag && item.access?.upgradePlan && (
+          <span className="absolute bottom-2.5 left-3 flex max-w-[85%] items-center gap-1 rounded-full bg-violet-600 px-2.5 py-[3px] text-[10px] font-bold text-white shadow-md z-10">
+            <span className="truncate">In {item.access.upgradePlan.name}</span>
+          </span>
+        )}
         {accessTag && (
           <span className="absolute bottom-2.5 left-3 flex max-w-[85%] items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-[3px] text-[10px] font-bold text-white shadow-md z-10">
             <FiCheck className="shrink-0" strokeWidth={3} /> <span className="truncate">{accessTag}</span>

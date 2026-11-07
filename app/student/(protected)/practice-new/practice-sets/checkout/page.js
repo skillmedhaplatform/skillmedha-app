@@ -28,6 +28,7 @@ import {
   levelLabel,
 } from "@/components/practiceSets/constants";
 import { loadRazorpayScript } from "@/utils/loadRazorpay";
+import { PLANS_PATH, planOfferText } from "@/components/membership/plans";
 import {
   PRACTICE_SETS_PATH,
   accessTag,
@@ -436,6 +437,11 @@ export default function PracticeCheckoutPage() {
           <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-400">
             <FiShield /> Secure payment via Razorpay
           </div>
+          {!isBundle && item.access?.upgradePlan && (
+            <Button type="link" block onClick={() => router.push(PLANS_PATH)} className="!mt-2 !font-semibold">
+              {planOfferText(item.access.upgradePlan)}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -468,7 +474,7 @@ export default function PracticeCheckoutPage() {
                 <PracticeSetCard
                   item={cardItem}
                   isBundle={cardIsBundle}
-                  owned={cardIsBundle ? !!cardItem.access?.unlocked : isOwned(cardItem.access)}
+                  owned={cardIsBundle ? !!cardItem.access?.unlocked : isOwned(cardItem.access) || cardItem.access?.reason === "plan"}
                   accessTag={
                     cardIsBundle
                       ? cardItem.access?.unlocked

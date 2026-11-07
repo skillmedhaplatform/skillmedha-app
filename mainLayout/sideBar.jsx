@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAppRouter } from "@/helpers/useAppRouter";
 import { useDispatch, useSelector } from "react-redux";
 import { sideBarTitles } from "@/universalUtils/sideBarTitles";
+import { fetchMembership } from "@/services/membershipApi";
 import { getSstorage, setSstorage } from "@/universalUtils/windowMW";
 import { message, Menu, Modal, Button, Dropdown, Skeleton } from "antd";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
@@ -105,6 +106,15 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
     }
   }, [student?._id]);
 
+  // The Plans link stays hidden until an admin turns a paid plan on.
+  const [plansEnabled, setPlansEnabled] = useState(false);
+  useEffect(() => {
+    if (!student?._id || isSpecialOrg) return;
+    fetchMembership()
+      .then((data) => setPlansEnabled(!!data?.enabled || !!data?.current))
+      .catch(() => setPlansEnabled(false));
+  }, [student?._id, isSpecialOrg]);
+
   const router = useAppRouter();
   useEffect(() => {
     if (orgDetails && orgDetails?.features) {
@@ -124,7 +134,7 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
         );
 
         // Block access if feature is disabled and not in allowed list
-        const allowedSlugs = ["/", "myprofile", "dashboard", "help"];
+        const allowedSlugs = ["/", "myprofile", "dashboard", "help", "plans"];
 
         if (!allowedSlugs.includes(matchingItem.slug)) {
           if (!featureKey) {
@@ -154,7 +164,7 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
           (e) => e?.toLocaleLowerCase() === title.slug.toLocaleLowerCase()
         );
         
-        const isCoreTab = ["myprofile", "dashboard", "help"].includes(title.slug);
+        const isCoreTab = ["myprofile", "dashboard", "help", "plans"].includes(title.slug);
         
         if (!isCoreTab) {
           if (tab) {
@@ -176,6 +186,10 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
       }
 
       if (!isSpecialOrg && title.slug === "testresults") {
+        isVisible = false;
+      }
+
+      if (title.slug === "plans" && !plansEnabled) {
         isVisible = false;
       }
 
@@ -211,7 +225,7 @@ const SideBar = ({ activeView, setView, onLinkClick }) => {
 
       if (['dashboard', 'talktoai'].includes(title.slug)) {
         mainItems.push(menuItem);
-      } else if (['practice', 'internshiplibrary', 'courseslibrary'].includes(title.slug)) {
+      } else if (['practice', 'internshiplibrary', 'courseslibrary', 'plans'].includes(title.slug)) {
         learnItems.push(menuItem);
       } else if (['resumebuilder', 'jobopenings', 'myassessments', 'testresults'].includes(title.slug)) {
         careerItems.push(menuItem);

@@ -9,6 +9,7 @@ import { message, Spin, Popover } from "antd";
 import BuyNowPopoverContent from "@/universalUtils/LibraryPage/BuyNowPopoverContent";
 import ShareModal from "@/components/shared/ShareModal";
 import { accessValidity, courseBundleCheckoutUrl, expiringIn, expiryText, formatPrice } from "@/components/courseAccess/access";
+import { PLANS_PATH, planOfferText } from "@/components/membership/plans";
 import {
   Clock,
   PlayCircle,
@@ -650,7 +651,7 @@ export default function CourseDetailsPage() {
                     <div className="flex items-center gap-2 mb-6">
                       <span className="bg-emerald-100 text-emerald-800 font-bold px-3.5 py-1.5 rounded-full text-[13px] flex items-center gap-1.5">
                         <CheckCircle className="w-4 h-4 text-emerald-600" />{" "}
-                        {courseAccess?.reason === "free" || courseAccess?.reason === "assigned" ? "Free course — start anytime" : courseAccess?.reason === "bundle" ? `Unlocked via ${courseAccess?.bundleTitle || "your bundle"}` : "You are enrolled in this course"}
+                        {courseAccess?.reason === "free" || courseAccess?.reason === "assigned" ? "Free course — start anytime" : courseAccess?.reason === "bundle" ? `Unlocked via ${courseAccess?.bundleTitle || "your bundle"}` : courseAccess?.reason === "plan" ? `Included in your ${courseAccess?.planName || "plan"}` : "You are enrolled in this course"}
                       </span>
                     </div>
                   ) : (
@@ -710,6 +711,15 @@ export default function CourseDetailsPage() {
                         : accessValidity(courseAccess.expiresAt)}
                     </div>
                   )}
+                  {!isEnrolled && courseAccess?.upgradePlan && (
+                    <button
+                      type="button"
+                      onClick={() => router.push(PLANS_PATH)}
+                      className="mb-6 -mt-3 w-full cursor-pointer rounded-lg border border-violet-200 bg-violet-50 px-3 py-2.5 text-left text-[13px] font-semibold text-violet-800 hover:bg-violet-100"
+                    >
+                      {planOfferText(courseAccess.upgradePlan)} — see plans
+                    </button>
+                  )}
                   {isBundleOnly && (
                     <div className="mb-6 -mt-3 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2.5 text-[13px] text-violet-800">
                       <div className="font-semibold">This course is available only in a bundle</div>
@@ -751,7 +761,7 @@ export default function CourseDetailsPage() {
                         <Tv className="w-4 h-4" />
                         <span>Access</span>
                       </div>
-                      <span className="font-semibold text-slate-800">Lifetime Access</span>
+                      <span className="font-semibold text-slate-800">{courseAccess?.reason === "plan" ? "While your plan is active" : "Lifetime Access"}</span>
                     </div>
                     {course?.courseIncludes?.certificateOfCompletion && (
                       <div className="flex items-center justify-between text-[14px]">

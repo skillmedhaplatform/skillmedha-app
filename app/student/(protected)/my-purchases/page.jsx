@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Empty, Result, Segmented, Spin } from "antd";
 import { FiArrowLeft, FiBookOpen, FiLayers, FiClock, FiPlayCircle } from "react-icons/fi";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
+import MyPlanNotice from "@/components/membership/MyPlanNotice";
 import { accessValidity, expiringIn, expiryText, formatPrice } from "@/components/courseAccess/access";
 import { fetchMyCoursePurchases } from "@/services/courseAccessApi";
 
@@ -75,7 +76,10 @@ export default function MyPurchasesPage() {
           </button>
         }
       />
-      <div className="mx-auto w-full max-w-[1000px] flex-1 px-4 py-8 lg:px-8">{content}</div>
+      <div className="mx-auto w-full max-w-[1000px] flex-1 px-4 py-8 lg:px-8">
+        <MyPlanNotice />
+        {content}
+      </div>
     </div>
   );
 

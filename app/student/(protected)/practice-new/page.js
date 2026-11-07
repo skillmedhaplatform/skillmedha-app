@@ -18,6 +18,7 @@ import { fetchPracticeCatalog } from "@/redux/slices/practiceSlice";
 import { restUrl } from "@/config/urls";
 import { PracticeSetCard, PracticeSetDetails } from "@/components/practiceSets/PracticeSetCard";
 import StudentPageHeader from "@/modules/student/components/StudentPageHeader";
+import PlansBanner from "@/components/membership/PlansBanner";
 import CompanyAssessmentModal from "@/modules/student/components/CompanyAssessmentModal";
 import {
   DIFFICULTY_OPTIONS,
@@ -148,7 +149,7 @@ function CatalogCard({ item, isBundle, isMobile, onAction, onViewResults }) {
   const [open, setOpen] = useState(false);
   const [hasCompletedTest, setHasCompletedTest] = useState(Boolean(item.hasCompletedTest));
   const access = item.access || {};
-  const owned = isBundle ? !!access.unlocked : isOwned(access);
+  const owned = isBundle ? !!access.unlocked : isOwned(access) || access.reason === "plan";
   const tag = isBundle ? (access.unlocked ? "Purchased" : null) : accessTag(access);
   const note = isBundle ? (access.unlocked ? accessNote({ ...access, reason: "purchased" }) : null) : accessNote(access);
   const label = isBundle ? bundleActionLabel(item) : setActionLabel(item);
@@ -756,6 +757,7 @@ function PracticeCatalogInner() {
       {/* Scrollable Cards & Content Area */}
       <div ref={cardsScrollRef} className="flex-1 overflow-y-auto min-h-0">
         <div className="mx-auto w-full max-w-[1400px] px-4 pb-16 pt-6 lg:px-8">
+          <PlansBanner className="mb-5" />
           {focusBundle && category !== "company-wise" && (
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               <span className="flex items-center gap-2">
